@@ -1,0 +1,500 @@
+/************************************************************************
+ * Copyright 2018 Jürgen Buchmüller <pullmoll@t-online.de>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *************************************************************************/
+
+#include "llept.h"
+#include <lauxlib.h>
+#include <lualib.h>
+
+/*====================================================================*
+ *
+ *  Lua class NUMA
+ *
+ *====================================================================*/
+
+/**
+ * @brief Check Lua stack at index %arg for udata of class LL_NUMA
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the NUMA* contained in the user data
+ */
+NUMA *
+ll_check_NUMA(lua_State *L, int arg)
+{
+    return *(NUMA **)ll_check_udata(L, arg, LL_NUMA);
+}
+
+/**
+ * \brief Push NUMA user data to the Lua stack and set its meta table
+ * \param L pointer to the lua_State
+ * \param na pointer to the NUMA
+ * \return 1 NUMA* on the Lua stack
+ */
+int
+ll_push_NUMA(lua_State *L, NUMA *na)
+{
+    if (NULL == na)
+        return 0;
+    return ll_push_udata(L, LL_NUMA, na);
+}
+
+/**
+ * \brief Create and push NUMA user data to the Lua stack
+ * \param L pointer to the lua_State
+ * \param na pointer to the NUMA
+ * \return 1 NUMA* on the Lua stack
+ */
+int
+ll_new_NUMA(lua_State *L)
+{
+    l_int32 n = ll_check_l_int32_default(L, 1, 1);
+    NUMA *na = numaCreate(n);
+    return ll_push_NUMA(L, na);
+}
+
+/**
+ * \brief Create a new NUMA*
+ *
+ * Arg #1 is expected to be a l_int32 (n)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 NUMA* on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    return ll_new_NUMA(L);
+}
+
+/**
+ * \brief Destroy a NUMA*
+ *
+ * \param L pointer to the lua_State
+ * \return 0 for nothing on the Lua stack
+ */
+static int
+Destroy(lua_State *L)
+{
+    void **pna = ll_check_udata(L, 1, LL_NUMA);
+    DBG(LOG_DESTROY, "%s: '%s' pna=%p na=%p refcount=%d\n", __func__,
+        LL_NUMA, (void *)pna, *pna, numaGetRefcount(*pna));
+    numaDestroy((NUMA **)pna);
+    *pna = NULL;
+    return 0;
+}
+
+/**
+ * \brief Get the number of stored numbers in the NUMA*
+ *
+ * Arg #1 (i.e. self) is expected to be a NUMA* user data
+ *
+ * \param L pointer to the lua_State
+ * \return 1 integer on the Lua stack
+ */
+static int
+GetCount(lua_State *L)
+{
+    NUMA* na = ll_check_NUMA(L, 1);
+    l_int32 n = numaGetCount(na);
+    lua_pushinteger(L, n);
+    return 1;
+}
+
+/**
+ * \brief Set the number of stored numbers in the NUMA*, i.e. resize NUMA*
+ *
+ * Arg #1 (i.e. self) is expected to be a NUMA* user data
+ * Arg #2 is expected to be a l_int32 (n)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 integer on the Lua stack
+ */
+static int
+SetCount(lua_State *L)
+{
+    NUMA* na = ll_check_NUMA(L, 1);
+    l_int32 n = ll_check_l_int32(L, 2);
+    lua_pushboolean(L, 0 == numaSetCount(na, n));
+    return 1;
+}
+
+/**
+ * \brief Copy a NUMA*
+ *
+ * Arg #1 (i.e. self) is expected to be a NUMA* user data
+ *
+ * \param L pointer to the lua_State
+ * \return 1 NUMA* on the Lua stack
+ */
+static int
+Copy(lua_State *L)
+{
+    NUMA *nas = ll_check_NUMA(L, 1);
+    NUMA *na = numaCopy(nas);
+    return ll_push_NUMA(L, na);
+}
+
+/**
+ * \brief Clone a NUMA*
+ *
+ * \param L pointer to the lua_State
+ * \return 1 NUMA* on the Lua stack
+ */
+static int
+Clone(lua_State *L)
+{
+    NUMA *nas = ll_check_NUMA(L, 1);
+    NUMA *na = numaClone(nas);
+    return ll_push_NUMA(L, na);
+}
+
+/**
+ * \brief Set the number of stored numbes in the NUMA* to zero
+ *
+ * Arg #1 (i.e. self) is expected to be a NUMA* user data
+ *
+ * \param L pointer to the lua_State
+ * \return 1 for boolean on the Lua stack
+ */
+static int
+Empty(lua_State *L)
+{
+    NUMA *na = ll_check_NUMA(L, 1);
+    lua_pushboolean(L, 0 == numaEmpty(na));
+    return 1;
+}
+
+/**
+ * \brief Add one number to the NUMA*
+ *
+ * Arg #1 (i.e. self) is expected to be a NUMA* user data
+ * Arg #2 is expected to be a lua_Number in the range of l_float32
+ *
+ * \param L pointer to the lua_State
+ * \return 1 for boolean on the Lua stack
+ */
+static int
+AddNumber(lua_State *L)
+{
+    NUMA *na = ll_check_NUMA(L, 1);
+    l_float32 val = ll_check_l_float32(L, 2);
+    lua_pushboolean(L, 0 == numaAddNumber(na, val));
+    return 1;
+}
+
+/**
+ * \brief Insert one number to the NUMA* at the given index
+ *
+ * Arg #1 (i.e. self) is expected to be a NUMA* user data
+ * Arg #2 is expected to be a lua_Integer in the range of l_int32 for the
+ * index Arg #3 is expected to be a lua_Number in the range of l_float32
+ *
+ * \param L pointer to the lua_State
+ * \return 1 for boolean on the Lua stack
+ */
+static int
+InsertNumber(lua_State *L)
+{
+    NUMA *na = ll_check_NUMA(L, 1);
+    l_int32 idx = ll_check_index(L, 2, numaGetCount(na));
+    l_float32 val = ll_check_l_float32(L, 3);
+    lua_pushboolean(L, 0 == numaInsertNumber(na, idx, val));
+    return 1;
+}
+
+/**
+ * \brief Remove one number to the NUMA* at the given index
+ *
+ * Arg #1 (i.e. self) is expected to be a NUMA* user data
+ * Arg #2 is expected to be a lua_Integer in the range of l_int32 for the
+ * index
+ *
+ * \param L pointer to the lua_State
+ * \return 1 for boolean on the Lua stack
+ */
+static int
+RemoveNumber(lua_State *L)
+{
+    NUMA *na = ll_check_NUMA(L, 1);
+    l_int32 idx = ll_check_index(L, 2, numaGetCount(na));
+    lua_pushboolean(L, 0 == numaRemoveNumber(na, idx));
+    return 1;
+}
+
+/**
+ * \brief Replace one number to the NUMA* at the given index
+ *
+ * Arg #1 (i.e. self) is expected to be a NUMA* user data
+ * Arg #2 is expected to be a lua_Integer in the range of l_int32 for the
+ * index Arg #3 is expected to be a lua_Number in the range of l_float32
+ *
+ * \param L pointer to the lua_State
+ * \return 1 for boolean on the Lua stack
+ */
+static int
+ReplaceNumber(lua_State *L)
+{
+    NUMA *na = ll_check_NUMA(L, 1);
+    l_int32 idx = ll_check_index(L, 2, numaGetCount(na));
+    l_float32 val = ll_check_l_float32(L, 3);
+    lua_pushboolean(L, 0 == numaReplaceNumber(na, idx, val));
+    return 1;
+}
+
+/**
+ * \brief Get the l_float32 from the NUMA* at index
+ *
+ * Arg #1 (i.e. self) is expected to be a NUMA* user data
+ * Arg #2 is expected to be a l_int32 (idx)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 integer on the Lua stack
+ */
+static int
+GetFValue(lua_State *L)
+{
+    NUMA *na = ll_check_NUMA(L, 1);
+    l_int32 idx = ll_check_index(L, 2, numaGetCount(na));
+    l_float32 val;
+    if (numaGetFValue(na, idx, &val))
+        return 0;
+    lua_pushnumber(L, (lua_Number)val);
+    return 1;
+}
+
+/**
+ * \brief Get the l_int32 from the NUMA* at index
+ *
+ * Arg #1 (i.e. self) is expected to be a NUMA* user data
+ * Arg #2 is expected to be a l_int32 (idx)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 integer on the Lua stack
+ */
+static int
+GetIValue(lua_State *L)
+{
+    NUMA *na = ll_check_NUMA(L, 1);
+    l_int32 idx = ll_check_index(L, 2, numaGetCount(na));
+    l_int32 val;
+    if (numaGetIValue(na, idx, &val))
+        return 0;
+    lua_pushinteger(L, val);
+    return 1;
+}
+
+/**
+ * \brief Set the value for the NUMA* at the given index
+ *
+ * Arg #1 (i.e. self) is expected to be a NUMA* user data
+ * Arg #2 is expected to be a lua_Integer in the range of l_int32 for the
+ * index Arg #3 is expected to be a lua_Number in the range of l_float32
+ *
+ * \param L pointer to the lua_State
+ * \return 1 for boolean on the Lua stack
+ */
+static int
+SetValue(lua_State *L)
+{
+    NUMA *na = ll_check_NUMA(L, 1);
+    l_int32 idx = ll_check_index(L, 2, numaGetCount(na));
+    l_float32 val = ll_check_l_float32(L, 3);
+    lua_pushboolean(L, 0 == numaSetValue(na, idx, val));
+    return 1;
+}
+
+/**
+ * \brief Add a difference to the value for the NUMA* at the given index
+ *
+ * Arg #1 (i.e. self) is expected to be a NUMA* user data
+ * Arg #2 is expected to be a lua_Integer in the range of l_int32 for the
+ * index Arg #3 is expected to be a lua_Number in the range of l_float32
+ *
+ * \param L pointer to the lua_State
+ * \return 1 for boolean on the Lua stack
+ */
+static int
+ShiftValue(lua_State *L)
+{
+    NUMA *na = ll_check_NUMA(L, 1);
+    l_int32 idx = ll_check_index(L, 2, numaGetCount(na));
+    l_float32 diff = ll_check_l_float32(L, 3);
+    lua_pushboolean(L, 0 == numaShiftValue(na, idx, diff));
+    return 1;
+}
+
+/**
+ * \brief Get the NUMA* as an array of lua_Number
+ *
+ * Arg #1 (i.e. self) is expected to be a NUMA* user data
+ * Arg #2 is an optional string defining the storage flags (copy, clone,
+ * copy_clone)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 NUMA* on the Lua stack
+ */
+static int
+GetFArray(lua_State *L)
+{
+    NUMA *na = ll_check_NUMA(L, 1);
+    l_int32 copyflag = ll_check_access_storage(L, 2, L_COPY);
+    l_float32 *array = numaGetFArray(na, copyflag);
+    l_int32 n = numaGetCount(na);
+    l_int32 i;
+    lua_checkstack(L, n);
+    for (i = 0; i < n; i++) {
+        lua_pushnumber(L, (lua_Number)array[i]);
+    }
+    free(array);
+    return n;
+}
+
+/**
+ * \brief Get the NUMA* as an array of lua_Integer
+ *
+ * Arg #1 (i.e. self) is expected to be a NUMA* user data
+ *
+ * \param L pointer to the lua_State
+ * \return 1 NUMA* on the Lua stack
+ */
+static int
+GetIArray(lua_State *L)
+{
+    NUMA *na = ll_check_NUMA(L, 1);
+    l_int32 *array = numaGetIArray(na);
+    l_int32 n = numaGetCount(na);
+    l_int32 i;
+    lua_checkstack(L, n);
+    for (i = 0; i < n; i++) {
+        lua_pushinteger(L, (lua_Integer)array[i]);
+    }
+    free(array);
+    return n;
+}
+
+/**
+ * \brief Get the parameters of the NUMA*
+ *
+ * Arg #1 (i.e. self) is expected to be a NUMA* user data
+ *
+ * \param L pointer to the lua_State
+ * \return 2 for NUMA* starx and deltax
+ */
+static int
+GetParameters(lua_State *L)
+{
+    NUMA *na = ll_check_NUMA(L, 1);
+    l_float32 startx = 0;
+    l_float32 deltax = 0;
+    if (numaGetParameters(na, &startx, &deltax))
+        return 0;
+    lua_pushnumber(L, (lua_Number)startx);
+    lua_pushnumber(L, (lua_Number)deltax);
+    return 2;
+}
+
+/**
+ * \brief Set the parameters of the NUMA*
+ *
+ * Arg #1 (i.e. self) is expected to be a NUMA* user data
+ * Arg #2 is expected to be a lua_Number in the range of l_float32 (startx)
+ * Arg #3 is expected to be a lua_Number in the range of l_float32 (deltax)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 for boolean on the Lua stack
+ */
+static int
+SetParameters(lua_State *L)
+{
+    NUMA *na = ll_check_NUMA(L, 1);
+    l_float32 startx = ll_check_l_float32(L, 2);
+    l_float32 deltax = ll_check_l_float32(L, 3);
+    lua_pushboolean(L, 0 == numaSetParameters(na, startx, deltax));
+    return 1;
+}
+
+/**
+ * \brief Set the parameters of the NUMA*
+ *
+ * Arg #1 (i.e. self) is expected to be a NUMA* user data (destination)
+ * Arg #2 is expected to be another NUMA* user data (source)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 for boolean on the Lua stack
+ */
+static int
+CopyParameters(lua_State *L)
+{
+    NUMA *nad = ll_check_NUMA(L, 1);
+    NUMA *nas = ll_check_NUMA(L, 2);
+    lua_pushboolean(L, 0 == numaCopyParameters(nad, nas));
+    return 1;
+}
+
+/**
+ * \brief Register the NUMA methods and functions in the LL_NUMA meta table
+ * \param L pointer to the lua_State
+ * \return 1 table on the Lua stack
+ */
+int
+ll_register_NUMA(lua_State *L)
+{
+    static const luaL_Reg methods[] = {
+        {"__gc",                Destroy},          /* garbage collector */
+        {"__new",               Create},           /* new NUMA */
+        {"__len",               GetCount},         /* #numa */
+        {"__newitem",           ReplaceNumber},    /* numa[index] = number */
+        {"Clone",               Clone},
+        {"Copy",                Copy},
+        {"Empty",               Empty},
+        {"AddNumber",           AddNumber},
+        {"InsertNumber",        InsertNumber},
+        {"RemoveNumber",        RemoveNumber},
+        {"ReplaceNumber",       ReplaceNumber},
+        {"SetCount",            SetCount},
+        {"GetFValue",           GetFValue},
+        {"GetIValue",           GetIValue},
+        {"SetValue",            SetValue},
+        {"ShiftValue",          ShiftValue},
+        {"GetFArray",           GetFArray},
+        {"GetIArray",           GetIArray},
+        {"GetParameters",       GetParameters},
+        {"SetParameters",       SetParameters},
+        {"CopyParameters",      CopyParameters},
+        LUA_SENTINEL
+    };
+
+    static const luaL_Reg functions[] = {
+        {"Create",              Create},
+        LUA_SENTINEL
+    };
+
+    return ll_register_class(L, LL_NUMA, methods, functions);
+}

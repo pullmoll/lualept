@@ -1,0 +1,12 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@/lualept
+
+Name: lualept
+Description: Lua scripting interface for Leptonica
+Version: @VERSION@
+Libs: -L${libdir} -llualept
+Libs.private: @LEPT_LIBS@ @LUA53_LIBS@
+Cflags: -I${includedir}
+
