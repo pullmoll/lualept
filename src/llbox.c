@@ -29,7 +29,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *************************************************************************/
 
-#include "llept.h"
+#include "modules.h"
 #include <lauxlib.h>
 #include <lualib.h>
 
@@ -79,10 +79,10 @@ ll_push_BOX(lua_State *L, BOX *box)
 int
 ll_new_BOX(lua_State *L)
 {
-    l_int32 x = ll_check_l_int32_default(L, 1, 0);
-    l_int32 y = ll_check_l_int32_default(L, 2, 0);
-    l_int32 w = ll_check_l_int32_default(L, 3, 1);
-    l_int32 h = ll_check_l_int32_default(L, 4, 1);
+    l_int32 x = ll_check_l_int32_default(__func__, L, 1, 0);
+    l_int32 y = ll_check_l_int32_default(__func__, L, 2, 0);
+    l_int32 w = ll_check_l_int32_default(__func__, L, 3, 1);
+    l_int32 h = ll_check_l_int32_default(__func__, L, 4, 1);
     BOX *box = boxCreate(x, y, w, h);
     return ll_push_BOX(L, box);
 }
@@ -151,10 +151,10 @@ CreateValid(lua_State *L)
     l_int32 x, y, w, h;
     BOX *box;
 
-    x = ll_check_l_int32_default(L, 1, 0);
-    y = ll_check_l_int32_default(L, 2, 0);
-    w = ll_check_l_int32_default(L, 3, 1);
-    h = ll_check_l_int32_default(L, 4, 1);
+    x = ll_check_l_int32_default(__func__, L, 1, 0);
+    y = ll_check_l_int32_default(__func__, L, 2, 0);
+    w = ll_check_l_int32_default(__func__, L, 3, 1);
+    h = ll_check_l_int32_default(__func__, L, 4, 1);
     box = boxCreateValid(x, y, w, h);
     return ll_push_BOX(L, box);
 }
@@ -248,10 +248,10 @@ static int
 SetGeometry(lua_State *L)
 {
     BOX *box = ll_check_BOX(L, 1);
-    l_int32 x = ll_check_l_int32_default(L, 2, 0);
-    l_int32 y = ll_check_l_int32_default(L, 3, 0);
-    l_int32 w = ll_check_l_int32_default(L, 4, 1);
-    l_int32 h = ll_check_l_int32_default(L, 5, 1);
+    l_int32 x = ll_check_l_int32_default(__func__, L, 2, 0);
+    l_int32 y = ll_check_l_int32_default(__func__, L, 3, 0);
+    l_int32 w = ll_check_l_int32_default(__func__, L, 4, 1);
+    l_int32 h = ll_check_l_int32_default(__func__, L, 5, 1);
     lua_pushboolean(L, 0 == boxSetGeometry(box, x, y, w, h));
     return 1;
 }
@@ -294,10 +294,10 @@ static int
 SetSideLocations(lua_State *L)
 {
     BOX *box = ll_check_BOX(L, 1);
-    l_int32 l = ll_check_l_int32_default(L, 2, 0);
-    l_int32 r = ll_check_l_int32_default(L, 3, 0);
-    l_int32 t = ll_check_l_int32_default(L, 4, 0);
-    l_int32 b = ll_check_l_int32_default(L, 5, 0);
+    l_int32 l = ll_check_l_int32_default(__func__, L, 2, 0);
+    l_int32 r = ll_check_l_int32_default(__func__, L, 3, 0);
+    l_int32 t = ll_check_l_int32_default(__func__, L, 4, 0);
+    l_int32 b = ll_check_l_int32_default(__func__, L, 5, 0);
     lua_pushboolean(L, 0 == boxSetSideLocations(box, l, r, t, b));
     return 1;
 }
@@ -331,7 +331,7 @@ static int
 ChangeRefcount(lua_State *L)
 {
     BOX *box = ll_check_BOX(L, 1);
-    l_int32 delta = ll_check_l_int32(L, 2);
+    l_int32 delta = ll_check_l_int32(__func__, L, 2);
     lua_pushboolean(L, 0 == boxChangeRefcount(box, delta));
     return 1;
 }
@@ -352,6 +352,48 @@ IsValid(lua_State *L)
     if (boxIsValid(box, &valid))
         return 0;
     lua_pushboolean(L, valid);
+    return 1;
+}
+
+/**
+ * \brief Check if a BOX* (%box1) contains another BOX* (%box2)
+ *
+ * Arg #1 (i.e. self) is expected to be a BOX* (box1)
+ * Arg #2 is expected to be another BOX* (box2)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 for boolean on the Lua stack
+ */
+static int
+Contains(lua_State *L)
+{
+    BOX *box1 = ll_check_BOX(L, 1);
+    BOX *box2 = ll_check_BOX(L, 2);
+    l_int32 result = 0;
+    if (boxContains(box1, box2, &result))
+        return 0;
+    lua_pushboolean(L, result);
+    return 1;
+}
+
+/**
+ * \brief Check if a BOX* (%box1) intersects another BOX* (%box2)
+ *
+ * Arg #1 (i.e. self) is expected to be a BOX* (box1)
+ * Arg #2 is expected to be another BOX* (box2)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 for boolean on the Lua stack
+ */
+static int
+Intersects(lua_State *L)
+{
+    BOX *box1 = ll_check_BOX(L, 1);
+    BOX *box2 = ll_check_BOX(L, 2);
+    l_int32 result = 0;
+    if (boxIntersects(box1, box2, &result))
+        return 0;
+    lua_pushboolean(L, result);
     return 1;
 }
 
@@ -377,6 +419,8 @@ ll_register_BOX(lua_State *L)
         {"GetRefcount",         GetRefcount},
         {"ChangeRefcount",      ChangeRefcount},
         {"IsValid",             IsValid},
+        {"Contains",            Contains},
+        {"Intersects",          Intersects},
         LUA_SENTINEL
     };
 

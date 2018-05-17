@@ -29,24 +29,42 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *************************************************************************/
 
-#include <string.h>
-#include <allheaders.h>
-#include "lualept.h"
+/* MS VC++ does not provide stdint.h, so define the missing types here */
+#if !defined(LUALEPT_ENVIRON_H)
 
-int main(int argc, char **argv)
-{
-        const char* progname = NULL;
-        const char* script = NULL;
-        progname = strrchr(argv[0], '/');
-        if (NULL == progname)
-                progname = strrchr(argv[0], '\\');
-        if (NULL == progname)
-                progname = argv[0];
+#ifdef _MSC_VER
+/* Note that _WIN32 is defined for both 32 and 64 bit applications,
+   whereas _WIN64 is defined only for the latter */
 
-        if (argc < 2) {
-                return ERROR_INT("Usage: llua <script.lua>\n", progname, 1);
-        }
-        script = argv[1];
+#ifdef _WIN64
+typedef __int64 intptr_t;
+typedef unsigned __int64 uintptr_t;
+#else
+typedef int intptr_t;
+typedef unsigned int uintptr_t;
+#endif
 
-        return ll_RunScript(script);
-}
+/* VC++6 doesn't seem to have powf, expf. */
+#if (_MSC_VER < 1400)
+#define powf(x, y) (float)pow((double)(x), (double)(y))
+#define expf(x) (float)exp((double)(x))
+#endif
+
+#endif /* _MSC_VER */
+
+/* Windows specifics */
+#ifdef _WIN32
+  /* DLL EXPORTS and IMPORTS */
+  #if defined(LUALEPT_LIB)
+    #define LUALEPT_DLL __declspec(dllexport)
+  #elif defined(LUALEPT_LIB)
+    #define LUALEPT_DLL __declspec(dllimport)
+  #else
+    #define LUALEPT_DLL
+  #endif
+#else  /* non-Windows specifics */
+  #include <stdint.h>
+  #define LUALEPT_DLL
+#endif  /* _WIN32 */
+
+#endif	/* !defined(LUALEPT_ENVIRON_H) */

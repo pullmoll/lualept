@@ -29,24 +29,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *************************************************************************/
 
-#include <string.h>
+#pragma once
+#if !defined(LUALEPT_H)
+#define  LUALEPT_H
+
+#if defined (HAVE_CONFIG_H)
+#include "config.h"
+#endif
+#include "environ.h"
+
+/* Leptonica allheaders.h */
 #include <allheaders.h>
-#include "lualept.h"
 
-int main(int argc, char **argv)
-{
-        const char* progname = NULL;
-        const char* script = NULL;
-        progname = strrchr(argv[0], '/');
-        if (NULL == progname)
-                progname = strrchr(argv[0], '\\');
-        if (NULL == progname)
-                progname = argv[0];
+LUALEPT_DLL extern int ll_RunScript(const char* script);
 
-        if (argc < 2) {
-                return ERROR_INT("Usage: llua <script.lua>\n", progname, 1);
-        }
-        script = argv[1];
-
-        return ll_RunScript(script);
-}
+#endif	/* !defined(LUALEPT_H) */

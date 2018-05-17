@@ -29,7 +29,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *************************************************************************/
 
-#include "llept.h"
+#include "modules.h"
 #include <lauxlib.h>
 #include <lualib.h>
 
@@ -76,7 +76,7 @@ ll_push_PTA(lua_State *L, PTA *pta)
 int
 ll_new_PTA(lua_State *L)
 {
-    l_int32 n = ll_check_l_int32_default(L, 1, 1);
+    l_int32 n = ll_check_l_int32_default(__func__, L, 1, 1);
     PTA *pa = ptaCreate(n);
     return ll_push_PTA(L, pa);
 }
@@ -207,8 +207,8 @@ static int
 CopyRange(lua_State *L)
 {
     PTA *ptas = ll_check_PTA(L, 1);
-    l_int32 istart = ll_check_l_int32_default(L, 2, 1);
-    l_int32 iend = ll_check_l_int32_default(L, 3, ptaGetCount(ptas));
+    l_int32 istart = ll_check_l_int32_default(__func__, L, 2, 1);
+    l_int32 iend = ll_check_l_int32_default(__func__, L, 3, ptaGetCount(ptas));
     PTA *pta = ptaCopyRange(ptas, istart, iend);
     return ll_push_PTA(L, pta);
 }
@@ -243,8 +243,8 @@ static int
 AddPt(lua_State *L)
 {
     PTA *pta = ll_check_PTA(L, 1);
-    l_float32 x = ll_check_l_float32(L, 2);
-    l_float32 y = ll_check_l_float32(L, 3);
+    l_float32 x = ll_check_l_float32(__func__, L, 2);
+    l_float32 y = ll_check_l_float32(__func__, L, 3);
     lua_pushboolean(L, 0 == ptaAddPt(pta, x, y));
     return 1;
 }
@@ -264,9 +264,9 @@ static int
 InsertPt(lua_State *L)
 {
     PTA *pta = ll_check_PTA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, ptaGetCount(pta));
-    l_int32 x = ll_check_l_int32(L, 3);
-    l_int32 y = ll_check_l_int32(L, 4);
+    l_int32 idx = ll_check_index(__func__, L, 2, ptaGetCount(pta));
+    l_int32 x = ll_check_l_int32(__func__, L, 3);
+    l_int32 y = ll_check_l_int32(__func__, L, 4);
     lua_pushboolean(L, 0 == ptaInsertPt(pta, idx, x, y));
     return 1;
 }
@@ -284,7 +284,7 @@ static int
 RemovePt(lua_State *L)
 {
     PTA *pta = ll_check_PTA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, ptaGetCount(pta));
+    l_int32 idx = ll_check_index(__func__, L, 2, ptaGetCount(pta));
     lua_pushboolean(L, 0 == ptaRemovePt(pta, idx));
     return 1;
 }
@@ -302,7 +302,7 @@ static int
 GetPt(lua_State *L)
 {
     PTA *pta = ll_check_PTA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, ptaGetCount(pta));
+    l_int32 idx = ll_check_index(__func__, L, 2, ptaGetCount(pta));
     l_float32 x = 0;
     l_float32 y = 0;
     if (ptaGetPt(pta, idx, &x, &y))
@@ -325,7 +325,7 @@ static int
 GetIPt(lua_State *L)
 {
     PTA *pta = ll_check_PTA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, ptaGetCount(pta));
+    l_int32 idx = ll_check_index(__func__, L, 2, ptaGetCount(pta));
     l_int32 x;
     l_int32 y;
     if (ptaGetIPt(pta, idx, &x, &y))
@@ -350,9 +350,9 @@ static int
 SetPt(lua_State *L)
 {
     PTA *pta = ll_check_PTA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, ptaGetCount(pta));
-    l_float32 x = ll_check_l_float32(L, 3);
-    l_float32 y = ll_check_l_float32(L, 4);
+    l_int32 idx = ll_check_index(__func__, L, 2, ptaGetCount(pta));
+    l_float32 x = ll_check_l_float32(__func__, L, 3);
+    l_float32 y = ll_check_l_float32(__func__, L, 4);
     lua_pushboolean(L, 0 == ptaSetPt(pta, idx, x, y));
     return 1;
 }

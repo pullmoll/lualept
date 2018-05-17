@@ -29,7 +29,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *************************************************************************/
 
-#include "llept.h"
+#include "modules.h"
 #include <lauxlib.h>
 #include <lualib.h>
 
@@ -76,7 +76,7 @@ ll_push_PIXA(lua_State *L, PIXA *pixa)
 int
 ll_new_PIXA(lua_State *L)
 {
-    l_int32 n = ll_check_l_int32_default(L, 1, 1);
+    l_int32 n = ll_check_l_int32_default(__func__, L, 1, 1);
     PIXA *pixa = pixaCreate(n);
     return ll_push_PIXA(L, pixa);
 }
@@ -180,7 +180,7 @@ static int
 GetBoxGeometry(lua_State *L)
 {
     PIXA *pixa = ll_check_PIXA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, pixaGetCount(pixa));
+    l_int32 idx = ll_check_index(__func__, L, 2, pixaGetCount(pixa));
     l_int32 x, y, w, h;
     if (pixaGetBoxGeometry(pixa, idx, &x, &y, &w, &h))
         return 0;
@@ -206,7 +206,7 @@ static int
 ReplacePix(lua_State *L)
 {
     PIXA *pixa = ll_check_PIXA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, pixaGetCount(pixa));
+    l_int32 idx = ll_check_index(__func__, L, 2, pixaGetCount(pixa));
     PIX *pixs = ll_check_PIX(L, 3);
     BOX *boxs = lua_isuserdata(L, 4) ? ll_check_BOX(L, 4) : NULL;
     PIX *pix = pixClone(pixs);
@@ -230,7 +230,7 @@ static int
 InsertPix(lua_State *L)
 {
     PIXA *pixa = ll_check_PIXA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, pixaGetCount(pixa));
+    l_int32 idx = ll_check_index(__func__, L, 2, pixaGetCount(pixa));
     PIX *pixs = ll_check_PIX(L, 3);
     BOX *boxs = lua_isuserdata(L, 4) ? ll_check_BOX(L, 4) : NULL;
     PIX *pix = pixClone(pixs);
@@ -252,7 +252,7 @@ static int
 RemovePix(lua_State *L)
 {
     PIXA *pixa = ll_check_PIXA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, pixaGetCount(pixa));
+    l_int32 idx = ll_check_index(__func__, L, 2, pixaGetCount(pixa));
     lua_pushboolean(L, 0 == pixaRemovePix(pixa, idx));
     return 1;
 }
@@ -272,7 +272,7 @@ static int
 RemovePixAndSave(lua_State *L)
 {
     PIXA *pixa = ll_check_PIXA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, pixaGetCount(pixa));
+    l_int32 idx = ll_check_index(__func__, L, 2, pixaGetCount(pixa));
     PIX *pix = NULL;
     BOX *box = NULL;
     if (pixaRemovePixAndSave(pixa, idx, &pix, &box))
@@ -294,8 +294,8 @@ Join(lua_State *L)
 {
     PIXA *pixad = ll_check_PIXA(L, 1);
     PIXA *pixas = ll_check_PIXA(L, 2);
-    l_int32 istart = ll_check_l_int32_default(L, 3, 1);
-    l_int32 iend = ll_check_l_int32_default(L, 3, pixaGetCount(pixas));
+    l_int32 istart = ll_check_l_int32_default(__func__, L, 3, 1);
+    l_int32 iend = ll_check_l_int32_default(__func__, L, 3, pixaGetCount(pixas));
     lua_pushboolean(L, 0 == pixaJoin(pixad, pixas, istart, iend));
     return 1;
 }
@@ -349,8 +349,8 @@ GetAlignedStats(lua_State *L)
 {
     PIXA *pixa = ll_check_PIXA(L, 1);
     l_int32 type = ll_check_stats_type(L, 2, L_MEAN_ABSVAL);
-    l_int32 nbins = ll_check_l_int32_default(L, 3, 2);
-    l_int32 thresh = ll_check_l_int32_default(L, 4, 0);
+    l_int32 nbins = ll_check_l_int32_default(__func__, L, 3, 2);
+    l_int32 thresh = ll_check_l_int32_default(__func__, L, 4, 0);
     PIX *pix = pixaGetAlignedStats(pixa, type, nbins, thresh);
     return ll_push_PIX(L, pix);
 }

@@ -29,7 +29,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *************************************************************************/
 
-#include "llept.h"
+#include "modules.h"
 #include <lauxlib.h>
 #include <lualib.h>
 
@@ -76,7 +76,7 @@ ll_push_BOXAA(lua_State *L, BOXAA *boxaa)
 int
 ll_new_BOXAA(lua_State *L)
 {
-    l_int32 n = ll_check_l_int32(L, 1);
+    l_int32 n = ll_check_l_int32_default(__func__, L, 1, 1);
     BOXAA *boxaa = boxaaCreate(n);
     return ll_push_BOXAA(L, boxaa);
 }
@@ -112,6 +112,45 @@ Destroy(lua_State *L)
     boxaaDestroy((BOXAA **)pboxaa);
     *pboxaa = NULL;
     return 0;
+}
+
+/**
+ * @brief Printable string for a BOXAA*
+ * \param L pointer to the lua_State
+ * \return 1 string on the Lua stack
+ */
+static int
+toString(lua_State *L)
+{
+    static char str[256];
+    BOXAA *boxaa = ll_check_BOXAA(L, 1);
+    luaL_Buffer B;
+    l_int32 i, j, x, y, w, h;
+
+    luaL_buffinit(L, &B);
+    if (NULL == boxaa) {
+        luaL_addstring(&B, "nil");
+    } else {
+        luaL_addchar(&B, '{');
+        for (i = 0; i < boxaaGetCount(boxaa); i++) {
+            BOXA *boxa = boxaaGetBoxa(boxaa, i, L_CLONE);
+            if (i > 0)
+                luaL_addchar(&B, ',');
+            snprintf(str, sizeof(str), "%d={", i);
+            luaL_addstring(&B, str);
+            for (j = 0; j < boxaGetCount(boxa); j++) {
+                boxaGetBoxGeometry(boxa, j, &x, &y, &w, &h);
+                snprintf(str, sizeof(str), "%d={%d,%d,%d,%d}", j, x, y, w, h);
+                if (j > 0)
+                    luaL_addchar(&B, ',');
+                luaL_addstring(&B, str);
+            }
+            luaL_addchar(&B, '}');
+        }
+        luaL_addchar(&B, '}');
+    }
+    luaL_pushresult(&B);
+    return 1;
 }
 
 /**
@@ -181,7 +220,7 @@ static int
 ExtendArrayToSize(lua_State *L)
 {
     BOXAA *boxaa = ll_check_BOXAA(L, 1);
-    l_int32 n = ll_check_l_int32(L, 2);
+    l_int32 n = ll_check_l_int32(__func__, L, 2);
     lua_pushboolean(L, 0 == boxaaExtendArrayToSize(boxaa, n));
     return 1;
 }
@@ -232,7 +271,7 @@ static int
 GetBoxa(lua_State *L)
 {
     BOXAA *boxaa = ll_check_BOXAA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, boxaaGetCount(boxaa));
+    l_int32 idx = ll_check_index(__func__, L, 2, boxaaGetCount(boxaa));
     l_int32 flag = ll_check_access_storage(L, 3, L_COPY);
     BOXA *boxa = boxaaGetBoxa(boxaa, idx, flag);
     return ll_push_BOXA(L, boxa);
@@ -253,8 +292,8 @@ static int
 GetBox(lua_State *L)
 {
     BOXAA *boxaa = ll_check_BOXAA(L, 1);
-    l_int32 iboxa = ll_check_index(L, 2, boxaaGetCount(boxaa));
-    l_int32 ibox = ll_check_index(L, 3, INT32_MAX);
+    l_int32 iboxa = ll_check_index(__func__, L, 2, boxaaGetCount(boxaa));
+    l_int32 ibox = ll_check_index(__func__, L, 3, INT32_MAX);
     l_int32 flag = ll_check_access_storage(L, 4, L_COPY);
     BOX *box = boxaaGetBox(boxaa, iboxa, ibox, flag);
     return ll_push_BOX(L, box);
@@ -274,7 +313,7 @@ static int
 ReplaceBoxa(lua_State *L)
 {
     BOXAA *boxaa = ll_check_BOXAA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, boxaaGetCount(boxaa));
+    l_int32 idx = ll_check_index(__func__, L, 2, boxaaGetCount(boxaa));
     BOXA *boxa = ll_check_BOXA(L, 3);
     lua_pushboolean(L, boxa && 0 == boxaaReplaceBoxa(boxaa, idx, boxa));
     return 1;
@@ -294,7 +333,7 @@ static int
 InsertBoxa(lua_State *L)
 {
     BOXAA *boxaa = ll_check_BOXAA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, boxaaGetCount(boxaa));
+    l_int32 idx = ll_check_index(__func__, L, 2, boxaaGetCount(boxaa));
     BOXA *boxas = ll_check_BOXA(L, 3);
     BOXA *boxa = boxaCopy(boxas, L_CLONE);
     lua_pushboolean(L, boxa && 0 == boxaaInsertBoxa(boxaa, idx, boxa));
@@ -314,10 +353,52 @@ static int
 RemoveBoxa(lua_State *L)
 {
     BOXAA *boxaa = ll_check_BOXAA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, boxaaGetCount(boxaa));
+    l_int32 idx = ll_check_index(__func__, L, 2, boxaaGetCount(boxaa));
     lua_pushboolean(L, 0 == boxaaRemoveBoxa(boxaa, idx));
     return 1;
 }
+
+/**
+ * \brief Flatten the BOXAA* to a BOXA*
+ *
+ * Arg #1 (i.e. self) is expected to be a BOXAA* user data (boxaa)
+ * Arg #2 is expected to be a string describing the copy flag (copyflag)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+FlattenToBoxa(lua_State *L)
+{
+    BOXAA *boxaa = ll_check_BOXAA(L, 1);
+    l_int32 copyflag = ll_check_access_storage(L, 2, L_COPY);
+    NUMA *naindex = NULL;
+    BOXA *boxa = boxaaFlattenToBoxa(boxaa, &naindex, copyflag);
+    return ll_push_BOXA(L, boxa);
+}
+
+/**
+ * \brief Aligned flatten the BOXAA* to a BOXA*
+ *
+ * Arg #1 (i.e. self) is expected to be a BOXAA* user data (boxaa)
+ * Arg #2 is expected to be a l_int32 (num)
+ * Arg #3 is expected to be a string describing the copy flag (copyflag)
+ * Arg #3 is optional and, if given, expected to be a BOX* (fillerbox)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+FlattenAligned(lua_State *L)
+{
+    BOXAA *boxaa = ll_check_BOXAA(L, 1);
+    l_int32 num = ll_check_l_int32(__func__, L, 2);
+    l_int32 copyflag = ll_check_access_storage(L, 3, L_COPY);
+    BOX *fillerbox = lua_isuserdata(L, 4) ? ll_check_BOX(L, 4) : NULL;
+    BOXA *boxa = boxaaFlattenAligned(boxaa, num, fillerbox, copyflag);
+    return ll_push_BOXA(L, boxa);
+}
+
 
 /**
  * \brief Register the BOX methods and functions in the LL_BOX meta table
@@ -331,6 +412,7 @@ ll_register_BOXAA(lua_State *L)
         {"__gc",                Destroy},               /* garbage collect */
         {"__new",               Create},                /* new BOXAA */
         {"__len",               GetCount},              /* #boxa */
+        {"__tostring",          toString},
         {"Destroy",             Destroy},
         {"Copy",                Copy},
         {"GetCount",            GetCount},
@@ -343,6 +425,8 @@ ll_register_BOXAA(lua_State *L)
         {"ReplaceBoxa",         ReplaceBoxa},
         {"InsertBoxa",          InsertBoxa},
         {"RemoveBoxa",          RemoveBoxa},
+        {"FlattenToBoxa",       FlattenToBoxa},
+        {"FlattenAligned",      FlattenAligned},
         LUA_SENTINEL
     };
 

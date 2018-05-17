@@ -29,7 +29,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *************************************************************************/
 
-#include "llept.h"
+#include "modules.h"
 #include <lauxlib.h>
 #include <lualib.h>
 
@@ -163,12 +163,12 @@ ll_push_udata(lua_State *L, const char* name, void *udata)
  * \return l_int32 for the integer; lua_error if out of bounds
  */
 l_int32
-ll_check_index(lua_State *L, int arg, l_int32 imax)
+ll_check_index(const char* func, lua_State *L, int arg, l_int32 imax)
 {
     /* Lua indices are 1-based but Leptonica index is 0-based */
     lua_Integer index = luaL_checkinteger(L, arg) - 1;
     if (index < 0 || index >= imax) {
-        lua_pushfstring(L, "index out of bounds (%d)", index);
+        lua_pushfstring(L, "%s: index #%d out of bounds (0 <= %d < %d)", func, arg, index, imax);
         lua_error(L);
         return 0;       /* NOTREACHED */
     }
@@ -182,12 +182,12 @@ ll_check_index(lua_State *L, int arg, l_int32 imax)
  * \return l_int32 for the integer; lua_error if out of bounds
  */
 l_int32
-ll_check_l_int32(lua_State *L, int arg)
+ll_check_l_int32(const char* func, lua_State *L, int arg)
 {
     lua_Integer val = luaL_checkinteger(L, arg);
 
     if (val < INT32_MIN || val > INT32_MAX) {
-        lua_pushfstring(L, "l_int32 out of bounds (%d)", val);
+        lua_pushfstring(L, "%s: l_int32 #%d out of bounds (%d)", func, arg, val);
         lua_error(L);
         return 0;    /* NOTREACHED */
     }
@@ -202,12 +202,12 @@ ll_check_l_int32(lua_State *L, int arg)
  * \return l_int32 for the integer; lua_error if out of bounds
  */
 l_int32
-ll_check_l_int32_default(lua_State *L, int arg, l_int32 dflt)
+ll_check_l_int32_default(const char* func, lua_State *L, int arg, l_int32 dflt)
 {
     lua_Integer val = luaL_optinteger(L, arg, dflt);
 
     if (val < INT32_MIN || val > INT32_MAX) {
-        lua_pushfstring(L, "l_int32 #%d out of bounds (%d)", arg, val);
+        lua_pushfstring(L, "%s: l_int32 #%d out of bounds (%d)", func, arg, val);
         lua_error(L);
         return 0;    /* NOTREACHED */
     }
@@ -221,12 +221,12 @@ ll_check_l_int32_default(lua_State *L, int arg, l_int32 dflt)
  * \return l_uint32 for the integer; lua_error if out of bounds
  */
 l_uint32
-ll_check_l_uint32(lua_State *L, int arg)
+ll_check_l_uint32(const char* func, lua_State *L, int arg)
 {
     lua_Integer val = luaL_checkinteger(L, arg);
 
     if (val < 0 || val > UINT32_MAX) {
-        lua_pushfstring(L, "l_uint32 out of bounds (%d)", val);
+        lua_pushfstring(L, "%s: l_uint32 #$d out of bounds (%d)", func, arg, val);
         lua_error(L);
         return 0;    /* NOTREACHED */
     }
@@ -241,12 +241,12 @@ ll_check_l_uint32(lua_State *L, int arg)
  * \return l_uint32 for the integer; lua_error if out of bounds
  */
 l_uint32
-ll_check_l_uint32_default(lua_State *L, int arg, l_uint32 dflt)
+ll_check_l_uint32_default(const char* func, lua_State *L, int arg, l_uint32 dflt)
 {
     lua_Integer val = luaL_optinteger(L, arg, dflt);
 
     if (val < 0 || val > UINT32_MAX) {
-        lua_pushfstring(L, "l_uint32 #%d out of bounds (%d)", arg, val);
+        lua_pushfstring(L, "%s: l_uint32 #%d out of bounds (%d)", func, arg, val);
         lua_error(L);
         return dflt;    /* NOTREACHED */
     }
@@ -260,12 +260,13 @@ ll_check_l_uint32_default(lua_State *L, int arg, l_uint32 dflt)
  * \return l_float32 for the number; lua_error if out of bounds
  */
 l_float32
-ll_check_l_float32(lua_State *L, int arg)
+ll_check_l_float32(const char* func, lua_State *L, int arg)
 {
     lua_Number val = luaL_checknumber(L, arg);
 
-    if (val < (lua_Number)FLT_MIN || val > (lua_Number)FLT_MAX) {
-        lua_pushfstring(L, "l_float32 #%d out of bounds (%g)", arg, val);
+    if (val < (lua_Number)-FLT_MAX || val > (lua_Number)FLT_MAX) {
+        lua_pushfstring(L, "%s: l_float32 #%d out of bounds (%f < %f < %f)",
+                        func, arg, (lua_Number)-FLT_MAX, val, (lua_Number)FLT_MAX);
         lua_error(L);
         return 0.0f;    /* NOTREACHED */
     }
@@ -280,12 +281,13 @@ ll_check_l_float32(lua_State *L, int arg)
  * \return l_float32 for the number; lua_error if out of bounds
  */
 l_float32
-ll_check_l_float32_default(lua_State *L, int arg, l_float32 dflt)
+ll_check_l_float32_default(const char* func, lua_State *L, int arg, l_float32 dflt)
 {
     lua_Number val = luaL_optnumber(L, arg, (lua_Number)dflt);
 
-    if (val < (lua_Number)FLT_MIN || val > (lua_Number)FLT_MAX) {
-        lua_pushfstring(L, "l_float32 #%d out of bounds (%g)", arg, val);
+    if (val < (lua_Number)-FLT_MAX || val > (lua_Number)FLT_MAX) {
+        lua_pushfstring(L, "%s: l_float32 #%d out of bounds (%f < %f < %f)",
+                        func, arg, (lua_Number)-FLT_MAX, val, (lua_Number)FLT_MAX);
         lua_error(L);
         return 0.0f;    /* NOTREACHED */
     }
@@ -478,6 +480,9 @@ ll_string_input_format(int format)
     return ll_string_tbl(format, tbl_input_format, ARRAYSIZE(tbl_input_format));
 }
 
+/**
+ * @brief Table of key type names for AMAP and ASET
+ */
 static const lept_enums_t tbl_keytype[] = {
     {"int",         "L_INT_TYPE",   L_INT_TYPE},
     {"uint",        "L_UINT_TYPE",  L_UINT_TYPE},
@@ -507,6 +512,9 @@ const char* ll_string_keytype(l_int32 type)
     return ll_string_tbl(type, tbl_keytype, ARRAYSIZE(tbl_keytype));
 }
 
+/**
+ * @brief Table of choice names and enumeration values
+ */
 static const lept_enums_t tbl_consecutive_skip_by[] = {
     {"consecutive",     "L_CHOOSE_CONSECUTIVE",     L_CHOOSE_CONSECUTIVE},
     {"cons",            "L_CHOOSE_CONSECUTIVE",     L_CHOOSE_CONSECUTIVE},
@@ -528,6 +536,9 @@ ll_check_consecutive_skip_by(lua_State *L, int arg, l_int32 dflt)
     return ll_check_tbl(L, arg, dflt, tbl_consecutive_skip_by, ARRAYSIZE(tbl_consecutive_skip_by));
 }
 
+/**
+ * @brief Table of color component names and enumeration values
+ */
 static const lept_enums_t tbl_component[] = {
     {"red",             "COLOR_RED",                COLOR_RED},
     {"r",               "COLOR_RED",                COLOR_RED},
@@ -554,6 +565,9 @@ ll_check_component(lua_State *L, int arg, l_int32 dflt)
     return ll_check_tbl(L, arg, dflt, tbl_component, ARRAYSIZE(tbl_component));
 }
 
+/**
+ * @brief Table of choice min/max names and enumeration values
+ */
 static const lept_enums_t tbl_choose_min_max[] = {
     {"min",             "L_CHOOSE_MIN",          L_CHOOSE_MIN},
     {"max",             "L_CHOOSE_MAX",          L_CHOOSE_MAX}
@@ -572,6 +586,9 @@ ll_check_choose_min_max(lua_State *L, int arg, l_int32 dflt)
     return ll_check_tbl(L, arg, dflt, tbl_choose_min_max, ARRAYSIZE(tbl_choose_min_max));
 }
 
+/**
+ * @brief Table of white/black is max names and enumeration values
+ */
 static const lept_enums_t tbl_what_is_max[] = {
     {"white-is-max",    "L_WHITE_IS_MAX",          L_WHITE_IS_MAX},
     {"white",           "L_WHITE_IS_MAX",          L_WHITE_IS_MAX},
@@ -594,6 +611,9 @@ ll_check_what_is_max(lua_State *L, int arg, l_int32 dflt)
     return ll_check_tbl(L, arg, dflt, tbl_what_is_max, ARRAYSIZE(tbl_what_is_max));
 }
 
+/**
+ * @brief Table of get white/black val names and enumeration values
+ */
 static const lept_enums_t tbl_getval[] = {
     {"white",           "L_GET_WHITE_VAL",          L_GET_WHITE_VAL},
     {"w",               "L_GET_WHITE_VAL",          L_GET_WHITE_VAL},
@@ -614,11 +634,14 @@ ll_check_getval(lua_State *L, int arg, l_int32 dflt)
     return ll_check_tbl(L, arg, dflt, tbl_getval, ARRAYSIZE(tbl_getval));
 }
 
+/**
+ * @brief Table of direction names and enumeration values
+ */
 static const lept_enums_t tbl_direction[] = {
-    {"horizontal-line", "L_HORIZONTAL_LINE",          L_HORIZONTAL_LINE},
-    {"horizontal",      "L_HORIZONTAL_LINE",          L_HORIZONTAL_LINE},
-    {"horiz",           "L_HORIZONTAL_LINE",          L_HORIZONTAL_LINE},
-    {"h",               "L_HORIZONTAL_LINE",          L_HORIZONTAL_LINE},
+    {"horizontal-line", "L_HORIZONTAL_LINE",        L_HORIZONTAL_LINE},
+    {"horizontal",      "L_HORIZONTAL_LINE",        L_HORIZONTAL_LINE},
+    {"horiz",           "L_HORIZONTAL_LINE",        L_HORIZONTAL_LINE},
+    {"h",               "L_HORIZONTAL_LINE",        L_HORIZONTAL_LINE},
     {"vertical-line",   "L_VERTICAL_LINE",          L_VERTICAL_LINE},
     {"vertical",        "L_VERTICAL_LINE",          L_VERTICAL_LINE},
     {"vert",            "L_VERTICAL_LINE",          L_VERTICAL_LINE},
@@ -638,6 +661,9 @@ ll_check_direction(lua_State *L, int arg, l_int32 dflt)
     return ll_check_tbl(L, arg, dflt, tbl_direction, ARRAYSIZE(tbl_direction));
 }
 
+/**
+ * @brief Table of set white/black names and enumeration values
+ */
 static const lept_enums_t tbl_blackwhite[] = {
     {"white",           "L_SET_WHITE",          L_SET_WHITE},
     {"w",               "L_SET_WHITE",          L_SET_WHITE},
@@ -658,6 +684,9 @@ ll_check_blackwhite(lua_State *L, int arg, l_int32 dflt)
     return ll_check_tbl(L, arg, dflt, tbl_blackwhite, ARRAYSIZE(tbl_blackwhite));
 }
 
+/**
+ * @brief Table of rasterop names and enumeration values
+ */
 static const lept_enums_t tbl_rasterop[] = {
     {"clr",             "PIX_CLR",                      PIX_CLR},
     {"set",             "PIX_SET",                      PIX_SET},
@@ -682,25 +711,7 @@ static const lept_enums_t tbl_rasterop[] = {
 };
 
 /**
- * \brief Check for a PIX_XXX name as string
- * <pre>
- *      PIX_CLR                           0000             0x0
- *      PIX_SET                           1111             0xf
- *      PIX_SRC                           1100             0xc
- *      PIX_DST                           1010             0xa
- *      PIX_NOT(PIX_SRC)                  0011             0x3
- *      PIX_NOT(PIX_DST)                  0101             0x5
- *      PIX_SRC | PIX_DST                 1110             0xe
- *      PIX_SRC & PIX_DST                 1000             0x8
- *      PIX_SRC ^ PIX_DST                 0110             0x6
- *      PIX_NOT(PIX_SRC) | PIX_DST        1011             0xb
- *      PIX_NOT(PIX_SRC) & PIX_DST        0010             0x2
- *      PIX_SRC | PIX_NOT(PIX_DST)        1101             0xd
- *      PIX_SRC & PIX_NOT(PIX_DST)        0100             0x4
- *      PIX_NOT(PIX_SRC | PIX_DST)        0001             0x1
- *      PIX_NOT(PIX_SRC & PIX_DST)        0111             0x7
- *      PIX_NOT(PIX_SRC ^ PIX_DST)        1001             0x9
- * </pre>
+ * \brief Check for a rasterop name as string
  * \param L pointer to the lua_State
  * \param arg index where to find the string
  * \param dflt default value to return if not specified or unknown
@@ -712,6 +723,9 @@ ll_check_rasterop(lua_State *L, int arg, l_int32 dflt)
     return ll_check_tbl(L, arg, dflt, tbl_rasterop, ARRAYSIZE(tbl_rasterop));
 }
 
+/**
+ * @brief Table of search direction names and enumeration values
+ */
 static const lept_enums_t tbl_searchdir[] = {
     {"horizontal",          "L_HORIZ",              L_HORIZ},
     {"horiz",               "L_HORIZ",              L_HORIZ},
@@ -737,6 +751,9 @@ ll_check_searchdir(lua_State *L, int arg, l_int32 dflt)
     return ll_check_tbl(L, arg, dflt, tbl_searchdir, ARRAYSIZE(tbl_searchdir));
 }
 
+/**
+ * @brief Table of stats type names and enumeration values
+ */
 static const lept_enums_t tbl_stats_type[] = {
     {"mean-absval",         "L_MEAN_ABSVAL",        L_MEAN_ABSVAL},
     {"mean-abs",            "L_MEAN_ABSVAL",        L_MEAN_ABSVAL},
@@ -766,6 +783,9 @@ ll_check_stats_type(lua_State* L, int arg, l_int32 dflt)
     return ll_check_tbl(L, arg, dflt, tbl_stats_type, ARRAYSIZE(tbl_stats_type));
 }
 
+/**
+ * @brief Table of select color names and enumeration values
+ */
 static const lept_enums_t tbl_select_color[] = {
     {"red",                 "L_SELECT_RED",         L_SELECT_RED},
     {"r",                   "L_SELECT_RED",         L_SELECT_RED},
@@ -797,6 +817,9 @@ ll_check_select_color(lua_State* L, int arg, l_int32 dflt)
     return ll_check_tbl(L, arg, dflt, tbl_select_color, ARRAYSIZE(tbl_select_color));
 }
 
+/**
+ * @brief Table of select min/max names and enumeration values
+ */
 static const lept_enums_t tbl_select_minmax[] = {
     {"min",                 "L_SELECT_MIN",          L_SELECT_MIN},
     {"max",                 "L_SELECT_MAX",          L_SELECT_MAX}
@@ -840,7 +863,7 @@ ll_check_LEPT(lua_State *L, int arg)
  * \return 1 LEPT* on the Lua stack
  */
 static int
-ll_push_LEPT(lua_State *L, LEPT *lept)
+ll_push_LEPT(lua_State *L, LUALEPT *lept)
 {
     if (NULL == lept)
         return 0;
@@ -856,7 +879,7 @@ static int
 ll_new_LEPT(lua_State *L)
 {
     static const char lept_prefix[] = "leptonica-";
-    LEPT *lept = (LEPT *) LEPT_CALLOC(1, sizeof(LEPT));
+    LUALEPT *lept = (LUALEPT *) LEPT_CALLOC(1, sizeof(LUALEPT));
     const char* lept_ver = getLeptonicaVersion();
     const lua_Number *lua_ver = lua_version(L);
 
@@ -895,7 +918,7 @@ static int
 Version(lua_State *L)
 {
     void **plept = ll_check_LEPT(L, 1);
-    LEPT *lept = *(LEPT **)plept;
+    LUALEPT *lept = *(LUALEPT **)plept;
     lua_pushstring(L, lept->str_version);
     return 1;
 }
@@ -909,7 +932,7 @@ static int
 LuaVersion(lua_State *L)
 {
     void **plept = ll_check_LEPT(L, 1);
-    LEPT *lept = *(LEPT **)plept;
+    LUALEPT *lept = *(LUALEPT **)plept;
     lua_pushstring(L, lept->str_version_lua);
     return 1;
 }
@@ -923,7 +946,7 @@ static int
 LeptVersion(lua_State *L)
 {
     void **plept = ll_check_LEPT(L, 1);
-    LEPT *lept = *(LEPT **)plept;
+    LUALEPT *lept = *(LUALEPT **)plept;
     lua_pushstring(L, lept->str_version_lept);
     return 1;
 }
@@ -941,9 +964,9 @@ LeptVersion(lua_State *L)
 static int
 RGB(lua_State *L)
 {
-    l_int32 rval = ll_check_l_int32(L, 1);
-    l_int32 gval = ll_check_l_int32(L, 2);
-    l_int32 bval = ll_check_l_int32(L, 3);
+    l_int32 rval = ll_check_l_int32(__func__, L, 1);
+    l_int32 gval = ll_check_l_int32(__func__, L, 2);
+    l_int32 bval = ll_check_l_int32(__func__, L, 3);
     l_uint32 pixel;
     if (composeRGBPixel(rval, gval, bval, &pixel))
         return 0;
@@ -965,10 +988,10 @@ RGB(lua_State *L)
 static int
 RGBA(lua_State *L)
 {
-    l_int32 rval = ll_check_l_int32(L, 1);
-    l_int32 gval = ll_check_l_int32(L, 2);
-    l_int32 bval = ll_check_l_int32(L, 3);
-    l_int32 aval = ll_check_l_int32(L, 3);
+    l_int32 rval = ll_check_l_int32(__func__, L, 1);
+    l_int32 gval = ll_check_l_int32(__func__, L, 2);
+    l_int32 bval = ll_check_l_int32(__func__, L, 3);
+    l_int32 aval = ll_check_l_int32(__func__, L, 3);
     l_uint32 pixel;
     if (composeRGBAPixel(rval, gval, bval, aval, &pixel))
         return 0;
@@ -987,7 +1010,7 @@ RGBA(lua_State *L)
 static int
 ToRGB(lua_State *L)
 {
-    l_uint32 pixel = ll_check_l_uint32(L, 1);
+    l_uint32 pixel = ll_check_l_uint32(__func__, L, 1);
     l_int32 rval = 0;
     l_int32 gval = 0;
     l_int32 bval = 0;
@@ -1009,7 +1032,7 @@ ToRGB(lua_State *L)
 static int
 ToRGBA(lua_State *L)
 {
-    l_uint32 pixel = ll_check_l_uint32(L, 1);
+    l_uint32 pixel = ll_check_l_uint32(__func__, L, 1);
     l_int32 rval = 0;
     l_int32 gval = 0;
     l_int32 bval = 0;
@@ -1034,7 +1057,7 @@ ToRGBA(lua_State *L)
 static int
 MinMaxComponent(lua_State *L)
 {
-    l_uint32 pixel = ll_check_l_uint32(L, 1);
+    l_uint32 pixel = ll_check_l_uint32(__func__, L, 1);
     l_int32 type = ll_check_choose_min_max(L, 2, 0);
     lua_pushinteger(L, extractMinMaxComponent(pixel, type));
     return 1;
@@ -1052,7 +1075,7 @@ MinMaxComponent(lua_State *L)
 static int
 MinComponent(lua_State *L)
 {
-    l_uint32 pixel = ll_check_l_uint32(L, 1);
+    l_uint32 pixel = ll_check_l_uint32(__func__, L, 1);
     lua_pushinteger(L, extractMinMaxComponent(pixel, L_CHOOSE_MIN));
     return 1;
 }
@@ -1069,7 +1092,7 @@ MinComponent(lua_State *L)
 static int
 MaxComponent(lua_State *L)
 {
-    l_uint32 pixel = ll_check_l_uint32(L, 1);
+    l_uint32 pixel = ll_check_l_uint32(__func__, L, 1);
     lua_pushinteger(L, extractMinMaxComponent(pixel, L_CHOOSE_MAX));
     return 1;
 }
@@ -1135,7 +1158,7 @@ static int register_LEPT(lua_State *L) {
     return ll_register_class(L, LL_LEPT, methods, functions);
 }
 
-l_int32
+int
 ll_RunScript(const char *script)
 {
     lua_State *L;

@@ -63,11 +63,11 @@ function boxa_test()
 	print("************** BOX/BOXA/BOXAA")
 	-- Create a new BOX
 	local b = LuaLept.BOX(10,10,40,80)
-	print("b = BOX(10,10,40,80)", b)
+	print("b = BOX(10,10,40,80)     ", b)
 
 	-- Create a new BOXA
 	local ba = LuaLept.BOXA(1)
-	print("ba = LuaLept.BOXA(1)", ba)
+	print("ba = LuaLept.BOXA(1)     ", ba)
 	print("#ba", #ba)
 
 	-- Add box b using default, clone, copy
@@ -79,26 +79,39 @@ function boxa_test()
 	print("... after 5x ba:AddBox()")
 
 	-- Print ba:GetCount() or short #ba
-	print("#ba", #ba)
-	print("ba", ba)
+	print("#ba                      ", #ba)
+	print("ba                       ", ba)
 
 	-- Insert before the third BOX in BOXA
 	ba:InsertBox(3, LuaLept.BOX(3,4,19,18))
 	print("... after ba:InsertBox(3, LuaLept.BOX(3,4,19,18))")
-	print("#ba", #ba)
-	print("ba", ba)
+	print("#ba                      ", #ba)
+	print("ba                       ", ba)
 
 	-- Get the inserted BOX
 	b = ba:GetBox(3)
-	print("b = ba:GetBox(3)", b)
+	print("b = ba:GetBox(3)		", b)
 
-	-- Get the BOX geometry
+	-- Get the BOX at index 4
 	b = ba:GetBox(4)
-	print("b = ba:GetBox(4)", b)
+	print("b = ba:GetBox(4)         ", b)
+
+	baa = LuaLept.BOXAA()
+	print("baa = LuaLept.BOXAA()	", baa)
+	print("#baa                     ", #baa)
+	local count = 7
+	for i = 1,count do baa:AddBoxa(ba) end
+	print("... after " .. count .. " times baa:AddBoxa(ba)")
+	print("#baa                     ", #baa)
+	print("baa                      ", baa)
+	print("baa:GetBoxCount()        ", baa:GetBoxCount())
+
+	local ba2 = baa:FlattenToBoxa()
+	print("baa::FlattenToBoxa()     ", ba2)
 end
 
 function numa_test()
-	local filename = "test.log"
+	local filename = "/tmp/test.log"
 	print("************** NUMA/NUMAA")
 
 	local PI = 3.14159265358979323846
@@ -106,7 +119,7 @@ function numa_test()
 
 	-- Create a new NUMA
 	local na = LuaLept.NUMA()
-	print("na = LuaLept.NUMA()", na)
+	print("na = LuaLept.NUMA()     ", na)
 
 	-- Add some numbers
 	na:AddNumber(PI)
@@ -116,43 +129,41 @@ function numa_test()
 	na:AddNumber(E^(1/PI))
 
 	print("... after adding some numbers")
-	print("na", na)
-	print("#na", #na)
-	print("na:GetParameters()", na:GetParameters())
+	print("na                      ", na)
+	print("#na                     ", #na)
+	print("na:GetParameters()      ", na:GetParameters())
 
 	-- As array of numbers
-	print("na:GetFArray()", na:GetFArray())
+	print("na:GetFArray()          ", na:GetFArray())
 
 	-- As array of integers
-	print("na:GetIArray()", na:GetIArray())
+	print("na:GetIArray()	       ", na:GetIArray())
 
 	-- Create a new MUMAA
 	local naa = LuaLept.NUMAA(1)
-	print("naa = LuaLept.NUMAA(1)", naa)
+	print("naa = LuaLept.NUMAA(1)  ", naa)
 
 	local count = 10
-	for i = 1, count do
-		naa:AddNuma(na)
-	end
-	print("... after 16 x naa:AddNuma(na)")
+	for i = 1, count do naa:AddNuma(na) end
+	print("... after " .. count .." times naa:AddNuma(na)")
 
 	print("#naa",	#naa)
+	print("naa:GetNumberCount()    ", naa:GetNumberCount())
 	for i = 1, count do
 		print("naa:GetNumaCount("..i..")", naa:GetNumaCount(i))
 	end
-	print("naa:GetNumberCount()", naa:GetNumberCount())
+
+	local ok = naa:Write(filename)
+	print("naa:Write('" .. filename .. "')", ok)
+
+	naa = LuaLept.NUMAA().Read(filename)
+	print("naa.Read('" .. filename .. "')", ok)
 
 	local na = naa:FlattenToNuma()
 	print("... after na = naa:FlattenToNuma()")
-	print("#na",	#na)
-	print("na",	na)
-	print("na:GetFArray()", na:GetFArray())
-
-	local ok = naa:Write(filename)
-	print("naa:Write('"..filename.."')", ok)
-
-	naa = naa.Read(filename)
-	print("naa.Read('"..filename.."')", ok)
+	print("#na                     ", #na)
+	print("na                      ", na)
+	print("na:GetFArray()          ", na:GetFArray())
 end
 
 function dna_test()
@@ -188,7 +199,7 @@ function dna_test()
 	for i = 1, count do
 		daa:AddDna(da)
 	end
-	print("... after 16 x daa:AddDna(da)")
+	print("... after " .. count .. " times daa:AddDna(da)")
 
 	print("#daa",	#daa)
 	for i = 1, count do
@@ -224,61 +235,58 @@ function pix_test()
 	print("cmap:GetFreeCount()", cmap:GetFreeCount())
 	cmap:AddColor(0x00,0x00,0x00)
 	cmap:AddColor(0x7f,0x7f,0x7f)
-	cmap:AddColor(0x40,0xe0,0xf0)
-	cmap:AddColor(0xff,0xff,0xff)
+	local bluish = cmap:AddNewColor(0x40,0xe0,0xf0)
+	cmap:AddRGBA(0xff,0xff,0xff,0xff)
+	print("cmap:AddNewColor(0x40,0xe0,0xf0)", bluish)
 
-	local color = 3
-	print("cmap:GetWhiteVal() index", color)
+	local black = cmap:UsableColor(0,0,0)
+	print("cmap:UsableColor(0,0,0) index", black)
 	print("cmap:GetFreeCount()", cmap:GetFreeCount())
+
+	print("cmap", cmap)
 
 	local ok = pix:SetColormap(cmap)
 	print("pix:SetColormap()", ok)
 	print("pix", pix);
 
-	-- Clear all pixels
+	-- Set all pixels (to 2^depth - 1)
 	pix:SetAll()
 
-	for dist = 4, 11 do
-		local ok = pix:SetBorderRingVal(dist,0)
-		print("pix:SetBorderRingVal("..dist..",2)", ok);
-	end
+	-- Draw some border rings
+	for dist = 4,13 do pix:SetBorderRingVal(dist,2) end
 
-	for x = 0, width-1 do
-		pix:SetPixel(x, height/2, color)
-	end
+	-- Draw a horizontal line in the vertical center
+	for x = 0, width-1 do pix:SetPixel(x, height/2, black) end
 
 	pix:SetSpecial(10+9)	-- maximum compression
 	local ok = pix:Write(filename, "png")
 	print("pix:Write('" .. filename .."')", ok)
 
 	local pix2 = LuaLept.PIX(filename)
-	print("pix = LuaLept.PIX('" .. filename .. "')", pix2);
+	print("pix2 = LuaLept.PIX('" .. filename .. "')", pix2);
 
-	local w = pix2:GetWidth()
-	print("w", w)
-
-	local h = pix2:GetHeight()
-	print("h", h)
-
-	local d = pix2:GetDepth()
-	print("d", d)
+	local w, h, d = pix2:GetDimensions()
+	print("width            ", w)
+	print("height           ", h)
+	print("depth            ", d)
 
 	local spp = pix2:GetSpp()
-	print("spp", spp)
+	print("spp              ", spp)
 
 	local wpl = pix2:GetWpl()
-	print("wpl", wpl)
+	print("wpl              ", wpl)
 
 	local bits = h * wpl * 32
-	print("bits", bits)
+	print("bits		", bits)
 end
 
 function pix2_test()
+	local filename = "/tmp/lualept.png"
 	local pix = LuaLept.PIX('lualept.jpg')
 	print ("pix", pix)
 
-	local ok = pix:Write('/tmp/lualept.png', 'png')
-	print ("pix:Write('/tmp/lualept.png', 'png')", ok)
+	local ok = pix:Write(filename, 'png')
+	print ("pix:Write('" .. filename .. "', 'png')", ok)
 
 	local w, h, d = pix:GetDimensions()
 	print ("dimensions      :", w, h, d)
@@ -286,8 +294,8 @@ function pix2_test()
 	print ("RGB colors      :", pix:CountRGBColors())
 	-- print ("color histogram :", pix:GetColorAmapHistogram(8))
 
-	local pixm = pix:MakeArbMaskFromRGB(0.0, 0.5, -0.5, 0.05)
-	pixm:SetInputFormat('tiff-g4')
+	local pixm = pix:MakeArbMaskFromRGB(-0.5, -0.5, 0.75, 0.05)
+	-- pixm:SetInputFormat('tiff-g4')
 	print ("pixm            :", pixm)
 	print ("dimensions      :", pixm:GetDimensions())
 
@@ -296,10 +304,10 @@ function pix2_test()
 	print ("pixels in rect  :", box, pixm:CountPixelsInRect(box))
 	print ("foreground fract:", pixm:ForegroundFraction())
 
-	local ok = pixm:Write('/tmp/lualept-mask.tif', 'g3')
-	pix:PaintThroughMask(pixm, 0, 0, LuaLept.RGB(255,0,128))
+	local ok = pixm:Write('/tmp/lualept-mask.tif', 'g4')
+	pix:PaintThroughMask(pixm, 0, 0, LuaLept.RGB(255,128,128))
 
-	local ok = pix:Write('/tmp/lualept-masked.jpg', 'jpg')
+	local ok = pix:Write('/tmp/lualept-masked.png', 'png')
 end
 
 function hex_dump(buf)
@@ -328,10 +336,10 @@ aset_test()
 amap_test()
 pta_test()
 boxa_test()
--- numa_test()
--- dna_test()
--- pix_test()
--- pix2_test()
+numa_test()
+dna_test()
+pix_test()
+pix2_test()
 
 print("**************")
 print("That's all, folks!")

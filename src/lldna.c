@@ -29,7 +29,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *************************************************************************/
 
-#include "llept.h"
+#include "modules.h"
 #include <lauxlib.h>
 #include <lualib.h>
 
@@ -76,7 +76,7 @@ ll_push_DNA(lua_State *L, L_DNA *da)
 int
 ll_new_DNA(lua_State *L)
 {
-    l_int32 n = ll_check_l_int32_default(L, 1, 1);
+    l_int32 n = ll_check_l_int32_default(__func__, L, 1, 1);
     L_DNA *da = l_dnaCreate(n);
     return ll_push_DNA(L, da);
 }
@@ -174,7 +174,7 @@ static int
 SetCount(lua_State *L)
 {
     L_DNA *da = ll_check_DNA(L, 1);
-    l_int32 n = ll_check_l_int32(L, 2);
+    l_int32 n = ll_check_l_int32(__func__, L, 2);
     lua_pushboolean(L, 0 == l_dnaSetCount(da, n));
     return 1;
 }
@@ -258,7 +258,7 @@ static int
 InsertNumber(lua_State *L)
 {
     L_DNA *da = ll_check_DNA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, l_dnaGetCount(da));
+    l_int32 idx = ll_check_index(__func__, L, 2, l_dnaGetCount(da));
     int isnumber = 0;
     lua_Number val = lua_tonumberx(L, 3, &isnumber);
     lua_pushboolean(
@@ -279,7 +279,7 @@ static int
 RemoveNumber(lua_State *L)
 {
     L_DNA *da = ll_check_DNA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, l_dnaGetCount(da));
+    l_int32 idx = ll_check_index(__func__, L, 2, l_dnaGetCount(da));
     lua_pushboolean(L, 0 == l_dnaRemoveNumber(da, idx));
     return 1;
 }
@@ -298,7 +298,7 @@ static int
 ReplaceNumber(lua_State *L)
 {
     L_DNA *da = ll_check_DNA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, l_dnaGetCount(da));
+    l_int32 idx = ll_check_index(__func__, L, 2, l_dnaGetCount(da));
     int isnumber = 0;
     lua_Number val = lua_tonumberx(L, 3, &isnumber);
     lua_pushboolean(L, isnumber && 0 == l_dnaReplaceNumber(da, idx, val) ? TRUE : FALSE);
@@ -318,7 +318,7 @@ static int
 GetDValue(lua_State *L)
 {
     L_DNA *da = ll_check_DNA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, l_dnaGetCount(da));
+    l_int32 idx = ll_check_index(__func__, L, 2, l_dnaGetCount(da));
     lua_Number val;
     if (l_dnaGetDValue(da, idx, &val))
         return 0;
@@ -339,7 +339,7 @@ static int
 GetIValue(lua_State *L)
 {
     L_DNA *da = ll_check_DNA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, l_dnaGetCount(da));
+    l_int32 idx = ll_check_index(__func__, L, 2, l_dnaGetCount(da));
     l_int32 val;
     if (l_dnaGetIValue(da, idx, &val))
         return 0;
@@ -361,7 +361,7 @@ static int
 SetValue(lua_State *L)
 {
     L_DNA *da = ll_check_DNA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, l_dnaGetCount(da));
+    l_int32 idx = ll_check_index(__func__, L, 2, l_dnaGetCount(da));
     int isnumber = 0;
     lua_Number val = lua_tonumberx(L, 3, &isnumber);
     lua_pushboolean(L, isnumber && 0 == l_dnaSetValue(da, idx, val));
@@ -382,7 +382,7 @@ static int
 ShiftValue(lua_State *L)
 {
     L_DNA *da = ll_check_DNA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, l_dnaGetCount(da));
+    l_int32 idx = ll_check_index(__func__, L, 2, l_dnaGetCount(da));
     int isnumber = 0;
     lua_Number diff = lua_tonumberx(L, 3, &isnumber);
     lua_pushboolean(L, isnumber && 0 == l_dnaShiftValue(da, idx, diff));

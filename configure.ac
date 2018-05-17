@@ -2,7 +2,7 @@ AC_PREREQ([2.50])
 AC_INIT([lualept], [0.1.0])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_HEADERS([src/config.h:config/config.h.in])
-AC_CONFIG_SRCDIR([src/llept.c])
+AC_CONFIG_SRCDIR([src/lualept.c])
 
 AC_CONFIG_MACRO_DIR([m4])
 LT_INIT
@@ -40,7 +40,7 @@ AC_CHECK_HEADERS([ctype.h float.h])
 AC_C_BIGENDIAN
 
 # Checks for library functions.
-AC_CHECK_FUNC([strcasecmp stricmp])
+AC_CHECK_FUNCS([strcasecmp stricmp])
 
 AC_CONFIG_FILES([Makefile src/Makefile lualept.pc])
 AC_OUTPUT

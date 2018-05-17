@@ -29,18 +29,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *************************************************************************/
 
-#pragma once
+#if !defined(LUALEPT_EXPORTS_H)
+#define LUALEPT_EXPORTS_H
 
-#if !defined(LUALEPT_H)
-#define  LUALEPT_H
-
-#if defined (HAVE_CONFIG_H)
-#include "config.h"
-#endif
-
-#define LLUA_DEBUG      0
-
-#include <allheaders.h>
+#include "lualept.h"
 
 #if defined(HAVE_CTYPE_H)
 #include <ctype.h>
@@ -76,17 +68,7 @@
 #include <unistd.h>
 #endif
 
-/*! Dummy structure for the top level Lua class LL_LEPT */
-struct LuaLept {
-    char str_version[32];           /*!< Our own version number */
-    char str_version_lua[32];       /*!< Lua's version number */
-    char str_version_lept[32];      /*!< Leptonica's version number */
-};
-
-/*! Dummy type for the top level Lua class LL_LEPT */
-typedef struct LuaLept LEPT;
-
-#define LUA_SENTINEL    {NULL,NULL}     /*!< Lua function table (luaL_Reg array[]) sentinel */
+#define LLUA_DEBUG      0
 
 #define	LL_PTA		"PTA"           /*!< Lua class: array of points (pair of l_float32) */
 #define	LL_PTAA		"PTAA"          /*!< Lua class: array of PTA */
@@ -107,13 +89,12 @@ typedef struct LuaLept LEPT;
 
 #define	LL_LEPT		"LuaLept"       /*!< Lua class: LuaLept top level */
 
-
 #if LLUA_DEBUG
 #define DBG(enable, fmt, ...)                                                  \
     do {                                                                       \
-        if (enable) {                                                          \
-            fprintf(stderr, fmt, __VA_ARGS__);                                 \
-        }                                                                      \
+	if (enable) {                                                          \
+	    fprintf(stderr, fmt, __VA_ARGS__);                                 \
+	}                                                                      \
     } while (0)
 #else
 #define DBG(enable, fmt, ...)
@@ -126,6 +107,19 @@ typedef struct LuaLept LEPT;
 typedef struct lua_State lua_State;
 typedef struct luaL_Reg luaL_Reg;
 
+/** Lua function table (luaL_Reg array[]) sentinel */
+#define LUA_SENTINEL    {NULL,NULL}
+
+/*! Dummy structure for the top level Lua class LL_LEPT */
+struct LuaLept {
+    char str_version[32];           /*!< Our own version number */
+    char str_version_lua[32];       /*!< Lua's version number */
+    char str_version_lept[32];      /*!< Leptonica's version number */
+};
+
+/*! Dummy type for the top level Lua class LL_LEPT */
+typedef struct LuaLept LUALEPT;
+
 /** Structure to list keys (string) with their l_int32 (enumeration) values */
 typedef struct lept_enums_s {
     const char *key;		/*!< string for the enumeration value */
@@ -137,13 +131,13 @@ typedef struct lept_enums_s {
 extern int          ll_register_class(lua_State *L, const char *name, const luaL_Reg *methods, const luaL_Reg *functions);
 extern void **      ll_check_udata(lua_State *L, int arg, const char* name);
 extern int          ll_push_udata(lua_State *L, const char* name, void *udata);
-extern l_int32      ll_check_index(lua_State *L, int arg, l_int32 imax);
-extern l_int32      ll_check_l_int32(lua_State *L, int arg);
-extern l_int32      ll_check_l_int32_default(lua_State *L, int arg, l_int32 dflt);
-extern l_uint32     ll_check_l_uint32(lua_State *L, int arg);
-extern l_uint32     ll_check_l_uint32_default(lua_State *L, int arg, l_uint32 dflt);
-extern l_float32    ll_check_l_float32(lua_State *L, int arg);
-extern l_float32    ll_check_l_float32_default(lua_State *L, int arg, l_float32 dflt);
+extern l_int32      ll_check_index(const char* func, lua_State *L, int arg, l_int32 imax);
+extern l_int32      ll_check_l_int32(const char* func, lua_State *L, int arg);
+extern l_int32      ll_check_l_int32_default(const char* func, lua_State *L, int arg, l_int32 dflt);
+extern l_uint32     ll_check_l_uint32(const char* func, lua_State *L, int arg);
+extern l_uint32     ll_check_l_uint32_default(const char* func, lua_State *L, int arg, l_uint32 dflt);
+extern l_float32    ll_check_l_float32(const char* func, lua_State *L, int arg);
+extern l_float32    ll_check_l_float32_default(const char* func, lua_State *L, int arg, l_float32 dflt);
 extern l_int32      ll_check_tbl(lua_State *L, int arg, l_int32 dflt, const lept_enums_t *tbl, size_t len);
 extern l_int32      ll_check_access_storage(lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_access_storage(int flag);
@@ -165,100 +159,100 @@ extern l_int32      ll_check_select_color(lua_State *L, int arg, l_int32 dflt);
 extern l_int32      ll_check_select_min_max(lua_State *L, int arg, l_int32 dflt);
 
 /* llnuma.c */
-extern NUMA    * ll_check_NUMA(lua_State *L, int arg);
-extern int       ll_push_NUMA(lua_State *L, NUMA *na);
-extern int       ll_new_NUMA(lua_State *L);
-extern int       ll_register_NUMA(lua_State *L);
+extern NUMA       * ll_check_NUMA(lua_State *L, int arg);
+extern int          ll_push_NUMA(lua_State *L, NUMA *na);
+extern int          ll_new_NUMA(lua_State *L);
+extern int          ll_register_NUMA(lua_State *L);
 
 /* llnumaa.c */
-extern NUMAA   * ll_check_NUMAA(lua_State *L, int arg);
-extern int       ll_push_NUMAA(lua_State *L, NUMAA *naa);
-extern int       ll_new_NUMAA(lua_State *L);
-extern int       ll_register_NUMAA(lua_State *L);
+extern NUMAA      * ll_check_NUMAA(lua_State *L, int arg);
+extern int          ll_push_NUMAA(lua_State *L, NUMAA *naa);
+extern int          ll_new_NUMAA(lua_State *L);
+extern int          ll_register_NUMAA(lua_State *L);
 
 /* lldna.c */
-extern L_DNA   * ll_check_DNA(lua_State *L, int arg);
-extern int       ll_push_DNA(lua_State *L, L_DNA *da);
-extern int       ll_new_DNA(lua_State *L);
-extern int       ll_register_DNA(lua_State *L);
+extern L_DNA      * ll_check_DNA(lua_State *L, int arg);
+extern int          ll_push_DNA(lua_State *L, L_DNA *da);
+extern int          ll_new_DNA(lua_State *L);
+extern int          ll_register_DNA(lua_State *L);
 
 /* lldnaa.c */
-extern L_DNAA  * ll_check_DNAA(lua_State *L, int arg);
-extern int       ll_push_DNAA(lua_State *L, L_DNAA *naa);
-extern int       ll_new_DNAA(lua_State *L);
-extern int       ll_register_DNAA(lua_State *L);
+extern L_DNAA     * ll_check_DNAA(lua_State *L, int arg);
+extern int          ll_push_DNAA(lua_State *L, L_DNAA *naa);
+extern int          ll_new_DNAA(lua_State *L);
+extern int          ll_register_DNAA(lua_State *L);
 
 /* llpta.c */
-extern PTA     * ll_check_PTA(lua_State *L, int arg);
-extern int       ll_push_PTA(lua_State *L, PTA *pta);
-extern int       ll_new_PTA(lua_State *L);
-extern int       ll_register_PTA(lua_State *L);
+extern PTA        * ll_check_PTA(lua_State *L, int arg);
+extern int          ll_push_PTA(lua_State *L, PTA *pta);
+extern int          ll_new_PTA(lua_State *L);
+extern int          ll_register_PTA(lua_State *L);
 
 /* llptaa.c */
-extern PTAA    * ll_check_PTAA(lua_State *L, int arg);
-extern int       ll_push_PTAA(lua_State *L, PTAA *ptaa);
-extern int       ll_new_PTAA(lua_State *L);
-extern int       ll_register_PTAA(lua_State *L);
+extern PTAA       * ll_check_PTAA(lua_State *L, int arg);
+extern int          ll_push_PTAA(lua_State *L, PTAA *ptaa);
+extern int          ll_new_PTAA(lua_State *L);
+extern int          ll_register_PTAA(lua_State *L);
 
 /* llamap.c */
-extern L_AMAP  * ll_check_AMAP(lua_State *L, int arg);
-extern int       ll_push_AMAP(lua_State *L, L_AMAP *amap);
-extern int       ll_new_AMAP(lua_State *L);
-extern int       ll_register_AMAP(lua_State *L);
+extern L_AMAP     * ll_check_AMAP(lua_State *L, int arg);
+extern int          ll_push_AMAP(lua_State *L, L_AMAP *amap);
+extern int          ll_new_AMAP(lua_State *L);
+extern int          ll_register_AMAP(lua_State *L);
 
 /* llaset.c */
-extern L_ASET  * ll_check_ASET(lua_State *L, int arg);
-extern int       ll_push_ASET(lua_State *L, L_ASET *aset);
-extern int       ll_new_ASET(lua_State *L);
-extern int       ll_register_ASET(lua_State *L);
+extern L_ASET     * ll_check_ASET(lua_State *L, int arg);
+extern int          ll_push_ASET(lua_State *L, L_ASET *aset);
+extern int          ll_new_ASET(lua_State *L);
+extern int          ll_register_ASET(lua_State *L);
 
 /* lllist.c */
-extern DLLIST  * ll_check_DLLIST(lua_State *L, int arg);
-extern int       ll_push_DLLIST(lua_State *L, DLLIST *list);
-extern int       ll_new_DLLIST(lua_State *L);
-extern int       ll_register_DLLIST(lua_State *L);
+extern DLLIST     * ll_check_DLLIST(lua_State *L, int arg);
+extern int          ll_push_DLLIST(lua_State *L, DLLIST *list);
+extern int          ll_new_DLLIST(lua_State *L);
+extern int          ll_register_DLLIST(lua_State *L);
 
 /* llbox.c */
-extern BOX     * ll_check_BOX(lua_State *L, int arg);
-extern int       ll_push_BOX(lua_State *L, BOX *box);
-extern int       ll_new_BOX(lua_State *L);
-extern int       ll_register_BOX(lua_State *L);
+extern BOX        * ll_check_BOX(lua_State *L, int arg);
+extern int          ll_push_BOX(lua_State *L, BOX *box);
+extern int          ll_new_BOX(lua_State *L);
+extern int          ll_register_BOX(lua_State *L);
 
 /* llboxa.c */
-extern BOXA    * ll_check_BOXA(lua_State *L, int arg);
-extern int       ll_push_BOXA(lua_State *L, BOXA *boxa);
-extern int       ll_new_BOXA(lua_State *L);
-extern int       ll_register_BOXA(lua_State *L);
+extern BOXA       * ll_check_BOXA(lua_State *L, int arg);
+extern int          ll_push_BOXA(lua_State *L, BOXA *boxa);
+extern int          ll_new_BOXA(lua_State *L);
+extern int          ll_register_BOXA(lua_State *L);
 
 /* llboxaa.c */
-extern BOXAA   * ll_check_BOXAA(lua_State *L, int arg);
-extern int       ll_push_BOXAA(lua_State *L, BOXAA *boxaa);
-extern int       ll_new_BOXAA(lua_State *L);
-extern int       ll_register_BOXAA(lua_State *L);
+extern BOXAA      * ll_check_BOXAA(lua_State *L, int arg);
+extern int          ll_push_BOXAA(lua_State *L, BOXAA *boxaa);
+extern int          ll_new_BOXAA(lua_State *L);
+extern int          ll_register_BOXAA(lua_State *L);
 
 /* llpixcmap.c */
-extern PIXCMAP * ll_check_PIXCMAP(lua_State *L, int arg);
-extern PIXCMAP * ll_take_PIXCMAP(lua_State *L, int arg);
-extern int       ll_push_PIXCMAP(lua_State *L, PIXCMAP *cmap);
-extern int       ll_new_PIXCMAP(lua_State *L);
-extern int       ll_register_PIXCMAP(lua_State *L);
+extern PIXCMAP    * ll_check_PIXCMAP(lua_State *L, int arg);
+extern PIXCMAP    * ll_take_PIXCMAP(lua_State *L, int arg);
+extern int          ll_push_PIXCMAP(lua_State *L, PIXCMAP *cmap);
+extern int          ll_new_PIXCMAP(lua_State *L);
+extern int          ll_register_PIXCMAP(lua_State *L);
 
 /* llpix.c */
-extern PIX     * ll_check_PIX(lua_State *L, int arg);
-extern int       ll_push_PIX(lua_State *L, PIX *pix);
-extern int       ll_new_PIX(lua_State *L);
-extern int       ll_register_PIX(lua_State *L);
+extern PIX        * ll_check_PIX(lua_State *L, int arg);
+extern int          ll_push_PIX(lua_State *L, PIX *pix);
+extern int          ll_new_PIX(lua_State *L);
+extern int          ll_register_PIX(lua_State *L);
 
 /* llpixa.c */
-extern PIXA    * ll_check_PIXA(lua_State *L, int arg);
-extern int       ll_push_PIXA(lua_State *L, PIXA *pixa);
-extern int       ll_new_PIXA(lua_State *L);
-extern int       ll_register_PIXA(lua_State *L);
+extern PIXA       * ll_check_PIXA(lua_State *L, int arg);
+extern int          ll_push_PIXA(lua_State *L, PIXA *pixa);
+extern int          ll_new_PIXA(lua_State *L);
+extern int          ll_register_PIXA(lua_State *L);
 
 /* llpixaa.c */
-extern PIXAA   * ll_check_PIXAA(lua_State *L, int arg);
-extern int       ll_push_PIXAA(lua_State *L, PIXAA *pixaa);
-extern int       ll_new_PIXAA(lua_State *L);
-extern int       ll_register_PIXAA(lua_State *L);
+extern PIXAA      * ll_check_PIXAA(lua_State *L, int arg);
+extern int          ll_push_PIXAA(lua_State *L, PIXAA *pixaa);
+extern int          ll_new_PIXAA(lua_State *L);
+extern int          ll_register_PIXAA(lua_State *L);
 
-#endif	/* LUALEPT_H */
+#endif

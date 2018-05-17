@@ -29,7 +29,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *************************************************************************/
 
-#include "llept.h"
+#include "modules.h"
 #include <lauxlib.h>
 #include <lualib.h>
 
@@ -76,7 +76,7 @@ ll_push_DNAA(lua_State *L, L_DNAA *daa)
 int
 ll_new_DNAA(lua_State *L)
 {
-    l_int32 n = ll_check_l_int32_default(L, 1, 1);
+    l_int32 n = ll_check_l_int32_default(__func__, L, 1, 1);
     L_DNAA *daa = l_dnaaCreate(n);
     return ll_push_DNAA(L, daa);
 }
@@ -107,8 +107,8 @@ Create(lua_State *L)
 static int
 CreateFull(lua_State *L)
 {
-    l_int32 nptr = ll_check_l_int32_default(L, 1, 1);
-    l_int32 n = ll_check_l_int32_default(L, 2, 1);
+    l_int32 nptr = ll_check_l_int32_default(__func__, L, 1, 1);
+    l_int32 n = ll_check_l_int32_default(__func__, L, 2, 1);
     L_DNAA *daa = l_dnaaCreateFull(nptr, n);
     return ll_push_DNAA(L, daa);
 }
@@ -176,7 +176,7 @@ static int
 GetDnaCount(lua_State *L)
 {
     L_DNAA *daa = ll_check_DNAA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, l_dnaaGetCount(daa));
+    l_int32 idx = ll_check_index(__func__, L, 2, l_dnaaGetCount(daa));
     l_int32 n = l_dnaaGetDnaCount(daa, idx);
     lua_pushinteger(L, n);
     return 1;
@@ -232,7 +232,7 @@ static int
 GetDna(lua_State *L)
 {
     L_DNAA *daa = ll_check_DNAA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, l_dnaaGetCount(daa));
+    l_int32 idx = ll_check_index(__func__, L, 2, l_dnaaGetCount(daa));
     l_int32 accessflag = ll_check_access_storage(L, 3, L_COPY);
     L_DNA *da = l_dnaaGetDna(daa, idx, accessflag);
     return ll_push_DNA(L, da);
@@ -252,8 +252,8 @@ static int
 GetValue(lua_State *L)
 {
     L_DNAA *daa = ll_check_DNAA(L, 1);
-    l_int32 i = ll_check_index(L, 2, l_dnaaGetCount(daa));
-    l_int32 j = ll_check_index(L, 3, INT32_MAX);
+    l_int32 i = ll_check_index(__func__, L, 2, l_dnaaGetCount(daa));
+    l_int32 j = ll_check_index(__func__, L, 3, INT32_MAX);
     lua_Number val;
     if (l_dnaaGetValue(daa, i, j, &val))
         return 0;
@@ -275,7 +275,7 @@ static int
 AddNumber(lua_State *L)
 {
     L_DNAA *daa = ll_check_DNAA(L, 1);
-    l_int32 idx = ll_check_l_int32(L, 2);
+    l_int32 idx = ll_check_l_int32(__func__, L, 2);
     int isnumber = 0;
     lua_Number val = lua_tonumberx(L, 3, &isnumber);
     lua_pushboolean(L, isnumber && 0 == l_dnaaAddNumber(daa, idx, val));

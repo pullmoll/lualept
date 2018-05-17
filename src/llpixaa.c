@@ -29,7 +29,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *************************************************************************/
 
-#include "llept.h"
+#include "modules.h"
 #include <lauxlib.h>
 #include <lualib.h>
 
@@ -76,7 +76,7 @@ ll_push_PIXAA(lua_State *L, PIXAA *pixaa)
 int
 ll_new_PIXAA(lua_State *L)
 {
-    l_int32 n = ll_check_l_int32_default(L, 1, 1);
+    l_int32 n = ll_check_l_int32_default(__func__, L, 1, 1);
     PIXAA *pixaa = pixaaCreate(n);
     return ll_push_PIXAA(L, pixaa);
 }
@@ -110,7 +110,7 @@ static int
 CreateFromPixa(lua_State *L)
 {
     PIXA *pixa = ll_check_PIXA(L, 1);
-    l_int32 n = ll_check_l_int32_default(L, 2, 1);
+    l_int32 n = ll_check_l_int32_default(__func__, L, 2, 1);
     l_int32 type = ll_check_consecutive_skip_by(L, 3, L_CHOOSE_CONSECUTIVE);
     l_int32 copyflag = ll_check_access_storage(L, 4, L_CLONE);
     PIXAA *pixaa = pixaaCreateFromPixa(pixa, n, type, copyflag);
@@ -152,7 +152,7 @@ static int
 AddPix(lua_State *L)
 {
     PIXAA *pixaa = ll_check_PIXAA(L, 1);
-    l_int32 idx = ll_check_l_int32(L, 2) - 1;
+    l_int32 idx = ll_check_index(__func__, L, 2, pixaaGetCount(pixaa, NULL));
     PIX *pix = ll_check_PIX(L, 3);
     BOX *box = ll_check_BOX(L, 4);
     l_int32 copyflag = ll_check_access_storage(L, 5, L_COPY);
@@ -246,7 +246,7 @@ static int
 ReplacePixa(lua_State *L)
 {
     PIXAA *paa = ll_check_PIXAA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, pixaaGetCount(paa, NULL));
+    l_int32 idx = ll_check_index(__func__, L, 2, pixaaGetCount(paa, NULL));
     PIXA *pa = ll_check_PIXA(L, 3);
     lua_pushboolean(L, 0 == pixaaReplacePixa(paa, idx, pa));
     return 1;
@@ -284,8 +284,8 @@ Join(lua_State *L)
 {
     PIXAA *pixaad = ll_check_PIXAA(L, 1);
     PIXAA *pixaas = ll_check_PIXAA(L, 2);
-    l_int32 istart = ll_check_l_int32_default(L, 3, 1) - 1;
-    l_int32 iend = ll_check_l_int32_default(L, 3, pixaaGetCount(pixaas, NULL)) - 1;
+    l_int32 istart = ll_check_l_int32_default(__func__, L, 3, 1) - 1;
+    l_int32 iend = ll_check_l_int32_default(__func__, L, 3, pixaaGetCount(pixaas, NULL)) - 1;
     lua_pushboolean(L, 0 == pixaaJoin(pixaad, pixaas, istart, iend));
     return 1;
 }
@@ -322,7 +322,7 @@ static int
 GetPixa(lua_State *L)
 {
     PIXAA *pixaa = ll_check_PIXAA(L, 1);
-    l_int32 idx = ll_check_l_int32(L, 2)- 1;
+    l_int32 idx = ll_check_index(__func__, L, 2, pixaaGetCount(pixaa, NULL));
     l_int32 accesstype = ll_check_access_storage(L, 3, L_CLONE);
     PIXA *pixa = pixaaGetPixa(pixaa, idx, accesstype);
     return ll_push_PIXA(L, pixa);

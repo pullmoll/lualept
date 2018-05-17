@@ -29,7 +29,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *************************************************************************/
 
-#include "llept.h"
+#include "modules.h"
 #include <lauxlib.h>
 #include <lualib.h>
 
@@ -76,7 +76,7 @@ ll_push_BOXA(lua_State *L, BOXA *boxa)
 int
 ll_new_BOXA(lua_State *L)
 {
-    l_int32 n = ll_check_l_int32(L, 1);
+    l_int32 n = ll_check_l_int32_default(__func__, L, 1, 1);
     BOXA *boxa = boxaCreate(n);
     return ll_push_BOXA(L, boxa);
 }
@@ -101,7 +101,7 @@ toString(lua_State *L)
         luaL_addchar(&B, '{');
         for (i = 0; i < boxaGetCount(boxa); i++) {
             boxaGetBoxGeometry(boxa, i, &x, &y, &w, &h);
-            snprintf(str, sizeof(str), "{%d,%d,%d,%d}", x, y, w, h);
+            snprintf(str, sizeof(str), "%d={%d,%d,%d,%d}", i, x, y, w, h);
             if (i > 0)
                 luaL_addchar(&B, ',');
             luaL_addstring(&B, str);
@@ -129,7 +129,7 @@ Create(lua_State *L)
 /**
  * \brief Destroy a BOXA*
  *
- * Arg #1 (i.e. self) is expected to be a BOXA* user data
+ * Arg #1 (i.e. self) is expected to be a BOXA*
  *
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack
@@ -148,7 +148,7 @@ Destroy(lua_State *L)
 /**
  * \brief Copy a BOXA*
  *
- * Arg #1 (i.e. self) is expected to be a BOXA* user data
+ * Arg #1 (i.e. self) is expected to be a BOXA*
  * Arg #2 is an optional string defining the storage flags (copy, clone,
  * copy_clone)
  *
@@ -167,8 +167,8 @@ Copy(lua_State *L)
 /**
  * \brief Add a BOX* to a BOXA*
  *
- * Arg #1 (i.e. self) is expected to be a BOXA* user data
- * Arg #2 is expected to be a BOX* user data
+ * Arg #1 (i.e. self) is expected to be a BOXA*
+ * Arg #2 is expected to be a BOX*
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -186,7 +186,7 @@ AddBox(lua_State *L)
 /**
  * \brief Extend a BOXA*
  *
- * Arg #1 (i.e. self) is expected to be a BOXA* user data
+ * Arg #1 (i.e. self) is expected to be a BOXA*
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -202,7 +202,7 @@ ExtendArray(lua_State *L)
 /**
  * \brief Extend a BOXA* to a given size %n
  *
- * Arg #1 (i.e. self) is expected to be a BOXA* user data
+ * Arg #1 (i.e. self) is expected to be a BOXA*
  * Arg #2 is expected to be a l_int32 (n)
  *
  * \param L pointer to the lua_State
@@ -212,7 +212,7 @@ static int
 ExtendArrayToSize(lua_State *L)
 {
     BOXA *boxa = ll_check_BOXA(L, 1);
-    l_int32 n = ll_check_l_int32(L, 2);
+    l_int32 n = ll_check_l_int32(__func__, L, 2);
     lua_pushboolean(L, 0 == boxaExtendArrayToSize(boxa, n));
     return 1;
 }
@@ -220,7 +220,7 @@ ExtendArrayToSize(lua_State *L)
 /**
  * \brief Get count for a BOXA*
  *
- * Arg #1 (i.e. self) is expected to be a BOXA* user data
+ * Arg #1 (i.e. self) is expected to be a BOXA*
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -236,7 +236,7 @@ GetCount(lua_State *L)
 /**
  * \brief Get valid count for a BOXA*
  *
- * Arg #1 (i.e. self) is expected to be a BOXA* user data
+ * Arg #1 (i.e. self) is expected to be a BOXA*
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -252,7 +252,7 @@ GetValidCount(lua_State *L)
 /**
  * \brief Get BOX* from a BOXA* at index %idx
  *
- * Arg #1 (i.e. self) is expected to be a BOXA* user data
+ * Arg #1 (i.e. self) is expected to be a BOXA*
  * Arg #2 is expected to be a l_int32 (idx)
  * Arg #3 is an optional string defining the storage flags (copy, clone).
  *
@@ -263,7 +263,7 @@ static int
 GetBox(lua_State *L)
 {
     BOXA *boxa = ll_check_BOXA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, boxaGetCount(boxa));
+    l_int32 idx = ll_check_index(__func__, L, 2, boxaGetCount(boxa));
     l_int32 flag = ll_check_access_storage(L, 3, L_COPY);
     BOX *box = boxaGetBox(boxa, idx, flag);
     return ll_push_BOX(L, box);
@@ -272,7 +272,7 @@ GetBox(lua_State *L)
 /**
  * \brief Get valid BOX* from a BOXA* at index %idx
  *
- * Arg #1 (i.e. self) is expected to be a BOXA* user data
+ * Arg #1 (i.e. self) is expected to be a BOXA*
  * Arg #2 is expected to be a l_int32 (idx)
  * Arg #3 is an optional string defining the storage flags (copy, clone).
  *
@@ -283,7 +283,7 @@ static int
 GetValidBox(lua_State *L)
 {
     BOXA *boxa = ll_check_BOXA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, boxaGetCount(boxa));
+    l_int32 idx = ll_check_index(__func__, L, 2, boxaGetCount(boxa));
     l_int32 flag = ll_check_access_storage(L, 3, L_COPY);
     BOX *box = boxaGetValidBox(boxa, idx, flag);
     return ll_push_BOX(L, box);
@@ -292,7 +292,7 @@ GetValidBox(lua_State *L)
 /**
  * \brief Find invalid BOX* in a BOXA* and return a NUMA* of indices
  *
- * Arg #1 (i.e. self) is expected to be a BOXA* user data
+ * Arg #1 (i.e. self) is expected to be a BOXA*
  *
  * \param L pointer to the lua_State
  * \return 1 NUMA* on the Lua stack, or nil if no invalid boxes
@@ -308,7 +308,7 @@ FindInvalidBoxes(lua_State *L)
 /**
  * \brief Get the geometry for a BOX* from a BOXA* at index %idx
  *
- * Arg #1 (i.e. self) is expected to be a BOXA* user data
+ * Arg #1 (i.e. self) is expected to be a BOXA*
  * Arg #2 is expected to be a l_int32 (idx)
  *
  * \param L pointer to the lua_State
@@ -319,7 +319,7 @@ GetBoxGeometry(lua_State *L)
 {
     BOXA *boxa = ll_check_BOXA(L, 1);
     l_int32 x, y, w, h;
-    l_int32 idx = ll_check_index(L, 2, boxaGetCount(boxa));
+    l_int32 idx = ll_check_index(__func__, L, 2, boxaGetCount(boxa));
     if (boxaGetBoxGeometry(boxa, idx, &x, &y, &w, &h))
         return 0;
     lua_pushinteger(L, x);
@@ -332,7 +332,7 @@ GetBoxGeometry(lua_State *L)
 /**
  * \brief Get the IsFull state for a BOXA*
  *
- * Arg #1 (i.e. self) is expected to be a BOXA* user data
+ * Arg #1 (i.e. self) is expected to be a BOXA*
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -349,9 +349,9 @@ IsFull(lua_State *L)
 /**
  * \brief Replace the BOX* in a BOXA* at index %idx
  *
- * Arg #1 (i.e. self) is expected to be a BOXA* user data
+ * Arg #1 (i.e. self) is expected to be a BOXA*
  * Arg #2 is expected to be a l_int32 (idx)
- * Arg #3 is expected to be a BOX* user data
+ * Arg #3 is expected to be a BOX*
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -360,7 +360,7 @@ static int
 ReplaceBox(lua_State *L)
 {
     BOXA *boxa = ll_check_BOXA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, boxaGetCount(boxa));
+    l_int32 idx = ll_check_index(__func__, L, 2, boxaGetCount(boxa));
     BOX *box = ll_check_BOX(L, 3);
     lua_pushboolean(L, box && 0 == boxaReplaceBox(boxa, idx, box));
     return 1;
@@ -369,9 +369,9 @@ ReplaceBox(lua_State *L)
 /**
  * \brief Insert the BOX* in a BOXA* at index %idx
  *
- * Arg #1 (i.e. self) is expected to be a BOXA* user data
+ * Arg #1 (i.e. self) is expected to be a BOXA*
  * Arg #2 is expected to be a l_int32 (idx)
- * Arg #3 is expected to be a BOX* user data
+ * Arg #3 is expected to be a BOX*
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -380,7 +380,7 @@ static int
 InsertBox(lua_State *L)
 {
     BOXA *boxa = ll_check_BOXA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, boxaGetCount(boxa));
+    l_int32 idx = ll_check_index(__func__, L, 2, boxaGetCount(boxa));
     BOX *boxs = ll_check_BOX(L, 3);
     BOX *box = boxClone(boxs);
     lua_pushboolean(L, box && 0 == boxaInsertBox(boxa, idx, box));
@@ -390,7 +390,7 @@ InsertBox(lua_State *L)
 /**
  * \brief Reomve the BOX* from a BOXA* at index %idx
  *
- * Arg #1 (i.e. self) is expected to be a BOXA* user data
+ * Arg #1 (i.e. self) is expected to be a BOXA*
  * Arg #2 is expected to be a l_int32 (%idx)
  *
  * \param L pointer to the lua_State
@@ -400,7 +400,7 @@ static int
 RemoveBox(lua_State *L)
 {
     BOXA *boxa = ll_check_BOXA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, boxaGetCount(boxa));
+    l_int32 idx = ll_check_index(__func__, L, 2, boxaGetCount(boxa));
     lua_pushboolean(L, 0 == boxaRemoveBox(boxa, idx));
     return 1;
 }
@@ -409,7 +409,7 @@ RemoveBox(lua_State *L)
  * \brief Reomve the BOX* from a BOXA* at index %idx and return it as BOX* user
  * data
  *
- * Arg #1 (i.e. self) is expected to be a BOXA* user data
+ * Arg #1 (i.e. self) is expected to be a BOXA*
  * Arg #2 is expected to be a l_int32 (%idx)
  *
  * \param L pointer to the lua_State
@@ -419,7 +419,7 @@ static int
 RemoveBoxAndSave(lua_State *L)
 {
     BOXA *boxa = ll_check_BOXA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, boxaGetCount(boxa));
+    l_int32 idx = ll_check_index(__func__, L, 2, boxaGetCount(boxa));
     BOX *box = NULL;
     int n = 0;
     if (0 == boxaRemoveBoxAndSave(boxa, idx, &box) && box) {
@@ -431,7 +431,7 @@ RemoveBoxAndSave(lua_State *L)
 /**
  * \brief Save the valid BOX* in a BOXA* boxas and return the resulting BOXA*
  *
- * Arg #1 (i.e. self) is expected to be a BOXA* user data
+ * Arg #1 (i.e. self) is expected to be a BOXA*
  * Arg #2 is an optional string defining the storage flags (copy, clone)
  *
  * \param L pointer to the lua_State
@@ -449,7 +449,7 @@ SaveValid(lua_State *L)
 /**
  * \brief Clear the BOXA*
  *
- * Arg #1 (i.e. self) is expected to be a BOXA* user data
+ * Arg #1 (i.e. self) is expected to be a BOXA*
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -459,6 +459,105 @@ Clear(lua_State *L)
 {
     BOXA *boxa = ll_check_BOXA(L, 1);
     lua_pushboolean(L, 0 == boxaClear(boxa));
+    return 1;
+}
+
+/**
+ * \brief Return a BOXA* (%boxad) of boxes from BOXA* (%boxas) contained within BOX* (%box)
+ *
+ * Arg #1 (i.e. self) is expected to be a BOXA* (boxas)
+ * Arg #2 is expected to be a BOX* (box)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 BOXA* on the Lua stack
+ */
+static int
+ContainedInBox(lua_State *L)
+{
+    BOXA *boxas = ll_check_BOXA(L, 1);
+    BOX *box = ll_check_BOX(L, 2);
+    BOXA *boxad = boxaContainedInBox(boxas, box);
+    return ll_push_BOXA(L, boxad);
+}
+
+/**
+ * \brief Return the count of boxes from BOXA* (%boxas) contained within BOX* (%box)
+ *
+ * Arg #1 (i.e. self) is expected to be a BOXA* (boxas)
+ * Arg #2 is expected to be a BOX* (box)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 integer on the Lua stack
+ */
+static int
+ContainedInBoxCount(lua_State *L)
+{
+    BOXA *boxas = ll_check_BOXA(L, 1);
+    BOX *box = ll_check_BOX(L, 2);
+    l_int32 count = 0;
+    if (boxaContainedInBoxCount(boxas, box, &count))
+        return 0;
+    lua_pushinteger(L, count);
+    return 1;
+}
+
+/**
+ * \brief Return true, if every box of BOXA* (%boxa2) is contained in a box of BOXA* (%boxa1)
+ *
+ * Arg #1 (i.e. self) is expected to be a BOXA* (boxa1)
+ * Arg #2 is expected to be a BOXA* (boxa2)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+ContainedInBoxa(lua_State *L)
+{
+    BOXA *boxa1 = ll_check_BOXA(L, 1);
+    BOXA *boxa2 = ll_check_BOXA(L, 2);
+    l_int32 contained = 0;
+    if (boxaContainedInBoxa(boxa1, boxa2, &contained))
+        return 0;
+    lua_pushboolean(L, contained);
+    return 1;
+}
+
+/**
+ * \brief Return a BOXA* (%boxad) of boxes from BOXA* (%boxas) which intersect within BOX* (%box)
+ *
+ * Arg #1 (i.e. self) is expected to be a BOXA* (boxas)
+ * Arg #2 is expected to be a BOX* (box)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 BOXA* on the Lua stack
+ */
+static int
+IntersectsBox(lua_State *L)
+{
+    BOXA *boxas = ll_check_BOXA(L, 1);
+    BOX *box = ll_check_BOX(L, 2);
+    BOXA *boxad = boxaIntersectsBox(boxas, box);
+    return ll_push_BOXA(L, boxad);
+}
+
+/**
+ * \brief Return the count of boxes from BOXA* (%boxa) which intersect with BOX* (%box)
+ *
+ * Arg #1 (i.e. self) is expected to be a BOXA* (boxa)
+ * Arg #2 is expected to be a BOX* (box)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 integer on the Lua stack
+ */
+static int
+IntersectsBoxCount(lua_State *L)
+{
+    BOXA *boxa = ll_check_BOXA(L, 1);
+    BOX *box = ll_check_BOX(L, 2);
+    l_int32 count = 0;
+    if (boxaIntersectsBoxCount(boxa, box, &count))
+        return 0;
+    lua_pushinteger(L, count);
     return 1;
 }
 
@@ -493,6 +592,11 @@ ll_register_BOXA(lua_State *L)
         {"TakeBox",             RemoveBoxAndSave},      /* alias */
         {"SaveValid",           SaveValid},
         {"Clear",               Clear},
+        {"ContainedInBox",      ContainedInBox},
+        {"ContainedInBoxCount", ContainedInBoxCount},
+        {"ContainedInBoxa",     ContainedInBoxa},
+        {"IntersectsBox",       IntersectsBox},
+        {"IntersectsBoxCount",  IntersectsBoxCount},
         LUA_SENTINEL
     };
 

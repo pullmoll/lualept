@@ -29,7 +29,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *************************************************************************/
 
-#include "llept.h"
+#include "modules.h"
 #include <lauxlib.h>
 #include <lualib.h>
 
@@ -76,7 +76,7 @@ ll_push_PTAA(lua_State *L, PTAA *ptaa)
 int
 ll_new_PTAA(lua_State *L)
 {
-    l_int32 n = ll_check_l_int32_default(L, 1, 1);
+    l_int32 n = ll_check_l_int32_default(__func__, L, 1, 1);
     PTAA *ptaa = ptaaCreate(n);
     return ll_push_PTAA(L, ptaa);
 }
@@ -160,8 +160,8 @@ static int
 GetPt(lua_State *L)
 {
     PTAA *ptaa = ll_check_PTAA(L, 1);
-    l_int32 ipta = ll_check_index(L, 2, ptaaGetCount(ptaa));
-    l_int32 ipt = ll_check_index(L, 3, INT32_MAX);
+    l_int32 ipta = ll_check_index(__func__, L, 2, ptaaGetCount(ptaa));
+    l_int32 ipt = ll_check_index(__func__, L, 3, INT32_MAX);
     l_float32 x;
     l_float32 y;
     if (ptaaGetPt(ptaa, ipta, ipt, &x, &y))
@@ -186,7 +186,7 @@ static int
 GetPta(lua_State *L)
 {
     PTAA *ptaa = ll_check_PTAA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, ptaaGetCount(ptaa));
+    l_int32 idx = ll_check_index(__func__, L, 2, ptaaGetCount(ptaa));
     l_int32 accessflag = ll_check_access_storage(L, 3, L_COPY);
     PTA *pta = ptaaGetPta(ptaa, idx, accessflag);
     return ll_push_PTA(L, pta);
@@ -227,7 +227,7 @@ static int
 ReplacePta(lua_State *L)
 {
     PTAA *ptaa = ll_check_PTAA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, ptaaGetCount(ptaa));
+    l_int32 idx = ll_check_index(__func__, L, 2, ptaaGetCount(ptaa));
     PTA *pta = ll_check_PTA(L, 3);
     lua_pushboolean(L, 0 == ptaaReplacePta(ptaa, idx, pta));
     return 1;

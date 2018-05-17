@@ -29,7 +29,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *************************************************************************/
 
-#include "llept.h"
+#include "modules.h"
 #include <lauxlib.h>
 #include <lualib.h>
 
@@ -76,7 +76,7 @@ ll_push_NUMAA(lua_State *L, NUMAA *naa)
 int
 ll_new_NUMAA(lua_State *L)
 {
-    l_int32 n = ll_check_l_int32_default(L, 1, 1);
+    l_int32 n = ll_check_l_int32_default(__func__, L, 1, 1);
     NUMAA *naa = numaaCreate(n);
     return ll_push_NUMAA(L, naa);
 }
@@ -107,8 +107,8 @@ Create(lua_State *L)
 static int
 CreateFull(lua_State *L)
 {
-    l_int32 nptr = ll_check_l_int32_default(L, 1, 1);
-    l_int32 n = ll_check_l_int32_default(L, 2, 1);
+    l_int32 nptr = ll_check_l_int32_default(__func__, L, 1, 1);
+    l_int32 n = ll_check_l_int32_default(__func__, L, 2, 1);
     NUMAA *naa = numaaCreateFull(nptr, n);
     return ll_push_NUMAA(L, naa);
 }
@@ -176,7 +176,7 @@ static int
 GetNumaCount(lua_State *L)
 {
     NUMAA *naa = ll_check_NUMAA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, numaaGetCount(naa));
+    l_int32 idx = ll_check_index(__func__, L, 2, numaaGetCount(naa));
     l_int32 n = numaaGetNumaCount(naa, idx);
     lua_pushinteger(L, n);
     return 1;
@@ -214,7 +214,7 @@ static int
 GetNuma(lua_State *L)
 {
     NUMAA *naa = ll_check_NUMAA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, numaaGetCount(naa));
+    l_int32 idx = ll_check_index(__func__, L, 2, numaaGetCount(naa));
     l_int32 accessflag = ll_check_access_storage(L, 3, L_CLONE);
     NUMA *na = numaaGetNuma(naa, idx, accessflag);
     return ll_push_NUMA(L, na);
@@ -255,7 +255,7 @@ static int
 ReplaceNuma(lua_State *L)
 {
     NUMAA *naa = ll_check_NUMAA(L, 1);
-    l_int32 idx = ll_check_l_int32(L, 2);
+    l_int32 idx = ll_check_l_int32(__func__, L, 2);
     NUMA *na = ll_check_NUMA(L, 3);
     lua_pushboolean(L, 0 == numaaReplaceNuma(naa, idx, na));
     return 1;
@@ -329,6 +329,7 @@ ll_register_NUMAA(lua_State *L) {
         {"AddNuma",         AddNuma},
         {"GetNuma",         GetNuma},
         {"ReplaceNuma",     ReplaceNuma},
+        {"Read",            Read},
         {"Write",           Write},
         {"FlattenToNuma",   FlattenToNuma},
         LUA_SENTINEL
@@ -337,7 +338,6 @@ ll_register_NUMAA(lua_State *L) {
     static const luaL_Reg functions[] = {
         {"Create",          Create},
         {"CreateFull",      CreateFull},
-        {"Read",            Read},
         LUA_SENTINEL
     };
 

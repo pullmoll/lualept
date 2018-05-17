@@ -29,7 +29,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *************************************************************************/
 
-#include "llept.h"
+#include "modules.h"
 #include <lauxlib.h>
 #include <lualib.h>
 
@@ -73,7 +73,7 @@ ll_push_NUMA(lua_State *L, NUMA *na)
 int
 ll_new_NUMA(lua_State *L)
 {
-    l_int32 n = ll_check_l_int32_default(L, 1, 1);
+    l_int32 n = ll_check_l_int32_default(__func__, L, 1, 1);
     NUMA *na = numaCreate(n);
     return ll_push_NUMA(L, na);
 }
@@ -139,7 +139,7 @@ static int
 SetCount(lua_State *L)
 {
     NUMA* na = ll_check_NUMA(L, 1);
-    l_int32 n = ll_check_l_int32(L, 2);
+    l_int32 n = ll_check_l_int32(__func__, L, 2);
     lua_pushboolean(L, 0 == numaSetCount(na, n));
     return 1;
 }
@@ -203,7 +203,7 @@ static int
 AddNumber(lua_State *L)
 {
     NUMA *na = ll_check_NUMA(L, 1);
-    l_float32 val = ll_check_l_float32(L, 2);
+    l_float32 val = ll_check_l_float32(__func__, L, 2);
     lua_pushboolean(L, 0 == numaAddNumber(na, val));
     return 1;
 }
@@ -222,8 +222,8 @@ static int
 InsertNumber(lua_State *L)
 {
     NUMA *na = ll_check_NUMA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, numaGetCount(na));
-    l_float32 val = ll_check_l_float32(L, 3);
+    l_int32 idx = ll_check_index(__func__, L, 2, numaGetCount(na));
+    l_float32 val = ll_check_l_float32(__func__, L, 3);
     lua_pushboolean(L, 0 == numaInsertNumber(na, idx, val));
     return 1;
 }
@@ -242,7 +242,7 @@ static int
 RemoveNumber(lua_State *L)
 {
     NUMA *na = ll_check_NUMA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, numaGetCount(na));
+    l_int32 idx = ll_check_index(__func__, L, 2, numaGetCount(na));
     lua_pushboolean(L, 0 == numaRemoveNumber(na, idx));
     return 1;
 }
@@ -261,8 +261,8 @@ static int
 ReplaceNumber(lua_State *L)
 {
     NUMA *na = ll_check_NUMA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, numaGetCount(na));
-    l_float32 val = ll_check_l_float32(L, 3);
+    l_int32 idx = ll_check_index(__func__, L, 2, numaGetCount(na));
+    l_float32 val = ll_check_l_float32(__func__, L, 3);
     lua_pushboolean(L, 0 == numaReplaceNumber(na, idx, val));
     return 1;
 }
@@ -280,7 +280,7 @@ static int
 GetFValue(lua_State *L)
 {
     NUMA *na = ll_check_NUMA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, numaGetCount(na));
+    l_int32 idx = ll_check_index(__func__, L, 2, numaGetCount(na));
     l_float32 val;
     if (numaGetFValue(na, idx, &val))
         return 0;
@@ -301,7 +301,7 @@ static int
 GetIValue(lua_State *L)
 {
     NUMA *na = ll_check_NUMA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, numaGetCount(na));
+    l_int32 idx = ll_check_index(__func__, L, 2, numaGetCount(na));
     l_int32 val;
     if (numaGetIValue(na, idx, &val))
         return 0;
@@ -323,8 +323,8 @@ static int
 SetValue(lua_State *L)
 {
     NUMA *na = ll_check_NUMA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, numaGetCount(na));
-    l_float32 val = ll_check_l_float32(L, 3);
+    l_int32 idx = ll_check_index(__func__, L, 2, numaGetCount(na));
+    l_float32 val = ll_check_l_float32(__func__, L, 3);
     lua_pushboolean(L, 0 == numaSetValue(na, idx, val));
     return 1;
 }
@@ -343,8 +343,8 @@ static int
 ShiftValue(lua_State *L)
 {
     NUMA *na = ll_check_NUMA(L, 1);
-    l_int32 idx = ll_check_index(L, 2, numaGetCount(na));
-    l_float32 diff = ll_check_l_float32(L, 3);
+    l_int32 idx = ll_check_index(__func__, L, 2, numaGetCount(na));
+    l_float32 diff = ll_check_l_float32(__func__, L, 3);
     lua_pushboolean(L, 0 == numaShiftValue(na, idx, diff));
     return 1;
 }
@@ -433,8 +433,8 @@ static int
 SetParameters(lua_State *L)
 {
     NUMA *na = ll_check_NUMA(L, 1);
-    l_float32 startx = ll_check_l_float32(L, 2);
-    l_float32 deltax = ll_check_l_float32(L, 3);
+    l_float32 startx = ll_check_l_float32(__func__, L, 2);
+    l_float32 deltax = ll_check_l_float32(__func__, L, 3);
     lua_pushboolean(L, 0 == numaSetParameters(na, startx, deltax));
     return 1;
 }
