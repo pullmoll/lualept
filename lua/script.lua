@@ -1,6 +1,6 @@
 function aset_test()
 	print("************** ASET")
-	local aset = Lept.ASET("int")
+	local aset = LuaLept.ASET("int")
 	print("aset            ", '#'..#aset, aset)
 	aset:Insert(2)
 	aset[17] = true
@@ -11,13 +11,15 @@ function aset_test()
 	print("aset            ", '#'..#aset, aset)
 	print("aset:Find(5)    ", aset:Find(5))
 	print("aset:Find(99)   ", aset:Find(99))
+	print("aset:Find(17)   ", aset:Find(17))
 	print("aset:Delete(17) ", aset:Delete(17))
+	print("aset:Find(17)   ", aset:Find(17))
 	print("aset            ", '#'..#aset, aset)
 end
 
 function amap_test()
 	print("************** AMAP")
-	local amap = Lept.AMAP("int")
+	local amap = LuaLept.AMAP("int")
 	print("amap            ", '#'..#amap, amap)
 	amap[2] = 22
 	amap[17] = 100
@@ -28,15 +30,17 @@ function amap_test()
 	print("amap            ", '#'..#amap, amap)
 	print("amap:Find(5)    ", amap:Find(5))
 	print("amap:Find(99)   ", amap:Find(99))
+	print("amap:Find(17)   ", amap:Find(17))
 	print("amap:Delete(17) ", amap:Delete(17))
+	print("amap:Find(17)   ", amap:Find(17))
 	print("amap            ", '#'..#amap, amap)
 end
 
 function pta_test()
 	print("************** PTA/PTAA")
 	-- Create a new PTA
-	local pa = Lept.PTA(8)
-	print("pa = Lept.PTA(8)", pa)
+	local pa = LuaLept.PTA(8)
+	print("pa = LuaLept.PTA(8)", pa)
 
 	-- Add some points
 	pa:AddPt(2.71,3.14)
@@ -47,7 +51,7 @@ function pta_test()
 	print("#pa", #pa)
 	print("pa", pa)
 
-	local paa = Lept.PTAA()
+	local paa = LuaLept.PTAA()
 	paa:AddPta(pa)
 	paa:AddPta(pa)
 	paa:AddPta(pa)
@@ -58,12 +62,12 @@ end
 function boxa_test()
 	print("************** BOX/BOXA/BOXAA")
 	-- Create a new BOX
-	local b = Lept.BOX(10,10,40,80)
+	local b = LuaLept.BOX(10,10,40,80)
 	print("b = BOX(10,10,40,80)", b)
 
 	-- Create a new BOXA
-	local ba = Lept.BOXA(1)
-	print("ba = Lept.BOXA(1)", ba)
+	local ba = LuaLept.BOXA(1)
+	print("ba = LuaLept.BOXA(1)", ba)
 	print("#ba", #ba)
 
 	-- Add box b using default, clone, copy
@@ -79,10 +83,10 @@ function boxa_test()
 	print("ba", ba)
 
 	-- Insert before the third BOX in BOXA
-	ba:InsertBox(3, Lept.BOX(3,4,19,18))
-	print("... after ba:InsertBox(3, Lept.BOX(3,4,19,18))")
-	-- print("#ba", #ba)
-	-- print("ba", ba)
+	ba:InsertBox(3, LuaLept.BOX(3,4,19,18))
+	print("... after ba:InsertBox(3, LuaLept.BOX(3,4,19,18))")
+	print("#ba", #ba)
+	print("ba", ba)
 
 	-- Get the inserted BOX
 	b = ba:GetBox(3)
@@ -101,8 +105,8 @@ function numa_test()
 	local E = 2.7182818284590452354
 
 	-- Create a new NUMA
-	local na = Lept.NUMA()
-	print("na = Lept.NUMA()", na)
+	local na = LuaLept.NUMA()
+	print("na = LuaLept.NUMA()", na)
 
 	-- Add some numbers
 	na:AddNumber(PI)
@@ -123,8 +127,8 @@ function numa_test()
 	print("na:GetIArray()", na:GetIArray())
 
 	-- Create a new MUMAA
-	local naa = Lept.NUMAA(1)
-	print("naa = Lept.NUMAA(1)", naa)
+	local naa = LuaLept.NUMAA(1)
+	print("naa = LuaLept.NUMAA(1)", naa)
 
 	local count = 10
 	for i = 1, count do
@@ -158,8 +162,8 @@ function dna_test()
 	local E = 2.7182818284590452354
 
 	-- Create a new DNA
-	local da = Lept.DNA()
-	print("da = Lept.DNA()", da)
+	local da = LuaLept.DNA()
+	print("da = LuaLept.DNA()", da)
 
 	-- Add some numbers
 	da:AddNumber(PI)
@@ -177,8 +181,8 @@ function dna_test()
 	print("da:GetDArray()", da:GetDArray())
 
 	-- Create a new DNAA
-	local daa = Lept.DNAA(1)
-	print("daa = Lept.DNAA(1)", daa)
+	local daa = LuaLept.DNAA(1)
+	print("daa = LuaLept.DNAA(1)", daa)
 
 	local count = 10
 	for i = 1, count do
@@ -210,11 +214,11 @@ function pix_test()
 	local filename = "/tmp/test.png"
 	print("************** PIX")
 	local width, height, depth = 640, 480, 2
-	local pix = Lept.PIX(width,height,depth)
-	print("pix = Lept.PIX("..width..","..height..","..depth..")", pix)
+	local pix = LuaLept.PIX(width,height,depth)
+	print("pix = LuaLept.PIX("..width..","..height..","..depth..")", pix)
 
-	local cmap = Lept.PIXCMAP(2)
-	print("cmap = Lept.PIXCMAP(2)", cmap)
+	local cmap = LuaLept.PIXCMAP(2)
+	print("cmap = LuaLept.PIXCMAP(2)", cmap)
 	print("#cmap", #cmap)
 
 	print("cmap:GetFreeCount()", cmap:GetFreeCount())
@@ -247,8 +251,8 @@ function pix_test()
 	local ok = pix:Write(filename, "png")
 	print("pix:Write('" .. filename .."')", ok)
 
-	local pix2 = Lept.PIX(filename)
-	print("pix = Lept.PIX('" .. filename .. "')", pix2);
+	local pix2 = LuaLept.PIX(filename)
+	print("pix = LuaLept.PIX('" .. filename .. "')", pix2);
 
 	local w = pix2:GetWidth()
 	print("w", w)
@@ -270,7 +274,7 @@ function pix_test()
 end
 
 function pix2_test()
-	local pix = Lept.PIX('lualept.jpg')
+	local pix = LuaLept.PIX('lualept.jpg')
 	print ("pix", pix)
 
 	local ok = pix:Write('/tmp/lualept.png', 'png')
@@ -287,13 +291,13 @@ function pix2_test()
 	print ("pixm            :", pixm)
 	print ("dimensions      :", pixm:GetDimensions())
 
-	local box = Lept.BOX(12,12,140,140)
+	local box = LuaLept.BOX(12,12,140,140)
 	print ("pixels          :", pixm:CountPixels())
 	print ("pixels in rect  :", box, pixm:CountPixelsInRect(box))
 	print ("foreground fract:", pixm:ForegroundFraction())
 
 	local ok = pixm:Write('/tmp/lualept-mask.tif', 'g3')
-	pix:PaintThroughMask(pixm, 0, 0, Lept.RGB(255,0,128))
+	pix:PaintThroughMask(pixm, 0, 0, LuaLept.RGB(255,0,128))
 
 	local ok = pix:Write('/tmp/lualept-masked.jpg', 'jpg')
 end
@@ -316,12 +320,14 @@ end
 print("************** MAIN")
 print("Hello, world!")
 print("**************")
-print("Lept:Version()", Lept:Version())
+print("LuaLept:Version()", LuaLept:Version())
+print("LuaLept:LuaVersion()", LuaLept:LuaVersion())
+print("LuaLept:LeptVersion()", LuaLept:LeptVersion())
 
 aset_test()
 amap_test()
--- pta_test()
--- boxa_test()
+pta_test()
+boxa_test()
 -- numa_test()
 -- dna_test()
 -- pix_test()

@@ -52,7 +52,7 @@ ll_check_PIXA(lua_State *L, int arg)
 }
 
 /**
- * \brief Push PIXA* user data to the Lua stack and set its meta table
+ * \brief Push PIXA* to the Lua stack and set its meta table
  * \param L pointer to the lua_State
  * \param pixa pointer to the PIXA
  * \return 1 PIXA* on the Lua stack
@@ -98,7 +98,7 @@ Create(lua_State *L)
 /**
  * \brief Destroy a PIXA*
  *
- * Arg #1 (i.e. self) is expected to be a PIXA* user data.
+ * Arg #1 (i.e. self) is expected to be a PIXA*.
  *
  * \param L pointer to the lua_State
  * \return 0 nothing on the Lua stack
@@ -117,7 +117,7 @@ Destroy(lua_State *L)
 /**
  * \brief Copy a PIXA*
  *
- * Arg #1 (i.e. self) is expected to be a PIXA* user data.
+ * Arg #1 (i.e. self) is expected to be a PIXA*.
  * Arg #2 is an optional string defining the storage flags (copy, clone, copy_clone).
  *
  * \param L pointer to the lua_State
@@ -135,8 +135,8 @@ Copy(lua_State *L)
 /**
  * \brief Add a PIX* to a PIXA*
  *
- * Arg #1 (i.e. self) is expected to be a PIXA* user data.
- * Arg #2 is expected to be a PIX* user data.
+ * Arg #1 (i.e. self) is expected to be a PIXA*.
+ * Arg #2 is expected to be a PIX*.
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -154,7 +154,7 @@ AddPix(lua_State *L)
 /**
  * \brief Get count for a PIXA*
  *
- * Arg #1 (i.e. self) is expected to be a PIXA* user data.
+ * Arg #1 (i.e. self) is expected to be a PIXA*.
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -170,7 +170,7 @@ GetCount(lua_State *L)
 /**
  * \brief Get PIX* from a PIXA* at index %idx
  *
- * Arg #1 (i.e. self) is expected to be a PIXA* user data.
+ * Arg #1 (i.e. self) is expected to be a PIXA*.
  * Arg #2 is expected to be a l_int32 (idx).
  *
  * \param L pointer to the lua_State
@@ -194,10 +194,10 @@ GetBoxGeometry(lua_State *L)
 /**
  * \brief Replace the PIX* in a PIXA* at index %idx
  *
- * Arg #1 (i.e. self) is expected to be a PIXA* user data.
+ * Arg #1 (i.e. self) is expected to be a PIXA*.
  * Arg #2 is expected to be a l_int32 (idx).
- * Arg #3 is expected to be a PIX* user data.
- * Arg #4 is optional and, if specified, expected to be a BOX* user data.
+ * Arg #3 is expected to be a PIX*.
+ * Arg #4 is optional and, if specified, expected to be a BOX*.
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -218,10 +218,10 @@ ReplacePix(lua_State *L)
 /**
  * \brief Insert the PIX* in a PIXA* at index %idx
  *
- * Arg #1 (i.e. self) is expected to be a PIXA* user data.
+ * Arg #1 (i.e. self) is expected to be a PIXA*.
  * Arg #2 is expected to be a l_int32 (idx).
- * Arg #3 is expected to be a PIX* user data.
- * Arg #4 is optional and, if specified, expected to be a BOX* user data.
+ * Arg #3 is expected to be a PIX*.
+ * Arg #4 is optional and, if specified, expected to be a BOX*.
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -242,7 +242,7 @@ InsertPix(lua_State *L)
 /**
  * \brief Remove the PIX* from a PIXA* at index %idx
  *
- * Arg #1 (i.e. self) is expected to be a PIXA* user data.
+ * Arg #1 (i.e. self) is expected to be a PIXA*.
  * Arg #2 is expected to be a l_int32 (idx).
  *
  * \param L pointer to the lua_State
@@ -260,7 +260,7 @@ RemovePix(lua_State *L)
 /**
  * \brief Remove the PIX* from a PIXA* at index %idx and return it
  *
- * Arg #1 (i.e. self) is expected to be a PIXA* user data
+ * Arg #1 (i.e. self) is expected to be a PIXA*
  * Arg #2 is expected to be a l_int32 (%idx)
  *
  * \param L pointer to the lua_State
@@ -283,8 +283,8 @@ RemovePixAndSave(lua_State *L)
 /**
  * \brief Join two PIXA*
  *
- * Arg #1 (i.e. self) is expected to be a PIXA* user data.
- * Arg #2 is expected to be another PIXA* user data.
+ * Arg #1 (i.e. self) is expected to be a PIXA*.
+ * Arg #2 is expected to be another PIXA*.
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -303,8 +303,8 @@ Join(lua_State *L)
 /**
  * \brief Interleave two PIXA*
  *
- * Arg #1 (i.e. self) is expected to be a PIXA* user data.
- * Arg #2 is expected to be another PIXA* user data.
+ * Arg #1 (i.e. self) is expected to be a PIXA*.
+ * Arg #2 is expected to be another PIXA*.
  * Arg #3 is an optional string defining the storage flags (copy, clone, copy_clone).
  *
  * \param L pointer to the lua_State
@@ -323,7 +323,7 @@ Interleave(lua_State *L)
 /**
  * \brief Clear the PIXA*
  *
- * Arg #1 (i.e. self) is expected to be a PIXA* user data
+ * Arg #1 (i.e. self) is expected to be a PIXA*
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -334,6 +334,25 @@ Clear(lua_State *L)
     PIXA *pixa = ll_check_PIXA(L, 1);
     lua_pushboolean(L, 0 == pixaClear(pixa));
     return 1;
+}
+
+/**
+ * \brief Get pixel aligned statistics for PIXA*
+ *
+ * Arg #1 (i.e. self) is expected to be a PIXA*
+ *
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+GetAlignedStats(lua_State *L)
+{
+    PIXA *pixa = ll_check_PIXA(L, 1);
+    l_int32 type = ll_check_stats_type(L, 2, L_MEAN_ABSVAL);
+    l_int32 nbins = ll_check_l_int32_default(L, 3, 2);
+    l_int32 thresh = ll_check_l_int32_default(L, 4, 0);
+    PIX *pix = pixaGetAlignedStats(pixa, type, nbins, thresh);
+    return ll_push_PIX(L, pix);
 }
 
 /**
@@ -361,6 +380,7 @@ ll_register_PIXA(lua_State *L)
         {"Join",                Join},
         {"Interleave",          Interleave},
         {"Clear",               Clear},
+        {"GetAlignedStats",     GetAlignedStats},
         LUA_SENTINEL
     };
 

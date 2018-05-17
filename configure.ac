@@ -1,7 +1,7 @@
 AC_PREREQ([2.50])
 AC_INIT([lualept], [0.1.0])
 AC_CONFIG_AUX_DIR([config])
-AC_CONFIG_HEADERS([config.h:config/config.h.in])
+AC_CONFIG_HEADERS([src/config.h:config/config.h.in])
 AC_CONFIG_SRCDIR([src/llept.c])
 
 AC_CONFIG_MACRO_DIR([m4])
@@ -36,7 +36,7 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
-AC_CHECK_HEADERS([stdint.h ctype.h float.h])
+AC_CHECK_HEADERS([ctype.h float.h])
 AC_C_BIGENDIAN
 
 # Checks for library functions.

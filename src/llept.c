@@ -33,6 +33,10 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
+#if !defined(ARRAYSIZE)
+#define ARRAYSIZE(t) (sizeof(t)/sizeof(t[0]))
+#endif
+
 #if !defined(HAVE_FLOAT_H)
 /* FIXME: how are these values really defined? */
 static const unsigned long _flt_min = 0xfeffffffUL;
@@ -298,7 +302,7 @@ ll_check_l_float32_default(lua_State *L, int arg, l_float32 dflt)
  * @return value or dflt
  */
 l_int32
-ll_check_tbl(lua_State *L, int arg, l_int32 dflt, const key_value_t *tbl, size_t len)
+ll_check_tbl(lua_State *L, int arg, l_int32 dflt, const lept_enums_t *tbl, size_t len)
 {
     size_t i;
 
@@ -307,7 +311,7 @@ ll_check_tbl(lua_State *L, int arg, l_int32 dflt, const key_value_t *tbl, size_t
         return dflt;
 
     for (i = 0; i < len; i++) {
-        const key_value_t* p = &tbl[i];
+        const lept_enums_t* p = &tbl[i];
         if (!ll_strcasecmp(str, p->key))
             return p->value;
     }
@@ -319,6 +323,70 @@ ll_check_tbl(lua_State *L, int arg, l_int32 dflt, const key_value_t *tbl, size_t
 }
 
 /**
+ * @brief Push a string listing the table of keys to the Lua stack
+ * \param L pointer to the lua_State
+ * \param tbl table of key/value pairs
+ * \param len length of that table
+ * @return value or dflt
+ */
+int
+ll_push_tbl(lua_State *L, const lept_enums_t *tbl, size_t len)
+{
+    luaL_Buffer B;
+    l_int32 value = -1;
+    size_t i;
+
+    luaL_buffinit(L, &B);
+
+    for (i = 0; i < len; i++) {
+        const lept_enums_t* p = &tbl[i];
+        if (p->value != value) {
+            if (i > 0)
+                luaL_addchar(&B, '\n');
+            luaL_addstring(&B, p->name);
+            luaL_addstring(&B, ": ");
+            value = p->value;
+        } else {
+            luaL_addstring(&B, ", ");
+        }
+        luaL_addstring(&B, p->key);
+    }
+    luaL_pushresult(&B);
+    return 1;
+}
+
+/**
+ * @brief Return a const char* with the (first) key for a enumeration value
+ * @param value value to search for
+ * \param tbl table of key/value pairs
+ * \param len length of that table
+ * @return pointer to string with the (first) key for that value
+ */
+const char*
+ll_string_tbl(l_int32 value, const lept_enums_t *tbl, size_t len)
+{
+    size_t i;
+
+    for (i = 0; i < len; i++) {
+        const lept_enums_t* p = &tbl[i];
+        if (p->value == value)
+            return p->key;
+    }
+    return "<undefined>";
+}
+
+/**
+ * @brief Table of access/storage flag names and enumeration values
+ */
+static const lept_enums_t tbl_access_storage[] = {
+    {"nocopy",          "L_NOCOPY",         L_NOCOPY},      /* do not copy the object; do not delete the ptr */
+    {"insert",          "L_INSERT",         L_INSERT},      /* stuff it in; do not copy or clone */
+    {"copy",            "L_COPY",           L_COPY},        /* make/use a copy of the object */
+    {"clone",           "L_CLONE",          L_CLONE},       /* make/use clone (ref count) of the object */
+    {"copy-clone",      "L_COPY_CLONE",     L_COPY_CLONE}   /* make a new array object (e.g., pixa) and fill the array with clones (e.g., pix) */
+};
+
+/**
  * \brief Check for an optional storage flag as string
  * \param L pointer to the lua_State
  * \param arg index where to find the string
@@ -328,15 +396,52 @@ ll_check_tbl(lua_State *L, int arg, l_int32 dflt, const key_value_t *tbl, size_t
 l_int32
 ll_check_access_storage(lua_State *L, int arg, l_int32 dflt)
 {
-    static const key_value_t tbl[] = {
-        {"nocopy",      L_NOCOPY},      /* do not copy the object; do not delete the ptr */
-        {"insert",      L_INSERT},      /* stuff it in; do not copy or clone */
-        {"copy",        L_COPY},        /* make/use a copy of the object */
-        {"clone",       L_CLONE},       /* make/use clone (ref count) of the object */
-        {"copy_clone",  L_COPY_CLONE}   /* make a new array object (e.g., pixa) and fill the array with clones (e.g., pix) */
-    };
-    return ll_check_tbl(L, arg, dflt, tbl, sizeof(tbl)/sizeof(tbl[0]));
+    return ll_check_tbl(L, arg, dflt, tbl_access_storage, ARRAYSIZE(tbl_access_storage));
 }
+
+const char*
+ll_string_access_storage(int flag)
+{
+    return ll_string_tbl(flag, tbl_access_storage, ARRAYSIZE(tbl_access_storage));
+}
+
+/**
+ * @brief Table of file input format names and enumeration values
+ */
+static const lept_enums_t tbl_input_format[] = {
+    {"unknown",         "IFF_UNKNOWN",          IFF_UNKNOWN},
+    {"bmp",             "IFF_BMP",              IFF_BMP},
+    {"jpg",             "IFF_JFIF_JPEG",        IFF_JFIF_JPEG},
+    {"jpeg",            "IFF_JFIF_JPEG",        IFF_JFIF_JPEG},
+    {"jfif",            "IFF_JFIF_JPEG",        IFF_JFIF_JPEG},
+    {"png",             "IFF_PNG",              IFF_PNG},
+    {"tiff",            "IFF_TIFF",             IFF_TIFF},
+    {"tif",             "IFF_TIFF",             IFF_TIFF},
+    {"tiff-packbits",   "IFF_TIFF_PACKBITS",    IFF_TIFF_PACKBITS},
+    {"packbits",        "IFF_TIFF_PACKBITS",    IFF_TIFF_PACKBITS},
+    {"tiff-rle",        "IFF_TIFF_RLE",         IFF_TIFF_RLE},
+    {"rle",             "IFF_TIFF_RLE",         IFF_TIFF_RLE},
+    {"tiff-g3",         "IFF_TIFF_G3",          IFF_TIFF_G3},
+    {"g3",              "IFF_TIFF_G3",          IFF_TIFF_G3},
+    {"tiff-g4",         "IFF_TIFF_G4",          IFF_TIFF_G4},
+    {"g4",              "IFF_TIFF_G4",          IFF_TIFF_G4},
+    {"tiff-lzw",        "IFF_TIFF_LZW",         IFF_TIFF_LZW},
+    {"lzw",             "IFF_TIFF_LZW",         IFF_TIFF_LZW},
+    {"tiff-zip",        "IFF_TIFF_ZIP",         IFF_TIFF_ZIP},
+    {"zip",             "IFF_TIFF_ZIP",         IFF_TIFF_ZIP},
+    {"pnm",             "IFF_PNM",              IFF_PNM},
+    {"pbm",             "IFF_PNM",              IFF_PNM},
+    {"pgm",             "IFF_PNM",              IFF_PNM},
+    {"ppm",             "IFF_PNM",              IFF_PNM},
+    {"ps",              "IFF_PS",               IFF_PS},
+    {"gif",             "IFF_GIF",              IFF_GIF},
+    {"jp2",             "IFF_JP2",              IFF_JP2},
+    {"jpeg2k",          "IFF_JP2",              IFF_JP2},
+    {"webp",            "IFF_WEBP",             IFF_WEBP},
+    {"lpdf",            "IFF_LPDF",             IFF_LPDF},
+    {"default",         "IFF_DEFAULT",          IFF_DEFAULT},
+    {"spix",            "IFF_SPIX",             IFF_SPIX}
+};
 
 /**
  * \brief Check for an image format name as string
@@ -348,41 +453,18 @@ ll_check_access_storage(lua_State *L, int arg, l_int32 dflt)
 l_int32
 ll_check_input_format(lua_State *L, int arg, l_int32 dflt)
 {
-    static const key_value_t tbl[] = {
-        {"unknown",         IFF_UNKNOWN},
-        {"bmp",             IFF_BMP},
-        {"jpg",             IFF_JFIF_JPEG},
-        {"jpeg",            IFF_JFIF_JPEG},
-        {"jfif",            IFF_JFIF_JPEG},
-        {"png",             IFF_PNG},
-        {"tif",             IFF_TIFF},
-        {"tiff",            IFF_TIFF},
-        {"tiff-packbits",   IFF_TIFF_PACKBITS},
-        {"packbits",        IFF_TIFF_PACKBITS},
-        {"tiff-rle",        IFF_TIFF_RLE},
-        {"rle",             IFF_TIFF_RLE},
-        {"tiff-g3",         IFF_TIFF_G3},
-        {"g3",              IFF_TIFF_G3},
-        {"tiff-g4",         IFF_TIFF_G4},
-        {"g4",              IFF_TIFF_G4},
-        {"tiff-lzw",        IFF_TIFF_LZW},
-        {"lzw",             IFF_TIFF_LZW},
-        {"tiff-zip",        IFF_TIFF_ZIP},
-        {"zip",             IFF_TIFF_ZIP},
-        {"pnm",             IFF_PNM},
-        {"pbm",             IFF_PNM},
-        {"pgm",             IFF_PNM},
-        {"ppm",             IFF_PNM},
-        {"ps",              IFF_PS},
-        {"gif",             IFF_GIF},
-        {"jp2",             IFF_JP2},
-        {"jpeg2k",          IFF_JP2},
-        {"webp",            IFF_WEBP},
-        {"lpdf",            IFF_LPDF},
-        {"default",         IFF_DEFAULT},
-        {"spix",            IFF_SPIX}
-    };
-    return ll_check_tbl(L, arg, dflt, tbl, sizeof(tbl)/sizeof(tbl[0]));
+    return ll_check_tbl(L, arg, dflt, tbl_input_format, ARRAYSIZE(tbl_input_format));
+}
+
+/**
+ * @brief Push a string listing the input format keys
+ * \param L pointer to lua_State
+ * @return 1 string on the Lua stack
+ */
+int
+ll_print_input_format(lua_State *L)
+{
+    return ll_push_tbl(L, tbl_input_format, ARRAYSIZE(tbl_input_format));
 }
 
 /**
@@ -393,48 +475,14 @@ ll_check_input_format(lua_State *L, int arg, l_int32 dflt)
 const char*
 ll_string_input_format(int format)
 {
-    switch (format) {
-    case IFF_UNKNOWN:
-        return "unknown";
-    case IFF_BMP:
-        return "bmp";
-    case IFF_JFIF_JPEG:
-        return "jpeg";
-    case IFF_PNG:
-        return "png";
-    case IFF_TIFF:
-        return "tiff";
-    case IFF_TIFF_PACKBITS:
-        return "tiff-packbits";
-    case IFF_TIFF_RLE:
-        return "tiff-rle";
-    case IFF_TIFF_G3:
-        return "tiff-g3";
-    case IFF_TIFF_G4:
-        return "tiff-g4";
-    case IFF_TIFF_LZW:
-        return "tiff-lzw";
-    case IFF_TIFF_ZIP:
-        return "tiff-zip";
-    case IFF_PNM:
-        return "pnm";
-    case IFF_PS:
-        return "ps";
-    case IFF_GIF:
-        return "gif";
-    case IFF_JP2:
-        return "jp2";
-    case IFF_WEBP:
-        return "webp";
-    case IFF_LPDF:
-        return "lpdf";
-    case IFF_DEFAULT:
-        return "default";
-    case IFF_SPIX:
-        return "spix";
-    }
-    return "invalid";
+    return ll_string_tbl(format, tbl_input_format, ARRAYSIZE(tbl_input_format));
 }
+
+static const lept_enums_t tbl_keytype[] = {
+    {"int",         "L_INT_TYPE",   L_INT_TYPE},
+    {"uint",        "L_UINT_TYPE",  L_UINT_TYPE},
+    {"float",       "L_FLOAT_TYPE", L_FLOAT_TYPE}
+};
 
 /**
  * \brief Check for an L_AMAP keytype name as string
@@ -446,12 +494,7 @@ ll_string_input_format(int format)
 l_int32
 ll_check_keytype(lua_State *L, int arg, l_int32 dflt)
 {
-    static const key_value_t tbl[] = {
-        {"int",             L_INT_TYPE},
-        {"uint",            L_UINT_TYPE},
-        {"float",           L_FLOAT_TYPE}
-    };
-    return ll_check_tbl(L, arg, dflt, tbl, sizeof(tbl)/sizeof(tbl[0]));
+    return ll_check_tbl(L, arg, dflt, tbl_keytype, ARRAYSIZE(tbl_keytype));
 }
 
 /**
@@ -461,16 +504,16 @@ ll_check_keytype(lua_State *L, int arg, l_int32 dflt)
  */
 const char* ll_string_keytype(l_int32 type)
 {
-    switch (type) {
-    case L_INT_TYPE:
-        return "int";
-    case L_UINT_TYPE:
-        return "uint";
-    case L_FLOAT_TYPE:
-        return "float";
-    }
-    return "undefined";
+    return ll_string_tbl(type, tbl_keytype, ARRAYSIZE(tbl_keytype));
 }
+
+static const lept_enums_t tbl_consecutive_skip_by[] = {
+    {"consecutive",     "L_CHOOSE_CONSECUTIVE",     L_CHOOSE_CONSECUTIVE},
+    {"cons",            "L_CHOOSE_CONSECUTIVE",     L_CHOOSE_CONSECUTIVE},
+    {"skip-by",         "L_CHOOSE_SKIP_BY",         L_CHOOSE_SKIP_BY},
+    {"skip_by",         "L_CHOOSE_SKIP_BY",         L_CHOOSE_SKIP_BY},
+    {"skip",            "L_CHOOSE_SKIP_BY",         L_CHOOSE_SKIP_BY},
+};
 
 /**
  * \brief Check for an choose name as string
@@ -482,15 +525,21 @@ const char* ll_string_keytype(l_int32 type)
 l_int32
 ll_check_consecutive_skip_by(lua_State *L, int arg, l_int32 dflt)
 {
-    static const key_value_t tbl[] = {
-        {"consecutive",     L_CHOOSE_CONSECUTIVE},
-        {"cons",            L_CHOOSE_CONSECUTIVE},
-        {"skip_by",         L_CHOOSE_SKIP_BY},
-        {"skip-by",         L_CHOOSE_SKIP_BY},
-        {"skip",            L_CHOOSE_SKIP_BY},
-    };
-    return ll_check_tbl(L, arg, dflt, tbl, sizeof(tbl)/sizeof(tbl[0]));
+    return ll_check_tbl(L, arg, dflt, tbl_consecutive_skip_by, ARRAYSIZE(tbl_consecutive_skip_by));
 }
+
+static const lept_enums_t tbl_component[] = {
+    {"red",             "COLOR_RED",                COLOR_RED},
+    {"r",               "COLOR_RED",                COLOR_RED},
+    {"green",           "COLOR_GREEN",              COLOR_GREEN},
+    {"grn",             "COLOR_GREEN",              COLOR_GREEN},
+    {"g",               "COLOR_GREEN",              COLOR_GREEN},
+    {"blue",            "COLOR_BLUE",               COLOR_BLUE},
+    {"blu",             "COLOR_BLUE",               COLOR_BLUE},
+    {"b",               "COLOR_BLUE",               COLOR_BLUE},
+    {"alpha",           "L_ALPHA_CHANNEL",          L_ALPHA_CHANNEL},
+    {"a",               "L_ALPHA_CHANNEL",          L_ALPHA_CHANNEL}
+};
 
 /**
  * \brief Check for an component name as string
@@ -502,20 +551,13 @@ ll_check_consecutive_skip_by(lua_State *L, int arg, l_int32 dflt)
 l_int32
 ll_check_component(lua_State *L, int arg, l_int32 dflt)
 {
-    static const key_value_t tbl[] = {
-        {"red",             COLOR_RED},
-        {"r",               COLOR_RED},
-        {"green",           COLOR_GREEN},
-        {"grn",             COLOR_GREEN},
-        {"g",               COLOR_GREEN},
-        {"blue",            COLOR_BLUE},
-        {"blu",             COLOR_BLUE},
-        {"b",               COLOR_BLUE},
-        {"alpha",           L_ALPHA_CHANNEL},
-        {"a",               L_ALPHA_CHANNEL}
-    };
-    return ll_check_tbl(L, arg, dflt, tbl, sizeof(tbl)/sizeof(tbl[0]));
+    return ll_check_tbl(L, arg, dflt, tbl_component, ARRAYSIZE(tbl_component));
 }
+
+static const lept_enums_t tbl_choose_min_max[] = {
+    {"min",             "L_CHOOSE_MIN",          L_CHOOSE_MIN},
+    {"max",             "L_CHOOSE_MAX",          L_CHOOSE_MAX}
+};
 
 /**
  * \brief Check for an min/max name as string
@@ -527,12 +569,17 @@ ll_check_component(lua_State *L, int arg, l_int32 dflt)
 l_int32
 ll_check_choose_min_max(lua_State *L, int arg, l_int32 dflt)
 {
-    static const key_value_t tbl[] = {
-        {"min",             L_CHOOSE_MIN},
-        {"max",             L_CHOOSE_MAX}
-    };
-    return ll_check_tbl(L, arg, dflt, tbl, sizeof(tbl)/sizeof(tbl[0]));
+    return ll_check_tbl(L, arg, dflt, tbl_choose_min_max, ARRAYSIZE(tbl_choose_min_max));
 }
+
+static const lept_enums_t tbl_what_is_max[] = {
+    {"white-is-max",    "L_WHITE_IS_MAX",          L_WHITE_IS_MAX},
+    {"white",           "L_WHITE_IS_MAX",          L_WHITE_IS_MAX},
+    {"w",               "L_WHITE_IS_MAX",          L_WHITE_IS_MAX},
+    {"black-is-max",    "L_BLACK_IS_MAX",          L_BLACK_IS_MAX},
+    {"black",           "L_BLACK_IS_MAX",          L_BLACK_IS_MAX},
+    {"b",               "L_BLACK_IS_MAX",          L_BLACK_IS_MAX}
+};
 
 /**
  * \brief Check for a white or black is max name as string
@@ -544,16 +591,15 @@ ll_check_choose_min_max(lua_State *L, int arg, l_int32 dflt)
 l_int32
 ll_check_what_is_max(lua_State *L, int arg, l_int32 dflt)
 {
-    static const key_value_t tbl[] = {
-        {"white-is-max",    L_WHITE_IS_MAX},
-        {"white",           L_WHITE_IS_MAX},
-        {"w",               L_WHITE_IS_MAX},
-        {"black-is-max",    L_BLACK_IS_MAX},
-        {"black",           L_BLACK_IS_MAX},
-        {"b",               L_BLACK_IS_MAX}
-    };
-    return ll_check_tbl(L, arg, dflt, tbl, sizeof(tbl)/sizeof(tbl[0]));
+    return ll_check_tbl(L, arg, dflt, tbl_what_is_max, ARRAYSIZE(tbl_what_is_max));
 }
+
+static const lept_enums_t tbl_getval[] = {
+    {"white",           "L_GET_WHITE_VAL",          L_GET_WHITE_VAL},
+    {"w",               "L_GET_WHITE_VAL",          L_GET_WHITE_VAL},
+    {"black",           "L_GET_BLACK_VAL",          L_GET_BLACK_VAL},
+    {"b",               "L_GET_BLACK_VAL",          L_GET_BLACK_VAL}
+};
 
 /**
  * \brief Check for a L_GET_XXXX_VAL name as string
@@ -565,16 +611,21 @@ ll_check_what_is_max(lua_State *L, int arg, l_int32 dflt)
 l_int32
 ll_check_getval(lua_State *L, int arg, l_int32 dflt)
 {
-    static const key_value_t tbl[] = {
-        {"white",           L_GET_WHITE_VAL},
-        {"w",               L_GET_WHITE_VAL},
-        {"black",           L_GET_BLACK_VAL},
-        {"b",               L_GET_BLACK_VAL}
-    };
-    return ll_check_tbl(L, arg, dflt, tbl, sizeof(tbl)/sizeof(tbl[0]));
+    return ll_check_tbl(L, arg, dflt, tbl_getval, ARRAYSIZE(tbl_getval));
 }
 
+static const lept_enums_t tbl_direction[] = {
+    {"horizontal-line", "L_HORIZONTAL_LINE",          L_HORIZONTAL_LINE},
+    {"horizontal",      "L_HORIZONTAL_LINE",          L_HORIZONTAL_LINE},
+    {"horiz",           "L_HORIZONTAL_LINE",          L_HORIZONTAL_LINE},
+    {"h",               "L_HORIZONTAL_LINE",          L_HORIZONTAL_LINE},
+    {"vertical-line",   "L_VERTICAL_LINE",          L_VERTICAL_LINE},
+    {"vertical",        "L_VERTICAL_LINE",          L_VERTICAL_LINE},
+    {"vert",            "L_VERTICAL_LINE",          L_VERTICAL_LINE},
+    {"v",               "L_VERTICAL_LINE",          L_VERTICAL_LINE}
+};
 /**
+
  * \brief Check for a L_XXX_LINE name as string
  * \param L pointer to the lua_State
  * \param arg index where to find the string
@@ -584,18 +635,15 @@ ll_check_getval(lua_State *L, int arg, l_int32 dflt)
 l_int32
 ll_check_direction(lua_State *L, int arg, l_int32 dflt)
 {
-    static const key_value_t tbl[] = {
-        {"horizontal-line", L_HORIZONTAL_LINE},
-        {"horizontal",      L_HORIZONTAL_LINE},
-        {"horiz",           L_HORIZONTAL_LINE},
-        {"h",               L_HORIZONTAL_LINE},
-        {"vertical-line",   L_VERTICAL_LINE},
-        {"vertical",        L_VERTICAL_LINE},
-        {"vert",            L_VERTICAL_LINE},
-        {"v",               L_VERTICAL_LINE}
-    };
-    return ll_check_tbl(L, arg, dflt, tbl, sizeof(tbl)/sizeof(tbl[0]));
+    return ll_check_tbl(L, arg, dflt, tbl_direction, ARRAYSIZE(tbl_direction));
 }
+
+static const lept_enums_t tbl_blackwhite[] = {
+    {"white",           "L_SET_WHITE",          L_SET_WHITE},
+    {"w",               "L_SET_WHITE",          L_SET_WHITE},
+    {"black",           "L_SET_BLACK",          L_SET_BLACK},
+    {"b",               "L_SET_BLACK",          L_SET_BLACK}
+};
 
 /**
  * \brief Check for a L_SET_XXXX name as string
@@ -607,14 +655,31 @@ ll_check_direction(lua_State *L, int arg, l_int32 dflt)
 l_int32
 ll_check_blackwhite(lua_State *L, int arg, l_int32 dflt)
 {
-    static const key_value_t tbl[] = {
-        {"white",           L_SET_WHITE},
-        {"w",               L_SET_WHITE},
-        {"black",           L_SET_BLACK},
-        {"b",               L_SET_BLACK}
-    };
-    return ll_check_tbl(L, arg, dflt, tbl, sizeof(tbl)/sizeof(tbl[0]));
+    return ll_check_tbl(L, arg, dflt, tbl_blackwhite, ARRAYSIZE(tbl_blackwhite));
 }
+
+static const lept_enums_t tbl_rasterop[] = {
+    {"clr",             "PIX_CLR",                      PIX_CLR},
+    {"set",             "PIX_SET",                      PIX_SET},
+    {"src",             "PIX_SRC",                      PIX_SRC},
+    {"dst",             "PIX_DST",                      PIX_DST},
+    {"!src",            "PIX_NOT(PIX_SRC)",             PIX_NOT(PIX_SRC)},
+    {"!dst",            "PIX_NOT(PIX_DST)",             PIX_NOT(PIX_DST)},
+    {"src|dst",         "PIX_SRC | PIX_DST",            PIX_SRC | PIX_DST},
+    {"paint",           "PIX_SRC | PIX_DST",            PIX_SRC | PIX_DST},
+    {"src&dst",         "PIX_SRC & PIX_DST",            PIX_SRC & PIX_DST},
+    {"mask",            "PIX_SRC & PIX_DST",            PIX_SRC & PIX_DST},
+    {"src^dst",         "PIX_SRC ^ PIX_DST",            PIX_SRC ^ PIX_DST},
+    {"xor",             "PIX_SRC ^ PIX_DST",            PIX_SRC ^ PIX_DST},
+    {"!src|dst",        "PIX_NOT(PIX_SRC) | PIX_DST",   PIX_NOT(PIX_SRC) | PIX_DST},
+    {"!src&dst",        "PIX_NOT(PIX_SRC) & PIX_DST",   PIX_NOT(PIX_SRC) & PIX_DST},
+    {"subtract",        "PIX_NOT(PIX_SRC) & PIX_DST",   PIX_NOT(PIX_SRC) & PIX_DST},
+    {"src|!dst",        "PIX_SRC | PIX_NOT(PIX_DST)",   PIX_SRC | PIX_NOT(PIX_DST)},
+    {"src&!dst",        "PIX_SRC & PIX_NOT(PIX_DST)",   PIX_SRC & PIX_NOT(PIX_DST)},
+    {"!(src|dst)",      "PIX_NOT(PIX_SRC | PIX_DST)",   PIX_NOT(PIX_SRC | PIX_DST)},
+    {"!(src&dst)",      "PIX_NOT(PIX_SRC & PIX_DST)",   PIX_NOT(PIX_SRC & PIX_DST)},
+    {"!(src^dst)",      "PIX_NOT(PIX_SRC ^ PIX_DST)",   PIX_NOT(PIX_SRC ^ PIX_DST)}
+};
 
 /**
  * \brief Check for a PIX_XXX name as string
@@ -644,30 +709,20 @@ ll_check_blackwhite(lua_State *L, int arg, l_int32 dflt)
 l_int32
 ll_check_rasterop(lua_State *L, int arg, l_int32 dflt)
 {
-    static const key_value_t tbl[] = {
-        {"clr",                         PIX_CLR},
-        {"set",                         PIX_SET},
-        {"src",                         PIX_SRC},
-        {"dst",                         PIX_DST},
-        {"!src",                        PIX_NOT(PIX_SRC)},
-        {"!dst",                        PIX_NOT(PIX_DST)},
-        {"src|dst",                     PIX_SRC | PIX_DST},
-        {"paint",                       PIX_SRC | PIX_DST},
-        {"src&dst",                     PIX_SRC & PIX_DST},
-        {"mask",                        PIX_SRC & PIX_DST},
-        {"src^dst",                     PIX_SRC ^ PIX_DST},
-        {"xor",                         PIX_SRC ^ PIX_DST},
-        {"!src|dst",                    PIX_NOT(PIX_SRC) | PIX_DST},
-        {"!src&dst",                    PIX_NOT(PIX_SRC) & PIX_DST},
-        {"subtract",                    PIX_NOT(PIX_SRC) & PIX_DST},
-        {"src|!dst",                    PIX_SRC | PIX_NOT(PIX_DST)},
-        {"src&!dst",                    PIX_SRC & PIX_NOT(PIX_DST)},
-        {"!(src|dst)",                  PIX_NOT(PIX_SRC | PIX_DST)},
-        {"!(src&dst)",                  PIX_NOT(PIX_SRC & PIX_DST)},
-        {"!(src^dst)",                  PIX_NOT(PIX_SRC ^ PIX_DST)}
-    };
-    return ll_check_tbl(L, arg, dflt, tbl, sizeof(tbl)/sizeof(tbl[0]));
+    return ll_check_tbl(L, arg, dflt, tbl_rasterop, ARRAYSIZE(tbl_rasterop));
 }
+
+static const lept_enums_t tbl_searchdir[] = {
+    {"horizontal",          "L_HORIZ",              L_HORIZ},
+    {"horiz",               "L_HORIZ",              L_HORIZ},
+    {"h",                   "L_HORIZ",              L_HORIZ},
+    {"vertical",            "L_VERT",               L_VERT},
+    {"vert",                "L_VERT",               L_VERT},
+    {"v",                   "L_VERT",               L_VERT},
+    {"both-directions",     "L_BOTH_DIRECTIONS",    L_BOTH_DIRECTIONS},
+    {"both",                "L_BOTH_DIRECTIONS",    L_BOTH_DIRECTIONS},
+    {"b",                   "L_BOTH_DIRECTIONS",    L_BOTH_DIRECTIONS}
+};
 
 /**
  * \brief Check for a search direction name (%L_HORIZ, %L_VERT, or %L_BOTH_DIRECTIONS)
@@ -679,19 +734,24 @@ ll_check_rasterop(lua_State *L, int arg, l_int32 dflt)
 l_int32
 ll_check_searchdir(lua_State *L, int arg, l_int32 dflt)
 {
-    static const key_value_t tbl[] = {
-        {"horizontal",          L_HORIZ},
-        {"horiz",               L_HORIZ},
-        {"h",                   L_HORIZ},
-        {"vertical",            L_VERT},
-        {"vert",                L_VERT},
-        {"v",                   L_VERT},
-        {"both-directions",     L_BOTH_DIRECTIONS},
-        {"both",                L_BOTH_DIRECTIONS},
-        {"b",                   L_BOTH_DIRECTIONS}
-    };
-    return ll_check_tbl(L, arg, dflt, tbl, sizeof(tbl)/sizeof(tbl[0]));
+    return ll_check_tbl(L, arg, dflt, tbl_searchdir, ARRAYSIZE(tbl_searchdir));
 }
+
+static const lept_enums_t tbl_stats_type[] = {
+    {"mean-absval",         "L_MEAN_ABSVAL",        L_MEAN_ABSVAL},
+    {"mean-abs",            "L_MEAN_ABSVAL",        L_MEAN_ABSVAL},
+    {"mean",                "L_MEAN_ABSVAL",        L_MEAN_ABSVAL},
+    {"m",                   "L_MEAN_ABSVAL",        L_MEAN_ABSVAL},
+    {"root-mean-square",    "L_ROOT_MEAN_SQUARE",   L_ROOT_MEAN_SQUARE},
+    {"rms",                 "L_ROOT_MEAN_SQUARE",   L_ROOT_MEAN_SQUARE},
+    {"r",                   "L_ROOT_MEAN_SQUARE",   L_ROOT_MEAN_SQUARE},
+    {"standard-deviation",  "L_STANDARD_DEVIATION", L_STANDARD_DEVIATION},
+    {"stddev",              "L_STANDARD_DEVIATION", L_STANDARD_DEVIATION},
+    {"s",                   "L_STANDARD_DEVIATION", L_STANDARD_DEVIATION},
+    {"variance",            "L_VARIANCE",           L_VARIANCE},
+    {"var",                 "L_VARIANCE",           L_VARIANCE},
+    {"v",                   "L_VARIANCE",           L_VARIANCE}
+};
 
 /**
  * \brief Check for a stats type name (%L_MEAN_ABSVAL, %L_ROOT_MEAN_SQUARE, %L_STANDARD_DEVIATION, %L_VARIANCE)
@@ -703,23 +763,26 @@ ll_check_searchdir(lua_State *L, int arg, l_int32 dflt)
 l_int32
 ll_check_stats_type(lua_State* L, int arg, l_int32 dflt)
 {
-    static const key_value_t tbl[] = {
-        {"mean-absval",         L_MEAN_ABSVAL},
-        {"mean-abs",            L_MEAN_ABSVAL},
-        {"mean",                L_MEAN_ABSVAL},
-        {"m",                   L_MEAN_ABSVAL},
-        {"root-mean-square",    L_ROOT_MEAN_SQUARE},
-        {"rms",                 L_ROOT_MEAN_SQUARE},
-        {"r",                   L_ROOT_MEAN_SQUARE},
-        {"standard-deviation",  L_STANDARD_DEVIATION},
-        {"stddev",              L_STANDARD_DEVIATION},
-        {"s",                   L_STANDARD_DEVIATION},
-        {"variance",            L_VARIANCE},
-        {"var",                 L_VARIANCE},
-        {"v",                   L_VARIANCE}
-    };
-    return ll_check_tbl(L, arg, dflt, tbl, sizeof(tbl)/sizeof(tbl[0]));
+    return ll_check_tbl(L, arg, dflt, tbl_stats_type, ARRAYSIZE(tbl_stats_type));
 }
+
+static const lept_enums_t tbl_select_color[] = {
+    {"red",                 "L_SELECT_RED",         L_SELECT_RED},
+    {"r",                   "L_SELECT_RED",         L_SELECT_RED},
+    {"green",               "L_SELECT_GREEN",       L_SELECT_GREEN},
+    {"grn",                 "L_SELECT_GREEN",       L_SELECT_GREEN},
+    {"g",                   "L_SELECT_GREEN",       L_SELECT_GREEN},
+    {"blue",                "L_SELECT_BLUE",        L_SELECT_BLUE},
+    {"blu",                 "L_SELECT_BLUE",        L_SELECT_BLUE},
+    {"b",                   "L_SELECT_BLUE",        L_SELECT_BLUE},
+    {"min",                 "L_SELECT_MIN",         L_SELECT_MIN},
+    {"max",                 "L_SELECT_MAX",         L_SELECT_MAX},
+    {"average",             "L_SELECT_AVERAGE",     L_SELECT_AVERAGE},
+    {"avg",                 "L_SELECT_AVERAGE",     L_SELECT_AVERAGE},
+    {"hue",                 "L_SELECT_HUE",         L_SELECT_HUE},
+    {"saturation",          "L_SELECT_SATURATION",  L_SELECT_SATURATION},
+    {"sat",                 "L_SELECT_SATURATION",  L_SELECT_SATURATION}
+};
 
 /**
  * \brief Check for a select color name
@@ -731,25 +794,13 @@ ll_check_stats_type(lua_State* L, int arg, l_int32 dflt)
 l_int32
 ll_check_select_color(lua_State* L, int arg, l_int32 dflt)
 {
-    static const key_value_t tbl[] = {
-        {"red",                 L_SELECT_RED},
-        {"r",                   L_SELECT_RED},
-        {"green",               L_SELECT_GREEN},
-        {"grn",                 L_SELECT_GREEN},
-        {"g",                   L_SELECT_GREEN},
-        {"blue",                L_SELECT_BLUE},
-        {"blu",                 L_SELECT_BLUE},
-        {"b",                   L_SELECT_BLUE},
-        {"min",                 L_SELECT_MIN},
-        {"max",                 L_SELECT_MAX},
-        {"average",             L_SELECT_AVERAGE},
-        {"avg",                 L_SELECT_AVERAGE},
-        {"hue",                 L_SELECT_HUE},
-        {"saturation",          L_SELECT_SATURATION},
-        {"sat",                 L_SELECT_SATURATION}
-    };
-    return ll_check_tbl(L, arg, dflt, tbl, sizeof(tbl)/sizeof(tbl[0]));
+    return ll_check_tbl(L, arg, dflt, tbl_select_color, ARRAYSIZE(tbl_select_color));
 }
+
+static const lept_enums_t tbl_select_minmax[] = {
+    {"min",                 "L_SELECT_MIN",          L_SELECT_MIN},
+    {"max",                 "L_SELECT_MAX",          L_SELECT_MAX}
+};
 
 /**
  * \brief Check for a select min or max name (%L_SELECT_MIN, %L_SELECT_MAX)
@@ -761,11 +812,7 @@ ll_check_select_color(lua_State* L, int arg, l_int32 dflt)
 l_int32
 ll_check_select_min_max(lua_State* L, int arg, l_int32 dflt)
 {
-    static const key_value_t tbl[] = {
-        {"min",                 L_SELECT_MIN},
-        {"max",                 L_SELECT_MAX}
-    };
-    return ll_check_tbl(L, arg, dflt, tbl, sizeof(tbl)/sizeof(tbl[0]));
+    return ll_check_tbl(L, arg, dflt, tbl_select_minmax, ARRAYSIZE(tbl_select_minmax));
 }
 
 /*====================================================================*
@@ -787,7 +834,7 @@ ll_check_LEPT(lua_State *L, int arg)
 }
 
 /**
- * \brief Push LEPT* user data to the Lua stack and set its meta table
+ * \brief Push LEPT* to the Lua stack and set its meta table
  * \param L pointer to the lua_State
  * \param lept pointer to the LEPT
  * \return 1 LEPT* on the Lua stack
@@ -801,20 +848,24 @@ ll_push_LEPT(lua_State *L, LEPT *lept)
 }
 
 /**
- * \brief Create a new LEPT* user data
+ * \brief Create a new LEPT*
  * \param L pointer to the lua_State
  * \return 1 LEPT* on the Lua stack
  */
 static int
 ll_new_LEPT(lua_State *L)
 {
-    static const char leptonica[] = "leptonica-";
-    LEPT *lept = (LEPT *) calloc(1, sizeof(LEPT));
-    const char* version = getLeptonicaVersion();
+    static const char lept_prefix[] = "leptonica-";
+    LEPT *lept = (LEPT *) LEPT_CALLOC(1, sizeof(LEPT));
+    const char* lept_ver = getLeptonicaVersion();
+    const lua_Number *lua_ver = lua_version(L);
 
-    if (!strncmp(version, leptonica, strlen(leptonica)))
-        version += strlen(leptonica);
-    snprintf(lept->version, sizeof(lept->version), "%s", version);
+    snprintf(lept->str_version, sizeof(lept->str_version), "%s", PACKAGE_VERSION);
+    snprintf(lept->str_version_lua, sizeof(lept->str_version_lua), "%d.%d",
+             ((int)lua_ver[0])/100, ((int)lua_ver[0])%100);
+    if (!strncmp(lept_ver, lept_prefix, strlen(lept_prefix)))
+        lept_ver += strlen(lept_prefix);
+    snprintf(lept->str_version_lept, sizeof(lept->str_version_lept), "%s", lept_ver);
 
     return ll_push_udata(L, LL_LEPT, lept);
 }
@@ -845,7 +896,35 @@ Version(lua_State *L)
 {
     void **plept = ll_check_LEPT(L, 1);
     LEPT *lept = *(LEPT **)plept;
-    lua_pushstring(L, lept->version);
+    lua_pushstring(L, lept->str_version);
+    return 1;
+}
+
+/**
+ * \brief Return the Leptonica version number
+ * \param L pointer to the lua_State
+ * \return 1 string on the Lua stack
+ */
+static int
+LuaVersion(lua_State *L)
+{
+    void **plept = ll_check_LEPT(L, 1);
+    LEPT *lept = *(LEPT **)plept;
+    lua_pushstring(L, lept->str_version_lua);
+    return 1;
+}
+
+/**
+ * \brief Return the Leptonica version number
+ * \param L pointer to the lua_State
+ * \return 1 string on the Lua stack
+ */
+static int
+LeptVersion(lua_State *L)
+{
+    void **plept = ll_check_LEPT(L, 1);
+    LEPT *lept = *(LEPT **)plept;
+    lua_pushstring(L, lept->str_version_lept);
     return 1;
 }
 
@@ -1004,6 +1083,8 @@ static int register_LEPT(lua_State *L) {
     static const luaL_Reg methods[] = {
         {"__gc",                    Destroy},
         {"Version",                 Version},
+        {"LuaVersion",              LuaVersion},
+        {"LeptVersion",             LeptVersion},
         {LL_NUMA,                   ll_new_NUMA},
         {LL_NUMAA,                  ll_new_NUMAA},
         {LL_DNA,                    ll_new_DNA},

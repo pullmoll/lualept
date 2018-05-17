@@ -35,32 +35,56 @@
 #define  LUALEPT_H
 
 #if defined (HAVE_CONFIG_H)
-#include "../config.h"
+#include "config.h"
 #endif
 
 #define LLUA_DEBUG      0
 
 #include <allheaders.h>
-#if defined(HAVE_STDINT_H)
-#include <stdint.h>
-#endif
+
 #if defined(HAVE_CTYPE_H)
 #include <ctype.h>
 #endif
 #if defined(HAVE_FLOAT_H)
 #include <float.h>
 #endif
+#if defined(HAVE_INTTYPES_H)
+#include <inttypes.h>
+#endif
+#if defined(HAVE_MEMORY_H)
+#include <memory.h>
+#endif
+#if defined(HAVE_STDINT_H)
+#include <stdint.h>
+#endif
+#if defined(HAVE_STDLIB_H)
+#include <stdlib.h>
+#endif
+#if defined(HAVE_STRINGS_H)
+#include <strings.h>
+#endif
 #if defined(HAVE_STRING_H)
 #include <string.h>
 #endif
+#if defined(HAVE_SYS_STAT_H)
+#include <sys/stat.h>
+#endif
+#if defined(HAVE_SYS_TYPES_H)
+#include <sys/types.h>
+#endif
+#if defined(HAVE_UNISTD_H)
+#include <unistd.h>
+#endif
 
 /*! Dummy structure for the top level Lua class LL_LEPT */
-struct Lept {
-    char version[32];	/*!< Leptonica version number */
+struct LuaLept {
+    char str_version[32];           /*!< Our own version number */
+    char str_version_lua[32];       /*!< Lua's version number */
+    char str_version_lept[32];      /*!< Leptonica's version number */
 };
 
 /*! Dummy type for the top level Lua class LL_LEPT */
-typedef struct Lept LEPT;
+typedef struct LuaLept LEPT;
 
 #define LUA_SENTINEL    {NULL,NULL}     /*!< Lua function table (luaL_Reg array[]) sentinel */
 
@@ -81,7 +105,7 @@ typedef struct Lept LEPT;
 #define	LL_PIXA		"PIXA"          /*!< Lua class: array of PIX */
 #define	LL_PIXAA        "PIXAA"         /*!< Lua class: array of PIXA */
 
-#define	LL_LEPT		"Lept"          /*!< Lua class: Leptonica top level */
+#define	LL_LEPT		"LuaLept"       /*!< Lua class: LuaLept top level */
 
 
 #if LLUA_DEBUG
@@ -102,11 +126,12 @@ typedef struct Lept LEPT;
 typedef struct lua_State lua_State;
 typedef struct luaL_Reg luaL_Reg;
 
-/** structure to list keys (string) with their l_int32 (enumeration) values */
-typedef struct key_value_s {
+/** Structure to list keys (string) with their l_int32 (enumeration) values */
+typedef struct lept_enums_s {
     const char *key;		/*!< string for the enumeration value */
+    const char *name;		/*!< name of the enum value in Leptonica's alltypes.h */
     l_int32     value;		/*!< integer enumeration value */
-}   key_value_t;
+}   lept_enums_t;
 
 /* llept.c */
 extern int          ll_register_class(lua_State *L, const char *name, const luaL_Reg *methods, const luaL_Reg *functions);
@@ -119,8 +144,9 @@ extern l_uint32     ll_check_l_uint32(lua_State *L, int arg);
 extern l_uint32     ll_check_l_uint32_default(lua_State *L, int arg, l_uint32 dflt);
 extern l_float32    ll_check_l_float32(lua_State *L, int arg);
 extern l_float32    ll_check_l_float32_default(lua_State *L, int arg, l_float32 dflt);
-extern l_int32      ll_check_tbl(lua_State *L, int arg, l_int32 dflt, const key_value_t *tbl, size_t len);
+extern l_int32      ll_check_tbl(lua_State *L, int arg, l_int32 dflt, const lept_enums_t *tbl, size_t len);
 extern l_int32      ll_check_access_storage(lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_access_storage(int flag);
 extern l_int32      ll_check_input_format(lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_input_format(int format);
 extern l_int32      ll_check_keytype(lua_State *L, int arg, l_int32 dflt);

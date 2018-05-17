@@ -52,7 +52,7 @@ ll_check_PIX(lua_State *L, int arg)
 }
 
 /**
- * \brief Push PIX user data to the Lua stack and set its meta table
+ * \brief Push PIX to the Lua stack and set its meta table
  * \param L pointer to the lua_State
  * \param pix pointer to the PIX
  * \return 1 PIX* on the Lua stack
@@ -74,7 +74,7 @@ ll_push_PIX(lua_State *L, PIX *pix)
  * or
  * Arg #1 is expected to be a string (filename)
  * or
- * Arg #1 is expected to be PIX* user data
+ * Arg #1 is expected to be PIX*
  *
  * \param L pointer to the lua_State
  * \return 1 PIX* on the Lua stack
@@ -82,6 +82,7 @@ ll_push_PIX(lua_State *L, PIX *pix)
 int
 ll_new_PIX(lua_State *L)
 {
+    static char buff[32 + PATH_MAX];
     PIX *pix = NULL;
     if (lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
         l_int32 width = ll_check_l_int32_default(L, 1, 1);
@@ -94,6 +95,8 @@ ll_new_PIX(lua_State *L)
     } else {
         const char* filename = lua_tostring(L, 1);
         pix = pixRead(filename);
+        snprintf(buff, sizeof(buff), "filename: %s", filename);
+        pixAddText(pix, buff);
     }
     return ll_push_PIX(L, pix);
 }
@@ -146,7 +149,7 @@ toString(lua_State* L)
  * or
  * Arg #1 is expected to be a string (filename)
  * or
- * Arg #1 is expected to be PIX* user data
+ * Arg #1 is expected to be PIX*
  *
  * \param L pointer to the lua_State
  * \return 1 PIX* on the Lua stack
@@ -164,7 +167,7 @@ Create(lua_State *L)
  * Arg #2 is expected to be a l_int32 (height)
  * Arg #3 is optional and expected to be a l_int32 (depth; default = 1)
  * or
- * Arg #1 is expected to be PIX* user data
+ * Arg #1 is expected to be PIX*
  *
  * \param L pointer to the lua_State
  * \return 1 PIX* on the Lua stack
@@ -207,7 +210,7 @@ Destroy(lua_State *L)
 /**
  * \brief Copy a PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data
+ * Arg #1 (i.e. self) is expected to be a PIX*
  *
  * \param L pointer to the lua_State
  * \return 1 PIX* on the Lua stack
@@ -223,7 +226,7 @@ Copy(lua_State *L)
 /**
  * \brief Clone a PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data
+ * Arg #1 (i.e. self) is expected to be a PIX*
  *
  * \param L pointer to the lua_State
  * \return 1 PIX* on the Lua stack
@@ -239,8 +242,8 @@ Clone(lua_State *L)
 /**
  * \brief Resize a PIX* image data
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
- * Arg #2 is expected to be another PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
+ * Arg #2 is expected to be another PIX* (pixs)
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -257,8 +260,8 @@ ResizeImageData(lua_State *L)
 /**
  * \brief Copy the colormap of a PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
- * Arg #2 is expected to be another PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
+ * Arg #2 is expected to be another PIX* (pixs)
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -275,7 +278,7 @@ CopyColormap(lua_State *L)
 /**
  * \brief Check if a PIX* is valid
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data
+ * Arg #1 (i.e. self) is expected to be a PIX*
  *
  * \param L pointer to the lua_State
  * \return 1 for boolean on the Lua stack
@@ -292,8 +295,8 @@ SizesEqual(lua_State *L)
 /**
  * \brief Transfer all data from a PIX* (pixs) to self (pixd)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
- * Arg #2 is expected to be another PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
+ * Arg #2 is expected to be another PIX* (pixs)
  * Arg #3 is optional and expected to be a boolean (copytext)
  * Arg #4 is optional and expected to be a boolean (copyformat)
  *
@@ -316,8 +319,8 @@ TransferAllData(lua_State *L)
 /**
  * \brief Swap an destroy a PIX* (pixd) with another PIX* (pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
- * Arg #2 is expected to be another PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
+ * Arg #2 is expected to be another PIX* (pixs)
  *
  * \param L pointer to the lua_State
  * \return 1 for boolean on the Lua stack
@@ -338,7 +341,7 @@ SwapAndDestroy(lua_State *L)
 /**
  * \brief Get the PIX* width
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data
+ * Arg #1 (i.e. self) is expected to be a PIX*
  *
  * \param L pointer to the lua_State
  * \return 1 integers (or nil on error) on the stack
@@ -355,7 +358,7 @@ GetWidth(lua_State *L)
 /**
  * \brief Set the PIX* width
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data
+ * Arg #1 (i.e. self) is expected to be a PIX*
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -372,7 +375,7 @@ SetWidth(lua_State *L)
 /**
  * \brief Get the PIX* height
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data
+ * Arg #1 (i.e. self) is expected to be a PIX*
  *
  * \param L pointer to the lua_State
  * \return 1 integers (or nil on error) on the stack
@@ -389,7 +392,7 @@ GetHeight(lua_State *L)
 /**
  * \brief Set the PIX* height
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data
+ * Arg #1 (i.e. self) is expected to be a PIX*
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -406,7 +409,7 @@ SetHeight(lua_State *L)
 /**
  * \brief Get the PIX* depth
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data
+ * Arg #1 (i.e. self) is expected to be a PIX*
  *
  * \param L pointer to the lua_State
  * \return 1 integers (or nil on error) on the stack
@@ -423,7 +426,7 @@ GetDepth(lua_State *L)
 /**
  * \brief Set the PIX* depth
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data
+ * Arg #1 (i.e. self) is expected to be a PIX*
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -440,7 +443,7 @@ SetDepth(lua_State *L)
 /**
  * \brief Get the PIX* dimensions
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data
+ * Arg #1 (i.e. self) is expected to be a PIX*
  *
  * \param L pointer to the lua_State
  * \return 3 for four integers (or nil on error) on the stack
@@ -461,7 +464,7 @@ GetDimensions(lua_State *L)
 /**
  * \brief Set the PIX* dimensions
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data
+ * Arg #1 (i.e. self) is expected to be a PIX*
  * Arg #2 is expected to be a lua_Integer (width)
  * Arg #3 is expected to be a lua_Integer (height)
  * Arg #4 is expected to be a lua_Integer (depth)
@@ -483,8 +486,8 @@ SetDimensions(lua_State *L)
 /**
  * \brief Copy dimensions from a PIX* (pixs) to self (pixd)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
- * Arg #2 is expected to be another PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
+ * Arg #2 is expected to be another PIX* (pixs)
  *
  * \param L pointer to the lua_State
  * \return 1 for boolean on the Lua stack
@@ -501,7 +504,7 @@ CopyDimensions(lua_State *L)
 /**
  * \brief Get the PIX* SPP (samples per pixel)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data
+ * Arg #1 (i.e. self) is expected to be a PIX*
  *
  * \param L pointer to the lua_State
  * \return 1 integers (or nil on error) on the stack
@@ -518,7 +521,7 @@ GetSpp(lua_State *L)
 /**
  * \brief Set the PIX* SPP (samples per pixel)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data
+ * Arg #1 (i.e. self) is expected to be a PIX*
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -535,8 +538,8 @@ SetSpp(lua_State *L)
 /**
  * \brief Copy SPP (samples per pixel) from a PIX* (pixs) to self (pixd)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
- * Arg #2 is expected to be another PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
+ * Arg #2 is expected to be another PIX* (pixs)
  *
  * \param L pointer to the lua_State
  * \return 1 for boolean on the Lua stack
@@ -553,7 +556,7 @@ CopySpp(lua_State *L)
 /**
  * \brief Get the PIX* WPL (words per line)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data
+ * Arg #1 (i.e. self) is expected to be a PIX*
  *
  * \param L pointer to the lua_State
  * \return 1 integers (or nil on error) on the stack
@@ -570,7 +573,7 @@ GetWpl(lua_State *L)
 /**
  * \brief Set the PIX* WPL (words per line)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data
+ * Arg #1 (i.e. self) is expected to be a PIX*
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -587,7 +590,7 @@ SetWpl(lua_State *L)
 /**
  * \brief Get the PIX* X resolution
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data
+ * Arg #1 (i.e. self) is expected to be a PIX*
  *
  * \param L pointer to the lua_State
  * \return 1 integers (or nil on error) on the stack
@@ -604,7 +607,7 @@ GetXRes(lua_State *L)
 /**
  * \brief Set the PIX* X resolution
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data
+ * Arg #1 (i.e. self) is expected to be a PIX*
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -621,7 +624,7 @@ SetXRes(lua_State *L)
 /**
  * \brief Get the PIX* Y resolution
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data
+ * Arg #1 (i.e. self) is expected to be a PIX*
  *
  * \param L pointer to the lua_State
  * \return 1 integers (or nil on error) on the stack
@@ -638,7 +641,7 @@ GetYRes(lua_State *L)
 /**
  * \brief Set the PIX* Y resolution
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data
+ * Arg #1 (i.e. self) is expected to be a PIX*
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -655,7 +658,7 @@ SetYRes(lua_State *L)
 /**
  * \brief Get the PIX resolution (x, y)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data
+ * Arg #1 (i.e. self) is expected to be a PIX*
  *
  * \param L pointer to the lua_State
  * \return 2 for two integers (or nil on error) on the stack
@@ -675,7 +678,7 @@ GetResolution(lua_State *L)
 /**
  * \brief Set the PIX side resolution (x, y)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data
+ * Arg #1 (i.e. self) is expected to be a PIX*
  * Arg #2 is expected to be a lua_Integer (xres)
  * Arg #3 is expected to be a lua_Integer (yres)
  *
@@ -695,8 +698,8 @@ SetResolution(lua_State *L)
 /**
  * \brief Copy resolution from a PIX* (pixs) to self (pixd)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
- * Arg #2 is expected to be another PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
+ * Arg #2 is expected to be another PIX* (pixs)
  *
  * \param L pointer to the lua_State
  * \return 1 for boolean on the Lua stack
@@ -713,7 +716,7 @@ CopyResolution(lua_State *L)
 /**
  * \brief Scale resolution of a PIX* by a factor
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  * Arg #2 is expected to be a lua_Number in the range of l_float32 (xscale)
  * Arg #2 is expected to be a lua_Number in the range of l_float32 (yscale)
  *
@@ -733,7 +736,7 @@ ScaleResolution(lua_State *L)
 /**
  * \brief Get the input format of a PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  *
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
@@ -749,7 +752,7 @@ GetInputFormat(lua_State *L)
 /**
  * \brief Set the input format of a PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  * Arg #2 is expected to be a string with the input format name
  *
  * \param L pointer to the lua_State
@@ -767,8 +770,8 @@ SetInputFormat(lua_State *L)
 /**
  * \brief Copy input format a PIX* (pixs) to self (pixd)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
- * Arg #2 is expected to be another PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
+ * Arg #2 is expected to be another PIX* (pixs)
  *
  * \param L pointer to the lua_State
  * \return 1 for boolean on the Lua stack
@@ -785,7 +788,7 @@ CopyInputFormat(lua_State *L)
 /**
  * \brief Set the special value of a PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  * Arg #2 is expected to be a l_int32
  *
  * \param L pointer to the lua_State
@@ -803,7 +806,7 @@ SetSpecial(lua_State *L)
 /**
  * \brief Get the text of a PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  *
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
@@ -820,7 +823,7 @@ GetText(lua_State *L)
 /**
  * \brief Set the text of a PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  * Arg #2 is expected to be a string
  *
  * \param L pointer to the lua_State
@@ -838,7 +841,7 @@ SetText(lua_State *L)
 /**
  * \brief Add to the text of a PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  * Arg #2 is expected to be a string
  *
  * \param L pointer to the lua_State
@@ -856,8 +859,8 @@ AddText(lua_State *L)
 /**
  * \brief Copy text from a PIX* (pixs) to self (pixd)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
- * Arg #2 is expected to be another PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
+ * Arg #2 is expected to be another PIX* (pixs)
  *
  * \param L pointer to the lua_State
  * \return 1 for boolean on the Lua stack
@@ -874,7 +877,7 @@ CopyText(lua_State *L)
 /**
  * \brief Get the colormap of a PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  *
  * \param L pointer to the lua_State
  * \return 1 PIXCMAP* on the Lua stack
@@ -890,8 +893,8 @@ GetColormap(lua_State *L)
 /**
  * \brief Set the colormap of a PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
- * Arg #2 is expected to be a PIXCMAP* user data (colormap)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
+ * Arg #2 is expected to be a PIXCMAP* (colormap)
  *
  * \param L pointer to the lua_State
  * \return 1 PIXCMAP* on the Lua stack
@@ -908,7 +911,7 @@ SetColormap(lua_State *L)
 /**
  * \brief Get a pixel value from PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
  * Arg #2 is expected to be a l_int32 (x)
  * Arg #3 is expected to be a l_int32 (y)
  *
@@ -931,7 +934,7 @@ GetPixel(lua_State *L)
 /**
  * \brief Set a pixel value in PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
  * Arg #2 is expected to be a l_int32 (x)
  * Arg #3 is expected to be a l_int32 (y)
  * Arg #4 is expected to be a l_uint32 (val)
@@ -953,7 +956,7 @@ SetPixel(lua_State *L)
 /**
  * \brief Get a pixel's RGB values from PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
  * Arg #2 is expected to be a l_int32 (x)
  * Arg #3 is expected to be a l_int32 (y)
  *
@@ -980,7 +983,7 @@ GetRGBPixel(lua_State *L)
 /**
  * \brief Set a pixel's RGB values in PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
  * Arg #2 is expected to be a l_int32 (x)
  * Arg #3 is expected to be a l_int32 (y)
  * Arg #4 is expected to be a l_int32 (rval)
@@ -1006,7 +1009,7 @@ SetRGBPixel(lua_State *L)
 /**
  * \brief Get a random pixel's value from PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
  *
  * \param L pointer to the lua_State
  * \return 3 l_int32 on the Lua stack (val, x, y)
@@ -1029,7 +1032,7 @@ GetRandomPixel(lua_State *L)
 /**
  * \brief Clear a pixel value in PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
  * Arg #2 is expected to be a l_int32 (x)
  * Arg #3 is expected to be a l_int32 (y)
  *
@@ -1049,7 +1052,7 @@ ClearPixel(lua_State *L)
 /**
  * \brief Flip a pixel value in PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
  * Arg #2 is expected to be a l_int32 (x)
  * Arg #3 is expected to be a l_int32 (y)
  *
@@ -1069,7 +1072,7 @@ FlipPixel(lua_State *L)
 /**
  * \brief Get black or white value in PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
  * Arg #2 is expected to be a l_int32 (op = L_GET_BLACK_VAL or L_GET_WHITE_VAL)
  *
  * \param L pointer to the lua_State
@@ -1090,7 +1093,7 @@ GetBlackOrWhiteVal(lua_State *L)
 /**
  * \brief Get black value in PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -1109,7 +1112,7 @@ GetBlackVal(lua_State *L)
 /**
  * \brief Get white value in PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -1128,7 +1131,7 @@ GetWhiteVal(lua_State *L)
 /**
  * \brief Clear all pixels in a PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -1144,7 +1147,7 @@ ClearAll(lua_State *L)
 /**
  * \brief Set all pixels in a PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -1160,7 +1163,7 @@ SetAll(lua_State *L)
 /**
  * \brief Set all pixels in a PIX* to a gray value %grayval
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
  * Arg #2 is expected to be a l_int32 (grayval)
  *
  * \param L pointer to the lua_State
@@ -1178,7 +1181,7 @@ SetAllGray(lua_State *L)
 /**
  * \brief Set all pixels in a PIX* to an arbitrary value %val
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
  * Arg #2 is expected to be a l_uint32 (val)
  *
  * \param L pointer to the lua_State
@@ -1196,7 +1199,7 @@ SetAllArbitrary(lua_State *L)
 /**
  * \brief Set all pixels in a PIX* to black or white
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
  * Arg #2 is expected to be a string describing a setval (op = black, white)
  *
  * \param L pointer to the lua_State
@@ -1214,7 +1217,7 @@ SetBlackOrWhite(lua_State *L)
 /**
  * \brief Set all pixels in a PIX* to black
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -1230,7 +1233,7 @@ SetBlack(lua_State *L)
 /**
  * \brief Set all pixels in a PIX* to white
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -1246,7 +1249,7 @@ SetWhite(lua_State *L)
 /**
  * \brief Set all pixel components %comp in a PIX* to a value %val
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
  * Arg #2 is expected to be a string with the component name (comp)
  * Arg #3 is expected to be a l_int32 (val)
  *
@@ -1266,8 +1269,8 @@ SetComponentArbitrary(lua_State *L)
 /**
  * \brief Clear all pixels inside a BOX* in a PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
- * Arg #2 is expected to be a BOX* user data (box)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
+ * Arg #2 is expected to be a BOX* (box)
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -1284,8 +1287,8 @@ ClearInRect(lua_State *L)
 /**
  * \brief Set all pixels inside a BOX* in a PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
- * Arg #2 is expected to be a BOX* user data (box)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
+ * Arg #2 is expected to be a BOX* (box)
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -1302,8 +1305,8 @@ SetInRect(lua_State *L)
 /**
  * \brief Set all pixels inside a BOX* in a PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
- * Arg #2 is expected to be a BOX* user data (box)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
+ * Arg #2 is expected to be a BOX* (box)
  * Arg #3 is expected to be a l_uint32 (val)
  *
  * \param L pointer to the lua_State
@@ -1322,8 +1325,8 @@ SetInRectArbitrary(lua_State *L)
 /**
  * \brief Set all pixels inside a BOX* in a PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
- * Arg #2 is expected to be a BOX* user data (box)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
+ * Arg #2 is expected to be a BOX* (box)
  * Arg #3 is expected to be a l_uint32 (val)
  * Arg #4 is expected to be a l_float32 (fract)
  *
@@ -1344,7 +1347,7 @@ BlendInRect(lua_State *L)
 /**
  * \brief Set pad bits in a PIX* to value %val
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  * Arg #2 is expected to be a l_int32 (val)
  *
  * \param L pointer to the lua_State
@@ -1362,7 +1365,7 @@ SetPadBits(lua_State *L)
 /**
  * \brief Set pad bits in a PIX* to value %val
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  * Arg #2 is expected to be a l_int32 (by)
  * Arg #3 is expected to be a l_int32 (bh)
  * Arg #4 is expected to be a l_int32 (val)
@@ -1384,7 +1387,7 @@ SetPadBitsBand(lua_State *L)
 /**
  * \brief Set or clear border pixels in a PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  * Arg #2 is expected to be a l_int32 (left)
  * Arg #3 is expected to be a l_int32 (right)
  * Arg #4 is expected to be a l_int32 (top)
@@ -1410,7 +1413,7 @@ SetOrClearBorder(lua_State *L)
 /**
  * \brief Set border pixels in a PIX* to value %val
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  * Arg #2 is expected to be a l_int32 (left)
  * Arg #3 is expected to be a l_int32 (right)
  * Arg #4 is expected to be a l_int32 (top)
@@ -1436,7 +1439,7 @@ SetBorderVal(lua_State *L)
 /**
  * \brief Set border pixels in a PIX* to value %val
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  * Arg #2 is expected to be a l_int32 (dist)
  * Arg #3 is expected to be a l_uint32 (val)
  *
@@ -1456,7 +1459,7 @@ SetBorderRingVal(lua_State *L)
 /**
  * \brief Set mirrored border pixels in a PIX* to value %val
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  * Arg #2 is expected to be a l_int32 (left)
  * Arg #3 is expected to be a l_int32 (right)
  * Arg #4 is expected to be a l_int32 (top)
@@ -1480,7 +1483,7 @@ SetMirroredBorder(lua_State *L)
 /**
  * \brief Copy border pixels in a PIX* to a new PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  * Arg #2 is expected to be a l_int32 (left)
  * Arg #3 is expected to be a l_int32 (right)
  * Arg #4 is expected to be a l_int32 (top)
@@ -1505,7 +1508,7 @@ CopyBorder(lua_State *L)
 /**
  * \brief Add border pixels in a PIX* to a new PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  * Arg #2 is expected to be a l_int32 (npix)
  * Arg #3 is expected to be a l_uint32 (val)
  *
@@ -1526,7 +1529,7 @@ AddBorder(lua_State *L)
 /**
  * \brief Add black or white border pixels in a PIX* to a new PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  * Arg #2 is expected to be a l_int32 (left)
  * Arg #3 is expected to be a l_int32 (right)
  * Arg #4 is expected to be a l_int32 (top)
@@ -1553,7 +1556,7 @@ AddBlackOrWhiteBorder(lua_State *L)
 /**
  * \brief Add border pixels in a PIX* to a new PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  * Arg #2 is expected to be a l_int32 (left)
  * Arg #3 is expected to be a l_int32 (right)
  * Arg #4 is expected to be a l_int32 (top)
@@ -1580,7 +1583,7 @@ AddBorderGeneral(lua_State *L)
 /**
  * \brief Remove border pixels in a PIX* to a new PIX* (simple case %npix)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  * Arg #2 is expected to be a l_int32 (npix)
  *
  * \param L pointer to the lua_State
@@ -1599,7 +1602,7 @@ RemoveBorder(lua_State *L)
 /**
  * \brief Remove border pixels in a PIX* to a new PIX* (general case)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  * Arg #2 is expected to be a l_int32 (left)
  * Arg #3 is expected to be a l_int32 (right)
  * Arg #4 is expected to be a l_int32 (top)
@@ -1624,7 +1627,7 @@ RemoveBorderGeneral(lua_State *L)
 /**
  * \brief Remove border pixels resizing a PIX* to a new PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  * Arg #2 is expected to be a l_int32 (width)
  * Arg #3 is expected to be a l_int32 (height)
  *
@@ -1645,7 +1648,7 @@ RemoveBorderToSize(lua_State *L)
 /**
  * \brief Add mirrored border pixels in a PIX* to a new PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  * Arg #2 is expected to be a l_int32 (left)
  * Arg #3 is expected to be a l_int32 (right)
  * Arg #4 is expected to be a l_int32 (top)
@@ -1670,7 +1673,7 @@ AddMirroredBorder(lua_State *L)
 /**
  * \brief Add repeated border pixels in a PIX* to a new PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  * Arg #2 is expected to be a l_int32 (left)
  * Arg #3 is expected to be a l_int32 (right)
  * Arg #4 is expected to be a l_int32 (top)
@@ -1695,7 +1698,7 @@ AddRepeatedBorder(lua_State *L)
 /**
  * \brief Add mixed border pixels in a PIX* to a new PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  * Arg #2 is expected to be a l_int32 (left)
  * Arg #3 is expected to be a l_int32 (right)
  * Arg #4 is expected to be a l_int32 (top)
@@ -1720,7 +1723,7 @@ AddMixedBorder(lua_State *L)
 /**
  * \brief Add continued border pixels in a PIX* to a new PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  * Arg #2 is expected to be a l_int32 (left)
  * Arg #3 is expected to be a l_int32 (right)
  * Arg #4 is expected to be a l_int32 (top)
@@ -1745,7 +1748,7 @@ AddContinuedBorder(lua_State *L)
 /**
  * \brief Shift and transfer alpha channel from a PIX* (pixs) to this PIX* (pixd)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  * Arg #2 is expected to be a l_int32 (left)
  * Arg #3 is expected to be a l_int32 (right)
  * Arg #4 is expected to be a l_int32 (top)
@@ -1768,7 +1771,7 @@ ShiftAndTransferAlpha(lua_State *L)
 /**
  * \brief Display the layers of a PIX* (pixd)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  * Arg #2 is expected to be a l_int32 (left)
  * Arg #3 is expected to be a l_int32 (right)
  * Arg #4 is expected to be a l_int32 (top)
@@ -1790,9 +1793,9 @@ DisplayLayersRGBA(lua_State *L)
 /**
  * \brief Create a new PIX* from three PIX* layers (%pixr, %pixg, %pixb)
  *
- * Arg #1 is expected to be a PIX* user data (pixr)
- * Arg #2 is expected to be a PIX* user data (pixg)
- * Arg #3 is expected to be a PIX* user data (pixb)
+ * Arg #1 is expected to be a PIX* (pixr)
+ * Arg #2 is expected to be a PIX* (pixg)
+ * Arg #3 is expected to be a PIX* (pixb)
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -1810,7 +1813,7 @@ CreateRGBImage(lua_State *L)
 /**
  * \brief Create a new PIX* from one component of PIX*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  * Arg #2 is expected to be a string with the component name (comp)
  *
  * \param L pointer to the lua_State
@@ -1828,8 +1831,8 @@ GetRGBComponent(lua_State *L)
 /**
  * \brief Set one component in PIX* (pixd 32bpp) from PIX* (pixs 8bpp)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
- * Arg #2 is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
+ * Arg #2 is expected to be a PIX* (pixs)
  * Arg #3 is expected to be a string with the component name (comp)
  *
  * \param L pointer to the lua_State
@@ -1848,8 +1851,8 @@ SetRGBComponent(lua_State *L)
 /**
  * \brief Copy one component in PIX* (pixd 32bpp) from PIX* (pixs 32bpp)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
- * Arg #2 is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
+ * Arg #2 is expected to be a PIX* (pixs)
  * Arg #3 is expected to be a string with the component name (comp)
  *
  * \param L pointer to the lua_State
@@ -1868,7 +1871,7 @@ CopyRGBComponent(lua_State *L)
 /**
  * \brief Extract red, green and blue components from PIX* (pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -1908,7 +1911,7 @@ GetRGBLine(lua_State *L)
 /**
  * \brief Check alpha layer of a PIX* for opaqueness
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -1927,8 +1930,8 @@ AlphaIsOpaque(lua_State *L)
 /**
  * \brief Set the mask for a PIX* (%pixd) from another PIX* (%pixm 1bpp)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
- * Arg #2 is expected to be a PIX* user data with 1 bit/pixel (pixm)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
+ * Arg #2 is expected to be a PIX* with 1 bit/pixel (pixm)
  * Arg #3 is expected to be a l_uint32 (val)
  *
  * \param L pointer to the lua_State
@@ -1947,8 +1950,8 @@ SetMasked(lua_State *L)
 /**
  * \brief Set the mask for a PIX* (%pixd) from another PIX* (%pixm 1bpp) at offset %x and %y
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
- * Arg #2 is expected to be a PIX* user data with 1 bit/pixel (pixm)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
+ * Arg #2 is expected to be a PIX* with 1 bit/pixel (pixm)
  * Arg #3 is expected to be a l_uint32 (val)
  * Arg #4 is expected to be a l_int32 (x)
  * Arg #5 is expected to be a l_int32 (y)
@@ -1971,9 +1974,9 @@ SetMaskedGeneral(lua_State *L)
 /**
  * \brief Set the mask for a PIX* (%pixd) from another PIX* (%pixm 1bpp)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
- * Arg #2 is expected to be a PIX* user data (pixs)
- * Arg #3 is expected to be a PIX* user data with 1 bit/pixel (pixm)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
+ * Arg #2 is expected to be a PIX* (pixs)
+ * Arg #3 is expected to be a PIX* with 1 bit/pixel (pixm)
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -1991,9 +1994,9 @@ CombineMasked(lua_State *L)
 /**
  * \brief Set the mask for a PIX* (%pixd) from another PIX* (%pixm 1bpp) at offset %x and %y
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
- * Arg #2 is expected to be a PIX* user data (pixs)
- * Arg #3 is expected to be a PIX* user data with 1 bit/pixel (pixm)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
+ * Arg #2 is expected to be a PIX* (pixs)
+ * Arg #3 is expected to be a PIX* with 1 bit/pixel (pixm)
  * Arg #4 is expected to be a l_int32 (x)
  * Arg #5 is expected to be a l_int32 (y)
  *
@@ -2015,8 +2018,8 @@ CombineMaskedGeneral(lua_State *L)
 /**
  * \brief Paint %val through a mask PIX* (%pixm) onto a PIX* (%pixd) at offset %x and %y
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
- * Arg #2 is expected to be a PIX* user data with 1 bit/pixel (pixm)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
+ * Arg #2 is expected to be a PIX* with 1 bit/pixel (pixm)
  * Arg #3 is expected to be a l_int32 (x)
  * Arg #4 is expected to be a l_int32 (y)
  * Arg #5 is expected to be a l_uint32 (val)
@@ -2039,8 +2042,8 @@ PaintThroughMask(lua_State *L)
 /**
  * \brief Paint %val through a mask PIX* (%pixm) onto a PIX* (%pixd) at offset %x and %y
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixd)
- * Arg #2 is expected to be a PIX* user data with 1 bit/pixel (pixm)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
+ * Arg #2 is expected to be a PIX* with 1 bit/pixel (pixm)
  * Arg #3 is expected to be a l_int32 (x)
  * Arg #4 is expected to be a l_int32 (y)
  * Arg #5 is expected to be a string with a search direction name (searchdir)
@@ -2071,7 +2074,7 @@ PaintSelfThroughMask(lua_State *L)
 /**
  * \brief Create a new PIX* (%pixd) from a source PIX* (%pixs) using a mask value (%val)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  * Arg #2 is expected to be a l_int32 (val)
  *
  * \param L pointer to the lua_State
@@ -2089,7 +2092,7 @@ MakeMaskFromVal(lua_State *L)
 /**
  * \brief Create a new PIX* (%pixd) from a source PIX* (%pixs) using a 2^depth entry lookup-table (%lut)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  * Arg #2 is expected to be a string of max. 256 bytes (lut)
  *
  * \param L pointer to the lua_State
@@ -2119,7 +2122,7 @@ MakeMaskFromLUT(lua_State *L)
 /**
  * \brief Create a new PIX* (%pixd) from a source PIX* (%pixs) using arithmetic factors (%rc, %gc, %bc)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  * Arg #2 is expected to be a l_float32 (rc)
  * Arg #3 is expected to be a l_float32 (gc)
  * Arg #4 is expected to be a l_float32 (bc)
@@ -2143,7 +2146,7 @@ MakeArbMaskFromRGB(lua_State *L)
 /**
  * \brief Create a new PIX* (%pixd) from PIX* (%pixs) seting alpha == 0 pixels to a value (%val)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  * Arg #2 is expected to be a l_uint32 (val)
  *
  * \param L pointer to the lua_State
@@ -2161,7 +2164,7 @@ SetUnderTransparency(lua_State *L)
 /**
  * \brief Create a new alpha mask PIX* (%pixd) from PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  * Arg #2 is expected to be a l_int32 (dist)
  * Arg #3 is optional and, if given, expected to be a boolean (getbox)
  *
@@ -2187,9 +2190,9 @@ MakeAlphaFromMask(lua_State *L)
 /**
  * \brief Get the color near the mask boundary from PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
- * Arg #2 is expected to be a PIX* user data (pixm)
- * Arg #3 is expected to be a BOX* user data (box)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is expected to be a PIX* (pixm)
+ * Arg #3 is expected to be a BOX* (box)
  * Arg #4 is expected to be a l_int32 (dist)
  *
  * \param L pointer to the lua_State
@@ -2212,7 +2215,7 @@ GetColorNearMaskBoundary(lua_State *L)
 /**
  * \brief Invert the PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  *
  * \param L pointer to the lua_State
  * \return 1 PIX* on the Lua stack
@@ -2229,8 +2232,8 @@ Invert(lua_State *L)
 /**
  * \brief And the PIX* (%pix1) and PIX* (%pix2)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix1)
- * Arg #2 is expected to be another PIX* user data (pix2)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix1)
+ * Arg #2 is expected to be another PIX* (pix2)
  *
  * \param L pointer to the lua_State
  * \return 1 PIX* on the Lua stack
@@ -2248,8 +2251,8 @@ And(lua_State *L)
 /**
  * \brief Or the PIX* (%pix1) and PIX* (%pix2)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix1)
- * Arg #2 is expected to be another PIX* user data (pix2)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix1)
+ * Arg #2 is expected to be another PIX* (pix2)
  *
  * \param L pointer to the lua_State
  * \return 1 PIX* on the Lua stack
@@ -2267,8 +2270,8 @@ Or(lua_State *L)
 /**
  * \brief Xor the PIX* (%pix1) and PIX* (%pix2)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix1)
- * Arg #2 is expected to be another PIX* user data (pix2)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix1)
+ * Arg #2 is expected to be another PIX* (pix2)
  *
  * \param L pointer to the lua_State
  * \return 1 PIX* on the Lua stack
@@ -2286,8 +2289,8 @@ Xor(lua_State *L)
 /**
  * \brief Subtract the PIX* (%pix2) from PIX* (%pix1)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix1)
- * Arg #2 is expected to be another PIX* user data (pix2)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix1)
+ * Arg #2 is expected to be another PIX* (pix2)
  *
  * \param L pointer to the lua_State
  * \return 1 PIX* on the Lua stack
@@ -2305,7 +2308,7 @@ Subtract(lua_State *L)
 /**
  * \brief Check if all pixels in PIX* (%pixs) are 0
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  *
  * \param L pointer to the lua_State
  * \return 1 PIX* on the Lua stack
@@ -2324,7 +2327,7 @@ Zero(lua_State *L)
 /**
  * \brief Calculate the fraction of foreground in PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  *
  * \param L pointer to the lua_State
  * \return 1 number on the Lua stack
@@ -2343,7 +2346,7 @@ ForegroundFraction(lua_State *L)
 /**
  * \brief Count the number of foreground pixels in PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -2362,8 +2365,8 @@ CountPixels(lua_State *L)
 /**
  * \brief Count the number of foreground pixels in PIX* (%pixs) in a BOX* (%box)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
- * Arg #2 is expected to be a BOX* user data (box)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is expected to be a BOX* (box)
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -2383,7 +2386,7 @@ CountPixelsInRect(lua_State *L)
 /**
  * \brief Count the number of pixels by row in PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  *
  * \param L pointer to the lua_State
  * \return 1 NUMA* on the Lua stack
@@ -2399,7 +2402,7 @@ CountPixelsByRow(lua_State *L)
 /**
  * \brief Count the number of pixels by column in PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  *
  * \param L pointer to the lua_State
  * \return 1 NUMA* on the Lua stack
@@ -2415,7 +2418,7 @@ CountPixelsByColumn(lua_State *L)
 /**
  * \brief Count the number of pixels in row %row of PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  *
  * \param L pointer to the lua_State
  * \return 1 NUMA* on the Lua stack
@@ -2435,7 +2438,7 @@ CountPixelsInRow(lua_State *L)
 /**
  * \brief Get the moment of order %order by column in PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  * Arg #2 is expected to be a l_int32 (order; 1 or 2)
  *
  * \param L pointer to the lua_State
@@ -2453,7 +2456,7 @@ GetMomentByColumn(lua_State *L)
 /**
  * \brief Check if the pixel sum of PIX* (%pixs) is above threshold %thresh
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  * Arg #2 is expected to be a l_int32 (thresh)
  *
  * \param L pointer to the lua_State
@@ -2474,8 +2477,8 @@ ThresholdPixelSum(lua_State *L)
 /**
  * \brief Build the average by row of PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
- * Arg #2 is optional and, if specified, expected to be a BOX* user data (box)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is optional and, if specified, expected to be a BOX* (box)
  * Arg #3 is optional and, if specified, expected to be a string (type: white-is-max or black-is-max)
  *
  * \param L pointer to the lua_State
@@ -2494,8 +2497,8 @@ AverageByRow(lua_State *L)
 /**
  * \brief Build the average by column of PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
- * Arg #2 is optional and, if specified, expected to be a BOX* user data (box)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is optional and, if specified, expected to be a BOX* (box)
  * Arg #3 is optional and, if specified, expected to be a string (type: white-is-max or black-is-max)
  *
  * \param L pointer to the lua_State
@@ -2514,8 +2517,8 @@ AverageByColumn(lua_State *L)
 /**
  * \brief Build the average inside a BOX* (%box) of PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
- * Arg #2 is optional and, if specified, expected to be a BOX* user data (box)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is optional and, if specified, expected to be a BOX* (box)
  *
  * \param L pointer to the lua_State
  * \return 1 NUMA* on the Lua stack
@@ -2535,8 +2538,8 @@ AverageInRect(lua_State *L)
 /**
  * \brief Build the variance by row of PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
- * Arg #2 is optional and, if specified, expected to be a BOX* user data (box)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is optional and, if specified, expected to be a BOX* (box)
  *
  * \param L pointer to the lua_State
  * \return 1 NUMA* on the Lua stack
@@ -2553,8 +2556,8 @@ VarianceByRow(lua_State *L)
 /**
  * \brief Build the variance by column of PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
- * Arg #2 is optional and, if specified, expected to be a BOX* user data (box)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is optional and, if specified, expected to be a BOX* (box)
  *
  * \param L pointer to the lua_State
  * \return 1 NUMA* on the Lua stack
@@ -2571,8 +2574,8 @@ VarianceByColumn(lua_State *L)
 /**
  * \brief Build the square root of the variance inside a BOX* (%box) of PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
- * Arg #2 is optional and, if specified, expected to be a BOX* user data (box)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is optional and, if specified, expected to be a BOX* (box)
  *
  * \param L pointer to the lua_State
  * \return 1 NUMA* on the Lua stack
@@ -2592,8 +2595,8 @@ VarianceInRect(lua_State *L)
 /**
  * \brief Build the absolute difference by row of PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
- * Arg #2 is optional and, if specified, expected to be a BOX* user data (box)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is optional and, if specified, expected to be a BOX* (box)
  *
  * \param L pointer to the lua_State
  * \return 1 NUMA* on the Lua stack
@@ -2610,8 +2613,8 @@ AbsDiffByRow(lua_State *L)
 /**
  * \brief Build the absolute difference by column of PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
- * Arg #2 is optional and, if specified, expected to be a BOX* user data (box)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is optional and, if specified, expected to be a BOX* (box)
  *
  * \param L pointer to the lua_State
  * \return 1 NUMA* on the Lua stack
@@ -2628,8 +2631,8 @@ AbsDiffByColumn(lua_State *L)
 /**
  * \brief Build the absolute difference inside a BOX* (%box) of PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
- * Arg #2 is optional and, if specified, expected to be a BOX* user data (box)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is optional and, if specified, expected to be a BOX* (box)
  * Arg #2 is optional and, if specified, expected to be a string (dir: horizontal-line or vertical-line)
  *
  * \param L pointer to the lua_State
@@ -2651,8 +2654,8 @@ AbsDiffInRect(lua_State *L)
 /**
  * \brief Build absolute difference on a line (%x1,%y1 to %x2,%y2) of PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
- * Arg #2 is optional and, if specified, expected to be a BOX* user data (box)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is optional and, if specified, expected to be a BOX* (box)
  *
  * \param L pointer to the lua_State
  * \return 1 NUMA* on the Lua stack
@@ -2675,10 +2678,10 @@ AbsDiffOnLine(lua_State *L)
 /**
  * \brief Count pixels of arbitrary value %val in BOX* (%box) of PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  * Arg #2 is expected to be a l_int32 (val)
  * Arg #3 is expected to be a l_int32 (factor)
- * Arg #4 is optional and, if specified, expected to be a BOX* user data (box)
+ * Arg #4 is optional and, if specified, expected to be a BOX* (box)
  *
  * \param L pointer to the lua_State
  * \return 1 NUMA* on the Lua stack
@@ -2700,7 +2703,7 @@ CountArbInRect(lua_State *L)
 /**
  * \brief Create a mirrored tiling of the PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  * Arg #2 is expected to be a l_int32 (w)
  * Arg #3 is expected to be a l_int32 (h)
  *
@@ -2720,8 +2723,8 @@ MirroredTiling(lua_State *L)
  * \brief Look for one or two square tiles with conforming median
  *        intensity and low variance outside but near the input %box.
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
- * Arg #2 is expected to be a BOX* user data (box)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is expected to be a BOX* (box)
  * Arg #3 is expected to be a string describing the search direction (searchdir)
  * Arg #4 is expected to be a l_int32 (mindist)
  * Arg #5 is expected to be a l_int32 (tsize)
@@ -2748,7 +2751,7 @@ FindRepCloseTile(lua_State *L)
 /**
  * \brief Get the histogram of the grayscale PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  * Arg #2 is expected to be a l_int32 (factor)
  *
  * \param L pointer to the lua_State
@@ -2765,8 +2768,8 @@ GetGrayHistogram(lua_State *L)
 /**
  * \brief Get the histogram of the grayscale PIX* (%pixs) masked with another PIX* (%pixm)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
- * Arg #2 is expected to be a PIX* user data (pixm) (1bpp)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is expected to be a PIX* (pixm) (1bpp)
  * Arg #3 is expected to be a l_int32 (x)
  * Arg #4 is expected to be a l_int32 (y)
  * Arg #5 is expected to be a l_int32 (factor)
@@ -2788,8 +2791,8 @@ GetGrayHistogramMasked(lua_State *L)
 /**
  * \brief Get the histogram of the grayscale PIX* (%pixs) inside BOX* (%box)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
- * Arg #2 is expected to be a BOX* user data (box)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is expected to be a BOX* (box)
  * Arg #3 is expected to be a l_int32 (factor)
  *
  * \param L pointer to the lua_State
@@ -2807,7 +2810,7 @@ GetGrayHistogramInRect(lua_State *L)
 /**
  * \brief Get an array of histograms of the grayscale PIX* (%pixs) for %nx by %ny tiles
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  * Arg #2 is expected to be a l_int32 (factor)
  * Arg #3 is expected to be a l_int32 (nx)
  * Arg #4 is expected to be a l_int32 (ny)
@@ -2828,7 +2831,7 @@ GetGrayHistogramTiled(lua_State *L)
 /**
  * \brief Get the RGB histograms of the PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  * Arg #2 is expected to be a l_int32 (factor)
  *
  * \param L pointer to the lua_State
@@ -2850,8 +2853,8 @@ GetColorHistogram(lua_State *L)
 /**
  * \brief Get the RGB histograms of the PIX* (%pixs) masked with another PIX* (%pixm)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
- * Arg #2 is expected to be a PIX* user data (pixm) (1bpp)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is expected to be a PIX* (pixm) (1bpp)
  * Arg #3 is expected to be a l_int32 (x)
  * Arg #4 is expected to be a l_int32 (y)
  * Arg #5 is expected to be a l_int32 (factor)
@@ -2878,7 +2881,7 @@ GetColorHistogramMasked(lua_State *L)
 /**
  * \brief Get the histogram of the color mapped PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  * Arg #2 is expected to be a l_int32 (factor)
  *
  * \param L pointer to the lua_State
@@ -2895,8 +2898,8 @@ GetCmapHistogram(lua_State *L)
 /**
  * \brief Get the histogram of the color mapped PIX* (%pixs) masked with another PIX* (%pixm)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
- * Arg #2 is expected to be a PIX* user data (pixm) (1bpp)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is expected to be a PIX* (pixm) (1bpp)
  * Arg #3 is expected to be a l_int32 (x)
  * Arg #4 is expected to be a l_int32 (y)
  * Arg #5 is expected to be a l_int32 (factor)
@@ -2918,8 +2921,8 @@ GetCmapHistogramMasked(lua_State *L)
 /**
  * \brief Get the histogram of the color mapped PIX* (%pixs) inside BOX* (%box)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
- * Arg #2 is expected to be a BOX* user data (box)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is expected to be a BOX* (box)
  * Arg #3 is expected to be a l_int32 (factor)
  *
  * \param L pointer to the lua_State
@@ -2937,7 +2940,7 @@ GetCmapHistogramInRect(lua_State *L)
 /**
  * \brief Count the RGB colors in PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -2954,7 +2957,7 @@ CountRGBColors(lua_State *L)
 /**
  * \brief Get a histogram AMAP* for the colors in PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  * Arg #2 is expected to be a l_int32 (factor)
  *
  * \param L pointer to the lua_State
@@ -2971,7 +2974,7 @@ GetColorAmapHistogram(lua_State *L)
 /**
  * \brief Get rank value for PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  * Arg #2 is expected to be a l_int32 (factor)
  * Arg #3 is expected to be a l_float32 (rank)
  *
@@ -2994,8 +2997,8 @@ GetRankValue(lua_State *L)
 /**
  * \brief Get rank values for RGB for PIX* (%pixs) masked with another PIX* (%pixm)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
- * Arg #2 is expected to be a PIX* user data (pixm)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is expected to be a PIX* (pixm)
  * Arg #3 is expected to be a l_int32 (x)
  * Arg #4 is expected to be a l_int32 (y)
  * Arg #5 is expected to be a l_int32 (factor)
@@ -3025,8 +3028,8 @@ GetRankValueMaskedRGB(lua_State *L)
 /**
  * \brief Get rank value for PIX* (%pixs) masked with another PIX* (%pixm)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
- * Arg #2 is expected to be a PIX* user data (pixm)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is expected to be a PIX* (pixm)
  * Arg #3 is expected to be a l_int32 (x)
  * Arg #4 is expected to be a l_int32 (y)
  * Arg #5 is expected to be a l_int32 (factor)
@@ -3056,8 +3059,8 @@ GetRankValueMasked(lua_State *L)
 /**
  * \brief Get the pixel average for PIX* (%pixs) optionally masked with PIX* (%pixm)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
- * Arg #2 is optional and, if given, expected to be a PIX* user data (pixm)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is optional and, if given, expected to be a PIX* (pixm)
  * Arg #3 is optional and, if given, expected to be a l_int32 (x)
  * Arg #4 is optional and, if given, expected to be a l_int32 (y)
  * Arg #5 is optional and, if given, expected to be a l_int32 (factor)
@@ -3083,7 +3086,7 @@ GetPixelAverage(lua_State *L)
 /**
  * \brief Get the pixel stats for PIX* (%pixs) optionally masked with PIX* (%pixm)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  * Arg #2 is expected to be a string describing the type of stats (type)
  * Arg #3 is expected to be a l_int32 (factor)
  *
@@ -3106,9 +3109,9 @@ GetPixelStats(lua_State *L)
 /**
  * \brief Get the pixel average RGB values for PIX* (%pixs) optionally masked with PIX* (%pixm)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  * Arg #2 is expected to be a string describing the type of stats (type)
- * Arg #3 is optional and, if given, expected to be a PIX* user data (pixm)
+ * Arg #3 is optional and, if given, expected to be a PIX* (pixm)
  * Arg #4 is optional and, if given, expected to be a l_int32 (x)
  * Arg #5 is optional and, if given, expected to be a l_int32 (y)
  * Arg #6 is optional and, if given, expected to be a l_int32 (factor)
@@ -3137,9 +3140,9 @@ GetAverageMaskedRGB(lua_State *L)
 /**
  * \brief Get the pixel average value for PIX* (%pixs) optionally masked with PIX* (%pixm)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  * Arg #2 is expected to be a string describing the type of stats (type)
- * Arg #3 is optional and, if given, expected to be a PIX* user data (pixm)
+ * Arg #3 is optional and, if given, expected to be a PIX* (pixm)
  * Arg #4 is optional and, if given, expected to be a l_int32 (x)
  * Arg #5 is optional and, if given, expected to be a l_int32 (y)
  * Arg #6 is optional and, if given, expected to be a l_int32 (factor)
@@ -3166,7 +3169,7 @@ GetAverageMasked(lua_State *L)
 /**
  * \brief Get the average RGB values for PIX* (%pixs) as three PIX* (%pixr, %pixg, %pixb)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  * Arg #2 is expected to be a string describing the type of stats (type)
  * Arg #3 is expected to be a l_int32 (sx)
  * Arg #4 is expected to be a l_int32 (sy)
@@ -3192,7 +3195,7 @@ GetAverageTiledRGB(lua_State *L)
 /**
  * \brief Get the average value for PIX* (%pixs) as PIX* (%pixv)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  * Arg #2 is expected to be a string describing the type of stats (type)
  * Arg #4 is expected to be a l_int32 (sx)
  * Arg #5 is expected to be a l_int32 (sy)
@@ -3214,8 +3217,8 @@ GetAverageTiled(lua_State *L)
 /**
  * \brief Get the row stats for PIX* (%pixs) as six NUMA*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
- * Arg #2 is optional and, if given, expected to be a BOX* user data (box)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is optional and, if given, expected to be a BOX* (box)
  *
  * \param L pointer to the lua_State
  * \return 6 NUMA* on the Lua stack (mean, median, mode, modecount, var, rootvar)
@@ -3244,8 +3247,8 @@ RowStats(lua_State *L)
 /**
  * \brief Get the column stats for PIX* (%pixs) as six NUMA*
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
- * Arg #2 is optional and, if given, expected to be a BOX* user data (box)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is optional and, if given, expected to be a BOX* (box)
  *
  * \param L pointer to the lua_State
  * \return 6 NUMA* on the Lua stack (mean, median, mode, modecount, var, rootvar)
@@ -3274,7 +3277,7 @@ ColumnStats(lua_State *L)
 /**
  * \brief Get the range values for PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  * Arg #2 is expected to be a l_int32 (factor)
  * Arg #3 is expected to be a l_int32 (color)
  *
@@ -3299,7 +3302,7 @@ GetRangeValues(lua_State *L)
 /**
  * \brief Get an extreme value for PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  * Arg #2 is expected to be a l_int32 (factor)
  * Arg #3 is expected to be a string describing the type (type; min or max)
  *
@@ -3328,8 +3331,8 @@ GetExtremeValue(lua_State *L)
 /**
  * \brief Get the maximum value for PIX* (%pixs) optionally in rect BOX* (%box)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
- * Arg #2 is optional an, if given, expected to be a BOX* user data
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is optional an, if given, expected to be a BOX*
  *
  * \param L pointer to the lua_State
  * \return 3 integers on the Lua stack (maxval, xmax, ymax)
@@ -3353,7 +3356,7 @@ GetMaxValueInRect(lua_State *L)
 /**
  * \brief Get a binned component range for PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  * Arg #2 is expected to be a l_int32 (nbins)
  * Arg #3 is expected to be a l_int32 (factor)
  * Arg #4 is expected to be a string defining the selected color (color)
@@ -3388,7 +3391,7 @@ GetBinnedComponentRange(lua_State *L)
 /**
  * \brief Get a rank color array for PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
  * Arg #2 is expected to be a l_int32 (nbins)
  * Arg #3 is expected to be a l_int32 (factor)
  * Arg #4 is expected to be a string defining the selected color (color)
@@ -3417,11 +3420,11 @@ GetRankColorArray(lua_State *L)
 /**
  * \brief Get a binned color for PIX* (%pixs)
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pixs)
- * Arg #2 is expected to be a PIX* user data (pixg)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is expected to be a PIX* (pixg)
  * Arg #3 is expected to be a l_int32 (nbins)
  * Arg #4 is expected to be a l_int32 (factor)
- * Arg #5 is expected to be a NUMA* user data (alut)
+ * Arg #5 is expected to be a NUMA* (alut)
  *
  * \param L pointer to the lua_State
  * \return nbins integers on the Lua stack (carray[])
@@ -3444,33 +3447,185 @@ GetBinnedColor(lua_State *L)
     return nbins;
 }
 
+/**
+ * \brief Get a binned color for PIX* (%pixs)
+ *
+ * Arg #1 is expected to be a l_int32 (side)
+ * Arg #2 is expected to be a l_int32 (ncols)
+ * Arg #3 is expected to be a l_int32 (fontsize)
+ * Arg #4 .. n is expected to be l_uint32 (carray)
+ *
+ * \param L pointer to the lua_State
+ * \return nbins integers on the Lua stack (carray[])
+ */
+static int
+DisplayColorArray(lua_State *L)
+{
+    l_uint32 *carray = NULL;
+    l_int32 ncolors = 0;
+    l_int32 side = ll_check_l_int32(L, 1);
+    l_int32 ncols = ll_check_l_int32(L, 2);
+    l_int32 fontsize = ll_check_l_int32_default(L, 3, 0);
+    int i = 3;
+    PIX *pixd = NULL;
 
-/*
-*    Pixel histogram, rank val, averaging and min/max
-*           l_int32     pixGetAverageTiledRGB()
-*           PIX        *pixGetAverageTiled()
-*           NUMA       *pixRowStats()
-*           NUMA       *pixColumnStats()
-*           l_int32     pixGetRangeValues()
-*           l_int32     pixGetExtremeValue()
-*           l_int32     pixGetMaxValueInRect()
-*           l_int32     pixGetBinnedComponentRange()
-*           l_int32     pixGetRankColorArray()
-*           l_int32     pixGetBinnedColor()
-*           PIX        *pixDisplayColorArray()
-*           PIX        *pixRankBinByStrip()
-*
-*    Pixelwise aligned statistics
-*           PIX        *pixaGetAlignedStats()
-*           l_int32     pixaExtractColumnFromEachPix()
-*           l_int32     pixGetRowStats()
-*           l_int32     pixGetColumnStats()
-*           l_int32     pixSetPixelColumn()
-*
-*    Foreground/background estimation
-*           l_int32     pixThresholdForFgBg()
-*           l_int32     pixSplitDistributionFgBg()
-*/
+    while (!lua_isnil(L, ncolors + 4))
+        ncolors++;
+    carray = (l_uint32 *) calloc((size_t)ncolors, sizeof(l_uint32));
+    for (i = 0; i < ncolors; i++)
+        carray[i] = ll_check_l_uint32(L, i + 4);
+    pixd = pixDisplayColorArray(carray, ncolors, side, ncols, fontsize);
+    return ll_push_PIX(L, pixd);
+}
+
+/**
+ * \brief Get a binned color for PIX* (%pixs)
+ *
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is expected to be a string describing the select color type (type)
+ * Arg #3 is expected to be a string describing the direction (direction)
+ * Arg #4 is expected to be a l_int32 (size)
+ * Arg #5 is expected to be a l_int32 (nbins)
+ *
+ * \param L pointer to the lua_State
+ * \return nbins integers on the Lua stack (carray[])
+ */
+static int
+RankBinByStrip(lua_State *L)
+{
+    PIX *pixs = ll_check_PIX(L, 1);
+    l_int32 type = ll_check_select_color(L, 2, L_SELECT_RED);
+    l_int32 direction = ll_check_direction(L, 3, L_SCAN_HORIZONTAL);
+    l_int32 size = ll_check_l_int32_default(L, 4, 200);
+    l_int32 nbins = ll_check_l_int32_default(L, 5, 2);
+    PIX *pixd = pixRankBinByStrip(pixs, direction, size, nbins, type);
+    return ll_push_PIX(L, pixd);
+}
+
+/**
+ * \brief Get row stats for PIX* (%pixs)
+ *
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ *
+ * \param L pointer to the lua_State
+ * \return nbins numbers on the Lua stack (colvect[])
+ */
+static int
+GetRowStats(lua_State *L)
+{
+    PIX *pixs = ll_check_PIX(L, 1);
+    l_int32 type = ll_check_select_color(L, 2, L_SELECT_RED);
+    l_int32 nbins = ll_check_l_int32(L, 3);
+    l_int32 thresh = ll_check_l_int32_default(L, 4, 0);
+    l_float32 *colvect = (l_float32 *)LEPT_CALLOC(nbins, sizeof(l_float32));
+    l_int32 i;
+    if (pixGetRowStats(pixs, type, nbins, thresh, colvect))
+        return 0;
+    for (i = 0; i < nbins; i++)
+        lua_pushnumber(L, (lua_Number) colvect[i]);
+    return nbins;
+}
+
+/**
+ * \brief Get row stats for PIX* (%pixs)
+ *
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ *
+ * \param L pointer to the lua_State
+ * \return nbins numbers on the Lua stack (colvect[])
+ */
+static int
+GetColumnStats(lua_State *L)
+{
+    PIX *pixs = ll_check_PIX(L, 1);
+    l_int32 type = ll_check_select_color(L, 2, L_SELECT_RED);
+    l_int32 nbins = ll_check_l_int32(L, 3);
+    l_int32 thresh = ll_check_l_int32_default(L, 4, 0);
+    l_float32 *rowvect = (l_float32 *)LEPT_CALLOC(nbins, sizeof(l_float32));
+    l_int32 i;
+    if (pixGetColumnStats(pixs, type, nbins, thresh, rowvect))
+        return 0;
+    for (i = 0; i < nbins; i++)
+        lua_pushnumber(L, (lua_Number) rowvect[i]);
+    return nbins;
+}
+
+/**
+ * \brief Set a pixel column in PIX* (%pixd)
+ *
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixd)
+ * Arg #2 is expected to be a l_int32 (col)
+ * Arg #3 .. n is expected to be lua_Numbers / l_float32 for each row of pixd (colvect)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack (result)
+ */
+static int
+SetPixelColumn(lua_State *L)
+{
+    PIX *pixd = ll_check_PIX(L, 1);
+    l_int32 col = ll_check_l_int32(L, 2);
+    l_int32 rows = pixGetHeight(pixd);
+    l_float32 *colvect = (l_float32 *)LEPT_CALLOC(rows, sizeof(l_float32));
+    l_int32 i;
+    int result = FALSE;
+    for (i = 0; i < rows; i++)
+        colvect[i] = (l_float32) lua_tonumber(L, i+3);
+    result = pixSetPixelColumn(pixd, col, colvect);
+    LEPT_FREE(colvect);
+    lua_pushboolean(L, 0 == result);
+    return 1;
+}
+
+/**
+ * \brief Get the thresholds for bg/fg in PIX* (%pixs)
+ *
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is expected to be a l_int32 factor
+ *
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack (result)
+ */
+static int
+ThresholdForFgBg(lua_State *L)
+{
+    PIX *pixs = ll_check_PIX(L, 1);
+    l_int32 factor = ll_check_l_int32_default(L, 2, 1);
+    l_int32 thresh = ll_check_l_int32_default(L, 3, 0);
+    l_int32 fgval;
+    l_int32 bgval;
+    if (pixThresholdForFgBg(pixs, factor, thresh, &fgval, &bgval))
+        return 0;
+    lua_pushinteger(L, fgval);
+    lua_pushinteger(L, bgval);
+    return 2;
+}
+
+/**
+ * \brief Get the thresholds for bg/fg in PIX* (%pixs)
+ *
+ * Arg #1 (i.e. self) is expected to be a PIX* (pixs)
+ * Arg #2 is expected to be a l_int32 factor
+ *
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack (result)
+ */
+static int
+SplitDistributionFgBg(lua_State *L)
+{
+    PIX *pixs = ll_check_PIX(L, 1);
+    l_float32 scorefract = ll_check_l_float32_default(L, 2, 0.0f);
+    l_int32 factor = ll_check_l_int32_default(L, 3, 1);
+    l_int32 thresh;
+    l_int32 fgval;
+    l_int32 bgval;
+    if (pixSplitDistributionFgBg(pixs, scorefract, factor, &thresh, &fgval, &bgval, NULL))
+        return 0;
+    lua_pushinteger(L, thresh);
+    lua_pushinteger(L, fgval);
+    lua_pushinteger(L, bgval);
+    return 3;
+}
 
 /**
  * \brief Read new PIX*
@@ -3491,7 +3646,7 @@ Read(lua_State *L)
 /**
  * \brief Write the PIX* to a file
  *
- * Arg #1 (i.e. self) is expected to be a PIX* user data (pix)
+ * Arg #1 (i.e. self) is expected to be a PIX* (pix)
  * Arg #2 is expected to be a string (filename)
  * Arg #3 is expected to be a string with the input format name (format)
  *
@@ -3677,6 +3832,13 @@ ll_register_PIX(lua_State *L)
         {"GetBinnedComponentRange", GetBinnedComponentRange},
         {"GetRankColorArray",       GetRankColorArray},
         {"GetBinnedColor",          GetBinnedColor},
+        {"DisplayColorArray",       DisplayColorArray},
+        {"RankBinByStrip",          RankBinByStrip},
+        {"GetRowStats",             GetRowStats},
+        {"GetColumnStats",          GetColumnStats},
+        {"SetPixelColumn",          SetPixelColumn},
+        {"ThresholdForFgBg",        ThresholdForFgBg},
+        {"SplitDistributionFgBg",   SplitDistributionFgBg},
         {"Write",                   Write},
         LUA_SENTINEL
     };
