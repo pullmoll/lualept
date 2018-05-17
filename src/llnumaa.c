@@ -54,7 +54,7 @@ ll_check_NUMAA(lua_State *L, int arg)
 /**
  * \brief Push NUMAA user data to the Lua stack and set its meta table
  * \param L pointer to the lua_State
- * \param na pointer to the NUMAA
+ * \param naa pointer to the NUMAA
  * \return 1 NUMAA* on the Lua stack
  */
 int

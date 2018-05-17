@@ -68,7 +68,6 @@ ll_push_NUMA(lua_State *L, NUMA *na)
 /**
  * \brief Create and push NUMA user data to the Lua stack
  * \param L pointer to the lua_State
- * \param na pointer to the NUMA
  * \return 1 NUMA* on the Lua stack
  */
 int

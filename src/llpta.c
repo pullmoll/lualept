@@ -54,7 +54,7 @@ ll_check_PTA(lua_State *L, int arg)
 /**
  * \brief Push PTA user data to the Lua stack and set its meta table
  * \param L pointer to the lua_State
- * \param na pointer to the PTA
+ * \param pta pointer to the PTA
  * \return 1 PTA* on the Lua stack
  */
 int

@@ -54,7 +54,7 @@ ll_check_ASET(lua_State *L, int arg)
 /**
  * \brief Push ASET user data to the Lua stack and set its meta table
  * \param L pointer to the lua_State
- * \param box pointer to the ASET
+ * \param aset pointer to the ASET
  * \return 1 ASET* on the Lua stack
  */
 int
@@ -99,7 +99,7 @@ toString(lua_State *L)
     if (NULL == aset) {
         luaL_addstring(&B, "nil");
     } else {
-        luaL_addstring(&B, ll_string_aset_type(aset->keytype));
+        luaL_addstring(&B, ll_string_keytype(aset->keytype));
         luaL_addstring(&B, ": {");
         node = l_asetSize(aset) ? l_asetGetFirst(aset) : NULL;
         while (node) {
@@ -162,7 +162,7 @@ Size(lua_State *L)
 }
 
 /**
- * \brief Destroy a ASET*
+ * \brief Destroy an ASET*
  *
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack

@@ -54,15 +54,15 @@ ll_check_DLLIST(lua_State *L, int arg)
 /**
  * \brief Push DLLIST user data to the Lua stack and set its meta table
  * \param L pointer to the lua_State
- * \param box pointer to the DLLIST
+ * \param head pointer to the DLLIST
  * \return 1 DLLIST* on the Lua stack
  */
 int
-ll_push_DLLIST(lua_State *L, DLLIST *list)
+ll_push_DLLIST(lua_State *L, DLLIST *head)
 {
-    if (NULL == list)
+    if (NULL == head)
         return 0;
-    return ll_push_udata(L, LL_DLLIST, list);
+    return ll_push_udata(L, LL_DLLIST, head);
 }
 
 /**
@@ -98,7 +98,7 @@ toString(lua_State *L)
     if (NULL == head) {
         luaL_addstring(&B, "nil");
     } else {
-        luaL_addstring(&B, ": {");
+        luaL_addchar(&B, '{');
         L_BEGIN_LIST_FORWARD(head, elem)
             if (first) {
                 first = 0;
@@ -134,7 +134,7 @@ Create(lua_State *L)
  * Arg #1 is expected to be a string describing the key type (int,uint,float)
  *
  * \param L pointer to the lua_State
- * \return 1 DLLIST* on the Lua stack
+ * \return 1 integer on the Lua stack
  */
 static int
 GetCount(lua_State *L)
@@ -154,7 +154,7 @@ static int
 Destroy(lua_State *L)
 {
     void **plist = ll_check_udata(L, 1, LL_DLLIST);
-    DBG(LOG_DESTROY, "%s: '%s' paset=%p head=%p size=%d\n", __func__,
+    DBG(LOG_DESTROY, "%s: '%s' plist=%p head=%p size=%d\n", __func__,
         LL_DLLIST, (void *)plist, *plist, listGetCount(*(DLLIST **)plist));
     listDestroy((DLLIST **)plist);
     *plist = NULL;
@@ -226,7 +226,7 @@ AddToHead(lua_State *L)
  * Arg #2 is expected to be a pointer (data)
  *
  * \param L pointer to the lua_State
- * \return 0 for nothing on the Lua stack
+ * \return 2 for boolean and lightuserdata (tail) on the Lua stack
  */
 static int
 AddToTail(lua_State *L)
@@ -235,7 +235,8 @@ AddToTail(lua_State *L)
     DLLIST *tail = NULL;
     void *data = (void *)((intptr_t)lua_topointer(L, 2));
     lua_pushboolean(L, 0 == listAddToTail(&head, &tail, data));
-    return 1;
+    lua_pushlightuserdata(L, tail);
+    return 2;
 }
 
 /**
@@ -280,7 +281,7 @@ RemoveFromHead(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a DLLIST* (head)
  *
  * \param L pointer to the lua_State
- * \return 1 for light userdata on the Lua stack
+ * \return 2 for light userdata (data, tail) on the Lua stack
  */
 static int
 RemoveFromTail(lua_State *L)
@@ -289,6 +290,43 @@ RemoveFromTail(lua_State *L)
     DLLIST *tail = NULL;
     void *data = listRemoveFromTail(&head, &tail);
     lua_pushlightuserdata(L, data);
+    lua_pushlightuserdata(L, tail);
+    return 2;
+}
+
+/**
+ * \brief Find the element pointing to %data in an DLLIST* (%head)
+ *
+ * Arg #1 (i.e. self) is expected to be a DLLIST* (head)
+ * Arg #2 is expected to be light userdata (data)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 for light userdata (elem) on the Lua stack
+ */
+static int
+FindElement(lua_State *L)
+{
+    DLLIST *head = ll_check_DLLIST(L, 1);
+    void *data = (void *)((intptr_t)lua_topointer(L, 2));
+    DLLIST *elem = listFindElement(head, data);
+    lua_pushlightuserdata(L, elem);
+    return 1;
+}
+
+/**
+ * \brief Find the tail of an DLLIST* (%head)
+ *
+ * Arg #1 (i.e. self) is expected to be a DLLIST* (head)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 for light userdata (tail) on the Lua stack
+ */
+static int
+FindTail(lua_State *L)
+{
+    DLLIST *head = ll_check_DLLIST(L, 1);
+    DLLIST *tail = listFindTail(head);
+    lua_pushlightuserdata(L, tail);
     return 1;
 }
 
@@ -314,6 +352,8 @@ ll_register_DLLIST(lua_State *L)
         {"RemoveElement",       RemoveElement},
         {"RemoveFromHead",      RemoveFromHead},
         {"RemoveFromTail",      RemoveFromTail},
+        {"FindElement",         FindElement},
+        {"FindTail",            FindTail},
         LUA_SENTINEL
     };
 

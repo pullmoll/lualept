@@ -54,7 +54,7 @@ ll_check_AMAP(lua_State *L, int arg)
 /**
  * \brief Push AMAP user data to the Lua stack and set its meta table
  * \param L pointer to the lua_State
- * \param box pointer to the AMAP
+ * \param amap pointer to the AMAP
  * \return 1 AMAP* on the Lua stack
  */
 int
@@ -99,7 +99,7 @@ toString(lua_State *L)
     if (NULL == amap) {
         luaL_addstring(&B, "nil");
     } else {
-        luaL_addstring(&B, ll_string_amap_type(amap->keytype));
+        luaL_addstring(&B, ll_string_keytype(amap->keytype));
         luaL_addstring(&B, ": {");
         node = l_amapSize(amap) ? l_amapGetFirst(amap) : NULL;
         while (node) {

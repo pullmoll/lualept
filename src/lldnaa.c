@@ -54,7 +54,7 @@ ll_check_DNAA(lua_State *L, int arg)
 /**
  * \brief Push L_DNAA user data to the Lua stack and set its meta table
  * \param L pointer to the lua_State
- * \param na pointer to the L_DNAA
+ * \param daa pointer to the L_DNAA
  * \return 1 DNAA* on the Lua stack
  */
 int
@@ -99,7 +99,7 @@ Create(lua_State *L)
  * \brief Create a full new L_DNAA*
  *
  * Arg #1 is expected to be a l_int32 (nptr)
- * Arg #1 is expected to be a l_int32 (n)
+ * Arg #2 is expected to be a l_int32 (n)
  *
  * \param L pointer to the lua_State
  * \return 1 DNAA* on the Lua stack
@@ -194,8 +194,7 @@ static int
 GetNumberCount(lua_State *L)
 {
     L_DNAA *daa = ll_check_DNAA(L, 1);
-    l_int32 n = l_dnaaGetNumberCount(daa);
-    lua_pushinteger(L, n);
+    lua_pushinteger(L, l_dnaaGetNumberCount(daa));
     return 1;
 }
 
@@ -204,8 +203,7 @@ GetNumberCount(lua_State *L)
  *
  * Arg #1 (i.e. self) is expected to be a L_DNAA* user data
  * Arg #2 is expected to be a L_DNA* user data
- * Arg #3 is an optional string defining the storage flags (copy, clone,
- * copy_clone)
+ * Arg #3 is an optional string defining the storage flags (copyflag)
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -225,8 +223,7 @@ AddDna(lua_State *L)
  *
  * Arg #1 (i.e. self) is expected to be a L_DNAA* user data
  * Arg #2 is expected to be a l_int32 (idx)
- * Arg #3 is an optional string defining the storage flags (copy, clone,
- * copy_clone)
+ * Arg #3 is an optional string defining the storage flags (accessflag)
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -269,7 +266,7 @@ GetValue(lua_State *L)
  *
  * Arg #1 (i.e. self) is expected to be a L_DNAA* user data
  * Arg #2 is expected to be a l_int32 (idx)
- * Arg #3 is expected to be a lua_Number
+ * Arg #3 is expected to be a lua_Number/l_float64 (val)
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -331,12 +328,11 @@ static int
 FlattenToDna(lua_State *L)
 {
     L_DNAA *daa = ll_check_DNAA(L, 1);
-    L_DNA *da = l_dnaaFlattenToDna(daa);
-    return ll_push_DNA(L, da);
+    return ll_push_DNA(L, l_dnaaFlattenToDna(daa));
 }
 
 /**
- * \brief Register the L_DNAA methods and functions in the LL_L_DNAA meta table
+ * \brief Register the L_DNAA methods and functions in the LL_DNAA meta table
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */

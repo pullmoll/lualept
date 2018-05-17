@@ -54,7 +54,7 @@ ll_check_PIXA(lua_State *L, int arg)
 /**
  * \brief Push PIXA* user data to the Lua stack and set its meta table
  * \param L pointer to the lua_State
- * \param boxa pointer to the PIXA
+ * \param pixa pointer to the PIXA
  * \return 1 PIXA* on the Lua stack
  */
 int

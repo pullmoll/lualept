@@ -54,7 +54,7 @@ ll_check_BOXAA(lua_State *L, int arg)
 /**
  * \brief Push BOXAA* user data to the Lua stack and set its meta table
  * \param L pointer to the lua_State
- * \param boxa pointer to the BOXAA
+ * \param boxaa pointer to the BOXAA
  * \return 1 BOXAA* on the Lua stack
  */
 int

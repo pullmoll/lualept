@@ -119,13 +119,12 @@ extern l_uint32     ll_check_l_uint32(lua_State *L, int arg);
 extern l_uint32     ll_check_l_uint32_default(lua_State *L, int arg, l_uint32 dflt);
 extern l_float32    ll_check_l_float32(lua_State *L, int arg);
 extern l_float32    ll_check_l_float32_default(lua_State *L, int arg, l_float32 dflt);
-extern const char * ll_string_amap_type(l_int32 type);
-extern const char * ll_string_aset_type(l_int32 type);
 extern l_int32      ll_check_tbl(lua_State *L, int arg, l_int32 dflt, const key_value_t *tbl, size_t len);
 extern l_int32      ll_check_access_storage(lua_State *L, int arg, l_int32 dflt);
 extern l_int32      ll_check_input_format(lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_input_format(int format);
 extern l_int32      ll_check_keytype(lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_keytype(l_int32 type);
 extern l_int32      ll_check_consecutive_skip_by(lua_State *L, int arg, l_int32 dflt);
 extern l_int32      ll_check_component(lua_State *L, int arg, l_int32 dflt);
 extern l_int32      ll_check_choose_min_max(lua_State *L, int arg, l_int32 dflt);
@@ -190,8 +189,8 @@ extern int       ll_register_ASET(lua_State *L);
 /* lllist.c */
 extern DLLIST  * ll_check_DLLIST(lua_State *L, int arg);
 extern int       ll_push_DLLIST(lua_State *L, DLLIST *list);
-extern int       ll_new_ASET(lua_State *L);
-extern int       ll_register_ASET(lua_State *L);
+extern int       ll_new_DLLIST(lua_State *L);
+extern int       ll_register_DLLIST(lua_State *L);
 
 /* llbox.c */
 extern BOX     * ll_check_BOX(lua_State *L, int arg);

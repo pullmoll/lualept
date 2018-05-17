@@ -44,7 +44,7 @@ static const unsigned long _flt_max = 0x7effffffUL;
 #if !defined(HAVE_CTYPE_H)
 /**
  * @brief Poor man's toupper(3)
- * @param ch ASCII character
+ * \param ch ASCII character
  * @return upper case value for ch
  */
 static __inline int toupper(const int ch) { return (ch >= 'a' && ch <= 'z') ? ch - 'a' + 'A' : ch; }
@@ -57,8 +57,8 @@ static __inline int toupper(const int ch) { return (ch >= 'a' && ch <= 'z') ? ch
 #else
 /**
  * @brief Our own version of strcasecmp(3)
- * @param dst first string
- * @param src second string
+ * \param dst first string
+ * \param src second string
  * @return -1 if dst < src, +1 if dst > str, 0 otherwise
  */
 int
@@ -117,9 +117,9 @@ ll_register_class(lua_State *L, const char *name, const luaL_Reg *methods, const
 
 /**
  * @brief Check Lua stack at index %arg for udata with %name
- * @param L pointer to the lua_State
- * @param arg argument index
- * @param name tname of the expected udata
+ * \param L pointer to the lua_State
+ * \param arg argument index
+ * \param name tname of the expected udata
  * @return pointer to the udata
  */
 void **
@@ -135,9 +135,9 @@ ll_check_udata(lua_State *L, int arg, const char* name)
 
 /**
  * @brief Push user data %udata to the Lua stack and set its meta table %name
- * @param L pointer to the lua_State
- * @param name tname for the udata
- * @param udata pointer to the udata
+ * \param L pointer to the lua_State
+ * \param name tname for the udata
+ * \param udata pointer to the udata
  * @return 1 table on the stack
  */
 int
@@ -152,9 +152,10 @@ ll_push_udata(lua_State *L, const char* name, void *udata)
 }
 
 /**
- * \brief Check if an argument is a lua_Integer in the range of imin <= index < imax
+ * \brief Check if an argument is a lua_Integer in the range of 0 < index <= imax
  * \param L pointer to the lua_State
  * \param arg index where to find the integer
+ * \param imax maximum index value (for the 1-based value)
  * \return l_int32 for the integer; lua_error if out of bounds
  */
 l_int32
@@ -165,6 +166,7 @@ ll_check_index(lua_State *L, int arg, l_int32 imax)
     if (index < 0 || index >= imax) {
         lua_pushfstring(L, "index out of bounds (%d)", index);
         lua_error(L);
+        return 0;       /* NOTREACHED */
     }
     return (l_int32)index;
 }
@@ -183,16 +185,16 @@ ll_check_l_int32(lua_State *L, int arg)
     if (val < INT32_MIN || val > INT32_MAX) {
         lua_pushfstring(L, "l_int32 out of bounds (%d)", val);
         lua_error(L);
-        return 1;
+        return 0;    /* NOTREACHED */
     }
     return (l_int32)val;
 }
 
 /**
- * \brief Check if an argument is a lua_Integer in the range of l_int32, or
- * return the default
+ * \brief Return an argument lua_Integer in the range of l_int32 or the default
  * \param L pointer to the lua_State
  * \param arg index where to find the integer
+ * \param dflt default value
  * \return l_int32 for the integer; lua_error if out of bounds
  */
 l_int32
@@ -203,7 +205,7 @@ ll_check_l_int32_default(lua_State *L, int arg, l_int32 dflt)
     if (val < INT32_MIN || val > INT32_MAX) {
         lua_pushfstring(L, "l_int32 #%d out of bounds (%d)", arg, val);
         lua_error(L);
-        return 1;
+        return 0;    /* NOTREACHED */
     }
     return (l_int32)val;
 }
@@ -222,16 +224,16 @@ ll_check_l_uint32(lua_State *L, int arg)
     if (val < 0 || val > UINT32_MAX) {
         lua_pushfstring(L, "l_uint32 out of bounds (%d)", val);
         lua_error(L);
-        return 1;
+        return 0;    /* NOTREACHED */
     }
     return (l_uint32)val;
 }
 
 /**
- * \brief Check if an argument is a lua_Integer in the range of l_uint32, or
- * return the default
+ * \brief Return an argument lua_Integer in the range of l_uint32 or the default
  * \param L pointer to the lua_State
  * \param arg index where to find the integer
+ * \param dflt default value
  * \return l_uint32 for the integer; lua_error if out of bounds
  */
 l_uint32
@@ -242,7 +244,7 @@ ll_check_l_uint32_default(lua_State *L, int arg, l_uint32 dflt)
     if (val < 0 || val > UINT32_MAX) {
         lua_pushfstring(L, "l_uint32 #%d out of bounds (%d)", arg, val);
         lua_error(L);
-        return 1;
+        return dflt;    /* NOTREACHED */
     }
     return (l_uint32)val;
 }
@@ -261,15 +263,16 @@ ll_check_l_float32(lua_State *L, int arg)
     if (val < (lua_Number)FLT_MIN || val > (lua_Number)FLT_MAX) {
         lua_pushfstring(L, "l_float32 #%d out of bounds (%g)", arg, val);
         lua_error(L);
-        return 1;
+        return 0.0f;    /* NOTREACHED */
     }
     return (l_float32)val;
 }
 
 /**
- * \brief Check if an argument is a lua_Number in the range of l_float32
+ * \brief Return an argument lua_Integer in the range of l_float32 or the default
  * \param L pointer to the lua_State
  * \param arg index where to find the integer
+ * \param dflt default value
  * \return l_float32 for the number; lua_error if out of bounds
  */
 l_float32
@@ -280,46 +283,9 @@ ll_check_l_float32_default(lua_State *L, int arg, l_float32 dflt)
     if (val < (lua_Number)FLT_MIN || val > (lua_Number)FLT_MAX) {
         lua_pushfstring(L, "l_float32 #%d out of bounds (%g)", arg, val);
         lua_error(L);
-        return 1;
+        return 0.0f;    /* NOTREACHED */
     }
     return (l_float32)val;
-}
-
-/**
- * @brief Return a string for the keytype of an AMAP
- * @param type key type
- * @return const string with the name
- */
-const char* ll_string_amap_type(l_int32 type)
-{
-    switch (type) {
-    case L_INT_TYPE:
-        return "int";
-    case L_UINT_TYPE:
-        return "uint";
-    case L_FLOAT_TYPE:
-        return "float";
-    }
-    return "undefined";
-}
-
-
-/**
- * @brief Return a string for the keytype of an ASET
- * @param type key type
- * @return const string with the name
- */
-const char* ll_string_aset_type(l_int32 type)
-{
-    switch (type) {
-    case L_INT_TYPE:
-        return "int";
-    case L_UINT_TYPE:
-        return "uint";
-    case L_FLOAT_TYPE:
-        return "float";
-    }
-    return "undefined";
 }
 
 /**
@@ -327,9 +293,8 @@ const char* ll_string_aset_type(l_int32 type)
  * \param L pointer to the lua_State
  * \param arg index where to find the string
  * \param dflt default value to return if not specified or unknown
- * @param str string to fine
- * @param tbl table of key/value pairs
- * @param len length of that table
+ * \param tbl table of key/value pairs
+ * \param len length of that table
  * @return value or dflt
  */
 l_int32
@@ -422,7 +387,7 @@ ll_check_input_format(lua_State *L, int arg, l_int32 dflt)
 
 /**
  * @brief Return the name for an input file format (IFF_*)
- * @param format input file format
+ * \param format input file format
  * @return pointer to const string
  */
 const char*
@@ -487,6 +452,24 @@ ll_check_keytype(lua_State *L, int arg, l_int32 dflt)
         {"float",           L_FLOAT_TYPE}
     };
     return ll_check_tbl(L, arg, dflt, tbl, sizeof(tbl)/sizeof(tbl[0]));
+}
+
+/**
+ * @brief Return a string for the keytype of an ASET
+ * \param type key type
+ * @return const string with the name
+ */
+const char* ll_string_keytype(l_int32 type)
+{
+    switch (type) {
+    case L_INT_TYPE:
+        return "int";
+    case L_UINT_TYPE:
+        return "uint";
+    case L_FLOAT_TYPE:
+        return "float";
+    }
+    return "undefined";
 }
 
 /**
@@ -1029,6 +1012,7 @@ static int register_LEPT(lua_State *L) {
         {LL_PTAA,                   ll_new_PTAA},
         {LL_AMAP,                   ll_new_AMAP},
         {LL_ASET,                   ll_new_ASET},
+        {LL_DLLIST,                 ll_new_DLLIST},
         {LL_BOX,                    ll_new_BOX},
         {LL_BOXA,                   ll_new_BOXA},
         {LL_BOXAA,                  ll_new_BOXAA},
@@ -1058,6 +1042,7 @@ static int register_LEPT(lua_State *L) {
     ll_register_PTAA(L);
     ll_register_AMAP(L);
     ll_register_ASET(L);
+    ll_register_DLLIST(L);
     ll_register_BOX(L);
     ll_register_BOXA(L);
     ll_register_BOXAA(L);
