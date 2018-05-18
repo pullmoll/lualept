@@ -59,7 +59,7 @@ int
 ll_push_DoubleLinkedList(lua_State *L, DoubleLinkedList *head)
 {
     if (!head)
-        return 0;
+        return ll_push_nil(L);
     return ll_push_udata(L, LL_DLLIST, head);
 }
 

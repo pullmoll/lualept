@@ -59,7 +59,7 @@ int
 ll_push_Dnaa(lua_State *L, L_Dnaa *daa)
 {
     if (!daa)
-        return 0;
+        return ll_push_nil(L);
     return ll_push_udata(L, LL_DNAA, daa);
 }
 
@@ -254,7 +254,7 @@ GetValue(lua_State *L)
     l_int32 j = ll_check_index(__func__, L, 3, INT32_MAX);
     lua_Number val;
     if (l_dnaaGetValue(daa, i, j, &val))
-        return 0;
+        return ll_push_nil(L);
     lua_pushnumber(L, val);
     return 1;
 }

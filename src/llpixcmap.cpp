@@ -80,7 +80,7 @@ int
 ll_push_PixColormap(lua_State *L, PixColormap *cmap)
 {
     if (!cmap)
-        return 0;
+        return ll_push_nil(L);
     return ll_push_udata(L, LL_PIXCMAP, cmap);
 }
 
@@ -284,7 +284,7 @@ AddNewColor(lua_State *L)
     l_int32 bval = ll_check_l_int32(__func__, L, 4);
     l_int32 idx = 0;
     if (pixcmapAddNewColor(cmap, rval, gval, bval, &idx))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, idx + 1);  /* Lua index is 1-based */
     return 1;
 }
@@ -309,7 +309,7 @@ AddNearestColor(lua_State *L)
     l_int32 bval = ll_check_l_int32(__func__, L, 4);
     l_int32 idx = 0;
     if (pixcmapAddNearestColor(cmap, rval, gval, bval, &idx))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, idx + 1);  /* Lua index is 1-based */
     return 1;
 }
@@ -334,7 +334,7 @@ UsableColor(lua_State *L)
     l_int32 bval = ll_check_l_int32(__func__, L, 4);
     l_int32 idx = 0;
     if (pixcmapUsableColor(cmap, rval, gval, bval, &idx))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, idx + 1);  /* Lua index is 1-based */
     return 1;
 }
@@ -355,7 +355,7 @@ AddBlackOrWhite(lua_State *L)
     l_int32 color = ll_check_blackwhite(L, 2, L_SET_BLACK);
     l_int32 idx = 0;
     if (pixcmapAddBlackOrWhite(cmap, color, &idx))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, idx + 1);  /* Lua index is 1-based */
     return 1;
 }
@@ -428,7 +428,7 @@ GetMinDepth(lua_State *L)
     PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 mindepth = 0;
     if (pixcmapGetMinDepth(cmap, &mindepth))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, mindepth);
     return 1;
 }
@@ -484,7 +484,7 @@ GetColor(lua_State *L)
     l_int32 gval = 0;
     l_int32 bval = 0;
     if (pixcmapGetColor(cmap, idx, &rval, &gval, &bval))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, rval);
     lua_pushinteger(L, gval);
     lua_pushinteger(L, bval);
@@ -507,7 +507,7 @@ GetColor32(lua_State *L)
     l_int32 idx = ll_check_index(__func__, L, 2, pixcmapGetCount(cmap));
     l_uint32 val32 = 0;
     if (pixcmapGetColor32(cmap, idx, &val32))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, val32);
     return 1;
 }
@@ -531,7 +531,7 @@ GetRGBA(lua_State *L)
     l_int32 bval = 0;
     l_int32 aval = 0;
     if (pixcmapGetRGBA(cmap, idx, &rval, &gval, &bval, &aval))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, rval);
     lua_pushinteger(L, gval);
     lua_pushinteger(L, bval);
@@ -555,7 +555,7 @@ GetRGBA32(lua_State *L)
     l_int32 idx = ll_check_index(__func__, L, 2, pixcmapGetCount(cmap));
     l_uint32 val32 = 0;
     if (pixcmapGetRGBA32(cmap, idx, &val32))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, val32);
     return 1;
 }
@@ -624,7 +624,7 @@ GetIndex(lua_State *L)
     l_int32 bval = ll_check_l_int32(__func__, L, 4);
     l_int32 idx = 0;
     if (pixcmapGetIndex(cmap, rval, gval, bval, &idx))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, idx + 1);  /* Lua index is 1-based */
     return 1;
 }
@@ -643,7 +643,7 @@ HasColor(lua_State *L)
     PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 color = 0;
     if (pixcmapHasColor(cmap, &color))
-        return 0;
+        return ll_push_nil(L);
     lua_pushboolean(L, color);
     return 1;
 }
@@ -662,7 +662,7 @@ IsOpaque(lua_State *L)
     PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 opaque = 0;
     if (pixcmapIsOpaque(cmap, &opaque))
-        return 0;
+        return ll_push_nil(L);
     lua_pushboolean(L, opaque);
     return 1;
 }
@@ -681,7 +681,7 @@ IsBlackAndWhite(lua_State *L)
     PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 blackandwhite = 0;
     if (pixcmapIsBlackAndWhite(cmap, &blackandwhite))
-        return 0;
+        return ll_push_nil(L);
     lua_pushboolean(L, blackandwhite);
     return 1;
 }
@@ -700,7 +700,7 @@ CountGrayColors(lua_State *L)
     PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 ngray = 0;
     if (pixcmapCountGrayColors(cmap, &ngray))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, ngray);
     return 1;
 }
@@ -736,7 +736,7 @@ Write(lua_State *L)
     PixColormap *cmap = ll_check_PixColormap(L, 1);
     const char *filename = lua_tostring(L, 2);
     if (pixcmapWrite(filename, cmap))
-        return 0;
+        return ll_push_nil(L);
     lua_pushboolean(L, TRUE);
     return 1;
 }

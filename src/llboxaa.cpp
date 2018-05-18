@@ -59,7 +59,7 @@ int
 ll_push_Boxaa(lua_State *L, Boxaa *boxaa)
 {
     if (!boxaa)
-        return 0;
+        return ll_push_nil(L);
     return ll_push_udata(L, LL_BOXAA, boxaa);
 }
 

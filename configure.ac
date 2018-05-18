@@ -8,7 +8,7 @@ AC_CONFIG_MACRO_DIR([m4])
 LT_INIT
 
 AM_INIT_AUTOMAKE
-AC_LANG(C)
+AC_LANG(C++)
 AC_CANONICAL_HOST
 
 # Checks for programs.
@@ -35,8 +35,8 @@ esac
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 # Checks for typedefs, structures, and compiler characteristics.
-AC_TYPE_SIZE_T
 AC_CHECK_HEADERS([ctype.h float.h limits.h])
+AC_TYPE_SIZE_T
 AC_C_BIGENDIAN
 
 # Checks for library functions.

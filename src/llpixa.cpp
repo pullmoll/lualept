@@ -59,7 +59,7 @@ int
 ll_push_Pixa(lua_State *L, Pixa *pixa)
 {
     if (!pixa)
-        return 0;
+        return ll_push_nil(L);
     return ll_push_udata(L, LL_PIXA, pixa);
 }
 
@@ -181,7 +181,7 @@ GetBoxGeometry(lua_State *L)
     l_int32 idx = ll_check_index(__func__, L, 2, pixaGetCount(pixa));
     l_int32 x, y, w, h;
     if (pixaGetBoxGeometry(pixa, idx, &x, &y, &w, &h))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, x);
     lua_pushinteger(L, y);
     lua_pushinteger(L, 2);
@@ -274,7 +274,7 @@ RemovePixAndSave(lua_State *L)
     Pix *pix = nullptr;
     Box *box = nullptr;
     if (pixaRemovePixAndSave(pixa, idx, &pix, &box))
-        return 0;
+        return ll_push_nil(L);
     return ll_push_Pix(L, pix) + ll_push_Box(L, box);
 }
 

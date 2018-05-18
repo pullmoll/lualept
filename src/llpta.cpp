@@ -59,7 +59,7 @@ int
 ll_push_Pta(lua_State *L, Pta *pta)
 {
     if (!pta)
-        return 0;
+        return ll_push_nil(L);
     return ll_push_udata(L, LL_PTA, pta);
 }
 
@@ -304,7 +304,7 @@ GetPt(lua_State *L)
     l_float32 x = 0;
     l_float32 y = 0;
     if (ptaGetPt(pta, idx, &x, &y))
-        return 0;
+        return ll_push_nil(L);
     lua_pushnumber(L, (lua_Number)x);
     lua_pushnumber(L, (lua_Number)y);
     return 2;
@@ -327,7 +327,7 @@ GetIPt(lua_State *L)
     l_int32 x;
     l_int32 y;
     if (ptaGetIPt(pta, idx, &x, &y))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, (lua_Integer)x);
     lua_pushinteger(L, (lua_Integer)y);
     return 2;
@@ -370,7 +370,7 @@ GetArrays(lua_State *L)
     Numa *ptax = nullptr;
     Numa *ptay = nullptr;
     if (ptaGetArrays(pta, &ptax, &ptay))
-        return 0;
+        return ll_push_nil(L);
     return ll_push_Numa(L, ptax) + ll_push_Numa(L, ptay);
 }
 

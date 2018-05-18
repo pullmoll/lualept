@@ -78,6 +78,7 @@
 #define	LL_NUMAA	"Numaa"         /*!< Lua class: array of Numa */
 #define	LL_DNA		"Dna"           /*!< Lua class: array of doubles (l_float64, equiv. to lua_Number) */
 #define	LL_DNAA		"Dnaa"          /*!< Lua class: array of Dna */
+#define	LL_RBTNODE      "RbtreeNode"    /*!< Lua class: RbtreeNode (Amap and Aset nodes) */
 #define	LL_AMAP		"Amap"          /*!< Lua class: Amap (key / value pairs) */
 #define	LL_ASET		"Aset"          /*!< Lua class: Aset (key set) */
 #define	LL_DLLIST	"Dllist"        /*!< Lua class: DoubleLinkedList */
@@ -135,6 +136,7 @@ typedef struct lept_enums_s {
 extern int          ll_register_class(lua_State *L, const char *name, const luaL_Reg *methods, const luaL_Reg *functions);
 extern void **      ll_check_udata(lua_State *L, int arg, const char* name);
 extern int          ll_push_udata(lua_State *L, const char* name, void *udata);
+extern int          ll_push_nil(lua_State *L);
 extern l_int32      ll_check_index(const char* func, lua_State *L, int arg, l_int32 imax);
 extern l_int32      ll_check_l_int32(const char* func, lua_State *L, int arg);
 extern l_int32      ll_check_l_int32_default(const char* func, lua_State *L, int arg, l_int32 dflt);
@@ -173,6 +175,10 @@ extern l_int32      ll_check_select_color(lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_select_color(l_int32 color);
 extern l_int32      ll_check_select_min_max(lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_select_min_max(l_int32 which);
+extern l_int32      ll_check_sort_by(lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_sort_by(l_int32 which);
+extern l_int32      ll_check_from_side(lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_from_side(l_int32 which);
 
 /* llnuma.cpp */
 extern Numa       * ll_check_Numa(lua_State *L, int arg);

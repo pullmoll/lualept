@@ -59,7 +59,7 @@ int
 ll_push_Numaa(lua_State *L, Numaa *naa)
 {
     if (!naa)
-        return 0;
+        return ll_push_nil(L);
     return ll_push_udata(L, LL_NUMAA, naa);
 }
 

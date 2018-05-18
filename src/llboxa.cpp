@@ -59,7 +59,7 @@ int
 ll_push_Boxa(lua_State *L, Boxa *boxa)
 {
     if (!boxa)
-        return 0;
+        return ll_push_nil(L);
     return ll_push_udata(L, LL_BOXA, boxa);
 }
 
@@ -319,7 +319,7 @@ GetBoxGeometry(lua_State *L)
     l_int32 x, y, w, h;
     l_int32 idx = ll_check_index(__func__, L, 2, boxaGetCount(boxa));
     if (boxaGetBoxGeometry(boxa, idx, &x, &y, &w, &h))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, x);
     lua_pushinteger(L, y);
     lua_pushinteger(L, w);
@@ -494,7 +494,7 @@ ContainedInBoxCount(lua_State *L)
     Box *box = ll_check_Box(L, 2);
     l_int32 count = 0;
     if (boxaContainedInBoxCount(boxas, box, &count))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, count);
     return 1;
 }
@@ -515,7 +515,7 @@ ContainedInBoxa(lua_State *L)
     Boxa *boxa2 = ll_check_Boxa(L, 2);
     l_int32 contained = 0;
     if (boxaContainedInBoxa(boxa1, boxa2, &contained))
-        return 0;
+        return ll_push_nil(L);
     lua_pushboolean(L, contained);
     return 1;
 }
@@ -554,7 +554,7 @@ IntersectsBoxCount(lua_State *L)
     Box *box = ll_check_Box(L, 2);
     l_int32 count = 0;
     if (boxaIntersectsBoxCount(boxa, box, &count))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, count);
     return 1;
 }

@@ -59,7 +59,7 @@ int
 ll_push_Pixaa(lua_State *L, Pixaa *pixaa)
 {
     if (!pixaa)
-        return 0;
+        return ll_push_nil(L);
     return ll_push_udata(L, LL_PIXAA, pixaa);
 }
 

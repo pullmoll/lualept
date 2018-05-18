@@ -157,12 +157,24 @@ ll_check_udata(lua_State *L, int arg, const char* name)
 int
 ll_push_udata(lua_State *L, const char* name, void *udata)
 {
-    void **ppvoid = (void **)lua_newuserdata(L, sizeof(udata));
+    void **ppvoid = reinterpret_cast<void **>(lua_newuserdata(L, sizeof(udata)));
     *ppvoid = udata;
     lua_getfield(L, LUA_REGISTRYINDEX, name);
     lua_setmetatable(L, -2);
     DBG(LOG_CREATE, "%s: pushed '%s' ppvoid=%p udata=%p\n",
-         __func__, name, ppvoid, udata);
+         __func__, name ? name : "<nil>", ppvoid, udata);
+    return 1;
+}
+
+/**
+ * \brief Push nil to the Lua stack return 1
+ * \param L pointer to the lua_State
+ * \return 1 nil on the stack
+ */
+int
+ll_push_nil(lua_State *L)
+{
+    lua_pushnil(L);
     return 1;
 }
 
@@ -991,6 +1003,80 @@ ll_string_select_min_max(l_int32 which)
     return ll_string_tbl(which, tbl_select_minmax, ARRAYSIZE(tbl_select_minmax));
 }
 
+/**
+ * \brief Table of sort by names and enumeration values
+ */
+static const lept_enums_t tbl_sort_by[] = {
+    TBL_ENTRY("width",          L_SORT_BY_WIDTH),
+    TBL_ENTRY("height",         L_SORT_BY_HEIGHT),
+    TBL_ENTRY("max-dimension",  L_SORT_BY_MAX_DIMENSION),
+    TBL_ENTRY("perimeter",      L_SORT_BY_PERIMETER),
+    TBL_ENTRY("area",           L_SORT_BY_AREA)
+};
+
+/**
+ * \brief Check for a select min or max name (%L_SELECT_MIN, %L_SELECT_MAX)
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \param dflt default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_sort_by(lua_State* L, int arg, l_int32 dflt)
+{
+    return ll_check_tbl(L, arg, dflt, tbl_sort_by, ARRAYSIZE(tbl_sort_by));
+}
+
+/**
+ * \brief Return a string for the selection minimum or maximum
+ * \param color selected color enumeration value
+ * \return const string with the name
+ */
+const char*
+ll_string_sort_by(l_int32 which)
+{
+    return ll_string_tbl(which, tbl_sort_by, ARRAYSIZE(tbl_sort_by));
+}
+
+/**
+ * \brief Table of sort by names and enumeration values
+ */
+static const lept_enums_t tbl_from_side[] = {
+    TBL_ENTRY("left",           L_FROM_LEFT),
+    TBL_ENTRY("l",              L_FROM_LEFT),
+    TBL_ENTRY("right",          L_FROM_RIGHT),
+    TBL_ENTRY("r",              L_FROM_RIGHT),
+    TBL_ENTRY("top",            L_FROM_TOP),
+    TBL_ENTRY("t",              L_FROM_TOP),
+    TBL_ENTRY("bottom",         L_FROM_BOT),
+    TBL_ENTRY("bot",            L_FROM_BOT),
+    TBL_ENTRY("b",              L_FROM_BOT)
+};
+
+/**
+ * \brief Check for a select min or max name (%L_SELECT_MIN, %L_SELECT_MAX)
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \param dflt default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_from_side(lua_State* L, int arg, l_int32 dflt)
+{
+    return ll_check_tbl(L, arg, dflt, tbl_from_side, ARRAYSIZE(tbl_from_side));
+}
+
+/**
+ * \brief Return a string for the selection minimum or maximum
+ * \param color selected color enumeration value
+ * \return const string with the name
+ */
+const char*
+ll_string_from_side(l_int32 which)
+{
+    return ll_string_tbl(which, tbl_from_side, ARRAYSIZE(tbl_from_side));
+}
+
 /*====================================================================*
  *
  *  Lua LEPT class
@@ -1019,7 +1105,7 @@ static int
 ll_push_LEPT(lua_State *L, LuaLept *lept)
 {
     if (!lept)
-        return 0;
+        return ll_push_nil(L);
     return ll_push_udata(L, LL_LEPT, lept);
 }
 
@@ -1122,7 +1208,7 @@ RGB(lua_State *L)
     l_int32 bval = ll_check_l_int32(__func__, L, 3);
     l_uint32 pixel;
     if (composeRGBPixel(rval, gval, bval, &pixel))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, pixel);
     return 1;
 }
@@ -1147,7 +1233,7 @@ RGBA(lua_State *L)
     l_int32 aval = ll_check_l_int32(__func__, L, 3);
     l_uint32 pixel;
     if (composeRGBAPixel(rval, gval, bval, aval, &pixel))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, pixel);
     return 1;
 }

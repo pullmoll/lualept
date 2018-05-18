@@ -33,7 +33,7 @@
 
 /*====================================================================*
  *
- *  Lua class AMAP
+ *  Lua class L_AMAP
  *
  *====================================================================*/
 
@@ -41,7 +41,7 @@
  * @brief Check Lua stack at index %arg for udata of class LL_AMAP
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the AMAP* contained in the user data
+ * \return pointer to the L_AMAP* contained in the user data
  */
 L_AMAP *
 ll_check_Amap(lua_State *L, int arg)
@@ -50,26 +50,26 @@ ll_check_Amap(lua_State *L, int arg)
 }
 
 /**
- * \brief Push AMAP user data to the Lua stack and set its meta table
+ * \brief Push L_AMAP user data to the Lua stack and set its meta table
  * \param L pointer to the lua_State
- * \param amap pointer to the AMAP
- * \return 1 AMAP* on the Lua stack
+ * \param amap pointer to the L_AMAP
+ * \return 1 L_AMAP* on the Lua stack
  */
 int
 ll_push_Amap(lua_State *L, L_AMAP *amap)
 {
     if (!amap)
-        return 0;
+        return ll_push_nil(L);
     return ll_push_udata(L, LL_AMAP, amap);
 }
 
 /**
- * \brief Create and push a new AMAP*
+ * \brief Create and push a new L_AMAP*
  *
  * Arg #1 is expected to be a key type name (int, uint, or float)
  *
  * \param L pointer to the lua_State
- * \return 1 AMAP* on the Lua stack
+ * \return 1 L_AMAP* on the Lua stack
  */
 int
 ll_new_Amap(lua_State *L)
@@ -80,7 +80,7 @@ ll_new_Amap(lua_State *L)
 }
 
 /**
- * @brief Printable string for a AMAP*
+ * @brief Printable string for a L_AMAP*
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
  */
@@ -130,12 +130,12 @@ toString(lua_State *L)
 }
 
 /**
- * \brief Create a new AMAP*
+ * \brief Create a new L_AMAP*
  *
  * Arg #1 is expected to be a string describing the key type (int,uint,float)
  *
  * \param L pointer to the lua_State
- * \return 1 AMAP* on the Lua stack
+ * \return 1 L_AMAP* on the Lua stack
  */
 static int
 Create(lua_State *L)
@@ -144,7 +144,7 @@ Create(lua_State *L)
 }
 
 /**
- * \brief Destroy a AMAP*
+ * \brief Destroy a L_AMAP*
  *
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack
@@ -177,9 +177,9 @@ Size(lua_State *L)
 }
 
 /**
- * \brief Insert a node into an AMAP* (%amap)
+ * \brief Insert a node into an L_AMAP* (%amap)
  *
- * Arg #1 (i.e. self) is expected to be a AMAP* (amap)
+ * Arg #1 (i.e. self) is expected to be a L_AMAP* (amap)
  * Arg #2 is expected to be a key (int, uint or float)
  * Arg #3 is expected to be a value (int, uint or float)
  *
@@ -207,7 +207,7 @@ Insert(lua_State *L)
             }
             result = TRUE;
         } else {
-            lua_pushfstring(L, "AMAP key is not a number: '%s'", lua_tostring(L, 2));
+            lua_pushfstring(L, "L_AMAP key is not a number: '%s'", lua_tostring(L, 2));
             lua_error(L);
         }
         break;
@@ -222,7 +222,7 @@ Insert(lua_State *L)
             }
             result = TRUE;
         } else {
-            lua_pushfstring(L, "AMAP key is not a number: '%s'", lua_tostring(L, 2));
+            lua_pushfstring(L, "L_AMAP key is not a number: '%s'", lua_tostring(L, 2));
             lua_error(L);
         }
         break;
@@ -232,9 +232,9 @@ Insert(lua_State *L)
 }
 
 /**
- * \brief Delete a node from an AMAP* (%amap)
+ * \brief Delete a node from an L_AMAP* (%amap)
  *
- * Arg #1 (i.e. self) is expected to be a AMAP* (amap)
+ * Arg #1 (i.e. self) is expected to be a L_AMAP* (amap)
  * Arg #2 is expected to be a key (int, uint or float)
  *
  * \param L pointer to the lua_State
@@ -265,9 +265,9 @@ Delete(lua_State *L)
 }
 
 /**
- * \brief Find a key in an AMAP* (%amap)
+ * \brief Find a key in an L_AMAP* (%amap)
  *
- * Arg #1 (i.e. self) is expected to be a AMAP* (amap)
+ * Arg #1 (i.e. self) is expected to be a L_AMAP* (amap)
  * Arg #2 is expected to be a key (int, uint or float)
  *
  * \param L pointer to the lua_State
@@ -304,7 +304,77 @@ Find(lua_State *L)
 }
 
 /**
- * \brief Register the AMAP methods and functions in the LL_AMAP meta table
+ * \brief Get first node in an L_AMAP* (%amap)
+ *
+ * Arg #1 (i.e. self) is expected to be a L_AMAP* (amap)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 light user data on the Lua stack
+ */
+static int
+GetFirst(lua_State *L)
+{
+    L_AMAP *amap = ll_check_Amap(L, 1);
+    L_AMAP_NODE *node = l_amapGetFirst(amap);
+    lua_pushlightuserdata(L, node);
+    return 1;
+}
+
+/**
+ * \brief Get next node of an L_AMAP_NODE* (%node)
+ *
+ * Arg #1 is expected to be a L_AMAP_NODE* (node)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 light user data on the Lua stack
+ */
+static int
+GetNext(lua_State *L)
+{
+    /* HACK: deconstify */
+    L_AMAP_NODE *node = reinterpret_cast<L_AMAP_NODE *>(reinterpret_cast<intptr_t>(lua_topointer(L, 2)));
+    L_AMAP_NODE *next = l_amapGetNext(node);
+    lua_pushlightuserdata(L, next);
+    return 1;
+}
+
+/**
+ * \brief Get previous node of an L_AMAP_NODE* (%node)
+ *
+ * Arg #1 is expected to be a L_AMAP_NODE* (node)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 light user data on the Lua stack
+ */
+static int
+GetPrev(lua_State *L)
+{
+    /* HACK: deconstify */
+    L_AMAP_NODE *node = reinterpret_cast<L_AMAP_NODE *>(reinterpret_cast<intptr_t>(lua_topointer(L, 2)));
+    L_AMAP_NODE *prev = l_amapGetPrev(node);
+    lua_pushlightuserdata(L, prev);
+    return 1;
+}
+
+/**
+ * \brief Get last node in an L_AMAP* (%amap)
+ *
+ * Arg #1 is expected to be a L_AMAP* (amap)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 light user data on the Lua stack
+ */
+static int
+GetLast(lua_State *L)
+{
+    L_AMAP *amap = ll_check_Amap(L, 1);
+    L_AMAP_NODE *node = l_amapGetLast(amap);
+    lua_pushlightuserdata(L, node);
+    return 1;
+}
+
+/**
+ * \brief Register the L_AMAP methods and functions in the LL_AMAP meta table
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
@@ -321,11 +391,15 @@ ll_register_Amap(lua_State *L)
         {"Insert",              Insert},
         {"Delete",              Delete},
         {"Find",                Find},
+        {"GetFirst",            GetFirst},
+        {"GetLast",             GetLast},
         LUA_SENTINEL
     };
 
     static const luaL_Reg functions[] = {
         {"Create",              Create},
+        {"GetNext",             GetNext},
+        {"GetPrev",             GetPrev},
         LUA_SENTINEL
     };
 

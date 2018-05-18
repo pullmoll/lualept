@@ -59,7 +59,7 @@ int
 ll_push_Dna(lua_State *L, L_Dna *da)
 {
     if (!da)
-        return 0;
+        return ll_push_nil(L);
     return ll_push_udata(L, LL_DNA, da);
 }
 
@@ -319,7 +319,7 @@ GetDValue(lua_State *L)
     l_int32 idx = ll_check_index(__func__, L, 2, l_dnaGetCount(da));
     lua_Number val;
     if (l_dnaGetDValue(da, idx, &val))
-        return 0;
+        return ll_push_nil(L);
     lua_pushnumber(L, val);
     return 1;
 }
@@ -340,7 +340,7 @@ GetIValue(lua_State *L)
     l_int32 idx = ll_check_index(__func__, L, 2, l_dnaGetCount(da));
     l_int32 val;
     if (l_dnaGetIValue(da, idx, &val))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, val);
     return 1;
 }
@@ -453,7 +453,7 @@ GetParameters(lua_State *L)
     lua_Number startx = 0;
     lua_Number deltax = 0;
     if (l_dnaGetParameters(da, &startx, &deltax))
-        return 0;
+        return ll_push_nil(L);
     lua_pushnumber(L, startx);
     lua_pushnumber(L, deltax);
     return 2;

@@ -59,7 +59,7 @@ int
 ll_push_Ptaa(lua_State *L, Ptaa *ptaa)
 {
     if (!ptaa)
-        return 0;
+        return ll_push_nil(L);
     return ll_push_udata(L, LL_PTAA, ptaa);
 }
 
@@ -163,7 +163,7 @@ GetPt(lua_State *L)
     l_float32 x;
     l_float32 y;
     if (ptaaGetPt(ptaa, ipta, ipt, &x, &y))
-        return 0;
+        return ll_push_nil(L);
     lua_pushnumber(L, (lua_Number)x);
     lua_pushnumber(L, (lua_Number)y);
     return 2;

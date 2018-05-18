@@ -59,7 +59,7 @@ int
 ll_push_Aset(lua_State *L, L_ASET *aset)
 {
     if (!aset)
-        return 0;
+        return ll_push_nil(L);
     return ll_push_udata(L, LL_ASET, aset);
 }
 
@@ -285,6 +285,76 @@ Find(lua_State *L)
 }
 
 /**
+ * \brief Get first node in an L_ASET* (%aset)
+ *
+ * Arg #1 (i.e. self) is expected to be a L_ASET* (aset)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 light user data on the Lua stack
+ */
+static int
+GetFirst(lua_State *L)
+{
+    L_ASET *aset = ll_check_Aset(L, 1);
+    L_ASET_NODE *node = l_asetGetFirst(aset);
+    lua_pushlightuserdata(L, node);
+    return 1;
+}
+
+/**
+ * \brief Get next node of L_ASET_NODE* (%node)
+ *
+ * Arg #1 is expected to be a L_ASET_NODE* (node)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 light user data on the Lua stack
+ */
+static int
+GetNext(lua_State *L)
+{
+    /* HACK: deconstify */
+    L_ASET_NODE *node = reinterpret_cast<L_ASET_NODE *>(reinterpret_cast<intptr_t>(lua_topointer(L, 2)));
+    L_ASET_NODE *next = l_asetGetNext(node);
+    lua_pushlightuserdata(L, next);
+    return 1;
+}
+
+/**
+ * \brief Get previous node of L_ASET_NODE* (%node)
+ *
+ * Arg #1 (i.e. self) is expected to be a L_ASET_NODE* (node)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 light user data on the Lua stack
+ */
+static int
+GetPrev(lua_State *L)
+{
+    /* HACK: deconstify */
+    L_ASET_NODE *node = reinterpret_cast<L_ASET_NODE *>(reinterpret_cast<intptr_t>(lua_topointer(L, 2)));
+    L_ASET_NODE *prev = l_asetGetPrev(node);
+    lua_pushlightuserdata(L, prev);
+    return 1;
+}
+
+/**
+ * \brief Get last node in an L_ASET* (%aset)
+ *
+ * Arg #1 (i.e. self) is expected to be a L_ASET* (aset)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 light user data on the Lua stack
+ */
+static int
+GetLast(lua_State *L)
+{
+    L_ASET *aset = ll_check_Amap(L, 1);
+    L_ASET_NODE *node = l_asetGetLast(aset);
+    lua_pushlightuserdata(L, node);
+    return 1;
+}
+
+/**
  * \brief Register the ASET methods and functions in the LL_ASET meta table
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
@@ -303,11 +373,15 @@ ll_register_Aset(lua_State *L)
         {"Insert",              Insert},
         {"Delete",              Delete},
         {"Find",                Find},
+        {"GetFirst",            GetFirst},
+        {"GetLast",             GetLast},
         LUA_SENTINEL
     };
 
     static const luaL_Reg functions[] = {
         {"Create",              Create},
+        {"GetNext",             GetNext},
+        {"GetPrev",             GetPrev},
         LUA_SENTINEL
     };
 

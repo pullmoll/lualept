@@ -90,7 +90,7 @@ int
 ll_push_Pix(lua_State *L, Pix *pix)
 {
     if (!pix)
-        return 0;
+        return ll_push_nil(L);
     return ll_push_udata(L, LL_PIX, pix);
 }
 
@@ -488,7 +488,7 @@ GetDimensions(lua_State *L)
     Pix *pix = ll_check_Pix(L, 1);
     l_int32 width, height, depth;
     if (pixGetDimensions(pix, &width, &height, &depth))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, width);
     lua_pushinteger(L, height);
     lua_pushinteger(L, depth);
@@ -703,7 +703,7 @@ GetResolution(lua_State *L)
     Pix *pix = ll_check_Pix(L, 1);
     l_int32 xres, yres;
     if (pixGetResolution(pix, &xres, &yres))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, xres);
     lua_pushinteger(L, yres);
     return 2;
@@ -960,7 +960,7 @@ GetPixel(lua_State *L)
     l_int32 y = ll_check_l_int32(__func__, L, 3);
     l_uint32 val = 0;
     if (pixGetPixel(pix, x, y, &val))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, val);
     return 1;
 }
@@ -1007,7 +1007,7 @@ GetRGBPixel(lua_State *L)
     l_int32 gval = 0;
     l_int32 bval = 0;
     if (pixGetRGBPixel(pix, x, y, &rval, &gval, &bval))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, rval);
     lua_pushinteger(L, gval);
     lua_pushinteger(L, bval);
@@ -1056,7 +1056,7 @@ GetRandomPixel(lua_State *L)
     l_int32 y = 0;
     l_uint32 val = 0;
     if (pixGetRandomPixel(pix, &val, &x, &y))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, val);
     lua_pushinteger(L, x);
     lua_pushinteger(L, y);
@@ -1119,7 +1119,7 @@ GetBlackOrWhiteVal(lua_State *L)
     l_int32 op = ll_check_getval(L, 2, L_GET_BLACK_VAL);
     l_uint32 val = 0;
     if (pixGetBlackOrWhiteVal(pix, op, &val))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, val);
     return 1;
 }
@@ -1138,7 +1138,7 @@ GetBlackVal(lua_State *L)
     Pix *pix = ll_check_Pix(L, 1);
     l_uint32 val = 0;
     if (pixGetBlackOrWhiteVal(pix, L_GET_BLACK_VAL, &val))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, val);
     return 1;
 }
@@ -1157,7 +1157,7 @@ GetWhiteVal(lua_State *L)
     Pix *pix = ll_check_Pix(L, 1);
     l_uint32 val = 0;
     if (pixGetBlackOrWhiteVal(pix, L_GET_WHITE_VAL, &val))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, val);
     return 1;
 }
@@ -1923,7 +1923,7 @@ GetRGBLine(lua_State *L)
         LEPT_FREE(bufr);
         LEPT_FREE(bufg);
         LEPT_FREE(bufb);
-        return 0;
+        return ll_push_nil(L);
     }
     lua_pushlstring(L, (const char *)bufr, width);
     lua_pushlstring(L, (const char *)bufg, width);
@@ -1948,7 +1948,7 @@ AlphaIsOpaque(lua_State *L)
     Pix *pix = ll_check_Pix(L, 1);
     l_int32 opaque = 0;
     if (pixAlphaIsOpaque(pix, &opaque))
-        return 0;
+        return ll_push_nil(L);
     lua_pushboolean(L, opaque);
     return 1;
 }
@@ -2230,7 +2230,7 @@ GetColorNearMaskBoundary(lua_State *L)
     l_uint32 val = 0;
     l_int32 dist = ll_check_l_int32(__func__, L, 4);
     if (pixGetColorNearMaskBoundary(pixs, pixm, box, dist, &val, 0))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, val);
     return 1;
 }
@@ -2342,7 +2342,7 @@ Zero(lua_State *L)
     Pix *pixs = ll_check_Pix(L, 1);
     l_int32 empty = 0;
     if (pixZero(pixs, &empty))
-        return 0;
+        return ll_push_nil(L);
     lua_pushboolean(L, empty);
     return 1;
 }
@@ -2361,7 +2361,7 @@ ForegroundFraction(lua_State *L)
     Pix *pixs = ll_check_Pix(L, 1);
     l_float32 fract = 0;
     if (pixForegroundFraction(pixs, &fract))
-        return 0;
+        return ll_push_nil(L);
     lua_pushnumber(L, (lua_Number) fract);
     return 1;
 }
@@ -2380,7 +2380,7 @@ CountPixels(lua_State *L)
     Pix *pixs = ll_check_Pix(L, 1);
     l_int32 count = 0;
     if (pixCountPixels(pixs, &count, nullptr))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, count);
     return 1;
 }
@@ -2401,7 +2401,7 @@ CountPixelsInRect(lua_State *L)
     Box *box = ll_check_Box(L, 2);
     l_int32 count = 0;
     if (pixCountPixelsInRect(pixs, box, &count, nullptr))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, count);
     return 1;
 }
@@ -2453,7 +2453,7 @@ CountPixelsInRow(lua_State *L)
     l_int32 row = ll_check_l_int32(__func__, L, 2);
     l_int32 count = 0;
     if (pixCountPixelsInRow(pixs, row, &count, nullptr))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, count);
     return 1;
 }
@@ -2492,7 +2492,7 @@ ThresholdPixelSum(lua_State *L)
     l_int32 thresh = ll_check_l_int32(__func__, L, 2);
     l_int32 above = 0;
     if (pixThresholdPixelSum(pixs, thresh, &above, nullptr))
-        return 0;
+        return ll_push_nil(L);
     lua_pushboolean(L, above);
     return 1;
 }
@@ -2553,7 +2553,7 @@ AverageInRect(lua_State *L)
     Box *box = lua_isuserdata(L, 2) ? ll_check_Box(L, 2) : nullptr;
     l_float32 ave = 0.0f;
     if (pixAverageInRect(pixs, box, &ave))
-        return 0;
+        return ll_push_nil(L);
     lua_pushnumber(L, (lua_Number) ave);
     return 1;
 }
@@ -2610,7 +2610,7 @@ VarianceInRect(lua_State *L)
     Box *box = lua_isuserdata(L, 2) ? ll_check_Box(L, 2) : nullptr;
     l_float32 sqrvar = 0.0f;
     if (pixVarianceInRect(pixs, box, &sqrvar))
-        return 0;
+        return ll_push_nil(L);
     lua_pushnumber(L, (lua_Number) sqrvar);
     return 1;
 }
@@ -2669,7 +2669,7 @@ AbsDiffInRect(lua_State *L)
     l_int32 dir = ll_check_direction(L, 3, L_HORIZONTAL_LINE);
     l_float32 absdiff = 0.0f;
     if (pixAbsDiffInRect(pixs, box, dir, &absdiff))
-        return 0;
+        return ll_push_nil(L);
     lua_pushnumber(L, (lua_Number) absdiff);
     return 1;
 }
@@ -2693,7 +2693,7 @@ AbsDiffOnLine(lua_State *L)
     l_int32 y2 = ll_check_l_int32(__func__, L, 5);
     l_float32 absdiff = 0.0f;
     if (pixAbsDiffOnLine(pixs, x1, y1, x2, y2, &absdiff))
-        return 0;
+        return ll_push_nil(L);
     lua_pushnumber(L, (lua_Number) absdiff);
     return 1;
 }
@@ -2718,7 +2718,7 @@ CountArbInRect(lua_State *L)
     Box *box = lua_isuserdata(L, 4) ? ll_check_Box(L, 4) : nullptr;
     l_int32 count;
     if (pixCountArbInRect(pixs, box, val, factor, &count))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, count);
     return 1;
 }
@@ -2767,7 +2767,7 @@ FindRepCloseTile(lua_State *L)
     l_int32 ntiles = ll_check_l_int32(__func__, L, 6);
     Box *boxtile = nullptr;
     if (pixFindRepCloseTile(pixs, box, searchdir, mindist, tsize, ntiles, &boxtile, 0))
-        return 0;
+        return ll_push_nil(L);
     return ll_push_Box(L, boxtile);
 }
 
@@ -2869,7 +2869,7 @@ GetColorHistogram(lua_State *L)
     Numa *nag = nullptr;
     Numa *nab = nullptr;
     if (pixGetColorHistogram(pixs, factor, &nar, &nag, &nab))
-        return 0;
+        return ll_push_nil(L);
     return ll_push_Numa(L, nar) + ll_push_Numa(L, nag) + ll_push_Numa(L, nab);
 }
 
@@ -2897,7 +2897,7 @@ GetColorHistogramMasked(lua_State *L)
     Numa *nag = nullptr;
     Numa *nab = nullptr;
     if (pixGetColorHistogramMasked(pixs, pixm, x, y, factor, &nar, &nag, &nab))
-        return 0;
+        return ll_push_nil(L);
     return ll_push_Numa(L, nar) + ll_push_Numa(L, nag) + ll_push_Numa(L, nab);
 }
 
@@ -3012,7 +3012,7 @@ GetRankValue(lua_State *L)
     l_float32 rank = ll_check_l_float32(__func__, L, 3);
     l_uint32 value = 0;
     if (pixGetRankValue(pixs, factor, rank, &value))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, value);
     return 1;
 }
@@ -3041,7 +3041,7 @@ GetRankValueMaskedRGB(lua_State *L)
     l_float32 rank = ll_check_l_int32(__func__, L, 6);
     l_float32 rval = 0.0f, gval = 0.0f, bval = 0.0f;
     if (pixGetRankValueMaskedRGB(pixs, pixm, x, y, factor, rank, &rval, &gval, &bval))
-        return 0;
+        return ll_push_nil(L);
     lua_pushnumber(L, (lua_Number)rval);
     lua_pushnumber(L, (lua_Number)gval);
     lua_pushnumber(L, (lua_Number)bval);
@@ -3073,7 +3073,7 @@ GetRankValueMasked(lua_State *L)
     l_float32 value = 0.0f;
     Numa *na = nullptr;
     if (pixGetRankValueMasked(pixs, pixm, x, y, factor, rank, &value, &na))
-        return 0;
+        return ll_push_nil(L);
     lua_pushnumber(L, (lua_Number)value);
     ll_push_Numa(L, na);
     return 1;
@@ -3101,7 +3101,7 @@ GetPixelAverage(lua_State *L)
     l_int32 factor = ll_check_l_int32_default(__func__, L, 5, 1);
     l_uint32 value = 0;
     if (pixGetPixelAverage(pixs, pixm, x,y, factor, &value))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, value);
     return 1;
 }
@@ -3124,7 +3124,7 @@ GetPixelStats(lua_State *L)
     l_int32 factor = ll_check_l_int32_default(__func__, L, 3, 1);
     l_uint32 value = 0;
     if (pixGetPixelStats(pixs, factor, type, &value))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, value);
     return 1;
 }
@@ -3153,7 +3153,7 @@ GetAverageMaskedRGB(lua_State *L)
     l_int32 factor = ll_check_l_int32_default(__func__, L, 6, 1);
     l_float32 rval = 0.0, gval = 0.0, bval = 0.0;
     if (pixGetAverageMaskedRGB(pixs, pixm, x, y, factor, type, &rval, &gval, &bval))
-        return 0;
+        return ll_push_nil(L);
     lua_pushnumber(L, (lua_Number)rval);
     lua_pushnumber(L, (lua_Number)gval);
     lua_pushnumber(L, (lua_Number)bval);
@@ -3184,7 +3184,7 @@ GetAverageMasked(lua_State *L)
     l_int32 factor = ll_check_l_int32_default(__func__, L, 6, 1);
     l_float32 value = 0.0;
     if (pixGetAverageMasked(pixs, pixm, x, y, factor, type, &value))
-        return 0;
+        return ll_push_nil(L);
     lua_pushnumber(L, (lua_Number)value);
     return 3;
 }
@@ -3211,7 +3211,7 @@ GetAverageTiledRGB(lua_State *L)
     Pix *pixg = nullptr;
     Pix *pixb = nullptr;
     if (pixGetAverageTiledRGB(pixs, sx, sy, type, &pixr, &pixg, &pixb))
-        return 0;
+        return ll_push_nil(L);
     return ll_push_Pix(L, pixr) + ll_push_Pix(L, pixg) + ll_push_Pix(L, pixb);
 }
 
@@ -3258,7 +3258,7 @@ RowStats(lua_State *L)
     Numa *var = nullptr;
     Numa *rootvar = nullptr;
     if (pixRowStats(pixs, box, &mean, &median, &mode, &modecount, &var, &rootvar))
-        return 0;
+        return ll_push_nil(L);
     return ll_push_Numa(L, mean) +
             ll_push_Numa(L, median) +
             ll_push_Numa(L, mode) +
@@ -3288,7 +3288,7 @@ ColumnStats(lua_State *L)
     Numa *var = nullptr;
     Numa *rootvar = nullptr;
     if (pixColumnStats(pixs, box, &mean, &median, &mode, &modecount, &var, &rootvar))
-        return 0;
+        return ll_push_nil(L);
     return ll_push_Numa(L, mean) +
             ll_push_Numa(L, median) +
             ll_push_Numa(L, mode) +
@@ -3316,7 +3316,7 @@ GetRangeValues(lua_State *L)
     l_int32 minval = 0;
     l_int32 maxval = 0;
     if (pixGetRangeValues(pixs, factor, color, &minval, &maxval))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, minval);
     lua_pushinteger(L, maxval);
     return 2;
@@ -3343,7 +3343,7 @@ GetExtremeValue(lua_State *L)
     l_int32 bval = 0;
     l_int32 grayval = 0;
     if (pixGetExtremeValue(pixs, factor, type, &rval, &gval, &bval, &grayval))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, rval);
     lua_pushinteger(L, gval);
     lua_pushinteger(L, bval);
@@ -3369,7 +3369,7 @@ GetMaxValueInRect(lua_State *L)
     l_int32 xmax = 0;
     l_int32 ymax = 0;
     if (pixGetMaxValueInRect(pixs, box, &maxval, &xmax, &ymax))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, maxval);
     lua_pushinteger(L, xmax);
     lua_pushinteger(L, ymax);
@@ -3402,7 +3402,7 @@ GetBinnedComponentRange(lua_State *L)
     l_int32 i;
 
     if (pixGetBinnedComponentRange(pixs, nbins, factor, color, &minval, &maxval, &carray, fontsize))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, minval);
     lua_pushinteger(L, maxval);
     for (i = 0; i < nbins; i++)
@@ -3433,7 +3433,7 @@ GetRankColorArray(lua_State *L)
     l_int32 i;
 
     if (pixGetRankColorArray(pixs, nbins, type, factor, &carray, 0, 0))
-        return 0;
+        return ll_push_nil(L);
     for (i = 0; i < nbins; i++)
         lua_pushinteger(L, carray[i]);
     free(carray);
@@ -3464,7 +3464,7 @@ GetBinnedColor(lua_State *L)
     l_int32 i;
 
     if (pixGetBinnedColor(pixs, pixg, factor, nbins, alut, &carray, 0))
-        return 0;
+        return ll_push_nil(L);
     for (i = 0; i < nbins; i++)
         lua_pushinteger(L, carray[i]);
     return nbins;
@@ -3543,7 +3543,7 @@ GetRowStats(lua_State *L)
     l_float32 *colvect = (l_float32 *)LEPT_CALLOC(nbins, sizeof(l_float32));
     l_int32 i;
     if (pixGetRowStats(pixs, type, nbins, thresh, colvect))
-        return 0;
+        return ll_push_nil(L);
     for (i = 0; i < nbins; i++)
         lua_pushnumber(L, (lua_Number) colvect[i]);
     return nbins;
@@ -3567,7 +3567,7 @@ GetColumnStats(lua_State *L)
     l_float32 *rowvect = (l_float32 *)LEPT_CALLOC(nbins, sizeof(l_float32));
     l_int32 i;
     if (pixGetColumnStats(pixs, type, nbins, thresh, rowvect))
-        return 0;
+        return ll_push_nil(L);
     for (i = 0; i < nbins; i++)
         lua_pushnumber(L, (lua_Number) rowvect[i]);
     return nbins;
@@ -3618,7 +3618,7 @@ ThresholdForFgBg(lua_State *L)
     l_int32 fgval;
     l_int32 bgval;
     if (pixThresholdForFgBg(pixs, factor, thresh, &fgval, &bgval))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, fgval);
     lua_pushinteger(L, bgval);
     return 2;
@@ -3643,7 +3643,7 @@ SplitDistributionFgBg(lua_State *L)
     l_int32 fgval;
     l_int32 bgval;
     if (pixSplitDistributionFgBg(pixs, scorefract, factor, &thresh, &fgval, &bgval, nullptr))
-        return 0;
+        return ll_push_nil(L);
     lua_pushinteger(L, thresh);
     lua_pushinteger(L, fgval);
     lua_pushinteger(L, bgval);
@@ -3651,12 +3651,12 @@ SplitDistributionFgBg(lua_State *L)
 }
 
 static int
-FindAreadPerimRatio(lua_State *L)
+FindAreaPerimRatio(lua_State *L)
 {
     Pix *pixs = ll_check_Pix(L, 1);
     l_float32 fract = 0.0f;
     if (pixFindAreaPerimRatio(pixs, tab8, &fract))
-        return 0;
+        return ll_push_nil(L);
     lua_pushnumber(L, (lua_Number)fract);
     return 1;
 }
@@ -3667,7 +3667,7 @@ FindPerimToAreaRatio(lua_State *L)
     Pix *pixs = ll_check_Pix(L, 1);
     l_float32 fract = 0.0f;
     if (pixFindPerimToAreaRatio(pixs, tab8, &fract))
-        return 0;
+        return ll_push_nil(L);
     lua_pushnumber(L, (lua_Number)fract);
     return 1;
 }
@@ -3950,6 +3950,8 @@ ll_register_Pix(lua_State *L)
         {"SetPixelColumn",          SetPixelColumn},
         {"ThresholdForFgBg",        ThresholdForFgBg},
         {"SplitDistributionFgBg",   SplitDistributionFgBg},
+        {"FindAreaPerimRatio",      FindAreaPerimRatio},
+        {"FindPerimToAreaRatio",    FindPerimToAreaRatio},
         {"Write",                   Write},
         LUA_SENTINEL
     };
