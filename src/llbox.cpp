@@ -38,54 +38,6 @@
  *====================================================================*/
 
 /**
- * @brief Check Lua stack at index %arg for udata of class LL_BOX
- * \param L pointer to the lua_State
- * \param arg index where to find the user data (usually 1)
- * \return pointer to the Box* contained in the user data
- */
-Box *
-ll_check_Box(lua_State *L, int arg)
-{
-    return *(reinterpret_cast<Box **>(ll_check_udata(L, arg, LL_BOX)));
-}
-
-/**
- * \brief Push BOX user data to the Lua stack and set its meta table
- * \param L pointer to the lua_State
- * \param box pointer to the BOX
- * \return 1 Box* on the Lua stack
- */
-int
-ll_push_Box(lua_State *L, Box *box)
-{
-    if (!box)
-        return ll_push_nil(L);
-    return ll_push_udata(L, LL_BOX, box);
-}
-
-/**
- * \brief Create and push a new Box*
- *
- * Arg #1 is expected to be a l_int32 (x)
- * Arg #2 is expected to be a l_int32 (y)
- * Arg #3 is expected to be a l_int32 (w)
- * Arg #4 is expected to be a l_int32 (h)
- *
- * \param L pointer to the lua_State
- * \return 1 Box* on the Lua stack
- */
-int
-ll_new_Box(lua_State *L)
-{
-    l_int32 x = ll_check_l_int32_default(__func__, L, 1, 0);
-    l_int32 y = ll_check_l_int32_default(__func__, L, 2, 0);
-    l_int32 w = ll_check_l_int32_default(__func__, L, 3, 1);
-    l_int32 h = ll_check_l_int32_default(__func__, L, 4, 1);
-    Box *box = boxCreate(x, y, w, h);
-    return ll_push_Box(L, box);
-}
-
-/**
  * @brief Printable string for a Box*
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
@@ -93,8 +45,9 @@ ll_new_Box(lua_State *L)
 static int
 toString(lua_State *L)
 {
+    FUNC(LL_BOX ".toString");
     static char str[256];
-    Box *box = ll_check_Box(L, 1);
+    Box *box = ll_check_Box(_fun, L, 1);
     luaL_Buffer B;
     l_int32 x, y, w, h;
 
@@ -129,7 +82,13 @@ toString(lua_State *L)
 static int
 Create(lua_State *L)
 {
-    return ll_new_Box(L);
+    FUNC(LL_BOX ".Create");
+    l_int32 x = ll_check_l_int32_default(_fun, L, 1, 0);
+    l_int32 y = ll_check_l_int32_default(_fun, L, 2, 0);
+    l_int32 w = ll_check_l_int32_default(_fun, L, 3, 1);
+    l_int32 h = ll_check_l_int32_default(_fun, L, 4, 1);
+    Box *box = boxCreate(x, y, w, h);
+    return ll_push_Box(_fun, L, box);
 }
 
 /**
@@ -146,15 +105,16 @@ Create(lua_State *L)
 static int
 CreateValid(lua_State *L)
 {
+    FUNC(LL_BOX ".CreateValid");
     l_int32 x, y, w, h;
     Box *box;
 
-    x = ll_check_l_int32_default(__func__, L, 1, 0);
-    y = ll_check_l_int32_default(__func__, L, 2, 0);
-    w = ll_check_l_int32_default(__func__, L, 3, 1);
-    h = ll_check_l_int32_default(__func__, L, 4, 1);
+    x = ll_check_l_int32_default(_fun, L, 1, 0);
+    y = ll_check_l_int32_default(_fun, L, 2, 0);
+    w = ll_check_l_int32_default(_fun, L, 3, 1);
+    h = ll_check_l_int32_default(_fun, L, 4, 1);
     box = boxCreateValid(x, y, w, h);
-    return ll_push_Box(L, box);
+    return ll_push_Box(_fun, L, box);
 }
 
 /**
@@ -168,10 +128,11 @@ CreateValid(lua_State *L)
 static int
 Copy(lua_State *L)
 {
+    FUNC(LL_BOX ".Copy");
     Box *boxs, *box;
-    boxs = ll_check_Box(L, 1);
+    boxs = ll_check_Box(_fun, L, 1);
     box = boxCopy(boxs);
-    return ll_push_Box(L, box);
+    return ll_push_Box(_fun, L, box);
 }
 
 /**
@@ -185,10 +146,11 @@ Copy(lua_State *L)
 static int
 Clone(lua_State *L)
 {
+    FUNC(LL_BOX ".Clone");
     Box *boxs, *box;
-    boxs = ll_check_Box(L, 1);
+    boxs = ll_check_Box(_fun, L, 1);
     box = boxClone(boxs);
-    return ll_push_Box(L, box);
+    return ll_push_Box(_fun, L, box);
 }
 
 /**
@@ -200,8 +162,9 @@ Clone(lua_State *L)
 static int
 Destroy(lua_State *L)
 {
-    Box **pbox = reinterpret_cast<Box **>(ll_check_udata(L, 1, LL_BOX));
-    DBG(LOG_DESTROY, "%s: '%s' pbox=%p box=%p refcount=%d\n", __func__,
+    FUNC(LL_BOX ".Destroy");
+    Box **pbox = reinterpret_cast<Box **>(ll_check_udata(_fun, L, 1, LL_BOX));
+    DBG(LOG_DESTROY, "%s: '%s' pbox=%p box=%p refcount=%d\n", _fun,
         LL_BOX, pbox, *pbox, boxGetRefcount(*pbox));
     boxDestroy(pbox);
     *pbox = nullptr;
@@ -219,7 +182,8 @@ Destroy(lua_State *L)
 static int
 GetGeometry(lua_State *L)
 {
-    Box *box = ll_check_Box(L, 1);
+    FUNC(LL_BOX ".GetGeometry");
+    Box *box = ll_check_Box(_fun, L, 1);
     l_int32 x, y, w, h;
     if (boxGetGeometry(box, &x, &y, &w, &h))
         return ll_push_nil(L);
@@ -245,11 +209,12 @@ GetGeometry(lua_State *L)
 static int
 SetGeometry(lua_State *L)
 {
-    Box *box = ll_check_Box(L, 1);
-    l_int32 x = ll_check_l_int32_default(__func__, L, 2, 0);
-    l_int32 y = ll_check_l_int32_default(__func__, L, 3, 0);
-    l_int32 w = ll_check_l_int32_default(__func__, L, 4, 1);
-    l_int32 h = ll_check_l_int32_default(__func__, L, 5, 1);
+    FUNC(LL_BOX ".SetGeometry");
+    Box *box = ll_check_Box(_fun, L, 1);
+    l_int32 x = ll_check_l_int32_default(_fun, L, 2, 0);
+    l_int32 y = ll_check_l_int32_default(_fun, L, 3, 0);
+    l_int32 w = ll_check_l_int32_default(_fun, L, 4, 1);
+    l_int32 h = ll_check_l_int32_default(_fun, L, 5, 1);
     lua_pushboolean(L, 0 == boxSetGeometry(box, x, y, w, h));
     return 1;
 }
@@ -265,7 +230,8 @@ SetGeometry(lua_State *L)
 static int
 GetSideLocations(lua_State *L)
 {
-    Box *box = ll_check_Box(L, 1);
+    FUNC(LL_BOX ".GetSideLocations");
+    Box *box = ll_check_Box(_fun, L, 1);
     l_int32 l, r, t, b;
     if (boxGetSideLocations(box, &l, &r, &t, &b))
         return ll_push_nil(L);
@@ -291,11 +257,12 @@ GetSideLocations(lua_State *L)
 static int
 SetSideLocations(lua_State *L)
 {
-    Box *box = ll_check_Box(L, 1);
-    l_int32 l = ll_check_l_int32_default(__func__, L, 2, 0);
-    l_int32 r = ll_check_l_int32_default(__func__, L, 3, 0);
-    l_int32 t = ll_check_l_int32_default(__func__, L, 4, 0);
-    l_int32 b = ll_check_l_int32_default(__func__, L, 5, 0);
+    FUNC(LL_BOX ".SetSideLocations");
+    Box *box = ll_check_Box(_fun, L, 1);
+    l_int32 l = ll_check_l_int32_default(_fun, L, 2, 0);
+    l_int32 r = ll_check_l_int32_default(_fun, L, 3, 0);
+    l_int32 t = ll_check_l_int32_default(_fun, L, 4, 0);
+    l_int32 b = ll_check_l_int32_default(_fun, L, 5, 0);
     lua_pushboolean(L, 0 == boxSetSideLocations(box, l, r, t, b));
     return 1;
 }
@@ -311,7 +278,8 @@ SetSideLocations(lua_State *L)
 static int
 GetRefcount(lua_State *L)
 {
-    Box *box = ll_check_Box(L, 1);
+    FUNC(LL_BOX ".GetRefcount");
+    Box *box = ll_check_Box(_fun, L, 1);
     lua_pushinteger(L, boxGetRefcount(box));
     return 1;
 }
@@ -328,8 +296,9 @@ GetRefcount(lua_State *L)
 static int
 ChangeRefcount(lua_State *L)
 {
-    Box *box = ll_check_Box(L, 1);
-    l_int32 delta = ll_check_l_int32(__func__, L, 2);
+    FUNC(LL_BOX ".ChangeRefcount");
+    Box *box = ll_check_Box(_fun, L, 1);
+    l_int32 delta = ll_check_l_int32(_fun, L, 2);
     lua_pushboolean(L, 0 == boxChangeRefcount(box, delta));
     return 1;
 }
@@ -345,7 +314,8 @@ ChangeRefcount(lua_State *L)
 static int
 IsValid(lua_State *L)
 {
-    Box *box = ll_check_Box(L, 1);
+    FUNC(LL_BOX ".IsValid");
+    Box *box = ll_check_Box(_fun, L, 1);
     l_int32 valid = 0;
     if (boxIsValid(box, &valid))
         return ll_push_nil(L);
@@ -365,8 +335,9 @@ IsValid(lua_State *L)
 static int
 Contains(lua_State *L)
 {
-    Box *box1 = ll_check_Box(L, 1);
-    Box *box2 = ll_check_Box(L, 2);
+    FUNC(LL_BOX ".Contains");
+    Box *box1 = ll_check_Box(_fun, L, 1);
+    Box *box2 = ll_check_Box(_fun, L, 2);
     l_int32 result = 0;
     if (boxContains(box1, box2, &result))
         return ll_push_nil(L);
@@ -386,8 +357,9 @@ Contains(lua_State *L)
 static int
 Intersects(lua_State *L)
 {
-    Box *box1 = ll_check_Box(L, 1);
-    Box *box2 = ll_check_Box(L, 2);
+    FUNC(LL_BOX ".Intersects");
+    Box *box1 = ll_check_Box(_fun, L, 1);
+    Box *box2 = ll_check_Box(_fun, L, 2);
     l_int32 result = 0;
     if (boxIntersects(box1, box2, &result))
         return ll_push_nil(L);
@@ -407,10 +379,11 @@ Intersects(lua_State *L)
 static int
 OverlapRegion(lua_State *L)
 {
-    Box *box1 = ll_check_Box(L, 1);
-    Box *box2 = ll_check_Box(L, 2);
+    FUNC(LL_BOX ".OverlapRegion");
+    Box *box1 = ll_check_Box(_fun, L, 1);
+    Box *box2 = ll_check_Box(_fun, L, 2);
     Box *box = boxOverlapRegion(box1, box2);
-    ll_push_Box(L, box);
+    ll_push_Box(_fun, L, box);
     return 1;
 }
 
@@ -426,10 +399,11 @@ OverlapRegion(lua_State *L)
 static int
 BoundingRegion(lua_State *L)
 {
-    Box *box1 = ll_check_Box(L, 1);
-    Box *box2 = ll_check_Box(L, 2);
+    FUNC(LL_BOX ".BoundingRegion");
+    Box *box1 = ll_check_Box(_fun, L, 1);
+    Box *box2 = ll_check_Box(_fun, L, 2);
     Box *box = boxBoundingRegion(box1, box2);
-    ll_push_Box(L, box);
+    ll_push_Box(_fun, L, box);
     return 1;
 }
 
@@ -445,8 +419,9 @@ BoundingRegion(lua_State *L)
 static int
 OverlapFraction(lua_State *L)
 {
-    Box *box1 = ll_check_Box(L, 1);
-    Box *box2 = ll_check_Box(L, 2);
+    FUNC(LL_BOX ".OverlapFraction");
+    Box *box1 = ll_check_Box(_fun, L, 1);
+    Box *box2 = ll_check_Box(_fun, L, 2);
     l_float32 fract = 0.0f;
     if (boxOverlapFraction(box1, box2, &fract))
         return ll_push_nil(L);
@@ -466,8 +441,9 @@ OverlapFraction(lua_State *L)
 static int
 OverlapArea(lua_State *L)
 {
-    Box *box1 = ll_check_Box(L, 1);
-    Box *box2 = ll_check_Box(L, 2);
+    FUNC(LL_BOX ".OverlapArea");
+    Box *box1 = ll_check_Box(_fun, L, 1);
+    Box *box2 = ll_check_Box(_fun, L, 2);
     l_int32 area = 0.0f;
     if (boxOverlapArea(box1, box2, &area))
         return ll_push_nil(L);
@@ -487,8 +463,9 @@ OverlapArea(lua_State *L)
 static int
 SeparationDistance(lua_State *L)
 {
-    Box *box1 = ll_check_Box(L, 1);
-    Box *box2 = ll_check_Box(L, 2);
+    FUNC(LL_BOX ".SeparationDistance");
+    Box *box1 = ll_check_Box(_fun, L, 1);
+    Box *box2 = ll_check_Box(_fun, L, 2);
     l_int32 h_sep = 0;
     l_int32 v_sep = 0;
     if (boxSeparationDistance(box1, box2, &h_sep, &v_sep))
@@ -511,9 +488,10 @@ SeparationDistance(lua_State *L)
 static int
 CompareSize(lua_State *L)
 {
-    Box *box1 = ll_check_Box(L, 1);
-    Box *box2 = ll_check_Box(L, 2);
-    l_int32 type = ll_check_sort_by(__func__, L, 3, L_SORT_BY_WIDTH);
+    FUNC(LL_BOX ".CompareSize");
+    Box *box1 = ll_check_Box(_fun, L, 1);
+    Box *box2 = ll_check_Box(_fun, L, 2);
+    l_int32 type = ll_check_sort_by(_fun, L, 3, L_SORT_BY_WIDTH);
     l_int32 rel = 0;
     if (boxCompareSize(box1, box2, type, &rel))
         return ll_push_nil(L);
@@ -534,9 +512,10 @@ CompareSize(lua_State *L)
 static int
 ContainsPt(lua_State *L)
 {
-    Box *box = ll_check_Box(L, 1);
-    l_float32 x = ll_check_l_float32(__func__, L, 2);
-    l_float32 y = ll_check_l_float32(__func__, L, 3);
+    FUNC(LL_BOX ".ContainsPt");
+    Box *box = ll_check_Box(_fun, L, 1);
+    l_float32 x = ll_check_l_float32(_fun, L, 2);
+    l_float32 y = ll_check_l_float32(_fun, L, 3);
     l_int32 contains = FALSE;
     if (boxContainsPt(box, x, y, &contains))
         return ll_push_nil(L);
@@ -555,7 +534,8 @@ ContainsPt(lua_State *L)
 static int
 GetCenter(lua_State *L)
 {
-    Box *box = ll_check_Box(L, 1);
+    FUNC(LL_BOX ".GetCenter");
+    Box *box = ll_check_Box(_fun, L, 1);
     l_float32 cx = 0;
     l_float32 cy = 0;
     if (boxGetCenter(box, &cx, &cy))
@@ -576,10 +556,11 @@ GetCenter(lua_State *L)
 static int
 IntersectByLine(lua_State *L)
 {
-    Box *box = ll_check_Box(L, 1);
-    l_int32 x = ll_check_l_int32(__func__, L, 2);
-    l_int32 y = ll_check_l_int32(__func__, L, 3);
-    l_float32 slope = ll_check_l_float32(__func__, L, 4);
+    FUNC(LL_BOX ".IntersectByLine");
+    Box *box = ll_check_Box(_fun, L, 1);
+    l_int32 x = ll_check_l_int32(_fun, L, 2);
+    l_int32 y = ll_check_l_int32(_fun, L, 3);
+    l_float32 slope = ll_check_l_float32(_fun, L, 4);
     l_int32 x1 = 0;
     l_int32 y1 = 0;
     l_int32 x2 = 0;
@@ -606,11 +587,12 @@ IntersectByLine(lua_State *L)
 static int
 ClipToRectangle(lua_State *L)
 {
-    Box *boxs = ll_check_Box(L, 1);
-    l_int32 wi = ll_check_l_int32(__func__, L, 2);
-    l_int32 hi = ll_check_l_int32(__func__, L, 3);
+    FUNC(LL_BOX ".ClipToRectangle");
+    Box *boxs = ll_check_Box(_fun, L, 1);
+    l_int32 wi = ll_check_l_int32(_fun, L, 2);
+    l_int32 hi = ll_check_l_int32(_fun, L, 3);
     Box *box = boxClipToRectangle(boxs, wi, hi);
-    ll_push_Box(L, box);
+    ll_push_Box(_fun, L, box);
     return 1;
 }
 
@@ -625,9 +607,10 @@ ClipToRectangle(lua_State *L)
 static int
 ClipToRectangleParams(lua_State *L)
 {
-    Box *boxs = ll_check_Box(L, 1);
-    l_int32 w = ll_check_l_int32(__func__, L, 2);
-    l_int32 h = ll_check_l_int32(__func__, L, 3);
+    FUNC(LL_BOX ".ClipToRectangleParams");
+    Box *boxs = ll_check_Box(_fun, L, 1);
+    l_int32 w = ll_check_l_int32(_fun, L, 2);
+    l_int32 h = ll_check_l_int32(_fun, L, 3);
     l_int32 xstart = 0;
     l_int32 ystart = 0;
     l_int32 xend = 0;
@@ -656,11 +639,12 @@ ClipToRectangleParams(lua_State *L)
 static int
 RelocateOneSide(lua_State *L)
 {
-    Box *boxs = ll_check_Box(L, 1);
-    l_int32 loc = ll_check_l_int32(__func__, L, 2);
-    l_int32 sideflag = ll_check_from_side(__func__, L, 3, L_FROM_LEFT);
+    FUNC(LL_BOX ".RelocateOneSide");
+    Box *boxs = ll_check_Box(_fun, L, 1);
+    l_int32 loc = ll_check_l_int32(_fun, L, 2);
+    l_int32 sideflag = ll_check_from_side(_fun, L, 3, L_FROM_LEFT);
     Box *boxd = boxRelocateOneSide(nullptr, boxs, loc, sideflag);
-    ll_push_Box(L, boxd);
+    ll_push_Box(_fun, L, boxd);
     return 1;
 }
 
@@ -675,13 +659,14 @@ RelocateOneSide(lua_State *L)
 static int
 AdjustSides(lua_State *L)
 {
-    Box *boxs = ll_check_Box(L, 1);
-    l_int32 delleft = ll_check_l_int32_default(__func__, L, 2, 0);
-    l_int32 delright = ll_check_l_int32_default(__func__, L, 3, 0);
-    l_int32 deltop = ll_check_l_int32_default(__func__, L, 4, 0);
-    l_int32 delbot = ll_check_l_int32_default(__func__, L, 5, 0);
+    FUNC(LL_BOX ".AdjustSides");
+    Box *boxs = ll_check_Box(_fun, L, 1);
+    l_int32 delleft = ll_check_l_int32_default(_fun, L, 2, 0);
+    l_int32 delright = ll_check_l_int32_default(_fun, L, 3, 0);
+    l_int32 deltop = ll_check_l_int32_default(_fun, L, 4, 0);
+    l_int32 delbot = ll_check_l_int32_default(_fun, L, 5, 0);
     Box *boxd = boxAdjustSides(nullptr, boxs, delleft, delright, deltop, delbot);
-    ll_push_Box(L, boxd);
+    ll_push_Box(_fun, L, boxd);
     return 1;
 }
 
@@ -697,8 +682,9 @@ AdjustSides(lua_State *L)
 static int
 Equal(lua_State *L)
 {
-    Box *box1 = ll_check_Box(L, 1);
-    Box *box2 = ll_check_Box(L, 2);
+    FUNC(LL_BOX ".Equal");
+    Box *box1 = ll_check_Box(_fun, L, 1);
+    Box *box2 = ll_check_Box(_fun, L, 2);
     l_int32 same = FALSE;
     if (boxEqual(box1, box2, &same))
         return ll_push_nil(L);
@@ -722,12 +708,13 @@ Equal(lua_State *L)
 static int
 Similar(lua_State *L)
 {
-    Box *box1 = ll_check_Box(L, 1);
-    Box *box2 = ll_check_Box(L, 2);
-    l_int32 leftdiff = ll_check_l_int32(__func__, L, 3);
-    l_int32 rightdiff = ll_check_l_int32_default(__func__, L, 4, leftdiff);
-    l_int32 topdiff = ll_check_l_int32_default(__func__, L, 5, rightdiff);
-    l_int32 botdiff = ll_check_l_int32_default(__func__, L, 6, topdiff);
+    FUNC(LL_BOX ".Similar");
+    Box *box1 = ll_check_Box(_fun, L, 1);
+    Box *box2 = ll_check_Box(_fun, L, 2);
+    l_int32 leftdiff = ll_check_l_int32(_fun, L, 3);
+    l_int32 rightdiff = ll_check_l_int32_default(_fun, L, 4, leftdiff);
+    l_int32 topdiff = ll_check_l_int32_default(_fun, L, 5, rightdiff);
+    l_int32 botdiff = ll_check_l_int32_default(_fun, L, 6, topdiff);
     l_int32 similar = FALSE;
     if (boxSimilar(box1, box2, leftdiff, rightdiff, topdiff, botdiff, &similar))
         return ll_push_nil(L);
@@ -750,13 +737,14 @@ Similar(lua_State *L)
 static int
 Transform(lua_State *L)
 {
-    Box *boxs = ll_check_Box(L, 1);
-    l_int32 shiftx = ll_check_l_int32(__func__, L, 2);
-    l_int32 shifty = ll_check_l_int32(__func__, L, 3);
-    l_float32 scalex = ll_check_l_float32_default(__func__, L, 4, 1.0f);
-    l_float32 scaley = ll_check_l_float32_default(__func__, L, 5, 1.0f);
+    FUNC(LL_BOX ".Transform");
+    Box *boxs = ll_check_Box(_fun, L, 1);
+    l_int32 shiftx = ll_check_l_int32(_fun, L, 2);
+    l_int32 shifty = ll_check_l_int32(_fun, L, 3);
+    l_float32 scalex = ll_check_l_float32_default(_fun, L, 4, 1.0f);
+    l_float32 scaley = ll_check_l_float32_default(_fun, L, 5, 1.0f);
     Box *box = boxTransform(boxs, shiftx, shifty, scalex, scaley);
-    ll_push_Box(L, box);
+    ll_push_Box(_fun, L, box);
     return 1;
 }
 
@@ -779,19 +767,20 @@ Transform(lua_State *L)
 static int
 TransformOrdered(lua_State *L)
 {
-    Box *boxs = ll_check_Box(L, 1);
+    FUNC(LL_BOX ".TransformOrdered");
+    Box *boxs = ll_check_Box(_fun, L, 1);
     l_float32 xc, yc;
     l_int32 ok = boxGetCenter(boxs, &xc, &yc);
-    l_int32 order = ll_check_order(__func__, L, 2, L_TR_SC_RO);
-    l_int32 shiftx = ll_check_l_int32_default(__func__, L, 3, 0);
-    l_int32 shifty = ll_check_l_int32_default(__func__, L, 4, 0);
-    l_float32 scalex = ll_check_l_float32_default(__func__, L, 5, 1.0f);
-    l_float32 scaley = ll_check_l_float32_default(__func__, L, 6, 1.0f);
-    l_int32 xcen = ll_check_l_int32_default(__func__, L, 7, ok ? static_cast<l_int32>(xc) : 0);
-    l_int32 ycen = ll_check_l_int32_default(__func__, L, 8, ok ? static_cast<l_int32>(yc) : 0);
-    l_float32 angle = ll_check_l_float32_default(__func__, L, 9, 0.0f);
+    l_int32 order = ll_check_order(_fun, L, 2, L_TR_SC_RO);
+    l_int32 shiftx = ll_check_l_int32_default(_fun, L, 3, 0);
+    l_int32 shifty = ll_check_l_int32_default(_fun, L, 4, 0);
+    l_float32 scalex = ll_check_l_float32_default(_fun, L, 5, 1.0f);
+    l_float32 scaley = ll_check_l_float32_default(_fun, L, 6, 1.0f);
+    l_int32 xcen = ll_check_l_int32_default(_fun, L, 7, ok ? static_cast<l_int32>(xc) : 0);
+    l_int32 ycen = ll_check_l_int32_default(_fun, L, 8, ok ? static_cast<l_int32>(yc) : 0);
+    l_float32 angle = ll_check_l_float32_default(_fun, L, 9, 0.0f);
     Box *box = boxTransformOrdered(boxs, shiftx, shifty, scalex, scaley, xcen, ycen, angle, order);
-    ll_push_Box(L, box);
+    ll_push_Box(_fun, L, box);
     return 1;
 }
 
@@ -806,13 +795,57 @@ TransformOrdered(lua_State *L)
 static int
 RotateOrth(lua_State *L)
 {
-    Box *boxs = ll_check_Box(L, 1);
-    l_int32 w = ll_check_l_int32(__func__, L, 2);
-    l_int32 h = ll_check_l_int32(__func__, L, 3);
-    l_int32 rotation = ll_check_rotation(__func__, L, 4, 0);
+    FUNC(LL_BOX ".RotateOrth");
+    Box *boxs = ll_check_Box(_fun, L, 1);
+    l_int32 w = ll_check_l_int32(_fun, L, 2);
+    l_int32 h = ll_check_l_int32(_fun, L, 3);
+    l_int32 rotation = ll_check_rotation(_fun, L, 4, 0);
     Box *box = boxRotateOrth(boxs, w, h, rotation);
-    ll_push_Box(L, box);
+    ll_push_Box(_fun, L, box);
     return 1;
+}
+
+/**
+ * @brief Check Lua stack at index %arg for udata of class LL_BOX
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the Box* contained in the user data
+ */
+Box *
+ll_check_Box(const char* _fun, lua_State *L, int arg)
+{
+    return *(reinterpret_cast<Box **>(ll_check_udata(_fun, L, arg, LL_BOX)));
+}
+
+/**
+ * \brief Push BOX user data to the Lua stack and set its meta table
+ * \param L pointer to the lua_State
+ * \param box pointer to the BOX
+ * \return 1 Box* on the Lua stack
+ */
+int
+ll_push_Box(const char* _fun, lua_State *L, Box *box)
+{
+    if (!box)
+        return ll_push_nil(L);
+    return ll_push_udata(_fun, L, LL_BOX, box);
+}
+
+/**
+ * \brief Create and push a new Box*
+ *
+ * Arg #1 is expected to be a l_int32 (x)
+ * Arg #2 is expected to be a l_int32 (y)
+ * Arg #3 is expected to be a l_int32 (w)
+ * Arg #4 is expected to be a l_int32 (h)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Box* on the Lua stack
+ */
+int
+ll_new_Box(lua_State *L)
+{
+    return Create(L);
 }
 
 /**

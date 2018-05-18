@@ -38,50 +38,6 @@
  *====================================================================*/
 
 /**
- * @brief Check Lua stack at index %arg for udata of class LL_BMF
- * \param L pointer to the lua_State
- * \param arg index where to find the user data (usually 1)
- * \return pointer to the Bmf* contained in the user data
- */
-L_Bmf *
-ll_check_Bmf(lua_State *L, int arg)
-{
-    return *(reinterpret_cast<L_Bmf **>(ll_check_udata(L, arg, LL_BMF)));
-}
-
-/**
- * \brief Push BMF user data to the Lua stack and set its meta table
- * \param L pointer to the lua_State
- * \param head pointer to the BMF
- * \return 1 Bmf* on the Lua stack
- */
-int
-ll_push_Bmf(lua_State *L, L_Bmf *bmf)
-{
-    if (!bmf)
-        return ll_push_nil(L);
-    return ll_push_udata(L, LL_BMF, bmf);
-}
-
-/**
- * \brief Create and push a new Bmf*
- *
- * Arg #1 is expected to be a string (dir)
- * Arg #2 is expected to be a l_int32 (fontsize)
- *
- * \param L pointer to the lua_State
- * \return 1 Bmf* on the Lua stack
- */
-int
-ll_new_Bmf(lua_State *L)
-{
-    const char* dir = lua_tostring(L, 1);
-    l_int32 fontsize = ll_check_l_int32_default(__func__, L, 2, 6);
-    L_Bmf *bmf = bmfCreate(dir, fontsize);
-    return ll_push_Bmf(L, bmf);
-}
-
-/**
  * \brief Create a new Bmf*
  *
  * Arg #1 is expected to be a string (dir)
@@ -93,7 +49,11 @@ ll_new_Bmf(lua_State *L)
 static int
 Create(lua_State *L)
 {
-    return ll_new_Bmf(L);
+    FUNC(LL_BMF ".Create");
+    const char* dir = ll_check_string(_fun, L, 1);
+    l_int32 fontsize = ll_check_l_int32_default(_fun, L, 2, 6);
+    L_Bmf *bmf = bmfCreate(dir, fontsize);
+    return ll_push_Bmf(_fun, L, bmf);
 }
 
 /**
@@ -105,9 +65,10 @@ Create(lua_State *L)
 static int
 Destroy(lua_State *L)
 {
-    L_Bmf **pbmf = reinterpret_cast<L_Bmf **>(ll_check_udata(L, 1, LL_BMF));
+    FUNC(LL_BMF ".Destroy");
+    L_Bmf **pbmf = reinterpret_cast<L_Bmf **>(ll_check_udata(_fun, L, 1, LL_BMF));
     DBG(LOG_DESTROY, "%s: '%s' pbmf=%p bmf=%p\n",
-        __func__, LL_BMF, pbmf, *pbmf);
+        _fun, LL_BMF, pbmf, *pbmf);
     bmfDestroy(pbmf);
     *pbmf = nullptr;
     return 0;
@@ -125,10 +86,11 @@ Destroy(lua_State *L)
 static int
 GetPix(lua_State *L)
 {
-    L_Bmf *bmf = ll_check_Bmf(L, 1);
-    char chr = ll_check_char(__func__, L, 2);
+    FUNC(LL_BMF ".GetPix");
+    L_Bmf *bmf = ll_check_Bmf(_fun, L, 1);
+    char chr = ll_check_char(_fun, L, 2);
     Pix *pix = bmfGetPix(bmf, chr);
-    return ll_push_Pix(L, pix);
+    return ll_push_Pix(_fun, L, pix);
 }
 
 /**
@@ -143,8 +105,9 @@ GetPix(lua_State *L)
 static int
 GetWidth(lua_State *L)
 {
-    L_Bmf *bmf = ll_check_Bmf(L, 1);
-    char chr = ll_check_char(__func__, L, 2);
+    FUNC(LL_BMF ".GetWidth");
+    L_Bmf *bmf = ll_check_Bmf(_fun, L, 1);
+    char chr = ll_check_char(_fun, L, 2);
     l_int32 w = 0;
     if (bmfGetWidth(bmf, chr, &w))
         return ll_push_nil(L);
@@ -164,8 +127,9 @@ GetWidth(lua_State *L)
 static int
 GetBaseline(lua_State *L)
 {
-    L_Bmf *bmf = ll_check_Bmf(L, 1);
-    char chr = ll_check_char(__func__, L, 2);
+    FUNC(LL_BMF ".GetBaseline");
+    L_Bmf *bmf = ll_check_Bmf(_fun, L, 1);
+    char chr = ll_check_char(_fun, L, 2);
     l_int32 baseline = 0;
     if (bmfGetBaseline(bmf, chr, &baseline))
         return ll_push_nil(L);
@@ -185,8 +149,9 @@ GetBaseline(lua_State *L)
 static int
 GetStringWidth(lua_State *L)
 {
-    L_Bmf *bmf = ll_check_Bmf(L, 1);
-    const char* str = lua_tostring(L, 2);
+    FUNC(LL_BMF ".GetStringWidth");
+    L_Bmf *bmf = ll_check_Bmf(_fun, L, 1);
+    const char* str = ll_check_string(_fun, L, 2);
     l_int32 w;
     if (bmfGetStringWidth(bmf, str, &w))
         return ll_push_nil(L);
@@ -208,14 +173,56 @@ GetStringWidth(lua_State *L)
 static int
 GetLineStrings(lua_State *L)
 {
-    L_Bmf *bmf = ll_check_Bmf(L, 1);
-    const char* str = lua_tostring(L, 2);
-    l_int32 maxw = ll_check_l_int32(__func__, L, 3);
-    l_int32 firstident = ll_check_l_int32_default(__func__, L, 4, 0);
+    FUNC(LL_BMF ".GetLineStrings");
+    L_Bmf *bmf = ll_check_Bmf(_fun, L, 1);
+    const char* str = ll_check_string(_fun, L, 2);
+    l_int32 maxw = ll_check_l_int32(_fun, L, 3);
+    l_int32 firstident = ll_check_l_int32_default(_fun, L, 4, 0);
     l_int32 h = 0;
     SARRAY *sa = bmfGetLineStrings(bmf, str, maxw, firstident, &h);
     lua_pushinteger(L, h);
     return 1 + ll_push_sarray(L, sa);
+}
+
+/**
+ * @brief Check Lua stack at index %arg for udata of class LL_BMF
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the Bmf* contained in the user data
+ */
+L_Bmf *
+ll_check_Bmf(const char* _fun, lua_State *L, int arg)
+{
+    return *(reinterpret_cast<L_Bmf **>(ll_check_udata(_fun, L, arg, LL_BMF)));
+}
+
+/**
+ * \brief Push BMF user data to the Lua stack and set its meta table
+ * \param L pointer to the lua_State
+ * \param head pointer to the BMF
+ * \return 1 Bmf* on the Lua stack
+ */
+int
+ll_push_Bmf(const char* _fun, lua_State *L, L_Bmf *bmf)
+{
+    if (!bmf)
+        return ll_push_nil(L);
+    return ll_push_udata(_fun, L, LL_BMF, bmf);
+}
+
+/**
+ * \brief Create and push a new Bmf*
+ *
+ * Arg #1 is expected to be a string (dir)
+ * Arg #2 is expected to be a l_int32 (fontsize)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Bmf* on the Lua stack
+ */
+int
+ll_new_Bmf(lua_State *L)
+{
+    return Create(L);
 }
 
 /**

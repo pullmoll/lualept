@@ -38,48 +38,6 @@
  *====================================================================*/
 
 /**
- * @brief Check Lua stack at index %arg for udata of class LL_DNA
- * \param L pointer to the lua_State
- * \param arg index where to find the user data (usually 1)
- * \return pointer to the L_Dna* contained in the user data
- */
-L_Dna *
-ll_check_Dna(lua_State *L, int arg)
-{
-    return *(reinterpret_cast<L_Dna **>(ll_check_udata(L, arg, LL_DNA)));
-}
-
-/**
- * \brief Push DNA user data to the Lua stack and set its meta table
- * \param L pointer to the lua_State
- * \param da pointer to the L_DNA
- * \return 1 DNA* on the Lua stack
- */
-int
-ll_push_Dna(lua_State *L, L_Dna *da)
-{
-    if (!da)
-        return ll_push_nil(L);
-    return ll_push_udata(L, LL_DNA, da);
-}
-
-/**
- * \brief Create and push a new DNA*
- *
- * Arg #1 is expected to be a l_int32 (n)
- *
- * \param L pointer to the lua_State
- * \return 1 DNA* on the Lua stack
- */
-int
-ll_new_Dna(lua_State *L)
-{
-    l_int32 n = ll_check_l_int32_default(__func__, L, 1, 1);
-    L_Dna *da = l_dnaCreate(n);
-    return ll_push_Dna(L, da);
-}
-
-/**
  * @brief Printable string for a DNA*
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
@@ -87,8 +45,9 @@ ll_new_Dna(lua_State *L)
 static int
 toString(lua_State *L)
 {
+    FUNC(LL_DNA ".toString");
     static char str[256];
-    L_Dna *da = ll_check_Dna(L, 1);
+    L_Dna *da = ll_check_Dna(_fun, L, 1);
     luaL_Buffer B;
     l_int32 i;
     l_float64 val;
@@ -122,7 +81,10 @@ toString(lua_State *L)
 static int
 Create(lua_State *L)
 {
-    return ll_new_Dna(L);
+    FUNC(LL_DNA ".Create");
+    l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+    L_Dna *da = l_dnaCreate(n);
+    return ll_push_Dna(_fun, L, da);
 }
 
 /**
@@ -134,9 +96,10 @@ Create(lua_State *L)
 static int
 Destroy(lua_State *L)
 {
-    L_Dna **pda = reinterpret_cast<L_Dna**>(ll_check_udata(L, 1, LL_DNA));
+    FUNC(LL_DNA ".Destroy");
+    L_Dna **pda = reinterpret_cast<L_Dna**>(ll_check_udata(_fun, L, 1, LL_DNA));
     DBG(LOG_DESTROY, "%s: '%s' pda=%p da=%p refcount=%d\n",
-         __func__, LL_DNA, pda, *pda, l_dnaGetRefcount(*pda));
+         _fun, LL_DNA, pda, *pda, l_dnaGetRefcount(*pda));
     l_dnaDestroy(pda);
     *pda = nullptr;
     return 0;
@@ -153,7 +116,8 @@ Destroy(lua_State *L)
 static int
 GetCount(lua_State *L)
 {
-    L_Dna *da = ll_check_Dna(L, 1);
+    FUNC(LL_DNA ".GetCount");
+    L_Dna *da = ll_check_Dna(_fun, L, 1);
     l_int32 n = l_dnaGetCount(da);
     lua_pushinteger(L, n);
     return 1;
@@ -171,8 +135,9 @@ GetCount(lua_State *L)
 static int
 SetCount(lua_State *L)
 {
-    L_Dna *da = ll_check_Dna(L, 1);
-    l_int32 n = ll_check_l_int32(__func__, L, 2);
+    FUNC(LL_DNA ".SetCount");
+    L_Dna *da = ll_check_Dna(_fun, L, 1);
+    l_int32 n = ll_check_l_int32(_fun, L, 2);
     lua_pushboolean(L, 0 == l_dnaSetCount(da, n));
     return 1;
 }
@@ -188,9 +153,10 @@ SetCount(lua_State *L)
 static int
 Copy(lua_State *L)
 {
-    L_Dna *das = ll_check_Dna(L, 1);
+    FUNC(LL_DNA ".Copy");
+    L_Dna *das = ll_check_Dna(_fun, L, 1);
     L_Dna *da = l_dnaCopy(das);
-    return ll_push_Dna(L, da);
+    return ll_push_Dna(_fun, L, da);
 }
 
 /**
@@ -202,9 +168,10 @@ Copy(lua_State *L)
 static int
 Clone(lua_State *L)
 {
-    L_Dna *das = ll_check_Dna(L, 1);
+    FUNC(LL_DNA ".Clone");
+    L_Dna *das = ll_check_Dna(_fun, L, 1);
     L_Dna *da = l_dnaClone(das);
-    return ll_push_Dna(L, da);
+    return ll_push_Dna(_fun, L, da);
 }
 
 /**
@@ -218,7 +185,8 @@ Clone(lua_State *L)
 static int
 Empty(lua_State *L)
 {
-    L_Dna *da = ll_check_Dna(L, 1);
+    FUNC(LL_DNA ".Empty");
+    L_Dna *da = ll_check_Dna(_fun, L, 1);
     lua_pushboolean(L, 0 == l_dnaEmpty(da));
     return 1;
 }
@@ -235,7 +203,8 @@ Empty(lua_State *L)
 static int
 AddNumber(lua_State *L)
 {
-    L_Dna *da = ll_check_Dna(L, 1);
+    FUNC(LL_DNA ".AddNumber");
+    L_Dna *da = ll_check_Dna(_fun, L, 1);
     int isnumber = 0;
     lua_Number val = lua_tonumberx(L, 2, &isnumber);
     lua_pushboolean(L, isnumber && 0 == l_dnaAddNumber(da, val));
@@ -255,8 +224,9 @@ AddNumber(lua_State *L)
 static int
 InsertNumber(lua_State *L)
 {
-    L_Dna *da = ll_check_Dna(L, 1);
-    l_int32 idx = ll_check_index(__func__, L, 2, l_dnaGetCount(da));
+    FUNC(LL_DNA ".InsertNumber");
+    L_Dna *da = ll_check_Dna(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
     int isnumber = 0;
     lua_Number val = lua_tonumberx(L, 3, &isnumber);
     lua_pushboolean(
@@ -276,8 +246,9 @@ InsertNumber(lua_State *L)
 static int
 RemoveNumber(lua_State *L)
 {
-    L_Dna *da = ll_check_Dna(L, 1);
-    l_int32 idx = ll_check_index(__func__, L, 2, l_dnaGetCount(da));
+    FUNC(LL_DNA ".RemoveNumber");
+    L_Dna *da = ll_check_Dna(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
     lua_pushboolean(L, 0 == l_dnaRemoveNumber(da, idx));
     return 1;
 }
@@ -295,8 +266,9 @@ RemoveNumber(lua_State *L)
 static int
 ReplaceNumber(lua_State *L)
 {
-    L_Dna *da = ll_check_Dna(L, 1);
-    l_int32 idx = ll_check_index(__func__, L, 2, l_dnaGetCount(da));
+    FUNC(LL_DNA ".ReplaceNumber");
+    L_Dna *da = ll_check_Dna(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
     int isnumber = 0;
     lua_Number val = lua_tonumberx(L, 3, &isnumber);
     lua_pushboolean(L, isnumber && 0 == l_dnaReplaceNumber(da, idx, val) ? TRUE : FALSE);
@@ -315,8 +287,9 @@ ReplaceNumber(lua_State *L)
 static int
 GetDValue(lua_State *L)
 {
-    L_Dna *da = ll_check_Dna(L, 1);
-    l_int32 idx = ll_check_index(__func__, L, 2, l_dnaGetCount(da));
+    FUNC(LL_DNA ".GetDValue");
+    L_Dna *da = ll_check_Dna(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
     lua_Number val;
     if (l_dnaGetDValue(da, idx, &val))
         return ll_push_nil(L);
@@ -336,8 +309,9 @@ GetDValue(lua_State *L)
 static int
 GetIValue(lua_State *L)
 {
-    L_Dna *da = ll_check_Dna(L, 1);
-    l_int32 idx = ll_check_index(__func__, L, 2, l_dnaGetCount(da));
+    FUNC(LL_DNA ".GetIValue");
+    L_Dna *da = ll_check_Dna(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
     l_int32 val;
     if (l_dnaGetIValue(da, idx, &val))
         return ll_push_nil(L);
@@ -358,8 +332,9 @@ GetIValue(lua_State *L)
 static int
 SetValue(lua_State *L)
 {
-    L_Dna *da = ll_check_Dna(L, 1);
-    l_int32 idx = ll_check_index(__func__, L, 2, l_dnaGetCount(da));
+    FUNC(LL_DNA ".SetValue");
+    L_Dna *da = ll_check_Dna(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
     int isnumber = 0;
     lua_Number val = lua_tonumberx(L, 3, &isnumber);
     lua_pushboolean(L, isnumber && 0 == l_dnaSetValue(da, idx, val));
@@ -379,8 +354,9 @@ SetValue(lua_State *L)
 static int
 ShiftValue(lua_State *L)
 {
-    L_Dna *da = ll_check_Dna(L, 1);
-    l_int32 idx = ll_check_index(__func__, L, 2, l_dnaGetCount(da));
+    FUNC(LL_DNA ".ShiftValue");
+    L_Dna *da = ll_check_Dna(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
     int isnumber = 0;
     lua_Number diff = lua_tonumberx(L, 3, &isnumber);
     lua_pushboolean(L, isnumber && 0 == l_dnaShiftValue(da, idx, diff));
@@ -398,7 +374,8 @@ ShiftValue(lua_State *L)
 static int
 GetDArray(lua_State *L)
 {
-    L_Dna *dna = ll_check_Dna(L, 1);
+    FUNC(LL_DNA ".GetDArray");
+    L_Dna *dna = ll_check_Dna(_fun, L, 1);
     l_float64 *da = l_dnaGetDArray(dna, L_COPY);
     l_int32 n = l_dnaGetCount(dna);
     int res = ll_push_darray(L, da, n);
@@ -417,7 +394,8 @@ GetDArray(lua_State *L)
 static int
 GetIArray(lua_State *L)
 {
-    L_Dna *dna = ll_check_Dna(L, 1);
+    FUNC(LL_DNA ".GetIArray");
+    L_Dna *dna = ll_check_Dna(_fun, L, 1);
     l_int32 *ia = l_dnaGetIArray(dna);
     l_int32 n = l_dnaGetCount(dna);
     int res = ll_push_iarray(L, ia, n);
@@ -436,7 +414,8 @@ GetIArray(lua_State *L)
 static int
 GetParameters(lua_State *L)
 {
-    L_Dna *da = ll_check_Dna(L, 1);
+    FUNC(LL_DNA ".GetParameters");
+    L_Dna *da = ll_check_Dna(_fun, L, 1);
     lua_Number startx = 0;
     lua_Number deltax = 0;
     if (l_dnaGetParameters(da, &startx, &deltax))
@@ -459,7 +438,8 @@ GetParameters(lua_State *L)
 static int
 SetParameters(lua_State *L)
 {
-    L_Dna *da = ll_check_Dna(L, 1);
+    FUNC(LL_DNA ".SetParameters");
+    L_Dna *da = ll_check_Dna(_fun, L, 1);
     int isnumber1 = 0, isnumber2 = 0;
     lua_Number startx = lua_tonumberx(L, 2, &isnumber1);
     lua_Number deltax = lua_tonumberx(L, 3, &isnumber2);
@@ -479,10 +459,51 @@ SetParameters(lua_State *L)
 static int
 CopyParameters(lua_State *L)
 {
-    L_Dna *dad = ll_check_Dna(L, 1);
-    L_Dna *das = ll_check_Dna(L, 2);
+    FUNC(LL_DNA ".CopyParameters");
+    L_Dna *dad = ll_check_Dna(_fun, L, 1);
+    L_Dna *das = ll_check_Dna(_fun, L, 2);
     lua_pushboolean(L, 0 == l_dnaCopyParameters(dad, das));
     return 1;
+}
+
+/**
+ * @brief Check Lua stack at index %arg for udata of class LL_DNA
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the L_Dna* contained in the user data
+ */
+L_Dna *
+ll_check_Dna(const char* _fun, lua_State *L, int arg)
+{
+    return *(reinterpret_cast<L_Dna **>(ll_check_udata(_fun, L, arg, LL_DNA)));
+}
+
+/**
+ * \brief Push DNA user data to the Lua stack and set its meta table
+ * \param L pointer to the lua_State
+ * \param da pointer to the L_DNA
+ * \return 1 DNA* on the Lua stack
+ */
+int
+ll_push_Dna(const char* _fun, lua_State *L, L_Dna *da)
+{
+    if (!da)
+        return ll_push_nil(L);
+    return ll_push_udata(_fun, L, LL_DNA, da);
+}
+
+/**
+ * \brief Create and push a new DNA*
+ *
+ * Arg #1 is expected to be a l_int32 (n)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 DNA* on the Lua stack
+ */
+int
+ll_new_Dna(lua_State *L)
+{
+    return Create(L);
 }
 
 /**

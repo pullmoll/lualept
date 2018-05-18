@@ -38,81 +38,6 @@
  *====================================================================*/
 
 /**
- * @brief Check Lua stack at index %arg for udata of class LL_BOXAA
- * \param L pointer to the lua_State
- * \param arg index where to find the user data (usually 1)
- * \return pointer to the Boxaa* contained in the user data
- */
-Boxaa *
-ll_check_Boxaa(lua_State *L, int arg)
-{
-    return *(reinterpret_cast<Boxaa **>(ll_check_udata(L, arg, LL_BOXAA)));
-}
-
-/**
- * \brief Push Boxaa* user data to the Lua stack and set its meta table
- * \param L pointer to the lua_State
- * \param boxaa pointer to the BOXAA
- * \return 1 Boxaa* on the Lua stack
- */
-int
-ll_push_Boxaa(lua_State *L, Boxaa *boxaa)
-{
-    if (!boxaa)
-        return ll_push_nil(L);
-    return ll_push_udata(L, LL_BOXAA, boxaa);
-}
-
-/**
- * \brief Create and push a new Boxaa*
- *
- * Arg #1 is expected to be a l_int32 (n)
- *
- * \param L pointer to the lua_State
- * \return 1 Boxaa* on the Lua stack
- */
-int
-ll_new_Boxaa(lua_State *L)
-{
-    l_int32 n = ll_check_l_int32_default(__func__, L, 1, 1);
-    Boxaa *boxaa = boxaaCreate(n);
-    return ll_push_Boxaa(L, boxaa);
-}
-
-/**
- * \brief Create a new Boxaa*
- *
- * Arg #1 is expected to be a l_int32 (n)
- *
- * \param L pointer to the lua_State
- * \return 1 Boxaa* on the Lua stack
- */
-static int
-Create(lua_State *L)
-{
-    return ll_new_Boxaa(L);
-}
-
-/**
- * \brief Destroy a Boxaa*
- *
- * Arg #1 (i.e. self) is expected to be a Boxaa* user data
- *
- * \param L pointer to the lua_State
- * \return 0 for nothing on the Lua stack
- */
-static int
-Destroy(lua_State *L)
-{
-    Boxaa **pboxaa = reinterpret_cast<Boxaa **>(ll_check_udata(L, 1, LL_BOXAA));
-    DBG(LOG_DESTROY, "%s: '%s' pboxaa=%p boxaa=%p\n",
-        __func__, LL_BOXAA, pboxaa, *pboxaa);
-    boxaaDestroy(pboxaa);
-    *pboxaa = nullptr;
-    return 0;
-}
-
-/**
  * @brief Printable string for a Boxaa*
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
@@ -120,8 +45,9 @@ Destroy(lua_State *L)
 static int
 toString(lua_State *L)
 {
+    FUNC(LL_BOXAA ".toString");
     static char str[256];
-    Boxaa *boxaa = ll_check_Boxaa(L, 1);
+    Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
     luaL_Buffer B;
     l_int32 i, j, x, y, w, h;
 
@@ -152,6 +78,43 @@ toString(lua_State *L)
 }
 
 /**
+ * \brief Create a new Boxaa*
+ *
+ * Arg #1 is expected to be a l_int32 (n)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Boxaa* on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    FUNC(LL_BOXAA ".Create");
+    l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+    Boxaa *boxaa = boxaaCreate(n);
+    return ll_push_Boxaa(_fun, L, boxaa);
+}
+
+/**
+ * \brief Destroy a Boxaa*
+ *
+ * Arg #1 (i.e. self) is expected to be a Boxaa* user data
+ *
+ * \param L pointer to the lua_State
+ * \return 0 for nothing on the Lua stack
+ */
+static int
+Destroy(lua_State *L)
+{
+    FUNC(LL_BOXAA ".Destroy");
+    Boxaa **pboxaa = reinterpret_cast<Boxaa **>(ll_check_udata(_fun, L, 1, LL_BOXAA));
+    DBG(LOG_DESTROY, "%s: '%s' pboxaa=%p boxaa=%p\n",
+        _fun, LL_BOXAA, pboxaa, *pboxaa);
+    boxaaDestroy(pboxaa);
+    *pboxaa = nullptr;
+    return 0;
+}
+
+/**
  * \brief Copy a Boxaa*
  *
  * Arg #1 (i.e. self) is expected to be a Boxaa* user data
@@ -164,10 +127,11 @@ toString(lua_State *L)
 static int
 Copy(lua_State *L)
 {
-    Boxaa *boxaas = ll_check_Boxaa(L, 1);
-    l_int32 copyflag = ll_check_access_storage(__func__, L, 2, L_COPY);
+    FUNC(LL_BOXAA ".Copy");
+    Boxaa *boxaas = ll_check_Boxaa(_fun, L, 1);
+    l_int32 copyflag = ll_check_access_storage(_fun, L, 2, L_COPY);
     Boxaa *boxaa = boxaaCopy(boxaas, copyflag);
-    return ll_push_Boxaa(L, boxaa);
+    return ll_push_Boxaa(_fun, L, boxaa);
 }
 
 /**
@@ -182,9 +146,10 @@ Copy(lua_State *L)
 static int
 AddBoxa(lua_State *L)
 {
-    Boxaa *boxaa = ll_check_Boxaa(L, 1);
-    Boxa *boxa = ll_check_Boxa(L, 2);
-    l_int32 flag = ll_check_access_storage(__func__, L, 3, L_COPY);
+    FUNC(LL_BOXAA ".AddBoxa");
+    Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
+    Boxa *boxa = ll_check_Boxa(_fun, L, 2);
+    l_int32 flag = ll_check_access_storage(_fun, L, 3, L_COPY);
     lua_pushboolean(L, 0 == boxaaAddBoxa(boxaa, boxa, flag));
     return 1;
 }
@@ -200,7 +165,8 @@ AddBoxa(lua_State *L)
 static int
 ExtendArray(lua_State *L)
 {
-    Boxaa *boxaa = ll_check_Boxaa(L, 1);
+    FUNC(LL_BOXAA ".ExtendArray");
+    Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
     lua_pushboolean(L, 0 == boxaaExtendArray(boxaa));
     return 1;
 }
@@ -217,8 +183,9 @@ ExtendArray(lua_State *L)
 static int
 ExtendArrayToSize(lua_State *L)
 {
-    Boxaa *boxaa = ll_check_Boxaa(L, 1);
-    l_int32 n = ll_check_l_int32(__func__, L, 2);
+    FUNC(LL_BOXAA ".ExtendArrayToSize");
+    Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
+    l_int32 n = ll_check_l_int32(_fun, L, 2);
     lua_pushboolean(L, 0 == boxaaExtendArrayToSize(boxaa, n));
     return 1;
 }
@@ -234,7 +201,8 @@ ExtendArrayToSize(lua_State *L)
 static int
 GetCount(lua_State *L)
 {
-    Boxaa *boxaa = ll_check_Boxaa(L, 1);
+    FUNC(LL_BOXAA ".GetCount");
+    Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
     lua_pushinteger(L, boxaaGetCount(boxaa));
     return 1;
 }
@@ -250,7 +218,8 @@ GetCount(lua_State *L)
 static int
 GetBoxCount(lua_State *L)
 {
-    Boxaa *boxaa = ll_check_Boxaa(L, 1);
+    FUNC(LL_BOXAA ".GetBoxCount");
+    Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
     lua_pushinteger(L, boxaaGetBoxCount(boxaa));
     return 1;
 }
@@ -268,11 +237,12 @@ GetBoxCount(lua_State *L)
 static int
 GetBoxa(lua_State *L)
 {
-    Boxaa *boxaa = ll_check_Boxaa(L, 1);
-    l_int32 idx = ll_check_index(__func__, L, 2, boxaaGetCount(boxaa));
-    l_int32 flag = ll_check_access_storage(__func__, L, 3, L_COPY);
+    FUNC(LL_BOXAA ".GetBoxa");
+    Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, boxaaGetCount(boxaa));
+    l_int32 flag = ll_check_access_storage(_fun, L, 3, L_COPY);
     Boxa *boxa = boxaaGetBoxa(boxaa, idx, flag);
-    return ll_push_Boxa(L, boxa);
+    return ll_push_Boxa(_fun, L, boxa);
 }
 
 /**
@@ -289,12 +259,13 @@ GetBoxa(lua_State *L)
 static int
 GetBox(lua_State *L)
 {
-    Boxaa *boxaa = ll_check_Boxaa(L, 1);
-    l_int32 iboxa = ll_check_index(__func__, L, 2, boxaaGetCount(boxaa));
-    l_int32 ibox = ll_check_index(__func__, L, 3, INT32_MAX);
-    l_int32 flag = ll_check_access_storage(__func__, L, 4, L_COPY);
+    FUNC(LL_BOXAA ".GetBox");
+    Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
+    l_int32 iboxa = ll_check_index(_fun, L, 2, boxaaGetCount(boxaa));
+    l_int32 ibox = ll_check_index(_fun, L, 3, INT32_MAX);
+    l_int32 flag = ll_check_access_storage(_fun, L, 4, L_COPY);
     Box *box = boxaaGetBox(boxaa, iboxa, ibox, flag);
-    return ll_push_Box(L, box);
+    return ll_push_Box(_fun, L, box);
 }
 
 /**
@@ -310,9 +281,10 @@ GetBox(lua_State *L)
 static int
 ReplaceBoxa(lua_State *L)
 {
-    Boxaa *boxaa = ll_check_Boxaa(L, 1);
-    l_int32 idx = ll_check_index(__func__, L, 2, boxaaGetCount(boxaa));
-    Boxa *boxa = ll_check_Boxa(L, 3);
+    FUNC(LL_BOXAA ".ReplaceBoxa");
+    Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, boxaaGetCount(boxaa));
+    Boxa *boxa = ll_check_Boxa(_fun, L, 3);
     lua_pushboolean(L, boxa && 0 == boxaaReplaceBoxa(boxaa, idx, boxa));
     return 1;
 }
@@ -330,9 +302,10 @@ ReplaceBoxa(lua_State *L)
 static int
 InsertBoxa(lua_State *L)
 {
-    Boxaa *boxaa = ll_check_Boxaa(L, 1);
-    l_int32 idx = ll_check_index(__func__, L, 2, boxaaGetCount(boxaa));
-    Boxa *boxas = ll_check_Boxa(L, 3);
+    FUNC(LL_BOXAA ".InsertBoxa");
+    Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, boxaaGetCount(boxaa));
+    Boxa *boxas = ll_check_Boxa(_fun, L, 3);
     Boxa *boxa = boxaCopy(boxas, L_CLONE);
     lua_pushboolean(L, boxa && 0 == boxaaInsertBoxa(boxaa, idx, boxa));
     return 1;
@@ -350,8 +323,9 @@ InsertBoxa(lua_State *L)
 static int
 RemoveBoxa(lua_State *L)
 {
-    Boxaa *boxaa = ll_check_Boxaa(L, 1);
-    l_int32 idx = ll_check_index(__func__, L, 2, boxaaGetCount(boxaa));
+    FUNC(LL_BOXAA ".RemoveBoxa");
+    Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, boxaaGetCount(boxaa));
     lua_pushboolean(L, 0 == boxaaRemoveBoxa(boxaa, idx));
     return 1;
 }
@@ -368,11 +342,12 @@ RemoveBoxa(lua_State *L)
 static int
 FlattenToBoxa(lua_State *L)
 {
-    Boxaa *boxaa = ll_check_Boxaa(L, 1);
-    l_int32 copyflag = ll_check_access_storage(__func__, L, 2, L_COPY);
+    FUNC(LL_BOXAA ".FlattenToBoxa");
+    Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
+    l_int32 copyflag = ll_check_access_storage(_fun, L, 2, L_COPY);
     Numa *naindex = nullptr;
     Boxa *boxa = boxaaFlattenToBoxa(boxaa, &naindex, copyflag);
-    return ll_push_Boxa(L, boxa);
+    return ll_push_Boxa(_fun, L, boxa);
 }
 
 /**
@@ -389,14 +364,54 @@ FlattenToBoxa(lua_State *L)
 static int
 FlattenAligned(lua_State *L)
 {
-    Boxaa *boxaa = ll_check_Boxaa(L, 1);
-    l_int32 num = ll_check_l_int32(__func__, L, 2);
-    l_int32 copyflag = ll_check_access_storage(__func__, L, 3, L_COPY);
-    Box *fillerbox = lua_isuserdata(L, 4) ? ll_check_Box(L, 4) : nullptr;
+    FUNC(LL_BOXAA ".FlattenAligned");
+    Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
+    l_int32 num = ll_check_l_int32(_fun, L, 2);
+    l_int32 copyflag = ll_check_access_storage(_fun, L, 3, L_COPY);
+    Box *fillerbox = lua_isuserdata(L, 4) ? ll_check_Box(_fun, L, 4) : nullptr;
     Boxa *boxa = boxaaFlattenAligned(boxaa, num, fillerbox, copyflag);
-    return ll_push_Boxa(L, boxa);
+    return ll_push_Boxa(_fun, L, boxa);
 }
 
+/**
+ * @brief Check Lua stack at index %arg for udata of class LL_BOXAA
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the Boxaa* contained in the user data
+ */
+Boxaa *
+ll_check_Boxaa(const char* _fun, lua_State *L, int arg)
+{
+    return *(reinterpret_cast<Boxaa **>(ll_check_udata(_fun, L, arg, LL_BOXAA)));
+}
+
+/**
+ * \brief Push Boxaa* user data to the Lua stack and set its meta table
+ * \param L pointer to the lua_State
+ * \param boxaa pointer to the BOXAA
+ * \return 1 Boxaa* on the Lua stack
+ */
+int
+ll_push_Boxaa(const char *_fun, lua_State *L, Boxaa *boxaa)
+{
+    if (!boxaa)
+        return ll_push_nil(L);
+    return ll_push_udata(_fun, L, LL_BOXAA, boxaa);
+}
+
+/**
+ * \brief Create and push a new Boxaa*
+ *
+ * Arg #1 is expected to be a l_int32 (n)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Boxaa* on the Lua stack
+ */
+int
+ll_new_Boxaa(lua_State *L)
+{
+    return Create(L);
+}
 
 /**
  * \brief Register the BOX methods and functions in the LL_BOX meta table

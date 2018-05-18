@@ -38,48 +38,6 @@
  *====================================================================*/
 
 /**
- * @brief Check Lua stack at index %arg for udata of class LL_NUMAA
- * \param L pointer to the lua_State
- * \param arg index where to find the user data (usually 1)
- * \return pointer to the Numaa* contained in the user data
- */
-Numaa *
-ll_check_Numaa(lua_State *L, int arg)
-{
-    return *(reinterpret_cast<Numaa **>(ll_check_udata(L, arg, LL_NUMAA)));
-}
-
-/**
- * \brief Push Numaa* user data to the Lua stack and set its meta table
- * \param L pointer to the lua_State
- * \param naa pointer to the NUMAA
- * \return 1 Numaa* on the Lua stack
- */
-int
-ll_push_Numaa(lua_State *L, Numaa *naa)
-{
-    if (!naa)
-        return ll_push_nil(L);
-    return ll_push_udata(L, LL_NUMAA, naa);
-}
-
-/**
- * \brief Create and push a new Numaa*
- *
- * Arg #1 is expected to be a l_int32 (n)
- *
- * \param L pointer to the lua_State
- * \return 1 Numaa* on the Lua stack
- */
-int
-ll_new_Numaa(lua_State *L)
-{
-    l_int32 n = ll_check_l_int32_default(__func__, L, 1, 1);
-    Numaa *naa = numaaCreate(n);
-    return ll_push_Numaa(L, naa);
-}
-
-/**
  * \brief Create a new Numaa*
  *
  * Arg #1 is expected to be a l_int32 (n)
@@ -90,7 +48,10 @@ ll_new_Numaa(lua_State *L)
 static int
 Create(lua_State *L)
 {
-    return ll_new_Numaa(L);
+    FUNC(LL_NUMAA ".Create");
+    l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+    Numaa *naa = numaaCreate(n);
+    return ll_push_Numaa(_fun, L, naa);
 }
 
 /**
@@ -105,10 +66,11 @@ Create(lua_State *L)
 static int
 CreateFull(lua_State *L)
 {
-    l_int32 nptr = ll_check_l_int32_default(__func__, L, 1, 1);
-    l_int32 n = ll_check_l_int32_default(__func__, L, 2, 1);
+    FUNC(LL_NUMAA ".CreateFull");
+    l_int32 nptr = ll_check_l_int32_default(_fun, L, 1, 1);
+    l_int32 n = ll_check_l_int32_default(_fun, L, 2, 1);
     Numaa *naa = numaaCreateFull(nptr, n);
-    return ll_push_Numaa(L, naa);
+    return ll_push_Numaa(_fun, L, naa);
 }
 
 /**
@@ -122,7 +84,8 @@ CreateFull(lua_State *L)
 static int
 Truncate(lua_State *L)
 {
-    Numaa *naa = ll_check_Numaa(L, 1);
+    FUNC(LL_NUMAA ".Truncate");
+    Numaa *naa = ll_check_Numaa(_fun, L, 1);
     lua_pushboolean(L, 0 == numaaTruncate(naa));
     return 1;
 }
@@ -136,9 +99,10 @@ Truncate(lua_State *L)
 static int
 Destroy(lua_State *L)
 {
-    Numaa **pnaa = reinterpret_cast<Numaa **>(ll_check_udata(L, 1, LL_NUMAA));
+    FUNC(LL_NUMAA ".Destroy");
+    Numaa **pnaa = reinterpret_cast<Numaa **>(ll_check_udata(_fun, L, 1, LL_NUMAA));
     DBG(LOG_DESTROY, "%s: '%s' pnaa=%p naa=%p\n",
-         __func__, LL_NUMAA, pnaa, *pnaa);
+         _fun, LL_NUMAA, pnaa, *pnaa);
     numaaDestroy(pnaa);
     *pnaa = nullptr;
     return 0;
@@ -155,7 +119,8 @@ Destroy(lua_State *L)
 static int
 GetCount(lua_State *L)
 {
-    Numaa *naa = ll_check_Numaa(L, 1);
+    FUNC(LL_NUMAA ".GetCount");
+    Numaa *naa = ll_check_Numaa(_fun, L, 1);
     l_int32 n = numaaGetCount(naa);
     lua_pushinteger(L, n);
     return 1;
@@ -173,8 +138,9 @@ GetCount(lua_State *L)
 static int
 GetNumaCount(lua_State *L)
 {
-    Numaa *naa = ll_check_Numaa(L, 1);
-    l_int32 idx = ll_check_index(__func__, L, 2, numaaGetCount(naa));
+    FUNC(LL_NUMAA ".GetNumaCount");
+    Numaa *naa = ll_check_Numaa(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, numaaGetCount(naa));
     l_int32 n = numaaGetNumaCount(naa, idx);
     lua_pushinteger(L, n);
     return 1;
@@ -191,7 +157,8 @@ GetNumaCount(lua_State *L)
 static int
 GetNumberCount(lua_State *L)
 {
-    Numaa *naa = ll_check_Numaa(L, 1);
+    FUNC(LL_NUMAA ".GetNumberCount");
+    Numaa *naa = ll_check_Numaa(_fun, L, 1);
     l_int32 n = numaaGetNumberCount(naa);
     lua_pushinteger(L, n);
     return 1;
@@ -211,11 +178,12 @@ GetNumberCount(lua_State *L)
 static int
 GetNuma(lua_State *L)
 {
-    Numaa *naa = ll_check_Numaa(L, 1);
-    l_int32 idx = ll_check_index(__func__, L, 2, numaaGetCount(naa));
-    l_int32 accessflag = ll_check_access_storage(__func__, L, 3, L_CLONE);
+    FUNC(LL_NUMAA ".GetNuma");
+    Numaa *naa = ll_check_Numaa(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, numaaGetCount(naa));
+    l_int32 accessflag = ll_check_access_storage(_fun, L, 3, L_CLONE);
     Numa *na = numaaGetNuma(naa, idx, accessflag);
-    return ll_push_Numa(L, na);
+    return ll_push_Numa(_fun, L, na);
 }
 
 /**
@@ -232,9 +200,10 @@ GetNuma(lua_State *L)
 static int
 AddNuma(lua_State *L)
 {
-    Numaa *naa = ll_check_Numaa(L, 1);
-    Numa *na = ll_check_Numa(L, 2);
-    l_int32 copyflag = ll_check_access_storage(__func__, L, 3, L_CLONE);
+    FUNC(LL_NUMAA ".AddNuma");
+    Numaa *naa = ll_check_Numaa(_fun, L, 1);
+    Numa *na = ll_check_Numa(_fun, L, 2);
+    l_int32 copyflag = ll_check_access_storage(_fun, L, 3, L_CLONE);
     lua_pushboolean(L, 0 == numaaAddNuma(naa, na, copyflag));
     return 1;
 }
@@ -252,9 +221,10 @@ AddNuma(lua_State *L)
 static int
 ReplaceNuma(lua_State *L)
 {
-    Numaa *naa = ll_check_Numaa(L, 1);
-    l_int32 idx = ll_check_l_int32(__func__, L, 2);
-    Numa *na = ll_check_Numa(L, 3);
+    FUNC(LL_NUMAA ".ReplaceNuma");
+    Numaa *naa = ll_check_Numaa(_fun, L, 1);
+    l_int32 idx = ll_check_l_int32(_fun, L, 2);
+    Numa *na = ll_check_Numa(_fun, L, 3);
     lua_pushboolean(L, 0 == numaaReplaceNuma(naa, idx, na));
     return 1;
 }
@@ -271,8 +241,9 @@ ReplaceNuma(lua_State *L)
 static int
 Write(lua_State *L)
 {
-    Numaa *naa = ll_check_Numaa(L, 1);
-    const char *filename = lua_tostring(L, 2);
+    FUNC(LL_NUMAA ".Write");
+    Numaa *naa = ll_check_Numaa(_fun, L, 1);
+    const char *filename = ll_check_string(_fun, L, 2);
     lua_pushboolean(L, 0 == numaaWrite(filename, naa));
     return 1;
 }
@@ -288,9 +259,10 @@ Write(lua_State *L)
 static int
 Read(lua_State *L)
 {
-    const char *filename = lua_tostring(L, 1);
+    FUNC(LL_NUMAA ".Read");
+    const char *filename = ll_check_string(_fun, L, 1);
     Numaa *naa = numaaRead(filename);
-    return ll_push_Numaa(L, naa);
+    return ll_push_Numaa(_fun, L, naa);
 }
 
 /**
@@ -304,9 +276,50 @@ Read(lua_State *L)
 static int
 FlattenToNuma(lua_State *L)
 {
-    Numaa *naa = ll_check_Numaa(L, 1);
+    FUNC(LL_NUMAA ".FlattenToNuma");
+    Numaa *naa = ll_check_Numaa(_fun, L, 1);
     Numa *na = numaaFlattenToNuma(naa);
-    return ll_push_Numa(L, na);
+    return ll_push_Numa(_fun, L, na);
+}
+
+/**
+ * @brief Check Lua stack at index %arg for udata of class LL_NUMAA
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the Numaa* contained in the user data
+ */
+Numaa *
+ll_check_Numaa(const char* _fun, lua_State *L, int arg)
+{
+    return *(reinterpret_cast<Numaa **>(ll_check_udata(_fun, L, arg, LL_NUMAA)));
+}
+
+/**
+ * \brief Push Numaa* user data to the Lua stack and set its meta table
+ * \param L pointer to the lua_State
+ * \param naa pointer to the NUMAA
+ * \return 1 Numaa* on the Lua stack
+ */
+int
+ll_push_Numaa(const char* _fun, lua_State *L, Numaa *naa)
+{
+    if (!naa)
+        return ll_push_nil(L);
+    return ll_push_udata(_fun, L, LL_NUMAA, naa);
+}
+
+/**
+ * \brief Create and push a new Numaa*
+ *
+ * Arg #1 is expected to be a l_int32 (n)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Numaa* on the Lua stack
+ */
+int
+ll_new_Numaa(lua_State *L)
+{
+    return Create(L);
 }
 
 /**

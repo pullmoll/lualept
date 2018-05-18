@@ -38,48 +38,6 @@
  *====================================================================*/
 
 /**
- * @brief Check Lua stack at index %arg for udata of class LL_ASET
- * \param L pointer to the lua_State
- * \param arg index where to find the user data (usually 1)
- * \return pointer to the ASET* contained in the user data
- */
-L_ASET *
-ll_check_Aset(lua_State *L, int arg)
-{
-    return *(reinterpret_cast<L_ASET **>(ll_check_udata(L, arg, LL_ASET)));
-}
-
-/**
- * \brief Push ASET user data to the Lua stack and set its meta table
- * \param L pointer to the lua_State
- * \param aset pointer to the ASET
- * \return 1 ASET* on the Lua stack
- */
-int
-ll_push_Aset(lua_State *L, L_ASET *aset)
-{
-    if (!aset)
-        return ll_push_nil(L);
-    return ll_push_udata(L, LL_ASET, aset);
-}
-
-/**
- * \brief Create and push a new ASET*
- *
- * Arg #1 is expected to be a key type name (int, uint, or float)
- *
- * \param L pointer to the lua_State
- * \return 1 ASET* on the Lua stack
- */
-int
-ll_new_Aset(lua_State *L)
-{
-    l_int32 keytype = ll_check_keytype(__func__, L, 1, L_INT_TYPE);
-    L_ASET *aset = l_asetCreate(keytype);
-    return ll_push_Aset(L, aset);
-}
-
-/**
  * @brief Printable string for a ASET*
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
@@ -87,8 +45,9 @@ ll_new_Aset(lua_State *L)
 static int
 toString(lua_State *L)
 {
+    FUNC(LL_ASET ".toString");
     static char str[256];
-    L_ASET *aset = ll_check_Aset(L, 1);
+    L_ASET *aset = ll_check_Aset(_fun, L, 1);
     L_ASET_NODE *node = nullptr;
     luaL_Buffer B;
     int first = 1;
@@ -140,7 +99,10 @@ toString(lua_State *L)
 static int
 Create(lua_State *L)
 {
-    return ll_new_Aset(L);
+    FUNC(LL_ASET ".Create");
+    l_int32 keytype = ll_check_keytype(_fun, L, 1, L_INT_TYPE);
+    L_ASET *aset = l_asetCreate(keytype);
+    return ll_push_Aset(_fun, L, aset);
 }
 
 /**
@@ -154,7 +116,8 @@ Create(lua_State *L)
 static int
 Size(lua_State *L)
 {
-    L_ASET *aset = ll_check_Aset(L, 1);
+    FUNC(LL_ASET ".Size");
+    L_ASET *aset = ll_check_Aset(_fun, L, 1);
     lua_pushinteger(L, l_asetSize(aset));
     return 1;
 }
@@ -168,8 +131,9 @@ Size(lua_State *L)
 static int
 Destroy(lua_State *L)
 {
-    L_Rbtree **paset = reinterpret_cast<L_Rbtree **>(ll_check_udata(L, 1, LL_ASET));
-    DBG(LOG_DESTROY, "%s: '%s' paset=%p aset=%p size=%d\n", __func__,
+    FUNC(LL_ASET ".Destroy");
+    L_Rbtree **paset = reinterpret_cast<L_Rbtree **>(ll_check_udata(_fun, L, 1, LL_ASET));
+    DBG(LOG_DESTROY, "%s: '%s' paset=%p aset=%p size=%d\n", _fun,
         LL_ASET, paset, *paset, l_asetSize(*paset));
     l_asetDestroy(paset);
     *paset = nullptr;
@@ -188,7 +152,8 @@ Destroy(lua_State *L)
 static int
 Insert(lua_State *L)
 {
-    L_ASET *aset = ll_check_Aset(L, 1);
+    FUNC(LL_ASET ".Insert");
+    L_ASET *aset = ll_check_Aset(_fun, L, 1);
     RB_TYPE key;
     int isnum = 0;
     int result = FALSE;
@@ -201,7 +166,7 @@ Insert(lua_State *L)
             l_asetInsert(aset, key);
             result = TRUE;
         } else {
-            lua_pushfstring(L, "ASET key is not a number: '%s'", lua_tostring(L, 2));
+            lua_pushfstring(L, LL_ASET " key is not a number: '%s'", lua_tostring(L, 2));
             lua_error(L);
         }
         break;
@@ -211,7 +176,7 @@ Insert(lua_State *L)
             l_asetInsert(aset, key);
             result = TRUE;
         } else {
-            lua_pushfstring(L, "ASET key is not a number: '%s'", lua_tostring(L, 2));
+            lua_pushfstring(L, LL_ASET " key is not a number: '%s'", lua_tostring(L, 2));
             lua_error(L);
         }
         break;
@@ -232,7 +197,8 @@ Insert(lua_State *L)
 static int
 Delete(lua_State *L)
 {
-    L_ASET *aset = ll_check_Aset(L, 1);
+    FUNC(LL_ASET ".Delete");
+    L_ASET *aset = ll_check_Aset(_fun, L, 1);
     RB_TYPE key;
     int result = FALSE;
 
@@ -265,7 +231,8 @@ Delete(lua_State *L)
 static int
 Find(lua_State *L)
 {
-    L_ASET *aset = ll_check_Aset(L, 1);
+    FUNC(LL_ASET ".Find");
+    L_ASET *aset = ll_check_Aset(_fun, L, 1);
     RB_TYPE key;
     RB_TYPE *value = nullptr;
 
@@ -295,7 +262,8 @@ Find(lua_State *L)
 static int
 GetFirst(lua_State *L)
 {
-    L_ASET *aset = ll_check_Aset(L, 1);
+    FUNC(LL_ASET ".GetFirst");
+    L_ASET *aset = ll_check_Aset(_fun, L, 1);
     L_ASET_NODE *node = l_asetGetFirst(aset);
     lua_pushlightuserdata(L, node);
     return 1;
@@ -312,6 +280,7 @@ GetFirst(lua_State *L)
 static int
 GetNext(lua_State *L)
 {
+    FUNC(LL_ASET ".GetNext");
     /* HACK: deconstify */
     L_ASET_NODE *node = reinterpret_cast<L_ASET_NODE *>(reinterpret_cast<intptr_t>(lua_topointer(L, 2)));
     L_ASET_NODE *next = l_asetGetNext(node);
@@ -330,6 +299,7 @@ GetNext(lua_State *L)
 static int
 GetPrev(lua_State *L)
 {
+    FUNC(LL_ASET ".GetPrev");
     /* HACK: deconstify */
     L_ASET_NODE *node = reinterpret_cast<L_ASET_NODE *>(reinterpret_cast<intptr_t>(lua_topointer(L, 2)));
     L_ASET_NODE *prev = l_asetGetPrev(node);
@@ -348,10 +318,51 @@ GetPrev(lua_State *L)
 static int
 GetLast(lua_State *L)
 {
-    L_ASET *aset = ll_check_Amap(L, 1);
+    FUNC(LL_ASET ".GetLast");
+    L_ASET *aset = ll_check_Amap(_fun, L, 1);
     L_ASET_NODE *node = l_asetGetLast(aset);
     lua_pushlightuserdata(L, node);
     return 1;
+}
+
+/**
+ * @brief Check Lua stack at index %arg for udata of class LL_ASET
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the ASET* contained in the user data
+ */
+L_ASET *
+ll_check_Aset(const char* _fun, lua_State *L, int arg)
+{
+    return *(reinterpret_cast<L_ASET **>(ll_check_udata(_fun, L, arg, LL_ASET)));
+}
+
+/**
+ * \brief Push ASET user data to the Lua stack and set its meta table
+ * \param L pointer to the lua_State
+ * \param aset pointer to the ASET
+ * \return 1 ASET* on the Lua stack
+ */
+int
+ll_push_Aset(const char* _fun, lua_State *L, L_ASET *aset)
+{
+    if (!aset)
+        return ll_push_nil(L);
+    return ll_push_udata(_fun, L, LL_ASET, aset);
+}
+
+/**
+ * \brief Create and push a new ASET*
+ *
+ * Arg #1 is expected to be a key type name (int, uint, or float)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 ASET* on the Lua stack
+ */
+int
+ll_new_Aset(lua_State *L)
+{
+    return Create(L);
 }
 
 /**

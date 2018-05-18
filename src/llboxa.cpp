@@ -38,48 +38,6 @@
  *====================================================================*/
 
 /**
- * @brief Check Lua stack at index %arg for udata of class LL_BOXA
- * \param L pointer to the lua_State
- * \param arg index where to find the user data (usually 1)
- * \return pointer to the Boxa* contained in the user data
- */
-Boxa *
-ll_check_Boxa(lua_State *L, int arg)
-{
-    return *(reinterpret_cast<Boxa **>(ll_check_udata(L, arg, LL_BOXA)));
-}
-
-/**
- * \brief Push Boxa* user data to the Lua stack and set its meta table
- * \param L pointer to the lua_State
- * \param boxa pointer to the BOXA
- * \return 1 Boxa* on the Lua stack
- */
-int
-ll_push_Boxa(lua_State *L, Boxa *boxa)
-{
-    if (!boxa)
-        return ll_push_nil(L);
-    return ll_push_udata(L, LL_BOXA, boxa);
-}
-
-/**
- * \brief Create and push a new Boxa*
- *
- * Arg #1 is expected to be a l_int32 (n)
- *
- * \param L pointer to the lua_State
- * \return 1 Boxa* on the Lua stack
- */
-int
-ll_new_Boxa(lua_State *L)
-{
-    l_int32 n = ll_check_l_int32_default(__func__, L, 1, 1);
-    Boxa *boxa = boxaCreate(n);
-    return ll_push_Boxa(L, boxa);
-}
-
-/**
  * @brief Printable string for a Boxa*
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
@@ -87,8 +45,9 @@ ll_new_Boxa(lua_State *L)
 static int
 toString(lua_State *L)
 {
+    FUNC(LL_BOXA ".toString");
     static char str[256];
-    Boxa *boxa = ll_check_Boxa(L, 1);
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     luaL_Buffer B;
     l_int32 i, x, y, w, h;
 
@@ -121,7 +80,10 @@ toString(lua_State *L)
 static int
 Create(lua_State *L)
 {
-    return ll_new_Boxa(L);
+    FUNC(LL_BOXA ".Create");
+    l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+    Boxa *boxa = boxaCreate(n);
+    return ll_push_Boxa(_fun, L, boxa);
 }
 
 /**
@@ -135,9 +97,10 @@ Create(lua_State *L)
 static int
 Destroy(lua_State *L)
 {
-    Boxa **pboxa = reinterpret_cast<Boxa **>(ll_check_udata(L, 1, LL_BOXA));
+    FUNC(LL_BOXA ".Destroy");
+    Boxa **pboxa = reinterpret_cast<Boxa **>(ll_check_udata(_fun, L, 1, LL_BOXA));
     DBG(LOG_DESTROY, "%s: '%s' pboxa=%p boxa=%p\n",
-        __func__, LL_BOXA, pboxa, *pboxa);
+        _fun, LL_BOXA, pboxa, *pboxa);
     boxaDestroy(pboxa);
     *pboxa = nullptr;
     return 0;
@@ -156,10 +119,11 @@ Destroy(lua_State *L)
 static int
 Copy(lua_State *L)
 {
-    Boxa *boxas = ll_check_Boxa(L, 1);
-    l_int32 copyflag = ll_check_access_storage(__func__, L, 2, L_COPY);
+    FUNC(LL_BOXA ".Copy");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 copyflag = ll_check_access_storage(_fun, L, 2, L_COPY);
     Boxa *boxa = boxaCopy(boxas, copyflag);
-    return ll_push_Boxa(L, boxa);
+    return ll_push_Boxa(_fun, L, boxa);
 }
 
 /**
@@ -174,9 +138,10 @@ Copy(lua_State *L)
 static int
 AddBox(lua_State *L)
 {
-    Boxa *boxa = ll_check_Boxa(L, 1);
-    Box *box = ll_check_Box(L, 2);
-    l_int32 flag = ll_check_access_storage(__func__, L, 3, L_COPY);
+    FUNC(LL_BOXA ".AddBox");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
+    Box *box = ll_check_Box(_fun, L, 2);
+    l_int32 flag = ll_check_access_storage(_fun, L, 3, L_COPY);
     lua_pushboolean(L, 0 == boxaAddBox(boxa, box, flag));
     return 1;
 }
@@ -192,7 +157,8 @@ AddBox(lua_State *L)
 static int
 ExtendArray(lua_State *L)
 {
-    Boxa *boxa = ll_check_Boxa(L, 1);
+    FUNC(LL_BOXA ".ExtendArray");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     lua_pushboolean(L, 0 == boxaExtendArray(boxa));
     return 1;
 }
@@ -209,8 +175,9 @@ ExtendArray(lua_State *L)
 static int
 ExtendArrayToSize(lua_State *L)
 {
-    Boxa *boxa = ll_check_Boxa(L, 1);
-    l_int32 n = ll_check_l_int32(__func__, L, 2);
+    FUNC(LL_BOXA ".ExtendArrayToSize");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
+    l_int32 n = ll_check_l_int32(_fun, L, 2);
     lua_pushboolean(L, 0 == boxaExtendArrayToSize(boxa, n));
     return 1;
 }
@@ -226,7 +193,8 @@ ExtendArrayToSize(lua_State *L)
 static int
 GetCount(lua_State *L)
 {
-    Boxa *boxa = ll_check_Boxa(L, 1);
+    FUNC(LL_BOXA ".GetCount");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     lua_pushinteger(L, boxaGetCount(boxa));
     return 1;
 }
@@ -242,7 +210,8 @@ GetCount(lua_State *L)
 static int
 GetValidCount(lua_State *L)
 {
-    Boxa *boxa = ll_check_Boxa(L, 1);
+    FUNC(LL_BOXA ".GetValidCount");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     lua_pushinteger(L, boxaGetValidCount(boxa));
     return 1;
 }
@@ -260,11 +229,12 @@ GetValidCount(lua_State *L)
 static int
 GetBox(lua_State *L)
 {
-    Boxa *boxa = ll_check_Boxa(L, 1);
-    l_int32 idx = ll_check_index(__func__, L, 2, boxaGetCount(boxa));
-    l_int32 flag = ll_check_access_storage(__func__, L, 3, L_COPY);
+    FUNC(LL_BOXA ".GetBox");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, boxaGetCount(boxa));
+    l_int32 flag = ll_check_access_storage(_fun, L, 3, L_COPY);
     Box *box = boxaGetBox(boxa, idx, flag);
-    return ll_push_Box(L, box);
+    return ll_push_Box(_fun, L, box);
 }
 
 /**
@@ -280,11 +250,12 @@ GetBox(lua_State *L)
 static int
 GetValidBox(lua_State *L)
 {
-    Boxa *boxa = ll_check_Boxa(L, 1);
-    l_int32 idx = ll_check_index(__func__, L, 2, boxaGetCount(boxa));
-    l_int32 flag = ll_check_access_storage(__func__, L, 3, L_COPY);
+    FUNC(LL_BOXA ".GetValidBox");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, boxaGetCount(boxa));
+    l_int32 flag = ll_check_access_storage(_fun, L, 3, L_COPY);
     Box *box = boxaGetValidBox(boxa, idx, flag);
-    return ll_push_Box(L, box);
+    return ll_push_Box(_fun, L, box);
 }
 
 /**
@@ -298,9 +269,10 @@ GetValidBox(lua_State *L)
 static int
 FindInvalidBoxes(lua_State *L)
 {
-    Boxa *boxa = ll_check_Boxa(L, 1);
+    FUNC(LL_BOXA ".FindInvalidBoxes");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     Numa *na = boxaFindInvalidBoxes(boxa);
-    return ll_push_Numa(L, na);
+    return ll_push_Numa(_fun, L, na);
 }
 
 /**
@@ -315,9 +287,10 @@ FindInvalidBoxes(lua_State *L)
 static int
 GetBoxGeometry(lua_State *L)
 {
-    Boxa *boxa = ll_check_Boxa(L, 1);
+    FUNC(LL_BOXA ".GetBoxGeometry");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     l_int32 x, y, w, h;
-    l_int32 idx = ll_check_index(__func__, L, 2, boxaGetCount(boxa));
+    l_int32 idx = ll_check_index(_fun, L, 2, boxaGetCount(boxa));
     if (boxaGetBoxGeometry(boxa, idx, &x, &y, &w, &h))
         return ll_push_nil(L);
     lua_pushinteger(L, x);
@@ -338,7 +311,8 @@ GetBoxGeometry(lua_State *L)
 static int
 IsFull(lua_State *L)
 {
-    Boxa *boxa = ll_check_Boxa(L, 1);
+    FUNC(LL_BOXA ".IsFull");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     int isfull = 0;
     lua_pushboolean(L, 0 == boxaIsFull(boxa, &isfull) && isfull);
     return 1;
@@ -357,9 +331,10 @@ IsFull(lua_State *L)
 static int
 ReplaceBox(lua_State *L)
 {
-    Boxa *boxa = ll_check_Boxa(L, 1);
-    l_int32 idx = ll_check_index(__func__, L, 2, boxaGetCount(boxa));
-    Box *box = ll_check_Box(L, 3);
+    FUNC(LL_BOXA ".ReplaceBox");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, boxaGetCount(boxa));
+    Box *box = ll_check_Box(_fun, L, 3);
     lua_pushboolean(L, box && 0 == boxaReplaceBox(boxa, idx, box));
     return 1;
 }
@@ -377,9 +352,10 @@ ReplaceBox(lua_State *L)
 static int
 InsertBox(lua_State *L)
 {
-    Boxa *boxa = ll_check_Boxa(L, 1);
-    l_int32 idx = ll_check_index(__func__, L, 2, boxaGetCount(boxa));
-    Box *boxs = ll_check_Box(L, 3);
+    FUNC(LL_BOXA ".InsertBox");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, boxaGetCount(boxa));
+    Box *boxs = ll_check_Box(_fun, L, 3);
     Box *box = boxClone(boxs);
     lua_pushboolean(L, box && 0 == boxaInsertBox(boxa, idx, box));
     return 1;
@@ -397,8 +373,9 @@ InsertBox(lua_State *L)
 static int
 RemoveBox(lua_State *L)
 {
-    Boxa *boxa = ll_check_Boxa(L, 1);
-    l_int32 idx = ll_check_index(__func__, L, 2, boxaGetCount(boxa));
+    FUNC(LL_BOXA ".RemoveBox");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, boxaGetCount(boxa));
     lua_pushboolean(L, 0 == boxaRemoveBox(boxa, idx));
     return 1;
 }
@@ -416,14 +393,13 @@ RemoveBox(lua_State *L)
 static int
 RemoveBoxAndSave(lua_State *L)
 {
-    Boxa *boxa = ll_check_Boxa(L, 1);
-    l_int32 idx = ll_check_index(__func__, L, 2, boxaGetCount(boxa));
+    FUNC(LL_BOXA ".RemoveBoxAndSave");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, boxaGetCount(boxa));
     Box *box = nullptr;
-    int n = 0;
-    if (0 == boxaRemoveBoxAndSave(boxa, idx, &box) && box) {
-        n += ll_push_Box(L, box);
-    }
-    return n;
+    if (boxaRemoveBoxAndSave(boxa, idx, &box))
+        return ll_push_nil(L);
+    return ll_push_Box(_fun, L, box);
 }
 
 /**
@@ -438,10 +414,11 @@ RemoveBoxAndSave(lua_State *L)
 static int
 SaveValid(lua_State *L)
 {
-    Boxa *boxas = ll_check_Boxa(L, 1);
-    l_int32 copyflag = ll_check_access_storage(__func__, L, 2, L_COPY);
+    FUNC(LL_BOXA ".SaveValid");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 copyflag = ll_check_access_storage(_fun, L, 2, L_COPY);
     Boxa *boxa = boxaSaveValid(boxas, copyflag);
-    return ll_push_Boxa(L, boxa);
+    return ll_push_Boxa(_fun, L, boxa);
 }
 
 /**
@@ -455,7 +432,8 @@ SaveValid(lua_State *L)
 static int
 Clear(lua_State *L)
 {
-    Boxa *boxa = ll_check_Boxa(L, 1);
+    FUNC(LL_BOXA ".Clear");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     lua_pushboolean(L, 0 == boxaClear(boxa));
     return 1;
 }
@@ -472,10 +450,11 @@ Clear(lua_State *L)
 static int
 ContainedInBox(lua_State *L)
 {
-    Boxa *boxas = ll_check_Boxa(L, 1);
-    Box *box = ll_check_Box(L, 2);
+    FUNC(LL_BOXA ".ContainedInBox");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    Box *box = ll_check_Box(_fun, L, 2);
     Boxa *boxad = boxaContainedInBox(boxas, box);
-    return ll_push_Boxa(L, boxad);
+    return ll_push_Boxa(_fun, L, boxad);
 }
 
 /**
@@ -490,8 +469,9 @@ ContainedInBox(lua_State *L)
 static int
 ContainedInBoxCount(lua_State *L)
 {
-    Boxa *boxas = ll_check_Boxa(L, 1);
-    Box *box = ll_check_Box(L, 2);
+    FUNC(LL_BOXA ".ContainedInBoxCount");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    Box *box = ll_check_Box(_fun, L, 2);
     l_int32 count = 0;
     if (boxaContainedInBoxCount(boxas, box, &count))
         return ll_push_nil(L);
@@ -511,8 +491,9 @@ ContainedInBoxCount(lua_State *L)
 static int
 ContainedInBoxa(lua_State *L)
 {
-    Boxa *boxa1 = ll_check_Boxa(L, 1);
-    Boxa *boxa2 = ll_check_Boxa(L, 2);
+    FUNC(LL_BOXA ".ContainedInBoxa");
+    Boxa *boxa1 = ll_check_Boxa(_fun, L, 1);
+    Boxa *boxa2 = ll_check_Boxa(_fun, L, 2);
     l_int32 contained = 0;
     if (boxaContainedInBoxa(boxa1, boxa2, &contained))
         return ll_push_nil(L);
@@ -532,10 +513,11 @@ ContainedInBoxa(lua_State *L)
 static int
 IntersectsBox(lua_State *L)
 {
-    Boxa *boxas = ll_check_Boxa(L, 1);
-    Box *box = ll_check_Box(L, 2);
+    FUNC(LL_BOXA ".IntersectsBox");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    Box *box = ll_check_Box(_fun, L, 2);
     Boxa *boxad = boxaIntersectsBox(boxas, box);
-    return ll_push_Boxa(L, boxad);
+    return ll_push_Boxa(_fun, L, boxad);
 }
 
 /**
@@ -550,8 +532,9 @@ IntersectsBox(lua_State *L)
 static int
 IntersectsBoxCount(lua_State *L)
 {
-    Boxa *boxa = ll_check_Boxa(L, 1);
-    Box *box = ll_check_Box(L, 2);
+    FUNC(LL_BOXA ".IntersectsBoxCount");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
+    Box *box = ll_check_Box(_fun, L, 2);
     l_int32 count = 0;
     if (boxaIntersectsBoxCount(boxa, box, &count))
         return ll_push_nil(L);
@@ -570,13 +553,54 @@ IntersectsBoxCount(lua_State *L)
 static int
 RotateOrth(lua_State *L)
 {
-    Boxa *boxas = ll_check_Boxa(L, 1);
-    l_int32 w = ll_check_l_int32(__func__, L, 2);
-    l_int32 h = ll_check_l_int32(__func__, L, 3);
-    l_int32 rotation = ll_check_rotation(__func__, L, 4, 0);
+    FUNC(LL_BOXA ".RotateOrth");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 w = ll_check_l_int32(_fun, L, 2);
+    l_int32 h = ll_check_l_int32(_fun, L, 3);
+    l_int32 rotation = ll_check_rotation(_fun, L, 4, 0);
     Boxa *boxa = boxaRotateOrth(boxas, w, h, rotation);
-    ll_push_Boxa(L, boxa);
+    ll_push_Boxa(_fun, L, boxa);
     return 1;
+}
+
+/**
+ * @brief Check Lua stack at index %arg for udata of class LL_BOXA
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the Boxa* contained in the user data
+ */
+Boxa *
+ll_check_Boxa(const char *_fun, lua_State *L, int arg)
+{
+    return *(reinterpret_cast<Boxa **>(ll_check_udata(_fun, L, arg, LL_BOXA)));
+}
+
+/**
+ * \brief Push Boxa* user data to the Lua stack and set its meta table
+ * \param L pointer to the lua_State
+ * \param boxa pointer to the BOXA
+ * \return 1 Boxa* on the Lua stack
+ */
+int
+ll_push_Boxa(const char *_fun, lua_State *L, Boxa *boxa)
+{
+    if (!boxa)
+        return ll_push_nil(L);
+    return ll_push_udata(_fun, L, LL_BOXA, boxa);
+}
+
+/**
+ * \brief Create and push a new Boxa*
+ *
+ * Arg #1 is expected to be a l_int32 (n)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Boxa* on the Lua stack
+ */
+int
+ll_new_Boxa(lua_State *L)
+{
+    return Create(L);
 }
 
 /**

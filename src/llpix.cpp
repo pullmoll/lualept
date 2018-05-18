@@ -69,68 +69,6 @@ static l_int32 tab8[256] = {
  *====================================================================*/
 
 /**
- * @brief Check Lua stack at index %arg for udata of class LL_PIX
- * \param L pointer to the lua_State
- * \param arg index where to find the user data (usually 1)
- * \return pointer to the PIX contained in the user data
- */
-Pix *
-ll_check_Pix(lua_State *L, int arg)
-{
-    return *(reinterpret_cast<Pix **>(ll_check_udata(L, arg, LL_PIX)));
-}
-
-/**
- * \brief Push PIX to the Lua stack and set its meta table
- * \param L pointer to the lua_State
- * \param pix pointer to the PIX
- * \return 1 Pix* on the Lua stack
- */
-int
-ll_push_Pix(lua_State *L, Pix *pix)
-{
-    if (!pix)
-        return ll_push_nil(L);
-    return ll_push_udata(L, LL_PIX, pix);
-}
-
-/**
- * \brief Create and push a new Pix*
- *
- * Arg #1 is expected to be a l_int32 (width)
- * Arg #2 is expected to be a l_int32 (height)
- * Arg #3 is optional and expected to be a l_int32 (depth; default = 1)
- * or
- * Arg #1 is expected to be a string (filename)
- * or
- * Arg #1 is expected to be Pix*
- *
- * \param L pointer to the lua_State
- * \return 1 Pix* on the Lua stack
- */
-int
-ll_new_Pix(lua_State *L)
-{
-    static char buff[32 + PATH_MAX];
-    Pix *pix = nullptr;
-    if (lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
-        l_int32 width = ll_check_l_int32_default(__func__, L, 1, 1);
-        l_int32 height = ll_check_l_int32_default(__func__, L, 2, 1);
-        l_int32 depth = ll_check_l_int32_default(__func__, L, 3, 1);
-        pix = pixCreate(width, height, depth);
-    } else if (lua_isuserdata(L, 1)) {
-        Pix *pixs = ll_check_Pix(L, 1);
-        pix = pixCreateTemplate(pixs);
-    } else {
-        const char* filename = lua_tostring(L, 1);
-        pix = pixRead(filename);
-        snprintf(buff, sizeof(buff), "filename: %s", filename);
-        pixAddText(pix, buff);
-    }
-    return ll_push_Pix(L, pix);
-}
-
-/**
  * @brief toString
  * \param L pointer to the lua_State
  * @return 1 string on the Lua stack
@@ -138,8 +76,9 @@ ll_new_Pix(lua_State *L)
 static int
 toString(lua_State* L)
 {
+    FUNC(LL_PIX ".toString");
     static char str[256];
-    Pix *pix = ll_check_Pix(L, 1);
+    Pix *pix = ll_check_Pix(_fun, L, 1);
     luaL_Buffer B;
     char *dst = str;
     const char* format = nullptr;
@@ -191,7 +130,24 @@ toString(lua_State* L)
 static int
 Create(lua_State *L)
 {
-    return ll_new_Pix(L);
+    FUNC(LL_PIX ".Create");
+    static char buff[32 + PATH_MAX];
+    Pix *pix = nullptr;
+    if (lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
+        l_int32 width = ll_check_l_int32_default(_fun, L, 1, 1);
+        l_int32 height = ll_check_l_int32_default(_fun, L, 2, 1);
+        l_int32 depth = ll_check_l_int32_default(_fun, L, 3, 1);
+        pix = pixCreate(width, height, depth);
+    } else if (lua_isuserdata(L, 1)) {
+        Pix *pixs = ll_check_Pix(_fun, L, 1);
+        pix = pixCreateTemplate(pixs);
+    } else {
+        const char* filename = ll_check_string(_fun, L, 1);
+        pix = pixRead(filename);
+        snprintf(buff, sizeof(buff), "filename: %s", filename);
+        pixAddText(pix, buff);
+    }
+    return ll_push_Pix(_fun, L, pix);
 }
 
 /**
@@ -209,19 +165,20 @@ Create(lua_State *L)
 static int
 CreateNoInit(lua_State *L)
 {
+    FUNC(LL_PIX ".CreateNoInit");
     Pix *pix = nullptr;
     if (lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
-        l_int32 width = ll_check_l_int32(__func__, L, 1);
-        l_int32 height = ll_check_l_int32(__func__, L, 2);
-        l_int32 depth = ll_check_l_int32_default(__func__, L, 3, 1);
+        l_int32 width = ll_check_l_int32(_fun, L, 1);
+        l_int32 height = ll_check_l_int32(_fun, L, 2);
+        l_int32 depth = ll_check_l_int32_default(_fun, L, 3, 1);
         pix = pixCreateNoInit(width, height, depth);
     } else if (lua_isuserdata(L, 1)) {
-        Pix *pixs = ll_check_Pix(L, 1);
+        Pix *pixs = ll_check_Pix(_fun, L, 1);
         pix = pixCreateTemplateNoInit(pixs);
     } else {
         /* FIXME: what is this? */
     }
-    return ll_push_Pix(L, pix);
+    return ll_push_Pix(_fun, L, pix);
 }
 
 /**
@@ -233,9 +190,10 @@ CreateNoInit(lua_State *L)
 static int
 Destroy(lua_State *L)
 {
-    Pix **ppix = reinterpret_cast<Pix **>(ll_check_udata(L, 1, LL_PIX));
+    FUNC(LL_PIX ".Destroy");
+    Pix **ppix = reinterpret_cast<Pix **>(ll_check_udata(_fun, L, 1, LL_PIX));
     DBG(LOG_DESTROY, "%s: '%s' ppix=%p pix=%p refcount=%d\n",
-        __func__, LL_PIX, ppix, *ppix, pixGetRefcount(*ppix));
+        _fun, LL_PIX, ppix, *ppix, pixGetRefcount(*ppix));
     pixDestroy(reinterpret_cast<Pix **>(ppix));
     *ppix = nullptr;
     return 0;
@@ -252,9 +210,10 @@ Destroy(lua_State *L)
 static int
 Copy(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".Copy");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
     Pix *pixd = pixCopy(nullptr, pixs);
-    return ll_push_Pix(L, pixd);
+    return ll_push_Pix(_fun, L, pixd);
 }
 
 /**
@@ -268,9 +227,10 @@ Copy(lua_State *L)
 static int
 Clone(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".Clone");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
     Pix *pixd = pixClone(pixs);
-    return ll_push_Pix(L, pixd);
+    return ll_push_Pix(_fun, L, pixd);
 }
 
 /**
@@ -285,8 +245,9 @@ Clone(lua_State *L)
 static int
 ResizeImageData(lua_State *L)
 {
-    Pix *pixd = ll_check_Pix(L, 1);
-    Pix *pixs = ll_check_Pix(L, 2);
+    FUNC(LL_PIX ".ResizeImageData");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
     lua_pushboolean(L, 0 == pixResizeImageData(pixd, pixs));
     return 1;
 }
@@ -303,8 +264,9 @@ ResizeImageData(lua_State *L)
 static int
 CopyColormap(lua_State *L)
 {
-    Pix *pixd = ll_check_Pix(L, 1);
-    Pix *pixs = ll_check_Pix(L, 2);
+    FUNC(LL_PIX ".CopyColormap");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
     lua_pushboolean(L, 0 == pixCopyColormap(pixd, pixs));
     return 1;
 }
@@ -320,8 +282,9 @@ CopyColormap(lua_State *L)
 static int
 SizesEqual(lua_State *L)
 {
-    Pix *pix1 = ll_check_Pix(L, 1);
-    Pix *pix2 = ll_check_Pix(L, 2);
+    FUNC(LL_PIX ".SizesEqual");
+    Pix *pix1 = ll_check_Pix(_fun, L, 1);
+    Pix *pix2 = ll_check_Pix(_fun, L, 2);
     lua_pushboolean(L, 0 == pixSizesEqual(pix1, pix2));
     return 1;
 }
@@ -340,9 +303,10 @@ SizesEqual(lua_State *L)
 static int
 TransferAllData(lua_State *L)
 {
-    void **ppixs = ll_check_udata(L, 2, LL_PIX);
-    Pix *pixd = ll_check_Pix(L, 1);
-    Pix *pixs = ll_check_Pix(L, 2);
+    FUNC(LL_PIX ".TransferAllData");
+    void **ppixs = ll_check_udata(_fun, L, 2, LL_PIX);
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
     int copytext = lua_isboolean(L, 3) ? lua_toboolean(L, 3) : TRUE;
     int copyformat = lua_isboolean(L, 4) ? lua_toboolean(L, 4) : TRUE;
     lua_pushboolean(L, 0 == pixTransferAllData(pixd, &pixs, copytext, copyformat));
@@ -362,10 +326,11 @@ TransferAllData(lua_State *L)
 static int
 SwapAndDestroy(lua_State *L)
 {
-    void **ppixd = ll_check_udata(L, 1, LL_PIX);
-    void **ppixs = ll_check_udata(L, 2, LL_PIX);
-    Pix *pixd = ll_check_Pix(L, 1);
-    Pix *pixs = ll_check_Pix(L, 2);
+    FUNC(LL_PIX ".SwapAndDestroy");
+    void **ppixd = ll_check_udata(_fun, L, 1, LL_PIX);
+    void **ppixs = ll_check_udata(_fun, L, 2, LL_PIX);
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
     lua_pushboolean(L, 0 == pixSwapAndDestroy(&pixd, &pixs));
     *ppixd = pixd;
     *ppixs = pixs;
@@ -383,7 +348,8 @@ SwapAndDestroy(lua_State *L)
 static int
 GetWidth(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".GetWidth");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 width = pixGetWidth(pix);
     lua_pushinteger(L, width);
     return 1;
@@ -400,8 +366,9 @@ GetWidth(lua_State *L)
 static int
 SetWidth(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 width = ll_check_l_int32_default(__func__, L, 2, pixGetWidth(pix));
+    FUNC(LL_PIX ".SetWidth");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 width = ll_check_l_int32_default(_fun, L, 2, pixGetWidth(pix));
     lua_pushboolean(L, 0 == pixSetWidth(pix, width));
     return 1;
 }
@@ -417,7 +384,8 @@ SetWidth(lua_State *L)
 static int
 GetHeight(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".GetHeight");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 height = pixGetHeight(pix);
     lua_pushinteger(L, height);
     return 1;
@@ -434,8 +402,9 @@ GetHeight(lua_State *L)
 static int
 SetHeight(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 height = ll_check_l_int32_default(__func__, L, 2, pixGetHeight(pix));
+    FUNC(LL_PIX ".SetHeight");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 height = ll_check_l_int32_default(_fun, L, 2, pixGetHeight(pix));
     lua_pushboolean(L, 0 == pixSetHeight(pix, height));
     return 1;
 }
@@ -451,7 +420,8 @@ SetHeight(lua_State *L)
 static int
 GetDepth(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".GetDepth");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 depth = pixGetDepth(pix);
     lua_pushinteger(L, depth);
     return 1;
@@ -468,8 +438,9 @@ GetDepth(lua_State *L)
 static int
 SetDepth(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 depth = ll_check_l_int32_default(__func__, L, 2, pixGetDepth(pix));
+    FUNC(LL_PIX ".SetDepth");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 depth = ll_check_l_int32_default(_fun, L, 2, pixGetDepth(pix));
     lua_pushboolean(L, 0 == pixSetDepth(pix, depth));
     return 1;
 }
@@ -485,7 +456,8 @@ SetDepth(lua_State *L)
 static int
 GetDimensions(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".GetDimensions");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 width, height, depth;
     if (pixGetDimensions(pix, &width, &height, &depth))
         return ll_push_nil(L);
@@ -509,10 +481,11 @@ GetDimensions(lua_State *L)
 static int
 SetDimensions(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 width = ll_check_l_int32_default(__func__, L, 2, 0);
-    l_int32 height = ll_check_l_int32_default(__func__, L, 3, 0);
-    l_int32 depth = ll_check_l_int32_default(__func__, L, 4, 1);
+    FUNC(LL_PIX ".SetDimensions");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 width = ll_check_l_int32_default(_fun, L, 2, 0);
+    l_int32 height = ll_check_l_int32_default(_fun, L, 3, 0);
+    l_int32 depth = ll_check_l_int32_default(_fun, L, 4, 1);
     lua_pushboolean(L, 0 == pixSetDimensions(pix, width, height, depth));
     return 1;
 }
@@ -529,8 +502,9 @@ SetDimensions(lua_State *L)
 static int
 CopyDimensions(lua_State *L)
 {
-    Pix *pixd = ll_check_Pix(L, 1);
-    Pix *pixs = ll_check_Pix(L, 2);
+    FUNC(LL_PIX ".CopyDimensions");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
     lua_pushboolean(L, 0 == pixCopyDimensions(pixd, pixs));
     return 1;
 }
@@ -546,7 +520,8 @@ CopyDimensions(lua_State *L)
 static int
 GetSpp(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".GetSpp");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 spp = pixGetSpp(pix);
     lua_pushinteger(L, spp);
     return 1;
@@ -563,8 +538,9 @@ GetSpp(lua_State *L)
 static int
 SetSpp(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 spp = ll_check_l_int32_default(__func__, L, 2, pixGetSpp(pix));
+    FUNC(LL_PIX ".SetSpp");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 spp = ll_check_l_int32_default(_fun, L, 2, pixGetSpp(pix));
     lua_pushboolean(L, 0 == pixSetSpp(pix, spp));
     return 1;
 }
@@ -581,8 +557,9 @@ SetSpp(lua_State *L)
 static int
 CopySpp(lua_State *L)
 {
-    Pix *pixd = ll_check_Pix(L, 1);
-    Pix *pixs = ll_check_Pix(L, 2);
+    FUNC(LL_PIX ".CopySpp");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
     lua_pushboolean(L, 0 == pixCopySpp(pixd, pixs));
     return 1;
 }
@@ -598,7 +575,8 @@ CopySpp(lua_State *L)
 static int
 GetWpl(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".GetWpl");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 wpl = pixGetWpl(pix);
     lua_pushinteger(L, wpl);
     return 1;
@@ -615,8 +593,9 @@ GetWpl(lua_State *L)
 static int
 SetWpl(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 wpl = ll_check_l_int32_default(__func__, L, 2, pixGetWpl(pix));
+    FUNC(LL_PIX ".SetWpl");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 wpl = ll_check_l_int32_default(_fun, L, 2, pixGetWpl(pix));
     lua_pushboolean(L, 0 == pixSetWpl(pix, wpl));
     return 1;
 }
@@ -632,7 +611,8 @@ SetWpl(lua_State *L)
 static int
 GetXRes(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".GetXRes");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 xres = pixGetXRes(pix);
     lua_pushinteger(L, xres);
     return 1;
@@ -649,8 +629,9 @@ GetXRes(lua_State *L)
 static int
 SetXRes(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 xres = ll_check_l_int32_default(__func__, L, 2, pixGetXRes(pix));
+    FUNC(LL_PIX ".SetXRes");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 xres = ll_check_l_int32_default(_fun, L, 2, pixGetXRes(pix));
     lua_pushboolean(L, 0 == pixSetXRes(pix, xres));
     return 1;
 }
@@ -666,7 +647,8 @@ SetXRes(lua_State *L)
 static int
 GetYRes(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".GetYRes");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 yres = pixGetYRes(pix);
     lua_pushinteger(L, yres);
     return 1;
@@ -683,8 +665,9 @@ GetYRes(lua_State *L)
 static int
 SetYRes(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 yres = ll_check_l_int32_default(__func__, L, 2, pixGetYRes(pix));
+    FUNC(LL_PIX ".SetYRes");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 yres = ll_check_l_int32_default(_fun, L, 2, pixGetYRes(pix));
     lua_pushboolean(L, 0 == pixSetYRes(pix, yres));
     return 1;
 }
@@ -700,7 +683,8 @@ SetYRes(lua_State *L)
 static int
 GetResolution(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".GetResolution");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 xres, yres;
     if (pixGetResolution(pix, &xres, &yres))
         return ll_push_nil(L);
@@ -722,9 +706,10 @@ GetResolution(lua_State *L)
 static int
 SetResolution(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 xres = ll_check_l_int32_default(__func__, L, 2, 300);
-    l_int32 yres = ll_check_l_int32_default(__func__, L, 3, xres);
+    FUNC(LL_PIX ".SetResolution");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 xres = ll_check_l_int32_default(_fun, L, 2, 300);
+    l_int32 yres = ll_check_l_int32_default(_fun, L, 3, xres);
     lua_pushboolean(L, 0 == pixSetResolution(pix, xres, yres));
     return 1;
 }
@@ -741,8 +726,9 @@ SetResolution(lua_State *L)
 static int
 CopyResolution(lua_State *L)
 {
-    Pix *pixd = ll_check_Pix(L, 1);
-    Pix *pixs = ll_check_Pix(L, 2);
+    FUNC(LL_PIX ".CopyResolution");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
     lua_pushboolean(L, 0 == pixCopyResolution(pixd, pixs));
     return 1;
 }
@@ -760,9 +746,10 @@ CopyResolution(lua_State *L)
 static int
 ScaleResolution(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_float32 xscale = ll_check_l_float32(__func__, L, 2);
-    l_float32 yscale = ll_check_l_float32(__func__, L, 3);
+    FUNC(LL_PIX ".ScaleResolution");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_float32 xscale = ll_check_l_float32(_fun, L, 2);
+    l_float32 yscale = ll_check_l_float32(_fun, L, 3);
     lua_pushboolean(L, 0 == pixScaleResolution(pix, xscale, yscale));
     return 1;
 }
@@ -778,7 +765,8 @@ ScaleResolution(lua_State *L)
 static int
 GetInputFormat(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".GetInputFormat");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
     lua_pushstring(L, ll_string_input_format(pixGetInputFormat(pix)));
     return 1;
 }
@@ -795,8 +783,9 @@ GetInputFormat(lua_State *L)
 static int
 SetInputFormat(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 format = ll_check_input_format(__func__, L, 2, IFF_UNKNOWN);
+    FUNC(LL_PIX ".SetInputFormat");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 format = ll_check_input_format(_fun, L, 2, IFF_UNKNOWN);
     lua_pushboolean(L, 0 == pixSetInputFormat(pix, format));
     return 1;
 }
@@ -813,8 +802,9 @@ SetInputFormat(lua_State *L)
 static int
 CopyInputFormat(lua_State *L)
 {
-    Pix *pixd = ll_check_Pix(L, 1);
-    Pix *pixs = ll_check_Pix(L, 2);
+    FUNC(LL_PIX ".CopyInputFormat");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
     lua_pushboolean(L, 0 == pixCopyInputFormat(pixd, pixs));
     return 1;
 }
@@ -831,8 +821,9 @@ CopyInputFormat(lua_State *L)
 static int
 SetSpecial(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 special = ll_check_l_int32(__func__, L, 2);
+    FUNC(LL_PIX ".SetSpecial");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 special = ll_check_l_int32(_fun, L, 2);
     lua_pushboolean(L, 0 == pixSetSpecial(pix, special));
     return 1;
 }
@@ -848,7 +839,8 @@ SetSpecial(lua_State *L)
 static int
 GetText(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".GetText");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
     const char* text = pixGetText(pix);
     lua_pushstring(L, text);
     return 1;
@@ -866,8 +858,9 @@ GetText(lua_State *L)
 static int
 SetText(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    const char* text = lua_tostring(L, 2);
+    FUNC(LL_PIX ".SetText");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    const char* text = ll_check_string(_fun, L, 2);
     lua_pushboolean(L, pixSetText(pix, text));
     return 1;
 }
@@ -884,8 +877,9 @@ SetText(lua_State *L)
 static int
 AddText(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    const char* text = lua_tostring(L, 2);
+    FUNC(LL_PIX ".AddText");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    const char* text = ll_check_string(_fun, L, 2);
     lua_pushboolean(L, pixAddText(pix, text));
     return 1;
 }
@@ -902,8 +896,9 @@ AddText(lua_State *L)
 static int
 CopyText(lua_State *L)
 {
-    Pix *pixd = ll_check_Pix(L, 1);
-    Pix *pixs = ll_check_Pix(L, 2);
+    FUNC(LL_PIX ".CopyText");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
     lua_pushboolean(L, 0 == pixCopyText(pixd, pixs));
     return 1;
 }
@@ -919,9 +914,10 @@ CopyText(lua_State *L)
 static int
 GetColormap(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".GetColormap");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
     PixColormap* colormap = pixGetColormap(pix);
-    return ll_push_PixColormap(L, colormap);
+    return ll_push_PixColormap(_fun, L, colormap);
 }
 
 /**
@@ -936,7 +932,8 @@ GetColormap(lua_State *L)
 static int
 SetColormap(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".SetColormap");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
     PixColormap* colormap = ll_take_PixColormap(L, 2);
     lua_pushboolean(L, 0 == pixSetColormap(pix, colormap));
     return 1;
@@ -955,9 +952,10 @@ SetColormap(lua_State *L)
 static int
 GetPixel(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 x = ll_check_l_int32(__func__, L, 2);
-    l_int32 y = ll_check_l_int32(__func__, L, 3);
+    FUNC(LL_PIX ".GetPixel");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 x = ll_check_l_int32(_fun, L, 2);
+    l_int32 y = ll_check_l_int32(_fun, L, 3);
     l_uint32 val = 0;
     if (pixGetPixel(pix, x, y, &val))
         return ll_push_nil(L);
@@ -979,10 +977,11 @@ GetPixel(lua_State *L)
 static int
 SetPixel(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 x = ll_check_l_int32(__func__, L, 2);
-    l_int32 y = ll_check_l_int32(__func__, L, 3);
-    l_uint32 val = ll_check_l_uint32(__func__, L, 4) - 1;
+    FUNC(LL_PIX ".SetPixel");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 x = ll_check_l_int32(_fun, L, 2);
+    l_int32 y = ll_check_l_int32(_fun, L, 3);
+    l_uint32 val = ll_check_l_uint32(_fun, L, 4) - 1;
     lua_pushboolean(L, 0 == pixSetPixel(pix, x, y, val));
     return 1;
 }
@@ -1000,9 +999,10 @@ SetPixel(lua_State *L)
 static int
 GetRGBPixel(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 x = ll_check_l_int32(__func__, L, 2);
-    l_int32 y = ll_check_l_int32(__func__, L, 3);
+    FUNC(LL_PIX ".GetRGBPixel");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 x = ll_check_l_int32(_fun, L, 2);
+    l_int32 y = ll_check_l_int32(_fun, L, 3);
     l_int32 rval = 0;
     l_int32 gval = 0;
     l_int32 bval = 0;
@@ -1030,12 +1030,13 @@ GetRGBPixel(lua_State *L)
 static int
 SetRGBPixel(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 x = ll_check_l_int32(__func__, L, 2);
-    l_int32 y = ll_check_l_int32(__func__, L, 3);
-    l_int32 rval = ll_check_l_int32(__func__, L, 4);
-    l_int32 gval = ll_check_l_int32(__func__, L, 5);
-    l_int32 bval = ll_check_l_int32(__func__, L, 6);
+    FUNC(LL_PIX ".SetRGBPixel");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 x = ll_check_l_int32(_fun, L, 2);
+    l_int32 y = ll_check_l_int32(_fun, L, 3);
+    l_int32 rval = ll_check_l_int32(_fun, L, 4);
+    l_int32 gval = ll_check_l_int32(_fun, L, 5);
+    l_int32 bval = ll_check_l_int32(_fun, L, 6);
     lua_pushboolean(L, 0 == pixSetRGBPixel(pix, x, y, rval, gval, bval));
     return 1;
 }
@@ -1051,7 +1052,8 @@ SetRGBPixel(lua_State *L)
 static int
 GetRandomPixel(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".GetRandomPixel");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 x = 0;
     l_int32 y = 0;
     l_uint32 val = 0;
@@ -1076,9 +1078,10 @@ GetRandomPixel(lua_State *L)
 static int
 ClearPixel(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 x = ll_check_l_int32(__func__, L, 2);
-    l_int32 y = ll_check_l_int32(__func__, L, 3);
+    FUNC(LL_PIX ".ClearPixel");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 x = ll_check_l_int32(_fun, L, 2);
+    l_int32 y = ll_check_l_int32(_fun, L, 3);
     lua_pushboolean(L, 0 == pixClearPixel(pix, x, y));
     return 1;
 }
@@ -1096,9 +1099,10 @@ ClearPixel(lua_State *L)
 static int
 FlipPixel(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 x = ll_check_l_int32(__func__, L, 2);
-    l_int32 y = ll_check_l_int32(__func__, L, 3);
+    FUNC(LL_PIX ".FlipPixel");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 x = ll_check_l_int32(_fun, L, 2);
+    l_int32 y = ll_check_l_int32(_fun, L, 3);
     lua_pushboolean(L, 0 == pixFlipPixel(pix, x, y));
     return 1;
 }
@@ -1115,8 +1119,9 @@ FlipPixel(lua_State *L)
 static int
 GetBlackOrWhiteVal(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 op = ll_check_getval(__func__, L, 2, L_GET_BLACK_VAL);
+    FUNC(LL_PIX ".GetBlackOrWhiteVal");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 op = ll_check_getval(_fun, L, 2, L_GET_BLACK_VAL);
     l_uint32 val = 0;
     if (pixGetBlackOrWhiteVal(pix, op, &val))
         return ll_push_nil(L);
@@ -1135,7 +1140,8 @@ GetBlackOrWhiteVal(lua_State *L)
 static int
 GetBlackVal(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".GetBlackVal");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
     l_uint32 val = 0;
     if (pixGetBlackOrWhiteVal(pix, L_GET_BLACK_VAL, &val))
         return ll_push_nil(L);
@@ -1154,7 +1160,8 @@ GetBlackVal(lua_State *L)
 static int
 GetWhiteVal(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".GetWhiteVal");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
     l_uint32 val = 0;
     if (pixGetBlackOrWhiteVal(pix, L_GET_WHITE_VAL, &val))
         return ll_push_nil(L);
@@ -1173,7 +1180,8 @@ GetWhiteVal(lua_State *L)
 static int
 ClearAll(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".ClearAll");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
     lua_pushboolean(L, 0 == pixClearAll(pix));
     return 1;
 }
@@ -1189,7 +1197,8 @@ ClearAll(lua_State *L)
 static int
 SetAll(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".SetAll");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
     lua_pushboolean(L, 0 == pixSetAll(pix));
     return 1;
 }
@@ -1206,8 +1215,9 @@ SetAll(lua_State *L)
 static int
 SetAllGray(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 grayval = ll_check_l_int32(__func__, L, 2);
+    FUNC(LL_PIX ".SetAllGray");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 grayval = ll_check_l_int32(_fun, L, 2);
     lua_pushboolean(L, 0 == pixSetAllGray(pix, grayval));
     return 1;
 }
@@ -1224,8 +1234,9 @@ SetAllGray(lua_State *L)
 static int
 SetAllArbitrary(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_uint32 val = ll_check_l_uint32(__func__, L, 2);
+    FUNC(LL_PIX ".SetAllArbitrary");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_uint32 val = ll_check_l_uint32(_fun, L, 2);
     lua_pushboolean(L, 0 == pixSetAllArbitrary(pix, val));
     return 1;
 }
@@ -1242,8 +1253,9 @@ SetAllArbitrary(lua_State *L)
 static int
 SetBlackOrWhite(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 op = ll_check_blackwhite(__func__, L, 2, L_SET_BLACK);
+    FUNC(LL_PIX ".SetBlackOrWhite");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 op = ll_check_blackwhite(_fun, L, 2, L_SET_BLACK);
     lua_pushboolean(L, 0 == pixSetBlackOrWhite(pix, op));
     return 1;
 }
@@ -1259,7 +1271,8 @@ SetBlackOrWhite(lua_State *L)
 static int
 SetBlack(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".SetBlack");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
     lua_pushboolean(L, 0 == pixSetBlackOrWhite(pix, L_SET_BLACK));
     return 1;
 }
@@ -1275,7 +1288,8 @@ SetBlack(lua_State *L)
 static int
 SetWhite(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".SetWhite");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
     lua_pushboolean(L, 0 == pixSetBlackOrWhite(pix, L_SET_WHITE));
     return 1;
 }
@@ -1293,9 +1307,10 @@ SetWhite(lua_State *L)
 static int
 SetComponentArbitrary(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 comp = ll_check_component(__func__, L, 2, 0);
-    l_int32 val = ll_check_l_int32(__func__, L, 3);
+    FUNC(LL_PIX ".SetComponentArbitrary");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 comp = ll_check_component(_fun, L, 2, 0);
+    l_int32 val = ll_check_l_int32(_fun, L, 3);
     lua_pushboolean(L, 0 == pixSetComponentArbitrary(pix, comp, val));
     return 1;
 }
@@ -1312,8 +1327,9 @@ SetComponentArbitrary(lua_State *L)
 static int
 ClearInRect(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    Box *box = ll_check_Box(L, 2);
+    FUNC(LL_PIX ".ClearInRect");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    Box *box = ll_check_Box(_fun, L, 2);
     lua_pushboolean(L, 0 == pixClearInRect(pix, box));
     return 1;
 }
@@ -1330,8 +1346,9 @@ ClearInRect(lua_State *L)
 static int
 SetInRect(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    Box *box = ll_check_Box(L, 2);
+    FUNC(LL_PIX ".SetInRect");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    Box *box = ll_check_Box(_fun, L, 2);
     lua_pushboolean(L, 0 == pixSetInRect(pix, box));
     return 1;
 }
@@ -1349,9 +1366,10 @@ SetInRect(lua_State *L)
 static int
 SetInRectArbitrary(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    Box *box = ll_check_Box(L, 2);
-    l_uint32 val = ll_check_l_uint32(__func__, L, 3);
+    FUNC(LL_PIX ".SetInRectArbitrary");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    Box *box = ll_check_Box(_fun, L, 2);
+    l_uint32 val = ll_check_l_uint32(_fun, L, 3);
     lua_pushboolean(L, 0 == pixSetInRectArbitrary(pix, box, val));
     return 1;
 }
@@ -1370,10 +1388,11 @@ SetInRectArbitrary(lua_State *L)
 static int
 BlendInRect(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    Box *box = ll_check_Box(L, 2);
-    l_uint32 val = ll_check_l_uint32(__func__, L, 3);
-    l_float32 fract = ll_check_l_float32(__func__, L, 4);
+    FUNC(LL_PIX ".BlendInRect");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    Box *box = ll_check_Box(_fun, L, 2);
+    l_uint32 val = ll_check_l_uint32(_fun, L, 3);
+    l_float32 fract = ll_check_l_float32(_fun, L, 4);
     lua_pushboolean(L, 0 == pixBlendInRect(pix, box, val, fract));
     return 1;
 }
@@ -1390,8 +1409,9 @@ BlendInRect(lua_State *L)
 static int
 SetPadBits(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 val = ll_check_l_int32(__func__, L, 2);
+    FUNC(LL_PIX ".SetPadBits");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 val = ll_check_l_int32(_fun, L, 2);
     lua_pushboolean(L, 0 == pixSetPadBits(pix, val));
     return 1;
 }
@@ -1410,10 +1430,11 @@ SetPadBits(lua_State *L)
 static int
 SetPadBitsBand(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 by = ll_check_l_int32(__func__, L, 2);
-    l_int32 bh = ll_check_l_int32(__func__, L, 3);
-    l_int32 val = ll_check_l_int32(__func__, L, 4);
+    FUNC(LL_PIX ".SetPadBitsBand");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 by = ll_check_l_int32(_fun, L, 2);
+    l_int32 bh = ll_check_l_int32(_fun, L, 3);
+    l_int32 val = ll_check_l_int32(_fun, L, 4);
     lua_pushboolean(L, 0 == pixSetPadBitsBand(pix, by, bh, val));
     return 1;
 }
@@ -1434,12 +1455,13 @@ SetPadBitsBand(lua_State *L)
 static int
 SetOrClearBorder(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 left = ll_check_l_int32(__func__, L, 2);
-    l_int32 right = ll_check_l_int32(__func__, L, 3);
-    l_int32 top = ll_check_l_int32(__func__, L, 4);
-    l_int32 bottom = ll_check_l_int32(__func__, L, 5);
-    l_int32 op = ll_check_rasterop(__func__, L, 6, PIX_CLR);
+    FUNC(LL_PIX ".SetOrClearBorder");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 left = ll_check_l_int32(_fun, L, 2);
+    l_int32 right = ll_check_l_int32(_fun, L, 3);
+    l_int32 top = ll_check_l_int32(_fun, L, 4);
+    l_int32 bottom = ll_check_l_int32(_fun, L, 5);
+    l_int32 op = ll_check_rasterop(_fun, L, 6, PIX_CLR);
     lua_pushboolean(L, 0 == pixSetOrClearBorder(pix, left, right, top, bottom, op));
     return 1;
 }
@@ -1460,12 +1482,13 @@ SetOrClearBorder(lua_State *L)
 static int
 SetBorderVal(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 left = ll_check_l_int32(__func__, L, 2);
-    l_int32 right = ll_check_l_int32(__func__, L, 3);
-    l_int32 top = ll_check_l_int32(__func__, L, 4);
-    l_int32 bottom = ll_check_l_int32(__func__, L, 5);
-    l_uint32 val = ll_check_l_uint32(__func__, L, 6);
+    FUNC(LL_PIX ".SetBorderVal");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 left = ll_check_l_int32(_fun, L, 2);
+    l_int32 right = ll_check_l_int32(_fun, L, 3);
+    l_int32 top = ll_check_l_int32(_fun, L, 4);
+    l_int32 bottom = ll_check_l_int32(_fun, L, 5);
+    l_uint32 val = ll_check_l_uint32(_fun, L, 6);
     lua_pushboolean(L, 0 == pixSetBorderVal(pix, left, right, top, bottom, val));
     return 1;
 }
@@ -1483,9 +1506,10 @@ SetBorderVal(lua_State *L)
 static int
 SetBorderRingVal(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 dist = ll_check_l_int32(__func__, L, 2);
-    l_uint32 val = ll_check_l_uint32(__func__, L, 3);
+    FUNC(LL_PIX ".SetBorderRingVal");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 dist = ll_check_l_int32(_fun, L, 2);
+    l_uint32 val = ll_check_l_uint32(_fun, L, 3);
     lua_pushboolean(L, 0 == pixSetBorderRingVal(pix, dist, val));
     return 1;
 }
@@ -1505,11 +1529,12 @@ SetBorderRingVal(lua_State *L)
 static int
 SetMirroredBorder(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    l_int32 left = ll_check_l_int32(__func__, L, 2);
-    l_int32 right = ll_check_l_int32(__func__, L, 3);
-    l_int32 top = ll_check_l_int32(__func__, L, 4);
-    l_int32 bottom = ll_check_l_int32(__func__, L, 5);
+    FUNC(LL_PIX ".SetMirroredBorder");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 left = ll_check_l_int32(_fun, L, 2);
+    l_int32 right = ll_check_l_int32(_fun, L, 3);
+    l_int32 top = ll_check_l_int32(_fun, L, 4);
+    l_int32 bottom = ll_check_l_int32(_fun, L, 5);
     lua_pushboolean(L, 0 == pixSetMirroredBorder(pix, left, right, top, bottom));
     return 1;
 }
@@ -1529,13 +1554,14 @@ SetMirroredBorder(lua_State *L)
 static int
 CopyBorder(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 left = ll_check_l_int32(__func__, L, 2);
-    l_int32 right = ll_check_l_int32(__func__, L, 3);
-    l_int32 top = ll_check_l_int32(__func__, L, 4);
-    l_int32 bottom = ll_check_l_int32(__func__, L, 5);
+    FUNC(LL_PIX ".CopyBorder");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 left = ll_check_l_int32(_fun, L, 2);
+    l_int32 right = ll_check_l_int32(_fun, L, 3);
+    l_int32 top = ll_check_l_int32(_fun, L, 4);
+    l_int32 bottom = ll_check_l_int32(_fun, L, 5);
     Pix* pix = pixCopyBorder(nullptr, pixs, left, right, top, bottom);
-    ll_push_Pix(L, pix);
+    ll_push_Pix(_fun, L, pix);
     return 1;
 }
 
@@ -1552,11 +1578,12 @@ CopyBorder(lua_State *L)
 static int
 AddBorder(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 npix = ll_check_l_int32(__func__, L, 2);
-    l_uint32 val = ll_check_l_uint32(__func__, L, 3);
+    FUNC(LL_PIX ".AddBorder");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 npix = ll_check_l_int32(_fun, L, 2);
+    l_uint32 val = ll_check_l_uint32(_fun, L, 3);
     Pix* pix = pixAddBorder(pixs, npix, val);
-    ll_push_Pix(L, pix);
+    ll_push_Pix(_fun, L, pix);
     return 1;
 }
 
@@ -1576,14 +1603,15 @@ AddBorder(lua_State *L)
 static int
 AddBlackOrWhiteBorder(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 left = ll_check_l_int32(__func__, L, 2);
-    l_int32 right = ll_check_l_int32(__func__, L, 3);
-    l_int32 top = ll_check_l_int32(__func__, L, 4);
-    l_int32 bottom = ll_check_l_int32(__func__, L, 5);
-    l_int32 op = ll_check_getval(__func__, L, 6, L_GET_BLACK_VAL);
+    FUNC(LL_PIX ".AddBlackOrWhiteBorder");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 left = ll_check_l_int32(_fun, L, 2);
+    l_int32 right = ll_check_l_int32(_fun, L, 3);
+    l_int32 top = ll_check_l_int32(_fun, L, 4);
+    l_int32 bottom = ll_check_l_int32(_fun, L, 5);
+    l_int32 op = ll_check_getval(_fun, L, 6, L_GET_BLACK_VAL);
     Pix* pix = pixAddBlackOrWhiteBorder(pixs, left, right, top, bottom, op);
-    ll_push_Pix(L, pix);
+    ll_push_Pix(_fun, L, pix);
     return 1;
 }
 
@@ -1603,14 +1631,15 @@ AddBlackOrWhiteBorder(lua_State *L)
 static int
 AddBorderGeneral(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 left = ll_check_l_int32(__func__, L, 2);
-    l_int32 right = ll_check_l_int32(__func__, L, 3);
-    l_int32 top = ll_check_l_int32(__func__, L, 4);
-    l_int32 bottom = ll_check_l_int32(__func__, L, 5);
-    l_uint32 val = ll_check_l_uint32(__func__, L, 6);
+    FUNC(LL_PIX ".AddBorderGeneral");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 left = ll_check_l_int32(_fun, L, 2);
+    l_int32 right = ll_check_l_int32(_fun, L, 3);
+    l_int32 top = ll_check_l_int32(_fun, L, 4);
+    l_int32 bottom = ll_check_l_int32(_fun, L, 5);
+    l_uint32 val = ll_check_l_uint32(_fun, L, 6);
     Pix* pix = pixAddBorderGeneral(pixs, left, right, top, bottom, val);
-    ll_push_Pix(L, pix);
+    ll_push_Pix(_fun, L, pix);
     return 1;
 }
 
@@ -1626,10 +1655,11 @@ AddBorderGeneral(lua_State *L)
 static int
 RemoveBorder(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 npix = ll_check_l_int32(__func__, L, 2);
+    FUNC(LL_PIX ".RemoveBorder");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 npix = ll_check_l_int32(_fun, L, 2);
     Pix* pix = pixRemoveBorder(pixs, npix);
-    ll_push_Pix(L, pix);
+    ll_push_Pix(_fun, L, pix);
     return 1;
 }
 
@@ -1648,13 +1678,14 @@ RemoveBorder(lua_State *L)
 static int
 RemoveBorderGeneral(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 left = ll_check_l_int32(__func__, L, 2);
-    l_int32 right = ll_check_l_int32(__func__, L, 3);
-    l_int32 top = ll_check_l_int32(__func__, L, 4);
-    l_int32 bottom = ll_check_l_int32(__func__, L, 5);
+    FUNC(LL_PIX ".RemoveBorderGeneral");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 left = ll_check_l_int32(_fun, L, 2);
+    l_int32 right = ll_check_l_int32(_fun, L, 3);
+    l_int32 top = ll_check_l_int32(_fun, L, 4);
+    l_int32 bottom = ll_check_l_int32(_fun, L, 5);
     Pix* pix = pixRemoveBorderGeneral(pixs, left, right, top, bottom);
-    ll_push_Pix(L, pix);
+    ll_push_Pix(_fun, L, pix);
     return 1;
 }
 
@@ -1671,11 +1702,12 @@ RemoveBorderGeneral(lua_State *L)
 static int
 RemoveBorderToSize(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 width = ll_check_l_int32(__func__, L, 2);
-    l_int32 height = ll_check_l_int32(__func__, L, 3);
+    FUNC(LL_PIX ".RemoveBorderToSize");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 width = ll_check_l_int32(_fun, L, 2);
+    l_int32 height = ll_check_l_int32(_fun, L, 3);
     Pix* pix = pixRemoveBorderToSize(pixs, width, height);
-    ll_push_Pix(L, pix);
+    ll_push_Pix(_fun, L, pix);
     return 1;
 }
 
@@ -1694,13 +1726,14 @@ RemoveBorderToSize(lua_State *L)
 static int
 AddMirroredBorder(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 left = ll_check_l_int32(__func__, L, 2);
-    l_int32 right = ll_check_l_int32(__func__, L, 3);
-    l_int32 top = ll_check_l_int32(__func__, L, 4);
-    l_int32 bottom = ll_check_l_int32(__func__, L, 5);
+    FUNC(LL_PIX ".AddMirroredBorder");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 left = ll_check_l_int32(_fun, L, 2);
+    l_int32 right = ll_check_l_int32(_fun, L, 3);
+    l_int32 top = ll_check_l_int32(_fun, L, 4);
+    l_int32 bottom = ll_check_l_int32(_fun, L, 5);
     Pix* pix = pixAddMirroredBorder(pixs, left, right, top, bottom);
-    ll_push_Pix(L, pix);
+    ll_push_Pix(_fun, L, pix);
     return 1;
 }
 
@@ -1719,13 +1752,14 @@ AddMirroredBorder(lua_State *L)
 static int
 AddRepeatedBorder(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 left = ll_check_l_int32(__func__, L, 2);
-    l_int32 right = ll_check_l_int32(__func__, L, 3);
-    l_int32 top = ll_check_l_int32(__func__, L, 4);
-    l_int32 bottom = ll_check_l_int32(__func__, L, 5);
+    FUNC(LL_PIX ".AddRepeatedBorder");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 left = ll_check_l_int32(_fun, L, 2);
+    l_int32 right = ll_check_l_int32(_fun, L, 3);
+    l_int32 top = ll_check_l_int32(_fun, L, 4);
+    l_int32 bottom = ll_check_l_int32(_fun, L, 5);
     Pix* pix = pixAddRepeatedBorder(pixs, left, right, top, bottom);
-    ll_push_Pix(L, pix);
+    ll_push_Pix(_fun, L, pix);
     return 1;
 }
 
@@ -1744,13 +1778,14 @@ AddRepeatedBorder(lua_State *L)
 static int
 AddMixedBorder(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 left = ll_check_l_int32(__func__, L, 2);
-    l_int32 right = ll_check_l_int32(__func__, L, 3);
-    l_int32 top = ll_check_l_int32(__func__, L, 4);
-    l_int32 bottom = ll_check_l_int32(__func__, L, 5);
+    FUNC(LL_PIX ".AddMixedBorder");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 left = ll_check_l_int32(_fun, L, 2);
+    l_int32 right = ll_check_l_int32(_fun, L, 3);
+    l_int32 top = ll_check_l_int32(_fun, L, 4);
+    l_int32 bottom = ll_check_l_int32(_fun, L, 5);
     Pix* pix = pixAddMixedBorder(pixs, left, right, top, bottom);
-    ll_push_Pix(L, pix);
+    ll_push_Pix(_fun, L, pix);
     return 1;
 }
 
@@ -1769,13 +1804,14 @@ AddMixedBorder(lua_State *L)
 static int
 AddContinuedBorder(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 left = ll_check_l_int32(__func__, L, 2);
-    l_int32 right = ll_check_l_int32(__func__, L, 3);
-    l_int32 top = ll_check_l_int32(__func__, L, 4);
-    l_int32 bottom = ll_check_l_int32(__func__, L, 5);
+    FUNC(LL_PIX ".AddContinuedBorder");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 left = ll_check_l_int32(_fun, L, 2);
+    l_int32 right = ll_check_l_int32(_fun, L, 3);
+    l_int32 top = ll_check_l_int32(_fun, L, 4);
+    l_int32 bottom = ll_check_l_int32(_fun, L, 5);
     Pix* pix = pixAddContinuedBorder(pixs, left, right, top, bottom);
-    ll_push_Pix(L, pix);
+    ll_push_Pix(_fun, L, pix);
     return 1;
 }
 
@@ -1794,10 +1830,11 @@ AddContinuedBorder(lua_State *L)
 static int
 ShiftAndTransferAlpha(lua_State *L)
 {
-    Pix *pixd = ll_check_Pix(L, 1);
-    Pix *pixs = ll_check_Pix(L, 2);
-    l_int32 shiftx = ll_check_l_int32(__func__, L, 3);
-    l_int32 shifty = ll_check_l_int32(__func__, L, 4);
+    FUNC(LL_PIX ".ShiftAndTransferAlpha");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
+    l_int32 shiftx = ll_check_l_int32(_fun, L, 3);
+    l_int32 shifty = ll_check_l_int32(_fun, L, 4);
     lua_pushboolean(L, pixShiftAndTransferAlpha(pixd, pixs, shiftx, shifty));
     return 1;
 }
@@ -1817,10 +1854,11 @@ ShiftAndTransferAlpha(lua_State *L)
 static int
 DisplayLayersRGBA(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_uint32 val = ll_check_l_uint32(__func__, L, 2);
-    l_int32 maxw = ll_check_l_int32(__func__, L, 3);
-    ll_push_Pix(L, pixDisplayLayersRGBA(pixs, val, maxw));
+    FUNC(LL_PIX ".DisplayLayersRGBA");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_uint32 val = ll_check_l_uint32(_fun, L, 2);
+    l_int32 maxw = ll_check_l_int32(_fun, L, 3);
+    ll_push_Pix(_fun, L, pixDisplayLayersRGBA(pixs, val, maxw));
     return 1;
 }
 
@@ -1837,10 +1875,11 @@ DisplayLayersRGBA(lua_State *L)
 static int
 CreateRGBImage(lua_State *L)
 {
-    Pix *pixr = ll_check_Pix(L, 1);
-    Pix *pixg = ll_check_Pix(L, 2);
-    Pix *pixb = ll_check_Pix(L, 3);
-    ll_push_Pix(L, pixCreateRGBImage(pixr, pixg, pixb));
+    FUNC(LL_PIX ".CreateRGBImage");
+    Pix *pixr = ll_check_Pix(_fun, L, 1);
+    Pix *pixg = ll_check_Pix(_fun, L, 2);
+    Pix *pixb = ll_check_Pix(_fun, L, 3);
+    ll_push_Pix(_fun, L, pixCreateRGBImage(pixr, pixg, pixb));
     return 1;
 }
 
@@ -1856,9 +1895,10 @@ CreateRGBImage(lua_State *L)
 static int
 GetRGBComponent(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 comp = ll_check_component(__func__, L, 2, L_ALPHA_CHANNEL);
-    ll_push_Pix(L, pixGetRGBComponent(pixs, comp));
+    FUNC(LL_PIX ".GetRGBComponent");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 comp = ll_check_component(_fun, L, 2, L_ALPHA_CHANNEL);
+    ll_push_Pix(_fun, L, pixGetRGBComponent(pixs, comp));
     return 1;
 }
 
@@ -1875,9 +1915,10 @@ GetRGBComponent(lua_State *L)
 static int
 SetRGBComponent(lua_State *L)
 {
-    Pix *pixd = ll_check_Pix(L, 1);
-    Pix *pixs = ll_check_Pix(L, 2);
-    l_int32 comp = ll_check_component(__func__, L, 3, L_ALPHA_CHANNEL);
+    FUNC(LL_PIX ".SetRGBComponent");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
+    l_int32 comp = ll_check_component(_fun, L, 3, L_ALPHA_CHANNEL);
     lua_pushboolean(L, 0 == pixSetRGBComponent(pixd, pixs, comp));
     return 1;
 }
@@ -1895,9 +1936,10 @@ SetRGBComponent(lua_State *L)
 static int
 CopyRGBComponent(lua_State *L)
 {
-    Pix *pixd = ll_check_Pix(L, 1);
-    Pix *pixs = ll_check_Pix(L, 2);
-    l_int32 comp = ll_check_component(__func__, L, 3, L_ALPHA_CHANNEL);
+    FUNC(LL_PIX ".CopyRGBComponent");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
+    l_int32 comp = ll_check_component(_fun, L, 3, L_ALPHA_CHANNEL);
     lua_pushboolean(L, 0 == pixCopyRGBComponent(pixd, pixs, comp));
     return 1;
 }
@@ -1913,8 +1955,9 @@ CopyRGBComponent(lua_State *L)
 static int
 GetRGBLine(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 row = ll_check_l_int32(__func__, L, 2);
+    FUNC(LL_PIX ".GetRGBLine");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 row = ll_check_l_int32(_fun, L, 2);
     size_t width = (size_t) pixGetWidth(pixs);
     l_uint8 *bufr = (l_uint8 *) LEPT_CALLOC(width, sizeof(l_uint8));
     l_uint8 *bufg = (l_uint8 *) LEPT_CALLOC(width, sizeof(l_uint8));
@@ -1945,7 +1988,8 @@ GetRGBLine(lua_State *L)
 static int
 AlphaIsOpaque(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".AlphaIsOpaque");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 opaque = 0;
     if (pixAlphaIsOpaque(pix, &opaque))
         return ll_push_nil(L);
@@ -1966,9 +2010,10 @@ AlphaIsOpaque(lua_State *L)
 static int
 SetMasked(lua_State *L)
 {
-    Pix *pixd = ll_check_Pix(L, 1);
-    Pix *pixm = ll_check_Pix(L, 2);
-    l_uint32 val = ll_check_l_uint32(__func__, L, 3);
+    FUNC(LL_PIX ".SetMasked");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixm = ll_check_Pix(_fun, L, 2);
+    l_uint32 val = ll_check_l_uint32(_fun, L, 3);
     lua_pushboolean(L, 0 == pixSetMasked(pixd, pixm, val));
     return 1;
 }
@@ -1988,11 +2033,12 @@ SetMasked(lua_State *L)
 static int
 SetMaskedGeneral(lua_State *L)
 {
-    Pix *pixd = ll_check_Pix(L, 1);
-    Pix *pixm = ll_check_Pix(L, 2);
-    l_uint32 val = ll_check_l_uint32(__func__, L, 3);
-    l_int32 x = ll_check_l_int32(__func__, L, 4);
-    l_int32 y = ll_check_l_int32(__func__, L, 5);
+    FUNC(LL_PIX ".SetMaskedGeneral");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixm = ll_check_Pix(_fun, L, 2);
+    l_uint32 val = ll_check_l_uint32(_fun, L, 3);
+    l_int32 x = ll_check_l_int32(_fun, L, 4);
+    l_int32 y = ll_check_l_int32(_fun, L, 5);
     lua_pushboolean(L, 0 == pixSetMaskedGeneral(pixd, pixm, val, x, y));
     return 1;
 }
@@ -2010,9 +2056,10 @@ SetMaskedGeneral(lua_State *L)
 static int
 CombineMasked(lua_State *L)
 {
-    Pix *pixd = ll_check_Pix(L, 1);
-    Pix *pixs = ll_check_Pix(L, 2);
-    Pix *pixm = ll_check_Pix(L, 3);
+    FUNC(LL_PIX ".CombineMasked");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
+    Pix *pixm = ll_check_Pix(_fun, L, 3);
     lua_pushboolean(L, 0 == pixCombineMasked(pixd, pixs, pixm));
     return 1;
 }
@@ -2032,11 +2079,12 @@ CombineMasked(lua_State *L)
 static int
 CombineMaskedGeneral(lua_State *L)
 {
-    Pix *pixd = ll_check_Pix(L, 1);
-    Pix *pixs = ll_check_Pix(L, 2);
-    Pix *pixm = ll_check_Pix(L, 3);
-    l_int32 x = ll_check_l_int32(__func__, L, 4);
-    l_int32 y = ll_check_l_int32(__func__, L, 5);
+    FUNC(LL_PIX ".CombineMaskedGeneral");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
+    Pix *pixm = ll_check_Pix(_fun, L, 3);
+    l_int32 x = ll_check_l_int32(_fun, L, 4);
+    l_int32 y = ll_check_l_int32(_fun, L, 5);
     lua_pushboolean(L, 0 == pixCombineMaskedGeneral(pixd, pixs, pixm, x, y));
     return 1;
 }
@@ -2056,11 +2104,12 @@ CombineMaskedGeneral(lua_State *L)
 static int
 PaintThroughMask(lua_State *L)
 {
-    Pix *pixd = ll_check_Pix(L, 1);
-    Pix *pixm = ll_check_Pix(L, 2);
-    l_int32 x = ll_check_l_int32(__func__, L, 3);
-    l_int32 y = ll_check_l_int32(__func__, L, 4);
-    l_uint32 val = ll_check_l_uint32(__func__, L, 5);
+    FUNC(LL_PIX ".PaintThroughMask");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixm = ll_check_Pix(_fun, L, 2);
+    l_int32 x = ll_check_l_int32(_fun, L, 3);
+    l_int32 y = ll_check_l_int32(_fun, L, 4);
+    l_uint32 val = ll_check_l_uint32(_fun, L, 5);
     lua_pushboolean(L, 0 == pixPaintThroughMask(pixd, pixm, x, y, val));
     return 1;
 }
@@ -2084,15 +2133,16 @@ PaintThroughMask(lua_State *L)
 static int
 PaintSelfThroughMask(lua_State *L)
 {
-    Pix *pixd = ll_check_Pix(L, 1);
-    Pix *pixm = ll_check_Pix(L, 2);
-    l_int32 x = ll_check_l_int32(__func__, L, 3);
-    l_int32 y = ll_check_l_int32(__func__, L, 4);
-    l_int32 searchdir = ll_check_searchdir(__func__, L, 5, L_BOTH_DIRECTIONS);
-    l_int32 mindist = ll_check_l_int32(__func__, L, 6);
-    l_int32 tilesize = ll_check_l_int32(__func__, L, 7);
-    l_int32 ntiles = ll_check_l_int32(__func__, L, 8);
-    l_int32 distblend = ll_check_l_int32_default(__func__, L, 9, 0);
+    FUNC(LL_PIX ".PaintSelfThroughMask");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixm = ll_check_Pix(_fun, L, 2);
+    l_int32 x = ll_check_l_int32(_fun, L, 3);
+    l_int32 y = ll_check_l_int32(_fun, L, 4);
+    l_int32 searchdir = ll_check_searchdir(_fun, L, 5, L_BOTH_DIRECTIONS);
+    l_int32 mindist = ll_check_l_int32(_fun, L, 6);
+    l_int32 tilesize = ll_check_l_int32(_fun, L, 7);
+    l_int32 ntiles = ll_check_l_int32(_fun, L, 8);
+    l_int32 distblend = ll_check_l_int32_default(_fun, L, 9, 0);
     lua_pushboolean(L, 0 == pixPaintSelfThroughMask(pixd, pixm, x, y, searchdir, mindist, tilesize, ntiles, distblend));
     return 1;
 }
@@ -2109,9 +2159,10 @@ PaintSelfThroughMask(lua_State *L)
 static int
 MakeMaskFromVal(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 val = ll_check_l_int32(__func__, L, 2);
-    ll_push_Pix(L, pixMakeMaskFromVal(pixs, val));
+    FUNC(LL_PIX ".MakeMaskFromVal");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 val = ll_check_l_int32(_fun, L, 2);
+    ll_push_Pix(_fun, L, pixMakeMaskFromVal(pixs, val));
     return 1;
 }
 
@@ -2127,7 +2178,8 @@ MakeMaskFromVal(lua_State *L)
 static int
 MakeMaskFromLUT(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".MakeMaskFromLUT");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
     size_t len = 0;
     const char* lut = lua_tolstring(L, 2, &len);
     l_int32* tab = nullptr;
@@ -2137,7 +2189,7 @@ MakeMaskFromLUT(lua_State *L)
     /* expand lookup-table (lut) to array of l_int32 (tab) */
     for (i = 0; i < 256 && i < len; i++)
         tab[i] = lut[i];
-    ll_push_Pix(L, pixMakeMaskFromLUT(pixs, tab));
+    ll_push_Pix(_fun, L, pixMakeMaskFromLUT(pixs, tab));
     LEPT_FREE(tab);
     return 1;
 }
@@ -2157,12 +2209,13 @@ MakeMaskFromLUT(lua_State *L)
 static int
 MakeArbMaskFromRGB(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_float32 rc = ll_check_l_float32(__func__, L, 2);
-    l_float32 gc = ll_check_l_float32(__func__, L, 3);
-    l_float32 bc = ll_check_l_float32(__func__, L, 4);
-    l_float32 thresh = ll_check_l_float32(__func__, L, 5);
-    ll_push_Pix(L, pixMakeArbMaskFromRGB(pixs, rc, gc, bc, thresh));
+    FUNC(LL_PIX ".MakeArbMaskFromRGB");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_float32 rc = ll_check_l_float32(_fun, L, 2);
+    l_float32 gc = ll_check_l_float32(_fun, L, 3);
+    l_float32 bc = ll_check_l_float32(_fun, L, 4);
+    l_float32 thresh = ll_check_l_float32(_fun, L, 5);
+    ll_push_Pix(_fun, L, pixMakeArbMaskFromRGB(pixs, rc, gc, bc, thresh));
     return 1;
 }
 
@@ -2178,9 +2231,10 @@ MakeArbMaskFromRGB(lua_State *L)
 static int
 SetUnderTransparency(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_uint32 val = ll_check_l_uint32(__func__, L, 2);
-    ll_push_Pix(L, pixSetUnderTransparency(pixs, val, 0));
+    FUNC(LL_PIX ".SetUnderTransparency");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_uint32 val = ll_check_l_uint32(_fun, L, 2);
+    ll_push_Pix(_fun, L, pixSetUnderTransparency(pixs, val, 0));
     return 1;
 }
 
@@ -2197,14 +2251,15 @@ SetUnderTransparency(lua_State *L)
 static int
 MakeAlphaFromMask(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 dist = ll_check_l_int32(__func__, L, 2);
+    FUNC(LL_PIX ".MakeAlphaFromMask");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 dist = ll_check_l_int32(_fun, L, 2);
     int getbox = lua_isboolean(L, 3) ?  lua_toboolean(L, 3) : FALSE;
     Box* box = nullptr;
     Pix* pixd = pixMakeAlphaFromMask(pixs, dist, getbox ? &box : nullptr);
-    ll_push_Pix(L, pixd);
+    ll_push_Pix(_fun, L, pixd);
     if (nullptr != pixd && nullptr != box) {
-        ll_push_Box(L, box);
+        ll_push_Box(_fun, L, box);
         return 2;
     }
     return 1;
@@ -2224,11 +2279,12 @@ MakeAlphaFromMask(lua_State *L)
 static int
 GetColorNearMaskBoundary(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    Pix *pixm = ll_check_Pix(L, 2);
-    Box *box = ll_check_Box(L, 3);
+    FUNC(LL_PIX ".GetColorNearMaskBoundary");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Pix *pixm = ll_check_Pix(_fun, L, 2);
+    Box *box = ll_check_Box(_fun, L, 3);
     l_uint32 val = 0;
-    l_int32 dist = ll_check_l_int32(__func__, L, 4);
+    l_int32 dist = ll_check_l_int32(_fun, L, 4);
     if (pixGetColorNearMaskBoundary(pixs, pixm, box, dist, &val, 0))
         return ll_push_nil(L);
     lua_pushinteger(L, val);
@@ -2246,9 +2302,10 @@ GetColorNearMaskBoundary(lua_State *L)
 static int
 Invert(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".Invert");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
     Pix *pixd = pixInvert(nullptr, pixs);
-    ll_push_Pix(L, pixd);
+    ll_push_Pix(_fun, L, pixd);
     return 1;
 }
 
@@ -2264,10 +2321,11 @@ Invert(lua_State *L)
 static int
 And(lua_State *L)
 {
-    Pix *pix1 = ll_check_Pix(L, 1);
-    Pix *pix2 = ll_check_Pix(L, 2);
+    FUNC(LL_PIX ".And");
+    Pix *pix1 = ll_check_Pix(_fun, L, 1);
+    Pix *pix2 = ll_check_Pix(_fun, L, 2);
     Pix *pixd = pixAnd(nullptr, pix1, pix2);
-    ll_push_Pix(L, pixd);
+    ll_push_Pix(_fun, L, pixd);
     return 1;
 }
 
@@ -2283,10 +2341,11 @@ And(lua_State *L)
 static int
 Or(lua_State *L)
 {
-    Pix *pix1 = ll_check_Pix(L, 1);
-    Pix *pix2 = ll_check_Pix(L, 2);
+    FUNC(LL_PIX ".Or");
+    Pix *pix1 = ll_check_Pix(_fun, L, 1);
+    Pix *pix2 = ll_check_Pix(_fun, L, 2);
     Pix *pixd = pixOr(nullptr, pix1, pix2);
-    ll_push_Pix(L, pixd);
+    ll_push_Pix(_fun, L, pixd);
     return 1;
 }
 
@@ -2302,10 +2361,11 @@ Or(lua_State *L)
 static int
 Xor(lua_State *L)
 {
-    Pix *pix1 = ll_check_Pix(L, 1);
-    Pix *pix2 = ll_check_Pix(L, 2);
+    FUNC(LL_PIX ".Xor");
+    Pix *pix1 = ll_check_Pix(_fun, L, 1);
+    Pix *pix2 = ll_check_Pix(_fun, L, 2);
     Pix *pixd = pixXor(nullptr, pix1, pix2);
-    ll_push_Pix(L, pixd);
+    ll_push_Pix(_fun, L, pixd);
     return 1;
 }
 
@@ -2321,10 +2381,11 @@ Xor(lua_State *L)
 static int
 Subtract(lua_State *L)
 {
-    Pix *pix1 = ll_check_Pix(L, 1);
-    Pix *pix2 = ll_check_Pix(L, 2);
+    FUNC(LL_PIX ".Subtract");
+    Pix *pix1 = ll_check_Pix(_fun, L, 1);
+    Pix *pix2 = ll_check_Pix(_fun, L, 2);
     Pix *pixd = pixSubtract(nullptr, pix1, pix2);
-    ll_push_Pix(L, pixd);
+    ll_push_Pix(_fun, L, pixd);
     return 1;
 }
 
@@ -2339,7 +2400,8 @@ Subtract(lua_State *L)
 static int
 Zero(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".Zero");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 empty = 0;
     if (pixZero(pixs, &empty))
         return ll_push_nil(L);
@@ -2358,11 +2420,12 @@ Zero(lua_State *L)
 static int
 ForegroundFraction(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".ForegroundFraction");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 fract = 0;
     if (pixForegroundFraction(pixs, &fract))
         return ll_push_nil(L);
-    lua_pushnumber(L, (lua_Number) fract);
+    lua_pushnumber(L, static_cast<lua_Number>(fract));
     return 1;
 }
 
@@ -2377,7 +2440,8 @@ ForegroundFraction(lua_State *L)
 static int
 CountPixels(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".CountPixels");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 count = 0;
     if (pixCountPixels(pixs, &count, nullptr))
         return ll_push_nil(L);
@@ -2397,8 +2461,9 @@ CountPixels(lua_State *L)
 static int
 CountPixelsInRect(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    Box *box = ll_check_Box(L, 2);
+    FUNC(LL_PIX ".CountPixelsInRect");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Box *box = ll_check_Box(_fun, L, 2);
     l_int32 count = 0;
     if (pixCountPixelsInRect(pixs, box, &count, nullptr))
         return ll_push_nil(L);
@@ -2417,9 +2482,10 @@ CountPixelsInRect(lua_State *L)
 static int
 CountPixelsByRow(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".CountPixelsByRow");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
     Numa *na = pixCountPixelsByRow(pixs, nullptr);
-    return ll_push_Numa(L, na);
+    return ll_push_Numa(_fun, L, na);
 }
 
 /**
@@ -2433,9 +2499,10 @@ CountPixelsByRow(lua_State *L)
 static int
 CountPixelsByColumn(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".CountPixelsByColumn");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
     Numa *na = pixCountPixelsByColumn(pixs);
-    return ll_push_Numa(L, na);
+    return ll_push_Numa(_fun, L, na);
 }
 
 /**
@@ -2449,8 +2516,9 @@ CountPixelsByColumn(lua_State *L)
 static int
 CountPixelsInRow(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 row = ll_check_l_int32(__func__, L, 2);
+    FUNC(LL_PIX ".CountPixelsInRow");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 row = ll_check_l_int32(_fun, L, 2);
     l_int32 count = 0;
     if (pixCountPixelsInRow(pixs, row, &count, nullptr))
         return ll_push_nil(L);
@@ -2470,10 +2538,11 @@ CountPixelsInRow(lua_State *L)
 static int
 GetMomentByColumn(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 order = ll_check_l_int32(__func__, L, 2);
+    FUNC(LL_PIX ".GetMomentByColumn");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 order = ll_check_l_int32(_fun, L, 2);
     Numa *na = pixGetMomentByColumn(pixs, order);
-    return ll_push_Numa(L, na);
+    return ll_push_Numa(_fun, L, na);
 }
 
 /**
@@ -2488,8 +2557,9 @@ GetMomentByColumn(lua_State *L)
 static int
 ThresholdPixelSum(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 thresh = ll_check_l_int32(__func__, L, 2);
+    FUNC(LL_PIX ".ThresholdPixelSum");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 thresh = ll_check_l_int32(_fun, L, 2);
     l_int32 above = 0;
     if (pixThresholdPixelSum(pixs, thresh, &above, nullptr))
         return ll_push_nil(L);
@@ -2510,11 +2580,12 @@ ThresholdPixelSum(lua_State *L)
 static int
 AverageByRow(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    Box *box = lua_isuserdata(L, 2) ? ll_check_Box(L, 2) : nullptr;
-    l_int32 type = ll_check_what_is_max(__func__, L, 3, L_WHITE_IS_MAX);
+    FUNC(LL_PIX ".AverageByRow");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Box *box = lua_isuserdata(L, 2) ? ll_check_Box(_fun, L, 2) : nullptr;
+    l_int32 type = ll_check_what_is_max(_fun, L, 3, L_WHITE_IS_MAX);
     Numa* na = pixAverageByRow(pixs, box, type);
-    return ll_push_Numa(L, na);
+    return ll_push_Numa(_fun, L, na);
 }
 
 /**
@@ -2530,11 +2601,12 @@ AverageByRow(lua_State *L)
 static int
 AverageByColumn(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    Box *box = lua_isuserdata(L, 2) ? ll_check_Box(L, 2) : nullptr;
-    l_int32 type = ll_check_what_is_max(__func__, L, 3, L_WHITE_IS_MAX);
+    FUNC(LL_PIX ".AverageByColumn");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Box *box = lua_isuserdata(L, 2) ? ll_check_Box(_fun, L, 2) : nullptr;
+    l_int32 type = ll_check_what_is_max(_fun, L, 3, L_WHITE_IS_MAX);
     Numa* na = pixAverageByColumn(pixs, box, type);
-    return ll_push_Numa(L, na);
+    return ll_push_Numa(_fun, L, na);
 }
 
 /**
@@ -2549,12 +2621,13 @@ AverageByColumn(lua_State *L)
 static int
 AverageInRect(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    Box *box = lua_isuserdata(L, 2) ? ll_check_Box(L, 2) : nullptr;
+    FUNC(LL_PIX ".AverageInRect");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Box *box = lua_isuserdata(L, 2) ? ll_check_Box(_fun, L, 2) : nullptr;
     l_float32 ave = 0.0f;
     if (pixAverageInRect(pixs, box, &ave))
         return ll_push_nil(L);
-    lua_pushnumber(L, (lua_Number) ave);
+    lua_pushnumber(L, static_cast<lua_Number>(ave));
     return 1;
 }
 
@@ -2570,10 +2643,11 @@ AverageInRect(lua_State *L)
 static int
 VarianceByRow(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    Box *box = lua_isuserdata(L, 2) ? ll_check_Box(L, 2) : nullptr;
+    FUNC(LL_PIX ".VarianceByRow");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Box *box = lua_isuserdata(L, 2) ? ll_check_Box(_fun, L, 2) : nullptr;
     Numa* na = pixVarianceByRow(pixs, box);
-    return ll_push_Numa(L, na);
+    return ll_push_Numa(_fun, L, na);
 }
 
 /**
@@ -2588,10 +2662,11 @@ VarianceByRow(lua_State *L)
 static int
 VarianceByColumn(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    Box *box = lua_isuserdata(L, 2) ? ll_check_Box(L, 2) : nullptr;
+    FUNC(LL_PIX ".VarianceByColumn");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Box *box = lua_isuserdata(L, 2) ? ll_check_Box(_fun, L, 2) : nullptr;
     Numa* na = pixVarianceByColumn(pixs, box);
-    return ll_push_Numa(L, na);
+    return ll_push_Numa(_fun, L, na);
 }
 
 /**
@@ -2606,12 +2681,13 @@ VarianceByColumn(lua_State *L)
 static int
 VarianceInRect(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    Box *box = lua_isuserdata(L, 2) ? ll_check_Box(L, 2) : nullptr;
+    FUNC(LL_PIX ".VarianceInRect");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Box *box = lua_isuserdata(L, 2) ? ll_check_Box(_fun, L, 2) : nullptr;
     l_float32 sqrvar = 0.0f;
     if (pixVarianceInRect(pixs, box, &sqrvar))
         return ll_push_nil(L);
-    lua_pushnumber(L, (lua_Number) sqrvar);
+    lua_pushnumber(L, static_cast<lua_Number>(sqrvar));
     return 1;
 }
 
@@ -2627,10 +2703,11 @@ VarianceInRect(lua_State *L)
 static int
 AbsDiffByRow(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    Box *box = lua_isuserdata(L, 2) ? ll_check_Box(L, 2) : nullptr;
+    FUNC(LL_PIX ".AbsDiffByRow");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Box *box = lua_isuserdata(L, 2) ? ll_check_Box(_fun, L, 2) : nullptr;
     Numa* na = pixAbsDiffByRow(pixs, box);
-    return ll_push_Numa(L, na);
+    return ll_push_Numa(_fun, L, na);
 }
 
 /**
@@ -2645,10 +2722,11 @@ AbsDiffByRow(lua_State *L)
 static int
 AbsDiffByColumn(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    Box *box = lua_isuserdata(L, 2) ? ll_check_Box(L, 2) : nullptr;
+    FUNC(LL_PIX ".AbsDiffByColumn");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Box *box = lua_isuserdata(L, 2) ? ll_check_Box(_fun, L, 2) : nullptr;
     Numa* na = pixAbsDiffByColumn(pixs, box);
-    return ll_push_Numa(L, na);
+    return ll_push_Numa(_fun, L, na);
 }
 
 /**
@@ -2664,13 +2742,14 @@ AbsDiffByColumn(lua_State *L)
 static int
 AbsDiffInRect(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    Box *box = lua_isuserdata(L, 2) ? ll_check_Box(L, 2) : nullptr;
-    l_int32 dir = ll_check_direction(__func__, L, 3, L_HORIZONTAL_LINE);
+    FUNC(LL_PIX ".AbsDiffInRect");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Box *box = lua_isuserdata(L, 2) ? ll_check_Box(_fun, L, 2) : nullptr;
+    l_int32 dir = ll_check_direction(_fun, L, 3, L_HORIZONTAL_LINE);
     l_float32 absdiff = 0.0f;
     if (pixAbsDiffInRect(pixs, box, dir, &absdiff))
         return ll_push_nil(L);
-    lua_pushnumber(L, (lua_Number) absdiff);
+    lua_pushnumber(L, static_cast<lua_Number>(absdiff));
     return 1;
 }
 
@@ -2686,15 +2765,16 @@ AbsDiffInRect(lua_State *L)
 static int
 AbsDiffOnLine(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 x1 = ll_check_l_int32(__func__, L, 2);
-    l_int32 y1 = ll_check_l_int32(__func__, L, 3);
-    l_int32 x2 = ll_check_l_int32(__func__, L, 4);
-    l_int32 y2 = ll_check_l_int32(__func__, L, 5);
+    FUNC(LL_PIX ".AbsDiffOnLine");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 x1 = ll_check_l_int32(_fun, L, 2);
+    l_int32 y1 = ll_check_l_int32(_fun, L, 3);
+    l_int32 x2 = ll_check_l_int32(_fun, L, 4);
+    l_int32 y2 = ll_check_l_int32(_fun, L, 5);
     l_float32 absdiff = 0.0f;
     if (pixAbsDiffOnLine(pixs, x1, y1, x2, y2, &absdiff))
         return ll_push_nil(L);
-    lua_pushnumber(L, (lua_Number) absdiff);
+    lua_pushnumber(L, static_cast<lua_Number>(absdiff));
     return 1;
 }
 
@@ -2712,10 +2792,11 @@ AbsDiffOnLine(lua_State *L)
 static int
 CountArbInRect(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 val = ll_check_l_int32(__func__, L, 2);
-    l_int32 factor = ll_check_l_int32(__func__, L, 3);
-    Box *box = lua_isuserdata(L, 4) ? ll_check_Box(L, 4) : nullptr;
+    FUNC(LL_PIX ".CountArbInRect");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 val = ll_check_l_int32(_fun, L, 2);
+    l_int32 factor = ll_check_l_int32(_fun, L, 3);
+    Box *box = lua_isuserdata(L, 4) ? ll_check_Box(_fun, L, 4) : nullptr;
     l_int32 count;
     if (pixCountArbInRect(pixs, box, val, factor, &count))
         return ll_push_nil(L);
@@ -2736,10 +2817,11 @@ CountArbInRect(lua_State *L)
 static int
 MirroredTiling(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 w = ll_check_l_int32(__func__, L, 2);
-    l_int32 h = ll_check_l_int32(__func__, L, 3);
-    return ll_push_Pix(L, pixMirroredTiling(pixs, w, h));
+    FUNC(LL_PIX ".MirroredTiling");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 w = ll_check_l_int32(_fun, L, 2);
+    l_int32 h = ll_check_l_int32(_fun, L, 3);
+    return ll_push_Pix(_fun, L, pixMirroredTiling(pixs, w, h));
 }
 
 /**
@@ -2759,16 +2841,17 @@ MirroredTiling(lua_State *L)
 static int
 FindRepCloseTile(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    Box *box = ll_check_Box(L, 2);
-    l_int32 searchdir = ll_check_direction(__func__, L, 3, L_HORIZ);
-    l_int32 mindist = ll_check_l_int32(__func__, L, 4);
-    l_int32 tsize = ll_check_l_int32(__func__, L, 5);
-    l_int32 ntiles = ll_check_l_int32(__func__, L, 6);
+    FUNC(LL_PIX ".FindRepCloseTile");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Box *box = ll_check_Box(_fun, L, 2);
+    l_int32 searchdir = ll_check_direction(_fun, L, 3, L_HORIZ);
+    l_int32 mindist = ll_check_l_int32(_fun, L, 4);
+    l_int32 tsize = ll_check_l_int32(_fun, L, 5);
+    l_int32 ntiles = ll_check_l_int32(_fun, L, 6);
     Box *boxtile = nullptr;
     if (pixFindRepCloseTile(pixs, box, searchdir, mindist, tsize, ntiles, &boxtile, 0))
         return ll_push_nil(L);
-    return ll_push_Box(L, boxtile);
+    return ll_push_Box(_fun, L, boxtile);
 }
 
 /**
@@ -2783,9 +2866,10 @@ FindRepCloseTile(lua_State *L)
 static int
 GetGrayHistogram(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 factor = ll_check_l_int32(__func__, L, 2);
-    return ll_push_Numa(L, pixGetGrayHistogram(pixs, factor));
+    FUNC(LL_PIX ".GetGrayHistogram");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 factor = ll_check_l_int32(_fun, L, 2);
+    return ll_push_Numa(_fun, L, pixGetGrayHistogram(pixs, factor));
 }
 
 /**
@@ -2803,12 +2887,13 @@ GetGrayHistogram(lua_State *L)
 static int
 GetGrayHistogramMasked(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    Pix *pixm = ll_check_Pix(L, 2);
-    l_int32 x = ll_check_l_int32(__func__, L, 3);
-    l_int32 y = ll_check_l_int32(__func__, L, 4);
-    l_int32 factor = ll_check_l_int32(__func__, L, 5);
-    return ll_push_Numa(L, pixGetGrayHistogramMasked(pixs, pixm, x, y, factor));
+    FUNC(LL_PIX ".GetGrayHistogramMasked");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Pix *pixm = ll_check_Pix(_fun, L, 2);
+    l_int32 x = ll_check_l_int32(_fun, L, 3);
+    l_int32 y = ll_check_l_int32(_fun, L, 4);
+    l_int32 factor = ll_check_l_int32(_fun, L, 5);
+    return ll_push_Numa(_fun, L, pixGetGrayHistogramMasked(pixs, pixm, x, y, factor));
 }
 
 /**
@@ -2824,10 +2909,11 @@ GetGrayHistogramMasked(lua_State *L)
 static int
 GetGrayHistogramInRect(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    Box *box = ll_check_Box(L, 2);
-    l_int32 factor = ll_check_l_int32(__func__, L, 3);
-    return ll_push_Numa(L, pixGetGrayHistogramInRect(pixs, box, factor));
+    FUNC(LL_PIX ".GetGrayHistogramInRect");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Box *box = ll_check_Box(_fun, L, 2);
+    l_int32 factor = ll_check_l_int32(_fun, L, 3);
+    return ll_push_Numa(_fun, L, pixGetGrayHistogramInRect(pixs, box, factor));
 }
 
 /**
@@ -2844,11 +2930,12 @@ GetGrayHistogramInRect(lua_State *L)
 static int
 GetGrayHistogramTiled(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 factor = ll_check_l_int32(__func__, L, 2);
-    l_int32 nx = ll_check_l_int32(__func__, L, 3);
-    l_int32 ny = ll_check_l_int32(__func__, L, 4);
-    return ll_push_Numaa(L, pixGetGrayHistogramTiled(pixs, factor, nx, ny));
+    FUNC(LL_PIX ".GetGrayHistogramTiled");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 factor = ll_check_l_int32(_fun, L, 2);
+    l_int32 nx = ll_check_l_int32(_fun, L, 3);
+    l_int32 ny = ll_check_l_int32(_fun, L, 4);
+    return ll_push_Numaa(_fun, L, pixGetGrayHistogramTiled(pixs, factor, nx, ny));
 }
 
 /**
@@ -2863,14 +2950,15 @@ GetGrayHistogramTiled(lua_State *L)
 static int
 GetColorHistogram(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 factor = ll_check_l_int32(__func__, L, 2);
+    FUNC(LL_PIX ".GetColorHistogram");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 factor = ll_check_l_int32(_fun, L, 2);
     Numa *nar = nullptr;
     Numa *nag = nullptr;
     Numa *nab = nullptr;
     if (pixGetColorHistogram(pixs, factor, &nar, &nag, &nab))
         return ll_push_nil(L);
-    return ll_push_Numa(L, nar) + ll_push_Numa(L, nag) + ll_push_Numa(L, nab);
+    return ll_push_Numa(_fun, L, nar) + ll_push_Numa(_fun, L, nag) + ll_push_Numa(_fun, L, nab);
 }
 
 /**
@@ -2888,17 +2976,18 @@ GetColorHistogram(lua_State *L)
 static int
 GetColorHistogramMasked(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    Pix *pixm = ll_check_Pix(L, 2);
-    l_int32 x = ll_check_l_int32(__func__, L, 3);
-    l_int32 y = ll_check_l_int32(__func__, L, 4);
-    l_int32 factor = ll_check_l_int32(__func__, L, 5);
+    FUNC(LL_PIX ".GetColorHistogramMasked");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Pix *pixm = ll_check_Pix(_fun, L, 2);
+    l_int32 x = ll_check_l_int32(_fun, L, 3);
+    l_int32 y = ll_check_l_int32(_fun, L, 4);
+    l_int32 factor = ll_check_l_int32(_fun, L, 5);
     Numa *nar = nullptr;
     Numa *nag = nullptr;
     Numa *nab = nullptr;
     if (pixGetColorHistogramMasked(pixs, pixm, x, y, factor, &nar, &nag, &nab))
         return ll_push_nil(L);
-    return ll_push_Numa(L, nar) + ll_push_Numa(L, nag) + ll_push_Numa(L, nab);
+    return ll_push_Numa(_fun, L, nar) + ll_push_Numa(_fun, L, nag) + ll_push_Numa(_fun, L, nab);
 }
 
 /**
@@ -2913,9 +3002,10 @@ GetColorHistogramMasked(lua_State *L)
 static int
 GetCmapHistogram(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 factor = ll_check_l_int32(__func__, L, 2);
-    return ll_push_Numa(L, pixGetCmapHistogram(pixs, factor));
+    FUNC(LL_PIX ".GetCmapHistogram");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 factor = ll_check_l_int32(_fun, L, 2);
+    return ll_push_Numa(_fun, L, pixGetCmapHistogram(pixs, factor));
 }
 
 /**
@@ -2933,12 +3023,13 @@ GetCmapHistogram(lua_State *L)
 static int
 GetCmapHistogramMasked(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    Pix *pixm = ll_check_Pix(L, 2);
-    l_int32 x = ll_check_l_int32(__func__, L, 3);
-    l_int32 y = ll_check_l_int32(__func__, L, 4);
-    l_int32 factor = ll_check_l_int32(__func__, L, 5);
-    return ll_push_Numa(L, pixGetCmapHistogramMasked(pixs, pixm, x, y, factor));
+    FUNC(LL_PIX ".GetCmapHistogramMasked");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Pix *pixm = ll_check_Pix(_fun, L, 2);
+    l_int32 x = ll_check_l_int32(_fun, L, 3);
+    l_int32 y = ll_check_l_int32(_fun, L, 4);
+    l_int32 factor = ll_check_l_int32(_fun, L, 5);
+    return ll_push_Numa(_fun, L, pixGetCmapHistogramMasked(pixs, pixm, x, y, factor));
 }
 
 /**
@@ -2954,10 +3045,11 @@ GetCmapHistogramMasked(lua_State *L)
 static int
 GetCmapHistogramInRect(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    Box *box = ll_check_Box(L, 2);
-    l_int32 factor = ll_check_l_int32(__func__, L, 3);
-    return ll_push_Numa(L, pixGetCmapHistogramInRect(pixs, box, factor));
+    FUNC(LL_PIX ".GetCmapHistogramInRect");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Box *box = ll_check_Box(_fun, L, 2);
+    l_int32 factor = ll_check_l_int32(_fun, L, 3);
+    return ll_push_Numa(_fun, L, pixGetCmapHistogramInRect(pixs, box, factor));
 }
 
 /**
@@ -2971,7 +3063,8 @@ GetCmapHistogramInRect(lua_State *L)
 static int
 CountRGBColors(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".CountRGBColors");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 count = pixCountRGBColors(pixs);
     lua_pushinteger(L, count);
     return 1;
@@ -2989,9 +3082,10 @@ CountRGBColors(lua_State *L)
 static int
 GetColorAmapHistogram(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 factor = ll_check_l_int32(__func__, L, 2);
-    return ll_push_Amap(L, pixGetColorAmapHistogram(pixs, factor));
+    FUNC(LL_PIX ".GetColorAmapHistogram");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 factor = ll_check_l_int32(_fun, L, 2);
+    return ll_push_Amap(_fun, L, pixGetColorAmapHistogram(pixs, factor));
 }
 
 /**
@@ -3007,9 +3101,10 @@ GetColorAmapHistogram(lua_State *L)
 static int
 GetRankValue(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 factor = ll_check_l_int32(__func__, L, 2);
-    l_float32 rank = ll_check_l_float32(__func__, L, 3);
+    FUNC(LL_PIX ".GetRankValue");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 factor = ll_check_l_int32(_fun, L, 2);
+    l_float32 rank = ll_check_l_float32(_fun, L, 3);
     l_uint32 value = 0;
     if (pixGetRankValue(pixs, factor, rank, &value))
         return ll_push_nil(L);
@@ -3033,12 +3128,13 @@ GetRankValue(lua_State *L)
 static int
 GetRankValueMaskedRGB(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    Pix *pixm = ll_check_Pix(L, 2);
-    l_int32 x = ll_check_l_int32(__func__, L, 3);
-    l_int32 y = ll_check_l_int32(__func__, L, 4);
-    l_int32 factor = ll_check_l_int32(__func__, L, 5);
-    l_float32 rank = ll_check_l_int32(__func__, L, 6);
+    FUNC(LL_PIX ".GetRankValueMaskedRGB");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Pix *pixm = ll_check_Pix(_fun, L, 2);
+    l_int32 x = ll_check_l_int32(_fun, L, 3);
+    l_int32 y = ll_check_l_int32(_fun, L, 4);
+    l_int32 factor = ll_check_l_int32(_fun, L, 5);
+    l_float32 rank = ll_check_l_int32(_fun, L, 6);
     l_float32 rval = 0.0f, gval = 0.0f, bval = 0.0f;
     if (pixGetRankValueMaskedRGB(pixs, pixm, x, y, factor, rank, &rval, &gval, &bval))
         return ll_push_nil(L);
@@ -3064,18 +3160,19 @@ GetRankValueMaskedRGB(lua_State *L)
 static int
 GetRankValueMasked(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    Pix *pixm = ll_check_Pix(L, 2);
-    l_int32 x = ll_check_l_int32(__func__, L, 3);
-    l_int32 y = ll_check_l_int32(__func__, L, 4);
-    l_int32 factor = ll_check_l_int32(__func__, L, 5);
-    l_float32 rank = ll_check_l_int32(__func__, L, 6);
+    FUNC(LL_PIX ".GetRankValueMasked");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Pix *pixm = ll_check_Pix(_fun, L, 2);
+    l_int32 x = ll_check_l_int32(_fun, L, 3);
+    l_int32 y = ll_check_l_int32(_fun, L, 4);
+    l_int32 factor = ll_check_l_int32(_fun, L, 5);
+    l_float32 rank = ll_check_l_int32(_fun, L, 6);
     l_float32 value = 0.0f;
     Numa *na = nullptr;
     if (pixGetRankValueMasked(pixs, pixm, x, y, factor, rank, &value, &na))
         return ll_push_nil(L);
     lua_pushnumber(L, (lua_Number)value);
-    ll_push_Numa(L, na);
+    ll_push_Numa(_fun, L, na);
     return 1;
 }
 
@@ -3094,11 +3191,12 @@ GetRankValueMasked(lua_State *L)
 static int
 GetPixelAverage(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    Pix *pixm = lua_isuserdata(L, 2) ? ll_check_Pix(L, 2) : nullptr;
-    l_int32 x = ll_check_l_int32_default(__func__, L, 3, 0);
-    l_int32 y = ll_check_l_int32_default(__func__, L, 4, 0);
-    l_int32 factor = ll_check_l_int32_default(__func__, L, 5, 1);
+    FUNC(LL_PIX ".GetPixelAverage");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Pix *pixm = lua_isuserdata(L, 2) ? ll_check_Pix(_fun, L, 2) : nullptr;
+    l_int32 x = ll_check_l_int32_default(_fun, L, 3, 0);
+    l_int32 y = ll_check_l_int32_default(_fun, L, 4, 0);
+    l_int32 factor = ll_check_l_int32_default(_fun, L, 5, 1);
     l_uint32 value = 0;
     if (pixGetPixelAverage(pixs, pixm, x,y, factor, &value))
         return ll_push_nil(L);
@@ -3119,9 +3217,10 @@ GetPixelAverage(lua_State *L)
 static int
 GetPixelStats(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 type = ll_check_stats_type(__func__, L, 2, L_MEAN_ABSVAL);
-    l_int32 factor = ll_check_l_int32_default(__func__, L, 3, 1);
+    FUNC(LL_PIX ".GetPixelStats");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 type = ll_check_stats_type(_fun, L, 2, L_MEAN_ABSVAL);
+    l_int32 factor = ll_check_l_int32_default(_fun, L, 3, 1);
     l_uint32 value = 0;
     if (pixGetPixelStats(pixs, factor, type, &value))
         return ll_push_nil(L);
@@ -3145,12 +3244,13 @@ GetPixelStats(lua_State *L)
 static int
 GetAverageMaskedRGB(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 type = ll_check_stats_type(__func__, L, 2, L_MEAN_ABSVAL);
-    Pix *pixm = lua_isuserdata(L, 3) ? ll_check_Pix(L, 3) : nullptr;
-    l_int32 x = ll_check_l_int32_default(__func__, L, 4, 0);
-    l_int32 y = ll_check_l_int32_default(__func__, L, 5, 0);
-    l_int32 factor = ll_check_l_int32_default(__func__, L, 6, 1);
+    FUNC(LL_PIX ".GetAverageMaskedRGB");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 type = ll_check_stats_type(_fun, L, 2, L_MEAN_ABSVAL);
+    Pix *pixm = lua_isuserdata(L, 3) ? ll_check_Pix(_fun, L, 3) : nullptr;
+    l_int32 x = ll_check_l_int32_default(_fun, L, 4, 0);
+    l_int32 y = ll_check_l_int32_default(_fun, L, 5, 0);
+    l_int32 factor = ll_check_l_int32_default(_fun, L, 6, 1);
     l_float32 rval = 0.0, gval = 0.0, bval = 0.0;
     if (pixGetAverageMaskedRGB(pixs, pixm, x, y, factor, type, &rval, &gval, &bval))
         return ll_push_nil(L);
@@ -3176,12 +3276,13 @@ GetAverageMaskedRGB(lua_State *L)
 static int
 GetAverageMasked(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 type = ll_check_stats_type(__func__, L, 2, L_MEAN_ABSVAL);
-    Pix *pixm = lua_isuserdata(L, 3) ? ll_check_Pix(L, 3) : nullptr;
-    l_int32 x = ll_check_l_int32_default(__func__, L, 4, 0);
-    l_int32 y = ll_check_l_int32_default(__func__, L, 5, 0);
-    l_int32 factor = ll_check_l_int32_default(__func__, L, 6, 1);
+    FUNC(LL_PIX ".GetAverageMasked");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 type = ll_check_stats_type(_fun, L, 2, L_MEAN_ABSVAL);
+    Pix *pixm = lua_isuserdata(L, 3) ? ll_check_Pix(_fun, L, 3) : nullptr;
+    l_int32 x = ll_check_l_int32_default(_fun, L, 4, 0);
+    l_int32 y = ll_check_l_int32_default(_fun, L, 5, 0);
+    l_int32 factor = ll_check_l_int32_default(_fun, L, 6, 1);
     l_float32 value = 0.0;
     if (pixGetAverageMasked(pixs, pixm, x, y, factor, type, &value))
         return ll_push_nil(L);
@@ -3203,16 +3304,17 @@ GetAverageMasked(lua_State *L)
 static int
 GetAverageTiledRGB(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 type = ll_check_stats_type(__func__, L, 2, L_MEAN_ABSVAL);
-    l_int32 sx = ll_check_l_int32_default(__func__, L, 3, 2);
-    l_int32 sy = ll_check_l_int32_default(__func__, L, 4, 2);
+    FUNC(LL_PIX ".GetAverageTiledRGB");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 type = ll_check_stats_type(_fun, L, 2, L_MEAN_ABSVAL);
+    l_int32 sx = ll_check_l_int32_default(_fun, L, 3, 2);
+    l_int32 sy = ll_check_l_int32_default(_fun, L, 4, 2);
     Pix *pixr = nullptr;
     Pix *pixg = nullptr;
     Pix *pixb = nullptr;
     if (pixGetAverageTiledRGB(pixs, sx, sy, type, &pixr, &pixg, &pixb))
         return ll_push_nil(L);
-    return ll_push_Pix(L, pixr) + ll_push_Pix(L, pixg) + ll_push_Pix(L, pixb);
+    return ll_push_Pix(_fun, L, pixr) + ll_push_Pix(_fun, L, pixg) + ll_push_Pix(_fun, L, pixb);
 }
 
 /**
@@ -3229,12 +3331,13 @@ GetAverageTiledRGB(lua_State *L)
 static int
 GetAverageTiled(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 type = ll_check_stats_type(__func__, L, 2, L_MEAN_ABSVAL);
-    l_int32 sx = ll_check_l_int32_default(__func__, L, 3, 2);
-    l_int32 sy = ll_check_l_int32_default(__func__, L, 4, 2);
+    FUNC(LL_PIX ".GetAverageTiled");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 type = ll_check_stats_type(_fun, L, 2, L_MEAN_ABSVAL);
+    l_int32 sx = ll_check_l_int32_default(_fun, L, 3, 2);
+    l_int32 sy = ll_check_l_int32_default(_fun, L, 4, 2);
     Pix *pixv = pixGetAverageTiled(pixs, sx, sy, type);
-    return ll_push_Pix(L, pixv);
+    return ll_push_Pix(_fun, L, pixv);
 }
 
 /**
@@ -3249,8 +3352,9 @@ GetAverageTiled(lua_State *L)
 static int
 RowStats(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    Box *box = lua_isuserdata(L, 2) ? ll_check_Box(L, 2) : nullptr;
+    FUNC(LL_PIX ".RowStats");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Box *box = lua_isuserdata(L, 2) ? ll_check_Box(_fun, L, 2) : nullptr;
     Numa *mean = nullptr;
     Numa *median = nullptr;
     Numa *mode = nullptr;
@@ -3259,12 +3363,12 @@ RowStats(lua_State *L)
     Numa *rootvar = nullptr;
     if (pixRowStats(pixs, box, &mean, &median, &mode, &modecount, &var, &rootvar))
         return ll_push_nil(L);
-    return ll_push_Numa(L, mean) +
-            ll_push_Numa(L, median) +
-            ll_push_Numa(L, mode) +
-            ll_push_Numa(L, modecount) +
-            ll_push_Numa(L, var) +
-            ll_push_Numa(L, rootvar);
+    return ll_push_Numa(_fun, L, mean) +
+            ll_push_Numa(_fun, L, median) +
+            ll_push_Numa(_fun, L, mode) +
+            ll_push_Numa(_fun, L, modecount) +
+            ll_push_Numa(_fun, L, var) +
+            ll_push_Numa(_fun, L, rootvar);
 }
 
 /**
@@ -3279,8 +3383,9 @@ RowStats(lua_State *L)
 static int
 ColumnStats(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    Box *box = lua_isuserdata(L, 2) ? ll_check_Box(L, 2) : nullptr;
+    FUNC(LL_PIX ".ColumnStats");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Box *box = lua_isuserdata(L, 2) ? ll_check_Box(_fun, L, 2) : nullptr;
     Numa *mean = nullptr;
     Numa *median = nullptr;
     Numa *mode = nullptr;
@@ -3289,12 +3394,12 @@ ColumnStats(lua_State *L)
     Numa *rootvar = nullptr;
     if (pixColumnStats(pixs, box, &mean, &median, &mode, &modecount, &var, &rootvar))
         return ll_push_nil(L);
-    return ll_push_Numa(L, mean) +
-            ll_push_Numa(L, median) +
-            ll_push_Numa(L, mode) +
-            ll_push_Numa(L, modecount) +
-            ll_push_Numa(L, var) +
-            ll_push_Numa(L, rootvar);
+    return ll_push_Numa(_fun, L, mean) +
+            ll_push_Numa(_fun, L, median) +
+            ll_push_Numa(_fun, L, mode) +
+            ll_push_Numa(_fun, L, modecount) +
+            ll_push_Numa(_fun, L, var) +
+            ll_push_Numa(_fun, L, rootvar);
 }
 
 /**
@@ -3310,9 +3415,10 @@ ColumnStats(lua_State *L)
 static int
 GetRangeValues(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 factor = ll_check_l_int32_default(__func__, L, 2, 1);
-    l_int32 color = ll_check_select_color(__func__, L, 3, L_SELECT_RED);
+    FUNC(LL_PIX ".GetRangeValues");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 factor = ll_check_l_int32_default(_fun, L, 2, 1);
+    l_int32 color = ll_check_select_color(_fun, L, 3, L_SELECT_RED);
     l_int32 minval = 0;
     l_int32 maxval = 0;
     if (pixGetRangeValues(pixs, factor, color, &minval, &maxval))
@@ -3335,9 +3441,10 @@ GetRangeValues(lua_State *L)
 static int
 GetExtremeValue(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 factor = ll_check_l_int32_default(__func__, L, 2, 1);
-    l_int32 type = ll_check_select_min_max(__func__, L, 3, L_SELECT_MIN);
+    FUNC(LL_PIX ".GetExtremeValue");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 factor = ll_check_l_int32_default(_fun, L, 2, 1);
+    l_int32 type = ll_check_select_min_max(_fun, L, 3, L_SELECT_MIN);
     l_int32 rval = 0;
     l_int32 gval = 0;
     l_int32 bval = 0;
@@ -3363,8 +3470,9 @@ GetExtremeValue(lua_State *L)
 static int
 GetMaxValueInRect(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    Box *box = lua_isuserdata(L, 2) ? ll_check_Box(L, 2) : nullptr;
+    FUNC(LL_PIX ".GetMaxValueInRect");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Box *box = lua_isuserdata(L, 2) ? ll_check_Box(_fun, L, 2) : nullptr;
     l_uint32 maxval = 0;
     l_int32 xmax = 0;
     l_int32 ymax = 0;
@@ -3391,11 +3499,12 @@ GetMaxValueInRect(lua_State *L)
 static int
 GetBinnedComponentRange(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 nbins = ll_check_l_int32_default(__func__, L, 2, 2);
-    l_int32 factor = ll_check_l_int32_default(__func__, L, 3, 1);
-    l_int32 color = ll_check_select_color(__func__, L, 4, L_SELECT_RED);
-    l_int32 fontsize = ll_check_l_int32_default(__func__, L, 5, 0);
+    FUNC(LL_PIX ".GetBinnedComponentRange");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 nbins = ll_check_l_int32_default(_fun, L, 2, 2);
+    l_int32 factor = ll_check_l_int32_default(_fun, L, 3, 1);
+    l_int32 color = ll_check_select_color(_fun, L, 4, L_SELECT_RED);
+    l_int32 fontsize = ll_check_l_int32_default(_fun, L, 5, 0);
     l_int32 minval = 0;
     l_int32 maxval = 0;
     l_uint32 *carray = nullptr;
@@ -3425,10 +3534,11 @@ GetBinnedComponentRange(lua_State *L)
 static int
 GetRankColorArray(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 nbins = ll_check_l_int32_default(__func__, L, 2, 1);
-    l_int32 factor = ll_check_l_int32_default(__func__, L, 3, 1);
-    l_int32 type = ll_check_select_color(__func__, L, 4, L_SELECT_AVERAGE);
+    FUNC(LL_PIX ".GetRankColorArray");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 nbins = ll_check_l_int32_default(_fun, L, 2, 1);
+    l_int32 factor = ll_check_l_int32_default(_fun, L, 3, 1);
+    l_int32 type = ll_check_select_color(_fun, L, 4, L_SELECT_AVERAGE);
     l_uint32 *carray = nullptr;
     l_int32 i;
 
@@ -3455,11 +3565,12 @@ GetRankColorArray(lua_State *L)
 static int
 GetBinnedColor(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    Pix *pixg = ll_check_Pix(L, 2);
-    l_int32 nbins = ll_check_l_int32_default(__func__, L, 3, 1);
-    l_int32 factor = ll_check_l_int32_default(__func__, L, 4, 1);
-    Numa *alut = ll_check_Numa(L, 5);
+    FUNC(LL_PIX ".GetBinnedColor");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Pix *pixg = ll_check_Pix(_fun, L, 2);
+    l_int32 nbins = ll_check_l_int32_default(_fun, L, 3, 1);
+    l_int32 factor = ll_check_l_int32_default(_fun, L, 4, 1);
+    Numa *alut = ll_check_Numa(_fun, L, 5);
     l_uint32 *carray = nullptr;
     l_int32 i;
 
@@ -3484,11 +3595,12 @@ GetBinnedColor(lua_State *L)
 static int
 DisplayColorArray(lua_State *L)
 {
+    FUNC(LL_PIX ".DisplayColorArray");
     l_uint32 *carray = nullptr;
     l_int32 ncolors = 0;
-    l_int32 side = ll_check_l_int32(__func__, L, 1);
-    l_int32 ncols = ll_check_l_int32(__func__, L, 2);
-    l_int32 fontsize = ll_check_l_int32_default(__func__, L, 3, 0);
+    l_int32 side = ll_check_l_int32(_fun, L, 1);
+    l_int32 ncols = ll_check_l_int32(_fun, L, 2);
+    l_int32 fontsize = ll_check_l_int32_default(_fun, L, 3, 0);
     int i = 3;
     Pix *pixd = nullptr;
 
@@ -3496,9 +3608,9 @@ DisplayColorArray(lua_State *L)
         ncolors++;
     carray = (l_uint32 *) LEPT_CALLOC(ncolors, sizeof(l_uint32));
     for (i = 0; i < ncolors; i++)
-        carray[i] = ll_check_l_uint32(__func__, L, i + 4);
+        carray[i] = ll_check_l_uint32(_fun, L, i + 4);
     pixd = pixDisplayColorArray(carray, ncolors, side, ncols, fontsize);
-    return ll_push_Pix(L, pixd);
+    return ll_push_Pix(_fun, L, pixd);
 }
 
 /**
@@ -3516,13 +3628,14 @@ DisplayColorArray(lua_State *L)
 static int
 RankBinByStrip(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 type = ll_check_select_color(__func__, L, 2, L_SELECT_RED);
-    l_int32 direction = ll_check_direction(__func__, L, 3, L_SCAN_HORIZONTAL);
-    l_int32 size = ll_check_l_int32_default(__func__, L, 4, 200);
-    l_int32 nbins = ll_check_l_int32_default(__func__, L, 5, 2);
+    FUNC(LL_PIX ".RankBinByStrip");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 type = ll_check_select_color(_fun, L, 2, L_SELECT_RED);
+    l_int32 direction = ll_check_direction(_fun, L, 3, L_SCAN_HORIZONTAL);
+    l_int32 size = ll_check_l_int32_default(_fun, L, 4, 200);
+    l_int32 nbins = ll_check_l_int32_default(_fun, L, 5, 2);
     Pix *pixd = pixRankBinByStrip(pixs, direction, size, nbins, type);
-    return ll_push_Pix(L, pixd);
+    return ll_push_Pix(_fun, L, pixd);
 }
 
 /**
@@ -3536,21 +3649,21 @@ RankBinByStrip(lua_State *L)
 static int
 GetRowStats(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 type = ll_check_select_color(__func__, L, 2, L_SELECT_RED);
-    l_int32 nbins = ll_check_l_int32(__func__, L, 3);
-    l_int32 thresh = ll_check_l_int32_default(__func__, L, 4, 0);
+    FUNC(LL_PIX ".GetRowStats");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 type = ll_check_select_color(_fun, L, 2, L_SELECT_RED);
+    l_int32 nbins = ll_check_l_int32(_fun, L, 3);
+    l_int32 thresh = ll_check_l_int32_default(_fun, L, 4, 0);
     l_float32 *colvect = (l_float32 *)LEPT_CALLOC(nbins, sizeof(l_float32));
-    l_int32 i;
     if (pixGetRowStats(pixs, type, nbins, thresh, colvect))
         return ll_push_nil(L);
-    for (i = 0; i < nbins; i++)
-        lua_pushnumber(L, (lua_Number) colvect[i]);
-    return nbins;
+    ll_push_farray(L, colvect, nbins);
+    LEPT_FREE(colvect);
+    return 1;
 }
 
 /**
- * \brief Get row stats for Pix* (%pixs)
+ * \brief Get column stats for Pix* (%pixs)
  *
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs)
  *
@@ -3560,17 +3673,18 @@ GetRowStats(lua_State *L)
 static int
 GetColumnStats(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 type = ll_check_select_color(__func__, L, 2, L_SELECT_RED);
-    l_int32 nbins = ll_check_l_int32(__func__, L, 3);
-    l_int32 thresh = ll_check_l_int32_default(__func__, L, 4, 0);
+    FUNC(LL_PIX ".GetColumnStats");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 type = ll_check_select_color(_fun, L, 2, L_SELECT_RED);
+    l_int32 nbins = ll_check_l_int32(_fun, L, 3);
+    l_int32 thresh = ll_check_l_int32_default(_fun, L, 4, 0);
     l_float32 *rowvect = (l_float32 *)LEPT_CALLOC(nbins, sizeof(l_float32));
     l_int32 i;
     if (pixGetColumnStats(pixs, type, nbins, thresh, rowvect))
         return ll_push_nil(L);
-    for (i = 0; i < nbins; i++)
-        lua_pushnumber(L, (lua_Number) rowvect[i]);
-    return nbins;
+    ll_push_farray(L, rowvect, nbins);
+    LEPT_FREE(rowvect);
+    return 1;
 }
 
 /**
@@ -3586,8 +3700,9 @@ GetColumnStats(lua_State *L)
 static int
 SetPixelColumn(lua_State *L)
 {
-    Pix *pixd = ll_check_Pix(L, 1);
-    l_int32 col = ll_check_l_int32(__func__, L, 2);
+    FUNC(LL_PIX ".SetPixelColumn");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    l_int32 col = ll_check_l_int32(_fun, L, 2);
     l_int32 rows = pixGetHeight(pixd);
     l_float32 *colvect = (l_float32 *)LEPT_CALLOC(rows, sizeof(l_float32));
     l_int32 i;
@@ -3612,9 +3727,10 @@ SetPixelColumn(lua_State *L)
 static int
 ThresholdForFgBg(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 factor = ll_check_l_int32_default(__func__, L, 2, 1);
-    l_int32 thresh = ll_check_l_int32_default(__func__, L, 3, 0);
+    FUNC(LL_PIX ".ThresholdForFgBg");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 factor = ll_check_l_int32_default(_fun, L, 2, 1);
+    l_int32 thresh = ll_check_l_int32_default(_fun, L, 3, 0);
     l_int32 fgval;
     l_int32 bgval;
     if (pixThresholdForFgBg(pixs, factor, thresh, &fgval, &bgval))
@@ -3625,20 +3741,22 @@ ThresholdForFgBg(lua_State *L)
 }
 
 /**
- * \brief Get the thresholds for bg/fg in Pix* (%pixs)
+ * \brief Split the distribution for bg/fg in Pix* (%pixs)
  *
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs)
- * Arg #2 is expected to be a l_int32 factor
+ * Arg #2 is expected to be a l_float32 (scorefract)
+ * Arg #3 is expected to be a l_int32 (factor)
  *
  * \param L pointer to the lua_State
- * \return 1 boolean on the Lua stack (result)
+ * \return 3 integers on the Lua stack (thresh, fgbal, bgval)
  */
 static int
 SplitDistributionFgBg(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
-    l_float32 scorefract = ll_check_l_float32_default(__func__, L, 2, 0.0f);
-    l_int32 factor = ll_check_l_int32_default(__func__, L, 3, 1);
+    FUNC(LL_PIX ".SplitDistributionFgBg");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_float32 scorefract = ll_check_l_float32_default(_fun, L, 2, 0.0f);
+    l_int32 factor = ll_check_l_int32_default(_fun, L, 3, 1);
     l_int32 thresh;
     l_int32 fgval;
     l_int32 bgval;
@@ -3650,10 +3768,19 @@ SplitDistributionFgBg(lua_State *L)
     return 3;
 }
 
+/**
+ * \brief Find the area to perimeter ratio in Pix* (%pixs)
+ *
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs)
+ *
+ * \param L pointer to the lua_State
+ * \return 3 integers on the Lua stack (thresh, fgbal, bgval)
+ */
 static int
 FindAreaPerimRatio(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".FindAreaPerimRatio");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 fract = 0.0f;
     if (pixFindAreaPerimRatio(pixs, tab8, &fract))
         return ll_push_nil(L);
@@ -3661,10 +3788,19 @@ FindAreaPerimRatio(lua_State *L)
     return 1;
 }
 
+/**
+ * \brief Find the perimeter to area ratio in Pix* (%pixs)
+ *
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs)
+ *
+ * \param L pointer to the lua_State
+ * \return 3 integers on the Lua stack (thresh, fgbal, bgval)
+ */
 static int
 FindPerimToAreaRatio(lua_State *L)
 {
-    Pix *pixs = ll_check_Pix(L, 1);
+    FUNC(LL_PIX ".FindPerimToAreaRatio");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 fract = 0.0f;
     if (pixFindPerimToAreaRatio(pixs, tab8, &fract))
         return ll_push_nil(L);
@@ -3749,9 +3885,10 @@ FindPerimToAreaRatio(lua_State *L)
 static int
 Read(lua_State *L)
 {
-    const char* filename = lua_tostring(L, 1);
+    FUNC(LL_PIX ".Read");
+    const char* filename = ll_check_string(_fun, L, 1);
     Pix *pix = pixRead(filename);
-    return ll_push_Pix(L, pix);
+    return ll_push_Pix(_fun, L, pix);
 }
 
 /**
@@ -3767,11 +3904,58 @@ Read(lua_State *L)
 static int
 Write(lua_State *L)
 {
-    Pix *pix = ll_check_Pix(L, 1);
-    const char *filename = lua_tostring(L, 2);
-    l_int32 format = ll_check_input_format(__func__, L, 3, IFF_DEFAULT);
+    FUNC(LL_PIX ".Write");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    const char *filename = ll_check_string(_fun, L, 2);
+    l_int32 format = ll_check_input_format(_fun, L, 3, IFF_DEFAULT);
     lua_pushboolean(L, 0 == pixWrite(filename, pix, format));
     return 1;
+}
+
+/**
+ * @brief Check Lua stack at index %arg for udata of class LL_PIX
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the PIX contained in the user data
+ */
+Pix *
+ll_check_Pix(const char* _fun, lua_State *L, int arg)
+{
+    return *(reinterpret_cast<Pix **>(ll_check_udata(_fun, L, arg, LL_PIX)));
+}
+
+/**
+ * \brief Push PIX to the Lua stack and set its meta table
+ * \param L pointer to the lua_State
+ * \param pix pointer to the PIX
+ * \return 1 Pix* on the Lua stack
+ */
+int
+ll_push_Pix(const char *_fun, lua_State *L, Pix *pix)
+{
+    if (!pix)
+        return ll_push_nil(L);
+    return ll_push_udata(_fun, L, LL_PIX, pix);
+}
+
+/**
+ * \brief Create and push a new Pix*
+ *
+ * Arg #1 is expected to be a l_int32 (width)
+ * Arg #2 is expected to be a l_int32 (height)
+ * Arg #3 is optional and expected to be a l_int32 (depth; default = 1)
+ * or
+ * Arg #1 is expected to be a string (filename)
+ * or
+ * Arg #1 is expected to be Pix*
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+int
+ll_new_Pix(lua_State *L)
+{
+    return Create(L);
 }
 
 /**

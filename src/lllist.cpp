@@ -38,47 +38,6 @@
  *====================================================================*/
 
 /**
- * @brief Check Lua stack at index %arg for udata of class LL_DLLIST
- * \param L pointer to the lua_State
- * \param arg index where to find the user data (usually 1)
- * \return pointer to the DoubleLinkedList* contained in the user data
- */
-DoubleLinkedList *
-ll_check_DoubleLinkedList(lua_State *L, int arg)
-{
-    return *(reinterpret_cast<DoubleLinkedList **>(ll_check_udata(L, arg, LL_DLLIST)));
-}
-
-/**
- * \brief Push DLLIST user data to the Lua stack and set its meta table
- * \param L pointer to the lua_State
- * \param head pointer to the DLLIST
- * \return 1 DoubleLinkedList* on the Lua stack
- */
-int
-ll_push_DoubleLinkedList(lua_State *L, DoubleLinkedList *head)
-{
-    if (!head)
-        return ll_push_nil(L);
-    return ll_push_udata(L, LL_DLLIST, head);
-}
-
-/**
- * \brief Create and push a new DoubleLinkedList*
- *
- * Arg #1 is expected to be a key type name (int, uint, or float)
- *
- * \param L pointer to the lua_State
- * \return 1 DoubleLinkedList* on the Lua stack
- */
-int
-ll_new_DoubleLinkedList(lua_State *L)
-{
-    DoubleLinkedList *head = reinterpret_cast<DoubleLinkedList *>(LEPT_CALLOC(1, sizeof(DLLIST)));
-    return ll_push_DoubleLinkedList(L, head);
-}
-
-/**
  * @brief Printable string for a DoubleLinkedList*
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
@@ -86,8 +45,9 @@ ll_new_DoubleLinkedList(lua_State *L)
 static int
 toString(lua_State *L)
 {
+    FUNC(LL_DLLIST ".toString");
     static char str[256];
-    DoubleLinkedList *head = ll_check_DoubleLinkedList(L, 1);
+    DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     DoubleLinkedList *elem;
     luaL_Buffer B;
     int first = 1;
@@ -123,7 +83,9 @@ toString(lua_State *L)
 static int
 Create(lua_State *L)
 {
-    return ll_new_DoubleLinkedList(L);
+    FUNC(LL_DLLIST ".Create");
+    DoubleLinkedList *head = reinterpret_cast<DoubleLinkedList *>(LEPT_CALLOC(1, sizeof(DLLIST)));
+    return ll_push_DoubleLinkedList(_fun, L, head);
 }
 
 /**
@@ -137,7 +99,8 @@ Create(lua_State *L)
 static int
 GetCount(lua_State *L)
 {
-    DoubleLinkedList *head = ll_check_DoubleLinkedList(L, 1);
+    FUNC(LL_DLLIST ".GetCount");
+    DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     lua_pushinteger(L, listGetCount(head));
     return 1;
 }
@@ -151,9 +114,10 @@ GetCount(lua_State *L)
 static int
 Destroy(lua_State *L)
 {
-    DoubleLinkedList **plist = reinterpret_cast<DoubleLinkedList **>(ll_check_udata(L, 1, LL_DLLIST));
+    FUNC(LL_DLLIST ".Destroy");
+    DoubleLinkedList **plist = reinterpret_cast<DoubleLinkedList **>(ll_check_udata(_fun, L, 1, LL_DLLIST));
     DBG(LOG_DESTROY, "%s: '%s' plist=%p head=%p size=%d\n",
-        __func__, LL_DLLIST, plist, *plist, listGetCount(*plist));
+        _fun, LL_DLLIST, plist, *plist, listGetCount(*plist));
     listDestroy(plist);
     *plist = nullptr;
     return 0;
@@ -172,8 +136,9 @@ Destroy(lua_State *L)
 static int
 InsertBefore(lua_State *L)
 {
-    DoubleLinkedList *head = ll_check_DoubleLinkedList(L, 1);
-    DoubleLinkedList *elem = ll_check_DoubleLinkedList(L, 2);
+    FUNC(LL_DLLIST ".InsertBefore");
+    DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
+    DoubleLinkedList *elem = ll_check_DoubleLinkedList(_fun, L, 2);
     void *data = reinterpret_cast<void *>(reinterpret_cast<intptr_t>(lua_topointer(L, 3)));
     lua_pushboolean(L, 0 == listInsertBefore(&head, elem, data));
     return 1;
@@ -192,8 +157,9 @@ InsertBefore(lua_State *L)
 static int
 InsertAfter(lua_State *L)
 {
-    DoubleLinkedList *head = ll_check_DoubleLinkedList(L, 1);
-    DoubleLinkedList *elem = ll_check_DoubleLinkedList(L, 2);
+    FUNC(LL_DLLIST ".InsertAfter");
+    DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
+    DoubleLinkedList *elem = ll_check_DoubleLinkedList(_fun, L, 2);
     void *data = reinterpret_cast<void *>(reinterpret_cast<intptr_t>(lua_topointer(L, 3)));
     lua_pushboolean(L, 0 == listInsertAfter(&head, elem, data));
     return 1;
@@ -211,7 +177,8 @@ InsertAfter(lua_State *L)
 static int
 AddToHead(lua_State *L)
 {
-    DoubleLinkedList *head = ll_check_DoubleLinkedList(L, 1);
+    FUNC(LL_DLLIST ".AddToHead");
+    DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     void *data = reinterpret_cast<void *>(reinterpret_cast<intptr_t>(lua_topointer(L, 2)));
     lua_pushboolean(L, 0 == listAddToHead(&head, data));
     return 1;
@@ -229,7 +196,8 @@ AddToHead(lua_State *L)
 static int
 AddToTail(lua_State *L)
 {
-    DoubleLinkedList *head = ll_check_DoubleLinkedList(L, 1);
+    FUNC(LL_DLLIST ".AddToTail");
+    DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     DoubleLinkedList *tail = nullptr;
     void *data = reinterpret_cast<void *>(reinterpret_cast<intptr_t>(lua_topointer(L, 2)));
     lua_pushboolean(L, 0 == listAddToTail(&head, &tail, data));
@@ -249,8 +217,9 @@ AddToTail(lua_State *L)
 static int
 RemoveElement(lua_State *L)
 {
-    DoubleLinkedList *head = ll_check_DoubleLinkedList(L, 1);
-    DoubleLinkedList *elem = ll_check_DoubleLinkedList(L, 2);
+    FUNC(LL_DLLIST ".RemoveElement");
+    DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
+    DoubleLinkedList *elem = ll_check_DoubleLinkedList(_fun, L, 2);
     void *data = listRemoveElement(&head, elem);
     lua_pushlightuserdata(L, data);
     return 1;
@@ -267,7 +236,8 @@ RemoveElement(lua_State *L)
 static int
 RemoveFromHead(lua_State *L)
 {
-    DoubleLinkedList *head = ll_check_DoubleLinkedList(L, 1);
+    FUNC(LL_DLLIST ".RemoveFromHead");
+    DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     void *data = listRemoveFromHead(&head);
     lua_pushlightuserdata(L, data);
     return 1;
@@ -284,7 +254,8 @@ RemoveFromHead(lua_State *L)
 static int
 RemoveFromTail(lua_State *L)
 {
-    DoubleLinkedList *head = ll_check_DoubleLinkedList(L, 1);
+    FUNC(LL_DLLIST ".RemoveFromTail");
+    DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     DoubleLinkedList *tail = nullptr;
     void *data = listRemoveFromTail(&head, &tail);
     lua_pushlightuserdata(L, data);
@@ -304,7 +275,8 @@ RemoveFromTail(lua_State *L)
 static int
 FindElement(lua_State *L)
 {
-    DoubleLinkedList *head = ll_check_DoubleLinkedList(L, 1);
+    FUNC(LL_DLLIST ".FindElement");
+    DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     void *data = reinterpret_cast<void *>(reinterpret_cast<intptr_t>(lua_topointer(L, 2)));
     DoubleLinkedList *elem = listFindElement(head, data);
     lua_pushlightuserdata(L, elem);
@@ -322,10 +294,51 @@ FindElement(lua_State *L)
 static int
 FindTail(lua_State *L)
 {
-    DoubleLinkedList *head = ll_check_DoubleLinkedList(L, 1);
+    FUNC(LL_DLLIST ".FindTail");
+    DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     DoubleLinkedList *tail = listFindTail(head);
     lua_pushlightuserdata(L, tail);
     return 1;
+}
+
+/**
+ * @brief Check Lua stack at index %arg for udata of class LL_DLLIST
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the DoubleLinkedList* contained in the user data
+ */
+DoubleLinkedList *
+ll_check_DoubleLinkedList(const char* _fun, lua_State *L, int arg)
+{
+    return *(reinterpret_cast<DoubleLinkedList **>(ll_check_udata(_fun, L, arg, LL_DLLIST)));
+}
+
+/**
+ * \brief Push DLLIST user data to the Lua stack and set its meta table
+ * \param L pointer to the lua_State
+ * \param head pointer to the DLLIST
+ * \return 1 DoubleLinkedList* on the Lua stack
+ */
+int
+ll_push_DoubleLinkedList(const char* _fun, lua_State *L, DoubleLinkedList *head)
+{
+    if (!head)
+        return ll_push_nil(L);
+    return ll_push_udata(_fun, L, LL_DLLIST, head);
+}
+
+/**
+ * \brief Create and push a new DoubleLinkedList*
+ *
+ * Arg #1 is expected to be a key type name (int, uint, or float)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 DoubleLinkedList* on the Lua stack
+ */
+int
+ll_new_DoubleLinkedList(lua_State *L)
+{
+    return Create(L);
 }
 
 /**

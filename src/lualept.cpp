@@ -124,8 +124,8 @@ ll_register_class(lua_State *L, const char *name, const luaL_Reg *methods, const
     luaL_setfuncs(L, methods, 0);
     lua_createtable(L, 0, nfunctions);
     luaL_setfuncs(L, functions, 0);
-    DBG(LOG_REGISTER, "%s: '%s' registered with %d methods and %d functions\n",
-         __func__, name, nmethods, nfunctions);
+    DBG(LOG_REGISTER, "'%s' registered with %d methods and %d functions\n",
+         name, nmethods, nfunctions);
     return 1;
 }
 
@@ -137,11 +137,11 @@ ll_register_class(lua_State *L, const char *name, const luaL_Reg *methods, const
  * \return pointer to the udata
  */
 void **
-ll_check_udata(lua_State *L, int arg, const char* name)
+ll_check_udata(const char* _fun, lua_State *L, int arg, const char* name)
 {
     static char msg[128];
-    void **ppvoid = (void **)luaL_checkudata(L, arg, name);
-    snprintf(msg, sizeof(msg), "'%s' expected", name);
+    void **ppvoid = reinterpret_cast<void **>(luaL_checkudata(L, arg, name));
+    snprintf(msg, sizeof(msg), "%s: '%s' expected", _fun, name);
     luaL_argcheck(L, ppvoid != nullptr, arg, msg);
     return ppvoid;
 
@@ -155,14 +155,15 @@ ll_check_udata(lua_State *L, int arg, const char* name)
  * \return 1 table on the stack
  */
 int
-ll_push_udata(lua_State *L, const char* name, void *udata)
+ll_push_udata(const char *_fun, lua_State *L, const char* name, void *udata)
 {
     void **ppvoid = reinterpret_cast<void **>(lua_newuserdata(L, sizeof(udata)));
     *ppvoid = udata;
+    (void)_fun;
     lua_getfield(L, LUA_REGISTRYINDEX, name);
     lua_setmetatable(L, -2);
     DBG(LOG_CREATE, "%s: pushed '%s' ppvoid=%p udata=%p\n",
-         __func__, name ? name : "<nil>", ppvoid, udata);
+         _fun, name ? name : "<nil>", ppvoid, udata);
     return 1;
 }
 
@@ -270,12 +271,12 @@ ll_push_sarray(lua_State *L, Sarray *sa)
  * \return l_int32 for the integer; lua_error if out of bounds
  */
 l_int32
-ll_check_index(const char* func, lua_State *L, int arg, l_int32 imax)
+ll_check_index(const char* _fun, lua_State *L, int arg, l_int32 imax)
 {
     /* Lua indices are 1-based but Leptonica index is 0-based */
     lua_Integer index = luaL_checkinteger(L, arg) - 1;
     if (index < 0 || index >= imax) {
-        lua_pushfstring(L, "%s: index #%d out of bounds (0 <= %d < %d)", func, arg, index, imax);
+        lua_pushfstring(L, "%s: index #%d out of bounds (0 <= %d < %d)", _fun, arg, index, imax);
         lua_error(L);
         return 0;       /* NOTREACHED */
     }
@@ -286,19 +287,38 @@ ll_check_index(const char* func, lua_State *L, int arg, l_int32 imax)
  * \brief Check if an argument is a lua_Integer in the range of char
  * \param L pointer to the lua_State
  * \param arg index where to find the integer
- * \return l_int32 for the integer; lua_error if out of bounds
+ * \return char for the integer; lua_error if out of bounds
  */
 char
-ll_check_char(const char* func, lua_State *L, int arg)
+ll_check_char(const char* _fun, lua_State *L, int arg)
 {
     lua_Integer val = luaL_checkinteger(L, arg);
 
     if (val < 1 || val > 255) {
-        lua_pushfstring(L, "%s: char #%d out of bounds (%d)", func, arg, val);
+        lua_pushfstring(L, "%s: char #%d out of bounds (%d)", _fun, arg, val);
         lua_error(L);
         return 0;    /* NOTREACHED */
     }
     return static_cast<char>(val);
+}
+
+/**
+ * \brief Check if an argument is a string
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \return l_int32 for the integer; lua_error if out of bounds
+ */
+const char *
+ll_check_string(const char* _fun, lua_State *L, int arg)
+{
+    const char *str = lua_isstring(L, arg) ? lua_tostring(L, arg) : nullptr;
+
+    if (!str) {
+        lua_pushfstring(L, "%s: string #%d not defined", _fun, arg);
+        lua_error(L);
+        return 0;    /* NOTREACHED */
+    }
+    return str;
 }
 
 /**
@@ -308,12 +328,12 @@ ll_check_char(const char* func, lua_State *L, int arg)
  * \return l_int32 for the integer; lua_error if out of bounds
  */
 l_int32
-ll_check_l_int32(const char* func, lua_State *L, int arg)
+ll_check_l_int32(const char* _fun, lua_State *L, int arg)
 {
     lua_Integer val = luaL_checkinteger(L, arg);
 
     if (val < INT32_MIN || val > INT32_MAX) {
-        lua_pushfstring(L, "%s: l_int32 #%d out of bounds (%d)", func, arg, val);
+        lua_pushfstring(L, "%s: l_int32 #%d out of bounds (%d)", _fun, arg, val);
         lua_error(L);
         return 0;    /* NOTREACHED */
     }
@@ -328,12 +348,12 @@ ll_check_l_int32(const char* func, lua_State *L, int arg)
  * \return l_int32 for the integer; lua_error if out of bounds
  */
 l_int32
-ll_check_l_int32_default(const char* func, lua_State *L, int arg, l_int32 dflt)
+ll_check_l_int32_default(const char* _fun, lua_State *L, int arg, l_int32 dflt)
 {
     lua_Integer val = luaL_optinteger(L, arg, dflt);
 
     if (val < INT32_MIN || val > INT32_MAX) {
-        lua_pushfstring(L, "%s: l_int32 #%d out of bounds (%d)", func, arg, val);
+        lua_pushfstring(L, "%s: l_int32 #%d out of bounds (%d)", _fun, arg, val);
         lua_error(L);
         return 0;    /* NOTREACHED */
     }
@@ -347,12 +367,12 @@ ll_check_l_int32_default(const char* func, lua_State *L, int arg, l_int32 dflt)
  * \return l_uint32 for the integer; lua_error if out of bounds
  */
 l_uint32
-ll_check_l_uint32(const char* func, lua_State *L, int arg)
+ll_check_l_uint32(const char* _fun, lua_State *L, int arg)
 {
     lua_Integer val = luaL_checkinteger(L, arg);
 
     if (val < 0 || val > UINT32_MAX) {
-        lua_pushfstring(L, "%s: l_uint32 #$d out of bounds (%d)", func, arg, val);
+        lua_pushfstring(L, "%s: l_uint32 #$d out of bounds (%d)", _fun, arg, val);
         lua_error(L);
         return 0;    /* NOTREACHED */
     }
@@ -367,12 +387,12 @@ ll_check_l_uint32(const char* func, lua_State *L, int arg)
  * \return l_uint32 for the integer; lua_error if out of bounds
  */
 l_uint32
-ll_check_l_uint32_default(const char* func, lua_State *L, int arg, l_uint32 dflt)
+ll_check_l_uint32_default(const char* _fun, lua_State *L, int arg, l_uint32 dflt)
 {
     lua_Integer val = luaL_optinteger(L, arg, dflt);
 
     if (val < 0 || val > UINT32_MAX) {
-        lua_pushfstring(L, "%s: l_uint32 #%d out of bounds (%d)", func, arg, val);
+        lua_pushfstring(L, "%s: l_uint32 #%d out of bounds (%d)", _fun, arg, val);
         lua_error(L);
         return dflt;    /* NOTREACHED */
     }
@@ -386,13 +406,13 @@ ll_check_l_uint32_default(const char* func, lua_State *L, int arg, l_uint32 dflt
  * \return l_float32 for the number; lua_error if out of bounds
  */
 l_float32
-ll_check_l_float32(const char* func, lua_State *L, int arg)
+ll_check_l_float32(const char* _fun, lua_State *L, int arg)
 {
     lua_Number val = luaL_checknumber(L, arg);
 
-    if (val < (lua_Number)-FLT_MAX || val > (lua_Number)FLT_MAX) {
+    if (val < static_cast<lua_Number>(-FLT_MAX) || val > static_cast<lua_Number>(FLT_MAX)) {
         lua_pushfstring(L, "%s: l_float32 #%d out of bounds (%f < %f < %f)",
-                        func, arg, (lua_Number)-FLT_MAX, val, (lua_Number)FLT_MAX);
+                        _fun, arg, (lua_Number)-FLT_MAX, val, (lua_Number)FLT_MAX);
         lua_error(L);
         return 0.0f;    /* NOTREACHED */
     }
@@ -407,13 +427,13 @@ ll_check_l_float32(const char* func, lua_State *L, int arg)
  * \return l_float32 for the number; lua_error if out of bounds
  */
 l_float32
-ll_check_l_float32_default(const char* func, lua_State *L, int arg, l_float32 dflt)
+ll_check_l_float32_default(const char* _fun, lua_State *L, int arg, l_float32 dflt)
 {
     lua_Number val = luaL_optnumber(L, arg, (lua_Number)dflt);
 
-    if (val < (lua_Number)-FLT_MAX || val > (lua_Number)FLT_MAX) {
+    if (val < static_cast<lua_Number>(-FLT_MAX) || val > static_cast<lua_Number>(FLT_MAX)) {
         lua_pushfstring(L, "%s: l_float32 #%d out of bounds (%f < %f < %f)",
-                        func, arg, (lua_Number)-FLT_MAX, val, (lua_Number)FLT_MAX);
+                        _fun, arg, (lua_Number)-FLT_MAX, val, (lua_Number)FLT_MAX);
         lua_error(L);
         return 0.0f;    /* NOTREACHED */
     }
@@ -483,7 +503,7 @@ ll_string_tbl(l_int32 value, const lept_enums_t *tbl, size_t len)
  * \return value or dflt
  */
 l_int32
-ll_check_tbl(const char* func, lua_State *L, int arg, l_int32 dflt, const lept_enums_t *tbl, size_t len)
+ll_check_tbl(const char* _fun, lua_State *L, int arg, l_int32 dflt, const lept_enums_t *tbl, size_t len)
 {
     size_t i;
 
@@ -499,7 +519,7 @@ ll_check_tbl(const char* func, lua_State *L, int arg, l_int32 dflt, const lept_e
 
     ll_push_tbl(L, tbl, len);
     lua_pushfstring(L, "%s: Invalid option #%d '%s'\n%s",
-                    func, arg, str, lua_tostring(L, 1));
+                    _fun, arg, str, lua_tostring(L, 1));
     lua_error(L);
     return dflt;    /* NOTREACHED */
 
@@ -520,16 +540,16 @@ static const lept_enums_t tbl_access_storage[] = {
 
 /**
  * \brief Check for an optional storage flag as string
- * \param func calling function name
+ * \param _fun calling function name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
  * \param dflt default value to return if not specified or unknown
  * \return storage flag
  */
 l_int32
-ll_check_access_storage(const char *func, lua_State *L, int arg, l_int32 dflt)
+ll_check_access_storage(const char *_fun, lua_State *L, int arg, l_int32 dflt)
 {
-    return ll_check_tbl(func, L, arg, dflt, tbl_access_storage, ARRAYSIZE(tbl_access_storage));
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_access_storage, ARRAYSIZE(tbl_access_storage));
 }
 
 /**
@@ -583,16 +603,16 @@ static const lept_enums_t tbl_input_format[] = {
 
 /**
  * \brief Check for an image format name as string
- * \param func calling function name
+ * \param _fun calling function name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
  * \param dflt default value to return if not specified or unknown
  * \return storage flag
  */
 l_int32
-ll_check_input_format(const char *func, lua_State *L, int arg, l_int32 dflt)
+ll_check_input_format(const char *_fun, lua_State *L, int arg, l_int32 dflt)
 {
-    return ll_check_tbl(func, L, arg, dflt, tbl_input_format, ARRAYSIZE(tbl_input_format));
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_input_format, ARRAYSIZE(tbl_input_format));
 }
 
 /**
@@ -628,16 +648,16 @@ static const lept_enums_t tbl_keytype[] = {
 
 /**
  * \brief Check for an L_AMAP keytype name as string
- * \param func calling function name
+ * \param _fun calling function name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
  * \param dflt default value to return if not specified or unknown
  * \return storage flag
  */
 l_int32
-ll_check_keytype(const char *func, lua_State *L, int arg, l_int32 dflt)
+ll_check_keytype(const char *_fun, lua_State *L, int arg, l_int32 dflt)
 {
-    return ll_check_tbl(func, L, arg, dflt, tbl_keytype, ARRAYSIZE(tbl_keytype));
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_keytype, ARRAYSIZE(tbl_keytype));
 }
 
 /**
@@ -664,16 +684,16 @@ static const lept_enums_t tbl_consecutive_skip_by[] = {
 
 /**
  * \brief Check for an choose name as string
- * \param func calling function name
+ * \param _fun calling function name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
  * \param dflt default value to return if not specified or unknown
  * \return storage flag
  */
 l_int32
-ll_check_consecutive_skip_by(const char *func, lua_State *L, int arg, l_int32 dflt)
+ll_check_consecutive_skip_by(const char *_fun, lua_State *L, int arg, l_int32 dflt)
 {
-    return ll_check_tbl(func, L, arg, dflt, tbl_consecutive_skip_by, ARRAYSIZE(tbl_consecutive_skip_by));
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_consecutive_skip_by, ARRAYSIZE(tbl_consecutive_skip_by));
 }
 
 /**
@@ -705,16 +725,16 @@ static const lept_enums_t tbl_component[] = {
 
 /**
  * \brief Check for an component name as string
- * \param func calling function name
+ * \param _fun calling function name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
  * \param dflt default value to return if not specified or unknown
  * \return storage flag
  */
 l_int32
-ll_check_component(const char *func, lua_State *L, int arg, l_int32 dflt)
+ll_check_component(const char *_fun, lua_State *L, int arg, l_int32 dflt)
 {
-    return ll_check_tbl(func, L, arg, dflt, tbl_component, ARRAYSIZE(tbl_component));
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_component, ARRAYSIZE(tbl_component));
 }
 
 /**
@@ -738,16 +758,16 @@ static const lept_enums_t tbl_choose_min_max[] = {
 
 /**
  * \brief Check for an min/max name as string
- * \param func calling function name
+ * \param _fun calling function name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
  * \param dflt default value to return if not specified or unknown
  * \return storage flag
  */
 l_int32
-ll_check_choose_min_max(const char *func, lua_State *L, int arg, l_int32 dflt)
+ll_check_choose_min_max(const char *_fun, lua_State *L, int arg, l_int32 dflt)
 {
-    return ll_check_tbl(func, L, arg, dflt, tbl_choose_min_max, ARRAYSIZE(tbl_choose_min_max));
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_choose_min_max, ARRAYSIZE(tbl_choose_min_max));
 }
 
 /**
@@ -775,16 +795,16 @@ static const lept_enums_t tbl_what_is_max[] = {
 
 /**
  * \brief Check for a white or black is max name as string
- * \param func calling function name
+ * \param _fun calling function name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
  * \param dflt default value to return if not specified or unknown
  * \return storage flag
  */
 l_int32
-ll_check_what_is_max(const char *func, lua_State *L, int arg, l_int32 dflt)
+ll_check_what_is_max(const char *_fun, lua_State *L, int arg, l_int32 dflt)
 {
-    return ll_check_tbl(func, L, arg, dflt, tbl_what_is_max, ARRAYSIZE(tbl_what_is_max));
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_what_is_max, ARRAYSIZE(tbl_what_is_max));
 }
 
 /**
@@ -810,16 +830,16 @@ static const lept_enums_t tbl_getval[] = {
 
 /**
  * \brief Check for a L_GET_XXXX_VAL name as string
- * \param func calling function name
+ * \param _fun calling function name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
  * \param dflt default value to return if not specified or unknown
  * \return storage flag
  */
 l_int32
-ll_check_getval(const char *func, lua_State *L, int arg, l_int32 dflt)
+ll_check_getval(const char *_fun, lua_State *L, int arg, l_int32 dflt)
 {
-    return ll_check_tbl(func, L, arg, dflt, tbl_getval, ARRAYSIZE(tbl_getval));
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_getval, ARRAYSIZE(tbl_getval));
 }
 
 /**
@@ -849,16 +869,16 @@ static const lept_enums_t tbl_direction[] = {
 
 /**
  * \brief Check for a L_XXX_LINE name as string
- * \param func calling function name
+ * \param _fun calling function name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
  * \param dflt default value to return if not specified or unknown
  * \return storage flag
  */
 l_int32
-ll_check_direction(const char *func, lua_State *L, int arg, l_int32 dflt)
+ll_check_direction(const char *_fun, lua_State *L, int arg, l_int32 dflt)
 {
-    return ll_check_tbl(func, L, arg, dflt, tbl_direction, ARRAYSIZE(tbl_direction));
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_direction, ARRAYSIZE(tbl_direction));
 }
 
 /**
@@ -884,16 +904,16 @@ static const lept_enums_t tbl_blackwhite[] = {
 
 /**
  * \brief Check for a set white or black name as string
- * \param func calling function name
+ * \param _fun calling function name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
  * \param dflt default value to return if not specified or unknown
  * \return storage flag
  */
 l_int32
-ll_check_blackwhite(const char *func, lua_State *L, int arg, l_int32 dflt)
+ll_check_blackwhite(const char *_fun, lua_State *L, int arg, l_int32 dflt)
 {
-    return ll_check_tbl(func, L, arg, dflt, tbl_blackwhite, ARRAYSIZE(tbl_blackwhite));
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_blackwhite, ARRAYSIZE(tbl_blackwhite));
 }
 
 /**
@@ -935,16 +955,16 @@ static const lept_enums_t tbl_rasterop[] = {
 
 /**
  * \brief Check for a rasterop name as string
- * \param func calling function name
+ * \param _fun calling function name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
  * \param dflt default value to return if not specified or unknown
  * \return storage flag
  */
 l_int32
-ll_check_rasterop(const char *func, lua_State *L, int arg, l_int32 dflt)
+ll_check_rasterop(const char *_fun, lua_State *L, int arg, l_int32 dflt)
 {
-    return ll_check_tbl(func, L, arg, dflt, tbl_rasterop, ARRAYSIZE(tbl_rasterop));
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_rasterop, ARRAYSIZE(tbl_rasterop));
 }
 
 /**
@@ -975,16 +995,16 @@ static const lept_enums_t tbl_searchdir[] = {
 
 /**
  * \brief Check for a search direction name
- * \param func calling function name
+ * \param _fun calling function name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
  * \param dflt default value to return if not specified or unknown
  * \return storage flag
  */
 l_int32
-ll_check_searchdir(const char *func, lua_State *L, int arg, l_int32 dflt)
+ll_check_searchdir(const char *_fun, lua_State *L, int arg, l_int32 dflt)
 {
-    return ll_check_tbl(func, L, arg, dflt, tbl_searchdir, ARRAYSIZE(tbl_searchdir));
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_searchdir, ARRAYSIZE(tbl_searchdir));
 }
 
 /**
@@ -1019,16 +1039,16 @@ static const lept_enums_t tbl_stats_type[] = {
 
 /**
  * \brief Check for a stats type name
- * \param func calling function name
+ * \param _fun calling function name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
  * \param dflt default value to return if not specified or unknown
  * \return storage flag
  */
 l_int32
-ll_check_stats_type(const char *func, lua_State* L, int arg, l_int32 dflt)
+ll_check_stats_type(const char *_fun, lua_State* L, int arg, l_int32 dflt)
 {
-    return ll_check_tbl(func, L, arg, dflt, tbl_stats_type, ARRAYSIZE(tbl_stats_type));
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_stats_type, ARRAYSIZE(tbl_stats_type));
 }
 
 /**
@@ -1065,16 +1085,16 @@ static const lept_enums_t tbl_select_color[] = {
 
 /**
  * \brief Check for a select color name
- * \param func calling function name
+ * \param _fun calling function name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
  * \param dflt default value to return if not specified or unknown
  * \return storage flag
  */
 l_int32
-ll_check_select_color(const char *func, lua_State* L, int arg, l_int32 dflt)
+ll_check_select_color(const char *_fun, lua_State* L, int arg, l_int32 dflt)
 {
-    return ll_check_tbl(func, L, arg, dflt, tbl_select_color, ARRAYSIZE(tbl_select_color));
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_select_color, ARRAYSIZE(tbl_select_color));
 }
 
 /**
@@ -1098,16 +1118,16 @@ static const lept_enums_t tbl_select_minmax[] = {
 
 /**
  * \brief Check for a select min or max name
- * \param func calling function name
+ * \param _fun calling function name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
  * \param dflt default value to return if not specified or unknown
  * \return storage flag
  */
 l_int32
-ll_check_select_min_max(const char *func, lua_State* L, int arg, l_int32 dflt)
+ll_check_select_min_max(const char *_fun, lua_State* L, int arg, l_int32 dflt)
 {
-    return ll_check_tbl(func, L, arg, dflt, tbl_select_minmax, ARRAYSIZE(tbl_select_minmax));
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_select_minmax, ARRAYSIZE(tbl_select_minmax));
 }
 
 /**
@@ -1134,16 +1154,16 @@ static const lept_enums_t tbl_sort_by[] = {
 
 /**
  * \brief Check for a sort by name
- * \param func calling function name
+ * \param _fun calling function name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
  * \param dflt default value to return if not specified or unknown
  * \return storage flag
  */
 l_int32
-ll_check_sort_by(const char *func, lua_State* L, int arg, l_int32 dflt)
+ll_check_sort_by(const char *_fun, lua_State* L, int arg, l_int32 dflt)
 {
-    return ll_check_tbl(func, L, arg, dflt, tbl_sort_by, ARRAYSIZE(tbl_sort_by));
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_sort_by, ARRAYSIZE(tbl_sort_by));
 }
 
 /**
@@ -1176,16 +1196,16 @@ static const lept_enums_t tbl_from_side[] = {
 
 /**
  * \brief Check for a select min or max name (%L_SELECT_MIN, %L_SELECT_MAX)
- * \param func calling function name
+ * \param _fun calling function name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
  * \param dflt default value to return if not specified or unknown
  * \return storage flag
  */
 l_int32
-ll_check_from_side(const char *func, lua_State* L, int arg, l_int32 dflt)
+ll_check_from_side(const char *_fun, lua_State* L, int arg, l_int32 dflt)
 {
-    return ll_check_tbl(func, L, arg, dflt, tbl_from_side, ARRAYSIZE(tbl_from_side));
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_from_side, ARRAYSIZE(tbl_from_side));
 }
 
 /**
@@ -1219,16 +1239,16 @@ static const lept_enums_t tbl_order[] = {
 
 /**
  * \brief Check for a select min or max name (%L_SELECT_MIN, %L_SELECT_MAX)
- * \param func calling function name
+ * \param _fun calling function name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
  * \param dflt default value to return if not specified or unknown
  * \return storage flag
  */
 l_int32
-ll_check_order(const char *func, lua_State* L, int arg, l_int32 dflt)
+ll_check_order(const char *_fun, lua_State* L, int arg, l_int32 dflt)
 {
-    return ll_check_tbl(func, L, arg, dflt, tbl_order, ARRAYSIZE(tbl_order));
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_order, ARRAYSIZE(tbl_order));
 }
 
 /**
@@ -1256,16 +1276,16 @@ static const lept_enums_t tbl_rotation[] = {
 
 /**
  * \brief Check for a select min or max name
- * \param func calling function name
+ * \param _fun calling function name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
  * \param dflt default value to return if not specified or unknown
  * \return storage flag
  */
 l_int32
-ll_check_rotation(const char *func, lua_State* L, int arg, l_int32 dflt)
+ll_check_rotation(const char *_fun, lua_State* L, int arg, l_int32 dflt)
 {
-    return ll_check_tbl(func, L, arg, dflt, tbl_rotation, ARRAYSIZE(tbl_rotation));
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_rotation, ARRAYSIZE(tbl_rotation));
 }
 
 /**
@@ -1281,44 +1301,14 @@ ll_string_rotation(l_int32 which)
 
 /*====================================================================*
  *
- *  Lua LEPT class
+ *  Lua LuaLept class
  *
  *====================================================================*/
 
-/**
- * \brief Check Lua stack at index %arg for udata of class LL_LEPT
- * \param L pointer to the lua_State
- * \param arg index where to find the user data (usually 1)
- * \return pointer to the LEPT contained in the user data
- */
-static void **
-ll_check_LEPT(lua_State *L, int arg)
-{
-    return ll_check_udata(L, arg, LL_LEPT);
-}
-
-/**
- * \brief Push LEPT* to the Lua stack and set its meta table
- * \param L pointer to the lua_State
- * \param lept pointer to the LEPT
- * \return 1 LEPT* on the Lua stack
- */
 static int
-ll_push_LEPT(lua_State *L, LuaLept *lept)
+Create(lua_State *L)
 {
-    if (!lept)
-        return ll_push_nil(L);
-    return ll_push_udata(L, LL_LEPT, lept);
-}
-
-/**
- * \brief Create a new LEPT*
- * \param L pointer to the lua_State
- * \return 1 LEPT* on the Lua stack
- */
-static int
-ll_new_LEPT(lua_State *L)
-{
+    FUNC("LuaLept.Create");
     static const char lept_prefix[] = "leptonica-";
     LuaLept *lept = (LuaLept *) LEPT_CALLOC(1, sizeof(LuaLept));
     const char* lept_ver = getLeptonicaVersion();
@@ -1326,13 +1316,14 @@ ll_new_LEPT(lua_State *L)
 
     snprintf(lept->str_version, sizeof(lept->str_version), "%s", PACKAGE_VERSION);
     snprintf(lept->str_version_lua, sizeof(lept->str_version_lua), "%d.%d",
-             ((int)lua_ver[0])/100, ((int)lua_ver[0])%100);
+             static_cast<int>(lua_ver[0])/100, static_cast<int>(lua_ver[0])%100);
     if (!strncmp(lept_ver, lept_prefix, strlen(lept_prefix)))
         lept_ver += strlen(lept_prefix);
     snprintf(lept->str_version_lept, sizeof(lept->str_version_lept), "%s", lept_ver);
 
-    return ll_push_udata(L, LL_LEPT, lept);
+    return ll_push_udata(_fun, L, LL_LEPT, lept);
 }
+
 /**
  * \brief Destroy a LEPT*
  *
@@ -1342,10 +1333,11 @@ ll_new_LEPT(lua_State *L)
 static int
 Destroy(lua_State *L)
 {
-    void **plept = ll_check_udata(L, 1, LL_LEPT);
+    FUNC("LuaLept.Destroy");
+    LuaLept **plept = reinterpret_cast<LuaLept **>(ll_check_udata(_fun, L, 1, LL_LEPT));
     DBG(LOG_DESTROY, "%s: '%s' plept=%p lept=%p\n",
-         __func__, LL_LEPT, plept, *plept);
-    free(*plept);
+         _fun, LL_LEPT, plept, *plept);
+    LEPT_FREE(*plept);
     *plept = nullptr;
     return 0;
 }
@@ -1358,8 +1350,8 @@ Destroy(lua_State *L)
 static int
 Version(lua_State *L)
 {
-    void **plept = ll_check_LEPT(L, 1);
-    LuaLept *lept = *(LuaLept **)plept;
+    FUNC("LuaLept.Version");
+    LuaLept *lept = ll_check_LuaLept(_fun, L, 1);
     lua_pushstring(L, lept->str_version);
     return 1;
 }
@@ -1372,8 +1364,8 @@ Version(lua_State *L)
 static int
 LuaVersion(lua_State *L)
 {
-    void **plept = ll_check_LEPT(L, 1);
-    LuaLept *lept = *(LuaLept **)plept;
+    FUNC("LuaLept.LuaVersion");
+    LuaLept *lept = ll_check_LuaLept(_fun, L, 1);
     lua_pushstring(L, lept->str_version_lua);
     return 1;
 }
@@ -1386,8 +1378,8 @@ LuaVersion(lua_State *L)
 static int
 LeptVersion(lua_State *L)
 {
-    void **plept = ll_check_LEPT(L, 1);
-    LuaLept *lept = *(LuaLept **)plept;
+    FUNC("LuaLept.LeptVersion");
+    LuaLept *lept = ll_check_LuaLept(_fun, L, 1);
     lua_pushstring(L, lept->str_version_lept);
     return 1;
 }
@@ -1405,9 +1397,10 @@ LeptVersion(lua_State *L)
 static int
 RGB(lua_State *L)
 {
-    l_int32 rval = ll_check_l_int32(__func__, L, 1);
-    l_int32 gval = ll_check_l_int32(__func__, L, 2);
-    l_int32 bval = ll_check_l_int32(__func__, L, 3);
+    FUNC("LuaLept.RGB");
+    l_int32 rval = ll_check_l_int32(_fun, L, 1);
+    l_int32 gval = ll_check_l_int32(_fun, L, 2);
+    l_int32 bval = ll_check_l_int32(_fun, L, 3);
     l_uint32 pixel;
     if (composeRGBPixel(rval, gval, bval, &pixel))
         return ll_push_nil(L);
@@ -1429,10 +1422,11 @@ RGB(lua_State *L)
 static int
 RGBA(lua_State *L)
 {
-    l_int32 rval = ll_check_l_int32(__func__, L, 1);
-    l_int32 gval = ll_check_l_int32(__func__, L, 2);
-    l_int32 bval = ll_check_l_int32(__func__, L, 3);
-    l_int32 aval = ll_check_l_int32(__func__, L, 3);
+    FUNC("LuaLept.RGBA");
+    l_int32 rval = ll_check_l_int32(_fun, L, 1);
+    l_int32 gval = ll_check_l_int32(_fun, L, 2);
+    l_int32 bval = ll_check_l_int32(_fun, L, 3);
+    l_int32 aval = ll_check_l_int32(_fun, L, 3);
     l_uint32 pixel;
     if (composeRGBAPixel(rval, gval, bval, aval, &pixel))
         return ll_push_nil(L);
@@ -1451,7 +1445,8 @@ RGBA(lua_State *L)
 static int
 ToRGB(lua_State *L)
 {
-    l_uint32 pixel = ll_check_l_uint32(__func__, L, 1);
+    FUNC("LuaLept.ToRGB");
+    l_uint32 pixel = ll_check_l_uint32(_fun, L, 1);
     l_int32 rval = 0;
     l_int32 gval = 0;
     l_int32 bval = 0;
@@ -1473,7 +1468,8 @@ ToRGB(lua_State *L)
 static int
 ToRGBA(lua_State *L)
 {
-    l_uint32 pixel = ll_check_l_uint32(__func__, L, 1);
+    FUNC("LuaLept.ToRGBA");
+    l_uint32 pixel = ll_check_l_uint32(_fun, L, 1);
     l_int32 rval = 0;
     l_int32 gval = 0;
     l_int32 bval = 0;
@@ -1498,8 +1494,9 @@ ToRGBA(lua_State *L)
 static int
 MinMaxComponent(lua_State *L)
 {
-    l_uint32 pixel = ll_check_l_uint32(__func__, L, 1);
-    l_int32 type = ll_check_choose_min_max(__func__, L, 2, 0);
+    FUNC("LuaLept.MinMaxComponent");
+    l_uint32 pixel = ll_check_l_uint32(_fun, L, 1);
+    l_int32 type = ll_check_choose_min_max(_fun, L, 2, 0);
     lua_pushinteger(L, extractMinMaxComponent(pixel, type));
     return 1;
 }
@@ -1516,7 +1513,8 @@ MinMaxComponent(lua_State *L)
 static int
 MinComponent(lua_State *L)
 {
-    l_uint32 pixel = ll_check_l_uint32(__func__, L, 1);
+    FUNC("LuaLept.MinComponent");
+    l_uint32 pixel = ll_check_l_uint32(_fun, L, 1);
     lua_pushinteger(L, extractMinMaxComponent(pixel, L_CHOOSE_MIN));
     return 1;
 }
@@ -1533,9 +1531,46 @@ MinComponent(lua_State *L)
 static int
 MaxComponent(lua_State *L)
 {
-    l_uint32 pixel = ll_check_l_uint32(__func__, L, 1);
+    FUNC("LuaLept.MaxComponent");
+    l_uint32 pixel = ll_check_l_uint32(_fun, L, 1);
     lua_pushinteger(L, extractMinMaxComponent(pixel, L_CHOOSE_MAX));
     return 1;
+}
+/**
+ * \brief Check Lua stack at index %arg for udata of class LL_LEPT
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the LEPT contained in the user data
+ */
+LuaLept *
+ll_check_LuaLept(const char* _fun, lua_State *L, int arg)
+{
+    return *(reinterpret_cast<LuaLept **>(ll_check_udata(_fun, L, arg, LL_LEPT)));
+}
+
+/**
+ * \brief Push LEPT* to the Lua stack and set its meta table
+ * \param L pointer to the lua_State
+ * \param lept pointer to the LEPT
+ * \return 1 LEPT* on the Lua stack
+ */
+int
+ll_push_LuaLept(const char* _fun, lua_State *L, LuaLept *lept)
+{
+    if (!lept)
+        return ll_push_nil(L);
+    return ll_push_udata(_fun, L, LL_LEPT, lept);
+}
+
+/**
+ * \brief Create a new LEPT*
+ * \param L pointer to the lua_State
+ * \return 1 LEPT* on the Lua stack
+ */
+int
+ll_new_LuaLept(lua_State *L)
+{
+    return Create(L);
 }
 
 /**
@@ -1543,9 +1578,10 @@ MaxComponent(lua_State *L)
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
-static int register_LEPT(lua_State *L) {
+static int register_LuaLept(lua_State *L) {
     static const luaL_Reg methods[] = {
         {"__gc",                    Destroy},
+        {"__new",                   Create},
         {"Version",                 Version},
         {"LuaVersion",              LuaVersion},
         {"LeptVersion",             LeptVersion},
@@ -1604,11 +1640,12 @@ static int register_LEPT(lua_State *L) {
 int
 ll_RunScript(const char *script)
 {
+    FUNC("ll_RunScript");
     lua_State *L;
     int res;
 
-    /* Allow Leptonica debugging (pixDisplay ...) */
-    setLeptDebugOK(TRUE);
+    /* Disable Leptonica debugging (pixDisplay ...) */
+    setLeptDebugOK(FALSE);
 
     /* Allocate a new Lua state */
     L = luaL_newstate();
@@ -1617,17 +1654,17 @@ ll_RunScript(const char *script)
     luaL_openlibs(L);
 
     /* Register our libraries */
-    register_LEPT(L);
+    register_LuaLept(L);
 
     res = luaL_loadfile(L, script);
     if (LUA_OK != res) {
         const char* msg = lua_tostring(L, -1);
         lua_close(L);
-        return ERROR_INT(msg, __func__, 1);
+        return ERROR_INT(msg, _fun, 1);
     }
 
     /* Create a global instance of the LL_LEPT */
-    ll_new_LEPT(L);
+    ll_new_LuaLept(L);
     lua_setglobal(L, LL_LEPT);
 
     /* Ask Lua to run our script */
@@ -1635,7 +1672,7 @@ ll_RunScript(const char *script)
     if (LUA_OK != res) {
         const char* msg = lua_tostring(L, -1);
         lua_close(L);
-        return ERROR_INT(msg, __func__, 1);
+        return ERROR_INT(msg, _fun, 1);
     }
 
     lua_close(L);

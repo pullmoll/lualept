@@ -38,48 +38,6 @@
  *====================================================================*/
 
 /**
- * @brief Check Lua stack at index %arg for udata of class LL_PTAA
- * \param L pointer to the lua_State
- * \param arg index where to find the user data (usually 1)
- * \return pointer to the Ptaa* contained in the user data
- */
-Ptaa *
-ll_check_Ptaa(lua_State *L, int arg)
-{
-    return *(reinterpret_cast<Ptaa **>(ll_check_udata(L, arg, LL_PTAA)));
-}
-
-/**
- * \brief Push PTAA user data to the Lua stack and set its meta table
- * \param L pointer to the lua_State
- * \param ptaa pointer to the PTAA
- * \return 1 Ptaa* on the Lua stack
- */
-int
-ll_push_Ptaa(lua_State *L, Ptaa *ptaa)
-{
-    if (!ptaa)
-        return ll_push_nil(L);
-    return ll_push_udata(L, LL_PTAA, ptaa);
-}
-
-/**
- * \brief Create and push a new Ptaa*
- *
- * Arg #1 is expected to be a l_int32 (n)
- *
- * \param L pointer to the lua_State
- * \return 1 for Ptaa* on the Lua stack
- */
-int
-ll_new_Ptaa(lua_State *L)
-{
-    l_int32 n = ll_check_l_int32_default(__func__, L, 1, 1);
-    Ptaa *ptaa = ptaaCreate(n);
-    return ll_push_Ptaa(L, ptaa);
-}
-
-/**
  * \brief Create a new Ptaa*
  *
  * Arg #1 is expected to be a l_int32 (n)
@@ -90,7 +48,10 @@ ll_new_Ptaa(lua_State *L)
 static int
 Create(lua_State *L)
 {
-    return ll_new_Ptaa(L);
+    FUNC(LL_PTAA ".Create");
+    l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+    Ptaa *ptaa = ptaaCreate(n);
+    return ll_push_Ptaa(_fun, L, ptaa);
 }
 
 /**
@@ -104,7 +65,8 @@ Create(lua_State *L)
 static int
 Truncate(lua_State *L)
 {
-    Ptaa *ptaa = ll_check_Ptaa(L, 1);
+    FUNC(LL_PTAA ".Truncate");
+    Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
     lua_pushboolean(L, 0 == ptaaTruncate(ptaa));
     return 1;
 }
@@ -118,9 +80,10 @@ Truncate(lua_State *L)
 static int
 Destroy(lua_State *L)
 {
-    Ptaa **pptaa = reinterpret_cast<Ptaa **>(ll_check_udata(L, 1, LL_PTAA));
+    FUNC(LL_PTAA ".Destroy");
+    Ptaa **pptaa = reinterpret_cast<Ptaa **>(ll_check_udata(_fun, L, 1, LL_PTAA));
     DBG(LOG_DESTROY, "%s: '%s' pptaa=%p ptaa=%p\n",
-        __func__, LL_PTAA, pptaa, *pptaa);
+        _fun, LL_PTAA, pptaa, *pptaa);
     ptaaDestroy(pptaa);
     *pptaa = nullptr;
     return 0;
@@ -137,7 +100,8 @@ Destroy(lua_State *L)
 static int
 GetCount(lua_State *L)
 {
-    Ptaa *ptaa = ll_check_Ptaa(L, 1);
+    FUNC(LL_PTAA ".GetCount");
+    Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
     l_int32 n = ptaaGetCount(ptaa);
     lua_pushinteger(L, n);
     return 1;
@@ -157,9 +121,10 @@ GetCount(lua_State *L)
 static int
 GetPt(lua_State *L)
 {
-    Ptaa *ptaa = ll_check_Ptaa(L, 1);
-    l_int32 ipta = ll_check_index(__func__, L, 2, ptaaGetCount(ptaa));
-    l_int32 ipt = ll_check_index(__func__, L, 3, INT32_MAX);
+    FUNC(LL_PTAA ".GetPt");
+    Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
+    l_int32 ipta = ll_check_index(_fun, L, 2, ptaaGetCount(ptaa));
+    l_int32 ipt = ll_check_index(_fun, L, 3, INT32_MAX);
     l_float32 x;
     l_float32 y;
     if (ptaaGetPt(ptaa, ipta, ipt, &x, &y))
@@ -183,11 +148,12 @@ GetPt(lua_State *L)
 static int
 GetPta(lua_State *L)
 {
-    Ptaa *ptaa = ll_check_Ptaa(L, 1);
-    l_int32 idx = ll_check_index(__func__, L, 2, ptaaGetCount(ptaa));
-    l_int32 accessflag = ll_check_access_storage(__func__, L, 3, L_COPY);
+    FUNC(LL_PTAA ".GetPta");
+    Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, ptaaGetCount(ptaa));
+    l_int32 accessflag = ll_check_access_storage(_fun, L, 3, L_COPY);
     Pta *pta = ptaaGetPta(ptaa, idx, accessflag);
-    return ll_push_Pta(L, pta);
+    return ll_push_Pta(_fun, L, pta);
 }
 
 /**
@@ -204,9 +170,10 @@ GetPta(lua_State *L)
 static int
 AddPta(lua_State *L)
 {
-    Ptaa *ptaa = ll_check_Ptaa(L, 1);
-    Pta *pta = ll_check_Pta(L, 2);
-    l_int32 copyflag = ll_check_access_storage(__func__, L, 3, L_COPY);
+    FUNC(LL_PTAA ".AddPta");
+    Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
+    Pta *pta = ll_check_Pta(_fun, L, 2);
+    l_int32 copyflag = ll_check_access_storage(_fun, L, 3, L_COPY);
     lua_pushboolean(L, 0 == ptaaAddPta(ptaa, pta, copyflag));
     return 1;
 }
@@ -224,9 +191,10 @@ AddPta(lua_State *L)
 static int
 ReplacePta(lua_State *L)
 {
-    Ptaa *ptaa = ll_check_Ptaa(L, 1);
-    l_int32 idx = ll_check_index(__func__, L, 2, ptaaGetCount(ptaa));
-    Pta *pta = ll_check_Pta(L, 3);
+    FUNC(LL_PTAA ".ReplacePta");
+    Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, ptaaGetCount(ptaa));
+    Pta *pta = ll_check_Pta(_fun, L, 3);
     lua_pushboolean(L, 0 == ptaaReplacePta(ptaa, idx, pta));
     return 1;
 }
@@ -242,9 +210,10 @@ ReplacePta(lua_State *L)
 static int
 Read(lua_State *L)
 {
-    const char *filename = lua_tostring(L, 1);
+    FUNC(LL_PTAA ".Read");
+    const char *filename = ll_check_string(_fun, L, 1);
     Ptaa *ptaa = ptaaRead(filename);
-    return ll_push_Ptaa(L, ptaa);
+    return ll_push_Ptaa(_fun, L, ptaa);
 }
 
 /**
@@ -261,11 +230,52 @@ Read(lua_State *L)
 static int
 Write(lua_State *L)
 {
-    Ptaa *ptaa = ll_check_Ptaa(L, 1);
-    const char *filename = lua_tostring(L, 2);
+    FUNC(LL_PTAA ".Write");
+    Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
+    const char *filename = ll_check_string(_fun, L, 2);
     int type = lua_toboolean(L, 3);
     lua_pushboolean(L, 0 == ptaaWrite(filename, ptaa, type));
     return 1;
+}
+
+/**
+ * @brief Check Lua stack at index %arg for udata of class LL_PTAA
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the Ptaa* contained in the user data
+ */
+Ptaa *
+ll_check_Ptaa(const char* _fun, lua_State *L, int arg)
+{
+    return *(reinterpret_cast<Ptaa **>(ll_check_udata(_fun, L, arg, LL_PTAA)));
+}
+
+/**
+ * \brief Push PTAA user data to the Lua stack and set its meta table
+ * \param L pointer to the lua_State
+ * \param ptaa pointer to the PTAA
+ * \return 1 Ptaa* on the Lua stack
+ */
+int
+ll_push_Ptaa(const char* _fun, lua_State *L, Ptaa *ptaa)
+{
+    if (!ptaa)
+        return ll_push_nil(L);
+    return ll_push_udata(_fun, L, LL_PTAA, ptaa);
+}
+
+/**
+ * \brief Create and push a new Ptaa*
+ *
+ * Arg #1 is expected to be a l_int32 (n)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 for Ptaa* on the Lua stack
+ */
+int
+ll_new_Ptaa(lua_State *L)
+{
+    return Create(L);
 }
 
 /**
