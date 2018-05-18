@@ -30,8 +30,6 @@
  *************************************************************************/
 
 #include "modules.h"
-#include <lauxlib.h>
-#include <lualib.h>
 
 /*====================================================================*
  *
@@ -43,30 +41,30 @@
  * @brief Check Lua stack at index %arg for udata of class LL_BOX
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the BOX* contained in the user data
+ * \return pointer to the Box* contained in the user data
  */
-BOX *
-ll_check_BOX(lua_State *L, int arg)
+Box *
+ll_check_Box(lua_State *L, int arg)
 {
-    return *(BOX **)ll_check_udata(L, arg, LL_BOX);
+    return *(reinterpret_cast<Box **>(ll_check_udata(L, arg, LL_BOX)));
 }
 
 /**
  * \brief Push BOX user data to the Lua stack and set its meta table
  * \param L pointer to the lua_State
  * \param box pointer to the BOX
- * \return 1 BOX* on the Lua stack
+ * \return 1 Box* on the Lua stack
  */
 int
-ll_push_BOX(lua_State *L, BOX *box)
+ll_push_Box(lua_State *L, Box *box)
 {
-    if (NULL == box)
+    if (!box)
         return 0;
     return ll_push_udata(L, LL_BOX, box);
 }
 
 /**
- * \brief Create and push a new BOX*
+ * \brief Create and push a new Box*
  *
  * Arg #1 is expected to be a l_int32 (x)
  * Arg #2 is expected to be a l_int32 (y)
@@ -74,21 +72,21 @@ ll_push_BOX(lua_State *L, BOX *box)
  * Arg #4 is expected to be a l_int32 (h)
  *
  * \param L pointer to the lua_State
- * \return 1 BOX* on the Lua stack
+ * \return 1 Box* on the Lua stack
  */
 int
-ll_new_BOX(lua_State *L)
+ll_new_Box(lua_State *L)
 {
     l_int32 x = ll_check_l_int32_default(__func__, L, 1, 0);
     l_int32 y = ll_check_l_int32_default(__func__, L, 2, 0);
     l_int32 w = ll_check_l_int32_default(__func__, L, 3, 1);
     l_int32 h = ll_check_l_int32_default(__func__, L, 4, 1);
-    BOX *box = boxCreate(x, y, w, h);
-    return ll_push_BOX(L, box);
+    Box *box = boxCreate(x, y, w, h);
+    return ll_push_Box(L, box);
 }
 
 /**
- * @brief Printable string for a BOX*
+ * @brief Printable string for a Box*
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
  */
@@ -96,12 +94,12 @@ static int
 toString(lua_State *L)
 {
     static char str[256];
-    BOX *box = ll_check_BOX(L, 1);
+    Box *box = ll_check_Box(L, 1);
     luaL_Buffer B;
     l_int32 x, y, w, h;
 
     luaL_buffinit(L, &B);
-    if (NULL == box) {
+    if (!box) {
         luaL_addstring(&B, "nil");
     } else {
         luaL_addchar(&B, '{');
@@ -118,7 +116,7 @@ toString(lua_State *L)
 }
 
 /**
- * \brief Create a new BOX*
+ * \brief Create a new Box*
  *
  * Arg #1 is expected to be a l_int32 (x)
  * Arg #2 is expected to be a l_int32 (y)
@@ -126,16 +124,16 @@ toString(lua_State *L)
  * Arg #4 is expected to be a l_int32 (h)
  *
  * \param L pointer to the lua_State
- * \return 1 BOX* on the Lua stack
+ * \return 1 Box* on the Lua stack
  */
 static int
 Create(lua_State *L)
 {
-    return ll_new_BOX(L);
+    return ll_new_Box(L);
 }
 
 /**
- * \brief Create a new BOX* if the parameters are valid
+ * \brief Create a new Box* if the parameters are valid
  *
  * Arg #1 is expected to be a l_int32 (x)
  * Arg #2 is expected to be a l_int32 (y)
@@ -143,26 +141,26 @@ Create(lua_State *L)
  * Arg #4 is expected to be a l_int32 (h)
  *
  * \param L pointer to the lua_State
- * \return 1 BOX* on the Lua stack
+ * \return 1 Box* on the Lua stack
  */
 static int
 CreateValid(lua_State *L)
 {
     l_int32 x, y, w, h;
-    BOX *box;
+    Box *box;
 
     x = ll_check_l_int32_default(__func__, L, 1, 0);
     y = ll_check_l_int32_default(__func__, L, 2, 0);
     w = ll_check_l_int32_default(__func__, L, 3, 1);
     h = ll_check_l_int32_default(__func__, L, 4, 1);
     box = boxCreateValid(x, y, w, h);
-    return ll_push_BOX(L, box);
+    return ll_push_Box(L, box);
 }
 
 /**
- * \brief Copy a BOX*
+ * \brief Copy a Box*
  *
- * Arg #1 (i.e. self) is expected to be a BOX* user data
+ * Arg #1 (i.e. self) is expected to be a Box* user data
  *
  * \param L pointer to the lua_State
  * \return 1 for BOX on the Lua stack
@@ -170,16 +168,16 @@ CreateValid(lua_State *L)
 static int
 Copy(lua_State *L)
 {
-    BOX *boxs, *box;
-    boxs = ll_check_BOX(L, 1);
+    Box *boxs, *box;
+    boxs = ll_check_Box(L, 1);
     box = boxCopy(boxs);
-    return ll_push_BOX(L, box);
+    return ll_push_Box(L, box);
 }
 
 /**
- * \brief Clone a BOX*
+ * \brief Clone a Box*
  *
- * Arg #1 (i.e. self) is expected to be a BOX* user data
+ * Arg #1 (i.e. self) is expected to be a Box* user data
  *
  * \param L pointer to the lua_State
  * \return 1 for BOX on the Lua stack
@@ -187,14 +185,14 @@ Copy(lua_State *L)
 static int
 Clone(lua_State *L)
 {
-    BOX *boxs, *box;
-    boxs = ll_check_BOX(L, 1);
+    Box *boxs, *box;
+    boxs = ll_check_Box(L, 1);
     box = boxClone(boxs);
-    return ll_push_BOX(L, box);
+    return ll_push_Box(L, box);
 }
 
 /**
- * \brief Destroy a BOX*
+ * \brief Destroy a Box*
  *
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack
@@ -204,16 +202,16 @@ Destroy(lua_State *L)
 {
     void **pbox = ll_check_udata(L, 1, LL_BOX);
     DBG(LOG_DESTROY, "%s: '%s' pbox=%p box=%p refcount=%d\n", __func__,
-        LL_BOX, (void *)pbox, *pbox, boxGetRefcount(*(BOX **)pbox));
-    boxDestroy((BOX **)pbox);
-    *pbox = NULL;
+        LL_BOX, (void *)pbox, *pbox, boxGetRefcount(*(Box **)pbox));
+    boxDestroy(reinterpret_cast<Box **>(pbox));
+    *pbox = nullptr;
     return 0;
 }
 
 /**
- * \brief Get the BOX* geometry
+ * \brief Get the Box* geometry
  *
- * Arg #1 (i.e. self) is expected to be a BOX* user data
+ * Arg #1 (i.e. self) is expected to be a Box* user data
  *
  * \param L pointer to the lua_State
  * \return 4 for four integers (or nil on error) on the stack
@@ -221,7 +219,7 @@ Destroy(lua_State *L)
 static int
 GetGeometry(lua_State *L)
 {
-    BOX *box = ll_check_BOX(L, 1);
+    Box *box = ll_check_Box(L, 1);
     l_int32 x, y, w, h;
     if (boxGetGeometry(box, &x, &y, &w, &h))
         return 0;
@@ -235,7 +233,7 @@ GetGeometry(lua_State *L)
 /**
  * \brief Set the BOX geometry
  *
- * Arg #1 (i.e. self) is expected to be a BOX* user data
+ * Arg #1 (i.e. self) is expected to be a Box* user data
  * Arg #2 is expected to be a lua_Integer (x)
  * Arg #3 is expected to be a lua_Integer (y)
  * Arg #4 is expected to be a lua_Integer (w)
@@ -247,7 +245,7 @@ GetGeometry(lua_State *L)
 static int
 SetGeometry(lua_State *L)
 {
-    BOX *box = ll_check_BOX(L, 1);
+    Box *box = ll_check_Box(L, 1);
     l_int32 x = ll_check_l_int32_default(__func__, L, 2, 0);
     l_int32 y = ll_check_l_int32_default(__func__, L, 3, 0);
     l_int32 w = ll_check_l_int32_default(__func__, L, 4, 1);
@@ -259,7 +257,7 @@ SetGeometry(lua_State *L)
 /**
  * \brief Get the BOX side locations (left, right, top, bottom)
  *
- * Arg #1 (i.e. self) is expected to be a BOX* user data
+ * Arg #1 (i.e. self) is expected to be a Box* user data
  *
  * \param L pointer to the lua_State
  * \return 4 for four integers (or nil on error) on the stack
@@ -267,7 +265,7 @@ SetGeometry(lua_State *L)
 static int
 GetSideLocations(lua_State *L)
 {
-    BOX *box = ll_check_BOX(L, 1);
+    Box *box = ll_check_Box(L, 1);
     l_int32 l, r, t, b;
     if (boxGetSideLocations(box, &l, &r, &t, &b))
         return 0;
@@ -281,7 +279,7 @@ GetSideLocations(lua_State *L)
 /**
  * \brief Set the BOX side locations (left, right, top, bottom)
  *
- * Arg #1 (i.e. self) is expected to be a BOX* user data
+ * Arg #1 (i.e. self) is expected to be a Box* user data
  * Arg #2 is expected to be a lua_Integer (l)
  * Arg #3 is expected to be a lua_Integer (r)
  * Arg #4 is expected to be a lua_Integer (t)
@@ -293,7 +291,7 @@ GetSideLocations(lua_State *L)
 static int
 SetSideLocations(lua_State *L)
 {
-    BOX *box = ll_check_BOX(L, 1);
+    Box *box = ll_check_Box(L, 1);
     l_int32 l = ll_check_l_int32_default(__func__, L, 2, 0);
     l_int32 r = ll_check_l_int32_default(__func__, L, 3, 0);
     l_int32 t = ll_check_l_int32_default(__func__, L, 4, 0);
@@ -303,9 +301,9 @@ SetSideLocations(lua_State *L)
 }
 
 /**
- * \brief Get the BOX* reference count
+ * \brief Get the Box* reference count
  *
- * Arg #1 (i.e. self) is expected to be a BOX* user data
+ * Arg #1 (i.e. self) is expected to be a Box* user data
  *
  * \param L pointer to the lua_State
  * \return 1 integers (or nil on error) on the stack
@@ -313,15 +311,15 @@ SetSideLocations(lua_State *L)
 static int
 GetRefcount(lua_State *L)
 {
-    BOX *box = ll_check_BOX(L, 1);
+    Box *box = ll_check_Box(L, 1);
     lua_pushinteger(L, boxGetRefcount(box));
     return 1;
 }
 
 /**
- * \brief Change the BOX* reference count
+ * \brief Change the Box* reference count
  *
- * Arg #1 (i.e. self) is expected to be a BOX* user data
+ * Arg #1 (i.e. self) is expected to be a Box* user data
  * Arg #1 (i.e. self) is expected to be a l_int32 (delta)
  *
  * \param L pointer to the lua_State
@@ -330,16 +328,16 @@ GetRefcount(lua_State *L)
 static int
 ChangeRefcount(lua_State *L)
 {
-    BOX *box = ll_check_BOX(L, 1);
+    Box *box = ll_check_Box(L, 1);
     l_int32 delta = ll_check_l_int32(__func__, L, 2);
     lua_pushboolean(L, 0 == boxChangeRefcount(box, delta));
     return 1;
 }
 
 /**
- * \brief Check if a BOX* is valid
+ * \brief Check if a Box* is valid
  *
- * Arg #1 (i.e. self) is expected to be a BOX* user data
+ * Arg #1 (i.e. self) is expected to be a Box* user data
  *
  * \param L pointer to the lua_State
  * \return 1 for boolean on the Lua stack
@@ -347,7 +345,7 @@ ChangeRefcount(lua_State *L)
 static int
 IsValid(lua_State *L)
 {
-    BOX *box = ll_check_BOX(L, 1);
+    Box *box = ll_check_Box(L, 1);
     l_int32 valid = 0;
     if (boxIsValid(box, &valid))
         return 0;
@@ -356,10 +354,10 @@ IsValid(lua_State *L)
 }
 
 /**
- * \brief Check if a BOX* (%box1) contains another BOX* (%box2)
+ * \brief Check if a Box* (%box1) contains another Box* (%box2)
  *
- * Arg #1 (i.e. self) is expected to be a BOX* (box1)
- * Arg #2 is expected to be another BOX* (box2)
+ * Arg #1 (i.e. self) is expected to be a Box* (box1)
+ * Arg #2 is expected to be another Box* (box2)
  *
  * \param L pointer to the lua_State
  * \return 1 for boolean on the Lua stack
@@ -367,8 +365,8 @@ IsValid(lua_State *L)
 static int
 Contains(lua_State *L)
 {
-    BOX *box1 = ll_check_BOX(L, 1);
-    BOX *box2 = ll_check_BOX(L, 2);
+    Box *box1 = ll_check_Box(L, 1);
+    Box *box2 = ll_check_Box(L, 2);
     l_int32 result = 0;
     if (boxContains(box1, box2, &result))
         return 0;
@@ -377,10 +375,10 @@ Contains(lua_State *L)
 }
 
 /**
- * \brief Check if a BOX* (%box1) intersects another BOX* (%box2)
+ * \brief Check if a Box* (%box1) intersects another Box* (%box2)
  *
- * Arg #1 (i.e. self) is expected to be a BOX* (box1)
- * Arg #2 is expected to be another BOX* (box2)
+ * Arg #1 (i.e. self) is expected to be a Box* (box1)
+ * Arg #2 is expected to be another Box* (box2)
  *
  * \param L pointer to the lua_State
  * \return 1 for boolean on the Lua stack
@@ -388,12 +386,31 @@ Contains(lua_State *L)
 static int
 Intersects(lua_State *L)
 {
-    BOX *box1 = ll_check_BOX(L, 1);
-    BOX *box2 = ll_check_BOX(L, 2);
+    Box *box1 = ll_check_Box(L, 1);
+    Box *box2 = ll_check_Box(L, 2);
     l_int32 result = 0;
     if (boxIntersects(box1, box2, &result))
         return 0;
     lua_pushboolean(L, result);
+    return 1;
+}
+
+/**
+ * \brief Get the overlap region of a Box* (%box1) and another Box* (%box2)
+ *
+ * Arg #1 (i.e. self) is expected to be a Box* (box1)
+ * Arg #2 is expected to be another Box* (box2)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 for Box* on the Lua stack
+ */
+static int
+OverlapRegion(lua_State *L)
+{
+    Box *box1 = ll_check_Box(L, 1);
+    Box *box2 = ll_check_Box(L, 2);
+    Box *box = boxOverlapRegion(box1, box2);
+    ll_push_Box(L, box);
     return 1;
 }
 
@@ -403,11 +420,11 @@ Intersects(lua_State *L)
  * \return 1 table on the Lua stack
  */
 int
-ll_register_BOX(lua_State *L)
+ll_register_Box(lua_State *L)
 {
     static const luaL_Reg methods[] = {
         {"__gc",                Destroy},   /* garbage collector */
-        {"__new",               Create},    /* new BOX */
+        {"__new",               Create},    /* new Box */
         {"__tostring",          toString},
         {"Destroy",             Destroy},
         {"Copy",                Copy},
@@ -421,6 +438,7 @@ ll_register_BOX(lua_State *L)
         {"IsValid",             IsValid},
         {"Contains",            Contains},
         {"Intersects",          Intersects},
+        {"OverlapRegion",       OverlapRegion},
         LUA_SENTINEL
     };
 

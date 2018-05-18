@@ -2,7 +2,7 @@ AC_PREREQ([2.50])
 AC_INIT([lualept], [0.1.0])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_HEADERS([src/config.h:config/config.h.in])
-AC_CONFIG_SRCDIR([src/lualept.c])
+AC_CONFIG_SRCDIR([src/lualept.cpp])
 
 AC_CONFIG_MACRO_DIR([m4])
 LT_INIT
@@ -12,7 +12,7 @@ AC_LANG(C)
 AC_CANONICAL_HOST
 
 # Checks for programs.
-AC_PROG_CC
+AC_PROG_CXX
 AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LIBTOOL

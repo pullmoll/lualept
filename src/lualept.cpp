@@ -30,8 +30,6 @@
  *************************************************************************/
 
 #include "modules.h"
-#include <lauxlib.h>
-#include <lualib.h>
 
 #if !defined(ARRAYSIZE)
 #define ARRAYSIZE(t) (sizeof(t)/sizeof(t[0]))
@@ -71,7 +69,7 @@ ll_strcasecmp(const char* dst, const char* src)
     unsigned long lend, lens;
     int d;
 
-    if (NULL == dst || NULL == src)
+    if (!dst || nullptr == src)
         return 0;
     lend = strlen(dst);
     lens = strlen(src);
@@ -130,9 +128,9 @@ void **
 ll_check_udata(lua_State *L, int arg, const char* name)
 {
     static char msg[128];
-    void **ppvoid = luaL_checkudata(L, arg, name);
+    void **ppvoid = (void **)luaL_checkudata(L, arg, name);
     snprintf(msg, sizeof(msg), "'%s' expected", name);
-    luaL_argcheck(L, ppvoid != NULL, arg, msg);
+    luaL_argcheck(L, ppvoid != nullptr, arg, msg);
     return ppvoid;
 
 }
@@ -147,7 +145,7 @@ ll_check_udata(lua_State *L, int arg, const char* name)
 int
 ll_push_udata(lua_State *L, const char* name, void *udata)
 {
-    void **ppvoid = lua_newuserdata(L, sizeof(udata));
+    void **ppvoid = (void **)lua_newuserdata(L, sizeof(udata));
     *ppvoid = udata;
     lua_getfield(L, LUA_REGISTRYINDEX, name);
     lua_setmetatable(L, -2);
@@ -361,7 +359,7 @@ ll_check_tbl(lua_State *L, int arg, l_int32 dflt, const lept_enums_t *tbl, size_
 {
     size_t i;
 
-    const char* str = lua_isstring(L, arg) ? lua_tostring(L, arg) : NULL;
+    const char* str = lua_isstring(L, arg) ? lua_tostring(L, arg) : nullptr;
     if (!str)
         return dflt;
 
@@ -1003,9 +1001,9 @@ ll_check_LEPT(lua_State *L, int arg)
  * \return 1 LEPT* on the Lua stack
  */
 static int
-ll_push_LEPT(lua_State *L, LUALEPT *lept)
+ll_push_LEPT(lua_State *L, LuaLept *lept)
 {
-    if (NULL == lept)
+    if (!lept)
         return 0;
     return ll_push_udata(L, LL_LEPT, lept);
 }
@@ -1019,7 +1017,7 @@ static int
 ll_new_LEPT(lua_State *L)
 {
     static const char lept_prefix[] = "leptonica-";
-    LUALEPT *lept = (LUALEPT *) LEPT_CALLOC(1, sizeof(LUALEPT));
+    LuaLept *lept = (LuaLept *) LEPT_CALLOC(1, sizeof(LuaLept));
     const char* lept_ver = getLeptonicaVersion();
     const lua_Number *lua_ver = lua_version(L);
 
@@ -1045,7 +1043,7 @@ Destroy(lua_State *L)
     DBG(LOG_DESTROY, "%s: '%s' plept=%p lept=%p\n", __func__,
         LL_LEPT, (void *)plept, *plept);
     free(*plept);
-    *plept = NULL;
+    *plept = nullptr;
     return 0;
 }
 
@@ -1058,7 +1056,7 @@ static int
 Version(lua_State *L)
 {
     void **plept = ll_check_LEPT(L, 1);
-    LUALEPT *lept = *(LUALEPT **)plept;
+    LuaLept *lept = *(LuaLept **)plept;
     lua_pushstring(L, lept->str_version);
     return 1;
 }
@@ -1072,7 +1070,7 @@ static int
 LuaVersion(lua_State *L)
 {
     void **plept = ll_check_LEPT(L, 1);
-    LUALEPT *lept = *(LUALEPT **)plept;
+    LuaLept *lept = *(LuaLept **)plept;
     lua_pushstring(L, lept->str_version_lua);
     return 1;
 }
@@ -1086,7 +1084,7 @@ static int
 LeptVersion(lua_State *L)
 {
     void **plept = ll_check_LEPT(L, 1);
-    LUALEPT *lept = *(LUALEPT **)plept;
+    LuaLept *lept = *(LuaLept **)plept;
     lua_pushstring(L, lept->str_version_lept);
     return 1;
 }
@@ -1099,7 +1097,7 @@ LeptVersion(lua_State *L)
  * Arg #3 is expected to be a l_int32 (bval)
  *
  * \param L pointer to the lua_State
- * \return 1 PIX* on the Lua stack
+ * \return 1 Pix* on the Lua stack
  */
 static int
 RGB(lua_State *L)
@@ -1123,7 +1121,7 @@ RGB(lua_State *L)
  * Arg #4 is expected to be a l_int32 (aval)
  *
  * \param L pointer to the lua_State
- * \return 1 PIX* on the Lua stack
+ * \return 1 Pix* on the Lua stack
  */
 static int
 RGBA(lua_State *L)
@@ -1145,7 +1143,7 @@ RGBA(lua_State *L)
  * Arg #1 is expected to be a string (filename)
  *
  * \param L pointer to the lua_State
- * \return 1 PIX* on the Lua stack
+ * \return 1 Pix* on the Lua stack
  */
 static int
 ToRGB(lua_State *L)
@@ -1167,7 +1165,7 @@ ToRGB(lua_State *L)
  * Arg #1 is expected to be a string (filename)
  *
  * \param L pointer to the lua_State
- * \return 1 PIX* on the Lua stack
+ * \return 1 Pix* on the Lua stack
  */
 static int
 ToRGBA(lua_State *L)
@@ -1192,7 +1190,7 @@ ToRGBA(lua_State *L)
  * Arg #2 is expected to be a string (min or max)
  *
  * \param L pointer to the lua_State
- * \return 1 PIX* on the Lua stack
+ * \return 1 Pix* on the Lua stack
  */
 static int
 MinMaxComponent(lua_State *L)
@@ -1210,7 +1208,7 @@ MinMaxComponent(lua_State *L)
  * Arg #2 is expected to be a string (min or max)
  *
  * \param L pointer to the lua_State
- * \return 1 PIX* on the Lua stack
+ * \return 1 Pix* on the Lua stack
  */
 static int
 MinComponent(lua_State *L)
@@ -1227,7 +1225,7 @@ MinComponent(lua_State *L)
  * Arg #2 is expected to be a string (min or max)
  *
  * \param L pointer to the lua_State
- * \return 1 PIX* on the Lua stack
+ * \return 1 Pix* on the Lua stack
  */
 static int
 MaxComponent(lua_State *L)
@@ -1248,22 +1246,22 @@ static int register_LEPT(lua_State *L) {
         {"Version",                 Version},
         {"LuaVersion",              LuaVersion},
         {"LeptVersion",             LeptVersion},
-        {LL_NUMA,                   ll_new_NUMA},
-        {LL_NUMAA,                  ll_new_NUMAA},
-        {LL_DNA,                    ll_new_DNA},
-        {LL_DNAA,                   ll_new_DNAA},
-        {LL_PTA,                    ll_new_PTA},
-        {LL_PTAA,                   ll_new_PTAA},
-        {LL_AMAP,                   ll_new_AMAP},
-        {LL_ASET,                   ll_new_ASET},
-        {LL_DLLIST,                 ll_new_DLLIST},
-        {LL_BOX,                    ll_new_BOX},
-        {LL_BOXA,                   ll_new_BOXA},
-        {LL_BOXAA,                  ll_new_BOXAA},
-        {LL_PIXCMAP,                ll_new_PIXCMAP},
-        {LL_PIX,                    ll_new_PIX},
-        {LL_PIXA,                   ll_new_PIXA},
-        {LL_PIXAA,                  ll_new_PIXAA},
+        {LL_NUMA,                   ll_new_Numa},
+        {LL_NUMAA,                  ll_new_Numaa},
+        {LL_DNA,                    ll_new_Dna},
+        {LL_DNAA,                   ll_new_Dnaa},
+        {LL_PTA,                    ll_new_Pta},
+        {LL_PTAA,                   ll_new_Ptaa},
+        {LL_AMAP,                   ll_new_Amap},
+        {LL_ASET,                   ll_new_Aset},
+        {LL_DLLIST,                 ll_new_DoubleLinkedList},
+        {LL_BOX,                    ll_new_Box},
+        {LL_BOXA,                   ll_new_Boxa},
+        {LL_BOXAA,                  ll_new_Boxaa},
+        {LL_PIXCMAP,                ll_new_PixColormap},
+        {LL_PIX,                    ll_new_Pix},
+        {LL_PIXA,                   ll_new_Pixa},
+        {LL_PIXAA,                  ll_new_Pixaa},
         {"RGB",                     RGB},
         {"RGBA",                    RGBA},
         {"ToRGB",                   ToRGB},
@@ -1278,22 +1276,22 @@ static int register_LEPT(lua_State *L) {
         LUA_SENTINEL
     };
 
-    ll_register_NUMA(L);
-    ll_register_NUMAA(L);
-    ll_register_DNA(L);
-    ll_register_DNAA(L);
-    ll_register_PTA(L);
-    ll_register_PTAA(L);
-    ll_register_AMAP(L);
-    ll_register_ASET(L);
-    ll_register_DLLIST(L);
-    ll_register_BOX(L);
+    ll_register_Numa(L);
+    ll_register_Numaa(L);
+    ll_register_Dna(L);
+    ll_register_Dnaa(L);
+    ll_register_Pta(L);
+    ll_register_Ptaa(L);
+    ll_register_Amap(L);
+    ll_register_Aset(L);
+    ll_register_DoubleLinkedList(L);
+    ll_register_Box(L);
     ll_register_BOXA(L);
-    ll_register_BOXAA(L);
-    ll_register_PIXCMAP(L);
-    ll_register_PIX(L);
-    ll_register_PIXA(L);
-    ll_register_PIXAA(L);
+    ll_register_Boxaa(L);
+    ll_register_PixColormap(L);
+    ll_register_Pix(L);
+    ll_register_Pixa(L);
+    ll_register_Pixaa(L);
 
     return ll_register_class(L, LL_LEPT, methods, functions);
 }

@@ -30,8 +30,6 @@
  *************************************************************************/
 
 #include "modules.h"
-#include <lauxlib.h>
-#include <lualib.h>
 
 /*====================================================================*
  *
@@ -43,12 +41,12 @@
  * @brief Check Lua stack at index %arg for udata of class LL_PIXCMAP
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the PIXCMAP* contained in the user data
+ * \return pointer to the PixColormap* contained in the user data
  */
-PIXCMAP *
-ll_check_PIXCMAP(lua_State *L, int arg)
+PixColormap *
+ll_check_PixColormap(lua_State *L, int arg)
 {
-    return *(PIXCMAP **)ll_check_udata(L, arg, LL_PIXCMAP);
+    return *(PixColormap **)ll_check_udata(L, arg, LL_PIXCMAP);
 }
 
 /**
@@ -61,65 +59,65 @@ ll_check_PIXCMAP(lua_State *L, int arg)
  *
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the PIXCMAP* contained in the user data
+ * \return pointer to the PixColormap* contained in the user data
  */
-PIXCMAP *
-ll_take_PIXCMAP(lua_State *L, int arg)
+PixColormap *
+ll_take_PixColormap(lua_State *L, int arg)
 {
-    PIXCMAP **pcmap = (PIXCMAP **)ll_check_udata(L, arg, LL_PIXCMAP);
-    PIXCMAP *cmap = *pcmap;
-    *pcmap = NULL;
+    PixColormap **pcmap = (PixColormap **)ll_check_udata(L, arg, LL_PIXCMAP);
+    PixColormap *cmap = *pcmap;
+    *pcmap = nullptr;
     return cmap;
 }
 
 /**
- * \brief Push PIXCMAP* user data to the Lua stack and set its meta table
+ * \brief Push PixColormap* user data to the Lua stack and set its meta table
  * \param L pointer to the lua_State
  * \param cmap pointer to the PIXCMAP
- * \return 1 PIXCMAP* on the Lua stack
+ * \return 1 PixColormap* on the Lua stack
  */
 int
-ll_push_PIXCMAP(lua_State *L, PIXCMAP *cmap)
+ll_push_PixColormap(lua_State *L, PixColormap *cmap)
 {
-    if (NULL == cmap)
+    if (!cmap)
         return 0;
     return ll_push_udata(L, LL_PIXCMAP, cmap);
 }
 
 /**
- * \brief Create a new PIXCMAP*
+ * \brief Create a new PixColormap*
  *
  * Arg #1 is expected to be a l_int32 (depth)
  *
  * \param L pointer to the lua_State
- * \return 1 PIXCMAP* on the Lua stack
+ * \return 1 PixColormap* on the Lua stack
  */
 int
-ll_new_PIXCMAP(lua_State *L)
+ll_new_PixColormap(lua_State *L)
 {
     l_int32 depth = ll_check_l_int32(__func__, L, 1);
-    PIXCMAP *cmap = pixcmapCreate(depth);
-    return ll_push_PIXCMAP(L, cmap);
+    PixColormap *cmap = pixcmapCreate(depth);
+    return ll_push_PixColormap(L, cmap);
 }
 
 /**
- * \brief Copy a PIXCMAP* (%cmaps)
+ * \brief Copy a PixColormap* (%cmaps)
  *
- * Arg #1 (i.e. self) is expected to be a PIXCMAP* (cmaps)
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmaps)
  *
  * \param L pointer to the lua_State
- * \return 1 PIXCMAP* on the Lua stack
+ * \return 1 PixColormap* on the Lua stack
  */
 static int
 toString(lua_State *L)
 {
     static char str[256];
-    PIXCMAP *cmap = ll_check_PIXCMAP(L, 1);
+    PixColormap *cmap = ll_check_PixColormap(L, 1);
     luaL_Buffer B;
     luaL_buffinit(L, &B);
     l_int32 i, r, g, b, a;
 
-    if (NULL == cmap) {
+    if (!cmap) {
         luaL_addstring(&B, "nil");
     } else {
         luaL_addchar(&B, '{');
@@ -136,28 +134,28 @@ toString(lua_State *L)
 }
 
 /**
- * \brief Create a new PIXCMAP*
+ * \brief Create a new PixColormap*
  *
  * Arg #1 is expected to be a l_int32 (depth)
  *
  * \param L pointer to the lua_State
- * \return 1 PIXCMAP* on the Lua stack
+ * \return 1 PixColormap* on the Lua stack
  */
 static int
 Create(lua_State *L)
 {
-    return ll_new_PIXCMAP(L);
+    return ll_new_PixColormap(L);
 }
 
 /**
- * \brief Create a random PIXCMAP* (%cmap)
+ * \brief Create a random PixColormap* (%cmap)
  *
  * Arg #1 is expected to be a l_int32 (depth)
  * Arg #2 is optional and, if specified, expected to be a boolean (hasblack)
  * Arg #3 is optional and, if specified, expected to be a boolean (haswhite)
  *
  * \param L pointer to the lua_State
- * \return 1 PIXCMAP* on the Lua stack
+ * \return 1 PixColormap* on the Lua stack
  */
 static int
 CreateRandom(lua_State *L)
@@ -165,30 +163,30 @@ CreateRandom(lua_State *L)
     l_int32 depth = ll_check_l_int32(__func__, L, 1);
     l_int32 hasblack = lua_toboolean(L, 2);
     l_int32 haswhite = lua_toboolean(L, 3);
-    PIXCMAP *cmap = pixcmapCreateRandom(depth, hasblack, haswhite);
-    return ll_push_PIXCMAP(L, cmap);
+    PixColormap *cmap = pixcmapCreateRandom(depth, hasblack, haswhite);
+    return ll_push_PixColormap(L, cmap);
 }
 
 /**
- * \brief Create a linear PIXCMAP* (%cmap)
+ * \brief Create a linear PixColormap* (%cmap)
  *
  * Arg #1 is expected to be a l_int32 (depth)
  * Arg #2 is expected to be a l_int32 (levels)
  *
  * \param L pointer to the lua_State
- * \return 1 PIXCMAP* on the Lua stack
+ * \return 1 PixColormap* on the Lua stack
  */
 static int
 CreateLinear(lua_State *L)
 {
     l_int32 depth = ll_check_l_int32(__func__, L, 1);
     l_int32 levels = ll_check_l_int32(__func__, L, 1);
-    PIXCMAP *cmap = pixcmapCreateLinear(depth, levels);
-    return ll_push_PIXCMAP(L, cmap);
+    PixColormap *cmap = pixcmapCreateLinear(depth, levels);
+    return ll_push_PixColormap(L, cmap);
 }
 
 /**
- * \brief Destroy a PIXCMAP*
+ * \brief Destroy a PixColormap*
  *
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack
@@ -199,31 +197,31 @@ Destroy(lua_State *L)
     void **pcmap = ll_check_udata(L, 1, LL_PIXCMAP);
     DBG(LOG_DESTROY, "%s: '%s' pcmap=%p cmap=%p\n", __func__,
         LL_PIXCMAP, (void *)pcmap, *pcmap);
-    pixcmapDestroy((PIXCMAP **)pcmap);
-    *pcmap = NULL;
+    pixcmapDestroy((PixColormap **)pcmap);
+    *pcmap = nullptr;
     return 0;
 }
 
 /**
- * \brief Copy a PIXCMAP* (%cmaps)
+ * \brief Copy a PixColormap* (%cmaps)
  *
- * Arg #1 (i.e. self) is expected to be a PIXCMAP* (cmaps)
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmaps)
  *
  * \param L pointer to the lua_State
- * \return 1 PIXCMAP* on the Lua stack
+ * \return 1 PixColormap* on the Lua stack
  */
 static int
 Copy(lua_State *L)
 {
-    PIXCMAP *cmaps = ll_check_PIXCMAP(L, 1);
-    PIXCMAP *cmap = pixcmapCopy(cmaps);
-    return ll_push_PIXCMAP(L, cmap);
+    PixColormap *cmaps = ll_check_PixColormap(L, 1);
+    PixColormap *cmap = pixcmapCopy(cmaps);
+    return ll_push_PixColormap(L, cmap);
 }
 
 /**
- * \brief Add a color to a PIXCMAP* (%cmap)
+ * \brief Add a color to a PixColormap* (%cmap)
  *
- * Arg #1 (i.e. self) is expected to be a PIXCMAP* (cmap)
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap)
  * Arg #2 is expected to be a l_int32 (rval)
  * Arg #3 is expected to be a l_int32 (gval)
  * Arg #4 is expected to be a l_int32 (bval)
@@ -234,7 +232,7 @@ Copy(lua_State *L)
 static int
 AddColor(lua_State *L)
 {
-    PIXCMAP *cmap = ll_check_PIXCMAP(L, 1);
+    PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 rval = ll_check_l_int32(__func__, L, 2);
     l_int32 gval = ll_check_l_int32(__func__, L, 3);
     l_int32 bval = ll_check_l_int32(__func__, L, 4);
@@ -243,9 +241,9 @@ AddColor(lua_State *L)
 }
 
 /**
- * \brief Add a RGBA color to a PIXCMAP* (%cmap)
+ * \brief Add a RGBA color to a PixColormap* (%cmap)
  *
- * Arg #1 (i.e. self) is expected to be a PIXCMAP* (cmap)
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap)
  * Arg #2 is expected to be a l_int32 (rval)
  * Arg #3 is expected to be a l_int32 (gval)
  * Arg #4 is expected to be a l_int32 (bval)
@@ -257,7 +255,7 @@ AddColor(lua_State *L)
 static int
 AddRGBA(lua_State *L)
 {
-    PIXCMAP *cmap = ll_check_PIXCMAP(L, 1);
+    PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 rval = ll_check_l_int32(__func__, L, 2);
     l_int32 gval = ll_check_l_int32(__func__, L, 3);
     l_int32 bval = ll_check_l_int32(__func__, L, 4);
@@ -267,9 +265,9 @@ AddRGBA(lua_State *L)
 }
 
 /**
- * \brief Add a new color to a PIXCMAP* (%cmap)
+ * \brief Add a new color to a PixColormap* (%cmap)
  *
- * Arg #1 (i.e. self) is expected to be a PIXCMAP* (cmap)
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap)
  * Arg #2 is expected to be a l_int32 (rval)
  * Arg #3 is expected to be a l_int32 (gval)
  * Arg #4 is expected to be a l_int32 (bval)
@@ -280,7 +278,7 @@ AddRGBA(lua_State *L)
 static int
 AddNewColor(lua_State *L)
 {
-    PIXCMAP *cmap = ll_check_PIXCMAP(L, 1);
+    PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 rval = ll_check_l_int32(__func__, L, 2);
     l_int32 gval = ll_check_l_int32(__func__, L, 3);
     l_int32 bval = ll_check_l_int32(__func__, L, 4);
@@ -292,9 +290,9 @@ AddNewColor(lua_State *L)
 }
 
 /**
- * \brief Add a nearest color to a PIXCMAP* (%cmap)
+ * \brief Add a nearest color to a PixColormap* (%cmap)
  *
- * Arg #1 (i.e. self) is expected to be a PIXCMAP* (cmap)
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap)
  * Arg #2 is expected to be a l_int32 (rval)
  * Arg #3 is expected to be a l_int32 (gval)
  * Arg #4 is expected to be a l_int32 (bval)
@@ -305,7 +303,7 @@ AddNewColor(lua_State *L)
 static int
 AddNearestColor(lua_State *L)
 {
-    PIXCMAP *cmap = ll_check_PIXCMAP(L, 1);
+    PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 rval = ll_check_l_int32(__func__, L, 2);
     l_int32 gval = ll_check_l_int32(__func__, L, 3);
     l_int32 bval = ll_check_l_int32(__func__, L, 4);
@@ -317,9 +315,9 @@ AddNearestColor(lua_State *L)
 }
 
 /**
- * \brief Get usable color from a PIXCMAP* (%cmap)
+ * \brief Get usable color from a PixColormap* (%cmap)
  *
- * Arg #1 (i.e. self) is expected to be a PIXCMAP* (cmap)
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap)
  * Arg #2 is expected to be a l_int32 (rval)
  * Arg #3 is expected to be a l_int32 (gval)
  * Arg #4 is expected to be a l_int32 (bval)
@@ -330,7 +328,7 @@ AddNearestColor(lua_State *L)
 static int
 UsableColor(lua_State *L)
 {
-    PIXCMAP *cmap = ll_check_PIXCMAP(L, 1);
+    PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 rval = ll_check_l_int32(__func__, L, 2);
     l_int32 gval = ll_check_l_int32(__func__, L, 3);
     l_int32 bval = ll_check_l_int32(__func__, L, 4);
@@ -342,9 +340,9 @@ UsableColor(lua_State *L)
 }
 
 /**
- * \brief Add black or white to a PIXCMAP* (%cmap)
+ * \brief Add black or white to a PixColormap* (%cmap)
  *
- * Arg #1 (i.e. self) is expected to be a PIXCMAP* (cmap)
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap)
  * Arg #2 is expected to be a l_int32 (color)
  *
  * \param L pointer to the lua_State
@@ -353,7 +351,7 @@ UsableColor(lua_State *L)
 static int
 AddBlackOrWhite(lua_State *L)
 {
-    PIXCMAP *cmap = ll_check_PIXCMAP(L, 1);
+    PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 color = ll_check_blackwhite(L, 2, L_SET_BLACK);
     l_int32 idx = 0;
     if (pixcmapAddBlackOrWhite(cmap, color, &idx))
@@ -363,9 +361,9 @@ AddBlackOrWhite(lua_State *L)
 }
 
 /**
- * \brief Set black and white to a PIXCMAP*
+ * \brief Set black and white to a PixColormap*
  *
- * Arg #1 (i.e. self) is expected to be a PIXCMAP* (cmap)
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap)
  * Arg #2 is expected to be a boolean (setblack)
  * Arg #3 is expected to be a boolean (setwhite)
  *
@@ -375,7 +373,7 @@ AddBlackOrWhite(lua_State *L)
 static int
 SetBlackAndWhite(lua_State *L)
 {
-    PIXCMAP *cmap = ll_check_PIXCMAP(L, 1);
+    PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 setblack = lua_toboolean(L, 2);
     l_int32 setwhite = lua_toboolean(L, 3);
     lua_pushboolean(L, 0 == pixcmapSetBlackAndWhite(cmap, setblack, setwhite));
@@ -383,9 +381,9 @@ SetBlackAndWhite(lua_State *L)
 }
 
 /**
- * \brief Get count of colors in a PIXCMAP*
+ * \brief Get count of colors in a PixColormap*
  *
- * Arg #1 (i.e. self) is expected to be a PIXCMAP* (cmap)
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap)
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -393,16 +391,16 @@ SetBlackAndWhite(lua_State *L)
 static int
 GetCount(lua_State *L)
 {
-    PIXCMAP *cmap = ll_check_PIXCMAP(L, 1);
+    PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 count = pixcmapGetCount(cmap);
     lua_pushinteger(L, count);
     return 1;
 }
 
 /**
- * \brief Get the depth of a PIXCMAP*
+ * \brief Get the depth of a PixColormap*
  *
- * Arg #1 (i.e. self) is expected to be a PIXCMAP* (cmap)
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap)
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -410,16 +408,16 @@ GetCount(lua_State *L)
 static int
 GetDepth(lua_State *L)
 {
-    PIXCMAP *cmap = ll_check_PIXCMAP(L, 1);
+    PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 depth = pixcmapGetDepth(cmap);
     lua_pushinteger(L, depth);
     return 1;
 }
 
 /**
- * \brief Get the minimum depth of a PIXCMAP*
+ * \brief Get the minimum depth of a PixColormap*
  *
- * Arg #1 (i.e. self) is expected to be a PIXCMAP* (cmap)
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap)
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -427,7 +425,7 @@ GetDepth(lua_State *L)
 static int
 GetMinDepth(lua_State *L)
 {
-    PIXCMAP *cmap = ll_check_PIXCMAP(L, 1);
+    PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 mindepth = 0;
     if (pixcmapGetMinDepth(cmap, &mindepth))
         return 0;
@@ -436,9 +434,9 @@ GetMinDepth(lua_State *L)
 }
 
 /**
- * \brief Get the count of free colors of a PIXCMAP*
+ * \brief Get the count of free colors of a PixColormap*
  *
- * Arg #1 (i.e. self) is expected to be a PIXCMAP* (cmap)
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap)
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -446,16 +444,16 @@ GetMinDepth(lua_State *L)
 static int
 GetFreeCount(lua_State *L)
 {
-    PIXCMAP *cmap = ll_check_PIXCMAP(L, 1);
+    PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 freecount = pixcmapGetFreeCount(cmap);
     lua_pushinteger(L, freecount);
     return 1;
 }
 
 /**
- * \brief Clear the colors of a PIXCMAP*
+ * \brief Clear the colors of a PixColormap*
  *
- * Arg #1 (i.e. self) is expected to be a PIXCMAP* (cmap)
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap)
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -463,15 +461,15 @@ GetFreeCount(lua_State *L)
 static int
 Clear(lua_State *L)
 {
-    PIXCMAP *cmap = ll_check_PIXCMAP(L, 1);
+    PixColormap *cmap = ll_check_PixColormap(L, 1);
     lua_pushboolean(L, 0 == pixcmapClear(cmap));
     return 1;
 }
 
 /**
- * \brief Get a color from a PIXCMAP*
+ * \brief Get a color from a PixColormap*
  *
- * Arg #1 (i.e. self) is expected to be a PIXCMAP* (cmap)
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap)
  * Arg #2 is expected to be a l_int32 (idx)
  *
  * \param L pointer to the lua_State
@@ -480,7 +478,7 @@ Clear(lua_State *L)
 static int
 GetColor(lua_State *L)
 {
-    PIXCMAP *cmap = ll_check_PIXCMAP(L, 1);
+    PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 idx = ll_check_index(__func__, L, 2, pixcmapGetCount(cmap));
     l_int32 rval = 0;
     l_int32 gval = 0;
@@ -494,9 +492,9 @@ GetColor(lua_State *L)
 }
 
 /**
- * \brief Get a color l_uint32 from a PIXCMAP*
+ * \brief Get a color l_uint32 from a PixColormap*
  *
- * Arg #1 (i.e. self) is expected to be a PIXCMAP* (cmap)
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap)
  * Arg #2 is expected to be a l_int32 (idx)
  *
  * \param L pointer to the lua_State
@@ -505,7 +503,7 @@ GetColor(lua_State *L)
 static int
 GetColor32(lua_State *L)
 {
-    PIXCMAP *cmap = ll_check_PIXCMAP(L, 1);
+    PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 idx = ll_check_index(__func__, L, 2, pixcmapGetCount(cmap));
     l_uint32 val32 = 0;
     if (pixcmapGetColor32(cmap, idx, &val32))
@@ -515,9 +513,9 @@ GetColor32(lua_State *L)
 }
 
 /**
- * \brief Get a RGBA from a PIXCMAP*
+ * \brief Get a RGBA from a PixColormap*
  *
- * Arg #1 (i.e. self) is expected to be a PIXCMAP* (cmap)
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap)
  * Arg #2 is expected to be a l_int32 (idx)
  *
  * \param L pointer to the lua_State
@@ -526,7 +524,7 @@ GetColor32(lua_State *L)
 static int
 GetRGBA(lua_State *L)
 {
-    PIXCMAP *cmap = ll_check_PIXCMAP(L, 1);
+    PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 idx = ll_check_index(__func__, L, 2, pixcmapGetCount(cmap));
     l_int32 rval = 0;
     l_int32 gval = 0;
@@ -542,9 +540,9 @@ GetRGBA(lua_State *L)
 }
 
 /**
- * \brief Get a RGBA l_uint32 from a PIXCMAP*
+ * \brief Get a RGBA l_uint32 from a PixColormap*
  *
- * Arg #1 (i.e. self) is expected to be a PIXCMAP* (cmap)
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap)
  * Arg #2 is expected to be a l_int32 (idx)
  *
  * \param L pointer to the lua_State
@@ -553,7 +551,7 @@ GetRGBA(lua_State *L)
 static int
 GetRGBA32(lua_State *L)
 {
-    PIXCMAP *cmap = ll_check_PIXCMAP(L, 1);
+    PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 idx = ll_check_index(__func__, L, 2, pixcmapGetCount(cmap));
     l_uint32 val32 = 0;
     if (pixcmapGetRGBA32(cmap, idx, &val32))
@@ -563,9 +561,9 @@ GetRGBA32(lua_State *L)
 }
 
 /**
- * \brief Reset a color for index %idx in a PIXCMAP* (%cmap)
+ * \brief Reset a color for index %idx in a PixColormap* (%cmap)
  *
- * Arg #1 (i.e. self) is expected to be a PIXCMAP* (cmap)
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap)
  * Arg #2 is expected to be a l_int32 (idx)
  * Arg #3 is expected to be a l_int32 (rval)
  * Arg #4 is expected to be a l_int32 (gval)
@@ -577,7 +575,7 @@ GetRGBA32(lua_State *L)
 static int
 ResetColor(lua_State *L)
 {
-    PIXCMAP *cmap = ll_check_PIXCMAP(L, 1);
+    PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 idx = ll_check_index(__func__, L, 2, 1 << pixcmapGetDepth(cmap));
     l_int32 rval = ll_check_l_int32(__func__, L, 3);
     l_int32 gval = ll_check_l_int32(__func__, L, 4);
@@ -587,9 +585,9 @@ ResetColor(lua_State *L)
 }
 
 /**
- * \brief Set alpha channel for an index in a PIXCMAP*
+ * \brief Set alpha channel for an index in a PixColormap*
  *
- * Arg #1 (i.e. self) is expected to be a PIXCMAP* (cmap)
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap)
  * Arg #2 is expected to be a l_int32 (idx)
  * Arg #3 is expected to be a l_int32 (aval)
  *
@@ -599,7 +597,7 @@ ResetColor(lua_State *L)
 static int
 SetAlpha(lua_State *L)
 {
-    PIXCMAP *cmap = ll_check_PIXCMAP(L, 1);
+    PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 idx = ll_check_index(__func__, L, 2, 1 << pixcmapGetDepth(cmap));
     l_int32 aval = ll_check_l_int32(__func__, L, 2);
     lua_pushboolean(L, 0 == pixcmapSetAlpha(cmap, idx, aval));
@@ -607,9 +605,9 @@ SetAlpha(lua_State *L)
 }
 
 /**
- * \brief Get index (%idx) for color from a PIXCMAP* (%cmap)
+ * \brief Get index (%idx) for color from a PixColormap* (%cmap)
  *
- * Arg #1 (i.e. self) is expected to be a PIXCMAP* (cmap)
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap)
  * Arg #2 is expected to be a l_int32 (rval)
  * Arg #3 is expected to be a l_int32 (gval)
  * Arg #4 is expected to be a l_int32 (bval)
@@ -620,7 +618,7 @@ SetAlpha(lua_State *L)
 static int
 GetIndex(lua_State *L)
 {
-    PIXCMAP *cmap = ll_check_PIXCMAP(L, 1);
+    PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 rval = ll_check_l_int32(__func__, L, 2);
     l_int32 gval = ll_check_l_int32(__func__, L, 3);
     l_int32 bval = ll_check_l_int32(__func__, L, 4);
@@ -632,9 +630,9 @@ GetIndex(lua_State *L)
 }
 
 /**
- * \brief Check if a PIXCMAP* (%cmap) has color
+ * \brief Check if a PixColormap* (%cmap) has color
  *
- * Arg #1 (i.e. self) is expected to be a PIXCMAP* (cmap)
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap)
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -642,7 +640,7 @@ GetIndex(lua_State *L)
 static int
 HasColor(lua_State *L)
 {
-    PIXCMAP *cmap = ll_check_PIXCMAP(L, 1);
+    PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 color = 0;
     if (pixcmapHasColor(cmap, &color))
         return 0;
@@ -651,9 +649,9 @@ HasColor(lua_State *L)
 }
 
 /**
- * \brief Check if a PIXCMAP* (%cmap) is opaque
+ * \brief Check if a PixColormap* (%cmap) is opaque
  *
- * Arg #1 (i.e. self) is expected to be a PIXCMAP* (cmap)
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap)
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -661,7 +659,7 @@ HasColor(lua_State *L)
 static int
 IsOpaque(lua_State *L)
 {
-    PIXCMAP *cmap = ll_check_PIXCMAP(L, 1);
+    PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 opaque = 0;
     if (pixcmapIsOpaque(cmap, &opaque))
         return 0;
@@ -670,9 +668,9 @@ IsOpaque(lua_State *L)
 }
 
 /**
- * \brief Check if a PIXCMAP* (%cmap) is black and white
+ * \brief Check if a PixColormap* (%cmap) is black and white
  *
- * Arg #1 (i.e. self) is expected to be a PIXCMAP* (cmap)
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap)
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -680,7 +678,7 @@ IsOpaque(lua_State *L)
 static int
 IsBlackAndWhite(lua_State *L)
 {
-    PIXCMAP *cmap = ll_check_PIXCMAP(L, 1);
+    PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 blackandwhite = 0;
     if (pixcmapIsBlackAndWhite(cmap, &blackandwhite))
         return 0;
@@ -689,9 +687,9 @@ IsBlackAndWhite(lua_State *L)
 }
 
 /**
- * \brief Count gray colors of a PIXCMAP* (%cmap)
+ * \brief Count gray colors of a PixColormap* (%cmap)
  *
- * Arg #1 (i.e. self) is expected to be a PIXCMAP* (cmap)
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap)
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -699,7 +697,7 @@ IsBlackAndWhite(lua_State *L)
 static int
 CountGrayColors(lua_State *L)
 {
-    PIXCMAP *cmap = ll_check_PIXCMAP(L, 1);
+    PixColormap *cmap = ll_check_PixColormap(L, 1);
     l_int32 ngray = 0;
     if (pixcmapCountGrayColors(cmap, &ngray))
         return 0;
@@ -713,11 +711,11 @@ CountGrayColors(lua_State *L)
  * \return 1 table on the Lua stack
  */
 int
-ll_register_PIXCMAP(lua_State *L)
+ll_register_PixColormap(lua_State *L)
 {
     static const luaL_Reg methods[] = {
         {"__gc",                Destroy},   /* garbage collector */
-        {"__new",               Create},    /* new PIXCMAP */
+        {"__new",               Create},    /* new PixColormap */
         {"__len",               GetCount},  /* #cmap */
         {"__tostring",          toString},
         {"Copy",                Copy},

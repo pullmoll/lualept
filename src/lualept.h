@@ -36,11 +36,17 @@
 #if defined (HAVE_CONFIG_H)
 #include "config.h"
 #endif
+
 #include "environ.h"
 
 /* Leptonica allheaders.h */
 #include <allheaders.h>
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 LUALEPT_DLL extern int ll_RunScript(const char* script);
+#ifdef __cplusplus
+}
+#endif
 
 #endif	/* !defined(LUALEPT_H) */

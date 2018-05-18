@@ -35,12 +35,12 @@
 
 int main(int argc, char **argv)
 {
-        const char* progname = NULL;
-        const char* script = NULL;
+        const char* progname = nullptr;
+        const char* script = nullptr;
         progname = strrchr(argv[0], '/');
-        if (NULL == progname)
+        if (!progname)
                 progname = strrchr(argv[0], '\\');
-        if (NULL == progname)
+        if (!progname)
                 progname = argv[0];
 
         if (argc < 2) {

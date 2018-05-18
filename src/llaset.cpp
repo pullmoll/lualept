@@ -30,59 +30,57 @@
  *************************************************************************/
 
 #include "modules.h"
-#include <lauxlib.h>
-#include <lualib.h>
 
 /*====================================================================*
  *
- *  Lua class AMAP
+ *  Lua class ASET
  *
  *====================================================================*/
 
 /**
- * @brief Check Lua stack at index %arg for udata of class LL_AMAP
+ * @brief Check Lua stack at index %arg for udata of class LL_ASET
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the AMAP* contained in the user data
+ * \return pointer to the ASET* contained in the user data
  */
-L_AMAP *
-ll_check_AMAP(lua_State *L, int arg)
+L_ASET *
+ll_check_Aset(lua_State *L, int arg)
 {
-    return *(L_AMAP **)ll_check_udata(L, arg, LL_AMAP);
+    return *(reinterpret_cast<L_ASET **>(ll_check_udata(L, arg, LL_ASET)));
 }
 
 /**
- * \brief Push AMAP user data to the Lua stack and set its meta table
+ * \brief Push ASET user data to the Lua stack and set its meta table
  * \param L pointer to the lua_State
- * \param amap pointer to the AMAP
- * \return 1 AMAP* on the Lua stack
+ * \param aset pointer to the ASET
+ * \return 1 ASET* on the Lua stack
  */
 int
-ll_push_AMAP(lua_State *L, L_AMAP *amap)
+ll_push_Aset(lua_State *L, L_ASET *aset)
 {
-    if (NULL == amap)
+    if (!aset)
         return 0;
-    return ll_push_udata(L, LL_AMAP, amap);
+    return ll_push_udata(L, LL_ASET, aset);
 }
 
 /**
- * \brief Create and push a new AMAP*
+ * \brief Create and push a new ASET*
  *
  * Arg #1 is expected to be a key type name (int, uint, or float)
  *
  * \param L pointer to the lua_State
- * \return 1 AMAP* on the Lua stack
+ * \return 1 ASET* on the Lua stack
  */
 int
-ll_new_AMAP(lua_State *L)
+ll_new_Aset(lua_State *L)
 {
     l_int32 keytype = ll_check_keytype(L, 1, L_INT_TYPE);
-    L_AMAP *amap = l_amapCreate(keytype);
-    return ll_push_AMAP(L, amap);
+    L_ASET *aset = l_asetCreate(keytype);
+    return ll_push_Aset(L, aset);
 }
 
 /**
- * @brief Printable string for a AMAP*
+ * @brief Printable string for a ASET*
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
  */
@@ -90,40 +88,40 @@ static int
 toString(lua_State *L)
 {
     static char str[256];
-    L_AMAP *amap = ll_check_AMAP(L, 1);
-    L_AMAP_NODE *node = NULL;
+    L_ASET *aset = ll_check_Aset(L, 1);
+    L_ASET_NODE *node = nullptr;
     luaL_Buffer B;
     int first = 1;
 
     luaL_buffinit(L, &B);
-    if (NULL == amap) {
+    if (!aset) {
         luaL_addstring(&B, "nil");
     } else {
-        luaL_addstring(&B, ll_string_keytype(amap->keytype));
+        luaL_addstring(&B, ll_string_keytype(aset->keytype));
         luaL_addstring(&B, ": {");
-        node = l_amapSize(amap) ? l_amapGetFirst(amap) : NULL;
+        node = l_asetSize(aset) ? l_asetGetFirst(aset) : nullptr;
         while (node) {
             if (first) {
                 first = 0;
             } else {
                 luaL_addchar(&B, ',');
             }
-            switch (amap->keytype) {
+            switch (aset->keytype) {
             case L_INT_TYPE:
-                snprintf(str, sizeof(str), "%lld=%lld", node->key.itype, node->value.itype);
+                snprintf(str, sizeof(str), "%lld", node->key.itype);
                 break;
             case L_UINT_TYPE:
-                snprintf(str, sizeof(str), "%llu=%llu", node->key.utype, node->value.utype);
+                snprintf(str, sizeof(str), "%llu", node->key.utype);
                 break;
             case L_FLOAT_TYPE:
-                snprintf(str, sizeof(str), "%g=%g", node->key.ftype, node->value.ftype);
+                snprintf(str, sizeof(str), "%g", node->key.ftype);
                 break;
             default:
-                snprintf(str, sizeof(str), "%p=%p", node->key.ptype, node->value.ptype);
+                snprintf(str, sizeof(str), "%p", node->key.ptype);
                 break;
             }
             luaL_addstring(&B, str);
-            node = l_amapGetNext(node);
+            node = l_asetGetNext(node);
         }
         luaL_addchar(&B, '}');
     }
@@ -132,34 +130,17 @@ toString(lua_State *L)
 }
 
 /**
- * \brief Create a new AMAP*
+ * \brief Create a new ASET*
  *
  * Arg #1 is expected to be a string describing the key type (int,uint,float)
  *
  * \param L pointer to the lua_State
- * \return 1 AMAP* on the Lua stack
+ * \return 1 ASET* on the Lua stack
  */
 static int
 Create(lua_State *L)
 {
-    return ll_new_AMAP(L);
-}
-
-/**
- * \brief Destroy a AMAP*
- *
- * \param L pointer to the lua_State
- * \return 0 for nothing on the Lua stack
- */
-static int
-Destroy(lua_State *L)
-{
-    void **pamap = ll_check_udata(L, 1, LL_AMAP);
-    DBG(LOG_DESTROY, "%s: '%s' pamap=%p amap=%p size=%d\n", __func__,
-        LL_AMAP, (void *)pamap, *pamap, l_amapSize(*(L_AMAP **)pamap));
-    l_amapDestroy((L_AMAP **)pamap);
-    *pamap = NULL;
-    return 0;
+    return ll_new_Aset(L);
 }
 
 /**
@@ -173,17 +154,33 @@ Destroy(lua_State *L)
 static int
 Size(lua_State *L)
 {
-    L_AMAP *amap = ll_check_AMAP(L, 1);
-    lua_pushinteger(L, l_amapSize(amap));
+    L_ASET *aset = ll_check_Aset(L, 1);
+    lua_pushinteger(L, l_asetSize(aset));
     return 1;
 }
 
 /**
- * \brief Insert a node into an AMAP* (%amap)
+ * \brief Destroy an ASET*
  *
- * Arg #1 (i.e. self) is expected to be a AMAP* (amap)
+ * \param L pointer to the lua_State
+ * \return 0 for nothing on the Lua stack
+ */
+static int
+Destroy(lua_State *L)
+{
+    void **paset = ll_check_udata(L, 1, LL_ASET);
+    DBG(LOG_DESTROY, "%s: '%s' paset=%p aset=%p size=%d\n", __func__,
+        LL_ASET, (void *)paset, *paset, l_asetSize(*(L_ASET **)paset));
+    l_asetDestroy(reinterpret_cast<L_ASET **>(paset));
+    *paset = nullptr;
+    return 0;
+}
+
+/**
+ * \brief Insert a node into an ASET* (%aset)
+ *
+ * Arg #1 (i.e. self) is expected to be a ASET* (aset)
  * Arg #2 is expected to be a key (int, uint or float)
- * Arg #3 is expected to be a value (int, uint or float)
  *
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack
@@ -191,40 +188,30 @@ Size(lua_State *L)
 static int
 Insert(lua_State *L)
 {
-    L_AMAP *amap = ll_check_AMAP(L, 1);
-    RB_TYPE key, value;
-    int isnum;
+    L_ASET *aset = ll_check_Aset(L, 1);
+    RB_TYPE key;
+    int isnum = 0;
     int result = FALSE;
 
-    switch (amap->keytype) {
+    switch (aset->keytype) {
     case L_INT_TYPE:
     case L_UINT_TYPE:
         key.itype = lua_tointegerx(L, 2, &isnum);
         if (isnum) {
-            if (lua_isnil(L, 3)) {
-                l_amapDelete(amap, key);
-            } else {
-                value.itype = lua_tointeger(L, 3);
-                l_amapInsert(amap, key, value);
-            }
+            l_asetInsert(aset, key);
             result = TRUE;
         } else {
-            lua_pushfstring(L, "AMAP key is not a number: '%s'", lua_tostring(L, 2));
+            lua_pushfstring(L, "ASET key is not a number: '%s'", lua_tostring(L, 2));
             lua_error(L);
         }
         break;
     case L_FLOAT_TYPE:
         key.ftype = lua_tonumberx(L, 2, &isnum);
         if (isnum) {
-            if (lua_isnil(L, 3)) {
-                l_amapDelete(amap, key);
-            } else {
-                value.ftype = lua_tonumber(L, 3);
-                l_amapInsert(amap, key, value);
-            }
+            l_asetInsert(aset, key);
             result = TRUE;
         } else {
-            lua_pushfstring(L, "AMAP key is not a number: '%s'", lua_tostring(L, 2));
+            lua_pushfstring(L, "ASET key is not a number: '%s'", lua_tostring(L, 2));
             lua_error(L);
         }
         break;
@@ -234,9 +221,9 @@ Insert(lua_State *L)
 }
 
 /**
- * \brief Delete a node from an AMAP* (%amap)
+ * \brief Delete a node from an ASET* (%aset)
  *
- * Arg #1 (i.e. self) is expected to be a AMAP* (amap)
+ * Arg #1 (i.e. self) is expected to be a ASET* (aset)
  * Arg #2 is expected to be a key (int, uint or float)
  *
  * \param L pointer to the lua_State
@@ -245,20 +232,20 @@ Insert(lua_State *L)
 static int
 Delete(lua_State *L)
 {
-    L_AMAP *amap = ll_check_AMAP(L, 1);
+    L_ASET *aset = ll_check_Aset(L, 1);
     RB_TYPE key;
     int result = FALSE;
 
-    switch (amap->keytype) {
+    switch (aset->keytype) {
     case L_INT_TYPE:
     case L_UINT_TYPE:
         key.itype = lua_tointeger(L, 2);
-        l_amapDelete(amap, key);
+        l_asetDelete(aset, key);
         result = TRUE;
         break;
     case L_FLOAT_TYPE:
         key.ftype = lua_tonumber(L, 2);
-        l_amapDelete(amap, key);
+        l_asetDelete(aset, key);
         result = TRUE;
         break;
     }
@@ -267,51 +254,43 @@ Delete(lua_State *L)
 }
 
 /**
- * \brief Find a key in an AMAP* (%amap)
+ * \brief Find a key in an ASET* (%aset)
  *
- * Arg #1 (i.e. self) is expected to be a AMAP* (amap)
+ * Arg #1 (i.e. self) is expected to be a ASET* (aset)
  * Arg #2 is expected to be a key (int, uint or float)
  *
  * \param L pointer to the lua_State
- * \return 1 value on the Lua stack (either lua_Integer or lua_Number)
+ * \return 1 boolean on the Lua stack
  */
 static int
 Find(lua_State *L)
 {
-    L_AMAP *amap = ll_check_AMAP(L, 1);
+    L_ASET *aset = ll_check_Aset(L, 1);
     RB_TYPE key;
-    RB_TYPE *value;
-    int result = 0;
+    RB_TYPE *value = nullptr;
 
-    switch (amap->keytype) {
+    switch (aset->keytype) {
     case L_INT_TYPE:
     case L_UINT_TYPE:
         key.itype = lua_tointeger(L, 2);
-        value = l_amapFind(amap, key);
-        if (NULL != value) {
-            lua_pushinteger(L, value->itype);
-            result++;
-        }
+        value = l_asetFind(aset, key);
         break;
     case L_FLOAT_TYPE:
         key.ftype = lua_tonumber(L, 2);
-        value = l_amapFind(amap, key);
-        if (NULL != value) {
-            lua_pushnumber(L, value->ftype);
-            result++;
-        }
+        value = l_asetFind(aset, key);
         break;
     }
-    return result;
+    lua_pushboolean(L, nullptr != value);
+    return 1;
 }
 
 /**
- * \brief Register the AMAP methods and functions in the LL_AMAP meta table
+ * \brief Register the ASET methods and functions in the LL_ASET meta table
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
 int
-ll_register_AMAP(lua_State *L)
+ll_register_Aset(lua_State *L)
 {
     static const luaL_Reg methods[] = {
         {"__gc",                Destroy},   /* garbage collector */
@@ -320,6 +299,7 @@ ll_register_AMAP(lua_State *L)
         {"__newindex",          Insert},
         {"__tostring",          toString},
         {"Destroy",             Destroy},
+        {"Size",                Size},
         {"Insert",              Insert},
         {"Delete",              Delete},
         {"Find",                Find},
@@ -331,7 +311,7 @@ ll_register_AMAP(lua_State *L)
         LUA_SENTINEL
     };
 
-    int res = ll_register_class(L, LL_AMAP, methods, functions);
-    lua_setglobal(L, LL_AMAP);
+    int res = ll_register_class(L, LL_ASET, methods, functions);
+    lua_setglobal(L, LL_ASET);
     return res;
 }

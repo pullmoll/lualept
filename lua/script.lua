@@ -1,46 +1,65 @@
+function header(str)
+	local len = #str
+	local nstar = (76 - len) // 2
+	io.write(string.rep('*',nstar))
+	if (len > 0) then
+		io.write(" " .. str .. " ")
+	else
+	io.write("**")
+	end
+	io.write(string.rep('*',nstar))
+	io.write("\n")
+end
+
+function pad(str)
+	local len = #str
+	local nblank = 38 - len
+	return str .. string.rep(' ', nblank)
+end
+
 function aset_test()
-	print("************** ASET")
-	local aset = LuaLept.ASET("int")
-	print("aset            ", '#'..#aset, aset)
+	header("Aset")
+	local aset = LuaLept.Aset("int")
+	print(pad("aset"), '#'..#aset, aset)
 	aset:Insert(2)
 	aset[17] = true
 	aset[4] = true
 	aset[-1000] = true
 	aset[99] = true
 	aset[1] = true
-	print("aset            ", '#'..#aset, aset)
-	print("aset:Find(5)    ", aset:Find(5))
-	print("aset:Find(99)   ", aset:Find(99))
-	print("aset:Find(17)   ", aset:Find(17))
-	print("aset:Delete(17) ", aset:Delete(17))
-	print("aset:Find(17)   ", aset:Find(17))
-	print("aset            ", '#'..#aset, aset)
+	print(pad("aset"), '#'..#aset, aset)
+	print(pad("aset:Find(5)"), aset:Find(5))
+	print(pad("aset:Find(99)"), aset:Find(99))
+	print(pad("aset:Find(17)"), aset:Find(17))
+	print(pad("aset:Delete(17)"), aset:Delete(17))
+	print(pad("aset:Find(17)"), aset:Find(17))
+	print(pad("aset"), '#'..#aset, aset)
 end
 
 function amap_test()
-	print("************** AMAP")
-	local amap = LuaLept.AMAP("int")
-	print("amap            ", '#'..#amap, amap)
+	header("Amap")
+	local amap = LuaLept.Amap("int")
+	print(pad("amap"), '#'..#amap, amap)
 	amap[2] = 22
 	amap[17] = 100
 	amap[4] = 33
 	amap[-1000] = 512
 	amap[99] = 999
 	amap[1] = 0
-	print("amap            ", '#'..#amap, amap)
-	print("amap:Find(5)    ", amap:Find(5))
-	print("amap:Find(99)   ", amap:Find(99))
-	print("amap:Find(17)   ", amap:Find(17))
-	print("amap:Delete(17) ", amap:Delete(17))
-	print("amap:Find(17)   ", amap:Find(17))
-	print("amap            ", '#'..#amap, amap)
+	print(pad("amap"), '#'..#amap, amap)
+	print(pad("amap:Find(5)"), amap:Find(5))
+	print(pad("amap:Find(99)"), amap:Find(99))
+	print(pad("amap:Find(17)"), amap:Find(17))
+	print(pad("amap:Delete(17)"), amap:Delete(17))
+	print(pad("amap:Find(17)"), amap:Find(17))
+	print(pad("amap"), '#'..#amap, amap)
 end
 
 function pta_test()
-	print("************** PTA/PTAA")
-	-- Create a new PTA
-	local pa = LuaLept.PTA(8)
-	print("pa = LuaLept.PTA(8)", pa)
+	header("Pta/Ptaa")
+	-- Create a new Pta
+	local pa = LuaLept.Pta(8)
+	print(pad("pa = LuaLept.Pta(8)"), pa)
 
 	-- Add some points
 	pa:AddPt(2.71,3.14)
@@ -48,27 +67,27 @@ function pta_test()
 	pa:AddPt(12,16)
 	pa:AddPt(14,20)
 	pa:AddPt(16,24)
-	print("#pa", #pa)
-	print("pa", pa)
+	print(pad("#pa"), #pa)
+	print(pad("pa"), pa)
 
-	local paa = LuaLept.PTAA()
+	local paa = LuaLept.Ptaa()
 	paa:AddPta(pa)
 	paa:AddPta(pa)
 	paa:AddPta(pa)
-	print("#paa", #paa)
-	print("paa", paa)
+	print(pad("#paa"), #paa)
+	print(pad("paa"), paa)
 end
 
 function boxa_test()
-	print("************** BOX/BOXA/BOXAA")
-	-- Create a new BOX
-	local b = LuaLept.BOX(10,10,40,80)
-	print("b = BOX(10,10,40,80)     ", b)
+	header("Box/Boxa/Boxaa")
+	-- Create a new Box
+	local b = LuaLept.Box(10,10,40,80)
+	print(pad("b = Box(10,10,40,80)"), b)
 
-	-- Create a new BOXA
-	local ba = LuaLept.BOXA(1)
-	print("ba = LuaLept.BOXA(1)     ", ba)
-	print("#ba", #ba)
+	-- Create a new Boxa
+	local ba = LuaLept.Boxa(1)
+	print(pad("ba = LuaLept.Boxa(1)"), ba)
+	print(pad("#ba"), #ba)
 
 	-- Add box b using default, clone, copy
 	ba:AddBox(b)
@@ -79,47 +98,47 @@ function boxa_test()
 	print("... after 5x ba:AddBox()")
 
 	-- Print ba:GetCount() or short #ba
-	print("#ba                      ", #ba)
-	print("ba                       ", ba)
+	print(pad("#ba"), #ba)
+	print(pad("ba"), ba)
 
-	-- Insert before the third BOX in BOXA
-	ba:InsertBox(3, LuaLept.BOX(3,4,19,18))
-	print("... after ba:InsertBox(3, LuaLept.BOX(3,4,19,18))")
-	print("#ba                      ", #ba)
-	print("ba                       ", ba)
+	-- Insert before the third Box in Boxa
+	ba:InsertBox(3, LuaLept.Box(3,4,19,18))
+	print("... after ba:InsertBox(3, LuaLept.Box(3,4,19,18))")
+	print(pad("#ba"), #ba)
+	print(pad("ba"), ba)
 
-	-- Get the inserted BOX
+	-- Get the inserted Box
 	b = ba:GetBox(3)
-	print("b = ba:GetBox(3)		", b)
+	print(pad("b = ba:GetBox(3)"), b)
 
-	-- Get the BOX at index 4
+	-- Get the Box at index 4
 	b = ba:GetBox(4)
-	print("b = ba:GetBox(4)         ", b)
+	print(pad("b = ba:GetBox(4)"), b)
 
-	baa = LuaLept.BOXAA()
-	print("baa = LuaLept.BOXAA()	", baa)
-	print("#baa                     ", #baa)
+	baa = LuaLept.Boxaa()
+	print(pad("baa = LuaLept.Boxaa()"), baa)
+	print(pad("#baa"), #baa)
 	local count = 7
 	for i = 1,count do baa:AddBoxa(ba) end
 	print("... after " .. count .. " times baa:AddBoxa(ba)")
-	print("#baa                     ", #baa)
-	print("baa                      ", baa)
-	print("baa:GetBoxCount()        ", baa:GetBoxCount())
+	print(pad("#baa"), #baa)
+	print(pad("baa"), baa)
+	print(pad("baa:GetBoxCount()"), baa:GetBoxCount())
 
 	local ba2 = baa:FlattenToBoxa()
-	print("baa::FlattenToBoxa()     ", ba2)
+	print(pad("baa::FlattenToBoxa()"), ba2)
 end
 
 function numa_test()
 	local filename = "/tmp/test.log"
-	print("************** NUMA/NUMAA")
+	header("Numa/Numaa")
 
 	local PI = 3.14159265358979323846
 	local E = 2.7182818284590452354
 
-	-- Create a new NUMA
-	local na = LuaLept.NUMA()
-	print("na = LuaLept.NUMA()     ", na)
+	-- Create a new Numa
+	local na = LuaLept.Numa()
+	print(pad("na = LuaLept.Numa()"), na)
 
 	-- Add some numbers
 	na:AddNumber(PI)
@@ -129,53 +148,53 @@ function numa_test()
 	na:AddNumber(E^(1/PI))
 
 	print("... after adding some numbers")
-	print("na                      ", na)
-	print("#na                     ", #na)
-	print("na:GetParameters()      ", na:GetParameters())
+	print(pad("na"), na)
+	print(pad("#na"), #na)
+	print(pad("na:GetParameters()"), na:GetParameters())
 
 	-- As array of numbers
-	print("na:GetFArray()          ", na:GetFArray())
+	print(pad("na:GetFArray()"), na:GetFArray())
 
 	-- As array of integers
-	print("na:GetIArray()	       ", na:GetIArray())
+	print(pad("na:GetIArray()"), na:GetIArray())
 
 	-- Create a new MUMAA
-	local naa = LuaLept.NUMAA(1)
-	print("naa = LuaLept.NUMAA(1)  ", naa)
+	local naa = LuaLept.Numaa(1)
+	print(pad("naa = LuaLept.Numaa(1)"), naa)
 
 	local count = 10
 	for i = 1, count do naa:AddNuma(na) end
 	print("... after " .. count .." times naa:AddNuma(na)")
 
-	print("#naa",	#naa)
-	print("naa:GetNumberCount()    ", naa:GetNumberCount())
+	print(pad("#naa"),	#naa)
+	print(pad("naa:GetNumberCount()"), naa:GetNumberCount())
 	for i = 1, count do
-		print("naa:GetNumaCount("..i..")", naa:GetNumaCount(i))
+		print(pad("naa:GetNumaCount("..i..")"), naa:GetNumaCount(i))
 	end
 
 	local ok = naa:Write(filename)
-	print("naa:Write('" .. filename .. "')", ok)
+	print(pad("naa:Write('" .. filename .. "')"), ok)
 
-	naa = LuaLept.NUMAA().Read(filename)
-	print("naa.Read('" .. filename .. "')", ok)
+	naa = LuaLept.Numaa().Read(filename)
+	print(pad("naa.Read('" .. filename .. "')"), ok)
 
 	local na = naa:FlattenToNuma()
 	print("... after na = naa:FlattenToNuma()")
-	print("#na                     ", #na)
-	print("na                      ", na)
-	print("na:GetFArray()          ", na:GetFArray())
-	print("na:GetIArray()          ", na:GetIArray())
+	print(pad("#na"), #na)
+	print(pad("na"), na)
+	print(pad("na:GetFArray()"), na:GetFArray())
+	print(pad("na:GetIArray()"), na:GetIArray())
 end
 
 function dna_test()
-	print("************** DNA/DNAA")
+	header("Dna/Dnaa")
 
 	local PI = 3.14159265358979323846
 	local E = 2.7182818284590452354
 
-	-- Create a new DNA
-	local da = LuaLept.DNA()
-	print("da = LuaLept.DNA()", da)
+	-- Create a new Dna
+	local da = LuaLept.Dna()
+	print(pad("da = LuaLept.Dna()"), da)
 
 	-- Add some numbers
 	da:AddNumber(PI)
@@ -185,16 +204,16 @@ function dna_test()
 	da:AddNumber(E^(1/PI))
 
 	print("... after adding some numbers")
-	print("da", da)
-	print("#da", #da)
-	print("da:GetParameters()", da:GetParameters())
+	print(pad("#da"), #da)
+	print(pad("da"), da)
+	print(pad("da:GetParameters()"), da:GetParameters())
 
 	-- As array of numbers
-	print("da:GetDArray()", da:GetDArray())
+	print(pad("da:GetDArray()"), da:GetDArray())
 
-	-- Create a new DNAA
-	local daa = LuaLept.DNAA(1)
-	print("daa = LuaLept.DNAA(1)", daa)
+	-- Create a new Dnaa
+	local daa = LuaLept.Dnaa(1)
+	print(pad("daa = LuaLept.Dnaa(1)"), daa)
 
 	local count = 10
 	for i = 1, count do
@@ -202,55 +221,55 @@ function dna_test()
 	end
 	print("... after " .. count .. " times daa:AddDna(da)")
 
-	print("#daa",	#daa)
-	for i = 1, count do print("daa:GetDnaCount(" .. i .. ")", daa:GetDnaCount(i)) end
-	print("daa:GetNumberCount()", daa:GetNumberCount())
+	print(pad("#daa"),	#daa)
+	for i = 1, count do print(pad("daa:GetDnaCount(" .. i .. ")"), daa:GetDnaCount(i)) end
+	print(pad("daa:GetNumberCount()"), daa:GetNumberCount())
 
 	local da = daa:FlattenToDna()
 	print("... after da = daa:FlattenToDna()")
-	print("#da",	#da)
-	print("da",	da)
-	print("da:GetDArray()", da:GetDArray())
+	print(pad("#da"), #da)
+	print(pad("da"),	da)
+	print(pad("da:GetDArray()"), da:GetDArray())
 
 	local filename = "test.log"
 	local ok = daa:Write(filename)
-	print("daa:Write('"..filename.."')", ok)
+	print(pad("daa:Write('"..filename.."')"), ok)
 
 	daa = daa.Read(filename)
-	print("daa.Read('"..filename.."')", ok)
+	print(pad("daa.Read('"..filename.."')"), ok)
 	local da = daa:FlattenToDna()
 	print("... after da = daa:FlattenToDna()")
-	print("#da",	#da)
-	print("da",	da)
-	print("da:GetIArray()", da:GetIArray())
+	print(pad("#da"), #da)
+	print(pad("da"), da)
+	print(pad("da:GetIArray()"), da:GetIArray())
 end
 
 function pix_test()
 	local filename = "/tmp/test.png"
-	print("************** PIX")
+	header("Pix")
 	local width, height, depth = 640, 480, 2
-	local pix = LuaLept.PIX(width,height,depth)
-	print("pix = LuaLept.PIX("..width..","..height..","..depth..")", pix)
+	local pix = LuaLept.Pix(width,height,depth)
+	print(pad("pix = LuaLept.Pix("..width..","..height..","..depth..")"), pix)
 
-	local cmap = LuaLept.PIXCMAP(2)
-	print("cmap = LuaLept.PIXCMAP(2)", cmap)
-	print("#cmap", #cmap)
+	local cmap = LuaLept.PixColormap(2)
+	print(pad("cmap = LuaLept.PixColormap(2)"), cmap)
+	print(pad("#cmap"), #cmap)
 
-	print("cmap:GetFreeCount()", cmap:GetFreeCount())
+	print(pad("cmap:GetFreeCount()"), cmap:GetFreeCount())
 	local black = cmap:AddNearestColor(0x00,0x00,0x00)
 	local bluish = cmap:AddNewColor(0x40,0xe0,0xf0)
 	cmap:AddColor(0x7f,0x7f,0x7f)
 	cmap:AddRGBA(0xff,0xff,0xff,0xff)
-	print("cmap:AddNearestColor(0,0,0) index", black)
-	print("cmap:AddNewColor(0x40,0xe0,0xf0)", bluish)
+	print(pad("cmap:AddNearestColor(0x00,0x00,0x00)"), black)
+	print(pad("cmap:AddNewColor(0x40,0xe0,0xf0)"), bluish)
 
-	print("cmap:GetFreeCount()", cmap:GetFreeCount())
+	print(pad("cmap:GetFreeCount()"), cmap:GetFreeCount())
 
 	print("cmap", cmap)
 
 	local ok = pix:SetColormap(cmap)
-	print("pix:SetColormap()", ok)
-	print("pix", pix);
+	print(pad("pix:SetColormap()"), ok)
+	print(pad("pix"), pix);
 
 	-- Set all pixels (to 2^depth - 1)
 	pix:SetAllArbitrary(3)
@@ -263,54 +282,58 @@ function pix_test()
 
 	pix:SetSpecial(10+9)	-- maximum compression
 	local ok = pix:Write(filename, "png")
-	print("pix:Write('" .. filename .."')", ok)
+	print(pad("pix:Write('" .. filename .."')"), ok)
 
-	local pix2 = LuaLept.PIX(filename)
-	print("pix2 = LuaLept.PIX('" .. filename .. "')", pix2);
+	local pix2 = LuaLept.Pix(filename)
+	print(pad("pix2 = LuaLept.Pix('" .. filename .. "')"), pix2);
 
 	local w, h, d = pix2:GetDimensions()
-	print("width            ", w)
-	print("height           ", h)
-	print("depth            ", d)
+	print(pad("width"), w)
+	print(pad("height"), h)
+	print(pad("depth"), d)
 
 	local spp = pix2:GetSpp()
-	print("spp              ", spp)
+	print(pad("spp"), spp)
 
 	local wpl = pix2:GetWpl()
-	print("wpl              ", wpl)
+	print(pad("wpl"), wpl)
 
 	local bits = h * wpl * 32
-	print("bits		", bits)
+	print(pad("bits"), bits)
 end
 
 function pix2_test()
 	local filename = "/tmp/lualept.png"
-	local pix = LuaLept.PIX('lualept.jpg')
-	print ("pix", pix)
+	local filename2 = "/tmp/lualept-mask.tif"
+	local filename3 = "/tmp/lualept-masked.png"
+	header("Pix2")
+	local pix = LuaLept.Pix('lualept.jpg')
+	print (pad("pix"), pix)
 
 	local ok = pix:Write(filename, 'png')
-	print ("pix:Write('" .. filename .. "', 'png')", ok)
+	print (pad("pix:Write('" .. filename .. "', 'png')"), ok)
 
 	local w, h, d = pix:GetDimensions()
-	print ("dimensions      :", w, h, d)
-	print ("area            :", w * h)
-	print ("RGB colors      :", pix:CountRGBColors())
+	print (pad("dimensions"), w, h, d)
+	print (pad("area"), w * h)
+	print (pad("RGB colors"), pix:CountRGBColors())
 	-- print ("color histogram :", pix:GetColorAmapHistogram(8))
 
 	local pixm = pix:MakeArbMaskFromRGB(-0.5, -0.5, 0.75, 0.05)
 	-- pixm:SetInputFormat('tiff-g4')
-	print ("pixm            :", pixm)
-	print ("dimensions      :", pixm:GetDimensions())
+	print (pad("pixm"), pixm)
+	print (pad("dimensions"), pixm:GetDimensions())
 
-	local box = LuaLept.BOX(12,12,140,140)
-	print ("pixels          :", pixm:CountPixels())
-	print ("pixels in rect  :", box, pixm:CountPixelsInRect(box))
-	print ("foreground fract:", pixm:ForegroundFraction())
+	local box = LuaLept.Box(12,12,140,140)
+	print (pad("pixels"), pixm:CountPixels())
+	print (pad("pixels in rect"), box, pixm:CountPixelsInRect(box))
+	print (pad("foreground fract"), pixm:ForegroundFraction())
 
-	local ok = pixm:Write('/tmp/lualept-mask.tif', 'g4')
+	local ok = pixm:Write(filename2,'g4')
+	print (pad("pixm:Write('" .. filename2 .. "','g4')"), ok)
 	pix:PaintThroughMask(pixm, 0, 0, LuaLept.RGB(255,128,128))
-
-	local ok = pix:Write('/tmp/lualept-masked.png', 'png')
+	local ok = pix:Write(filename3,'png')
+	print (pad("pix:Write('" .. filename3 .. "','png')"), ok)
 end
 
 function hex_dump(buf)
@@ -328,9 +351,9 @@ function hex_dump(buf)
 	end
 end
 
-print("************** MAIN")
+header("Main program")
 print("Hello, world!")
-print("**************")
+header("")
 print("LuaLept:Version()", LuaLept:Version())
 print("LuaLept:LuaVersion()", LuaLept:LuaVersion())
 print("LuaLept:LeptVersion()", LuaLept:LeptVersion())
@@ -344,5 +367,5 @@ dna_test()
 pix_test()
 pix2_test()
 
-print("**************")
+header("")
 print("That's all, folks!")
