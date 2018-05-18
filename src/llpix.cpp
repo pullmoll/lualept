@@ -3914,18 +3914,20 @@ Write(lua_State *L)
 
 /**
  * @brief Check Lua stack at index %arg for udata of class LL_PIX
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the PIX contained in the user data
  */
 Pix *
-ll_check_Pix(const char* _fun, lua_State *L, int arg)
+ll_check_Pix(const char *_fun, lua_State *L, int arg)
 {
     return *(reinterpret_cast<Pix **>(ll_check_udata(_fun, L, arg, LL_PIX)));
 }
 
 /**
  * \brief Push PIX to the Lua stack and set its meta table
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param pix pointer to the PIX
  * \return 1 Pix* on the Lua stack

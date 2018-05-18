@@ -346,24 +346,26 @@ GetLast(lua_State *L)
 
 /**
  * @brief Check Lua stack at index %arg for udata of class LL_AMAP
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the L_AMAP* contained in the user data
  */
 L_AMAP *
-ll_check_Amap(const char* _fun, lua_State *L, int arg)
+ll_check_Amap(const char *_fun, lua_State *L, int arg)
 {
     return *(reinterpret_cast<L_AMAP **>(ll_check_udata(_fun, L, arg, LL_AMAP)));
 }
 
 /**
  * \brief Push L_AMAP user data to the Lua stack and set its meta table
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param amap pointer to the L_AMAP
  * \return 1 L_AMAP* on the Lua stack
  */
 int
-ll_push_Amap(const char* _fun, lua_State *L, L_AMAP *amap)
+ll_push_Amap(const char *_fun, lua_State *L, L_AMAP *amap)
 {
     if (!amap)
         return ll_push_nil(L);

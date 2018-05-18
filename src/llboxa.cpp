@@ -565,6 +565,7 @@ RotateOrth(lua_State *L)
 
 /**
  * @brief Check Lua stack at index %arg for udata of class LL_BOXA
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Boxa* contained in the user data
@@ -577,6 +578,7 @@ ll_check_Boxa(const char *_fun, lua_State *L, int arg)
 
 /**
  * \brief Push Boxa* user data to the Lua stack and set its meta table
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param boxa pointer to the BOXA
  * \return 1 Boxa* on the Lua stack

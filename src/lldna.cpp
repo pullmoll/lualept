@@ -468,24 +468,26 @@ CopyParameters(lua_State *L)
 
 /**
  * @brief Check Lua stack at index %arg for udata of class LL_DNA
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the L_Dna* contained in the user data
  */
 L_Dna *
-ll_check_Dna(const char* _fun, lua_State *L, int arg)
+ll_check_Dna(const char *_fun, lua_State *L, int arg)
 {
     return *(reinterpret_cast<L_Dna **>(ll_check_udata(_fun, L, arg, LL_DNA)));
 }
 
 /**
  * \brief Push DNA user data to the Lua stack and set its meta table
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param da pointer to the L_DNA
  * \return 1 DNA* on the Lua stack
  */
 int
-ll_push_Dna(const char* _fun, lua_State *L, L_Dna *da)
+ll_push_Dna(const char *_fun, lua_State *L, L_Dna *da)
 {
     if (!da)
         return ll_push_nil(L);

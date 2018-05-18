@@ -351,24 +351,26 @@ GetArrays(lua_State *L)
 
 /**
  * @brief Check Lua stack at index %arg for udata of class LL_PTA
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Pta* contained in the user data
  */
 Pta *
-ll_check_Pta(const char* _fun, lua_State *L, int arg)
+ll_check_Pta(const char *_fun, lua_State *L, int arg)
 {
     return *(reinterpret_cast<Pta **>(ll_check_udata(_fun, L, arg, LL_PTA)));
 }
 
 /**
  * \brief Push PTA user data to the Lua stack and set its meta table
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param pta pointer to the PTA
  * \return 1 Pta* on the Lua stack
  */
 int
-ll_push_Pta(const char* _fun, lua_State *L, Pta *pta)
+ll_push_Pta(const char *_fun, lua_State *L, Pta *pta)
 {
     if (!pta)
         return ll_push_nil(L);

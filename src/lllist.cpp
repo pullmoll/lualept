@@ -303,24 +303,26 @@ FindTail(lua_State *L)
 
 /**
  * @brief Check Lua stack at index %arg for udata of class LL_DLLIST
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the DoubleLinkedList* contained in the user data
  */
 DoubleLinkedList *
-ll_check_DoubleLinkedList(const char* _fun, lua_State *L, int arg)
+ll_check_DoubleLinkedList(const char *_fun, lua_State *L, int arg)
 {
     return *(reinterpret_cast<DoubleLinkedList **>(ll_check_udata(_fun, L, arg, LL_DLLIST)));
 }
 
 /**
  * \brief Push DLLIST user data to the Lua stack and set its meta table
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param head pointer to the DLLIST
  * \return 1 DoubleLinkedList* on the Lua stack
  */
 int
-ll_push_DoubleLinkedList(const char* _fun, lua_State *L, DoubleLinkedList *head)
+ll_push_DoubleLinkedList(const char *_fun, lua_State *L, DoubleLinkedList *head)
 {
     if (!head)
         return ll_push_nil(L);

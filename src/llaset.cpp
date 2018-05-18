@@ -327,24 +327,26 @@ GetLast(lua_State *L)
 
 /**
  * @brief Check Lua stack at index %arg for udata of class LL_ASET
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the ASET* contained in the user data
  */
 L_ASET *
-ll_check_Aset(const char* _fun, lua_State *L, int arg)
+ll_check_Aset(const char *_fun, lua_State *L, int arg)
 {
     return *(reinterpret_cast<L_ASET **>(ll_check_udata(_fun, L, arg, LL_ASET)));
 }
 
 /**
  * \brief Push ASET user data to the Lua stack and set its meta table
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param aset pointer to the ASET
  * \return 1 ASET* on the Lua stack
  */
 int
-ll_push_Aset(const char* _fun, lua_State *L, L_ASET *aset)
+ll_push_Aset(const char *_fun, lua_State *L, L_ASET *aset)
 {
     if (!aset)
         return ll_push_nil(L);

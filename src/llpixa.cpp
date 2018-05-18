@@ -329,18 +329,20 @@ GetAlignedStats(lua_State *L)
 
 /**
  * @brief Check Lua stack at index %arg for udata of class LL_PIXA
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the PIXA contained in the user data
  */
 Pixa *
-ll_check_Pixa(const char* _fun, lua_State *L, int arg)
+ll_check_Pixa(const char *_fun, lua_State *L, int arg)
 {
     return *(reinterpret_cast<Pixa **>(ll_check_udata(_fun, L, arg, LL_PIXA)));
 }
 
 /**
  * \brief Push Pixa* to the Lua stack and set its meta table
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param pixa pointer to the PIXA
  * \return 1 Pixa* on the Lua stack

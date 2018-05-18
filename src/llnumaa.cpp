@@ -284,24 +284,26 @@ FlattenToNuma(lua_State *L)
 
 /**
  * @brief Check Lua stack at index %arg for udata of class LL_NUMAA
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Numaa* contained in the user data
  */
 Numaa *
-ll_check_Numaa(const char* _fun, lua_State *L, int arg)
+ll_check_Numaa(const char *_fun, lua_State *L, int arg)
 {
     return *(reinterpret_cast<Numaa **>(ll_check_udata(_fun, L, arg, LL_NUMAA)));
 }
 
 /**
  * \brief Push Numaa* user data to the Lua stack and set its meta table
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param naa pointer to the NUMAA
  * \return 1 Numaa* on the Lua stack
  */
 int
-ll_push_Numaa(const char* _fun, lua_State *L, Numaa *naa)
+ll_push_Numaa(const char *_fun, lua_State *L, Numaa *naa)
 {
     if (!naa)
         return ll_push_nil(L);

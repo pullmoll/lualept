@@ -375,18 +375,20 @@ FlattenAligned(lua_State *L)
 
 /**
  * @brief Check Lua stack at index %arg for udata of class LL_BOXAA
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Boxaa* contained in the user data
  */
 Boxaa *
-ll_check_Boxaa(const char* _fun, lua_State *L, int arg)
+ll_check_Boxaa(const char *_fun, lua_State *L, int arg)
 {
     return *(reinterpret_cast<Boxaa **>(ll_check_udata(_fun, L, arg, LL_BOXAA)));
 }
 
 /**
  * \brief Push Boxaa* user data to the Lua stack and set its meta table
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param boxaa pointer to the BOXAA
  * \return 1 Boxaa* on the Lua stack

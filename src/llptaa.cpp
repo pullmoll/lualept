@@ -240,24 +240,26 @@ Write(lua_State *L)
 
 /**
  * @brief Check Lua stack at index %arg for udata of class LL_PTAA
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Ptaa* contained in the user data
  */
 Ptaa *
-ll_check_Ptaa(const char* _fun, lua_State *L, int arg)
+ll_check_Ptaa(const char *_fun, lua_State *L, int arg)
 {
     return *(reinterpret_cast<Ptaa **>(ll_check_udata(_fun, L, arg, LL_PTAA)));
 }
 
 /**
  * \brief Push PTAA user data to the Lua stack and set its meta table
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param ptaa pointer to the PTAA
  * \return 1 Ptaa* on the Lua stack
  */
 int
-ll_push_Ptaa(const char* _fun, lua_State *L, Ptaa *ptaa)
+ll_push_Ptaa(const char *_fun, lua_State *L, Ptaa *ptaa)
 {
     if (!ptaa)
         return ll_push_nil(L);

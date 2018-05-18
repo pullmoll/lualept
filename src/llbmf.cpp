@@ -179,31 +179,33 @@ GetLineStrings(lua_State *L)
     l_int32 maxw = ll_check_l_int32(_fun, L, 3);
     l_int32 firstident = ll_check_l_int32_default(_fun, L, 4, 0);
     l_int32 h = 0;
-    SARRAY *sa = bmfGetLineStrings(bmf, str, maxw, firstident, &h);
+    Sarray *sa = bmfGetLineStrings(bmf, str, maxw, firstident, &h);
     lua_pushinteger(L, h);
     return 1 + ll_push_sarray(L, sa);
 }
 
 /**
  * @brief Check Lua stack at index %arg for udata of class LL_BMF
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Bmf* contained in the user data
  */
 L_Bmf *
-ll_check_Bmf(const char* _fun, lua_State *L, int arg)
+ll_check_Bmf(const char *_fun, lua_State *L, int arg)
 {
     return *(reinterpret_cast<L_Bmf **>(ll_check_udata(_fun, L, arg, LL_BMF)));
 }
 
 /**
  * \brief Push BMF user data to the Lua stack and set its meta table
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
- * \param head pointer to the BMF
+ * \param bmf pointer to the L_Bmf
  * \return 1 Bmf* on the Lua stack
  */
 int
-ll_push_Bmf(const char* _fun, lua_State *L, L_Bmf *bmf)
+ll_push_Bmf(const char *_fun, lua_State *L, L_Bmf *bmf)
 {
     if (!bmf)
         return ll_push_nil(L);

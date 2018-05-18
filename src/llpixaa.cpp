@@ -320,24 +320,26 @@ GetBoxa(lua_State *L)
 
 /**
  * @brief Check Lua stack at index %arg for udata of class LL_PIXAA
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the PIX contained in the user data
  */
 Pixaa *
-ll_check_Pixaa(const char* _fun, lua_State *L, int arg)
+ll_check_Pixaa(const char *_fun, lua_State *L, int arg)
 {
     return *(reinterpret_cast<Pixaa **>(ll_check_udata(_fun, L, arg, LL_PIXAA)));
 }
 
 /**
  * \brief Push Pixaa* user data to the Lua stack and set its meta table
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param pixaa pointer to the PIXAA
  * \return 1 Pixaa* on the Lua stack
  */
 int
-ll_push_Pixaa(const char* _fun, lua_State *L, Pixaa *pixaa)
+ll_push_Pixaa(const char *_fun, lua_State *L, Pixaa *pixaa)
 {
     if (!pixaa)
         return ll_push_nil(L);

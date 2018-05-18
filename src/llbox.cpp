@@ -500,11 +500,11 @@ CompareSize(lua_State *L)
 }
 
 /**
- * \brief Check if a Box* (%box) contains a point (x,y)
+ * \brief Check if a Box* (%box) contains a point (%x,%y)
  *
  * Arg #1 (i.e. self) is expected to be a Box* (box)
  * Arg #2 is expected to be a l_float32 (x)
- * Arg #y is expected to be a l_float32 (y)
+ * Arg #3 is expected to be a l_float32 (y)
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -536,8 +536,8 @@ GetCenter(lua_State *L)
 {
     FUNC(LL_BOX ".GetCenter");
     Box *box = ll_check_Box(_fun, L, 1);
-    l_float32 cx = 0;
-    l_float32 cy = 0;
+    l_float32 cx = 0.0f;
+    l_float32 cy = 0.0f;
     if (boxGetCenter(box, &cx, &cy))
         return ll_push_nil(L);
     lua_pushnumber(L, static_cast<lua_Number>(cx));
@@ -549,6 +549,9 @@ GetCenter(lua_State *L)
  * \brief Intersect a Box* (%box) by a line (x,y)
  *
  * Arg #1 (i.e. self) is expected to be a Box* (box)
+ * Arg #2 is expected to be a l_int32 (x)
+ * Arg #3 is expected to be a l_int32 (y)
+ * Arg #4 is expected to be a l_float32 (slope)
  *
  * \param L pointer to the lua_State
  * \return 5 integers on the Lua stack (x1, y1, x2, y2, n)
@@ -577,9 +580,11 @@ IntersectByLine(lua_State *L)
 }
 
 /**
- * \brief Clip a Box* (%boxs) rectangle to width and height (wi,hi)
+ * \brief Clip a Box* (%boxs) rectangle to width and height (%wi,%hi)
  *
  * Arg #1 (i.e. self) is expected to be a Box* (box)
+ * Arg #2 is expected to be a l_int32 (wi)
+ * Arg #3 is expected to be a l_int32 (hi)
  *
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -592,8 +597,7 @@ ClipToRectangle(lua_State *L)
     l_int32 wi = ll_check_l_int32(_fun, L, 2);
     l_int32 hi = ll_check_l_int32(_fun, L, 3);
     Box *box = boxClipToRectangle(boxs, wi, hi);
-    ll_push_Box(_fun, L, box);
-    return 1;
+    return ll_push_Box(_fun, L, box);
 }
 
 /**
@@ -807,24 +811,26 @@ RotateOrth(lua_State *L)
 
 /**
  * @brief Check Lua stack at index %arg for udata of class LL_BOX
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Box* contained in the user data
  */
 Box *
-ll_check_Box(const char* _fun, lua_State *L, int arg)
+ll_check_Box(const char *_fun, lua_State *L, int arg)
 {
     return *(reinterpret_cast<Box **>(ll_check_udata(_fun, L, arg, LL_BOX)));
 }
 
 /**
  * \brief Push BOX user data to the Lua stack and set its meta table
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param box pointer to the BOX
  * \return 1 Box* on the Lua stack
  */
 int
-ll_push_Box(const char* _fun, lua_State *L, Box *box)
+ll_push_Box(const char *_fun, lua_State *L, Box *box)
 {
     if (!box)
         return ll_push_nil(L);

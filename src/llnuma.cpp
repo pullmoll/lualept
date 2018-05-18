@@ -431,18 +431,20 @@ CopyParameters(lua_State *L)
 
 /**
  * @brief Check Lua stack at index %arg for udata of class LL_NUMA
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Numa* contained in the user data
  */
 Numa *
-ll_check_Numa(const char* _fun, lua_State *L, int arg)
+ll_check_Numa(const char *_fun, lua_State *L, int arg)
 {
     return *(reinterpret_cast<Numa **>(ll_check_udata(_fun, L, arg, LL_NUMA)));
 }
 
 /**
  * \brief Push NUMA user data to the Lua stack and set its meta table
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param na pointer to the NUMA
  * \return 1 Numa* on the Lua stack
