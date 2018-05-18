@@ -44,6 +44,9 @@
 #if defined(HAVE_INTTYPES_H)
 #include <inttypes.h>
 #endif
+#if defined(HAVE_LIMITS_H)
+#include <limits.h>
+#endif
 #if defined(HAVE_MEMORY_H)
 #include <memory.h>
 #endif
@@ -69,8 +72,6 @@
 #include <unistd.h>
 #endif
 
-#define LLUA_DEBUG      0
-
 #define	LL_PTA		"Pta"           /*!< Lua class: array of points (pair of l_float32) */
 #define	LL_PTAA		"Ptaa"          /*!< Lua class: array of Pta */
 #define	LL_NUMA		"Numa"          /*!< Lua class: array of floats (l_float32) */
@@ -90,31 +91,28 @@
 
 #define	LL_LEPT		"LuaLept"       /*!< Lua class: LuaLept top level */
 
-#if LLUA_DEBUG
-#define DBG(enable, fmt, ...)                                                  \
-    do {                                                                       \
-        if (enable) {                                                          \
-            fprintf(stderr, fmt, __VA_ARGS__);                                 \
-        }                                                                      \
-    } while (0)
-#else
-#define DBG(enable, fmt, ...)
-#endif
+#define LLUA_DEBUG      0               /*!< set to 1 to enable debugging */
+#define LOG_REGISTER    1               /*!< set to 1 to enable debugging of Lua class registration */
+#define LOG_CREATE      1               /*!< set to 1 to enable debugging of object creation */
+#define LOG_DESTROY     1               /*!< set to 1 to enable debugging of object destruction */
 
-#define LOG_REGISTER    1
-#define LOG_CREATE      1
-#define LOG_DESTROY     1
+#if defined(LLUA_DEBUG) && (LLUA_DEBUG > 0)
+extern void dbg(int enable, const char* format, ...);
+#define DBG(enable, format, ...) dbg(enable, format, __VA_ARGS__)
+#else
+#define DBG(enable, format, ...)
+#endif
 
 #ifdef __cplusplus
 extern "C" {
-#else
-#if !defined(nullptr)
-#define nullptr 0
-#endif
 #endif
 
 #include <lauxlib.h>
 #include <lualib.h>
+
+#if !defined(__cplusplus)
+#define nullptr NULL
+#endif
 
 /** Lua function table (luaL_Reg array[]) sentinel */
 #define LUA_SENTINEL    {nullptr,nullptr}

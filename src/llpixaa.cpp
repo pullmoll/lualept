@@ -46,7 +46,7 @@
 Pixaa *
 ll_check_Pixaa(lua_State *L, int arg)
 {
-    return *(Pixaa **)ll_check_udata(L, arg, LL_PIXAA);
+    return *(reinterpret_cast<Pixaa **>(ll_check_udata(L, arg, LL_PIXAA)));
 }
 
 /**
@@ -98,8 +98,8 @@ Create(lua_State *L)
  *
  * Arg #1 is expected to be a Pixa* use data
  * Arg #2 is expected to be a l_int32 (n)
- * Arg #3 is expected to be a string (type = "consecutive", "skip_by")
- * Arg #4 is optionally a string (copyflag)
+ * Arg #3 is optional and, if given, expected to be a string (type)
+ * Arg #4 is optional and, if given, expected to be a string (copyflag)
  *
  * \param L pointer to the lua_State
  * \return 1 Pixaa* on the Lua stack
@@ -126,10 +126,10 @@ CreateFromPixa(lua_State *L)
 static int
 Destroy(lua_State *L)
 {
-    void **ppixaa = ll_check_udata(L, 1, LL_PIXAA);
-    DBG(LOG_DESTROY, "%s: '%s' ppaa=%p paa=%p\n", __func__,
-        LL_PIXAA, (void *)ppixaa, *ppixaa);
-    pixaaDestroy((Pixaa **)ppixaa);
+    Pixaa **ppixaa = reinterpret_cast<Pixaa **>(ll_check_udata(L, 1, LL_PIXAA));
+    DBG(LOG_DESTROY, "%s: '%s' ppixaa=%p pixaa=%p\n",
+        __func__, LL_PIXAA, ppixaa, *ppixaa);
+    pixaaDestroy(ppixaa);
     *ppixaa = nullptr;
     return 0;
 }
@@ -373,6 +373,7 @@ ll_register_Pixaa(lua_State *L)
 
     static const luaL_Reg functions[] = {
         {"Create",              Create},
+        {"CreateFromPixa",      CreateFromPixa},
         LUA_SENTINEL
     };
 

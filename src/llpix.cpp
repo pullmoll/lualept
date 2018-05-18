@@ -31,6 +31,14 @@
 
 #include "modules.h"
 
+#if !defined(PATH_MAX)
+#ifdef _MSC_VER
+#define PATH_MAX    266
+#else
+#define PATH_MAX    4096
+#endif
+#endif
+
 #undef  _
 #define _(x) (((x)>>7)&1)+(((x)>>6)&1)+(((x)>>5)&1)+(((x)>>4)&1)+(((x)>>3)&1)+(((x)>>2)&1)+(((x)>>0)&1)
 /** Table of bit counts in a byte */
@@ -69,7 +77,7 @@ static l_int32 tab8[256] = {
 Pix *
 ll_check_Pix(lua_State *L, int arg)
 {
-    return *(Pix **)ll_check_udata(L, arg, LL_PIX);
+    return *(reinterpret_cast<Pix **>(ll_check_udata(L, arg, LL_PIX)));
 }
 
 /**
@@ -122,6 +130,11 @@ ll_new_Pix(lua_State *L)
     return ll_push_Pix(L, pix);
 }
 
+/**
+ * @brief toString
+ * \param L pointer to the lua_State
+ * @return 1 string on the Lua stack
+ */
 static int
 toString(lua_State* L)
 {
@@ -143,7 +156,7 @@ toString(lua_State* L)
         } else {
             spp = pixGetSpp(pix);
             wpl = pixGetWpl(pix);
-            size = (l_uint64)wpl * (l_uint64)h * sizeof(l_uint32);
+            size = static_cast<l_uint64>(wpl) * static_cast<l_uint64>(h) * sizeof(l_uint32);
             format = ll_string_input_format(pixGetInputFormat(pix));
             dst += snprintf(dst, sizeof(str), "[%s] %dx%d %dbpp; %dspp; %dwpl; %llu bytes",
                      format, w, h, d, spp, wpl, size);
@@ -220,10 +233,10 @@ CreateNoInit(lua_State *L)
 static int
 Destroy(lua_State *L)
 {
-    void **ppix = ll_check_udata(L, 1, LL_PIX);
-    DBG(LOG_DESTROY, "%s: '%s' ppix=%p pix=%p refcount=%d\n", __func__,
-        LL_PIX, (void *)ppix, *ppix, pixGetRefcount(*(Pix **)ppix));
-    pixDestroy((Pix **)ppix);
+    Pix **ppix = reinterpret_cast<Pix **>(ll_check_udata(L, 1, LL_PIX));
+    DBG(LOG_DESTROY, "%s: '%s' ppix=%p pix=%p refcount=%d\n",
+        __func__, LL_PIX, ppix, *ppix, pixGetRefcount(*ppix));
+    pixDestroy(reinterpret_cast<Pix **>(ppix));
     *ppix = nullptr;
     return 0;
 }

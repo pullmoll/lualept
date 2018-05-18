@@ -46,7 +46,7 @@
 Boxa *
 ll_check_Boxa(lua_State *L, int arg)
 {
-    return *(Boxa **)ll_check_udata(L, arg, LL_BOXA);
+    return *(reinterpret_cast<Boxa **>(ll_check_udata(L, arg, LL_BOXA)));
 }
 
 /**
@@ -99,7 +99,7 @@ toString(lua_State *L)
         luaL_addchar(&B, '{');
         for (i = 0; i < boxaGetCount(boxa); i++) {
             boxaGetBoxGeometry(boxa, i, &x, &y, &w, &h);
-            snprintf(str, sizeof(str), "%d={%d,%d,%d,%d}", i, x, y, w, h);
+            snprintf(str, sizeof(str), "%d={%d,%d,%d,%d}", i+1, x, y, w, h);
             if (i > 0)
                 luaL_addchar(&B, ',');
             luaL_addstring(&B, str);
@@ -135,10 +135,10 @@ Create(lua_State *L)
 static int
 Destroy(lua_State *L)
 {
-    void **pboxa = ll_check_udata(L, 1, LL_BOXA);
-    DBG(LOG_DESTROY, "%s: '%s' pboxa=%p boxa=%p\n", __func__,
-        LL_BOXA, (void *)pboxa, *pboxa);
-    boxaDestroy((Boxa **)pboxa);
+    Boxa **pboxa = reinterpret_cast<Boxa **>(ll_check_udata(L, 1, LL_BOXA));
+    DBG(LOG_DESTROY, "%s: '%s' pboxa=%p boxa=%p\n",
+        __func__, LL_BOXA, pboxa, *pboxa);
+    boxaDestroy(pboxa);
     *pboxa = nullptr;
     return 0;
 }

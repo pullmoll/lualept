@@ -200,10 +200,10 @@ Clone(lua_State *L)
 static int
 Destroy(lua_State *L)
 {
-    void **pbox = ll_check_udata(L, 1, LL_BOX);
+    Box **pbox = reinterpret_cast<Box **>(ll_check_udata(L, 1, LL_BOX));
     DBG(LOG_DESTROY, "%s: '%s' pbox=%p box=%p refcount=%d\n", __func__,
-        LL_BOX, (void *)pbox, *pbox, boxGetRefcount(*(Box **)pbox));
-    boxDestroy(reinterpret_cast<Box **>(pbox));
+        LL_BOX, pbox, *pbox, boxGetRefcount(*pbox));
+    boxDestroy(pbox);
     *pbox = nullptr;
     return 0;
 }

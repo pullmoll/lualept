@@ -152,10 +152,10 @@ Create(lua_State *L)
 static int
 Destroy(lua_State *L)
 {
-    void **pamap = ll_check_udata(L, 1, LL_AMAP);
+    L_Rbtree **pamap = reinterpret_cast<L_Rbtree **>(ll_check_udata(L, 1, LL_AMAP));
     DBG(LOG_DESTROY, "%s: '%s' pamap=%p amap=%p size=%d\n", __func__,
-        LL_AMAP, (void *)pamap, *pamap, l_amapSize(*(L_AMAP **)pamap));
-    l_amapDestroy(reinterpret_cast<L_AMAP **>(pamap));
+        LL_AMAP, pamap, *pamap, l_amapSize(*pamap));
+    l_amapDestroy(pamap);
     *pamap = nullptr;
     return 0;
 }

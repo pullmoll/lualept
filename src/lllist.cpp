@@ -151,10 +151,10 @@ GetCount(lua_State *L)
 static int
 Destroy(lua_State *L)
 {
-    void **plist = ll_check_udata(L, 1, LL_DLLIST);
-    DBG(LOG_DESTROY, "%s: '%s' plist=%p head=%p size=%d\n", __func__,
-        LL_DLLIST, (void *)plist, *plist, listGetCount(*(DoubleLinkedList **)plist));
-    listDestroy(reinterpret_cast<DoubleLinkedList **>(plist));
+    DoubleLinkedList **plist = reinterpret_cast<DoubleLinkedList **>(ll_check_udata(L, 1, LL_DLLIST));
+    DBG(LOG_DESTROY, "%s: '%s' plist=%p head=%p size=%d\n",
+        __func__, LL_DLLIST, plist, *plist, listGetCount(*plist));
+    listDestroy(plist);
     *plist = nullptr;
     return 0;
 }

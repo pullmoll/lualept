@@ -46,7 +46,7 @@
 Pta *
 ll_check_Pta(lua_State *L, int arg)
 {
-    return *(Pta **)ll_check_udata(L, arg, LL_PTA);
+    return *(reinterpret_cast<Pta **>(ll_check_udata(L, arg, LL_PTA)));
 }
 
 /**
@@ -137,10 +137,10 @@ Create(lua_State *L)
 static int
 Destroy(lua_State *L)
 {
-    void **ppta = ll_check_udata(L, 1, LL_PTA);
-    DBG(LOG_DESTROY, "%s: '%s' ppta=%p pta=%p\n", __func__,
-        LL_PTA, (void *)ppta, *ppta);
-    ptaDestroy((Pta **)ppta);
+    Pta **ppta = reinterpret_cast<Pta **>(ll_check_udata(L, 1, LL_PTA));
+    DBG(LOG_DESTROY, "%s: '%s' ppta=%p pta=%p\n",
+        __func__, LL_PTA, ppta, *ppta);
+    ptaDestroy(ppta);
     *ppta = nullptr;
     return 0;
 }

@@ -36,7 +36,7 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
-AC_CHECK_HEADERS([ctype.h float.h])
+AC_CHECK_HEADERS([ctype.h float.h limits.h])
 AC_C_BIGENDIAN
 
 # Checks for library functions.

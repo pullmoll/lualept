@@ -46,7 +46,7 @@
 Pixa *
 ll_check_Pixa(lua_State *L, int arg)
 {
-    return *(Pixa **)ll_check_udata(L, arg, LL_PIXA);
+    return *(reinterpret_cast<Pixa **>(ll_check_udata(L, arg, LL_PIXA)));
 }
 
 /**
@@ -104,10 +104,10 @@ Create(lua_State *L)
 static int
 Destroy(lua_State *L)
 {
-    void **ppixa = ll_check_udata(L, 1, LL_PIXA);
+    Pixa **ppixa = reinterpret_cast<Pixa **>(ll_check_udata(L, 1, LL_PIXA));
     DBG(LOG_DESTROY, "%s: '%s' ppa=%p pa=%p\n", __func__,
-        LL_PIXA, (void *)ppixa, *ppixa);
-    pixaDestroy((Pixa **)ppixa);
+        LL_PIXA, ppixa, *ppixa);
+    pixaDestroy(ppixa);
     *ppixa = nullptr;
     return 0;
 }

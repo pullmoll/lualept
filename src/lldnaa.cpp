@@ -46,7 +46,7 @@
 L_Dnaa *
 ll_check_Dnaa(lua_State *L, int arg)
 {
-    return *(L_Dnaa **)ll_check_udata(L, arg, LL_DNAA);
+    return *(reinterpret_cast<L_Dnaa **>(ll_check_udata(L, arg, LL_DNAA)));
 }
 
 /**
@@ -136,10 +136,10 @@ Truncate(lua_State *L)
 static int
 Destroy(lua_State *L)
 {
-    void **pdaa = ll_check_udata(L, 1, LL_DNAA);
-    DBG(LOG_DESTROY, "%s: '%s' pdaa=%p daa=%p\n", __func__,
-        LL_DNAA, (void *)pdaa, *pdaa);
-    l_dnaaDestroy((L_Dnaa **)pdaa);
+    L_Dnaa **pdaa = reinterpret_cast<L_Dnaa **>(ll_check_udata(L, 1, LL_DNAA));
+    DBG(LOG_DESTROY, "%s: '%s' pdaa=%p daa=%p\n",
+        __func__, LL_DNAA, pdaa, *pdaa);
+    l_dnaaDestroy(pdaa);
     *pdaa = nullptr;
     return 0;
 }

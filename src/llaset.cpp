@@ -168,10 +168,10 @@ Size(lua_State *L)
 static int
 Destroy(lua_State *L)
 {
-    void **paset = ll_check_udata(L, 1, LL_ASET);
+    L_Rbtree **paset = reinterpret_cast<L_Rbtree **>(ll_check_udata(L, 1, LL_ASET));
     DBG(LOG_DESTROY, "%s: '%s' paset=%p aset=%p size=%d\n", __func__,
-        LL_ASET, (void *)paset, *paset, l_asetSize(*(L_ASET **)paset));
-    l_asetDestroy(reinterpret_cast<L_ASET **>(paset));
+        LL_ASET, paset, *paset, l_asetSize(*paset));
+    l_asetDestroy(paset);
     *paset = nullptr;
     return 0;
 }

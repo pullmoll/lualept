@@ -32,6 +32,7 @@
 #pragma once
 #if !defined(LUALEPT_H)
 #define  LUALEPT_H
+#include <allheaders.h>
 
 #if defined (HAVE_CONFIG_H)
 #include "config.h"
@@ -39,12 +40,12 @@
 
 #include "environ.h"
 
-/* Leptonica allheaders.h */
-#include <allheaders.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 LUALEPT_DLL extern int ll_RunScript(const char* script);
+
 #ifdef __cplusplus
 }
 #endif

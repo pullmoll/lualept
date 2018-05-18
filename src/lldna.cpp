@@ -46,7 +46,7 @@
 L_Dna *
 ll_check_Dna(lua_State *L, int arg)
 {
-    return *(L_Dna **)ll_check_udata(L, arg, LL_DNA);
+    return *(reinterpret_cast<L_Dna **>(ll_check_udata(L, arg, LL_DNA)));
 }
 
 /**
@@ -100,7 +100,7 @@ toString(lua_State *L)
         luaL_addchar(&B, '{');
         for (i = 0; i < l_dnaGetCount(da); i++) {
             l_dnaGetDValue(da, i, &val);
-            snprintf(str, sizeof(str), "{%g}", val);
+            snprintf(str, sizeof(str), "%d={%g}", i+1, val);
             if (i > 0)
                 luaL_addchar(&B, ',');
             luaL_addstring(&B, str);
@@ -134,10 +134,10 @@ Create(lua_State *L)
 static int
 Destroy(lua_State *L)
 {
-    void **pda = ll_check_udata(L, 1, LL_DNA);
-    DBG(LOG_DESTROY, "%s: '%s' pda=%p da=%p refcount=%d\n", __func__,
-        LL_DNA, (void *)pda, *pda, l_dnaGetRefcount(*pda));
-    l_dnaDestroy((L_Dna **)pda);
+    L_Dna **pda = reinterpret_cast<L_Dna**>(ll_check_udata(L, 1, LL_DNA));
+    DBG(LOG_DESTROY, "%s: '%s' pda=%p da=%p refcount=%d\n",
+         __func__, LL_DNA, pda, *pda, l_dnaGetRefcount(*pda));
+    l_dnaDestroy(pda);
     *pda = nullptr;
     return 0;
 }

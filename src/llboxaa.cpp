@@ -46,7 +46,7 @@
 Boxaa *
 ll_check_Boxaa(lua_State *L, int arg)
 {
-    return *(Boxaa **)ll_check_udata(L, arg, LL_BOXAA);
+    return *(reinterpret_cast<Boxaa **>(ll_check_udata(L, arg, LL_BOXAA)));
 }
 
 /**
@@ -104,10 +104,10 @@ Create(lua_State *L)
 static int
 Destroy(lua_State *L)
 {
-    void **pboxaa = ll_check_udata(L, 1, LL_BOXAA);
-    DBG(LOG_DESTROY, "%s: '%s' pboxaa=%p boxaa=%p\n", __func__,
-        LL_BOXAA, (void *)pboxaa, *pboxaa);
-    boxaaDestroy((Boxaa **)pboxaa);
+    Boxaa **pboxaa = reinterpret_cast<Boxaa **>(ll_check_udata(L, 1, LL_BOXAA));
+    DBG(LOG_DESTROY, "%s: '%s' pboxaa=%p boxaa=%p\n",
+        __func__, LL_BOXAA, pboxaa, *pboxaa);
+    boxaaDestroy(pboxaa);
     *pboxaa = nullptr;
     return 0;
 }
@@ -134,11 +134,11 @@ toString(lua_State *L)
             Boxa *boxa = boxaaGetBoxa(boxaa, i, L_CLONE);
             if (i > 0)
                 luaL_addchar(&B, ',');
-            snprintf(str, sizeof(str), "%d={", i);
+            snprintf(str, sizeof(str), "%d={", i+1);
             luaL_addstring(&B, str);
             for (j = 0; j < boxaGetCount(boxa); j++) {
                 boxaGetBoxGeometry(boxa, j, &x, &y, &w, &h);
-                snprintf(str, sizeof(str), "%d={%d,%d,%d,%d}", j, x, y, w, h);
+                snprintf(str, sizeof(str), "%d={%d,%d,%d,%d}", j+1, x, y, w, h);
                 if (j > 0)
                     luaL_addchar(&B, ',');
                 luaL_addstring(&B, str);

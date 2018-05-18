@@ -88,6 +88,18 @@ ll_strcasecmp(const char* dst, const char* src)
 }
 #endif
 
+#if defined(LLUA_DEBUG) && (LLUA_DEBUG>0)
+void dbg(int enable, const char* format, ...)
+{
+    va_list ap;
+    if (!enable)
+        return;
+    va_start(ap, format);
+    vfprintf(stderr, format, ap);
+    va_end(ap);
+}
+#endif
+
 /**
  * \brief Register a class for Lua
  * \param L pointer to the lua_State
@@ -111,9 +123,9 @@ ll_register_class(lua_State *L, const char *name, const luaL_Reg *methods, const
     lua_setfield(L, -2, "__index");
     luaL_setfuncs(L, methods, 0);
     lua_createtable(L, 0, nfunctions);
-    luaL_setfuncs(L, functions, 0)
-    DBG(LOG_REGISTER, "%s: '%s' registered with %d methods and %d functions\n", __func__,
-        name, nmethods, nfunctions);
+    luaL_setfuncs(L, functions, 0);
+    DBG(LOG_REGISTER, "%s: '%s' registered with %d methods and %d functions\n",
+         __func__, name, nmethods, nfunctions);
     return 1;
 }
 
@@ -149,7 +161,8 @@ ll_push_udata(lua_State *L, const char* name, void *udata)
     *ppvoid = udata;
     lua_getfield(L, LUA_REGISTRYINDEX, name);
     lua_setmetatable(L, -2);
-    DBG(LOG_CREATE, "%s: pushed '%s' ppvoid=%p udata=%p\n", __func__, name, (void *)ppvoid, udata);
+    DBG(LOG_CREATE, "%s: pushed '%s' ppvoid=%p udata=%p\n",
+         __func__, name, ppvoid, udata);
     return 1;
 }
 
@@ -377,15 +390,17 @@ ll_check_tbl(lua_State *L, int arg, l_int32 dflt, const lept_enums_t *tbl, size_
 
 }
 
+#define TBL_ENTRY(key,ENUMVALUE) { key, #ENUMVALUE, ENUMVALUE }
+
 /**
  * \brief Table of access/storage flag names and enumeration values
  */
 static const lept_enums_t tbl_access_storage[] = {
-    {"nocopy",          "L_NOCOPY",         L_NOCOPY},      /* do not copy the object; do not delete the ptr */
-    {"insert",          "L_INSERT",         L_INSERT},      /* stuff it in; do not copy or clone */
-    {"copy",            "L_COPY",           L_COPY},        /* make/use a copy of the object */
-    {"clone",           "L_CLONE",          L_CLONE},       /* make/use clone (ref count) of the object */
-    {"copy-clone",      "L_COPY_CLONE",     L_COPY_CLONE}   /* make a new array object (e.g., pixa) and fill the array with clones (e.g., pix) */
+    TBL_ENTRY("nocopy",         L_NOCOPY),      /* do not copy the object; do not delete the ptr */
+    TBL_ENTRY("insert",         L_INSERT),      /* stuff it in; do not copy or clone */
+    TBL_ENTRY("copy",           L_COPY),        /* make/use a copy of the object */
+    TBL_ENTRY("clone",          L_CLONE),       /* make/use clone (ref count) of the object */
+    TBL_ENTRY("copy-clone",     L_COPY_CLONE)   /* make a new array object (e.g., pixa) and fill the array with clones (e.g., pix) */
 };
 
 /**
@@ -416,38 +431,38 @@ ll_string_access_storage(int flag)
  * \brief Table of file input format names and enumeration values
  */
 static const lept_enums_t tbl_input_format[] = {
-    {"unknown",         "IFF_UNKNOWN",          IFF_UNKNOWN},
-    {"bmp",             "IFF_BMP",              IFF_BMP},
-    {"jpg",             "IFF_JFIF_JPEG",        IFF_JFIF_JPEG},
-    {"jpeg",            "IFF_JFIF_JPEG",        IFF_JFIF_JPEG},
-    {"jfif",            "IFF_JFIF_JPEG",        IFF_JFIF_JPEG},
-    {"png",             "IFF_PNG",              IFF_PNG},
-    {"tiff",            "IFF_TIFF",             IFF_TIFF},
-    {"tif",             "IFF_TIFF",             IFF_TIFF},
-    {"tiff-packbits",   "IFF_TIFF_PACKBITS",    IFF_TIFF_PACKBITS},
-    {"packbits",        "IFF_TIFF_PACKBITS",    IFF_TIFF_PACKBITS},
-    {"tiff-rle",        "IFF_TIFF_RLE",         IFF_TIFF_RLE},
-    {"rle",             "IFF_TIFF_RLE",         IFF_TIFF_RLE},
-    {"tiff-g3",         "IFF_TIFF_G3",          IFF_TIFF_G3},
-    {"g3",              "IFF_TIFF_G3",          IFF_TIFF_G3},
-    {"tiff-g4",         "IFF_TIFF_G4",          IFF_TIFF_G4},
-    {"g4",              "IFF_TIFF_G4",          IFF_TIFF_G4},
-    {"tiff-lzw",        "IFF_TIFF_LZW",         IFF_TIFF_LZW},
-    {"lzw",             "IFF_TIFF_LZW",         IFF_TIFF_LZW},
-    {"tiff-zip",        "IFF_TIFF_ZIP",         IFF_TIFF_ZIP},
-    {"zip",             "IFF_TIFF_ZIP",         IFF_TIFF_ZIP},
-    {"pnm",             "IFF_PNM",              IFF_PNM},
-    {"pbm",             "IFF_PNM",              IFF_PNM},
-    {"pgm",             "IFF_PNM",              IFF_PNM},
-    {"ppm",             "IFF_PNM",              IFF_PNM},
-    {"ps",              "IFF_PS",               IFF_PS},
-    {"gif",             "IFF_GIF",              IFF_GIF},
-    {"jp2",             "IFF_JP2",              IFF_JP2},
-    {"jpeg2k",          "IFF_JP2",              IFF_JP2},
-    {"webp",            "IFF_WEBP",             IFF_WEBP},
-    {"lpdf",            "IFF_LPDF",             IFF_LPDF},
-    {"default",         "IFF_DEFAULT",          IFF_DEFAULT},
-    {"spix",            "IFF_SPIX",             IFF_SPIX}
+    TBL_ENTRY("unknown",         IFF_UNKNOWN),
+    TBL_ENTRY("bmp",             IFF_BMP),
+    TBL_ENTRY("jpg",             IFF_JFIF_JPEG),
+    TBL_ENTRY("jpeg",            IFF_JFIF_JPEG),
+    TBL_ENTRY("jfif",            IFF_JFIF_JPEG),
+    TBL_ENTRY("png",             IFF_PNG),
+    TBL_ENTRY("tiff",            IFF_TIFF),
+    TBL_ENTRY("tif",             IFF_TIFF),
+    TBL_ENTRY("tiff-packbits",   IFF_TIFF_PACKBITS),
+    TBL_ENTRY("packbits",        IFF_TIFF_PACKBITS),
+    TBL_ENTRY("tiff-rle",        IFF_TIFF_RLE),
+    TBL_ENTRY("rle",             IFF_TIFF_RLE),
+    TBL_ENTRY("tiff-g3",         IFF_TIFF_G3),
+    TBL_ENTRY("g3",              IFF_TIFF_G3),
+    TBL_ENTRY("tiff-g4",         IFF_TIFF_G4),
+    TBL_ENTRY("g4",              IFF_TIFF_G4),
+    TBL_ENTRY("tiff-lzw",        IFF_TIFF_LZW),
+    TBL_ENTRY("lzw",             IFF_TIFF_LZW),
+    TBL_ENTRY("tiff-zip",        IFF_TIFF_ZIP),
+    TBL_ENTRY("zip",             IFF_TIFF_ZIP),
+    TBL_ENTRY("pnm",             IFF_PNM),
+    TBL_ENTRY("pbm",             IFF_PNM),
+    TBL_ENTRY("pgm",             IFF_PNM),
+    TBL_ENTRY("ppm",             IFF_PNM),
+    TBL_ENTRY("ps",              IFF_PS),
+    TBL_ENTRY("gif",             IFF_GIF),
+    TBL_ENTRY("jp2",             IFF_JP2),
+    TBL_ENTRY("jpeg2k",          IFF_JP2),
+    TBL_ENTRY("webp",            IFF_WEBP),
+    TBL_ENTRY("lpdf",            IFF_LPDF),
+    TBL_ENTRY("default",         IFF_DEFAULT),
+    TBL_ENTRY("spix",            IFF_SPIX)
 };
 
 /**
@@ -489,9 +504,9 @@ ll_string_input_format(int format)
  * \brief Table of key type names for AMAP and ASET
  */
 static const lept_enums_t tbl_keytype[] = {
-    {"int",         "L_INT_TYPE",   L_INT_TYPE},
-    {"uint",        "L_UINT_TYPE",  L_UINT_TYPE},
-    {"float",       "L_FLOAT_TYPE", L_FLOAT_TYPE}
+    TBL_ENTRY("int",         L_INT_TYPE),
+    TBL_ENTRY("uint",        L_UINT_TYPE),
+    TBL_ENTRY("float",       L_FLOAT_TYPE)
 };
 
 /**
@@ -522,11 +537,11 @@ ll_string_keytype(l_int32 type)
  * \brief Table of choice names and enumeration values
  */
 static const lept_enums_t tbl_consecutive_skip_by[] = {
-    {"consecutive",     "L_CHOOSE_CONSECUTIVE",     L_CHOOSE_CONSECUTIVE},
-    {"cons",            "L_CHOOSE_CONSECUTIVE",     L_CHOOSE_CONSECUTIVE},
-    {"skip-by",         "L_CHOOSE_SKIP_BY",         L_CHOOSE_SKIP_BY},
-    {"skip_by",         "L_CHOOSE_SKIP_BY",         L_CHOOSE_SKIP_BY},
-    {"skip",            "L_CHOOSE_SKIP_BY",         L_CHOOSE_SKIP_BY},
+    TBL_ENTRY("consecutive",     L_CHOOSE_CONSECUTIVE),
+    TBL_ENTRY("cons",            L_CHOOSE_CONSECUTIVE),
+    TBL_ENTRY("skip-by",         L_CHOOSE_SKIP_BY),
+    TBL_ENTRY("skip_by",         L_CHOOSE_SKIP_BY),
+    TBL_ENTRY("skip",            L_CHOOSE_SKIP_BY),
 };
 
 /**
@@ -557,16 +572,16 @@ ll_string_consecutive_skip_by(l_int32 choice)
  * \brief Table of color component names and enumeration values
  */
 static const lept_enums_t tbl_component[] = {
-    {"red",             "COLOR_RED",                COLOR_RED},
-    {"r",               "COLOR_RED",                COLOR_RED},
-    {"green",           "COLOR_GREEN",              COLOR_GREEN},
-    {"grn",             "COLOR_GREEN",              COLOR_GREEN},
-    {"g",               "COLOR_GREEN",              COLOR_GREEN},
-    {"blue",            "COLOR_BLUE",               COLOR_BLUE},
-    {"blu",             "COLOR_BLUE",               COLOR_BLUE},
-    {"b",               "COLOR_BLUE",               COLOR_BLUE},
-    {"alpha",           "L_ALPHA_CHANNEL",          L_ALPHA_CHANNEL},
-    {"a",               "L_ALPHA_CHANNEL",          L_ALPHA_CHANNEL}
+    TBL_ENTRY("red",             COLOR_RED),
+    TBL_ENTRY("r",               COLOR_RED),
+    TBL_ENTRY("green",           COLOR_GREEN),
+    TBL_ENTRY("grn",             COLOR_GREEN),
+    TBL_ENTRY("g",               COLOR_GREEN),
+    TBL_ENTRY("blue",            COLOR_BLUE),
+    TBL_ENTRY("blu",             COLOR_BLUE),
+    TBL_ENTRY("b",               COLOR_BLUE),
+    TBL_ENTRY("alpha",           L_ALPHA_CHANNEL),
+    TBL_ENTRY("a",               L_ALPHA_CHANNEL)
 };
 
 /**
@@ -597,8 +612,8 @@ ll_string_component(l_int32 component)
  * \brief Table of choice min/max names and enumeration values
  */
 static const lept_enums_t tbl_choose_min_max[] = {
-    {"min",             "L_CHOOSE_MIN",          L_CHOOSE_MIN},
-    {"max",             "L_CHOOSE_MAX",          L_CHOOSE_MAX}
+    TBL_ENTRY("min",             L_CHOOSE_MIN),
+    TBL_ENTRY("max",             L_CHOOSE_MAX)
 };
 
 /**
@@ -629,12 +644,12 @@ ll_string_choose_min_max(l_int32 choice)
  * \brief Table of white/black is max names and enumeration values
  */
 static const lept_enums_t tbl_what_is_max[] = {
-    {"white-is-max",    "L_WHITE_IS_MAX",          L_WHITE_IS_MAX},
-    {"white",           "L_WHITE_IS_MAX",          L_WHITE_IS_MAX},
-    {"w",               "L_WHITE_IS_MAX",          L_WHITE_IS_MAX},
-    {"black-is-max",    "L_BLACK_IS_MAX",          L_BLACK_IS_MAX},
-    {"black",           "L_BLACK_IS_MAX",          L_BLACK_IS_MAX},
-    {"b",               "L_BLACK_IS_MAX",          L_BLACK_IS_MAX}
+    TBL_ENTRY("white-is-max",    L_WHITE_IS_MAX),
+    TBL_ENTRY("white",           L_WHITE_IS_MAX),
+    TBL_ENTRY("w",               L_WHITE_IS_MAX),
+    TBL_ENTRY("black-is-max",    L_BLACK_IS_MAX),
+    TBL_ENTRY("black",           L_BLACK_IS_MAX),
+    TBL_ENTRY("b",               L_BLACK_IS_MAX)
 };
 
 /**
@@ -665,10 +680,10 @@ ll_string_what_is_max(l_int32 what)
  * \brief Table of get white/black val names and enumeration values
  */
 static const lept_enums_t tbl_getval[] = {
-    {"white",           "L_GET_WHITE_VAL",          L_GET_WHITE_VAL},
-    {"w",               "L_GET_WHITE_VAL",          L_GET_WHITE_VAL},
-    {"black",           "L_GET_BLACK_VAL",          L_GET_BLACK_VAL},
-    {"b",               "L_GET_BLACK_VAL",          L_GET_BLACK_VAL}
+    TBL_ENTRY("white",           L_GET_WHITE_VAL),
+    TBL_ENTRY("w",               L_GET_WHITE_VAL),
+    TBL_ENTRY("black",           L_GET_BLACK_VAL),
+    TBL_ENTRY("b",               L_GET_BLACK_VAL)
 };
 
 /**
@@ -699,14 +714,14 @@ ll_string_getval(l_int32 val)
  * \brief Table of direction names and enumeration values
  */
 static const lept_enums_t tbl_direction[] = {
-    {"horizontal-line", "L_HORIZONTAL_LINE",        L_HORIZONTAL_LINE},
-    {"horizontal",      "L_HORIZONTAL_LINE",        L_HORIZONTAL_LINE},
-    {"horiz",           "L_HORIZONTAL_LINE",        L_HORIZONTAL_LINE},
-    {"h",               "L_HORIZONTAL_LINE",        L_HORIZONTAL_LINE},
-    {"vertical-line",   "L_VERTICAL_LINE",          L_VERTICAL_LINE},
-    {"vertical",        "L_VERTICAL_LINE",          L_VERTICAL_LINE},
-    {"vert",            "L_VERTICAL_LINE",          L_VERTICAL_LINE},
-    {"v",               "L_VERTICAL_LINE",          L_VERTICAL_LINE}
+    TBL_ENTRY("horizontal-line", L_HORIZONTAL_LINE),
+    TBL_ENTRY("horizontal",      L_HORIZONTAL_LINE),
+    TBL_ENTRY("horiz",           L_HORIZONTAL_LINE),
+    TBL_ENTRY("h",               L_HORIZONTAL_LINE),
+    TBL_ENTRY("vertical-line",   L_VERTICAL_LINE),
+    TBL_ENTRY("vertical",        L_VERTICAL_LINE),
+    TBL_ENTRY("vert",            L_VERTICAL_LINE),
+    TBL_ENTRY("v",               L_VERTICAL_LINE)
 };
 
 /**
@@ -737,10 +752,10 @@ ll_string_direction(l_int32 dir)
  * \brief Table of set white/black names and enumeration values
  */
 static const lept_enums_t tbl_blackwhite[] = {
-    {"white",           "L_SET_WHITE",          L_SET_WHITE},
-    {"w",               "L_SET_WHITE",          L_SET_WHITE},
-    {"black",           "L_SET_BLACK",          L_SET_BLACK},
-    {"b",               "L_SET_BLACK",          L_SET_BLACK}
+    TBL_ENTRY("white",           L_SET_WHITE),
+    TBL_ENTRY("w",               L_SET_WHITE),
+    TBL_ENTRY("black",           L_SET_BLACK),
+    TBL_ENTRY("b",               L_SET_BLACK)
 };
 
 /**
@@ -771,26 +786,26 @@ ll_string_blackwhite(l_int32 which)
  * \brief Table of rasterop names and enumeration values
  */
 static const lept_enums_t tbl_rasterop[] = {
-    {"clr",             "PIX_CLR",                      PIX_CLR},
-    {"set",             "PIX_SET",                      PIX_SET},
-    {"src",             "PIX_SRC",                      PIX_SRC},
-    {"dst",             "PIX_DST",                      PIX_DST},
-    {"!src",            "PIX_NOT(PIX_SRC)",             PIX_NOT(PIX_SRC)},
-    {"!dst",            "PIX_NOT(PIX_DST)",             PIX_NOT(PIX_DST)},
-    {"src|dst",         "PIX_SRC | PIX_DST",            PIX_SRC | PIX_DST},
-    {"paint",           "PIX_SRC | PIX_DST",            PIX_SRC | PIX_DST},
-    {"src&dst",         "PIX_SRC & PIX_DST",            PIX_SRC & PIX_DST},
-    {"mask",            "PIX_SRC & PIX_DST",            PIX_SRC & PIX_DST},
-    {"src^dst",         "PIX_SRC ^ PIX_DST",            PIX_SRC ^ PIX_DST},
-    {"xor",             "PIX_SRC ^ PIX_DST",            PIX_SRC ^ PIX_DST},
-    {"!src|dst",        "PIX_NOT(PIX_SRC) | PIX_DST",   PIX_NOT(PIX_SRC) | PIX_DST},
-    {"!src&dst",        "PIX_NOT(PIX_SRC) & PIX_DST",   PIX_NOT(PIX_SRC) & PIX_DST},
-    {"subtract",        "PIX_NOT(PIX_SRC) & PIX_DST",   PIX_NOT(PIX_SRC) & PIX_DST},
-    {"src|!dst",        "PIX_SRC | PIX_NOT(PIX_DST)",   PIX_SRC | PIX_NOT(PIX_DST)},
-    {"src&!dst",        "PIX_SRC & PIX_NOT(PIX_DST)",   PIX_SRC & PIX_NOT(PIX_DST)},
-    {"!(src|dst)",      "PIX_NOT(PIX_SRC | PIX_DST)",   PIX_NOT(PIX_SRC | PIX_DST)},
-    {"!(src&dst)",      "PIX_NOT(PIX_SRC & PIX_DST)",   PIX_NOT(PIX_SRC & PIX_DST)},
-    {"!(src^dst)",      "PIX_NOT(PIX_SRC ^ PIX_DST)",   PIX_NOT(PIX_SRC ^ PIX_DST)}
+    TBL_ENTRY("clr",             PIX_CLR),
+    TBL_ENTRY("set",             PIX_SET),
+    TBL_ENTRY("src",             PIX_SRC),
+    TBL_ENTRY("dst",             PIX_DST),
+    TBL_ENTRY("!src",            PIX_NOT(PIX_SRC)),
+    TBL_ENTRY("!dst",            PIX_NOT(PIX_DST)),
+    TBL_ENTRY("src|dst",         PIX_SRC | PIX_DST),
+    TBL_ENTRY("paint",           PIX_SRC | PIX_DST),
+    TBL_ENTRY("src&dst",         PIX_SRC & PIX_DST),
+    TBL_ENTRY("mask",            PIX_SRC & PIX_DST),
+    TBL_ENTRY("src^dst",         PIX_SRC ^ PIX_DST),
+    TBL_ENTRY("xor",             PIX_SRC ^ PIX_DST),
+    TBL_ENTRY("!src|dst",        PIX_NOT(PIX_SRC) | PIX_DST),
+    TBL_ENTRY("!src&dst",        PIX_NOT(PIX_SRC) & PIX_DST),
+    TBL_ENTRY("subtract",        PIX_NOT(PIX_SRC) & PIX_DST),
+    TBL_ENTRY("src|!dst",        PIX_SRC | PIX_NOT(PIX_DST)),
+    TBL_ENTRY("src&!dst",        PIX_SRC & PIX_NOT(PIX_DST)),
+    TBL_ENTRY("!(src|dst)",      PIX_NOT(PIX_SRC | PIX_DST)),
+    TBL_ENTRY("!(src&dst)",      PIX_NOT(PIX_SRC & PIX_DST)),
+    TBL_ENTRY("!(src^dst)",      PIX_NOT(PIX_SRC ^ PIX_DST))
 };
 
 /**
@@ -821,15 +836,15 @@ ll_string_rasterop(l_int32 op)
  * \brief Table of search direction names and enumeration values
  */
 static const lept_enums_t tbl_searchdir[] = {
-    {"horizontal",          "L_HORIZ",              L_HORIZ},
-    {"horiz",               "L_HORIZ",              L_HORIZ},
-    {"h",                   "L_HORIZ",              L_HORIZ},
-    {"vertical",            "L_VERT",               L_VERT},
-    {"vert",                "L_VERT",               L_VERT},
-    {"v",                   "L_VERT",               L_VERT},
-    {"both-directions",     "L_BOTH_DIRECTIONS",    L_BOTH_DIRECTIONS},
-    {"both",                "L_BOTH_DIRECTIONS",    L_BOTH_DIRECTIONS},
-    {"b",                   "L_BOTH_DIRECTIONS",    L_BOTH_DIRECTIONS}
+    TBL_ENTRY("horizontal",          L_HORIZ),
+    TBL_ENTRY("horiz",               L_HORIZ),
+    TBL_ENTRY("h",                   L_HORIZ),
+    TBL_ENTRY("vertical",            L_VERT),
+    TBL_ENTRY("vert",                L_VERT),
+    TBL_ENTRY("v",                   L_VERT),
+    TBL_ENTRY("both-directions",     L_BOTH_DIRECTIONS),
+    TBL_ENTRY("both",                L_BOTH_DIRECTIONS),
+    TBL_ENTRY("b",                   L_BOTH_DIRECTIONS)
 };
 
 /**
@@ -860,19 +875,19 @@ ll_string_searchir(l_int32 dir)
  * \brief Table of stats type names and enumeration values
  */
 static const lept_enums_t tbl_stats_type[] = {
-    {"mean-absval",         "L_MEAN_ABSVAL",        L_MEAN_ABSVAL},
-    {"mean-abs",            "L_MEAN_ABSVAL",        L_MEAN_ABSVAL},
-    {"mean",                "L_MEAN_ABSVAL",        L_MEAN_ABSVAL},
-    {"m",                   "L_MEAN_ABSVAL",        L_MEAN_ABSVAL},
-    {"root-mean-square",    "L_ROOT_MEAN_SQUARE",   L_ROOT_MEAN_SQUARE},
-    {"rms",                 "L_ROOT_MEAN_SQUARE",   L_ROOT_MEAN_SQUARE},
-    {"r",                   "L_ROOT_MEAN_SQUARE",   L_ROOT_MEAN_SQUARE},
-    {"standard-deviation",  "L_STANDARD_DEVIATION", L_STANDARD_DEVIATION},
-    {"stddev",              "L_STANDARD_DEVIATION", L_STANDARD_DEVIATION},
-    {"s",                   "L_STANDARD_DEVIATION", L_STANDARD_DEVIATION},
-    {"variance",            "L_VARIANCE",           L_VARIANCE},
-    {"var",                 "L_VARIANCE",           L_VARIANCE},
-    {"v",                   "L_VARIANCE",           L_VARIANCE}
+    TBL_ENTRY("mean-absval",         L_MEAN_ABSVAL),
+    TBL_ENTRY("mean-abs",            L_MEAN_ABSVAL),
+    TBL_ENTRY("mean",                L_MEAN_ABSVAL),
+    TBL_ENTRY("m",                   L_MEAN_ABSVAL),
+    TBL_ENTRY("root-mean-square",    L_ROOT_MEAN_SQUARE),
+    TBL_ENTRY("rms",                 L_ROOT_MEAN_SQUARE),
+    TBL_ENTRY("r",                   L_ROOT_MEAN_SQUARE),
+    TBL_ENTRY("standard-deviation",  L_STANDARD_DEVIATION),
+    TBL_ENTRY("stddev",              L_STANDARD_DEVIATION),
+    TBL_ENTRY("s",                   L_STANDARD_DEVIATION),
+    TBL_ENTRY("variance",            L_VARIANCE),
+    TBL_ENTRY("var",                 L_VARIANCE),
+    TBL_ENTRY("v",                   L_VARIANCE)
 };
 
 /**
@@ -903,21 +918,21 @@ ll_string_stats_type(l_int32 type)
  * \brief Table of select color names and enumeration values
  */
 static const lept_enums_t tbl_select_color[] = {
-    {"red",                 "L_SELECT_RED",         L_SELECT_RED},
-    {"r",                   "L_SELECT_RED",         L_SELECT_RED},
-    {"green",               "L_SELECT_GREEN",       L_SELECT_GREEN},
-    {"grn",                 "L_SELECT_GREEN",       L_SELECT_GREEN},
-    {"g",                   "L_SELECT_GREEN",       L_SELECT_GREEN},
-    {"blue",                "L_SELECT_BLUE",        L_SELECT_BLUE},
-    {"blu",                 "L_SELECT_BLUE",        L_SELECT_BLUE},
-    {"b",                   "L_SELECT_BLUE",        L_SELECT_BLUE},
-    {"min",                 "L_SELECT_MIN",         L_SELECT_MIN},
-    {"max",                 "L_SELECT_MAX",         L_SELECT_MAX},
-    {"average",             "L_SELECT_AVERAGE",     L_SELECT_AVERAGE},
-    {"avg",                 "L_SELECT_AVERAGE",     L_SELECT_AVERAGE},
-    {"hue",                 "L_SELECT_HUE",         L_SELECT_HUE},
-    {"saturation",          "L_SELECT_SATURATION",  L_SELECT_SATURATION},
-    {"sat",                 "L_SELECT_SATURATION",  L_SELECT_SATURATION}
+    TBL_ENTRY("red",                 L_SELECT_RED),
+    TBL_ENTRY("r",                   L_SELECT_RED),
+    TBL_ENTRY("green",               L_SELECT_GREEN),
+    TBL_ENTRY("grn",                 L_SELECT_GREEN),
+    TBL_ENTRY("g",                   L_SELECT_GREEN),
+    TBL_ENTRY("blue",                L_SELECT_BLUE),
+    TBL_ENTRY("blu",                 L_SELECT_BLUE),
+    TBL_ENTRY("b",                   L_SELECT_BLUE),
+    TBL_ENTRY("min",                 L_SELECT_MIN),
+    TBL_ENTRY("max",                 L_SELECT_MAX),
+    TBL_ENTRY("average",             L_SELECT_AVERAGE),
+    TBL_ENTRY("avg",                 L_SELECT_AVERAGE),
+    TBL_ENTRY("hue",                 L_SELECT_HUE),
+    TBL_ENTRY("saturation",          L_SELECT_SATURATION),
+    TBL_ENTRY("sat",                 L_SELECT_SATURATION)
 };
 
 /**
@@ -948,8 +963,8 @@ ll_string_select_color(l_int32 color)
  * \brief Table of select min/max names and enumeration values
  */
 static const lept_enums_t tbl_select_minmax[] = {
-    {"min",                 "L_SELECT_MIN",          L_SELECT_MIN},
-    {"max",                 "L_SELECT_MAX",          L_SELECT_MAX}
+    TBL_ENTRY("min",                 L_SELECT_MIN),
+    TBL_ENTRY("max",                 L_SELECT_MAX)
 };
 
 /**
@@ -1040,8 +1055,8 @@ static int
 Destroy(lua_State *L)
 {
     void **plept = ll_check_udata(L, 1, LL_LEPT);
-    DBG(LOG_DESTROY, "%s: '%s' plept=%p lept=%p\n", __func__,
-        LL_LEPT, (void *)plept, *plept);
+    DBG(LOG_DESTROY, "%s: '%s' plept=%p lept=%p\n",
+         __func__, LL_LEPT, plept, *plept);
     free(*plept);
     *plept = nullptr;
     return 0;

@@ -46,7 +46,7 @@
 PixColormap *
 ll_check_PixColormap(lua_State *L, int arg)
 {
-    return *(PixColormap **)ll_check_udata(L, arg, LL_PIXCMAP);
+    return *(reinterpret_cast<PixColormap **>(ll_check_udata(L, arg, LL_PIXCMAP)));
 }
 
 /**
@@ -194,10 +194,10 @@ CreateLinear(lua_State *L)
 static int
 Destroy(lua_State *L)
 {
-    void **pcmap = ll_check_udata(L, 1, LL_PIXCMAP);
-    DBG(LOG_DESTROY, "%s: '%s' pcmap=%p cmap=%p\n", __func__,
-        LL_PIXCMAP, (void *)pcmap, *pcmap);
-    pixcmapDestroy((PixColormap **)pcmap);
+    PixColormap **pcmap = reinterpret_cast<PixColormap **>(ll_check_udata(L, 1, LL_PIXCMAP));
+    DBG(LOG_DESTROY, "%s: '%s' pcmap=%p cmap=%p\n",
+        __func__, LL_PIXCMAP, pcmap, *pcmap);
+    pixcmapDestroy(pcmap);
     *pcmap = nullptr;
     return 0;
 }
@@ -706,6 +706,42 @@ CountGrayColors(lua_State *L)
 }
 
 /**
+ * \brief Read a PixColormap* (%cmap) from a file
+ *
+ * Arg #1 is expected to be a string (filename)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+Read(lua_State *L)
+{
+    const char *filename = lua_tostring(L, 1);
+    PixColormap *cmap = pixcmapRead(filename);
+    return ll_push_PixColormap(L, cmap);
+}
+
+/**
+ * \brief Write a PixColormap* (%cmap) to a file
+ *
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap)
+ * Arg #2 is expected to be a string (filename)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+Write(lua_State *L)
+{
+    PixColormap *cmap = ll_check_PixColormap(L, 1);
+    const char *filename = lua_tostring(L, 2);
+    if (pixcmapWrite(filename, cmap))
+        return 0;
+    lua_pushboolean(L, TRUE);
+    return 1;
+}
+
+/**
  * \brief Register the PIXCMAP methods and functions in the LL_PIX meta table
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
@@ -743,6 +779,7 @@ ll_register_PixColormap(lua_State *L)
         {"IsOpaque",            IsOpaque},
         {"IsBlackAndWhite",     IsBlackAndWhite},
         {"CountGrayColors",     CountGrayColors},
+        {"Write",               Write},
         LUA_SENTINEL
     };
 
@@ -750,6 +787,7 @@ ll_register_PixColormap(lua_State *L)
         {"Create",              Create},
         {"CreateRandom",        CreateRandom},
         {"CreateLinear",        CreateLinear},
+        {"Read",                Read},
         LUA_SENTINEL
     };
 
