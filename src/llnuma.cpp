@@ -348,7 +348,7 @@ ShiftValue(lua_State *L)
 }
 
 /**
- * \brief Get the Numa* as an array of lua_Number
+ * \brief Get the Numa* as a table of lua_Number
  *
  * Arg #1 (i.e. self) is expected to be a Numa*
  * Arg #2 is an optional string defining the storage flags (copy, clone,
@@ -361,16 +361,12 @@ static int
 GetFArray(lua_State *L)
 {
     Numa *na = ll_check_Numa(L, 1);
-    l_int32 copyflag = ll_check_access_storage(L, 2, L_COPY);
-    l_float32 *array = numaGetFArray(na, copyflag);
+    l_int32 copyflag = ll_check_access_storage(__func__, L, 2, L_COPY);
+    l_float32 *fa = numaGetFArray(na, copyflag);
     l_int32 n = numaGetCount(na);
-    l_int32 i;
-    lua_checkstack(L, n);
-    for (i = 0; i < n; i++) {
-        lua_pushnumber(L, (lua_Number)array[i]);
-    }
-    free(array);
-    return n;
+    int res = ll_push_farray(L, fa, n);
+    LEPT_FREE(fa);
+    return res;
 }
 
 /**
@@ -385,15 +381,11 @@ static int
 GetIArray(lua_State *L)
 {
     Numa *na = ll_check_Numa(L, 1);
-    l_int32 *array = numaGetIArray(na);
+    l_int32 *ia = numaGetIArray(na);
     l_int32 n = numaGetCount(na);
-    l_int32 i;
-    lua_checkstack(L, n);
-    for (i = 0; i < n; i++) {
-        lua_pushinteger(L, (lua_Integer)array[i]);
-    }
-    free(array);
-    return n;
+    int res = ll_push_iarray(L, ia, n);
+    LEPT_FREE(ia);
+    return res;
 }
 
 /**

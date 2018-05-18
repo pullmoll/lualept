@@ -250,6 +250,20 @@ function dna_test()
 	print(pad("da:GetIArray()"), da:GetIArray())
 end
 
+function bmf_test()
+	local dir = "fonts";
+	local bmf = LuaLept.Bmf(dir, 10);
+	print(pad("bmf"), bmf)
+	local chr = string.byte('x')
+	print(pad("bmf:GetWidth("..chr..")"), bmf:GetWidth(chr))
+	local l = {}
+	local h, t = bmf:GetLineStrings("This is just a simple test to see how bmf:GetLineStrings() works out.", 240, 0)
+	print(pad("bmf:GetLineStrings(...)"), h, #t, t)
+	for k,v in pairs(t) do
+		print(pad("k="..k), v)
+	end
+end
+
 function pix_test()
 	local filename = "/tmp/test.png"
 	header("Pix")
@@ -364,12 +378,13 @@ print(pad("LuaLept:Version()"), LuaLept:Version())
 print(pad("LuaLept:LuaVersion()"), LuaLept:LuaVersion())
 print(pad("LuaLept:LeptVersion()"), LuaLept:LeptVersion())
 
+bmf_test()
 -- aset_test()
 -- amap_test()
 -- pta_test()
-box_test()
+-- box_test()
 -- numa_test()
--- dna_test()
+dna_test()
 -- pix_test()
 -- pix2_test()
 

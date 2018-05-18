@@ -211,7 +211,7 @@ AddDna(lua_State *L)
 {
     L_Dnaa *daa = ll_check_Dnaa(L, 1);
     L_Dna *da = ll_check_Dna(L, 2);
-    l_int32 copyflag = ll_check_access_storage(L, 3, L_COPY);
+    l_int32 copyflag = ll_check_access_storage(__func__, L, 3, L_COPY);
     lua_pushboolean(L, 0 == l_dnaaAddDna(daa, da, copyflag));
     return 1;
 }
@@ -231,7 +231,7 @@ GetDna(lua_State *L)
 {
     L_Dnaa *daa = ll_check_Dnaa(L, 1);
     l_int32 idx = ll_check_index(__func__, L, 2, l_dnaaGetCount(daa));
-    l_int32 accessflag = ll_check_access_storage(L, 3, L_COPY);
+    l_int32 accessflag = ll_check_access_storage(__func__, L, 3, L_COPY);
     L_Dna *da = l_dnaaGetDna(daa, idx, accessflag);
     return ll_push_Dna(L, da);
 }

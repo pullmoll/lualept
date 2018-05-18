@@ -125,7 +125,7 @@ static int
 Copy(lua_State *L)
 {
     Pixa *pixas = ll_check_Pixa(L, 1);
-    l_int32 copyflag = ll_check_access_storage(L, 2, L_COPY);
+    l_int32 copyflag = ll_check_access_storage(__func__, L, 2, L_COPY);
     Pixa *pixa = pixaCopy(pixas, copyflag);
     return ll_push_Pixa(L, pixa);
 }
@@ -144,7 +144,7 @@ AddPix(lua_State *L)
 {
     Pixa *pixa = ll_check_Pixa(L, 1);
     Pix *pix = ll_check_Pix(L, 2);
-    l_int32 flag = ll_check_access_storage(L, 3, L_COPY);
+    l_int32 flag = ll_check_access_storage(__func__, L, 3, L_COPY);
     lua_pushboolean(L, 0 == pixaAddPix(pixa, pix, flag));
     return 1;
 }
@@ -313,7 +313,7 @@ Interleave(lua_State *L)
 {
     Pixa *pixa1 = ll_check_Pixa(L, 1);
     Pixa *pixa2 = ll_check_Pixa(L, 2);
-    l_int32 copyflag = ll_check_access_storage(L, 3, L_CLONE);
+    l_int32 copyflag = ll_check_access_storage(__func__, L, 3, L_CLONE);
     Pixa *pixa = pixaInterleave(pixa1, pixa2, copyflag);
     return ll_push_Pixa(L, pixa);
 }
@@ -346,7 +346,7 @@ static int
 GetAlignedStats(lua_State *L)
 {
     Pixa *pixa = ll_check_Pixa(L, 1);
-    l_int32 type = ll_check_stats_type(L, 2, L_MEAN_ABSVAL);
+    l_int32 type = ll_check_stats_type(__func__, L, 2, L_MEAN_ABSVAL);
     l_int32 nbins = ll_check_l_int32_default(__func__, L, 3, 2);
     l_int32 thresh = ll_check_l_int32_default(__func__, L, 4, 0);
     Pix *pix = pixaGetAlignedStats(pixa, type, nbins, thresh);

@@ -185,7 +185,7 @@ GetPta(lua_State *L)
 {
     Ptaa *ptaa = ll_check_Ptaa(L, 1);
     l_int32 idx = ll_check_index(__func__, L, 2, ptaaGetCount(ptaa));
-    l_int32 accessflag = ll_check_access_storage(L, 3, L_COPY);
+    l_int32 accessflag = ll_check_access_storage(__func__, L, 3, L_COPY);
     Pta *pta = ptaaGetPta(ptaa, idx, accessflag);
     return ll_push_Pta(L, pta);
 }
@@ -206,7 +206,7 @@ AddPta(lua_State *L)
 {
     Ptaa *ptaa = ll_check_Ptaa(L, 1);
     Pta *pta = ll_check_Pta(L, 2);
-    l_int32 copyflag = ll_check_access_storage(L, 3, L_COPY);
+    l_int32 copyflag = ll_check_access_storage(__func__, L, 3, L_COPY);
     lua_pushboolean(L, 0 == ptaaAddPta(ptaa, pta, copyflag));
     return 1;
 }

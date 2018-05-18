@@ -352,7 +352,7 @@ static int
 AddBlackOrWhite(lua_State *L)
 {
     PixColormap *cmap = ll_check_PixColormap(L, 1);
-    l_int32 color = ll_check_blackwhite(L, 2, L_SET_BLACK);
+    l_int32 color = ll_check_blackwhite(__func__, L, 2, L_SET_BLACK);
     l_int32 idx = 0;
     if (pixcmapAddBlackOrWhite(cmap, color, &idx))
         return ll_push_nil(L);

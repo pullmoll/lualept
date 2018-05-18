@@ -513,7 +513,7 @@ CompareSize(lua_State *L)
 {
     Box *box1 = ll_check_Box(L, 1);
     Box *box2 = ll_check_Box(L, 2);
-    l_int32 type = ll_check_sort_by(L, 3, L_SORT_BY_WIDTH);
+    l_int32 type = ll_check_sort_by(__func__, L, 3, L_SORT_BY_WIDTH);
     l_int32 rel = 0;
     if (boxCompareSize(box1, box2, type, &rel))
         return ll_push_nil(L);
@@ -658,7 +658,7 @@ RelocateOneSide(lua_State *L)
 {
     Box *boxs = ll_check_Box(L, 1);
     l_int32 loc = ll_check_l_int32(__func__, L, 2);
-    l_int32 sideflag = ll_check_from_side(L, 3, L_FROM_LEFT);
+    l_int32 sideflag = ll_check_from_side(__func__, L, 3, L_FROM_LEFT);
     Box *boxd = boxRelocateOneSide(nullptr, boxs, loc, sideflag);
     ll_push_Box(L, boxd);
     return 1;
@@ -761,6 +761,61 @@ Transform(lua_State *L)
 }
 
 /**
+ * \brief Ordered transform a Box* (%boxs) by shifting and scaling
+ *
+ * Arg #1 (i.e. self) is expected to be a Box* (boxs)
+ * Arg #2 is expected to be a string describing the transform order (order)
+ * Arg #3 is optional and, if given, expected to be a l_int32 (shiftx)
+ * Arg #4 is optional and, if given, expected to be a l_int32 (shifty)
+ * Arg #5 is optional and, if given, expected to be a l_float32 (scalex)
+ * Arg #6 is optional and, if given, expected to be a l_float32 (scaley)
+ * Arg #7 is optional and, if given, expected to be a l_int32 (xcen)
+ * Arg #8 is optional and, if given, expected to be a l_int32 (ycen)
+ * Arg #9 is optional and, if given, expected to be a l_float32 (angle)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Box* on the Lua stack
+ */
+static int
+TransformOrdered(lua_State *L)
+{
+    Box *boxs = ll_check_Box(L, 1);
+    l_float32 xc, yc;
+    l_int32 ok = boxGetCenter(boxs, &xc, &yc);
+    l_int32 order = ll_check_order(__func__, L, 2, L_TR_SC_RO);
+    l_int32 shiftx = ll_check_l_int32_default(__func__, L, 3, 0);
+    l_int32 shifty = ll_check_l_int32_default(__func__, L, 4, 0);
+    l_float32 scalex = ll_check_l_float32_default(__func__, L, 5, 1.0f);
+    l_float32 scaley = ll_check_l_float32_default(__func__, L, 6, 1.0f);
+    l_int32 xcen = ll_check_l_int32_default(__func__, L, 7, ok ? static_cast<l_int32>(xc) : 0);
+    l_int32 ycen = ll_check_l_int32_default(__func__, L, 8, ok ? static_cast<l_int32>(yc) : 0);
+    l_float32 angle = ll_check_l_float32_default(__func__, L, 9, 0.0f);
+    Box *box = boxTransformOrdered(boxs, shiftx, shifty, scalex, scaley, xcen, ycen, angle, order);
+    ll_push_Box(L, box);
+    return 1;
+}
+
+/**
+ * \brief Rotate a Box* (%boxs)
+ *
+ * Arg #1 (i.e. self) is expected to be a Box* (boxs)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Box* on the Lua stack
+ */
+static int
+RotateOrth(lua_State *L)
+{
+    Box *boxs = ll_check_Box(L, 1);
+    l_int32 w = ll_check_l_int32(__func__, L, 2);
+    l_int32 h = ll_check_l_int32(__func__, L, 3);
+    l_int32 rotation = ll_check_rotation(__func__, L, 4, 0);
+    Box *box = boxRotateOrth(boxs, w, h, rotation);
+    ll_push_Box(L, box);
+    return 1;
+}
+
+/**
  * \brief Register the BOX methods and functions in the LL_BOX meta table
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
@@ -801,6 +856,8 @@ ll_register_Box(lua_State *L)
         {"Equal",                   Equal},
         {"Similar",                 Similar},
         {"Transform",               Transform},
+        {"TransformOrdered",        TransformOrdered},
+        {"RotateOrth",              RotateOrth},
         LUA_SENTINEL
     };
 

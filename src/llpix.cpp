@@ -796,7 +796,7 @@ static int
 SetInputFormat(lua_State *L)
 {
     Pix *pix = ll_check_Pix(L, 1);
-    l_int32 format = ll_check_input_format(L, 2, IFF_UNKNOWN);
+    l_int32 format = ll_check_input_format(__func__, L, 2, IFF_UNKNOWN);
     lua_pushboolean(L, 0 == pixSetInputFormat(pix, format));
     return 1;
 }
@@ -1116,7 +1116,7 @@ static int
 GetBlackOrWhiteVal(lua_State *L)
 {
     Pix *pix = ll_check_Pix(L, 1);
-    l_int32 op = ll_check_getval(L, 2, L_GET_BLACK_VAL);
+    l_int32 op = ll_check_getval(__func__, L, 2, L_GET_BLACK_VAL);
     l_uint32 val = 0;
     if (pixGetBlackOrWhiteVal(pix, op, &val))
         return ll_push_nil(L);
@@ -1243,7 +1243,7 @@ static int
 SetBlackOrWhite(lua_State *L)
 {
     Pix *pix = ll_check_Pix(L, 1);
-    l_int32 op = ll_check_blackwhite(L, 2, L_SET_BLACK);
+    l_int32 op = ll_check_blackwhite(__func__, L, 2, L_SET_BLACK);
     lua_pushboolean(L, 0 == pixSetBlackOrWhite(pix, op));
     return 1;
 }
@@ -1294,7 +1294,7 @@ static int
 SetComponentArbitrary(lua_State *L)
 {
     Pix *pix = ll_check_Pix(L, 1);
-    l_int32 comp = ll_check_component(L, 2, 0);
+    l_int32 comp = ll_check_component(__func__, L, 2, 0);
     l_int32 val = ll_check_l_int32(__func__, L, 3);
     lua_pushboolean(L, 0 == pixSetComponentArbitrary(pix, comp, val));
     return 1;
@@ -1439,7 +1439,7 @@ SetOrClearBorder(lua_State *L)
     l_int32 right = ll_check_l_int32(__func__, L, 3);
     l_int32 top = ll_check_l_int32(__func__, L, 4);
     l_int32 bottom = ll_check_l_int32(__func__, L, 5);
-    l_int32 op = ll_check_rasterop(L, 6, PIX_CLR);
+    l_int32 op = ll_check_rasterop(__func__, L, 6, PIX_CLR);
     lua_pushboolean(L, 0 == pixSetOrClearBorder(pix, left, right, top, bottom, op));
     return 1;
 }
@@ -1581,7 +1581,7 @@ AddBlackOrWhiteBorder(lua_State *L)
     l_int32 right = ll_check_l_int32(__func__, L, 3);
     l_int32 top = ll_check_l_int32(__func__, L, 4);
     l_int32 bottom = ll_check_l_int32(__func__, L, 5);
-    l_int32 op = ll_check_getval(L, 6, L_GET_BLACK_VAL);
+    l_int32 op = ll_check_getval(__func__, L, 6, L_GET_BLACK_VAL);
     Pix* pix = pixAddBlackOrWhiteBorder(pixs, left, right, top, bottom, op);
     ll_push_Pix(L, pix);
     return 1;
@@ -1857,7 +1857,7 @@ static int
 GetRGBComponent(lua_State *L)
 {
     Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 comp = ll_check_component(L, 2, L_ALPHA_CHANNEL);
+    l_int32 comp = ll_check_component(__func__, L, 2, L_ALPHA_CHANNEL);
     ll_push_Pix(L, pixGetRGBComponent(pixs, comp));
     return 1;
 }
@@ -1877,7 +1877,7 @@ SetRGBComponent(lua_State *L)
 {
     Pix *pixd = ll_check_Pix(L, 1);
     Pix *pixs = ll_check_Pix(L, 2);
-    l_int32 comp = ll_check_component(L, 3, L_ALPHA_CHANNEL);
+    l_int32 comp = ll_check_component(__func__, L, 3, L_ALPHA_CHANNEL);
     lua_pushboolean(L, 0 == pixSetRGBComponent(pixd, pixs, comp));
     return 1;
 }
@@ -1897,7 +1897,7 @@ CopyRGBComponent(lua_State *L)
 {
     Pix *pixd = ll_check_Pix(L, 1);
     Pix *pixs = ll_check_Pix(L, 2);
-    l_int32 comp = ll_check_component(L, 3, L_ALPHA_CHANNEL);
+    l_int32 comp = ll_check_component(__func__, L, 3, L_ALPHA_CHANNEL);
     lua_pushboolean(L, 0 == pixCopyRGBComponent(pixd, pixs, comp));
     return 1;
 }
@@ -2088,7 +2088,7 @@ PaintSelfThroughMask(lua_State *L)
     Pix *pixm = ll_check_Pix(L, 2);
     l_int32 x = ll_check_l_int32(__func__, L, 3);
     l_int32 y = ll_check_l_int32(__func__, L, 4);
-    l_int32 searchdir = ll_check_searchdir(L, 5, L_BOTH_DIRECTIONS);
+    l_int32 searchdir = ll_check_searchdir(__func__, L, 5, L_BOTH_DIRECTIONS);
     l_int32 mindist = ll_check_l_int32(__func__, L, 6);
     l_int32 tilesize = ll_check_l_int32(__func__, L, 7);
     l_int32 ntiles = ll_check_l_int32(__func__, L, 8);
@@ -2512,7 +2512,7 @@ AverageByRow(lua_State *L)
 {
     Pix *pixs = ll_check_Pix(L, 1);
     Box *box = lua_isuserdata(L, 2) ? ll_check_Box(L, 2) : nullptr;
-    l_int32 type = ll_check_what_is_max(L, 3, L_WHITE_IS_MAX);
+    l_int32 type = ll_check_what_is_max(__func__, L, 3, L_WHITE_IS_MAX);
     Numa* na = pixAverageByRow(pixs, box, type);
     return ll_push_Numa(L, na);
 }
@@ -2532,7 +2532,7 @@ AverageByColumn(lua_State *L)
 {
     Pix *pixs = ll_check_Pix(L, 1);
     Box *box = lua_isuserdata(L, 2) ? ll_check_Box(L, 2) : nullptr;
-    l_int32 type = ll_check_what_is_max(L, 3, L_WHITE_IS_MAX);
+    l_int32 type = ll_check_what_is_max(__func__, L, 3, L_WHITE_IS_MAX);
     Numa* na = pixAverageByColumn(pixs, box, type);
     return ll_push_Numa(L, na);
 }
@@ -2666,7 +2666,7 @@ AbsDiffInRect(lua_State *L)
 {
     Pix *pixs = ll_check_Pix(L, 1);
     Box *box = lua_isuserdata(L, 2) ? ll_check_Box(L, 2) : nullptr;
-    l_int32 dir = ll_check_direction(L, 3, L_HORIZONTAL_LINE);
+    l_int32 dir = ll_check_direction(__func__, L, 3, L_HORIZONTAL_LINE);
     l_float32 absdiff = 0.0f;
     if (pixAbsDiffInRect(pixs, box, dir, &absdiff))
         return ll_push_nil(L);
@@ -2761,7 +2761,7 @@ FindRepCloseTile(lua_State *L)
 {
     Pix *pixs = ll_check_Pix(L, 1);
     Box *box = ll_check_Box(L, 2);
-    l_int32 searchdir = ll_check_direction(L, 3, L_HORIZ);
+    l_int32 searchdir = ll_check_direction(__func__, L, 3, L_HORIZ);
     l_int32 mindist = ll_check_l_int32(__func__, L, 4);
     l_int32 tsize = ll_check_l_int32(__func__, L, 5);
     l_int32 ntiles = ll_check_l_int32(__func__, L, 6);
@@ -3120,7 +3120,7 @@ static int
 GetPixelStats(lua_State *L)
 {
     Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 type = ll_check_stats_type(L, 2, L_MEAN_ABSVAL);
+    l_int32 type = ll_check_stats_type(__func__, L, 2, L_MEAN_ABSVAL);
     l_int32 factor = ll_check_l_int32_default(__func__, L, 3, 1);
     l_uint32 value = 0;
     if (pixGetPixelStats(pixs, factor, type, &value))
@@ -3146,7 +3146,7 @@ static int
 GetAverageMaskedRGB(lua_State *L)
 {
     Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 type = ll_check_stats_type(L, 2, L_MEAN_ABSVAL);
+    l_int32 type = ll_check_stats_type(__func__, L, 2, L_MEAN_ABSVAL);
     Pix *pixm = lua_isuserdata(L, 3) ? ll_check_Pix(L, 3) : nullptr;
     l_int32 x = ll_check_l_int32_default(__func__, L, 4, 0);
     l_int32 y = ll_check_l_int32_default(__func__, L, 5, 0);
@@ -3177,7 +3177,7 @@ static int
 GetAverageMasked(lua_State *L)
 {
     Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 type = ll_check_stats_type(L, 2, L_MEAN_ABSVAL);
+    l_int32 type = ll_check_stats_type(__func__, L, 2, L_MEAN_ABSVAL);
     Pix *pixm = lua_isuserdata(L, 3) ? ll_check_Pix(L, 3) : nullptr;
     l_int32 x = ll_check_l_int32_default(__func__, L, 4, 0);
     l_int32 y = ll_check_l_int32_default(__func__, L, 5, 0);
@@ -3204,7 +3204,7 @@ static int
 GetAverageTiledRGB(lua_State *L)
 {
     Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 type = ll_check_stats_type(L, 2, L_MEAN_ABSVAL);
+    l_int32 type = ll_check_stats_type(__func__, L, 2, L_MEAN_ABSVAL);
     l_int32 sx = ll_check_l_int32_default(__func__, L, 3, 2);
     l_int32 sy = ll_check_l_int32_default(__func__, L, 4, 2);
     Pix *pixr = nullptr;
@@ -3230,7 +3230,7 @@ static int
 GetAverageTiled(lua_State *L)
 {
     Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 type = ll_check_stats_type(L, 2, L_MEAN_ABSVAL);
+    l_int32 type = ll_check_stats_type(__func__, L, 2, L_MEAN_ABSVAL);
     l_int32 sx = ll_check_l_int32_default(__func__, L, 3, 2);
     l_int32 sy = ll_check_l_int32_default(__func__, L, 4, 2);
     Pix *pixv = pixGetAverageTiled(pixs, sx, sy, type);
@@ -3312,7 +3312,7 @@ GetRangeValues(lua_State *L)
 {
     Pix *pixs = ll_check_Pix(L, 1);
     l_int32 factor = ll_check_l_int32_default(__func__, L, 2, 1);
-    l_int32 color = ll_check_select_color(L, 3, L_SELECT_RED);
+    l_int32 color = ll_check_select_color(__func__, L, 3, L_SELECT_RED);
     l_int32 minval = 0;
     l_int32 maxval = 0;
     if (pixGetRangeValues(pixs, factor, color, &minval, &maxval))
@@ -3337,7 +3337,7 @@ GetExtremeValue(lua_State *L)
 {
     Pix *pixs = ll_check_Pix(L, 1);
     l_int32 factor = ll_check_l_int32_default(__func__, L, 2, 1);
-    l_int32 type = ll_check_select_min_max(L, 3, L_SELECT_MIN);
+    l_int32 type = ll_check_select_min_max(__func__, L, 3, L_SELECT_MIN);
     l_int32 rval = 0;
     l_int32 gval = 0;
     l_int32 bval = 0;
@@ -3394,7 +3394,7 @@ GetBinnedComponentRange(lua_State *L)
     Pix *pixs = ll_check_Pix(L, 1);
     l_int32 nbins = ll_check_l_int32_default(__func__, L, 2, 2);
     l_int32 factor = ll_check_l_int32_default(__func__, L, 3, 1);
-    l_int32 color = ll_check_select_color(L, 4, L_SELECT_RED);
+    l_int32 color = ll_check_select_color(__func__, L, 4, L_SELECT_RED);
     l_int32 fontsize = ll_check_l_int32_default(__func__, L, 5, 0);
     l_int32 minval = 0;
     l_int32 maxval = 0;
@@ -3428,7 +3428,7 @@ GetRankColorArray(lua_State *L)
     Pix *pixs = ll_check_Pix(L, 1);
     l_int32 nbins = ll_check_l_int32_default(__func__, L, 2, 1);
     l_int32 factor = ll_check_l_int32_default(__func__, L, 3, 1);
-    l_int32 type = ll_check_select_color(L, 4, L_SELECT_AVERAGE);
+    l_int32 type = ll_check_select_color(__func__, L, 4, L_SELECT_AVERAGE);
     l_uint32 *carray = nullptr;
     l_int32 i;
 
@@ -3517,8 +3517,8 @@ static int
 RankBinByStrip(lua_State *L)
 {
     Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 type = ll_check_select_color(L, 2, L_SELECT_RED);
-    l_int32 direction = ll_check_direction(L, 3, L_SCAN_HORIZONTAL);
+    l_int32 type = ll_check_select_color(__func__, L, 2, L_SELECT_RED);
+    l_int32 direction = ll_check_direction(__func__, L, 3, L_SCAN_HORIZONTAL);
     l_int32 size = ll_check_l_int32_default(__func__, L, 4, 200);
     l_int32 nbins = ll_check_l_int32_default(__func__, L, 5, 2);
     Pix *pixd = pixRankBinByStrip(pixs, direction, size, nbins, type);
@@ -3537,7 +3537,7 @@ static int
 GetRowStats(lua_State *L)
 {
     Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 type = ll_check_select_color(L, 2, L_SELECT_RED);
+    l_int32 type = ll_check_select_color(__func__, L, 2, L_SELECT_RED);
     l_int32 nbins = ll_check_l_int32(__func__, L, 3);
     l_int32 thresh = ll_check_l_int32_default(__func__, L, 4, 0);
     l_float32 *colvect = (l_float32 *)LEPT_CALLOC(nbins, sizeof(l_float32));
@@ -3561,7 +3561,7 @@ static int
 GetColumnStats(lua_State *L)
 {
     Pix *pixs = ll_check_Pix(L, 1);
-    l_int32 type = ll_check_select_color(L, 2, L_SELECT_RED);
+    l_int32 type = ll_check_select_color(__func__, L, 2, L_SELECT_RED);
     l_int32 nbins = ll_check_l_int32(__func__, L, 3);
     l_int32 thresh = ll_check_l_int32_default(__func__, L, 4, 0);
     l_float32 *rowvect = (l_float32 *)LEPT_CALLOC(nbins, sizeof(l_float32));
@@ -3769,7 +3769,7 @@ Write(lua_State *L)
 {
     Pix *pix = ll_check_Pix(L, 1);
     const char *filename = lua_tostring(L, 2);
-    l_int32 format = ll_check_input_format(L, 3, IFF_DEFAULT);
+    l_int32 format = ll_check_input_format(__func__, L, 3, IFF_DEFAULT);
     lua_pushboolean(L, 0 == pixWrite(filename, pix, format));
     return 1;
 }

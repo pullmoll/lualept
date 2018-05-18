@@ -388,11 +388,9 @@ ShiftValue(lua_State *L)
 }
 
 /**
- * \brief Get the L_Dna* as an array of lua_Number
+ * \brief Get the L_Dna* as table of lua_Number
  *
  * Arg #1 (i.e. self) is expected to be a L_Dna* user data
- * Arg #2 is an optional string defining the storage flags (copy, clone,
- * copy_clone)
  *
  * \param L pointer to the lua_State
  * \return 1 DNA* on the Lua stack
@@ -400,22 +398,16 @@ ShiftValue(lua_State *L)
 static int
 GetDArray(lua_State *L)
 {
-    L_Dna *da = ll_check_Dna(L, 1);
-    l_int32 copyflag = ll_check_access_storage(L, 2, L_COPY);
-    l_float64 *array = l_dnaGetDArray(da, copyflag);
-    l_int32 i, n = l_dnaGetCount(da);
-    if (!array) {
-        n = 0;
-    } else {
-        for (i = 0; i < n; i++)
-            lua_pushnumber(L, (lua_Number)array[i]);
-        free(array);
-    }
-    return n;
+    L_Dna *dna = ll_check_Dna(L, 1);
+    l_float64 *da = l_dnaGetDArray(dna, L_COPY);
+    l_int32 n = l_dnaGetCount(dna);
+    int res = ll_push_darray(L, da, n);
+    LEPT_FREE(da);
+    return res;
 }
 
 /**
- * \brief Get the L_Dna* as an array of lua_Integer
+ * \brief Get the L_Dna* as a table of lua_Integer
  *
  * Arg #1 (i.e. self) is expected to be a L_Dna* user data
  *
@@ -425,17 +417,12 @@ GetDArray(lua_State *L)
 static int
 GetIArray(lua_State *L)
 {
-    L_Dna *da = ll_check_Dna(L, 1);
-    l_int32 *array = l_dnaGetIArray(da);
-    l_int32 i, n = l_dnaGetCount(da);
-    if (!array) {
-        n = 0;
-    } else {
-        for (i = 0; i < n; i++)
-            lua_pushinteger(L, array[i]);
-        free(array);
-    }
-    return n;
+    L_Dna *dna = ll_check_Dna(L, 1);
+    l_int32 *ia = l_dnaGetIArray(dna);
+    l_int32 n = l_dnaGetCount(dna);
+    int res = ll_push_iarray(L, ia, n);
+    LEPT_FREE(ia);
+    return res;
 }
 
 /**

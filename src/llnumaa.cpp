@@ -213,7 +213,7 @@ GetNuma(lua_State *L)
 {
     Numaa *naa = ll_check_Numaa(L, 1);
     l_int32 idx = ll_check_index(__func__, L, 2, numaaGetCount(naa));
-    l_int32 accessflag = ll_check_access_storage(L, 3, L_CLONE);
+    l_int32 accessflag = ll_check_access_storage(__func__, L, 3, L_CLONE);
     Numa *na = numaaGetNuma(naa, idx, accessflag);
     return ll_push_Numa(L, na);
 }
@@ -234,7 +234,7 @@ AddNuma(lua_State *L)
 {
     Numaa *naa = ll_check_Numaa(L, 1);
     Numa *na = ll_check_Numa(L, 2);
-    l_int32 copyflag = ll_check_access_storage(L, 3, L_CLONE);
+    l_int32 copyflag = ll_check_access_storage(__func__, L, 3, L_CLONE);
     lua_pushboolean(L, 0 == numaaAddNuma(naa, na, copyflag));
     return 1;
 }

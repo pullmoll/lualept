@@ -165,7 +165,7 @@ static int
 Copy(lua_State *L)
 {
     Boxaa *boxaas = ll_check_Boxaa(L, 1);
-    l_int32 copyflag = ll_check_access_storage(L, 2, L_COPY);
+    l_int32 copyflag = ll_check_access_storage(__func__, L, 2, L_COPY);
     Boxaa *boxaa = boxaaCopy(boxaas, copyflag);
     return ll_push_Boxaa(L, boxaa);
 }
@@ -184,7 +184,7 @@ AddBoxa(lua_State *L)
 {
     Boxaa *boxaa = ll_check_Boxaa(L, 1);
     Boxa *boxa = ll_check_Boxa(L, 2);
-    l_int32 flag = ll_check_access_storage(L, 3, L_COPY);
+    l_int32 flag = ll_check_access_storage(__func__, L, 3, L_COPY);
     lua_pushboolean(L, 0 == boxaaAddBoxa(boxaa, boxa, flag));
     return 1;
 }
@@ -270,7 +270,7 @@ GetBoxa(lua_State *L)
 {
     Boxaa *boxaa = ll_check_Boxaa(L, 1);
     l_int32 idx = ll_check_index(__func__, L, 2, boxaaGetCount(boxaa));
-    l_int32 flag = ll_check_access_storage(L, 3, L_COPY);
+    l_int32 flag = ll_check_access_storage(__func__, L, 3, L_COPY);
     Boxa *boxa = boxaaGetBoxa(boxaa, idx, flag);
     return ll_push_Boxa(L, boxa);
 }
@@ -292,7 +292,7 @@ GetBox(lua_State *L)
     Boxaa *boxaa = ll_check_Boxaa(L, 1);
     l_int32 iboxa = ll_check_index(__func__, L, 2, boxaaGetCount(boxaa));
     l_int32 ibox = ll_check_index(__func__, L, 3, INT32_MAX);
-    l_int32 flag = ll_check_access_storage(L, 4, L_COPY);
+    l_int32 flag = ll_check_access_storage(__func__, L, 4, L_COPY);
     Box *box = boxaaGetBox(boxaa, iboxa, ibox, flag);
     return ll_push_Box(L, box);
 }
@@ -369,7 +369,7 @@ static int
 FlattenToBoxa(lua_State *L)
 {
     Boxaa *boxaa = ll_check_Boxaa(L, 1);
-    l_int32 copyflag = ll_check_access_storage(L, 2, L_COPY);
+    l_int32 copyflag = ll_check_access_storage(__func__, L, 2, L_COPY);
     Numa *naindex = nullptr;
     Boxa *boxa = boxaaFlattenToBoxa(boxaa, &naindex, copyflag);
     return ll_push_Boxa(L, boxa);
@@ -391,7 +391,7 @@ FlattenAligned(lua_State *L)
 {
     Boxaa *boxaa = ll_check_Boxaa(L, 1);
     l_int32 num = ll_check_l_int32(__func__, L, 2);
-    l_int32 copyflag = ll_check_access_storage(L, 3, L_COPY);
+    l_int32 copyflag = ll_check_access_storage(__func__, L, 3, L_COPY);
     Box *fillerbox = lua_isuserdata(L, 4) ? ll_check_Box(L, 4) : nullptr;
     Boxa *boxa = boxaaFlattenAligned(boxaa, num, fillerbox, copyflag);
     return ll_push_Boxa(L, boxa);

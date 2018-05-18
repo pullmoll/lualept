@@ -157,7 +157,7 @@ static int
 Copy(lua_State *L)
 {
     Boxa *boxas = ll_check_Boxa(L, 1);
-    l_int32 copyflag = ll_check_access_storage(L, 2, L_COPY);
+    l_int32 copyflag = ll_check_access_storage(__func__, L, 2, L_COPY);
     Boxa *boxa = boxaCopy(boxas, copyflag);
     return ll_push_Boxa(L, boxa);
 }
@@ -176,7 +176,7 @@ AddBox(lua_State *L)
 {
     Boxa *boxa = ll_check_Boxa(L, 1);
     Box *box = ll_check_Box(L, 2);
-    l_int32 flag = ll_check_access_storage(L, 3, L_COPY);
+    l_int32 flag = ll_check_access_storage(__func__, L, 3, L_COPY);
     lua_pushboolean(L, 0 == boxaAddBox(boxa, box, flag));
     return 1;
 }
@@ -262,7 +262,7 @@ GetBox(lua_State *L)
 {
     Boxa *boxa = ll_check_Boxa(L, 1);
     l_int32 idx = ll_check_index(__func__, L, 2, boxaGetCount(boxa));
-    l_int32 flag = ll_check_access_storage(L, 3, L_COPY);
+    l_int32 flag = ll_check_access_storage(__func__, L, 3, L_COPY);
     Box *box = boxaGetBox(boxa, idx, flag);
     return ll_push_Box(L, box);
 }
@@ -282,7 +282,7 @@ GetValidBox(lua_State *L)
 {
     Boxa *boxa = ll_check_Boxa(L, 1);
     l_int32 idx = ll_check_index(__func__, L, 2, boxaGetCount(boxa));
-    l_int32 flag = ll_check_access_storage(L, 3, L_COPY);
+    l_int32 flag = ll_check_access_storage(__func__, L, 3, L_COPY);
     Box *box = boxaGetValidBox(boxa, idx, flag);
     return ll_push_Box(L, box);
 }
@@ -439,7 +439,7 @@ static int
 SaveValid(lua_State *L)
 {
     Boxa *boxas = ll_check_Boxa(L, 1);
-    l_int32 copyflag = ll_check_access_storage(L, 2, L_COPY);
+    l_int32 copyflag = ll_check_access_storage(__func__, L, 2, L_COPY);
     Boxa *boxa = boxaSaveValid(boxas, copyflag);
     return ll_push_Boxa(L, boxa);
 }
@@ -560,6 +560,26 @@ IntersectsBoxCount(lua_State *L)
 }
 
 /**
+ * \brief Rotate a Boxa* (%boxas)
+ *
+ * Arg #1 (i.e. self) is expected to be a Box* (boxs)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Box* on the Lua stack
+ */
+static int
+RotateOrth(lua_State *L)
+{
+    Boxa *boxas = ll_check_Boxa(L, 1);
+    l_int32 w = ll_check_l_int32(__func__, L, 2);
+    l_int32 h = ll_check_l_int32(__func__, L, 3);
+    l_int32 rotation = ll_check_rotation(__func__, L, 4, 0);
+    Boxa *boxa = boxaRotateOrth(boxas, w, h, rotation);
+    ll_push_Boxa(L, boxa);
+    return 1;
+}
+
+/**
  * \brief Register the BOX methods and functions in the LL_BOX meta table
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
@@ -595,6 +615,7 @@ ll_register_BOXA(lua_State *L)
         {"ContainedInBoxa",     ContainedInBoxa},
         {"IntersectsBox",       IntersectsBox},
         {"IntersectsBoxCount",  IntersectsBoxCount},
+        {"RotateOrth",          RotateOrth},
         LUA_SENTINEL
     };
 

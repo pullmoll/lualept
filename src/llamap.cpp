@@ -74,7 +74,7 @@ ll_push_Amap(lua_State *L, L_AMAP *amap)
 int
 ll_new_Amap(lua_State *L)
 {
-    l_int32 keytype = ll_check_keytype(L, 1, L_INT_TYPE);
+    l_int32 keytype = ll_check_keytype(__func__, L, 1, L_INT_TYPE);
     L_AMAP *amap = l_amapCreate(keytype);
     return ll_push_Amap(L, amap);
 }

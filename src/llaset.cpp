@@ -74,7 +74,7 @@ ll_push_Aset(lua_State *L, L_ASET *aset)
 int
 ll_new_Aset(lua_State *L)
 {
-    l_int32 keytype = ll_check_keytype(L, 1, L_INT_TYPE);
+    l_int32 keytype = ll_check_keytype(__func__, L, 1, L_INT_TYPE);
     L_ASET *aset = l_asetCreate(keytype);
     return ll_push_Aset(L, aset);
 }

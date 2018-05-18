@@ -109,8 +109,8 @@ CreateFromPixa(lua_State *L)
 {
     Pixa *pixa = ll_check_Pixa(L, 1);
     l_int32 n = ll_check_l_int32_default(__func__, L, 2, 1);
-    l_int32 type = ll_check_consecutive_skip_by(L, 3, L_CHOOSE_CONSECUTIVE);
-    l_int32 copyflag = ll_check_access_storage(L, 4, L_CLONE);
+    l_int32 type = ll_check_consecutive_skip_by(__func__, L, 3, L_CHOOSE_CONSECUTIVE);
+    l_int32 copyflag = ll_check_access_storage(__func__, L, 4, L_CLONE);
     Pixaa *pixaa = pixaaCreateFromPixa(pixa, n, type, copyflag);
     return ll_push_Pixaa(L, pixaa);
 }
@@ -153,7 +153,7 @@ AddPix(lua_State *L)
     l_int32 idx = ll_check_index(__func__, L, 2, pixaaGetCount(pixaa, nullptr));
     Pix *pix = ll_check_Pix(L, 3);
     Box *box = ll_check_Box(L, 4);
-    l_int32 copyflag = ll_check_access_storage(L, 5, L_COPY);
+    l_int32 copyflag = ll_check_access_storage(__func__, L, 5, L_COPY);
     lua_pushboolean(L, 0 == pixaaAddPix(pixaa, idx, pix, box, copyflag));
     return 1;
 }
@@ -173,7 +173,7 @@ AddBox(lua_State *L)
 {
     Pixaa *pixaa = ll_check_Pixaa(L, 1);
     Box *box = ll_check_Box(L, 2);
-    l_int32 copyflag = ll_check_access_storage(L, 3, L_COPY);
+    l_int32 copyflag = ll_check_access_storage(__func__, L, 3, L_COPY);
     lua_pushboolean(L, 0 == pixaaAddBox(pixaa, box, copyflag));
     return 1;
 }
@@ -193,7 +193,7 @@ AddPixa(lua_State *L)
 {
     Pixaa *pixaa = ll_check_Pixaa(L, 1);
     Pixa *pixa = ll_check_Pixa(L, 2);
-    l_int32 flag = ll_check_access_storage(L, 3, L_COPY);
+    l_int32 flag = ll_check_access_storage(__func__, L, 3, L_COPY);
     lua_pushboolean(L, 0 == pixaaAddPixa(pixaa, pixa, flag));
     return 1;
 }
@@ -321,7 +321,7 @@ GetPixa(lua_State *L)
 {
     Pixaa *pixaa = ll_check_Pixaa(L, 1);
     l_int32 idx = ll_check_index(__func__, L, 2, pixaaGetCount(pixaa, nullptr));
-    l_int32 accesstype = ll_check_access_storage(L, 3, L_CLONE);
+    l_int32 accesstype = ll_check_access_storage(__func__, L, 3, L_CLONE);
     Pixa *pixa = pixaaGetPixa(pixaa, idx, accesstype);
     return ll_push_Pixa(L, pixa);
 }
@@ -339,7 +339,7 @@ static int
 GetBoxa(lua_State *L)
 {
     Pixaa *pixaa = ll_check_Pixaa(L, 1);
-    l_int32 accesstype = ll_check_access_storage(L, 2, L_CLONE);
+    l_int32 accesstype = ll_check_access_storage(__func__, L, 2, L_CLONE);
     Boxa *boxa = pixaaGetBoxa(pixaa, accesstype);
     return ll_push_Boxa(L, boxa);
 }
