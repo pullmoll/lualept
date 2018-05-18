@@ -47,9 +47,9 @@ static const unsigned long _flt_max = 0x7effffffUL;
 
 #if !defined(HAVE_CTYPE_H)
 /**
- * @brief Poor man's toupper(3)
+ * \brief Poor man's toupper(3)
  * \param ch ASCII character
- * @return upper case value for ch
+ * \return upper case value for ch
  */
 static __inline int toupper(const int ch) { return (ch >= 'a' && ch <= 'z') ? ch - 'a' + 'A' : ch; }
 #endif
@@ -60,10 +60,10 @@ static __inline int toupper(const int ch) { return (ch >= 'a' && ch <= 'z') ? ch
 #define ll_strcasecmp stricmp
 #else
 /**
- * @brief Our own version of strcasecmp(3)
+ * \brief Our own version of strcasecmp(3)
  * \param dst first string
  * \param src second string
- * @return -1 if dst < src, +1 if dst > str, 0 otherwise
+ * \return -1 if dst < src, +1 if dst > str, 0 otherwise
  */
 int
 ll_strcasecmp(const char* dst, const char* src)
@@ -120,11 +120,11 @@ ll_register_class(lua_State *L, const char *name, const luaL_Reg *methods, const
 }
 
 /**
- * @brief Check Lua stack at index %arg for udata with %name
+ * \brief Check Lua stack at index %arg for udata with %name
  * \param L pointer to the lua_State
  * \param arg argument index
  * \param name tname of the expected udata
- * @return pointer to the udata
+ * \return pointer to the udata
  */
 void **
 ll_check_udata(lua_State *L, int arg, const char* name)
@@ -138,11 +138,11 @@ ll_check_udata(lua_State *L, int arg, const char* name)
 }
 
 /**
- * @brief Push user data %udata to the Lua stack and set its meta table %name
+ * \brief Push user data %udata to the Lua stack and set its meta table %name
  * \param L pointer to the lua_State
  * \param name tname for the udata
  * \param udata pointer to the udata
- * @return 1 table on the stack
+ * \return 1 table on the stack
  */
 int
 ll_push_udata(lua_State *L, const char* name, void *udata)
@@ -295,41 +295,11 @@ ll_check_l_float32_default(const char* func, lua_State *L, int arg, l_float32 df
 }
 
 /**
- * @brief Find a option %str in a key_value_t array %tbl of size %len
- * \param L pointer to the lua_State
- * \param arg index where to find the string
- * \param dflt default value to return if not specified or unknown
- * \param tbl table of key/value pairs
- * \param len length of that table
- * @return value or dflt
- */
-l_int32
-ll_check_tbl(lua_State *L, int arg, l_int32 dflt, const lept_enums_t *tbl, size_t len)
-{
-    size_t i;
-
-    const char* str = lua_isstring(L, arg) ? lua_tostring(L, arg) : NULL;
-    if (!str)
-        return dflt;
-
-    for (i = 0; i < len; i++) {
-        const lept_enums_t* p = &tbl[i];
-        if (!ll_strcasecmp(str, p->key))
-            return p->value;
-    }
-
-    lua_pushfstring(L, "Invalid option #%d '%s'", arg, str);
-    lua_error(L);
-    return dflt;
-
-}
-
-/**
- * @brief Push a string listing the table of keys to the Lua stack
+ * \brief Push a string listing the table of keys to the Lua stack
  * \param L pointer to the lua_State
  * \param tbl table of key/value pairs
  * \param len length of that table
- * @return value or dflt
+ * \return value or dflt
  */
 int
 ll_push_tbl(lua_State *L, const lept_enums_t *tbl, size_t len)
@@ -358,11 +328,11 @@ ll_push_tbl(lua_State *L, const lept_enums_t *tbl, size_t len)
 }
 
 /**
- * @brief Return a const char* with the (first) key for a enumeration value
- * @param value value to search for
+ * \brief Return a const char* with the (first) key for a enumeration value
+ * \param value value to search for
  * \param tbl table of key/value pairs
  * \param len length of that table
- * @return pointer to string with the (first) key for that value
+ * \return pointer to string with the (first) key for that value
  */
 const char*
 ll_string_tbl(l_int32 value, const lept_enums_t *tbl, size_t len)
@@ -378,7 +348,39 @@ ll_string_tbl(l_int32 value, const lept_enums_t *tbl, size_t len)
 }
 
 /**
- * @brief Table of access/storage flag names and enumeration values
+ * \brief Find a option %str in a key_value_t array %tbl of size %len
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \param dflt default value to return if not specified or unknown
+ * \param tbl table of key/value pairs
+ * \param len length of that table
+ * \return value or dflt
+ */
+l_int32
+ll_check_tbl(lua_State *L, int arg, l_int32 dflt, const lept_enums_t *tbl, size_t len)
+{
+    size_t i;
+
+    const char* str = lua_isstring(L, arg) ? lua_tostring(L, arg) : NULL;
+    if (!str)
+        return dflt;
+
+    for (i = 0; i < len; i++) {
+        const lept_enums_t* p = &tbl[i];
+        if (!ll_strcasecmp(str, p->key))
+            return p->value;
+    }
+
+    ll_push_tbl(L, tbl, len);
+    lua_pushfstring(L, "Invalid option #%d '%s'\n%s",
+                    arg, str, lua_tostring(L, 1));
+    lua_error(L);
+    return dflt;    /* NOTREACHED */
+
+}
+
+/**
+ * \brief Table of access/storage flag names and enumeration values
  */
 static const lept_enums_t tbl_access_storage[] = {
     {"nocopy",          "L_NOCOPY",         L_NOCOPY},      /* do not copy the object; do not delete the ptr */
@@ -401,6 +403,11 @@ ll_check_access_storage(lua_State *L, int arg, l_int32 dflt)
     return ll_check_tbl(L, arg, dflt, tbl_access_storage, ARRAYSIZE(tbl_access_storage));
 }
 
+/**
+ * \brief Return the name for an access/storage flag value
+ * \param flag access/storage flag
+ * \return pointer to const string
+ */
 const char*
 ll_string_access_storage(int flag)
 {
@@ -408,7 +415,7 @@ ll_string_access_storage(int flag)
 }
 
 /**
- * @brief Table of file input format names and enumeration values
+ * \brief Table of file input format names and enumeration values
  */
 static const lept_enums_t tbl_input_format[] = {
     {"unknown",         "IFF_UNKNOWN",          IFF_UNKNOWN},
@@ -459,9 +466,9 @@ ll_check_input_format(lua_State *L, int arg, l_int32 dflt)
 }
 
 /**
- * @brief Push a string listing the input format keys
+ * \brief Push a string listing the input format keys
  * \param L pointer to lua_State
- * @return 1 string on the Lua stack
+ * \return 1 string on the Lua stack
  */
 int
 ll_print_input_format(lua_State *L)
@@ -470,9 +477,9 @@ ll_print_input_format(lua_State *L)
 }
 
 /**
- * @brief Return the name for an input file format (IFF_*)
- * \param format input file format
- * @return pointer to const string
+ * \brief Return the name for an input file format (IFF_*)
+ * \param format input file format value
+ * \return pointer to const string
  */
 const char*
 ll_string_input_format(int format)
@@ -481,7 +488,7 @@ ll_string_input_format(int format)
 }
 
 /**
- * @brief Table of key type names for AMAP and ASET
+ * \brief Table of key type names for AMAP and ASET
  */
 static const lept_enums_t tbl_keytype[] = {
     {"int",         "L_INT_TYPE",   L_INT_TYPE},
@@ -503,17 +510,18 @@ ll_check_keytype(lua_State *L, int arg, l_int32 dflt)
 }
 
 /**
- * @brief Return a string for the keytype of an ASET
- * \param type key type
- * @return const string with the name
+ * \brief Return a string for the keytype of an AMAP/ASET
+ * \param type key type value
+ * \return const string with the name
  */
-const char* ll_string_keytype(l_int32 type)
+const char*
+ll_string_keytype(l_int32 type)
 {
     return ll_string_tbl(type, tbl_keytype, ARRAYSIZE(tbl_keytype));
 }
 
 /**
- * @brief Table of choice names and enumeration values
+ * \brief Table of choice names and enumeration values
  */
 static const lept_enums_t tbl_consecutive_skip_by[] = {
     {"consecutive",     "L_CHOOSE_CONSECUTIVE",     L_CHOOSE_CONSECUTIVE},
@@ -537,7 +545,18 @@ ll_check_consecutive_skip_by(lua_State *L, int arg, l_int32 dflt)
 }
 
 /**
- * @brief Table of color component names and enumeration values
+ * \brief Return a string for the choice between consecutive and skip_by
+ * \param choice consecutive/skip_by enumeration value
+ * \return const string with the name
+ */
+const char*
+ll_string_consecutive_skip_by(l_int32 choice)
+{
+    return ll_string_tbl(choice, tbl_consecutive_skip_by, ARRAYSIZE(tbl_consecutive_skip_by));
+}
+
+/**
+ * \brief Table of color component names and enumeration values
  */
 static const lept_enums_t tbl_component[] = {
     {"red",             "COLOR_RED",                COLOR_RED},
@@ -566,7 +585,18 @@ ll_check_component(lua_State *L, int arg, l_int32 dflt)
 }
 
 /**
- * @brief Table of choice min/max names and enumeration values
+ * \brief Return a string for the color component name
+ * \param component color component value
+ * \return const string with the name
+ */
+const char*
+ll_string_component(l_int32 component)
+{
+    return ll_string_tbl(component, tbl_component, ARRAYSIZE(tbl_component));
+}
+
+/**
+ * \brief Table of choice min/max names and enumeration values
  */
 static const lept_enums_t tbl_choose_min_max[] = {
     {"min",             "L_CHOOSE_MIN",          L_CHOOSE_MIN},
@@ -587,7 +617,18 @@ ll_check_choose_min_max(lua_State *L, int arg, l_int32 dflt)
 }
 
 /**
- * @brief Table of white/black is max names and enumeration values
+ * \brief Return a string for the choice between min and max
+ * \param choice min or max enumeration value
+ * \return const string with the name
+ */
+const char*
+ll_string_choose_min_max(l_int32 choice)
+{
+    return ll_string_tbl(choice, tbl_choose_min_max, ARRAYSIZE(tbl_choose_min_max));
+}
+
+/**
+ * \brief Table of white/black is max names and enumeration values
  */
 static const lept_enums_t tbl_what_is_max[] = {
     {"white-is-max",    "L_WHITE_IS_MAX",          L_WHITE_IS_MAX},
@@ -612,7 +653,18 @@ ll_check_what_is_max(lua_State *L, int arg, l_int32 dflt)
 }
 
 /**
- * @brief Table of get white/black val names and enumeration values
+ * \brief Return a string for the choice between min and max
+ * \param what white or black is max enumeration value
+ * \return const string with the name
+ */
+const char*
+ll_string_what_is_max(l_int32 what)
+{
+    return ll_string_tbl(what, tbl_what_is_max, ARRAYSIZE(tbl_what_is_max));
+}
+
+/**
+ * \brief Table of get white/black val names and enumeration values
  */
 static const lept_enums_t tbl_getval[] = {
     {"white",           "L_GET_WHITE_VAL",          L_GET_WHITE_VAL},
@@ -635,7 +687,18 @@ ll_check_getval(lua_State *L, int arg, l_int32 dflt)
 }
 
 /**
- * @brief Table of direction names and enumeration values
+ * \brief Return a string for the choice between min and max
+ * \param val white or black getval enumeration value
+ * \return const string with the name
+ */
+const char*
+ll_string_getval(l_int32 val)
+{
+    return ll_string_tbl(val, tbl_getval, ARRAYSIZE(tbl_getval));
+}
+
+/**
+ * \brief Table of direction names and enumeration values
  */
 static const lept_enums_t tbl_direction[] = {
     {"horizontal-line", "L_HORIZONTAL_LINE",        L_HORIZONTAL_LINE},
@@ -647,8 +710,8 @@ static const lept_enums_t tbl_direction[] = {
     {"vert",            "L_VERTICAL_LINE",          L_VERTICAL_LINE},
     {"v",               "L_VERTICAL_LINE",          L_VERTICAL_LINE}
 };
-/**
 
+/**
  * \brief Check for a L_XXX_LINE name as string
  * \param L pointer to the lua_State
  * \param arg index where to find the string
@@ -662,7 +725,18 @@ ll_check_direction(lua_State *L, int arg, l_int32 dflt)
 }
 
 /**
- * @brief Table of set white/black names and enumeration values
+ * \brief Return a string for the direction name
+ * \param dir horizontal or vertical line direction enumeration value
+ * \return const string with the name
+ */
+const char*
+ll_string_direction(l_int32 dir)
+{
+    return ll_string_tbl(dir, tbl_direction, ARRAYSIZE(tbl_direction));
+}
+
+/**
+ * \brief Table of set white/black names and enumeration values
  */
 static const lept_enums_t tbl_blackwhite[] = {
     {"white",           "L_SET_WHITE",          L_SET_WHITE},
@@ -685,7 +759,18 @@ ll_check_blackwhite(lua_State *L, int arg, l_int32 dflt)
 }
 
 /**
- * @brief Table of rasterop names and enumeration values
+ * \brief Return a string for the choice between setting black or white
+ * \param which set black or white enumeration value
+ * \return const string with the name
+ */
+const char*
+ll_string_blackwhite(l_int32 which)
+{
+    return ll_string_tbl(which, tbl_blackwhite, ARRAYSIZE(tbl_blackwhite));
+}
+
+/**
+ * \brief Table of rasterop names and enumeration values
  */
 static const lept_enums_t tbl_rasterop[] = {
     {"clr",             "PIX_CLR",                      PIX_CLR},
@@ -724,7 +809,18 @@ ll_check_rasterop(lua_State *L, int arg, l_int32 dflt)
 }
 
 /**
- * @brief Table of search direction names and enumeration values
+ * \brief Return a string for the raster operation
+ * \param op enumeration value of the raster operation
+ * \return const string with the name
+ */
+const char*
+ll_string_rasterop(l_int32 op)
+{
+    return ll_string_tbl(op, tbl_rasterop, ARRAYSIZE(tbl_rasterop));
+}
+
+/**
+ * \brief Table of search direction names and enumeration values
  */
 static const lept_enums_t tbl_searchdir[] = {
     {"horizontal",          "L_HORIZ",              L_HORIZ},
@@ -752,7 +848,18 @@ ll_check_searchdir(lua_State *L, int arg, l_int32 dflt)
 }
 
 /**
- * @brief Table of stats type names and enumeration values
+ * \brief Return a string for the search direction
+ * \param dir enumeration value of the search direction
+ * \return const string with the name
+ */
+const char*
+ll_string_searchir(l_int32 dir)
+{
+    return ll_string_tbl(dir, tbl_searchdir, ARRAYSIZE(tbl_searchdir));
+}
+
+/**
+ * \brief Table of stats type names and enumeration values
  */
 static const lept_enums_t tbl_stats_type[] = {
     {"mean-absval",         "L_MEAN_ABSVAL",        L_MEAN_ABSVAL},
@@ -784,7 +891,18 @@ ll_check_stats_type(lua_State* L, int arg, l_int32 dflt)
 }
 
 /**
- * @brief Table of select color names and enumeration values
+ * \brief Return a string for the stats type
+ * \param type enumeration value of the stats type
+ * \return const string with the name
+ */
+const char*
+ll_string_stats_type(l_int32 type)
+{
+    return ll_string_tbl(type, tbl_stats_type, ARRAYSIZE(tbl_stats_type));
+}
+
+/**
+ * \brief Table of select color names and enumeration values
  */
 static const lept_enums_t tbl_select_color[] = {
     {"red",                 "L_SELECT_RED",         L_SELECT_RED},
@@ -818,7 +936,18 @@ ll_check_select_color(lua_State* L, int arg, l_int32 dflt)
 }
 
 /**
- * @brief Table of select min/max names and enumeration values
+ * \brief Return a string for the selected color
+ * \param color selected color enumeration value
+ * \return const string with the name
+ */
+const char*
+ll_string_select_color(l_int32 color)
+{
+    return ll_string_tbl(color, tbl_select_color, ARRAYSIZE(tbl_select_color));
+}
+
+/**
+ * \brief Table of select min/max names and enumeration values
  */
 static const lept_enums_t tbl_select_minmax[] = {
     {"min",                 "L_SELECT_MIN",          L_SELECT_MIN},
@@ -838,6 +967,17 @@ ll_check_select_min_max(lua_State* L, int arg, l_int32 dflt)
     return ll_check_tbl(L, arg, dflt, tbl_select_minmax, ARRAYSIZE(tbl_select_minmax));
 }
 
+/**
+ * \brief Return a string for the selection minimum or maximum
+ * \param color selected color enumeration value
+ * \return const string with the name
+ */
+const char*
+ll_string_select_min_max(l_int32 which)
+{
+    return ll_string_tbl(which, tbl_select_minmax, ARRAYSIZE(tbl_select_minmax));
+}
+
 /*====================================================================*
  *
  *  Lua LEPT class
@@ -845,7 +985,7 @@ ll_check_select_min_max(lua_State* L, int arg, l_int32 dflt)
  *====================================================================*/
 
 /**
- * @brief Check Lua stack at index %arg for udata of class LL_LEPT
+ * \brief Check Lua stack at index %arg for udata of class LL_LEPT
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the LEPT contained in the user data

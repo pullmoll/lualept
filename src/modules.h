@@ -92,9 +92,9 @@
 #if LLUA_DEBUG
 #define DBG(enable, fmt, ...)                                                  \
     do {                                                                       \
-	if (enable) {                                                          \
-	    fprintf(stderr, fmt, __VA_ARGS__);                                 \
-	}                                                                      \
+        if (enable) {                                                          \
+            fprintf(stderr, fmt, __VA_ARGS__);                                 \
+        }                                                                      \
     } while (0)
 #else
 #define DBG(enable, fmt, ...)
@@ -146,17 +146,29 @@ extern const char * ll_string_input_format(int format);
 extern l_int32      ll_check_keytype(lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_keytype(l_int32 type);
 extern l_int32      ll_check_consecutive_skip_by(lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_consecutive_skip_by(l_int32 choice);
 extern l_int32      ll_check_component(lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_component(l_int32 component);
 extern l_int32      ll_check_choose_min_max(lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_choose_min_max(l_int32 choice);
 extern l_int32      ll_check_what_is_max(lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_what_is_max(l_int32 choice);
 extern l_int32      ll_check_getval(lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_getval(l_int32 choice);
 extern l_int32      ll_check_direction(lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_direction(l_int32 dir);
 extern l_int32      ll_check_blackwhite(lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_blackwhite(l_int32 which);
 extern l_int32      ll_check_rasterop(lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_rasterop(l_int32 op);
 extern l_int32      ll_check_searchdir(lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_searchir(l_int32 dir);
 extern l_int32      ll_check_stats_type(lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_stats_type(l_int32 dir);
 extern l_int32      ll_check_select_color(lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_select_color(l_int32 color);
 extern l_int32      ll_check_select_min_max(lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_select_min_max(l_int32 which);
 
 /* llnuma.c */
 extern NUMA       * ll_check_NUMA(lua_State *L, int arg);

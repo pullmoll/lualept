@@ -164,6 +164,7 @@ function numa_test()
 	print("#na                     ", #na)
 	print("na                      ", na)
 	print("na:GetFArray()          ", na:GetFArray())
+	print("na:GetIArray()          ", na:GetIArray())
 end
 
 function dna_test()
@@ -202,9 +203,7 @@ function dna_test()
 	print("... after " .. count .. " times daa:AddDna(da)")
 
 	print("#daa",	#daa)
-	for i = 1, count do
-		print("daa:GetDnaCount("..i..")", daa:GetDnaCount(i))
-	end
+	for i = 1, count do print("daa:GetDnaCount(" .. i .. ")", daa:GetDnaCount(i)) end
 	print("daa:GetNumberCount()", daa:GetNumberCount())
 
 	local da = daa:FlattenToDna()
@@ -219,6 +218,11 @@ function dna_test()
 
 	daa = daa.Read(filename)
 	print("daa.Read('"..filename.."')", ok)
+	local da = daa:FlattenToDna()
+	print("... after da = daa:FlattenToDna()")
+	print("#da",	#da)
+	print("da",	da)
+	print("da:GetIArray()", da:GetIArray())
 end
 
 function pix_test()
@@ -233,14 +237,13 @@ function pix_test()
 	print("#cmap", #cmap)
 
 	print("cmap:GetFreeCount()", cmap:GetFreeCount())
-	cmap:AddColor(0x00,0x00,0x00)
-	cmap:AddColor(0x7f,0x7f,0x7f)
+	local black = cmap:AddNearestColor(0x00,0x00,0x00)
 	local bluish = cmap:AddNewColor(0x40,0xe0,0xf0)
+	cmap:AddColor(0x7f,0x7f,0x7f)
 	cmap:AddRGBA(0xff,0xff,0xff,0xff)
+	print("cmap:AddNearestColor(0,0,0) index", black)
 	print("cmap:AddNewColor(0x40,0xe0,0xf0)", bluish)
 
-	local black = cmap:UsableColor(0,0,0)
-	print("cmap:UsableColor(0,0,0) index", black)
 	print("cmap:GetFreeCount()", cmap:GetFreeCount())
 
 	print("cmap", cmap)
@@ -250,10 +253,10 @@ function pix_test()
 	print("pix", pix);
 
 	-- Set all pixels (to 2^depth - 1)
-	pix:SetAll()
+	pix:SetAllArbitrary(3)
 
 	-- Draw some border rings
-	for dist = 4,13 do pix:SetBorderRingVal(dist,2) end
+	for dist = 4,13 do pix:SetBorderRingVal(dist, bluish-1) end
 
 	-- Draw a horizontal line in the vertical center
 	for x = 0, width-1 do pix:SetPixel(x, height/2, black) end
