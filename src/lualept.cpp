@@ -1399,9 +1399,9 @@ LeptVersion(lua_State *L)
 /**
  * \brief Compose a RGB pixel value
  *
- * Arg #1 is expected to be a l_int32 (rval)
- * Arg #2 is expected to be a l_int32 (gval)
- * Arg #3 is expected to be a l_int32 (bval)
+ * Arg #1 is expected to be a l_int32 (rval).
+ * Arg #2 is expected to be a l_int32 (gval).
+ * Arg #3 is expected to be a l_int32 (bval).
  *
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -1423,10 +1423,10 @@ RGB(lua_State *L)
 /**
  * \brief Compose a RGBA pixel value
  *
- * Arg #1 is expected to be a l_int32 (rval)
- * Arg #2 is expected to be a l_int32 (gval)
- * Arg #3 is expected to be a l_int32 (bval)
- * Arg #4 is expected to be a l_int32 (aval)
+ * Arg #1 is expected to be a l_int32 (rval).
+ * Arg #2 is expected to be a l_int32 (gval).
+ * Arg #3 is expected to be a l_int32 (bval).
+ * Arg #4 is expected to be a l_int32 (aval).
  *
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -1449,7 +1449,7 @@ RGBA(lua_State *L)
 /**
  * \brief Extract a RGB pixel values
  *
- * Arg #1 is expected to be a string (filename)
+ * Arg #1 is expected to be a string (filename).
  *
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -1472,7 +1472,7 @@ ToRGB(lua_State *L)
 /**
  * \brief Extract a RGBA pixel values
  *
- * Arg #1 is expected to be a string (filename)
+ * Arg #1 is expected to be a string (filename).
  *
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -1497,8 +1497,8 @@ ToRGBA(lua_State *L)
 /**
  * \brief Extract minimum or maximum component from pixel value
  *
- * Arg #1 is expected to be a l_uint32 (pixel)
- * Arg #2 is expected to be a string (min or max)
+ * Arg #1 is expected to be a l_uint32 (pixel).
+ * Arg #2 is expected to be a string (min or max).
  *
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -1516,8 +1516,8 @@ MinMaxComponent(lua_State *L)
 /**
  * \brief Extract minimum component from pixel value
  *
- * Arg #1 is expected to be a l_uint32 (pixel)
- * Arg #2 is expected to be a string (min or max)
+ * Arg #1 is expected to be a l_uint32 (pixel).
+ * Arg #2 is expected to be a string (min or max).
  *
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -1534,8 +1534,8 @@ MinComponent(lua_State *L)
 /**
  * \brief Extract maximum component from pixel value
  *
- * Arg #1 is expected to be a l_uint32 (pixel)
- * Arg #2 is expected to be a string (min or max)
+ * Arg #1 is expected to be a l_uint32 (pixel).
+ * Arg #2 is expected to be a string (min or max).
  *
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack

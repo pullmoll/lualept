@@ -40,7 +40,7 @@
 /**
  * \brief Create a new Numa*
  *
- * Arg #1 is expected to be a l_int32 (n)
+ * Arg #1 is expected to be a l_int32 (n).
  *
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -75,7 +75,7 @@ Destroy(lua_State *L)
 /**
  * \brief Get the number of stored numbers in the Numa* (na)
  *
- * Arg #1 (i.e. self) is expected to be a Numa*
+ * Arg #1 (i.e. self) is expected to be a Numa*.
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -93,8 +93,8 @@ GetCount(lua_State *L)
 /**
  * \brief Set the number of stored numbers in the Numa*, i.e. resize Numa*
  *
- * Arg #1 (i.e. self) is expected to be a Numa*
- * Arg #2 is expected to be a l_int32 (n)
+ * Arg #1 (i.e. self) is expected to be a Numa*.
+ * Arg #2 is expected to be a l_int32 (n).
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -112,7 +112,7 @@ SetCount(lua_State *L)
 /**
  * \brief Copy a Numa*
  *
- * Arg #1 (i.e. self) is expected to be a Numa*
+ * Arg #1 (i.e. self) is expected to be a Numa*.
  *
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -144,10 +144,10 @@ Clone(lua_State *L)
 /**
  * \brief Set the number of stored numbes in the Numa* to zero
  *
- * Arg #1 (i.e. self) is expected to be a Numa*
+ * Arg #1 (i.e. self) is expected to be a Numa*.
  *
  * \param L pointer to the lua_State
- * \return 1 for boolean on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 Empty(lua_State *L)
@@ -161,11 +161,11 @@ Empty(lua_State *L)
 /**
  * \brief Add one number to the Numa*
  *
- * Arg #1 (i.e. self) is expected to be a Numa*
- * Arg #2 is expected to be a lua_Number in the range of l_float32
+ * Arg #1 (i.e. self) is expected to be a Numa*.
+ * Arg #2 is expected to be a lua_Number in the range of l_float32.
  *
  * \param L pointer to the lua_State
- * \return 1 for boolean on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 AddNumber(lua_State *L)
@@ -180,12 +180,12 @@ AddNumber(lua_State *L)
 /**
  * \brief Insert one number to the Numa* at the given index
  *
- * Arg #1 (i.e. self) is expected to be a Numa*
- * Arg #2 is expected to be a lua_Integer in the range of l_int32 for the
+ * Arg #1 (i.e. self) is expected to be a Numa*.
+ * Arg #2 is expected to be a lua_Integer in the range of l_int32 for the.
  * index Arg #3 is expected to be a lua_Number in the range of l_float32
  *
  * \param L pointer to the lua_State
- * \return 1 for boolean on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 InsertNumber(lua_State *L)
@@ -201,11 +201,11 @@ InsertNumber(lua_State *L)
 /**
  * \brief Remove one number to the Numa* at the given index
  *
- * Arg #1 (i.e. self) is expected to be a Numa*
- * Arg #2 is expected to be a l_int32 (idx)
+ * Arg #1 (i.e. self) is expected to be a Numa*.
+ * Arg #2 is expected to be a l_int32 (idx).
  *
  * \param L pointer to the lua_State
- * \return 1 for boolean on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 RemoveNumber(lua_State *L)
@@ -220,12 +220,12 @@ RemoveNumber(lua_State *L)
 /**
  * \brief Replace one number to the Numa* at the given index
  *
- * Arg #1 (i.e. self) is expected to be a Numa*
- * Arg #2 is expected to be a lua_Integer in the range of l_int32 for the
+ * Arg #1 (i.e. self) is expected to be a Numa*.
+ * Arg #2 is expected to be a lua_Integer in the range of l_int32 for the.
  * index Arg #3 is expected to be a lua_Number in the range of l_float32
  *
  * \param L pointer to the lua_State
- * \return 1 for boolean on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 ReplaceNumber(lua_State *L)
@@ -241,8 +241,8 @@ ReplaceNumber(lua_State *L)
 /**
  * \brief Get the l_float32 from the Numa* at index
  *
- * Arg #1 (i.e. self) is expected to be a Numa*
- * Arg #2 is expected to be a l_int32 (idx)
+ * Arg #1 (i.e. self) is expected to be a Numa*.
+ * Arg #2 is expected to be a l_int32 (idx).
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -263,8 +263,8 @@ GetFValue(lua_State *L)
 /**
  * \brief Get the l_int32 from the Numa* at index
  *
- * Arg #1 (i.e. self) is expected to be a Numa*
- * Arg #2 is expected to be a l_int32 (idx)
+ * Arg #1 (i.e. self) is expected to be a Numa*.
+ * Arg #2 is expected to be a l_int32 (idx).
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -285,12 +285,12 @@ GetIValue(lua_State *L)
 /**
  * \brief Set the value for the Numa* at the given index
  *
- * Arg #1 (i.e. self) is expected to be a Numa*
- * Arg #2 is expected to be a lua_Integer in the range of l_int32 for the
+ * Arg #1 (i.e. self) is expected to be a Numa*.
+ * Arg #2 is expected to be a lua_Integer in the range of l_int32 for the.
  * index Arg #3 is expected to be a lua_Number in the range of l_float32
  *
  * \param L pointer to the lua_State
- * \return 1 for boolean on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 SetValue(lua_State *L)
@@ -306,12 +306,12 @@ SetValue(lua_State *L)
 /**
  * \brief Add a difference to the value for the Numa* at the given index
  *
- * Arg #1 (i.e. self) is expected to be a Numa*
- * Arg #2 is expected to be a lua_Integer in the range of l_int32 for the
+ * Arg #1 (i.e. self) is expected to be a Numa*.
+ * Arg #2 is expected to be a lua_Integer in the range of l_int32 for the.
  * index Arg #3 is expected to be a lua_Number in the range of l_float32
  *
  * \param L pointer to the lua_State
- * \return 1 for boolean on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 ShiftValue(lua_State *L)
@@ -327,8 +327,8 @@ ShiftValue(lua_State *L)
 /**
  * \brief Get the Numa* as a table of lua_Number
  *
- * Arg #1 (i.e. self) is expected to be a Numa*
- * Arg #2 is an optional string defining the storage flags (copy, clone,
+ * Arg #1 (i.e. self) is expected to be a Numa*.
+ * Arg #2 is an optional string defining the storage flags (copy, clone,.
  * copy_clone)
  *
  * \param L pointer to the lua_State
@@ -350,7 +350,7 @@ GetFArray(lua_State *L)
 /**
  * \brief Get the Numa* as an array of lua_Integer
  *
- * Arg #1 (i.e. self) is expected to be a Numa*
+ * Arg #1 (i.e. self) is expected to be a Numa*.
  *
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -370,7 +370,7 @@ GetIArray(lua_State *L)
 /**
  * \brief Get the parameters of the Numa*
  *
- * Arg #1 (i.e. self) is expected to be a Numa*
+ * Arg #1 (i.e. self) is expected to be a Numa*.
  *
  * \param L pointer to the lua_State
  * \return 2 for Numa* starx and deltax
@@ -392,12 +392,12 @@ GetParameters(lua_State *L)
 /**
  * \brief Set the parameters of the Numa*
  *
- * Arg #1 (i.e. self) is expected to be a Numa*
- * Arg #2 is expected to be a lua_Number in the range of l_float32 (startx)
- * Arg #3 is expected to be a lua_Number in the range of l_float32 (deltax)
+ * Arg #1 (i.e. self) is expected to be a Numa*.
+ * Arg #2 is expected to be a lua_Number in the range of l_float32 (startx).
+ * Arg #3 is expected to be a lua_Number in the range of l_float32 (deltax).
  *
  * \param L pointer to the lua_State
- * \return 1 for boolean on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 SetParameters(lua_State *L)
@@ -413,11 +413,11 @@ SetParameters(lua_State *L)
 /**
  * \brief Copy the parameters of the Numa* (%nas) to the Numa* (%nad)
  *
- * Arg #1 (i.e. self) is expected to be a Numa* (nad)
- * Arg #2 is expected to be another Numa* (nas)
+ * Arg #1 (i.e. self) is expected to be a Numa* (nad).
+ * Arg #2 is expected to be another Numa* (nas).
  *
  * \param L pointer to the lua_State
- * \return 1 for boolean on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 CopyParameters(lua_State *L)
@@ -430,7 +430,7 @@ CopyParameters(lua_State *L)
 }
 
 /**
- * @brief Check Lua stack at index %arg for udata of class LL_NUMA
+ * \brief Check Lua stack at index %arg for udata of class LL_NUMA
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -440,6 +440,21 @@ Numa *
 ll_check_Numa(const char *_fun, lua_State *L, int arg)
 {
     return *(reinterpret_cast<Numa **>(ll_check_udata(_fun, L, arg, LL_NUMA)));
+}
+
+/**
+ * \brief Optionally expect a LL_NUMA at index %arg on the Lua stack
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the Numa* contained in the user data
+ */
+Numa *
+ll_check_Numa_opt(const char *_fun, lua_State *L, int arg)
+{
+    if (!lua_isuserdata(L, arg))
+        return nullptr;
+    return ll_check_Numa(_fun, L, arg);
 }
 
 /**

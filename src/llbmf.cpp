@@ -40,8 +40,8 @@
 /**
  * \brief Create a new Bmf*
  *
- * Arg #1 is expected to be a string (dir)
- * Arg #2 is expected to be a l_int32 (fontsize)
+ * Arg #1 is expected to be a string (dir).
+ * Arg #2 is expected to be a l_int32 (fontsize).
  *
  * \param L pointer to the lua_State
  * \return 1 Bmf* on the Lua stack
@@ -77,8 +77,8 @@ Destroy(lua_State *L)
 /**
  * \brief Get the Pix* for a character from the Bmf* (%bmf)
  *
- * Arg #1 is expected to be a Bmf* (bmf)
- * Arg #2 is expected to be a character (chr)
+ * Arg #1 is expected to be a Bmf* (bmf).
+ * Arg #2 is expected to be a character (chr).
  *
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -96,8 +96,8 @@ GetPix(lua_State *L)
 /**
  * \brief Get the width for a character from the Bmf* (%bmf)
  *
- * Arg #1 is expected to be a Bmf* (bmf)
- * Arg #2 is expected to be a character (chr)
+ * Arg #1 is expected to be a Bmf* (bmf).
+ * Arg #2 is expected to be a character (chr).
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -118,8 +118,8 @@ GetWidth(lua_State *L)
 /**
  * \brief Get the baseline for a character from the Bmf* (%bmf)
  *
- * Arg #1 is expected to be a Bmf* (bmf)
- * Arg #2 is expected to be a character (chr)
+ * Arg #1 is expected to be a Bmf* (bmf).
+ * Arg #2 is expected to be a character (chr).
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -140,8 +140,8 @@ GetBaseline(lua_State *L)
 /**
  * \brief Get the baseline for a character from the Bmf* (%bmf)
  *
- * Arg #1 is expected to be a Bmf* (bmf)
- * Arg #2 is expected to be a string (str)
+ * Arg #1 is expected to be a Bmf* (bmf).
+ * Arg #2 is expected to be a string (str).
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -162,10 +162,10 @@ GetStringWidth(lua_State *L)
 /**
  * \brief Get the line strings for a string using the Bmf* (%bmf)
  *
- * Arg #1 is expected to be a Bmf* (bmf)
- * Arg #2 is expected to be a string (str)
- * Arg #3 is expected to be a l_int32 (maxw)
- * Arg #4 is optional and, if given, expected to be a l_int32 (firstident)
+ * Arg #1 is expected to be a Bmf* (bmf).
+ * Arg #2 is expected to be a string (str).
+ * Arg #3 is expected to be a l_int32 (maxw).
+ * Arg #4 is optional and, if given, expected to be a l_int32 (firstident).
  *
  * \param L pointer to the lua_State
  * \return 1 integer (h) plus a table of strings on the Lua stack
@@ -185,7 +185,7 @@ GetLineStrings(lua_State *L)
 }
 
 /**
- * @brief Check Lua stack at index %arg for udata of class LL_BMF
+ * \brief Check Lua stack at index %arg for udata of class LL_BMF
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -195,6 +195,21 @@ L_Bmf *
 ll_check_Bmf(const char *_fun, lua_State *L, int arg)
 {
     return *(reinterpret_cast<L_Bmf **>(ll_check_udata(_fun, L, arg, LL_BMF)));
+}
+
+/**
+ * \brief Optionally expect a LL_DLLIST at index %arg on the Lua stack
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the Bmf* contained in the user data
+ */
+L_Bmf *
+ll_check_Bmf_opt(const char *_fun, lua_State *L, int arg)
+{
+    if (!lua_isuserdata(L, arg))
+        return nullptr;
+    return ll_check_Bmf(_fun, L, arg);
 }
 
 /**
@@ -215,8 +230,8 @@ ll_push_Bmf(const char *_fun, lua_State *L, L_Bmf *bmf)
 /**
  * \brief Create and push a new Bmf*
  *
- * Arg #1 is expected to be a string (dir)
- * Arg #2 is expected to be a l_int32 (fontsize)
+ * Arg #1 is expected to be a string (dir).
+ * Arg #2 is expected to be a l_int32 (fontsize).
  *
  * \param L pointer to the lua_State
  * \return 1 Bmf* on the Lua stack

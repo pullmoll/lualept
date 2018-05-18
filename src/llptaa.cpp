@@ -40,10 +40,10 @@
 /**
  * \brief Create a new Ptaa*
  *
- * Arg #1 is expected to be a l_int32 (n)
+ * Arg #1 is expected to be a l_int32 (n).
  *
  * \param L pointer to the lua_State
- * \return 1 for Ptaa* on the Lua stack
+ * \return 1 Ptaa* on the Lua stack
  */
 static int
 Create(lua_State *L)
@@ -57,7 +57,7 @@ Create(lua_State *L)
 /**
  * \brief Truncate the arrays stored in the Ptaa*
  *
- * Arg #1 (i.e. self) is expected to be a Ptaa* user data
+ * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -92,7 +92,7 @@ Destroy(lua_State *L)
 /**
  * \brief Get the number of arrays stored in the Ptaa*
  *
- * Arg #1 (i.e. self) is expected to be a Ptaa* user data
+ * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -111,9 +111,9 @@ GetCount(lua_State *L)
  * \brief Get the Point stored in the Ptaa* at Pta* index %ipta and Point index
  * %jpt
  *
- * Arg #1 (i.e. self) is expected to be a Ptaa* user data
- * Arg #2 is expected to be a l_int32 (ipta)
- * Arg #3 is expected to be a l_int32 (jpt)
+ * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
+ * Arg #2 is expected to be a l_int32 (ipta).
+ * Arg #3 is expected to be a l_int32 (jpt).
  *
  * \param L pointer to the lua_State
  * \return 2 for two lua_Numbers on the Lua stack
@@ -137,9 +137,9 @@ GetPt(lua_State *L)
 /**
  * \brief Get the Pta* in the Ptaa* at index %idx
  *
- * Arg #1 (i.e. self) is expected to be a Ptaa* user data
- * Arg #2 is expected to be a l_int32 (idx)
- * Arg #3 is an optional string defining the storage flags (copy, clone,
+ * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
+ * Arg #2 is expected to be a l_int32 (idx).
+ * Arg #3 is an optional string defining the storage flags (copy, clone,.
  * copy_clone)
  *
  * \param L pointer to the lua_State
@@ -159,9 +159,9 @@ GetPta(lua_State *L)
 /**
  * \brief Get the Pta* in the Ptaa* at index %idx
  *
- * Arg #1 (i.e. self) is expected to be a Ptaa* user data
- * Arg #2 is expected to be a Pta* user data
- * Arg #3 is an optional string defining the storage flags (copy, clone,
+ * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
+ * Arg #2 is expected to be a Pta* user data.
+ * Arg #3 is an optional string defining the storage flags (copy, clone,.
  * copy_clone)
  *
  * \param L pointer to the lua_State
@@ -181,9 +181,9 @@ AddPta(lua_State *L)
 /**
  * \brief Replace a Pta* in the Ptaa* at %idx
  *
- * Arg #1 (i.e. self) is expected to be a Ptaa* user data
- * Arg #2 is expected to be a l_int32 (idx)
- * Arg #3 is expected to be a Pta* user data
+ * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
+ * Arg #2 is expected to be a l_int32 (idx).
+ * Arg #3 is expected to be a Pta* user data.
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -202,7 +202,7 @@ ReplacePta(lua_State *L)
 /**
  * \brief Read a Ptaa* from an external file
  *
- * Arg #1 is expected to be a string containing the filename
+ * Arg #1 is expected to be a string containing the filename.
  *
  * \param L pointer to the lua_State
  * \return 1 Ptaa* on the Lua stack
@@ -219,9 +219,9 @@ Read(lua_State *L)
 /**
  * \brief Write the Ptaa* to and external file
  *
- * Arg #1 (i.e. self) is expected to be a Ptaa* user data
- * Arg #2 is expected to be string containing the filename
- * Arg #3 is an optional boolean; if true, the data is
+ * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
+ * Arg #2 is expected to be string containing the filename.
+ * Arg #3 is an optional boolean; if true, the data is.
  *                written as integers, otherwise as floats
  *
  * \param L pointer to the lua_State
@@ -239,7 +239,7 @@ Write(lua_State *L)
 }
 
 /**
- * @brief Check Lua stack at index %arg for udata of class LL_PTAA
+ * \brief Check Lua stack at index %arg for udata of class LL_PTAA
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -249,6 +249,21 @@ Ptaa *
 ll_check_Ptaa(const char *_fun, lua_State *L, int arg)
 {
     return *(reinterpret_cast<Ptaa **>(ll_check_udata(_fun, L, arg, LL_PTAA)));
+}
+
+/**
+ * \brief Optionally expect a LL_PTAA at index %arg on the Lua stack
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the Ptaa* contained in the user data
+ */
+Ptaa *
+ll_check_Ptaa_opt(const char *_fun, lua_State *L, int arg)
+{
+    if (!lua_isuserdata(L, arg))
+        return nullptr;
+    return ll_check_Ptaa(_fun, L, arg);
 }
 
 /**
@@ -269,10 +284,10 @@ ll_push_Ptaa(const char *_fun, lua_State *L, Ptaa *ptaa)
 /**
  * \brief Create and push a new Ptaa*
  *
- * Arg #1 is expected to be a l_int32 (n)
+ * Arg #1 is expected to be a l_int32 (n).
  *
  * \param L pointer to the lua_State
- * \return 1 for Ptaa* on the Lua stack
+ * \return 1 Ptaa* on the Lua stack
  */
 int
 ll_new_Ptaa(lua_State *L)

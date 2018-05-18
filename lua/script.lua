@@ -1,11 +1,9 @@
 function header(str)
-	local len = #str
-	local nstar = (76 - len) // 2
+	local len = str ~= nil and #str or 0
+	local nstar = (78 - len) // 2
 	io.write(string.rep('*',nstar))
 	if (len > 0) then
-		io.write(" " .. str .. " ")
-	else
-	io.write("**")
+		io.write('[' .. str .. ']')
 	end
 	io.write(string.rep('*',nstar))
 	io.write("\n")
@@ -15,6 +13,24 @@ function pad(str)
 	local len = #str
 	local nblank = 38 - len
 	return str .. string.rep(' ', nblank)
+end
+
+function tbl(t)
+	for i,v in pairs(t) do
+		print(pad(string.rep(' ', 16) .. i .. ' ='), v)
+	end
+end
+
+function bmf_test()
+	local dir = "fonts";
+	local bmf = LuaLept.Bmf(dir, 10);
+	print(pad("bmf"), bmf)
+	local chr = string.byte('x')
+	print(pad("bmf:GetWidth("..chr..")"), bmf:GetWidth(chr))
+	local l = {}
+	local h, t = bmf:GetLineStrings("This is just a simple test to see how bmf:GetLineStrings() works out.", 240, 0)
+	print(pad("bmf:GetLineStrings(...)"), h, #t, t)
+	tbl(t)
 end
 
 function aset_test()
@@ -159,16 +175,18 @@ function numa_test()
 	print(pad("na:GetParameters()"), na:GetParameters())
 
 	-- As array of numbers
-	print(pad("na:GetFArray()"), na:GetFArray())
+	print("na:GetFArray():")
+	tbl(na:GetFArray())
 
 	-- As array of integers
-	print(pad("na:GetIArray()"), na:GetIArray())
+	print("na:GetIArray():")
+	tbl(na:GetIArray())
 
 	-- Create a new MUMAA
 	local naa = LuaLept.Numaa(1)
 	print(pad("naa = LuaLept.Numaa(1)"), naa)
 
-	local count = 10
+	local count = 4
 	for i = 1, count do naa:AddNuma(na) end
 	print("... after " .. count .." times naa:AddNuma(na)")
 
@@ -188,8 +206,10 @@ function numa_test()
 	print("... after na = naa:FlattenToNuma()")
 	print(pad("#na"), #na)
 	print(pad("na"), na)
-	print(pad("na:GetFArray()"), na:GetFArray())
-	print(pad("na:GetIArray()"), na:GetIArray())
+	print("na:GetFArray():")
+	tbl(na:GetFArray())
+	print("na:GetIArray():")
+	tbl(na:GetIArray())
 end
 
 function dna_test()
@@ -215,13 +235,14 @@ function dna_test()
 	print(pad("da:GetParameters()"), da:GetParameters())
 
 	-- As array of numbers
-	print(pad("da:GetDArray()"), da:GetDArray())
+	print("da:GetDArray()")
+	tbl(da:GetDArray())
 
 	-- Create a new Dnaa
 	local daa = LuaLept.Dnaa(1)
 	print(pad("daa = LuaLept.Dnaa(1)"), daa)
 
-	local count = 10
+	local count = 5
 	for i = 1, count do
 		daa:AddDna(da)
 	end
@@ -235,7 +256,8 @@ function dna_test()
 	print("... after da = daa:FlattenToDna()")
 	print(pad("#da"), #da)
 	print(pad("da"),	da)
-	print(pad("da:GetDArray()"), da:GetDArray())
+	print("da:GetDArray():")
+	tbl(da:GetDArray())
 
 	local filename = "test.log"
 	local ok = daa:Write(filename)
@@ -247,21 +269,8 @@ function dna_test()
 	print("... after da = daa:FlattenToDna()")
 	print(pad("#da"), #da)
 	print(pad("da"), da)
-	print(pad("da:GetIArray()"), da:GetIArray())
-end
-
-function bmf_test()
-	local dir = "fonts";
-	local bmf = LuaLept.Bmf(dir, 10);
-	print(pad("bmf"), bmf)
-	local chr = string.byte('x')
-	print(pad("bmf:GetWidth("..chr..")"), bmf:GetWidth(chr))
-	local l = {}
-	local h, t = bmf:GetLineStrings("This is just a simple test to see how bmf:GetLineStrings() works out.", 240, 0)
-	print(pad("bmf:GetLineStrings(...)"), h, #t, t)
-	for k,v in pairs(t) do
-		print(pad("k="..k), v)
-	end
+	print("da:GetIArray():")
+	tbl(da:GetIArray())
 end
 
 function pix_test()
@@ -337,7 +346,8 @@ function pix2_test()
 	print (pad("dimensions"), w, h, d)
 	print (pad("area"), w * h)
 	print (pad("RGB colors"), pix:CountRGBColors())
-	-- print ("color histogram :", pix:GetColorAmapHistogram(8))
+	local hist = pix:GetColorAmapHistogram(4)
+	print (pad("color histogram"), hist)
 
 	local pixm = pix:MakeArbMaskFromRGB(-0.5, -0.5, 0.75, 0.05)
 	-- pixm:SetInputFormat('tiff-g4')
@@ -357,7 +367,7 @@ function pix2_test()
 end
 
 function hex_dump(buf)
-	for i=1, math.ceil(#buf/16) * 16 do
+	for i = 1, math.ceil(#buf/16) * 16 do
 		if (i-1) % 16 == 0 then
 			io.write(string.format('%08X  ', i-1))
 			end
@@ -366,27 +376,37 @@ function hex_dump(buf)
 			io.write(' ')
 		end
 		if i % 16 == 0 then
-			io.write('\n')
+			io.write('|')
+			for j = 1,16 do
+				if (i - 16 + j) > #buf then
+					io.write(' ')
+				else
+					local c = buf:byte(i-16+j)
+					io.write(c > 31 and c < 127 and string.char(c) or '.')
+				end
+			end
+			io.write('|\n')
 		end
 	end
 end
 
 header("Main program")
 print("Hello, world!")
-header("")
+header()
 print(pad("LuaLept:Version()"), LuaLept:Version())
 print(pad("LuaLept:LuaVersion()"), LuaLept:LuaVersion())
 print(pad("LuaLept:LeptVersion()"), LuaLept:LeptVersion())
 
-bmf_test()
--- aset_test()
--- amap_test()
--- pta_test()
--- box_test()
--- numa_test()
-dna_test()
--- pix_test()
--- pix2_test()
 
-header("")
+bmf_test()
+aset_test()
+amap_test()
+pta_test()
+box_test()
+numa_test()
+dna_test()
+pix_test()
+pix2_test()
+
+header()
 print("That's all, folks!")

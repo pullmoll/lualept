@@ -38,7 +38,7 @@
  *====================================================================*/
 
 /**
- * @brief Printable string for a ASET*
+ * \brief Printable string for a ASET*
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
  */
@@ -91,7 +91,7 @@ toString(lua_State *L)
 /**
  * \brief Create a new ASET*
  *
- * Arg #1 is expected to be a string describing the key type (int,uint,float)
+ * Arg #1 is expected to be a string describing the key type (int,uint,float).
  *
  * \param L pointer to the lua_State
  * \return 1 ASET* on the Lua stack
@@ -108,7 +108,7 @@ Create(lua_State *L)
 /**
  * \brief Size of an ASET*
  *
- * Arg #1 is expected to be a string describing the key type (int,uint,float)
+ * Arg #1 is expected to be a string describing the key type (int,uint,float).
  *
  * \param L pointer to the lua_State
  * \return 1 ASET* on the Lua stack
@@ -143,11 +143,11 @@ Destroy(lua_State *L)
 /**
  * \brief Insert a node into an ASET* (%aset)
  *
- * Arg #1 (i.e. self) is expected to be a ASET* (aset)
- * Arg #2 is expected to be a key (int, uint or float)
+ * Arg #1 (i.e. self) is expected to be a ASET* (aset).
+ * Arg #2 is expected to be a key (int, uint or float).
  *
  * \param L pointer to the lua_State
- * \return 0 for nothing on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 Insert(lua_State *L)
@@ -188,11 +188,11 @@ Insert(lua_State *L)
 /**
  * \brief Delete a node from an ASET* (%aset)
  *
- * Arg #1 (i.e. self) is expected to be a ASET* (aset)
- * Arg #2 is expected to be a key (int, uint or float)
+ * Arg #1 (i.e. self) is expected to be a ASET* (aset).
+ * Arg #2 is expected to be a key (int, uint or float).
  *
  * \param L pointer to the lua_State
- * \return 0 for nothing on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 Delete(lua_State *L)
@@ -222,8 +222,8 @@ Delete(lua_State *L)
 /**
  * \brief Find a key in an ASET* (%aset)
  *
- * Arg #1 (i.e. self) is expected to be a ASET* (aset)
- * Arg #2 is expected to be a key (int, uint or float)
+ * Arg #1 (i.e. self) is expected to be a ASET* (aset).
+ * Arg #2 is expected to be a key (int, uint or float).
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -254,7 +254,7 @@ Find(lua_State *L)
 /**
  * \brief Get first node in an L_ASET* (%aset)
  *
- * Arg #1 (i.e. self) is expected to be a L_ASET* (aset)
+ * Arg #1 (i.e. self) is expected to be a L_ASET* (aset).
  *
  * \param L pointer to the lua_State
  * \return 1 light user data on the Lua stack
@@ -272,7 +272,7 @@ GetFirst(lua_State *L)
 /**
  * \brief Get next node of L_ASET_NODE* (%node)
  *
- * Arg #1 is expected to be a L_ASET_NODE* (node)
+ * Arg #1 is expected to be a L_ASET_NODE* (node).
  *
  * \param L pointer to the lua_State
  * \return 1 light user data on the Lua stack
@@ -291,7 +291,7 @@ GetNext(lua_State *L)
 /**
  * \brief Get previous node of L_ASET_NODE* (%node)
  *
- * Arg #1 (i.e. self) is expected to be a L_ASET_NODE* (node)
+ * Arg #1 (i.e. self) is expected to be a L_ASET_NODE* (node).
  *
  * \param L pointer to the lua_State
  * \return 1 light user data on the Lua stack
@@ -310,7 +310,7 @@ GetPrev(lua_State *L)
 /**
  * \brief Get last node in an L_ASET* (%aset)
  *
- * Arg #1 (i.e. self) is expected to be a L_ASET* (aset)
+ * Arg #1 (i.e. self) is expected to be a L_ASET* (aset).
  *
  * \param L pointer to the lua_State
  * \return 1 light user data on the Lua stack
@@ -326,7 +326,7 @@ GetLast(lua_State *L)
 }
 
 /**
- * @brief Check Lua stack at index %arg for udata of class LL_ASET
+ * \brief Check Lua stack at index %arg for udata of class LL_ASET
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -336,6 +336,21 @@ L_ASET *
 ll_check_Aset(const char *_fun, lua_State *L, int arg)
 {
     return *(reinterpret_cast<L_ASET **>(ll_check_udata(_fun, L, arg, LL_ASET)));
+}
+
+/**
+ * \brief Optionally expect a LL_ASET at index %arg on the Lua stack
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the ASET* contained in the user data
+ */
+L_ASET *
+ll_check_Aset_opt(const char *_fun, lua_State *L, int arg)
+{
+    if (!lua_isuserdata(L, arg))
+        return nullptr;
+    return ll_check_Aset(_fun, L, arg);
 }
 
 /**
@@ -356,7 +371,7 @@ ll_push_Aset(const char *_fun, lua_State *L, L_ASET *aset)
 /**
  * \brief Create and push a new ASET*
  *
- * Arg #1 is expected to be a key type name (int, uint, or float)
+ * Arg #1 is expected to be a key type name (int, uint, or float).
  *
  * \param L pointer to the lua_State
  * \return 1 ASET* on the Lua stack

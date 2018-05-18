@@ -38,7 +38,7 @@
  *====================================================================*/
 
 /**
- * @brief Printable string for a Box*
+ * \brief Printable string for a Box*
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
  */
@@ -71,10 +71,10 @@ toString(lua_State *L)
 /**
  * \brief Create a new Box*
  *
- * Arg #1 is expected to be a l_int32 (x)
- * Arg #2 is expected to be a l_int32 (y)
- * Arg #3 is expected to be a l_int32 (w)
- * Arg #4 is expected to be a l_int32 (h)
+ * Arg #1 is expected to be a l_int32 (x).
+ * Arg #2 is expected to be a l_int32 (y).
+ * Arg #3 is expected to be a l_int32 (w).
+ * Arg #4 is expected to be a l_int32 (h).
  *
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -94,10 +94,10 @@ Create(lua_State *L)
 /**
  * \brief Create a new Box* if the parameters are valid
  *
- * Arg #1 is expected to be a l_int32 (x)
- * Arg #2 is expected to be a l_int32 (y)
- * Arg #3 is expected to be a l_int32 (w)
- * Arg #4 is expected to be a l_int32 (h)
+ * Arg #1 is expected to be a l_int32 (x).
+ * Arg #2 is expected to be a l_int32 (y).
+ * Arg #3 is expected to be a l_int32 (w).
+ * Arg #4 is expected to be a l_int32 (h).
  *
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -120,10 +120,10 @@ CreateValid(lua_State *L)
 /**
  * \brief Copy a Box*
  *
- * Arg #1 (i.e. self) is expected to be a Box* user data
+ * Arg #1 (i.e. self) is expected to be a Box* user data.
  *
  * \param L pointer to the lua_State
- * \return 1 for BOX on the Lua stack
+ * \return 1 Box* on the Lua stack
  */
 static int
 Copy(lua_State *L)
@@ -138,10 +138,10 @@ Copy(lua_State *L)
 /**
  * \brief Clone a Box*
  *
- * Arg #1 (i.e. self) is expected to be a Box* user data
+ * Arg #1 (i.e. self) is expected to be a Box* user data.
  *
  * \param L pointer to the lua_State
- * \return 1 for BOX on the Lua stack
+ * \return 1 Box* on the Lua stack
  */
 static int
 Clone(lua_State *L)
@@ -174,7 +174,7 @@ Destroy(lua_State *L)
 /**
  * \brief Get the Box* geometry
  *
- * Arg #1 (i.e. self) is expected to be a Box* user data
+ * Arg #1 (i.e. self) is expected to be a Box* user data.
  *
  * \param L pointer to the lua_State
  * \return 4 for four integers (or nil on error) on the stack
@@ -197,14 +197,14 @@ GetGeometry(lua_State *L)
 /**
  * \brief Set the BOX geometry
  *
- * Arg #1 (i.e. self) is expected to be a Box* user data
- * Arg #2 is expected to be a lua_Integer (x)
- * Arg #3 is expected to be a lua_Integer (y)
- * Arg #4 is expected to be a lua_Integer (w)
- * Arg #5 is expected to be a lua_Integer (h)
+ * Arg #1 (i.e. self) is expected to be a Box* user data.
+ * Arg #2 is expected to be a lua_Integer (x).
+ * Arg #3 is expected to be a lua_Integer (y).
+ * Arg #4 is expected to be a lua_Integer (w).
+ * Arg #5 is expected to be a lua_Integer (h).
  *
  * \param L pointer to the lua_State
- * \return 1 for boolean result true or false
+ * \return 1 boolean result true or false
  */
 static int
 SetGeometry(lua_State *L)
@@ -222,7 +222,7 @@ SetGeometry(lua_State *L)
 /**
  * \brief Get the BOX side locations (left, right, top, bottom)
  *
- * Arg #1 (i.e. self) is expected to be a Box* user data
+ * Arg #1 (i.e. self) is expected to be a Box* user data.
  *
  * \param L pointer to the lua_State
  * \return 4 for four integers (or nil on error) on the stack
@@ -245,14 +245,14 @@ GetSideLocations(lua_State *L)
 /**
  * \brief Set the BOX side locations (left, right, top, bottom)
  *
- * Arg #1 (i.e. self) is expected to be a Box* user data
- * Arg #2 is expected to be a lua_Integer (l)
- * Arg #3 is expected to be a lua_Integer (r)
- * Arg #4 is expected to be a lua_Integer (t)
- * Arg #5 is expected to be a lua_Integer (b)
+ * Arg #1 (i.e. self) is expected to be a Box* user data.
+ * Arg #2 is expected to be a lua_Integer (l).
+ * Arg #3 is expected to be a lua_Integer (r).
+ * Arg #4 is expected to be a lua_Integer (t).
+ * Arg #5 is expected to be a lua_Integer (b).
  *
  * \param L pointer to the lua_State
- * \return 1 for boolean result true or false
+ * \return 1 boolean result true or false
  */
 static int
 SetSideLocations(lua_State *L)
@@ -270,7 +270,7 @@ SetSideLocations(lua_State *L)
 /**
  * \brief Get the Box* reference count
  *
- * Arg #1 (i.e. self) is expected to be a Box* user data
+ * Arg #1 (i.e. self) is expected to be a Box* user data.
  *
  * \param L pointer to the lua_State
  * \return 1 integers (or nil on error) on the stack
@@ -287,8 +287,8 @@ GetRefcount(lua_State *L)
 /**
  * \brief Change the Box* reference count
  *
- * Arg #1 (i.e. self) is expected to be a Box* user data
- * Arg #1 (i.e. self) is expected to be a l_int32 (delta)
+ * Arg #1 (i.e. self) is expected to be a Box* user data.
+ * Arg #1 (i.e. self) is expected to be a l_int32 (delta).
  *
  * \param L pointer to the lua_State
  * \return 1 integers (or nil on error) on the stack
@@ -306,10 +306,10 @@ ChangeRefcount(lua_State *L)
 /**
  * \brief Check if a Box* is valid
  *
- * Arg #1 (i.e. self) is expected to be a Box* user data
+ * Arg #1 (i.e. self) is expected to be a Box* user data.
  *
  * \param L pointer to the lua_State
- * \return 1 for boolean on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 IsValid(lua_State *L)
@@ -326,11 +326,11 @@ IsValid(lua_State *L)
 /**
  * \brief Check if a Box* (%box1) contains another Box* (%box2)
  *
- * Arg #1 (i.e. self) is expected to be a Box* (box1)
- * Arg #2 is expected to be another Box* (box2)
+ * Arg #1 (i.e. self) is expected to be a Box* (box1).
+ * Arg #2 is expected to be another Box* (box2).
  *
  * \param L pointer to the lua_State
- * \return 1 for boolean on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 Contains(lua_State *L)
@@ -348,11 +348,11 @@ Contains(lua_State *L)
 /**
  * \brief Check if a Box* (%box1) intersects another Box* (%box2)
  *
- * Arg #1 (i.e. self) is expected to be a Box* (box1)
- * Arg #2 is expected to be another Box* (box2)
+ * Arg #1 (i.e. self) is expected to be a Box* (box1).
+ * Arg #2 is expected to be another Box* (box2).
  *
  * \param L pointer to the lua_State
- * \return 1 for boolean on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 Intersects(lua_State *L)
@@ -370,11 +370,11 @@ Intersects(lua_State *L)
 /**
  * \brief Get the overlap region of a Box* (%box1) and another Box* (%box2)
  *
- * Arg #1 (i.e. self) is expected to be a Box* (box1)
- * Arg #2 is expected to be another Box* (box2)
+ * Arg #1 (i.e. self) is expected to be a Box* (box1).
+ * Arg #2 is expected to be another Box* (box2).
  *
  * \param L pointer to the lua_State
- * \return 1 for Box* on the Lua stack
+ * \return 1 Box* on the Lua stack
  */
 static int
 OverlapRegion(lua_State *L)
@@ -390,11 +390,11 @@ OverlapRegion(lua_State *L)
 /**
  * \brief Get the bounding region of a Box* (%box1) and another Box* (%box2)
  *
- * Arg #1 (i.e. self) is expected to be a Box* (box1)
- * Arg #2 is expected to be another Box* (box2)
+ * Arg #1 (i.e. self) is expected to be a Box* (box1).
+ * Arg #2 is expected to be another Box* (box2).
  *
  * \param L pointer to the lua_State
- * \return 1 for Box* on the Lua stack
+ * \return 1 Box* on the Lua stack
  */
 static int
 BoundingRegion(lua_State *L)
@@ -410,11 +410,11 @@ BoundingRegion(lua_State *L)
 /**
  * \brief Get the overlap fraction of a Box* (%box1) and another Box* (%box2)
  *
- * Arg #1 (i.e. self) is expected to be a Box* (box1)
- * Arg #2 is expected to be another Box* (box2)
+ * Arg #1 (i.e. self) is expected to be a Box* (box1).
+ * Arg #2 is expected to be another Box* (box2).
  *
  * \param L pointer to the lua_State
- * \return 1 for number on the Lua stack
+ * \return 1 number on the Lua stack
  */
 static int
 OverlapFraction(lua_State *L)
@@ -432,11 +432,11 @@ OverlapFraction(lua_State *L)
 /**
  * \brief Get the overlap area of a Box* (%box1) and another Box* (%box2)
  *
- * Arg #1 (i.e. self) is expected to be a Box* (box1)
- * Arg #2 is expected to be another Box* (box2)
+ * Arg #1 (i.e. self) is expected to be a Box* (box1).
+ * Arg #2 is expected to be another Box* (box2).
  *
  * \param L pointer to the lua_State
- * \return 1 for integer on the Lua stack
+ * \return 1 integer on the Lua stack
  */
 static int
 OverlapArea(lua_State *L)
@@ -454,8 +454,8 @@ OverlapArea(lua_State *L)
 /**
  * \brief Get the separation distances of a Box* (%box1) and another Box* (%box2)
  *
- * Arg #1 (i.e. self) is expected to be a Box* (box1)
- * Arg #2 is expected to be another Box* (box2)
+ * Arg #1 (i.e. self) is expected to be a Box* (box1).
+ * Arg #2 is expected to be another Box* (box2).
  *
  * \param L pointer to the lua_State
  * \return 2 integers on the Lua stack
@@ -478,9 +478,9 @@ SeparationDistance(lua_State *L)
 /**
  * \brief Compare the size of a Box* (%box1) and another Box* (%box2)
  *
- * Arg #1 (i.e. self) is expected to be a Box* (box1)
- * Arg #2 is expected to be another Box* (box2)
- * Arg #3 is expected to be a string describing the type of comparison (type)
+ * Arg #1 (i.e. self) is expected to be a Box* (box1).
+ * Arg #2 is expected to be another Box* (box2).
+ * Arg #3 is expected to be a string describing the type of comparison (type).
  *
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack (-1, 0, +1)
@@ -502,9 +502,9 @@ CompareSize(lua_State *L)
 /**
  * \brief Check if a Box* (%box) contains a point (%x,%y)
  *
- * Arg #1 (i.e. self) is expected to be a Box* (box)
- * Arg #2 is expected to be a l_float32 (x)
- * Arg #3 is expected to be a l_float32 (y)
+ * Arg #1 (i.e. self) is expected to be a Box* (box).
+ * Arg #2 is expected to be a l_float32 (x).
+ * Arg #3 is expected to be a l_float32 (y).
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -526,7 +526,7 @@ ContainsPt(lua_State *L)
 /**
  * \brief Get the center of a Box* (%box)
  *
- * Arg #1 (i.e. self) is expected to be a Box* (box)
+ * Arg #1 (i.e. self) is expected to be a Box* (box).
  *
  * \param L pointer to the lua_State
  * \return 2 numbers on the Lua stack (cx, cy)
@@ -548,10 +548,10 @@ GetCenter(lua_State *L)
 /**
  * \brief Intersect a Box* (%box) by a line (x,y)
  *
- * Arg #1 (i.e. self) is expected to be a Box* (box)
- * Arg #2 is expected to be a l_int32 (x)
- * Arg #3 is expected to be a l_int32 (y)
- * Arg #4 is expected to be a l_float32 (slope)
+ * Arg #1 (i.e. self) is expected to be a Box* (box).
+ * Arg #2 is expected to be a l_int32 (x).
+ * Arg #3 is expected to be a l_int32 (y).
+ * Arg #4 is expected to be a l_float32 (slope).
  *
  * \param L pointer to the lua_State
  * \return 5 integers on the Lua stack (x1, y1, x2, y2, n)
@@ -582,9 +582,9 @@ IntersectByLine(lua_State *L)
 /**
  * \brief Clip a Box* (%boxs) rectangle to width and height (%wi,%hi)
  *
- * Arg #1 (i.e. self) is expected to be a Box* (box)
- * Arg #2 is expected to be a l_int32 (wi)
- * Arg #3 is expected to be a l_int32 (hi)
+ * Arg #1 (i.e. self) is expected to be a Box* (box).
+ * Arg #2 is expected to be a l_int32 (wi).
+ * Arg #3 is expected to be a l_int32 (hi).
  *
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -603,7 +603,7 @@ ClipToRectangle(lua_State *L)
 /**
  * \brief Clip a Box* (%boxs) rectangle to width and height (w,h)
  *
- * Arg #1 (i.e. self) is expected to be a Box* (box)
+ * Arg #1 (i.e. self) is expected to be a Box* (box).
  *
  * \param L pointer to the lua_State
  * \return 6 integers on the Lua stack (xstart,ystart,xend,yend,bw,bh)
@@ -635,7 +635,7 @@ ClipToRectangleParams(lua_State *L)
 /**
  * \brief Relocate one side of a Box* (%boxs)
  *
- * Arg #1 (i.e. self) is expected to be a Box* (box)
+ * Arg #1 (i.e. self) is expected to be a Box* (box).
  *
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -655,7 +655,7 @@ RelocateOneSide(lua_State *L)
 /**
  * \brief Adjust sides of a Box* (%boxs)
  *
- * Arg #1 (i.e. self) is expected to be a Box* (box)
+ * Arg #1 (i.e. self) is expected to be a Box* (box).
  *
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -677,8 +677,8 @@ AdjustSides(lua_State *L)
 /**
  * \brief Test equality of a Box* (%box1) and another Box* (%box2)
  *
- * Arg #1 (i.e. self) is expected to be a Box* (box1)
- * Arg #2 is expected to be another Box* (box2)
+ * Arg #1 (i.e. self) is expected to be a Box* (box1).
+ * Arg #2 is expected to be another Box* (box2).
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -699,12 +699,12 @@ Equal(lua_State *L)
 /**
  * \brief Test similarity of a Box* (%box1) and another Box* (%box2)
  *
- * Arg #1 (i.e. self) is expected to be a Box* (box1)
- * Arg #2 is expected to be another Box* (box2)
- * Arg #3 is expected to be a l_int32 (leftdiff)
- * Arg #4 is expected to be a l_int32 (rightdiff)
- * Arg #5 is expected to be a l_int32 (topdiff)
- * Arg #6 is expected to be a l_int32 (botdiff)
+ * Arg #1 (i.e. self) is expected to be a Box* (box1).
+ * Arg #2 is expected to be another Box* (box2).
+ * Arg #3 is expected to be a l_int32 (leftdiff).
+ * Arg #4 is expected to be a l_int32 (rightdiff).
+ * Arg #5 is expected to be a l_int32 (topdiff).
+ * Arg #6 is expected to be a l_int32 (botdiff).
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -729,11 +729,11 @@ Similar(lua_State *L)
 /**
  * \brief Transform a Box* (%boxs) by shifting and scaling
  *
- * Arg #1 (i.e. self) is expected to be a Box* (boxs)
- * Arg #2 is expected to be a l_int32 (shiftx)
- * Arg #3 is expected to be a l_int32 (shifty)
- * Arg #4 is optional and, if given, expected to be a l_float32 (scalex)
- * Arg #5 is optional and, if given, expected to be a l_float32 (scaley)
+ * Arg #1 (i.e. self) is expected to be a Box* (boxs).
+ * Arg #2 is expected to be a l_int32 (shiftx).
+ * Arg #3 is expected to be a l_int32 (shifty).
+ * Arg #4 is optional and, if given, expected to be a l_float32 (scalex).
+ * Arg #5 is optional and, if given, expected to be a l_float32 (scaley).
  *
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -755,15 +755,15 @@ Transform(lua_State *L)
 /**
  * \brief Ordered transform a Box* (%boxs) by shifting and scaling
  *
- * Arg #1 (i.e. self) is expected to be a Box* (boxs)
- * Arg #2 is expected to be a string describing the transform order (order)
- * Arg #3 is optional and, if given, expected to be a l_int32 (shiftx)
- * Arg #4 is optional and, if given, expected to be a l_int32 (shifty)
- * Arg #5 is optional and, if given, expected to be a l_float32 (scalex)
- * Arg #6 is optional and, if given, expected to be a l_float32 (scaley)
- * Arg #7 is optional and, if given, expected to be a l_int32 (xcen)
- * Arg #8 is optional and, if given, expected to be a l_int32 (ycen)
- * Arg #9 is optional and, if given, expected to be a l_float32 (angle)
+ * Arg #1 (i.e. self) is expected to be a Box* (boxs).
+ * Arg #2 is expected to be a string describing the transform order (order).
+ * Arg #3 is optional and, if given, expected to be a l_int32 (shiftx).
+ * Arg #4 is optional and, if given, expected to be a l_int32 (shifty).
+ * Arg #5 is optional and, if given, expected to be a l_float32 (scalex).
+ * Arg #6 is optional and, if given, expected to be a l_float32 (scaley).
+ * Arg #7 is optional and, if given, expected to be a l_int32 (xcen).
+ * Arg #8 is optional and, if given, expected to be a l_int32 (ycen).
+ * Arg #9 is optional and, if given, expected to be a l_float32 (angle).
  *
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -784,14 +784,13 @@ TransformOrdered(lua_State *L)
     l_int32 ycen = ll_check_l_int32_default(_fun, L, 8, ok ? static_cast<l_int32>(yc) : 0);
     l_float32 angle = ll_check_l_float32_default(_fun, L, 9, 0.0f);
     Box *box = boxTransformOrdered(boxs, shiftx, shifty, scalex, scaley, xcen, ycen, angle, order);
-    ll_push_Box(_fun, L, box);
-    return 1;
+    return ll_push_Box(_fun, L, box);
 }
 
 /**
  * \brief Rotate a Box* (%boxs)
  *
- * Arg #1 (i.e. self) is expected to be a Box* (boxs)
+ * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  *
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -805,12 +804,30 @@ RotateOrth(lua_State *L)
     l_int32 h = ll_check_l_int32(_fun, L, 3);
     l_int32 rotation = ll_check_rotation(_fun, L, 4, 0);
     Box *box = boxRotateOrth(boxs, w, h, rotation);
-    ll_push_Box(_fun, L, box);
-    return 1;
+    return ll_push_Box(_fun, L, box);
 }
 
 /**
- * @brief Check Lua stack at index %arg for udata of class LL_BOX
+ * \brief Convert corners (%ncorners) of a Box* (%box) to a Pta* (%pta)
+ *
+ * Arg #1 (i.e. self) is expected to be a Box* (box).
+ * Arg #2 is expected to be a l_int32 (ncorners).
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Box* on the Lua stack
+ */
+static int
+ConvertToPta(lua_State *L)
+{
+    FUNC(LL_BOX ".ConvertToPta");
+    Box *box = ll_check_Box(_fun, L, 1);
+    l_int32 ncorners = ll_check_l_int32(_fun, L, 2);
+    Pta *pta = boxConvertToPta(box, ncorners);
+    return ll_push_Pta(_fun, L, pta);
+}
+
+/**
+ * \brief Check Lua stack at index %arg for udata of class LL_BOX
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -820,6 +837,21 @@ Box *
 ll_check_Box(const char *_fun, lua_State *L, int arg)
 {
     return *(reinterpret_cast<Box **>(ll_check_udata(_fun, L, arg, LL_BOX)));
+}
+
+/**
+ * \brief Optionally expect a LL_BOX at index %arg on the Lua stack
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the Box* contained in the user data
+ */
+Box *
+ll_check_Box_opt(const char *_fun, lua_State *L, int arg)
+{
+    if (!lua_isuserdata(L, arg))
+        return nullptr;
+    return ll_check_Box(_fun, L, arg);
 }
 
 /**
@@ -840,10 +872,10 @@ ll_push_Box(const char *_fun, lua_State *L, Box *box)
 /**
  * \brief Create and push a new Box*
  *
- * Arg #1 is expected to be a l_int32 (x)
- * Arg #2 is expected to be a l_int32 (y)
- * Arg #3 is expected to be a l_int32 (w)
- * Arg #4 is expected to be a l_int32 (h)
+ * Arg #1 is expected to be a l_int32 (x).
+ * Arg #2 is expected to be a l_int32 (y).
+ * Arg #3 is expected to be a l_int32 (w).
+ * Arg #4 is expected to be a l_int32 (h).
  *
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -897,6 +929,7 @@ ll_register_Box(lua_State *L)
         {"Transform",               Transform},
         {"TransformOrdered",        TransformOrdered},
         {"RotateOrth",              RotateOrth},
+        {"ConvertToPta",            ConvertToPta},
         LUA_SENTINEL
     };
 

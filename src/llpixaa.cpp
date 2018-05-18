@@ -40,7 +40,7 @@
 /**
  * \brief Create a new Pixaa*
  *
- * Arg #1 is expected to be a l_int32 (n)
+ * Arg #1 is expected to be a l_int32 (n).
  *
  * \param L pointer to the lua_State
  * \return 1 Pixaa* on the Lua stack
@@ -57,10 +57,10 @@ Create(lua_State *L)
 /**
  * \brief Create a new Pixaa* from a Pixa*
  *
- * Arg #1 is expected to be a Pixa* use data
- * Arg #2 is expected to be a l_int32 (n)
- * Arg #3 is optional and, if given, expected to be a string (type)
- * Arg #4 is optional and, if given, expected to be a string (copyflag)
+ * Arg #1 is expected to be a Pixa* use data.
+ * Arg #2 is expected to be a l_int32 (n).
+ * Arg #3 is optional and, if given, expected to be a string (type).
+ * Arg #4 is optional and, if given, expected to be a string (copyflag).
  *
  * \param L pointer to the lua_State
  * \return 1 Pixaa* on the Lua stack
@@ -80,7 +80,7 @@ CreateFromPixa(lua_State *L)
 /**
  * \brief Destroy a Pixaa*
  *
- * Arg #1 (i.e. self) is expected to be a Pixaa* user data
+ * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  *
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack
@@ -100,11 +100,11 @@ Destroy(lua_State *L)
 /**
  * \brief Add a Pix* and its Box* to a Pixaa*
  *
- * Arg #1 (i.e. self) is expected to be a Pixaa* user data
- * Arg #2 is expected to be a l_int32 (idx)
- * Arg #3 is expected to be a Pix* user data (pix)
- * Arg #4 is expected to be a Box* user data (box)
- * Arg #5 is optionally a string defining the copyflag
+ * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
+ * Arg #2 is expected to be a l_int32 (idx).
+ * Arg #3 is expected to be a Pix* user data (pix).
+ * Arg #4 is expected to be a Box* user data (box).
+ * Arg #5 is optionally a string defining the copyflag.
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -125,9 +125,9 @@ AddPix(lua_State *L)
 /**
  * \brief Add a Box* to a Pixaa*
  *
- * Arg #1 (i.e. self) is expected to be a Pixaa* user data
- * Arg #2 is expected to be a Box* user data (box)
- * Arg #3 is optionally a string defining the copyflag
+ * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
+ * Arg #2 is expected to be a Box* user data (box).
+ * Arg #3 is optionally a string defining the copyflag.
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -146,9 +146,9 @@ AddBox(lua_State *L)
 /**
  * \brief Add a Pixa* to a Pixaa*
  *
- * Arg #1 (i.e. self) is expected to be a Pixaa* user data
- * Arg #2 is expected to be a Pixa* user data
- * Arg #3 is optionally a string defining the copyflag
+ * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
+ * Arg #2 is expected to be a Pixa* user data.
+ * Arg #3 is optionally a string defining the copyflag.
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -167,7 +167,7 @@ AddPixa(lua_State *L)
 /**
  * \brief Get count for a Pixaa*
  *
- * Arg #1 (i.e. self) is expected to be a Pixaa* user data
+ * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  *
  * \param L pointer to the lua_State
  * \return 1: integer on the Lua stack (count), or
@@ -186,7 +186,7 @@ GetCount(lua_State *L)
 /**
  * \brief Extend array of a Pixaa*
  *
- * Arg #1 (i.e. self) is expected to be a Pixaa* user data
+ * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -203,7 +203,7 @@ ExtendArray(lua_State *L)
 /**
  * \brief Truncate array of a Pixaa*
  *
- * Arg #1 (i.e. self) is expected to be a Pixaa* user data
+ * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -220,9 +220,9 @@ Truncate(lua_State *L)
 /**
  * \brief Replace the Pixa* in a Pixaa* at index %idx
  *
- * Arg #1 (i.e. self) is expected to be a Pixaa* user data
- * Arg #2 is expected to be a l_int32 (idx)
- * Arg #3 is expected to be a Pix* user data (pixa)
+ * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
+ * Arg #2 is expected to be a l_int32 (idx).
+ * Arg #3 is expected to be a Pix* user data (pixa).
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -241,7 +241,7 @@ ReplacePixa(lua_State *L)
 /**
  * \brief Clear the Pixaa*
  *
- * Arg #1 (i.e. self) is expected to be a Pixaa* user data
+ * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -258,10 +258,10 @@ Clear(lua_State *L)
 /**
  * \brief Join the Pixaa*
  *
- * Arg #1 (i.e. self) is expected to be a Pixaa* user data
- * Arg #2 is expected to be another Pixaa* user data
- * Arg #3 is optional and expected to be a l_int32 (istart)
- * Arg #4 is optional and expected to be a l_int32 (iend)
+ * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
+ * Arg #2 is expected to be another Pixaa* user data.
+ * Arg #3 is optional and expected to be a l_int32 (istart).
+ * Arg #4 is optional and expected to be a l_int32 (iend).
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -281,9 +281,9 @@ Join(lua_State *L)
 /**
  * \brief Get a Pixa* from a Pixaa*
  *
- * Arg #1 (i.e. self) is expected to be a Pixaa* user data
- * Arg #2 is expected to be a l_int32 (idx)
- * Arg #3 is optionally a string defining the access flag (copy, clone)
+ * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
+ * Arg #2 is expected to be a l_int32 (idx).
+ * Arg #3 is optionally a string defining the access flag (copy, clone).
  *
  * \param L pointer to the lua_State
  * \return 1: Pixa* on the Lua stack , or 0 on error
@@ -302,8 +302,8 @@ GetPixa(lua_State *L)
 /**
  * \brief Get a Boxa* from a Pixaa*
  *
- * Arg #1 (i.e. self) is expected to be a Pixaa* user data
- * Arg #2 is optionally a string defining the access flag (copy, clone)
+ * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
+ * Arg #2 is optionally a string defining the access flag (copy, clone).
  *
  * \param L pointer to the lua_State
  * \return 1: Boxa* on the Lua stack , or 0 on error
@@ -319,16 +319,31 @@ GetBoxa(lua_State *L)
 }
 
 /**
- * @brief Check Lua stack at index %arg for udata of class LL_PIXAA
+ * \brief Check Lua stack at index %arg for udata of class LL_PIXAA
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the PIX contained in the user data
+ * \return pointer to the Pixaa* contained in the user data
  */
 Pixaa *
 ll_check_Pixaa(const char *_fun, lua_State *L, int arg)
 {
     return *(reinterpret_cast<Pixaa **>(ll_check_udata(_fun, L, arg, LL_PIXAA)));
+}
+
+/**
+ * \brief Optionally expect a LL_PIXAA at index %arg on the Lua stack
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the Pixaa* contained in the user data
+ */
+Pixaa *
+ll_check_Pixaa_opt(const char *_fun, lua_State *L, int arg)
+{
+    if (!lua_isuserdata(L, arg))
+        return nullptr;
+    return ll_check_Pixaa(_fun, L, arg);
 }
 
 /**
@@ -349,7 +364,7 @@ ll_push_Pixaa(const char *_fun, lua_State *L, Pixaa *pixaa)
 /**
  * \brief Create a new Pixaa*
  *
- * Arg #1 is expected to be a l_int32 (n)
+ * Arg #1 is expected to be a l_int32 (n).
  *
  * \param L pointer to the lua_State
  * \return 1 Pixaa* on the Lua stack
