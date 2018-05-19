@@ -104,7 +104,7 @@ toString(lua_State* L)
         if (nullptr != cmap) {
             ccnt = pixcmapGetCount(cmap);
             ctot = pixcmapGetFreeCount(cmap) + ccnt;
-            dst += snprintf(dst, sizeof(str) - (size_t)(dst - str),
+            snprintf(dst, sizeof(str) - (size_t)(dst - str),
                             "; %d[%d] colors", ccnt, ctot);
         }
         luaL_addstring(&B, str);
@@ -1963,6 +1963,9 @@ GetRGBLine(lua_State *L)
     l_uint8 *bufg = (l_uint8 *) LEPT_CALLOC(width, sizeof(l_uint8));
     l_uint8 *bufb = (l_uint8 *) LEPT_CALLOC(width, sizeof(l_uint8));
     if (!bufr || !bufg || !bufb) {
+        LEPT_FREE(bufr);
+        LEPT_FREE(bufg);
+        LEPT_FREE(bufb);
         lua_pushfstring(L, "%s: failed to allocate buffers (3 * %d)", _fun, width);
         lua_error(L);
         return 0;
@@ -3660,8 +3663,10 @@ GetRowStats(lua_State *L)
         lua_error(L);
         return 0;
     }
-    if (pixGetRowStats(pixs, type, nbins, thresh, colvect))
+    if (pixGetRowStats(pixs, type, nbins, thresh, colvect)) {
+        LEPT_FREE(colvect);
         return ll_push_nil(L);
+    }
     ll_push_farray(L, colvect, nbins);
     LEPT_FREE(colvect);
     return 1;
@@ -3690,8 +3695,10 @@ GetColumnStats(lua_State *L)
         lua_error(L);
         return 0;
     }
-    if (pixGetColumnStats(pixs, type, nbins, thresh, rowvect))
+    if (pixGetColumnStats(pixs, type, nbins, thresh, rowvect)) {
+        LEPT_FREE(rowvect);
         return ll_push_nil(L);
+    }
     ll_push_farray(L, rowvect, nbins);
     LEPT_FREE(rowvect);
     return 1;

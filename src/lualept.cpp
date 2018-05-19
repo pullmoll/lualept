@@ -197,8 +197,8 @@ ll_push_iarray(lua_State *L, const l_int32 *ia, l_int32 n)
         return ll_push_nil(L);
     lua_newtable(L);
     for (i = 0; i < n; i++) {
-        DBG(LOG_PUSH_TABLE, "%s: ia[%d] = 0x%08x\n", _fun, i, ia[i]);
-        lua_pushinteger(L, ia[i]);
+        DBG(LOG_PUSH_TABLE, "%s: ia[%d] = 0x%08x\n", _fun, i, *ia);
+        lua_pushinteger(L, *ia++);
         lua_rawseti(L, -2, i+1);
     }
     return 1;
@@ -220,8 +220,8 @@ ll_push_uarray(lua_State *L, const l_uint32 *ua, l_int32 n)
         return ll_push_nil(L);
     lua_newtable(L);
     for (i = 0; i < n; i++) {
-        DBG(LOG_PUSH_TABLE, "%s: ua[%d] = 0x%08x\n", _fun, i, ua[i]);
-        lua_pushinteger(L, ua[i]);
+        DBG(LOG_PUSH_TABLE, "%s: ua[%d] = 0x%08x\n", _fun, i, *ua);
+        lua_pushinteger(L, *ua++);
         lua_rawseti(L, -2, i+1);
     }
     return 1;
@@ -243,8 +243,8 @@ ll_push_farray(lua_State *L, const l_float32 *fa, l_int32 n)
         return ll_push_nil(L);
     lua_newtable(L);
     for (i = 0; i < n; i++) {
-        DBG(LOG_PUSH_TABLE, "%s: fa[%d] = %.8g\n", _fun, i, static_cast<double>(fa[i]));
-        lua_pushnumber(L, fa[i]);
+        DBG(LOG_PUSH_TABLE, "%s: fa[%d] = %.8g\n", _fun, i, static_cast<double>(*fa));
+        lua_pushnumber(L, static_cast<double>(*fa++));
         lua_rawseti(L, -2, i+1);
     }
     return 1;
@@ -266,8 +266,8 @@ ll_push_darray(lua_State *L, const l_float64 *da, l_int32 n)
         return ll_push_nil(L);
     lua_newtable(L);
     for (i = 0; i < n; i++) {
-        DBG(LOG_PUSH_TABLE, "%s: da[%d] = %.16g\n", _fun, i, da[i]);
-        lua_pushnumber(L, da[i]);
+        DBG(LOG_PUSH_TABLE, "%s: da[%d] = %.16g\n", _fun, i, *da);
+        lua_pushnumber(L, *da++);
         lua_rawseti(L, -2, i+1);
     }
     return 1;
@@ -474,7 +474,8 @@ ll_unpack_sarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
             /* XXX: sarrayReplaceString() needs a non-const str */
             char *str = reinterpret_cast<char *>(LEPT_CALLOC(1, slen+1));
             memcpy(str, value, slen);
-            sarrayReplaceString(sa, key-1, str, L_INSERT);
+            sarrayReplaceString(sa, key-1, str, L_CLONE);
+            LEPT_FREE(str);
         } else {
             /* FIXME: error? */
         }

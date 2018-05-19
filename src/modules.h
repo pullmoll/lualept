@@ -37,7 +37,7 @@
 #define LOG_REGISTER    0               /*!< set to 1 to enable debugging of Lua class registration */
 #define LOG_DESTROY     0               /*!< set to 1 to enable debugging of object destruction */
 #define LOG_PUSH_UDATA  0               /*!< set to 1 to enable debugging of pushing user data */
-#define LOG_PUSH_TABLE  0               /*!< set to 1 to enable debugging of pushing tables */
+#define LOG_PUSH_TABLE  1               /*!< set to 1 to enable debugging of pushing tables */
 
 #include "lualept.h"
 
