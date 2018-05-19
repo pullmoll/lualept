@@ -39,28 +39,8 @@
 #endif
 #endif
 
-#undef  _
-#define _(x) (((x)>>7)&1)+(((x)>>6)&1)+(((x)>>5)&1)+(((x)>>4)&1)+(((x)>>3)&1)+(((x)>>2)&1)+(((x)>>0)&1)
 /** Table of bit counts in a byte */
-static l_int32 tab8[256] = {
-    _(0x00),_(0x01),_(0x02),_(0x03),_(0x04),_(0x05),_(0x06),_(0x07),_(0x08),_(0x09),_(0x0a),_(0x0b),_(0x0c),_(0x0d),_(0x0e),_(0x0f),
-    _(0x10),_(0x11),_(0x12),_(0x13),_(0x14),_(0x15),_(0x16),_(0x17),_(0x18),_(0x19),_(0x1a),_(0x1b),_(0x1c),_(0x1d),_(0x1e),_(0x1f),
-    _(0x20),_(0x21),_(0x22),_(0x23),_(0x24),_(0x25),_(0x26),_(0x27),_(0x28),_(0x29),_(0x2a),_(0x2b),_(0x2c),_(0x2d),_(0x2e),_(0x2f),
-    _(0x30),_(0x31),_(0x32),_(0x33),_(0x34),_(0x35),_(0x36),_(0x37),_(0x38),_(0x39),_(0x3a),_(0x3b),_(0x3c),_(0x3d),_(0x3e),_(0x3f),
-    _(0x40),_(0x41),_(0x42),_(0x43),_(0x44),_(0x45),_(0x46),_(0x47),_(0x48),_(0x49),_(0x4a),_(0x4b),_(0x4c),_(0x4d),_(0x4e),_(0x4f),
-    _(0x50),_(0x51),_(0x52),_(0x53),_(0x54),_(0x55),_(0x56),_(0x57),_(0x58),_(0x59),_(0x5a),_(0x5b),_(0x5c),_(0x5d),_(0x5e),_(0x5f),
-    _(0x60),_(0x61),_(0x62),_(0x63),_(0x64),_(0x65),_(0x66),_(0x67),_(0x68),_(0x69),_(0x6a),_(0x6b),_(0x6c),_(0x6d),_(0x6e),_(0x6f),
-    _(0x70),_(0x71),_(0x72),_(0x73),_(0x74),_(0x75),_(0x76),_(0x77),_(0x78),_(0x79),_(0x7a),_(0x7b),_(0x7c),_(0x7d),_(0x7e),_(0x7f),
-    _(0x80),_(0x81),_(0x82),_(0x83),_(0x84),_(0x85),_(0x86),_(0x87),_(0x88),_(0x89),_(0x8a),_(0x8b),_(0x8c),_(0x8d),_(0x8e),_(0x8f),
-    _(0x90),_(0x91),_(0x92),_(0x93),_(0x94),_(0x95),_(0x96),_(0x97),_(0x98),_(0x99),_(0x9a),_(0x9b),_(0x9c),_(0x9d),_(0x9e),_(0x9f),
-    _(0xa0),_(0xa1),_(0xa2),_(0xa3),_(0xa4),_(0xa5),_(0xa6),_(0xa7),_(0xa8),_(0xa9),_(0xaa),_(0xab),_(0xac),_(0xad),_(0xae),_(0xaf),
-    _(0xb0),_(0xb1),_(0xb2),_(0xb3),_(0xb4),_(0xb5),_(0xb6),_(0xb7),_(0xb8),_(0xb9),_(0xba),_(0xbb),_(0xbc),_(0xbd),_(0xbe),_(0xbf),
-    _(0xc0),_(0xc1),_(0xc2),_(0xc3),_(0xc4),_(0xc5),_(0xc6),_(0xc7),_(0xc8),_(0xc9),_(0xca),_(0xcb),_(0xcc),_(0xcd),_(0xce),_(0xcf),
-    _(0xd0),_(0xd1),_(0xd2),_(0xd3),_(0xd4),_(0xd5),_(0xd6),_(0xd7),_(0xd8),_(0xd9),_(0xda),_(0xdb),_(0xdc),_(0xdd),_(0xde),_(0xdf),
-    _(0xe0),_(0xe1),_(0xe2),_(0xe3),_(0xe4),_(0xe5),_(0xe6),_(0xe7),_(0xe8),_(0xe9),_(0xea),_(0xeb),_(0xec),_(0xed),_(0xee),_(0xef),
-    _(0xf0),_(0xf1),_(0xf2),_(0xf3),_(0xf4),_(0xf5),_(0xf6),_(0xf7),_(0xf8),_(0xf9),_(0xfa),_(0xfb),_(0xfc),_(0xfd),_(0xfe),_(0xff)
-};
-#undef  _
+static l_int32 tab8[256];
 
 /*====================================================================*
  *
@@ -956,6 +936,78 @@ SetColormap(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     PixColormap* colormap = ll_take_PixColormap(L, 2);
     lua_pushboolean(L, 0 == pixSetColormap(pix, colormap));
+    return 1;
+}
+
+/**
+ * \brief Destroy the colormap of a Pix*
+ *
+ * Arg #1 (i.e. self) is expected to be a Pix* (pix).
+ * Arg #2 is expected to be a PixColormap* (colormap).
+ *
+ * \param L pointer to the lua_State
+ * \return 1 PixColormap* on the Lua stack
+ */
+static int
+DestroyColormap(lua_State *L)
+{
+    FUNC(LL_PIX ".DestroyColormap");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    PixColormap* colormap = ll_take_PixColormap(L, 2);
+    lua_pushboolean(L, 0 == pixDestroyColormap(pix));
+    (void)colormap;
+    return 1;
+}
+
+/**
+ * \brief Get the data of a Pix* (%pix)
+ *
+ * Arg #1 (i.e. self) is expected to be a Pix* (pix).
+ *
+ * \param L pointer to the lua_State
+ * \return 1 array table (h) of array tables (wpl) on the Lua stack
+ */
+static int
+GetData(lua_State *L)
+{
+    FUNC(LL_PIX ".GetData");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_uint32 *data = pixGetData(pix);
+    l_int32 wpl = pixGetWpl(pix);
+    l_int32 h = pixGetHeight(pix);
+    return ll_push_uarray_2d(L, data, wpl, h);
+}
+
+/**
+ * \brief Get the data of a Pix* (%pix)
+ *
+ * Arg #1 (i.e. self) is expected to be a Pix* (pix).
+ * Arg #2 is expected to be a Lua array table (h) of array tables (wpl).
+ *
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+SetData(lua_State *L)
+{
+    FUNC(LL_PIX ".SetData");
+    Pix* pix = ll_check_Pix(_fun, L, 1);
+    l_int32 wpl = pixGetWpl(pix);
+    l_int32 h = pixGetHeight(pix);
+    size_t size = static_cast<size_t>(wpl) * static_cast<size_t>(h) * sizeof(l_uint32);
+    l_uint32 *data = reinterpret_cast<l_uint32 *>(LEPT_MALLOC(size));
+
+    if (data) {
+        /* copy the previous Pix->data in case only a part of data[][] is written */
+        memcpy(data, pixGetData(pix), size);
+    } else {
+        lua_pushfstring(L, "%s: failed to alloc data (%d)", _fun, size);
+        lua_error(L);
+        return 0;
+    }
+    data = ll_unpack_uarray_2d(_fun, L, 2, data, wpl, h);
+    lua_pushboolean(L, 0 == pixSetData(pix, data));
+    /* Do not free(data); it is owned by the Pix* now */
     return 1;
 }
 
@@ -3962,7 +4014,7 @@ Write(lua_State *L)
  * \brief Print info about a Pix* (%pix) to a Lua stream (%stream)
  *
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
- * Arg #2 is expected to be a Lua io handle (stream).
+ * Arg #2 is expected to be a luaL_Stream io handle (stream).
  *
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -4098,6 +4150,9 @@ ll_register_Pix(lua_State *L)
         {"CopyText",                CopyText},
         {"GetColormap",             GetColormap},
         {"SetColormap",             SetColormap},
+        {"DestroyColormap",         DestroyColormap},
+        {"GetData",                 GetData},
+        {"SetData",                 SetData},
         {"GetPixel",                GetPixel},
         {"SetPixel",                SetPixel},
         {"GetRGBPixel",             GetRGBPixel},
@@ -4231,6 +4286,18 @@ ll_register_Pix(lua_State *L)
         {"Read",                    Read},
         LUA_SENTINEL
     };
+    int i;
+
+    for (i = 0; i < 256; i++) {
+        tab8[i] = ((i >> 7) & 1) +
+                  ((i >> 6) & 1) +
+                  ((i >> 5) & 1) +
+                  ((i >> 4) & 1) +
+                  ((i >> 3) & 1) +
+                  ((i >> 2) & 1) +
+                  ((i >> 1) & 1) +
+                  ((i >> 0) & 1);
+    }
 
     int res = ll_register_class(L, LL_PIX, methods, functions);
     lua_setglobal(L, LL_PIX);

@@ -228,6 +228,28 @@ ll_push_uarray(lua_State *L, const l_uint32 *ua, l_int32 n)
 }
 
 /**
+ * \brief Push a l_uint32 2D array (%data) to the Lua stack and return 1
+ * \param L pointer to the lua_State
+ * \param data pointer to the l_uint32 array
+ * \param wpl number of words in the row
+ * \param h number of rows
+ * \return 1 table containing (h) tables of (wpl) words on the stack
+ */
+int
+ll_push_uarray_2d(lua_State *L, const l_uint32 *data, l_int32 wpl, l_int32 h)
+{
+    FUNC("ll_push_uarray_2d");
+    l_int32 i;
+    lua_newtable(L);
+    for (i = 0; i < h; i++) {
+        ll_push_uarray(L, data, wpl);
+        data += wpl;
+        lua_rawseti(L, -2, i+1);
+    }
+    return 1;
+}
+
+/**
  * \brief Push a l_float32 array (%fa) to the Lua stack and return 1
  * \param L pointer to the lua_State
  * \param fa pointer to the l_float32 array
@@ -369,6 +391,47 @@ ll_unpack_uarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
     if (plen)
         *plen = len;
     return ua;
+}
+
+/**
+ * \brief Unpack an array of of arrays from the Lua stack as l_uint32* data
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the table
+ * \param data pointer to a array of %wpl * %h * l_uint32
+ * \param wpl words per line (inner array)
+ * \param h height of the array (outer array)
+ * \return pointer %data
+ */
+l_uint32 *
+ll_unpack_uarray_2d(const char *_fun, lua_State *L, int arg, l_uint32* data, l_int32 wpl, l_int32 h)
+{
+    /* verify there is a table at 2 */
+    luaL_checktype(L, arg, LUA_TTABLE);
+    /* push a nil key */
+    lua_pushnil(L);
+
+    /* iterate over the table of tables */
+    while (lua_next(L, arg)) {
+        l_int32 y = ll_check_l_int32(_fun, L, -2);          /* key is at index -2 */
+        luaL_checktype(L, -1, LUA_TTABLE);                  /* value is at index -1 */
+        /* push another nil key */
+        lua_pushnil(L);
+        /* iterate over the table of integers (table now at index -2) */
+        while (lua_next(L, -2)) {
+            l_int32 x = ll_check_l_int32(_fun, L, -2);          /* key is at index -2 */
+            l_uint32 value = ll_check_l_uint32(_fun, L, -1);    /* value is at index -1 */
+            /* if x,y are in bounds */
+            if (y > 0 && y <= h && x > 0 && x <= wpl) {
+                data[(y-1)*wpl + x - 1] = value;
+            }
+            /* remove value; keep 'key' for next iteration */
+            lua_pop(L, 1);
+        }
+        /* remove table; keep 'key' for next iteration */
+        lua_pop(L, 1);
+    }
+    return data;
 }
 
 /**

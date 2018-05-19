@@ -832,7 +832,7 @@ ConvertToPta(lua_State *L)
  * \brief Print info about a Box* (%box) to a Lua stream (%stream)
  *
  * Arg #1 (i.e. self) is expected to be a Box* (box).
- * Arg #2 is expected to be a Lua io handle (stream).
+ * Arg #2 is expected to be a luaL_Stream io handle (stream).
  *
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack

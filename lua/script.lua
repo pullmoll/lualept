@@ -275,7 +275,7 @@ end
 function pix_test()
 	local filename = "/tmp/test.png"
 	header("Pix")
-	local width, height, depth = 640, 480, 2
+	local width, height, depth = 320, 240, 2
 	local pix = LuaLept.Pix(width,height,depth)
 	pix:SetText("Created with LuaLept-" .. LuaLept:Version())
 	print(pad("pix = LuaLept.Pix("..width..","..height..","..depth..")"), pix)
@@ -308,7 +308,7 @@ function pix_test()
 
 	-- Draw some horizontal lines around the vertical center
 	for y = height/2-2,height/2+2 do
-		for x = 0, width-1 do pix:SetPixel(x, y, black) end
+		for x = 4, width-4 do pix:SetPixel(x, y, black) end
 	end
 
 	pix:SetSpecial(10+9)	-- maximum compression
@@ -331,6 +331,21 @@ function pix_test()
 
 	local pix2 = LuaLept.Pix(filename)
 	print(pad("pix2 = LuaLept.Pix('" .. filename .. "')"), pix2);
+
+
+	-- get the pixel data of pix2 as two dimensional array of integers
+	local data = pix2:GetData();
+	print(pad("pix2:GetData()"), data)
+	for y,words in pairs(data) do
+		io.write(string.format("%d = {", y))
+		for x,val in pairs(words) do
+			io.write(string.format(" %08x", val))
+		end
+		io.write(" }\n")
+	end
+
+	local ok = pix2:SetData(data)
+	print(pad("pix2:SetData(data)"), ok)
 
 	local w, h, d = pix2:GetDimensions()
 	print(pad("width"), w)

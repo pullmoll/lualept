@@ -881,10 +881,10 @@ ll_check_PixColormap_opt(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Check Lua stack at index %arg for udata of class LL_PIXCMAP
  *
- * This version removes the PIXCMAP from the object.
- * It is used when the PIXCMAP is e.g. attached to a PIX.
- * The reason is that a PIXCMAP does not have a reference
- * count and thus can be used exactly once in PIX:SetColormap().
+ * This version removes the PixColormap* from the object PIX;
+ * It is used when the PixColormap* is e.g. attached to a Pix*.
+ * The reason is that a PixColormap* does not have a reference
+ * count and thus can be used exactly once in Pix:SetColormap().
  *
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -894,7 +894,7 @@ PixColormap *
 ll_take_PixColormap(lua_State *L, int arg)
 {
     FUNC("ll_take_PixColormap");
-    PixColormap **pcmap = (PixColormap **)ll_check_udata(_fun, L, arg, LL_PIXCMAP);
+    PixColormap **pcmap = reinterpret_cast<PixColormap **>(ll_check_udata(_fun, L, arg, LL_PIXCMAP));
     PixColormap *cmap = *pcmap;
     *pcmap = nullptr;
     return cmap;

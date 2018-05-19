@@ -143,12 +143,14 @@ extern int          ll_push_udata(const char *_fun, lua_State *L, const char* na
 extern int          ll_push_nil(lua_State *L);
 extern int          ll_push_iarray(lua_State *L, const l_int32* ia, l_int32 n);
 extern int          ll_push_uarray(lua_State *L, const l_uint32* ua, l_int32 n);
+extern int          ll_push_uarray_2d(lua_State *L, const l_uint32* data, l_int32 wpl, l_int32 h);
 extern int          ll_push_farray(lua_State *L, const l_float32* fa, l_int32 n);
 extern int          ll_push_darray(lua_State *L, const l_float64* da, l_int32 n);
 extern int          ll_push_sarray(lua_State *L, Sarray *sa);
 
 extern l_int32    * ll_unpack_iarray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
 extern l_uint32   * ll_unpack_uarray(const char *_fun, lua_State *L, int arg, l_int32 *plen);
+extern l_uint32   * ll_unpack_uarray_2d(const char *_fun, lua_State *L, int arg, l_uint32 *data, l_int32 wpl, l_int32 h);
 extern l_float32  * ll_unpack_farray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
 extern l_float64  * ll_unpack_darray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
 extern Sarray     * ll_unpack_sarray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
