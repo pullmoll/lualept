@@ -56,33 +56,39 @@ toString(lua_State *L)
     if (!aset) {
         luaL_addstring(&B, "nil");
     } else {
-        luaL_addstring(&B, ll_string_keytype(aset->keytype));
-        luaL_addstring(&B, ": {");
+        snprintf(str, sizeof(str), "[%d: %s] L_ASET* %p",
+                 aset->keytype,
+                 ll_string_keytype(aset->keytype),
+                 reinterpret_cast<void *>(aset));
+        luaL_addstring(&B, str);
         node = l_asetSize(aset) ? l_asetGetFirst(aset) : nullptr;
         while (node) {
             if (first) {
                 first = 0;
+                luaL_addstring(&B, "\n");
             } else {
-                luaL_addchar(&B, ',');
+                luaL_addstring(&B, ",\n");
             }
             switch (aset->keytype) {
             case L_INT_TYPE:
-                snprintf(str, sizeof(str), "%lld", node->key.itype);
+                snprintf(str, sizeof(str), "    %" PRId64,
+                         static_cast<intptr_t>(node->key.itype));
                 break;
             case L_UINT_TYPE:
-                snprintf(str, sizeof(str), "%llu", node->key.utype);
+                snprintf(str, sizeof(str), "    %" PRIu64,
+                         static_cast<uintptr_t>(node->key.itype));
                 break;
             case L_FLOAT_TYPE:
-                snprintf(str, sizeof(str), "%g", node->key.ftype);
+                snprintf(str, sizeof(str), "    %g",
+                         node->key.ftype);
                 break;
             default:
-                snprintf(str, sizeof(str), "%p", node->key.ptype);
-                break;
+                snprintf(str, sizeof(str), "    %p",
+                         node->key.ptype);
             }
             luaL_addstring(&B, str);
-            node = l_asetGetNext(node);
+            node = l_amapGetNext(node);
         }
-        luaL_addchar(&B, '}');
     }
     luaL_pushresult(&B);
     return 1;
@@ -156,31 +162,29 @@ Insert(lua_State *L)
     L_ASET *aset = ll_check_Aset(_fun, L, 1);
     RB_TYPE key;
     int isnum = 0;
-    int result = FALSE;
+    int result = TRUE;
 
     switch (aset->keytype) {
     case L_INT_TYPE:
     case L_UINT_TYPE:
         key.itype = lua_tointegerx(L, 2, &isnum);
-        if (isnum) {
-            l_asetInsert(aset, key);
-            result = TRUE;
-        } else {
-            lua_pushfstring(L, LL_ASET " key is not a number: '%s'", lua_tostring(L, 2));
+        if (!isnum) {
+            lua_pushfstring(L, LL_ASET " key is not an integer: '%s'", lua_tostring(L, 2));
             lua_error(L);
+            result = FALSE;
         }
         break;
     case L_FLOAT_TYPE:
         key.ftype = lua_tonumberx(L, 2, &isnum);
-        if (isnum) {
-            l_asetInsert(aset, key);
-            result = TRUE;
-        } else {
+        if (!isnum) {
             lua_pushfstring(L, LL_ASET " key is not a number: '%s'", lua_tostring(L, 2));
             lua_error(L);
+            result = FALSE;
         }
         break;
     }
+    if (result)
+        l_asetInsert(aset, key);
     lua_pushboolean(L, result);
     return 1;
 }
@@ -200,21 +204,30 @@ Delete(lua_State *L)
     FUNC(LL_ASET ".Delete");
     L_ASET *aset = ll_check_Aset(_fun, L, 1);
     RB_TYPE key;
-    int result = FALSE;
+    int isnum = 0;
+    int result = TRUE;
 
     switch (aset->keytype) {
     case L_INT_TYPE:
     case L_UINT_TYPE:
-        key.itype = lua_tointeger(L, 2);
-        l_asetDelete(aset, key);
-        result = TRUE;
+        key.itype = lua_tointegerx(L, 2, &isnum);
+        if (!isnum) {
+            lua_pushfstring(L, LL_ASET " key is not an integer: '%s'", lua_tostring(L, 2));
+            lua_error(L);
+            result = FALSE;
+        }
         break;
     case L_FLOAT_TYPE:
-        key.ftype = lua_tonumber(L, 2);
-        l_asetDelete(aset, key);
-        result = TRUE;
+        key.ftype = lua_tonumberx(L, 2, &isnum);
+        if (!isnum) {
+            lua_pushfstring(L, LL_ASET " key is not a number: '%s'", lua_tostring(L, 2));
+            lua_error(L);
+            result = FALSE;
+        }
         break;
     }
+    if (result)
+        l_asetDelete(aset, key);
     lua_pushboolean(L, result);
     return 1;
 }

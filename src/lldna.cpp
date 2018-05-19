@@ -38,7 +38,7 @@
  *====================================================================*/
 
 /**
- * \brief Printable string for a DNA*
+ * \brief Printable string for a L_Dna*
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
  */
@@ -56,15 +56,15 @@ toString(lua_State *L)
     if (!da) {
         luaL_addstring(&B, "nil");
     } else {
-        luaL_addchar(&B, '{');
+        snprintf(str, sizeof(str),
+                 LL_DNA ": %p",
+                 reinterpret_cast<void *>(da));
+        luaL_addstring(&B, str);
         for (i = 0; i < l_dnaGetCount(da); i++) {
             l_dnaGetDValue(da, i, &val);
-            snprintf(str, sizeof(str), "%d={%g}", i+1, val);
-            if (i > 0)
-                luaL_addchar(&B, ',');
+            snprintf(str, sizeof(str), "\n    %d = %.15g", i+1, val);
             luaL_addstring(&B, str);
         }
-        luaL_addchar(&B, '}');
     }
     luaL_pushresult(&B);
     return 1;
@@ -375,11 +375,11 @@ static int
 GetDArray(lua_State *L)
 {
     FUNC(LL_DNA ".GetDArray");
-    L_Dna *dna = ll_check_Dna(_fun, L, 1);
-    l_float64 *da = l_dnaGetDArray(dna, L_COPY);
-    l_int32 n = l_dnaGetCount(dna);
-    int res = ll_push_darray(L, da, n);
-    LEPT_FREE(da);
+    L_Dna *da = ll_check_Dna(_fun, L, 1);
+    l_float64 *darray = l_dnaGetDArray(da, L_COPY);
+    l_int32 n = l_dnaGetCount(da);
+    int res = ll_push_darray(L, darray, n);
+    LEPT_FREE(darray);
     return res;
 }
 

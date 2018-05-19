@@ -38,6 +38,45 @@
  *====================================================================*/
 
 /**
+ * \brief Printable string for a Numaa*
+ * \param L pointer to the lua_State
+ * \return 1 string on the Lua stack
+ */
+static int
+toString(lua_State *L)
+{
+    FUNC(LL_NUMAA ".toString");
+    static char str[256];
+    Numaa *naa = ll_check_Numaa(_fun, L, 1);
+    luaL_Buffer B;
+    l_int32 i, j;
+    l_float32 val;
+
+    luaL_buffinit(L, &B);
+    if (!naa) {
+        luaL_addstring(&B, "nil");
+    } else {
+        snprintf(str, sizeof(str), LL_NUMAA ": %p", reinterpret_cast<void *>(naa));
+        luaL_addstring(&B, str);
+        for (i = 0; i < numaaGetCount(naa); i++) {
+            Numa *na = numaaGetNuma(naa, i, L_CLONE);
+            snprintf(str, sizeof(str),
+                     "\n    %d = {", i+1);
+            luaL_addstring(&B, str);
+            for (j = 0; j < numaGetCount(na); j++) {
+                numaGetFValue(na, j, &val);
+                snprintf(str, sizeof(str), "\n        %d = %.8g", j+1, val);
+                luaL_addstring(&B, str);
+            }
+            luaL_addstring(&B, "\n    }");
+            numaDestroy(&na);
+        }
+    }
+    luaL_pushresult(&B);
+    return 1;
+}
+
+/**
  * \brief Create a new Numaa*
  *
  * Arg #1 is expected to be a l_int32 (n).
@@ -350,6 +389,7 @@ ll_register_Numaa(lua_State *L) {
         {"__gc",            Destroy},     /* Lua garbage collector */
         {"__new",           Create},      /* new NUMAA([n]) */
         {"__len",           GetCount},    /* #numa */
+        {"__tostring",      toString},
         {"Truncate",        Truncate},
         {"GetCount",        GetCount},
         {"GetNumaCount",    GetNumaCount},

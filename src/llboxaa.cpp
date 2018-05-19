@@ -55,23 +55,25 @@ toString(lua_State *L)
     if (!boxaa) {
         luaL_addstring(&B, "nil");
     } else {
-        luaL_addchar(&B, '{');
+        snprintf(str, sizeof(str),
+                 LL_BOXAA ": %p",
+                 reinterpret_cast<void *>(boxaa));
+        luaL_addstring(&B, str);
         for (i = 0; i < boxaaGetCount(boxaa); i++) {
             Boxa *boxa = boxaaGetBoxa(boxaa, i, L_CLONE);
-            if (i > 0)
-                luaL_addchar(&B, ',');
-            snprintf(str, sizeof(str), "%d={", i+1);
+            snprintf(str, sizeof(str),
+                     "\n    %d = {", i+1);
             luaL_addstring(&B, str);
             for (j = 0; j < boxaGetCount(boxa); j++) {
                 boxaGetBoxGeometry(boxa, j, &x, &y, &w, &h);
-                snprintf(str, sizeof(str), "%d={%d,%d,%d,%d}", j+1, x, y, w, h);
-                if (j > 0)
-                    luaL_addchar(&B, ',');
+                snprintf(str, sizeof(str),
+                         "\n       %d = { x = %d, y = %d, w = %d, h = %d }",
+                         j+1, x, y, w, h);
                 luaL_addstring(&B, str);
             }
-            luaL_addchar(&B, '}');
+            luaL_addstring(&B, "\n    }");
+            boxaDestroy(&boxa);
         }
-        luaL_addchar(&B, '}');
     }
     luaL_pushresult(&B);
     return 1;

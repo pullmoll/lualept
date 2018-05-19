@@ -58,16 +58,16 @@ toString(lua_State *L)
     if (!cmap) {
         luaL_addstring(&B, "nil");
     } else {
-        luaL_addchar(&B, '{');
+        snprintf(str, sizeof(str),
+                 LL_PIXCMAP ": %p",
+                 reinterpret_cast<void *>(cmap));
+        luaL_addstring(&B, str);
         for (i = 0; i < pixcmapGetCount(cmap); i++) {
             pixcmapGetRGBA(cmap, i, &r, &g, &b, &a);
-            if (i > 0)
-                luaL_addchar(&B, ',');
-            snprintf(str, sizeof(str), "{#%02x,#%02x,#%02x,#%02x}",
-                     r, g, b, a);
+            snprintf(str, sizeof(str), "\n    %d = { r = %d, g = %d, b = %d, a = %d }",
+                     i + 1, r, g, b, a);
             luaL_addstring(&B, str);
         }
-        luaL_addchar(&B, '}');
     }
     luaL_pushresult(&B);
     return 1;

@@ -56,17 +56,15 @@ toString(lua_State *L)
     if (!head) {
         luaL_addstring(&B, "nil");
     } else {
-        luaL_addchar(&B, '{');
+        snprintf(str, sizeof(str), LL_DLLIST ": %p", reinterpret_cast<void *>(head));
+        luaL_addstring(&B, str);
         L_BEGIN_LIST_FORWARD(head, elem)
-            if (first) {
-                first = 0;
-            } else {
-                luaL_addchar(&B, ',');
-            }
-            snprintf(str, sizeof(str), "%p=%p", (void *)elem, elem->data);
+            snprintf(str, sizeof(str),
+                     "\n    %p = %p",
+                     reinterpret_cast<void *>(elem),
+                     elem->data);
             luaL_addstring(&B, str);
         L_END_LIST
-        luaL_addchar(&B, '}');
     }
     luaL_pushresult(&B);
     return 1;

@@ -56,33 +56,43 @@ toString(lua_State *L)
     if (!amap) {
         luaL_addstring(&B, "nil");
     } else {
-        luaL_addstring(&B, ll_string_keytype(amap->keytype));
-        luaL_addstring(&B, ": {");
+        snprintf(str, sizeof(str), "[%d: %s] L_AMAP* %p",
+                 amap->keytype,
+                 ll_string_keytype(amap->keytype),
+                 reinterpret_cast<void *>(amap));
+        luaL_addstring(&B, str);
         node = l_amapSize(amap) ? l_amapGetFirst(amap) : nullptr;
         while (node) {
             if (first) {
                 first = 0;
+                luaL_addstring(&B, "\n");
             } else {
-                luaL_addchar(&B, ',');
+                luaL_addstring(&B, ",\n");
             }
             switch (amap->keytype) {
             case L_INT_TYPE:
-                snprintf(str, sizeof(str), "%#" PRIx64 "=%" PRIi64, node->key.itype, node->value.itype);
+                snprintf(str, sizeof(str), "    %" PRId64 "\t= %" PRId64,
+                         static_cast<intptr_t>(node->key.itype),
+                         static_cast<intptr_t>(node->value.itype));
                 break;
             case L_UINT_TYPE:
-                snprintf(str, sizeof(str), "%#" PRIx64 "=%" PRIu64, node->key.utype, node->value.utype);
+                snprintf(str, sizeof(str), "    %" PRIu64 "\t= %" PRIu64,
+                         static_cast<uintptr_t>(node->key.itype),
+                         static_cast<uintptr_t>(node->value.itype));
                 break;
             case L_FLOAT_TYPE:
-                snprintf(str, sizeof(str), "%g=%g", node->key.ftype, node->value.ftype);
+                snprintf(str, sizeof(str), "    %g\t= %g",
+                         node->key.ftype,
+                         node->value.ftype);
                 break;
             default:
-                snprintf(str, sizeof(str), "%p=%p", node->key.ptype, node->value.ptype);
-                break;
+                snprintf(str, sizeof(str), "    %p\t= %p",
+                         node->key.ptype,
+                         node->value.ptype);
             }
             luaL_addstring(&B, str);
             node = l_amapGetNext(node);
         }
-        luaL_addchar(&B, '}');
     }
     luaL_pushresult(&B);
     return 1;

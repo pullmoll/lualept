@@ -80,10 +80,11 @@ toString(lua_State* L)
     static char str[256];
     Pix *pix = ll_check_Pix(_fun, L, 1);
     luaL_Buffer B;
-    char *dst = str;
     const char* format = nullptr;
-    l_int32 w, h, d, spp, wpl, ccnt, ctot;
-    l_uint64 size;
+    const char* text = nullptr;
+    void *data;
+    l_int32 w, h, d, spp, wpl, refcnt, ccnt, ctot, xres, yres;
+    long size;
     PixColormap *cmap = nullptr;
 
     luaL_buffinit(L, &B);
@@ -91,21 +92,43 @@ toString(lua_State* L)
         luaL_addstring(&B, "nil");
     } else {
         if (pixGetDimensions(pix, &w, &h, &d)) {
-            dst += snprintf(dst, sizeof(str), "invalid");
+            snprintf(str, sizeof(str), "invalid");
         } else {
             spp = pixGetSpp(pix);
             wpl = pixGetWpl(pix);
-            size = static_cast<l_uint64>(wpl) * static_cast<l_uint64>(h) * sizeof(l_uint32);
+            size = static_cast<long>(sizeof(l_uint32)) * wpl * h;
+            data = pixGetData(pix);
+            refcnt = pixGetRefcount(pix);
+            xres = pixGetXRes(pix);
+            yres = pixGetYRes(pix);
             format = ll_string_input_format(pixGetInputFormat(pix));
-            dst += snprintf(dst, sizeof(str), "[%s] %dx%d %dbpp; %dspp; %dwpl; %llu bytes",
-                     format, w, h, d, spp, wpl, size);
+            snprintf(str, sizeof(str),
+                     "Pix* %p\n"
+                     "    width = %d, height = %d, depth = %d, spp = %d\n"
+                     "    wpl = %d, data = %p, size = %#" PRIx64 "\n"
+                     "    xres = %d, yres = %d, refcount = %d\n", reinterpret_cast<void *>(pix),
+                     w, h, d, spp, wpl, data, size, xres, yres, refcnt);
         }
+        luaL_addstring(&B, str);
+
         cmap = pixGetColormap(pix);
-        if (nullptr != cmap) {
+        if (cmap) {
             ccnt = pixcmapGetCount(cmap);
             ctot = pixcmapGetFreeCount(cmap) + ccnt;
-            snprintf(dst, sizeof(str) - (size_t)(dst - str),
-                            "; %d[%d] colors", ccnt, ctot);
+            snprintf(str, sizeof(str),
+                     "    colormap: %d of %d colors\n", ccnt, ctot);
+        } else {
+            snprintf(str, sizeof(str),
+                     "    no colormap\n");
+        }
+        luaL_addstring(&B, str);
+
+        text = pixGetText(pix);
+        if (text) {
+            snprintf(str, sizeof(str),
+                     "    text: %s", text);
+        } else {
+            snprintf(str, sizeof(str), "    no text");
         }
         luaL_addstring(&B, str);
     }
@@ -131,7 +154,6 @@ static int
 Create(lua_State *L)
 {
     FUNC(LL_PIX ".Create");
-    static char buff[32 + PATH_MAX];
     Pix *pixs = ll_check_Pix_opt(_fun, L, 1);
     Pix *pix = nullptr;
     if (pixs) {
@@ -144,8 +166,6 @@ Create(lua_State *L)
     } else {
         const char* filename = ll_check_string(_fun, L, 1);
         pix = pixRead(filename);
-        snprintf(buff, sizeof(buff), "filename: %s", filename);
-        pixAddText(pix, buff);
     }
     return ll_push_Pix(_fun, L, pix);
 }
@@ -3939,6 +3959,27 @@ Write(lua_State *L)
 }
 
 /**
+ * \brief Print info about a Pix* (%pix) to a Lua stream (%stream)
+ *
+ * Arg #1 (i.e. self) is expected to be a Pix* (pix).
+ * Arg #2 is expected to be a Lua io handle (stream).
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Box* on the Lua stack
+ */
+static int
+PrintStreamInfo(lua_State *L)
+{
+    FUNC(LL_PIX ".PrintStreamInfo");
+    static char str[64];
+    Pix *pix= ll_check_Pix(_fun, L, 1);
+    luaL_Stream *stream = reinterpret_cast<luaL_Stream *>(luaL_checkudata(L, 2, LUA_FILEHANDLE));
+    snprintf(str, sizeof(str), "%p\n", reinterpret_cast<void *>(pix));
+    lua_pushboolean(L, 0 == pixPrintStreamInfo(stream->f, pix, str));
+    return 1;
+}
+
+/**
  * \brief Check Lua stack at index %arg for udata of class LL_PIX
  * \param _fun calling function's name
  * \param L pointer to the lua_State
@@ -4180,6 +4221,7 @@ ll_register_Pix(lua_State *L)
         {"FindAreaPerimRatio",      FindAreaPerimRatio},
         {"FindPerimToAreaRatio",    FindPerimToAreaRatio},
         {"Write",                   Write},
+        {"PrintStreamInfo",         PrintStreamInfo},
         LUA_SENTINEL
     };
 

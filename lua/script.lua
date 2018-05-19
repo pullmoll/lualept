@@ -18,7 +18,7 @@ end
 function tbl(t)
 	local str = "\n"
 	for i,v in pairs(t) do
-		str = str .. '   ' .. i .. ' = ' .. v .. '\n'
+		str = str .. '    ' .. i .. ' = ' .. v .. '\n'
 	end
 	return str
 end
@@ -177,10 +177,10 @@ function numa_test()
 	print(pad("na:GetParameters()"), na:GetParameters())
 
 	-- As array of numbers
-	print("na:GetFArray():", tbl(na:GetFArray()))
+	print("na:GetFArray()", tbl(na:GetFArray()))
 
 	-- As array of integers
-	print("na:GetIArray():", tbl(na:GetIArray()))
+	print("na:GetIArray()", tbl(na:GetIArray()))
 
 	-- Create a new MUMAA
 	local naa = LuaLept.Numaa(1)
@@ -190,7 +190,8 @@ function numa_test()
 	for i = 1, count do naa:AddNuma(na) end
 	print("... after " .. count .." times naa:AddNuma(na)")
 
-	print(pad("#naa"),	#naa)
+	print(pad("#naa"), #naa)
+	print(pad("naa"), naa)
 	print(pad("naa:GetNumberCount()"), naa:GetNumberCount())
 	for i = 1, count do
 		print(pad("naa:GetNumaCount("..i..")"), naa:GetNumaCount(i))
@@ -241,23 +242,23 @@ function dna_test()
 	print(pad("daa = LuaLept.Dnaa(1)"), daa)
 
 	local count = 5
-	for i = 1, count do
-		daa:AddDna(da)
-	end
+	for i = 1, count do daa:AddDna(da) end
 	print("... after " .. count .. " times daa:AddDna(da)")
 
-	print(pad("#daa"),	#daa)
+	print(pad("#daa"), #daa)
+	print(pad("daa"), daa)
 	for i = 1, count do print(pad("daa:GetDnaCount(" .. i .. ")"), daa:GetDnaCount(i)) end
 	print(pad("daa:GetNumberCount()"), daa:GetNumberCount())
 
 	local da = daa:FlattenToDna()
 	print("... after da = daa:FlattenToDna()")
 	print(pad("#da"), #da)
-	print(pad("da"),	da)
-	print("da:GetDArray():")
-	tbl(da:GetDArray())
+	print(pad("da"), da)
+	local t = da:GetDArray()
+	print("da:GetDArray():", t)
+	tbl(t)
 
-	local filename = "test.log"
+	local filename = "/tmp/test.daa"
 	local ok = daa:Write(filename)
 	print(pad("daa:Write('"..filename.."')"), ok)
 
@@ -267,8 +268,8 @@ function dna_test()
 	print("... after da = daa:FlattenToDna()")
 	print(pad("#da"), #da)
 	print(pad("da"), da)
-	print("da:GetIArray():")
-	tbl(da:GetIArray())
+	local t = da:GetIArray()
+	print("da:GetIArray()", #t, t, tbl(t))
 end
 
 function pix_test()
@@ -276,6 +277,7 @@ function pix_test()
 	header("Pix")
 	local width, height, depth = 640, 480, 2
 	local pix = LuaLept.Pix(width,height,depth)
+	pix:SetText("Created with LuaLept-" .. LuaLept:Version())
 	print(pad("pix = LuaLept.Pix("..width..","..height..","..depth..")"), pix)
 
 	local cmap = LuaLept.PixColormap(2)
@@ -361,7 +363,7 @@ function pix_test()
 	local pix3 = pix3.DisplayColorArray(240, 4, 6, carray)
 	local pix3 = pix3:AddBorder(20, LuaLept.RGB(255,255,255))
 	print(pad("pix3"), pix3)
-	local ok = pix3:Write("/tmp/carray.tiff", "zip")
+	local ok = pix3:Write("/tmp/carray.tiff", "lzw")
 end
 
 function pix2_test()
@@ -379,7 +381,7 @@ function pix2_test()
 	print (pad("dimensions"), w, h, d)
 	print (pad("area"), w * h)
 	print (pad("RGB colors"), pix:CountRGBColors())
-	local hist = pix:GetColorAmapHistogram(8)
+	local hist = pix:GetColorAmapHistogram(1)
 	print (pad("color histogram"), hist)
 
 	local pixm = pix:MakeArbMaskFromRGB(-0.5, -0.5, 0.75, 0.05)
@@ -387,9 +389,10 @@ function pix2_test()
 	print (pad("pixm"), pixm)
 	print (pad("dimensions"), pixm:GetDimensions())
 
-	local box = LuaLept.Box(12,12,140,140)
 	print (pad("pixels"), pixm:CountPixels())
-	print (pad("pixels in rect"), box, pixm:CountPixelsInRect(box))
+	local box = LuaLept.Box(10,w-20,h-30,30)
+	print (pad("rect"), box)
+	print (pad("pixels in rect"), pixm:CountPixelsInRect(box))
 	print (pad("foreground fract"), pixm:ForegroundFraction())
 
 	local ok = pixm:Write(filename2,'g4')
@@ -430,15 +433,15 @@ print(pad("LuaLept:Version()"), LuaLept:Version())
 print(pad("LuaLept:LuaVersion()"), LuaLept:LuaVersion())
 print(pad("LuaLept:LeptVersion()"), LuaLept:LeptVersion())
 
-bmf_test()
-aset_test()
-amap_test()
-pta_test()
-box_test()
+-- bmf_test()
+-- aset_test()
+-- amap_test()
+-- pta_test()
+-- box_test()
 numa_test()
-dna_test()
+-- dna_test()
 pix_test()
-pix2_test()
+-- pix2_test()
 
 header()
 print("That's all, folks!")

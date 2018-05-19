@@ -55,14 +55,16 @@ toString(lua_State *L)
     if (!box) {
         luaL_addstring(&B, "nil");
     } else {
-        luaL_addchar(&B, '{');
+        snprintf(str, sizeof(str),
+                 LL_BOX ": %p\n",
+                 reinterpret_cast<void *>(box));
+        luaL_addstring(&B, str);
         if (boxGetGeometry(box, &x, &y, &w, &h)) {
             snprintf(str, sizeof(str), "invalid");
         } else {
-            snprintf(str, sizeof(str), "%d,%d,%d,%d", x, y, w, h);
+            snprintf(str, sizeof(str), "    x = %d, y = %d, w = %d, h = %d", x, y, w, h);
         }
         luaL_addstring(&B, str);
-        luaL_addchar(&B, '}');
     }
     luaL_pushresult(&B);
     return 1;
@@ -827,6 +829,25 @@ ConvertToPta(lua_State *L)
 }
 
 /**
+ * \brief Print info about a Box* (%box) to a Lua stream (%stream)
+ *
+ * Arg #1 (i.e. self) is expected to be a Box* (box).
+ * Arg #2 is expected to be a Lua io handle (stream).
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Box* on the Lua stack
+ */
+static int
+PrintStreamInfo(lua_State *L)
+{
+    FUNC(LL_BOX ".PrintStreamInfo");
+    Box *box = ll_check_Box(_fun, L, 1);
+    luaL_Stream *stream = reinterpret_cast<luaL_Stream *>(luaL_checkudata(L, 2, LUA_FILEHANDLE));
+    lua_pushboolean(L, 0 == boxPrintStreamInfo(stream->f, box));
+    return 1;
+}
+
+/**
  * \brief Check Lua stack at index %arg for udata of class LL_BOX
  * \param _fun calling function's name
  * \param L pointer to the lua_State
@@ -930,6 +951,7 @@ ll_register_Box(lua_State *L)
         {"TransformOrdered",        TransformOrdered},
         {"RotateOrth",              RotateOrth},
         {"ConvertToPta",            ConvertToPta},
+        {"PrintStreamInfo",         PrintStreamInfo},
         LUA_SENTINEL
     };
 

@@ -38,6 +38,38 @@
  *====================================================================*/
 
 /**
+ * \brief Printable string for a Numa*
+ * \param L pointer to the lua_State
+ * \return 1 string on the Lua stack
+ */
+static int
+toString(lua_State *L)
+{
+    FUNC(LL_NUMA ".toString");
+    static char str[256];
+    Numa *da = ll_check_Numa(_fun, L, 1);
+    luaL_Buffer B;
+    l_int32 i;
+    l_float32 val;
+
+    luaL_buffinit(L, &B);
+    if (!da) {
+        luaL_addstring(&B, "nil");
+    } else {
+        snprintf(str, sizeof(str), LL_NUMA ": %p", reinterpret_cast<void *>(da));
+        luaL_addstring(&B, str);
+        for (i = 0; i < numaGetCount(da); i++) {
+            numaGetFValue(da, i, &val);
+            snprintf(str, sizeof(str), "\n    %d = %.8g",
+                     i+1, static_cast<double>(val));
+            luaL_addstring(&B, str);
+        }
+    }
+    luaL_pushresult(&B);
+    return 1;
+}
+
+/**
  * \brief Create a new Numa*
  *
  * Arg #1 is expected to be a l_int32 (n).
@@ -496,6 +528,7 @@ ll_register_Numa(lua_State *L)
         {"__new",               Create},           /* new Numa */
         {"__len",               GetCount},         /* #numa */
         {"__newitem",           ReplaceNumber},    /* numa[index] = number */
+        {"__tostring",          toString},
         {"Clone",               Clone},
         {"Copy",                Copy},
         {"Empty",               Empty},

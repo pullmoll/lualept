@@ -38,6 +38,47 @@
  *====================================================================*/
 
 /**
+ * \brief Printable string for a L_Dnaa*
+ * \param L pointer to the lua_State
+ * \return 1 string on the Lua stack
+ */
+static int
+toString(lua_State *L)
+{
+    FUNC(LL_DNAA ".toString");
+    static char str[256];
+    L_Dnaa *daa = ll_check_Dnaa(_fun, L, 1);
+    luaL_Buffer B;
+    l_int32 i, j;
+    l_float64 val;
+
+    luaL_buffinit(L, &B);
+    if (!daa) {
+        luaL_addstring(&B, "nil");
+    } else {
+        snprintf(str, sizeof(str),
+                 LL_DNAA ": %p",
+                 reinterpret_cast<void *>(daa));
+        luaL_addstring(&B, str);
+        for (i = 0; i < l_dnaaGetCount(daa); i++) {
+            L_Dna *da = l_dnaaGetDna(daa, i, L_CLONE);
+            snprintf(str, sizeof(str),
+                     "\n    %d = {", i+1);
+            luaL_addstring(&B, str);
+            for (j = 0; j < l_dnaGetCount(da); j++) {
+                l_dnaGetDValue(da, j, &val);
+                snprintf(str, sizeof(str), "\n        %d = %.15g", j+1, val);
+                luaL_addstring(&B, str);
+            }
+            luaL_addstring(&B, "\n    }");
+            l_dnaDestroy(&da);
+        }
+    }
+    luaL_pushresult(&B);
+    return 1;
+}
+
+/**
  * \brief Create a new L_Dnaa*
  *
  * Arg #1 is expected to be a l_int32 (n).
@@ -371,6 +412,7 @@ ll_register_Dnaa(lua_State *L) {
         {"__gc",            Destroy},      /* garbage collector */
         {"__new",           Create},       /* new DNAA */
         {"__len",           GetCount},     /* #dnaa */
+        {"__tostring",      toString},
         {"Truncate",        Truncate},
         {"GetCount",        GetCount},
         {"GetDnaCount",     GetDnaCount},
