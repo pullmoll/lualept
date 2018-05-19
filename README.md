@@ -25,5 +25,5 @@ at me and tell me where I'm missing the point.
 Still, the project already runs some script (`lua/script.lua`) which I use for testing
 the language bindings as I write the wrapper functions.
 
-<a href="mailto:'Jürgen Buchmüller <pullmoll@t-online.de>'>Jürgen Buchmüller</a>
+<a href="mailto:Jürgen Buchmüller <pullmoll@t-online.de>">Jürgen Buchmüller</a>
 
