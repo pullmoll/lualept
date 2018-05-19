@@ -16,9 +16,11 @@ function pad(str)
 end
 
 function tbl(t)
+	local str = "\n"
 	for i,v in pairs(t) do
-		print(pad(string.rep(' ', 16) .. i .. ' ='), v)
+		str = str .. '   ' .. i .. ' = ' .. v .. '\n'
 	end
+	return str
 end
 
 function bmf_test()
@@ -29,8 +31,8 @@ function bmf_test()
 	print(pad("bmf:GetWidth("..chr..")"), bmf:GetWidth(chr))
 	local l = {}
 	local h, t = bmf:GetLineStrings("This is just a simple test to see how bmf:GetLineStrings() works out.", 240, 0)
-	print(pad("bmf:GetLineStrings(...)"), h, #t, t)
-	tbl(t)
+	print(pad("bmf:GetLineStrings(...)"), h, #t, t, tbl(t))
+
 end
 
 function aset_test()
@@ -175,12 +177,10 @@ function numa_test()
 	print(pad("na:GetParameters()"), na:GetParameters())
 
 	-- As array of numbers
-	print("na:GetFArray():")
-	tbl(na:GetFArray())
+	print("na:GetFArray():", tbl(na:GetFArray()))
 
 	-- As array of integers
-	print("na:GetIArray():")
-	tbl(na:GetIArray())
+	print("na:GetIArray():", tbl(na:GetIArray()))
 
 	-- Create a new MUMAA
 	local naa = LuaLept.Numaa(1)
@@ -206,10 +206,8 @@ function numa_test()
 	print("... after na = naa:FlattenToNuma()")
 	print(pad("#na"), #na)
 	print(pad("na"), na)
-	print("na:GetFArray():")
-	tbl(na:GetFArray())
-	print("na:GetIArray():")
-	tbl(na:GetIArray())
+	print("na:GetFArray():", tbl(na:GetFArray()))
+	print("na:GetIArray():", tbl(na:GetIArray()))
 end
 
 function dna_test()
@@ -313,6 +311,14 @@ function pix_test()
 	local ok = pix:Write(filename, "png")
 	print(pad("pix:Write('" .. filename .."')"), ok)
 
+	local cmap = pix:GetColormap()
+	print(pad("cmap"), cmap)
+	local r,g,b,a = cmap:ToArrays()
+	print(pad("r"), tbl(r))
+	print(pad("g"), tbl(g))
+	print(pad("b"), tbl(b))
+	print(pad("a"), tbl(a))
+
 	local pix2 = LuaLept.Pix(filename)
 	print(pad("pix2 = LuaLept.Pix('" .. filename .. "')"), pix2);
 
@@ -329,6 +335,25 @@ function pix_test()
 
 	local bits = h * wpl * 32
 	print(pad("bits"), bits)
+
+	local carray = {
+		0x00000000, 0x11111100, 0x22222200, 0x33333300,
+		0x44444400, 0x55555500, 0x66666600, 0x77777700,
+		0x88888800, 0x99999900, 0xaaaaaa00, 0xbbbbbb00,
+		0xcccccc00, 0xdddddd00, 0xeeeeee00, 0xffffff00,
+		0x32847100, 0xc8411200, 0x01928200, 0x12479a00,
+		0x81ff2a00, 0x19f9fa00, 0x8a818b00, 0x586a9400}
+	--[[
+	      FIXME: how to access functions of LuaLept.Pix()
+	      Right now I need to create a dummy pix3 to have
+	      access to pix3.DisplayColorArray(...).
+	      Should I be using global function names.
+	--]]
+	local pix3 = LuaLept.Pix(1,1)
+	local pix3 = pix3.DisplayColorArray(240, 4, 6, carray)
+	local pix3 = pix3:AddBorder(20, LuaLept.RGB(255,255,255))
+	print(pad("pix3"), pix3)
+	local ok = pix3:Write("/tmp/carray.png")
 end
 
 function pix2_test()
@@ -396,7 +421,6 @@ header()
 print(pad("LuaLept:Version()"), LuaLept:Version())
 print(pad("LuaLept:LuaVersion()"), LuaLept:LuaVersion())
 print(pad("LuaLept:LeptVersion()"), LuaLept:LeptVersion())
-
 
 bmf_test()
 aset_test()

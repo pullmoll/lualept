@@ -141,9 +141,16 @@ extern void **      ll_check_udata(const char *_fun, lua_State *L, int arg, cons
 extern int          ll_push_udata(const char *_fun, lua_State *L, const char* name, void *udata);
 extern int          ll_push_nil(lua_State *L);
 extern int          ll_push_iarray(lua_State *L, l_int32 *ia, l_int32 n);
+extern int          ll_push_uarray(lua_State *L, l_uint32 *ua, l_int32 n);
 extern int          ll_push_farray(lua_State *L, l_float32 *fa, l_int32 n);
 extern int          ll_push_darray(lua_State *L, l_float64 *da, l_int32 n);
 extern int          ll_push_sarray(lua_State *L, Sarray *sa);
+
+extern l_int32    * ll_unpack_iarray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
+extern l_uint32   * ll_unpack_uarray(const char *_fun, lua_State *L, int arg, l_int32 *plen);
+extern l_float32  * ll_unpack_farray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
+extern l_float64  * ll_unpack_darray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
+extern Sarray     * ll_unpack_sarray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
 
 extern l_int32      ll_check_index(const char *_fun, lua_State *L, int arg, l_int32 imax);
 extern char         ll_check_char(const char *_fun, lua_State *L, int arg);
@@ -154,6 +161,8 @@ extern l_uint32     ll_check_l_uint32(const char *_fun, lua_State *L, int arg);
 extern l_uint32     ll_check_l_uint32_default(const char *_fun, lua_State *L, int arg, l_uint32 dflt);
 extern l_float32    ll_check_l_float32(const char *_fun, lua_State *L, int arg);
 extern l_float32    ll_check_l_float32_default(const char *_fun, lua_State *L, int arg, l_float32 dflt);
+extern l_float64    ll_check_l_float64(const char *_fun, lua_State *L, int arg);
+extern l_float64    ll_check_l_float64_default(const char *_fun, lua_State *L, int arg, l_float32 dflt);
 extern l_int32      ll_check_tbl(const char *_fun, lua_State *L, int arg, l_int32 dflt, const lept_enums_t *tbl, size_t len);
 
 extern l_int32      ll_check_access_storage(const char *_fun, lua_State *L, int arg, l_int32 dflt);

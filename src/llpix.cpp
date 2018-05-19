@@ -916,8 +916,8 @@ GetColormap(lua_State *L)
 {
     FUNC(LL_PIX ".GetColormap");
     Pix *pix = ll_check_Pix(_fun, L, 1);
-    PixColormap* colormap = pixGetColormap(pix);
-    return ll_push_PixColormap(_fun, L, colormap);
+    PixColormap* cmap = pixcmapCopy(pixGetColormap(pix));
+    return ll_push_PixColormap(_fun, L, cmap);
 }
 
 /**
@@ -1582,8 +1582,8 @@ AddBorder(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 npix = ll_check_l_int32(_fun, L, 2);
     l_uint32 val = ll_check_l_uint32(_fun, L, 3);
-    Pix* pix = pixAddBorder(pixs, npix, val);
-    ll_push_Pix(_fun, L, pix);
+    Pix* pixd = pixAddBorder(pixs, npix, val);
+    ll_push_Pix(_fun, L, pixd);
     return 1;
 }
 
@@ -3494,7 +3494,7 @@ GetMaxValueInRect(lua_State *L)
  * Arg #5 is optional and, if given, expected to be a l_int32 (fontsize).
  *
  * \param L pointer to the lua_State
- * \return 2+nbins integers on the Lua stack (minval, maxval, carray[])
+ * \return 2 integers and 1 table on the Lua stack (minval, maxval, carray)
  */
 static int
 GetBinnedComponentRange(lua_State *L)
@@ -3508,16 +3508,15 @@ GetBinnedComponentRange(lua_State *L)
     l_int32 minval = 0;
     l_int32 maxval = 0;
     l_uint32 *carray = nullptr;
-    l_int32 i;
+    l_int32 res;
 
     if (pixGetBinnedComponentRange(pixs, nbins, factor, color, &minval, &maxval, &carray, fontsize))
         return ll_push_nil(L);
     lua_pushinteger(L, minval);
     lua_pushinteger(L, maxval);
-    for (i = 0; i < nbins; i++)
-        lua_pushinteger(L, carray[i]);
-    free(carray);
-    return 2 + nbins;
+    res = ll_push_uarray(L, carray, nbins);
+    LEPT_FREE(carray);
+    return 2 + res;
 }
 
 /**
@@ -3529,7 +3528,7 @@ GetBinnedComponentRange(lua_State *L)
  * Arg #4 is expected to be a string defining the selected color (color).
  *
  * \param L pointer to the lua_State
- * \return nbins integers on the Lua stack (carray[])
+ * \return 1 table on the Lua stack (carray)
  */
 static int
 GetRankColorArray(lua_State *L)
@@ -3540,14 +3539,13 @@ GetRankColorArray(lua_State *L)
     l_int32 factor = ll_check_l_int32_default(_fun, L, 3, 1);
     l_int32 type = ll_check_select_color(_fun, L, 4, L_SELECT_AVERAGE);
     l_uint32 *carray = nullptr;
-    l_int32 i;
+    l_int32 res;
 
     if (pixGetRankColorArray(pixs, nbins, type, factor, &carray, 0, 0))
         return ll_push_nil(L);
-    for (i = 0; i < nbins; i++)
-        lua_pushinteger(L, carray[i]);
-    free(carray);
-    return nbins;
+    res = ll_push_uarray(L, carray, nbins);
+    LEPT_FREE(carray);
+    return res;
 }
 
 /**
@@ -3560,7 +3558,7 @@ GetRankColorArray(lua_State *L)
  * Arg #5 is expected to be a Numa* (alut).
  *
  * \param L pointer to the lua_State
- * \return nbins integers on the Lua stack (carray[])
+ * \return 1 table on the Lua stack (carray)
  */
 static int
 GetBinnedColor(lua_State *L)
@@ -3572,44 +3570,37 @@ GetBinnedColor(lua_State *L)
     l_int32 factor = ll_check_l_int32_default(_fun, L, 4, 1);
     Numa *alut = ll_check_Numa(_fun, L, 5);
     l_uint32 *carray = nullptr;
-    l_int32 i;
+    l_int32 res;
 
     if (pixGetBinnedColor(pixs, pixg, factor, nbins, alut, &carray, 0))
         return ll_push_nil(L);
-    for (i = 0; i < nbins; i++)
-        lua_pushinteger(L, carray[i]);
-    return nbins;
+    res = ll_push_uarray(L, carray, nbins);
+    LEPT_FREE(carray);
+    return res;
 }
 
 /**
- * \brief Get a binned color for Pix* (%pixs)
+ * \brief Display a color array creating a Pix* (%pix)
  *
  * Arg #1 is expected to be a l_int32 (side).
  * Arg #2 is expected to be a l_int32 (ncols).
  * Arg #3 is expected to be a l_int32 (fontsize).
- * Arg #4 .. n is expected to be l_uint32 (carray).
+ * Arg #4 is expected to be a Lua array table (carray).
  *
  * \param L pointer to the lua_State
- * \return nbins integers on the Lua stack (carray[])
+ * \return 1 Pix* on the Lua stack
  */
 static int
 DisplayColorArray(lua_State *L)
 {
     FUNC(LL_PIX ".DisplayColorArray");
-    l_uint32 *carray = nullptr;
-    l_int32 ncolors = 0;
     l_int32 side = ll_check_l_int32(_fun, L, 1);
     l_int32 ncols = ll_check_l_int32(_fun, L, 2);
     l_int32 fontsize = ll_check_l_int32_default(_fun, L, 3, 0);
-    int i = 3;
-    Pix *pixd = nullptr;
-
-    while (!lua_isnil(L, ncolors + 4))
-        ncolors++;
-    carray = (l_uint32 *) LEPT_CALLOC(ncolors, sizeof(l_uint32));
-    for (i = 0; i < ncolors; i++)
-        carray[i] = ll_check_l_uint32(_fun, L, i + 4);
-    pixd = pixDisplayColorArray(carray, ncolors, side, ncols, fontsize);
+    l_int32 ncolors = 0;
+    l_uint32 *carray = ll_unpack_uarray(_fun, L, 4, &ncolors);
+    Pix *pixd = pixDisplayColorArray(carray, ncolors, side, ncols, fontsize);
+    LEPT_FREE(carray);
     return ll_push_Pix(_fun, L, pixd);
 }
 

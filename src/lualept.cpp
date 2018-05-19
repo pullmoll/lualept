@@ -203,6 +203,27 @@ ll_push_iarray(lua_State *L, l_int32 *ia, l_int32 n)
 }
 
 /**
+ * \brief Push a l_uint32 array (%ua) to the Lua stack and return 1
+ * \param L pointer to the lua_State
+ * \param ua pointer to the l_uint32 array
+ * \param n number of values in the array
+ * \return 1 table on the stack
+ */
+int
+ll_push_uarray(lua_State *L, l_uint32 *ua, l_int32 n)
+{
+    l_int32 i;
+    if (!n || !ua)
+        return ll_push_nil(L);
+    lua_newtable(L);
+    for (i = 0; i < n; i++) {
+        lua_pushinteger(L, static_cast<lua_Integer>(ua[i]));
+        lua_rawseti(L, -2, i+1);
+    }
+    return 1;
+}
+
+/**
  * \brief Push a l_float32 array (%fa) to the Lua stack and return 1
  * \param L pointer to the lua_State
  * \param fa pointer to the l_float32 array
@@ -263,6 +284,195 @@ ll_push_sarray(lua_State *L, Sarray *sa)
         lua_rawseti(L, -2, i+1);
     }
     return 1;
+}
+
+/**
+ * \brief Unpack an array of lua_Integer from the Lua stack as l_int32*
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the table
+ * \param plenn pointer to a l_int32 receiving the size of the array
+ * \return allocated array l_int32* with *pn entries
+ */
+l_int32 *
+ll_unpack_iarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
+{
+    l_int32 len = static_cast<l_int32>(luaL_len(L, arg));
+    l_int32 *ia = reinterpret_cast<l_int32 *>(LEPT_CALLOC(len, sizeof(*ia)));
+
+    /* verify there is a table at %arg */
+    luaL_checktype(L, arg, LUA_TTABLE);
+    /* push a nil key */
+    lua_pushnil(L);
+
+    /* iterate over the table */
+    while (lua_next(L, arg)) {
+        l_int32 key = ll_check_l_int32(_fun, L, -2);        /* key is at index -2 */
+        l_int32 value = ll_check_l_int32(_fun, L, -1);      /* value is at index -1 */
+        /* don't write out of bounds */
+        if (0 < key && key <= len) {
+            ia[key-1] = value;
+        } else {
+            /* FIXME: error? */
+        }
+        /* remove value; keep 'key' for next iteration */
+        lua_pop(L, 1);
+    }
+    if (plen)
+        *plen = len;
+    return ia;
+}
+
+/**
+ * \brief Unpack an array of lua_Integer from the Lua stack as l_uint32*
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the table
+ * \param plen pointer to a l_int32 receiving the size of the array
+ * \return allocated array l_uint32* with *pn entries
+ */
+l_uint32 *
+ll_unpack_uarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
+{
+    l_int32 len = static_cast<l_int32>(luaL_len(L, arg));
+    l_uint32 *ua = reinterpret_cast<l_uint32 *>(LEPT_CALLOC(len, sizeof(*ua)));
+
+    /* verify there is a table at %arg */
+    luaL_checktype(L, arg, LUA_TTABLE);
+    /* push a nil key */
+    lua_pushnil(L);
+
+    /* iterate over the table */
+    while (lua_next(L, arg)) {
+        l_int32 key = ll_check_l_int32(_fun, L, -2);        /* key is at index -2 */
+        l_uint32 value = ll_check_l_uint32(_fun, L, -1);    /* value is at index -1 */
+        /* don't write out of bounds */
+        if (0 < key && key <= len) {
+            ua[key-1] = value;
+        } else {
+            /* FIXME: error? */
+        }
+        /* remove value; keep 'key' for next iteration */
+        lua_pop(L, 1);
+    }
+    if (plen)
+        *plen = len;
+    return ua;
+}
+
+/**
+ * \brief Unpack an array of lua_Integer from the Lua stack
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the table
+ * \param plen pointer to a l_int32 receiving the size of the array
+ * \return allocated array l_uint32* with *pn entries
+ */
+l_float32 *
+ll_unpack_farray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
+{
+    l_int32 len = static_cast<l_int32>(luaL_len(L, arg));
+    l_float32 *fa = reinterpret_cast<l_float32 *>(LEPT_CALLOC(len, sizeof(*fa)));
+
+    /* verify there is a table at %arg */
+    luaL_checktype(L, arg, LUA_TTABLE);
+    /* push a nil key */
+    lua_pushnil(L);
+
+    /* iterate over the table */
+    while (lua_next(L, arg)) {
+        l_int32 key = ll_check_l_int32(_fun, L, -2);        /* key is at index -2 */
+        l_float32 value = ll_check_l_float32(_fun, L, -1);  /* value is at index -1 */
+        /* don't write out of bounds */
+        if (0 < key && key <= len) {
+            fa[key-1] = value;
+        } else {
+            /* FIXME: error? */
+        }
+        /* remove value; keep 'key' for next iteration */
+        lua_pop(L, 1);
+    }
+    if (plen)
+        *plen = len;
+    return fa;
+}
+
+/**
+ * \brief Unpack an array of lua_Integer from the Lua stack as l_float64*
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the table
+ * \param plen pointer to a l_int32 receiving the size of the array
+ * \return allocated array l_uint32* with *pn entries
+ */
+l_float64 *
+ll_unpack_darray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
+{
+    l_int32 len = static_cast<l_int32>(luaL_len(L, arg));
+    l_float64 *da = reinterpret_cast<l_float64 *>(LEPT_CALLOC(len, sizeof(*da)));
+
+    /* verify there is a table at %arg */
+    luaL_checktype(L, arg, LUA_TTABLE);
+    /* push a nil key */
+    lua_pushnil(L);
+
+    /* iterate over the table */
+    while (lua_next(L, arg)) {
+        l_int32 key = ll_check_l_int32(_fun, L, -2);        /* key is at index -2 */
+        l_float64 value = ll_check_l_float64(_fun, L, -1);  /* value is at index -1 */
+        /* don't write out of bounds */
+        if (0 < key && key <= len) {
+            da[key-1] = value;
+        } else {
+            /* FIXME: error? */
+        }
+        /* remove value; keep 'key' for next iteration */
+        lua_pop(L, 1);
+    }
+    if (plen)
+        *plen = len;
+    return da;
+}
+
+/**
+ * \brief Unpack an array of lua_Integer from the Lua stack as Sarray*
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the table
+ * \param plen pointer to a l_int32 receiving the size of the array
+ * \return allocated array l_uint32* with *pn entries
+ */
+Sarray *
+ll_unpack_sarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
+{
+    l_int32 len = static_cast<l_int32>(luaL_len(L, arg));
+    Sarray *sa = sarrayCreate(len);
+
+    /* verify there is a table at %arg */
+    luaL_checktype(L, arg, LUA_TTABLE);
+    /* push a nil key */
+    lua_pushnil(L);
+
+    /* iterate over the table */
+    while (lua_next(L, arg)) {
+        l_int32 key = ll_check_l_int32(_fun, L, -2);        /* key is at index -2 */
+        const char* value = ll_check_string(_fun, L, -1);   /* value is at index -1 */
+        /* don't write out of bounds */
+        if (0 < key && key <= len) {
+            size_t slen = strlen(value);
+            /* XXX: sarrayReplaceString() needs a non-const str */
+            char *str = reinterpret_cast<char *>(LEPT_CALLOC(1, slen+1));
+            memcpy(str, value, slen);
+            sarrayReplaceString(sa, key-1, str, L_INSERT);
+        } else {
+            /* FIXME: error? */
+        }
+        /* remove value; keep 'key' for next iteration */
+        lua_pop(L, 1);
+    }
+    if (plen)
+        *plen = len;
+    return sa;
 }
 
 /**
@@ -452,6 +662,37 @@ ll_check_l_float32_default(const char *_fun, lua_State *L, int arg, l_float32 df
 }
 
 /**
+ * \brief Check if an argument is a lua_Number in the range of l_float64
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the integer
+ * \return l_float64 for the number; lua_error if out of bounds
+ */
+l_float64
+ll_check_l_float64(const char *_fun, lua_State *L, int arg)
+{
+    lua_Number val = luaL_checknumber(L, arg);
+    (void)_fun;
+    return static_cast<l_float64>(val);
+}
+
+/**
+ * \brief Return an argument lua_Integer in the range of l_float64 or the default
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the integer
+ * \param dflt default value
+ * \return l_float64 for the number; lua_error if out of bounds
+ */
+l_float64
+ll_check_l_float64_default(const char *_fun, lua_State *L, int arg, l_float64 dflt)
+{
+    lua_Number val = luaL_optnumber(L, arg, dflt);
+    (void)_fun;
+    return static_cast<l_float64>(val);
+}
+
+/**
  * \brief Push a string listing the table of keys to the Lua stack
  * \param L pointer to the lua_State
  * \param tbl table of key/value pairs
@@ -576,7 +817,7 @@ ll_string_access_storage(int flag)
 }
 
 /**
- * \brief Table of file input format names and enumeration values
+ * \brief Table of input file format names and enumeration values
  */
 static const lept_enums_t tbl_input_format[] = {
     TBL_ENTRY("unknown",         IFF_UNKNOWN),

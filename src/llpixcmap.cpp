@@ -61,6 +61,8 @@ toString(lua_State *L)
         luaL_addchar(&B, '{');
         for (i = 0; i < pixcmapGetCount(cmap); i++) {
             pixcmapGetRGBA(cmap, i, &r, &g, &b, &a);
+            if (i > 0)
+                luaL_addchar(&B, ',');
             snprintf(str, sizeof(str), "{#%02x,#%02x,#%02x,#%02x}",
                      r, g, b, a);
             luaL_addstring(&B, str);
@@ -712,6 +714,37 @@ Write(lua_State *L)
 }
 
 /**
+ * \brief Return a PixColormap* (%cmap) as a 4 Lua array tables (%rmap,%gmap,%bmap,%amap)
+ *
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
+ *
+ * \param L pointer to the lua_State
+ * \return 4 array tables on the Lua stack
+ */
+static int
+ToArrays(lua_State *L)
+{
+    FUNC(LL_PIXCMAP ".ToArrays");
+    PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
+    l_int32 ncolors = pixcmapGetCount(cmap);
+    l_int32 *rmap = nullptr;
+    l_int32 *gmap = nullptr;
+    l_int32 *bmap = nullptr;
+    l_int32 *amap = nullptr;
+    if (pixcmapToArrays(cmap, &rmap, &gmap, &bmap, &amap))
+        return ll_push_nil(L);
+    ll_push_iarray(L, rmap, ncolors);
+    ll_push_iarray(L, gmap, ncolors);
+    ll_push_iarray(L, bmap, ncolors);
+    ll_push_iarray(L, amap, ncolors);
+    LEPT_FREE(rmap);
+    LEPT_FREE(gmap);
+    LEPT_FREE(bmap);
+    LEPT_FREE(amap);
+    return 4;
+}
+
+/**
  * \brief Check Lua stack at index %arg for udata of class LL_PIXCMAP
  * \param _fun calling function's name
  * \param L pointer to the lua_State
@@ -829,6 +862,7 @@ ll_register_PixColormap(lua_State *L)
         {"IsBlackAndWhite",     IsBlackAndWhite},
         {"CountGrayColors",     CountGrayColors},
         {"Write",               Write},
+        {"ToArrays",            ToArrays},
         LUA_SENTINEL
     };
 
