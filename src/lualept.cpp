@@ -164,7 +164,7 @@ ll_push_udata(const char *_fun, lua_State *L, const char* name, void *udata)
     (void)_fun;
     lua_getfield(L, LUA_REGISTRYINDEX, name);
     lua_setmetatable(L, -2);
-    DBG(LOG_CREATE, "%s: pushed '%s' ppvoid=%p udata=%p\n",
+    DBG(LOG_PUSH_UDATA, "%s: pushed '%s' ppvoid=%p udata=%p\n",
          _fun, name ? name : "<nil>", ppvoid, udata);
     return 1;
 }
@@ -189,14 +189,16 @@ ll_push_nil(lua_State *L)
  * \return 1 table on the stack
  */
 int
-ll_push_iarray(lua_State *L, l_int32 *ia, l_int32 n)
+ll_push_iarray(lua_State *L, const l_int32 *ia, l_int32 n)
 {
+    FUNC("ll_push_iarray");
     l_int32 i;
     if (!n || !ia)
         return ll_push_nil(L);
     lua_newtable(L);
     for (i = 0; i < n; i++) {
-        lua_pushinteger(L, static_cast<lua_Integer>(ia[i]));
+        DBG(LOG_PUSH_TABLE, "%s: ia[%d] = 0x%08x\n", _fun, i, ia[i]);
+        lua_pushinteger(L, ia[i]);
         lua_rawseti(L, -2, i+1);
     }
     return 1;
@@ -210,14 +212,16 @@ ll_push_iarray(lua_State *L, l_int32 *ia, l_int32 n)
  * \return 1 table on the stack
  */
 int
-ll_push_uarray(lua_State *L, l_uint32 *ua, l_int32 n)
+ll_push_uarray(lua_State *L, const l_uint32 *ua, l_int32 n)
 {
+    FUNC("ll_push_uarray");
     l_int32 i;
     if (!n || !ua)
         return ll_push_nil(L);
     lua_newtable(L);
     for (i = 0; i < n; i++) {
-        lua_pushinteger(L, static_cast<lua_Integer>(ua[i]));
+        DBG(LOG_PUSH_TABLE, "%s: ua[%d] = 0x%08x\n", _fun, i, ua[i]);
+        lua_pushinteger(L, ua[i]);
         lua_rawseti(L, -2, i+1);
     }
     return 1;
@@ -231,14 +235,16 @@ ll_push_uarray(lua_State *L, l_uint32 *ua, l_int32 n)
  * \return 1 table on the stack
  */
 int
-ll_push_farray(lua_State *L, l_float32 *fa, l_int32 n)
+ll_push_farray(lua_State *L, const l_float32 *fa, l_int32 n)
 {
+    FUNC("ll_push_farray");
     l_int32 i;
     if (!n || !fa)
         return ll_push_nil(L);
     lua_newtable(L);
     for (i = 0; i < n; i++) {
-        lua_pushnumber(L, static_cast<lua_Number>(fa[i]));
+        DBG(LOG_PUSH_TABLE, "%s: fa[%d] = %.8g\n", _fun, i, static_cast<double>(fa[i]));
+        lua_pushnumber(L, fa[i]);
         lua_rawseti(L, -2, i+1);
     }
     return 1;
@@ -252,14 +258,16 @@ ll_push_farray(lua_State *L, l_float32 *fa, l_int32 n)
  * \return 1 table on the stack
  */
 int
-ll_push_darray(lua_State *L, l_float64 *da, l_int32 n)
+ll_push_darray(lua_State *L, const l_float64 *da, l_int32 n)
 {
+    FUNC("ll_push_darray");
     l_int32 i;
     if (!n || !da)
         return ll_push_nil(L);
     lua_newtable(L);
     for (i = 0; i < n; i++) {
-        lua_pushnumber(L, static_cast<lua_Number>(da[i]));
+        DBG(LOG_PUSH_TABLE, "%s: da[%d] = %.16g\n", _fun, i, da[i]);
+        lua_pushnumber(L, da[i]);
         lua_rawseti(L, -2, i+1);
     }
     return 1;
@@ -274,13 +282,16 @@ ll_push_darray(lua_State *L, l_float64 *da, l_int32 n)
 int
 ll_push_sarray(lua_State *L, Sarray *sa)
 {
+    FUNC("ll_push_sarray");
     l_int32 n = sarrayGetCount(sa);
     l_int32 i;
     if (!n || !sa)
         return ll_push_nil(L);
     lua_newtable(L);
     for (i = 0; i < n; i++) {
-        lua_pushstring(L, sarrayGetString(sa, i, L_NOCOPY));
+        const char* str = sarrayGetString(sa, i, L_NOCOPY);
+        DBG(LOG_PUSH_TABLE, "%s: sa[%d] = '%s'\n", _fun, i, str);
+        lua_pushstring(L, str);
         lua_rawseti(L, -2, i+1);
     }
     return 1;

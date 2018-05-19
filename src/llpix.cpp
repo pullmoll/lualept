@@ -116,13 +116,13 @@ toString(lua_State* L)
 /**
  * \brief Create a new Pix*
  *
+ * Arg #1 is expected to be Pix*.
+ * or
  * Arg #1 is expected to be a l_int32 (width).
  * Arg #2 is expected to be a l_int32 (height).
  * Arg #3 is optional and expected to be a l_int32 (depth; default = 1).
  * or
  * Arg #1 is expected to be a string (filename).
- * or
- * Arg #1 is expected to be Pix*.
  *
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -153,11 +153,11 @@ Create(lua_State *L)
 /**
  * \brief Create a new Pix* but don't initialize it
  *
+ * Arg #1 is expected to be Pix*.
+ * or
  * Arg #1 is expected to be a l_int32 (width).
  * Arg #2 is expected to be a l_int32 (height).
  * Arg #3 is optional and expected to be a l_int32 (depth; default = 1).
- * or
- * Arg #1 is expected to be Pix*.
  *
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -176,7 +176,7 @@ CreateNoInit(lua_State *L)
         l_int32 depth = ll_check_l_int32_default(_fun, L, 3, 1);
         pix = pixCreateNoInit(width, height, depth);
     } else {
-        /* FIXME: what is this? */
+        pix = pixCreateNoInit(1, 1, 1);
     }
     return ll_push_Pix(_fun, L, pix);
 }
@@ -1962,6 +1962,11 @@ GetRGBLine(lua_State *L)
     l_uint8 *bufr = (l_uint8 *) LEPT_CALLOC(width, sizeof(l_uint8));
     l_uint8 *bufg = (l_uint8 *) LEPT_CALLOC(width, sizeof(l_uint8));
     l_uint8 *bufb = (l_uint8 *) LEPT_CALLOC(width, sizeof(l_uint8));
+    if (!bufr || !bufg || !bufb) {
+        lua_pushfstring(L, "%s: failed to allocate buffers (3 * %d)", _fun, width);
+        lua_error(L);
+        return 0;
+    }
     if (pixGetRGBLine(pixs, row, bufr, bufg, bufb)) {
         LEPT_FREE(bufr);
         LEPT_FREE(bufg);
@@ -2181,11 +2186,14 @@ MakeMaskFromLUT(lua_State *L)
     FUNC(LL_PIX ".MakeMaskFromLUT");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     size_t len = 0;
-    const char* lut = lua_tolstring(L, 2, &len);
-    l_int32* tab = nullptr;
     size_t i;
-
-    tab = (l_int32 *) LEPT_CALLOC(256, sizeof(l_int32));
+    const char* lut = lua_tolstring(L, 2, &len);
+    l_int32* tab = tab = reinterpret_cast<l_int32 *>(LEPT_CALLOC(256, sizeof(l_int32)));
+    if (!tab) {
+        lua_pushfstring(L, "%s: failed to allocate table (%d)", _fun, 256 * sizeof(l_int32));
+        lua_error(L);
+        return 0;
+    }
     /* expand lookup-table (lut) to array of l_int32 (tab) */
     for (i = 0; i < 256 && i < len; i++)
         tab[i] = lut[i];
@@ -3645,7 +3653,13 @@ GetRowStats(lua_State *L)
     l_int32 type = ll_check_select_color(_fun, L, 2, L_SELECT_RED);
     l_int32 nbins = ll_check_l_int32(_fun, L, 3);
     l_int32 thresh = ll_check_l_int32_default(_fun, L, 4, 0);
-    l_float32 *colvect = (l_float32 *)LEPT_CALLOC(nbins, sizeof(l_float32));
+    l_float32 *colvect = reinterpret_cast<l_float32 *>(LEPT_CALLOC(nbins, sizeof(*colvect)));
+    if (!colvect) {
+        lua_pushfstring(L, "%s: could not allocate colvect (%d)",
+                        _fun, static_cast<size_t>(nbins) * sizeof(*colvect));
+        lua_error(L);
+        return 0;
+    }
     if (pixGetRowStats(pixs, type, nbins, thresh, colvect))
         return ll_push_nil(L);
     ll_push_farray(L, colvect, nbins);
@@ -3669,8 +3683,13 @@ GetColumnStats(lua_State *L)
     l_int32 type = ll_check_select_color(_fun, L, 2, L_SELECT_RED);
     l_int32 nbins = ll_check_l_int32(_fun, L, 3);
     l_int32 thresh = ll_check_l_int32_default(_fun, L, 4, 0);
-    l_float32 *rowvect = (l_float32 *)LEPT_CALLOC(nbins, sizeof(l_float32));
-    l_int32 i;
+    l_float32 *rowvect = reinterpret_cast<l_float32 *>(LEPT_CALLOC(nbins, sizeof(l_float32)));
+    if (!rowvect) {
+        lua_pushfstring(L, "%s: could not allocate rowvect (%d)",
+                        _fun, static_cast<size_t>(nbins) * sizeof(*rowvect));
+        lua_error(L);
+        return 0;
+    }
     if (pixGetColumnStats(pixs, type, nbins, thresh, rowvect))
         return ll_push_nil(L);
     ll_push_farray(L, rowvect, nbins);
@@ -3683,7 +3702,7 @@ GetColumnStats(lua_State *L)
  *
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a l_int32 (col).
- * Arg #3 .. n is expected to be lua_Numbers / l_float32 for each row of pixd (colvect).
+ * Arg #3 is expected to be an array table of lua_Numbers for each row of pixd (tblvect).
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack (result)
@@ -3695,11 +3714,20 @@ SetPixelColumn(lua_State *L)
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     l_int32 col = ll_check_l_int32(_fun, L, 2);
     l_int32 rows = pixGetHeight(pixd);
-    l_float32 *colvect = (l_float32 *)LEPT_CALLOC(rows, sizeof(l_float32));
+    l_int32 n;
+    l_float32 *tblvect = ll_unpack_farray(_fun, L, 3, &n);
+    l_float32 *colvect = reinterpret_cast<l_float32 *>(LEPT_CALLOC(rows, sizeof(l_float32)));
     l_int32 i;
-    int result = FALSE;
-    for (i = 0; i < rows; i++)
-        colvect[i] = (l_float32) lua_tonumber(L, i+3);
+    l_int32 result = FALSE;
+    if (!colvect) {
+        lua_pushfstring(L, "%s: could not allocate colvect (%d)",
+                        _fun, static_cast<size_t>(rows) * sizeof(*colvect));
+        lua_error(L);
+        return 0;
+    }
+    for (i = 0; i < rows && i < n; i++)
+        colvect[i] = tblvect[i];
+    LEPT_FREE(tblvect);
     result = pixSetPixelColumn(pixd, col, colvect);
     LEPT_FREE(colvect);
     lua_pushboolean(L, 0 == result);

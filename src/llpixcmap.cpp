@@ -745,6 +745,112 @@ ToArrays(lua_State *L)
 }
 
 /**
+ * \brief Return a PixColormap* (%cmap) as a Lua array table
+ *
+ * FIXME: Pushing the table of l_uint32 with ll_push_uarray() appears to be broken.
+ * When I print the table entries in Lua, each value is 255. It seems as if only
+ * the least significant byte of each l_uint32 is pushed?
+ *
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
+ *
+ * \param L pointer to the lua_State
+ * \return 4 array tables on the Lua stack
+ */
+static int
+ToRGBTable(lua_State *L)
+{
+    FUNC(LL_PIXCMAP ".ToRGBTable");
+    PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
+    l_int32 ncolors = 0;
+    l_uint32 *table = nullptr;
+    l_int32 i;
+    if (pixcmapToRGBTable(cmap, &table, &ncolors))
+        return ll_push_nil(L);
+    ll_push_uarray(L, table, ncolors);
+    LEPT_FREE(table);
+    return 4;
+}
+
+/**
+ * \brief Serialize a PixColormap* (%cmap) to a Lua string
+ *
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
+ * Arg #2 is expected to be a l_int32 (cpc; 0 < cpc <= 4)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 string on the Lua stack
+ */
+static int
+SerializeToMemory(lua_State *L)
+{
+    FUNC(LL_PIXCMAP ".SerializeToMemory");
+    PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
+    l_int32 cpc = ll_check_l_int32_default(_fun, L, 2, 4);
+    l_int32 ncolors = 0;
+    l_uint8 *data = nullptr;
+    if (pixcmapSerializeToMemory(cmap, cpc, &ncolors, &data))
+        return ll_push_nil(L);
+    lua_pushlstring(L, reinterpret_cast<const char *>(data), static_cast<size_t>(cpc) * ncolors);
+    LEPT_FREE(data);
+    return 1;
+}
+
+/**
+ * \brief Deserialize a PixColormap* (%cmap) from a Lua string (data)
+ *
+ * Arg #1 is expected to be a string (data).
+ * Arg #2 is expected to be a l_int32 (cpc; 0 < cpc <= 4)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 PixColormap* on the Lua stack
+ */
+static int
+DeserializeFromMemory(lua_State *L)
+{
+    FUNC(LL_PIXCMAP ".DeserializeFromMemory");
+    size_t len = 0;
+    const char *str = lua_tolstring(L, 1, &len);
+    l_int32 cpc = ll_check_l_int32_default(_fun, L, 2, 4);
+    l_int32 ncolors = static_cast<l_int32>(len / static_cast<size_t>(cpc));
+    l_uint8 *data = reinterpret_cast<l_uint8 *>(LEPT_MALLOC(len));
+    PixColormap* cmap = nullptr;
+    if (!data) {
+        lua_pushfstring(L, "%s: allocating data failed (%d)", _fun, len);
+        lua_error(L);
+        return 0;
+    }
+    memcpy(data, str, len);
+    cmap = pixcmapDeserializeFromMemory(data, cpc, ncolors);
+    LEPT_FREE(data);
+    return ll_push_PixColormap(_fun, L, cmap);
+}
+
+/**
+ * \brief Convert a PixColormap* (%cmap) to a string of hexadecimal numbers in angle brackets
+ *
+ * Arg #1 is expected to be a string (data).
+ * Arg #2 is expected to be a l_int32 (cpc; 0 < cpc <= 4)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 PixColormap* on the Lua stack
+ */
+static int
+ConvertToHex(lua_State *L)
+{
+    FUNC(LL_PIXCMAP ".ConvertToHex");
+    PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
+    l_int32 ncolors = 0;
+    l_uint8 *data = nullptr;
+    if (!pixcmapSerializeToMemory(cmap, 3, &ncolors, &data))
+        return 0;
+    char *hex = pixcmapConvertToHex(data, ncolors);
+    lua_pushstring(L, hex);
+    LEPT_FREE(hex);
+    LEPT_FREE(data);
+    return 1;
+}
+
+/**
  * \brief Check Lua stack at index %arg for udata of class LL_PIXCMAP
  * \param _fun calling function's name
  * \param L pointer to the lua_State
@@ -832,45 +938,49 @@ int
 ll_register_PixColormap(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},   /* garbage collector */
-        {"__new",               Create},    /* new PixColormap */
-        {"__len",               GetCount},  /* #cmap */
-        {"__tostring",          toString},
-        {"Copy",                Copy},
-        {"Destroy",             Destroy},
-        {"AddColor",            AddColor},
-        {"AddRGBA",             AddRGBA},
-        {"AddNewColor",         AddNewColor},
-        {"AddNearestColor",     AddNearestColor},
-        {"UsableColor",         UsableColor},
-        {"AddBlackOrWhite",     AddBlackOrWhite},
-        {"SetBlackAndWhite",    SetBlackAndWhite},
-        {"GetCount",            GetCount},  /* same as #cmap */
-        {"GetDepth",            GetDepth},
-        {"GetMinDepth",         GetMinDepth},
-        {"GetFreeCount",        GetFreeCount},
-        {"Clear",               Clear},
-        {"GetColor",            GetColor},
-        {"GetColor32",          GetColor32},
-        {"GetRGBA",             GetRGBA},
-        {"GetRGBA32",           GetRGBA32},
-        {"ResetColor",          ResetColor},
-        {"SetAlpha",            SetAlpha},
-        {"GetIndex",            GetIndex},
-        {"HasColor",            HasColor},
-        {"IsOpaque",            IsOpaque},
-        {"IsBlackAndWhite",     IsBlackAndWhite},
-        {"CountGrayColors",     CountGrayColors},
-        {"Write",               Write},
-        {"ToArrays",            ToArrays},
+        {"__gc",                    Destroy},   /* garbage collector */
+        {"__new",                   Create},    /* new PixColormap */
+        {"__len",                   GetCount},  /* #cmap */
+        {"__tostring",              toString},
+        {"Copy",                    Copy},
+        {"Destroy",                 Destroy},
+        {"AddColor",                AddColor},
+        {"AddRGBA",                 AddRGBA},
+        {"AddNewColor",             AddNewColor},
+        {"AddNearestColor",         AddNearestColor},
+        {"UsableColor",             UsableColor},
+        {"AddBlackOrWhite",         AddBlackOrWhite},
+        {"SetBlackAndWhite",        SetBlackAndWhite},
+        {"GetCount",                GetCount},  /* same as #cmap */
+        {"GetDepth",                GetDepth},
+        {"GetMinDepth",             GetMinDepth},
+        {"GetFreeCount",            GetFreeCount},
+        {"Clear",                   Clear},
+        {"GetColor",                GetColor},
+        {"GetColor32",              GetColor32},
+        {"GetRGBA",                 GetRGBA},
+        {"GetRGBA32",               GetRGBA32},
+        {"ResetColor",              ResetColor},
+        {"SetAlpha",                SetAlpha},
+        {"GetIndex",                GetIndex},
+        {"HasColor",                HasColor},
+        {"IsOpaque",                IsOpaque},
+        {"IsBlackAndWhite",         IsBlackAndWhite},
+        {"CountGrayColors",         CountGrayColors},
+        {"Write",                   Write},
+        {"ToArrays",                ToArrays},
+        {"ToRGBTable",              ToRGBTable},
+        {"SerializeToMemory",       SerializeToMemory},
+        {"ConvertToHex",            ConvertToHex},
         LUA_SENTINEL
     };
 
     static const luaL_Reg functions[] = {
-        {"Create",              Create},
-        {"CreateRandom",        CreateRandom},
-        {"CreateLinear",        CreateLinear},
-        {"Read",                Read},
+        {"Create",                  Create},
+        {"CreateRandom",            CreateRandom},
+        {"CreateLinear",            CreateLinear},
+        {"Read",                    Read},
+        {"DeserializeFromMemory",   DeserializeFromMemory},
         LUA_SENTINEL
     };
 

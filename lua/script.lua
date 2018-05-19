@@ -154,7 +154,7 @@ function box_test()
 end
 
 function numa_test()
-	local filename = "/tmp/test.log"
+	local filename = "/tmp/test.numa"
 	header("Numa/Numaa")
 
 	local PI = 3.14159265358979323846
@@ -304,8 +304,10 @@ function pix_test()
 	-- Draw some border rings
 	for dist = 4,13 do pix:SetBorderRingVal(dist, bluish-1) end
 
-	-- Draw a horizontal line in the vertical center
-	for x = 0, width-1 do pix:SetPixel(x, height/2, black) end
+	-- Draw some horizontal lines around the vertical center
+	for y = height/2-2,height/2+2 do
+		for x = 0, width-1 do pix:SetPixel(x, y, black) end
+	end
 
 	pix:SetSpecial(10+9)	-- maximum compression
 	local ok = pix:Write(filename, "png")
@@ -314,10 +316,16 @@ function pix_test()
 	local cmap = pix:GetColormap()
 	print(pad("cmap"), cmap)
 	local r,g,b,a = cmap:ToArrays()
+	print(pad("r,g,b,a = cmap:ToArrays()"), r, g, b, a)
 	print(pad("r"), tbl(r))
 	print(pad("g"), tbl(g))
 	print(pad("b"), tbl(b))
 	print(pad("a"), tbl(a))
+	local rgb = cmap:ToRGBTable()
+	print(pad("rgb = cmap:ToRGBTable()"), rgb, #rgb, tbl(rgb))
+	local data = cmap:SerializeToMemory(4)
+	print(pad("data = cmap:SerializeToMemory(4)"), data)
+	hex_dump(data)
 
 	local pix2 = LuaLept.Pix(filename)
 	print(pad("pix2 = LuaLept.Pix('" .. filename .. "')"), pix2);
@@ -353,7 +361,7 @@ function pix_test()
 	local pix3 = pix3.DisplayColorArray(240, 4, 6, carray)
 	local pix3 = pix3:AddBorder(20, LuaLept.RGB(255,255,255))
 	print(pad("pix3"), pix3)
-	local ok = pix3:Write("/tmp/carray.png")
+	local ok = pix3:Write("/tmp/carray.tiff", "zip")
 end
 
 function pix2_test()
@@ -371,7 +379,7 @@ function pix2_test()
 	print (pad("dimensions"), w, h, d)
 	print (pad("area"), w * h)
 	print (pad("RGB colors"), pix:CountRGBColors())
-	local hist = pix:GetColorAmapHistogram(4)
+	local hist = pix:GetColorAmapHistogram(8)
 	print (pad("color histogram"), hist)
 
 	local pixm = pix:MakeArbMaskFromRGB(-0.5, -0.5, 0.75, 0.05)
@@ -395,7 +403,7 @@ function hex_dump(buf)
 	for i = 1, math.ceil(#buf/16) * 16 do
 		if (i-1) % 16 == 0 then
 			io.write(string.format('%08X  ', i-1))
-			end
+		end
 		io.write(i > #buf and '   ' or string.format('%02X ', buf:byte(i)))
 		if i %  8 == 0 then
 			io.write(' ')
@@ -403,7 +411,7 @@ function hex_dump(buf)
 		if i % 16 == 0 then
 			io.write('|')
 			for j = 1,16 do
-				if (i - 16 + j) > #buf then
+				if i-16+j > #buf then
 					io.write(' ')
 				else
 					local c = buf:byte(i-16+j)

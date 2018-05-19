@@ -33,10 +33,11 @@
 #if !defined(LUALEPT_EXPORTS_H)
 #define LUALEPT_EXPORTS_H
 
-#define LLUA_DEBUG      0               /*!< set to 1 to enable debugging */
-#define LOG_REGISTER    1               /*!< set to 1 to enable debugging of Lua class registration */
-#define LOG_CREATE      1               /*!< set to 1 to enable debugging of object creation */
-#define LOG_DESTROY     1               /*!< set to 1 to enable debugging of object destruction */
+#define LLUA_DEBUG      1               /*!< set to 1 to enable debugging */
+#define LOG_REGISTER    0               /*!< set to 1 to enable debugging of Lua class registration */
+#define LOG_DESTROY     0               /*!< set to 1 to enable debugging of object destruction */
+#define LOG_PUSH_UDATA  0               /*!< set to 1 to enable debugging of pushing user data */
+#define LOG_PUSH_TABLE  0               /*!< set to 1 to enable debugging of pushing tables */
 
 #include "lualept.h"
 
@@ -140,10 +141,10 @@ extern int          ll_register_class(lua_State *L, const char *name, const luaL
 extern void **      ll_check_udata(const char *_fun, lua_State *L, int arg, const char* name);
 extern int          ll_push_udata(const char *_fun, lua_State *L, const char* name, void *udata);
 extern int          ll_push_nil(lua_State *L);
-extern int          ll_push_iarray(lua_State *L, l_int32 *ia, l_int32 n);
-extern int          ll_push_uarray(lua_State *L, l_uint32 *ua, l_int32 n);
-extern int          ll_push_farray(lua_State *L, l_float32 *fa, l_int32 n);
-extern int          ll_push_darray(lua_State *L, l_float64 *da, l_int32 n);
+extern int          ll_push_iarray(lua_State *L, const l_int32* ia, l_int32 n);
+extern int          ll_push_uarray(lua_State *L, const l_uint32* ua, l_int32 n);
+extern int          ll_push_farray(lua_State *L, const l_float32* fa, l_int32 n);
+extern int          ll_push_darray(lua_State *L, const l_float64* da, l_int32 n);
 extern int          ll_push_sarray(lua_State *L, Sarray *sa);
 
 extern l_int32    * ll_unpack_iarray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
