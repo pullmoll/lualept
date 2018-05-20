@@ -768,6 +768,25 @@ ll_check_l_float64_default(const char *_fun, lua_State *L, int arg, l_float64 df
 }
 
 /**
+ * \brief Return an user data argument (%arg) as luaL_Stream*
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the integer
+ * \return pointer to luaL_Stream or error
+ */
+luaL_Stream *
+ll_check_stream(const char *_fun, lua_State *L, int arg)
+{
+    if (LUA_TUSERDATA != lua_type(L, arg)) {
+        lua_pushfstring(L, "%s: expected a '%s' as #%d, got '%s'",
+                        _fun, LUA_FILEHANDLE, arg, lua_typename(L, lua_type(L, arg)));
+        lua_error(L);
+        return nullptr;    /* NOTREACHED */
+    }
+    return reinterpret_cast<luaL_Stream *>(luaL_checkudata(L, arg, LUA_FILEHANDLE));
+}
+
+/**
  * \brief Push a string listing the table of keys to the Lua stack
  * \param L pointer to the lua_State
  * \param tbl table of key/value pairs

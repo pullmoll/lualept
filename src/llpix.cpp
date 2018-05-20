@@ -4025,7 +4025,7 @@ PrintStreamInfo(lua_State *L)
     FUNC(LL_PIX ".PrintStreamInfo");
     static char str[64];
     Pix *pix= ll_check_Pix(_fun, L, 1);
-    luaL_Stream *stream = reinterpret_cast<luaL_Stream *>(luaL_checkudata(L, 2, LUA_FILEHANDLE));
+    luaL_Stream *stream = ll_check_stream(_fun, L, 2);
     snprintf(str, sizeof(str), "%p\n", reinterpret_cast<void *>(pix));
     lua_pushboolean(L, 0 == pixPrintStreamInfo(stream->f, pix, str));
     return 1;

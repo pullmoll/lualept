@@ -283,7 +283,7 @@ FindInvalidBoxes(lua_State *L)
  * Arg #2 is expected to be a l_int32 (idx).
  *
  * \param L pointer to the lua_State
- * \return 4 integers x, y, w, h or nil on error
+ * \return 4 integers x, y, w, h on the Lua stack
  */
 static int
 GetBoxGeometry(lua_State *L)
@@ -565,6 +565,118 @@ RotateOrth(lua_State *L)
 }
 
 /**
+ * \brief Read a Boxa* (%boxa) from a file (%filename)
+ *
+ * Arg #1 is expected to be a string (filename)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Box* on the Lua stack
+ */
+static int
+Read(lua_State *L)
+{
+    FUNC(LL_BOXA ".Read");
+    const char *filename = ll_check_string(_fun, L, 1);
+    Boxa *boxa = boxaRead(filename);
+    return ll_push_Boxa(_fun, L, boxa);
+}
+
+/**
+ * \brief Write a Boxa* (%boxa) to a file (%filename)
+ *
+ * Arg #1 (i.e. self) is expected to be a Box* (box).
+ * Arg #2 is expected to be a string (filename).
+ *
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+Write(lua_State *L)
+{
+    FUNC(LL_BOXA ".Write");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
+    const char *filename = ll_check_string(_fun, L, 2);
+    lua_pushboolean(L, 0 == boxaWrite(filename, boxa));
+    return 1;
+}
+
+/**
+ * \brief Read a Boxa* (%boxa) from a stream (%stream)
+ *
+ * Arg #1 is expected to be a luaL_Stream* (stream)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Box* on the Lua stack
+ */
+static int
+ReadStream(lua_State *L)
+{
+    FUNC(LL_BOXA ".ReadStream");
+    luaL_Stream *stream = ll_check_stream(_fun, L, 1);
+    Boxa *boxa = boxaReadStream(stream->f);
+    return ll_push_Boxa(_fun, L, boxa);
+}
+
+/**
+ * \brief Write a Boxa* (%boxa) to a stream (%stream)
+ *
+ * Arg #1 (i.e. self) is expected to be a Box* (box).
+ * Arg #2 is expected to be a luaL_Stream* (stream).
+ *
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+WriteStream(lua_State *L)
+{
+    FUNC(LL_BOXA ".WriteStream");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
+    luaL_Stream *stream = ll_check_stream(_fun, L, 2);
+    lua_pushboolean(L, 0 == boxaWriteStream(stream->f, boxa));
+    return 1;
+}
+
+/**
+ * \brief Read a Boxa* (%boxa) from memory (%data)
+ *
+ * Arg #1 is expected to be a string (data)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Box* on the Lua stack
+ */
+static int
+ReadMem(lua_State *L)
+{
+    FUNC(LL_BOXA ".ReadMem");
+    const char *data = ll_check_string(_fun, L, 1);
+    lua_Integer size = luaL_len(L, 1);
+    Boxa *boxa = boxaReadMem(reinterpret_cast<const l_uint8 *>(data), static_cast<size_t>(size));
+    return ll_push_Boxa(_fun, L, boxa);
+}
+
+/**
+ * \brief Write a Boxa* (%boxa) to memory (%data)
+ *
+ * Arg #1 (i.e. self) is expected to be a Box* (box).
+ *
+ * \param L pointer to the lua_State
+ * \return 1 string on the Lua stack
+ */
+static int
+WriteMem(lua_State *L)
+{
+    FUNC(LL_BOXA ".WriteMem");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
+    l_uint8 *data = nullptr;
+    size_t size = 0;
+    if (boxaWriteMem(&data, &size, boxa))
+        return ll_push_nil(L);
+    lua_pushlstring(L, reinterpret_cast<const char *>(data), size);
+    LEPT_FREE(data);
+    return 1;
+}
+
+/**
  * \brief Check Lua stack at index %arg for udata of class LL_BOXA
  * \param _fun calling function's name
  * \param L pointer to the lua_State
@@ -658,11 +770,17 @@ ll_register_BOXA(lua_State *L)
         {"IntersectsBox",       IntersectsBox},
         {"IntersectsBoxCount",  IntersectsBoxCount},
         {"RotateOrth",          RotateOrth},
+        {"Write",               Write},
+        {"WriteStream",         WriteStream},
+        {"WriteStream",         WriteMem},
         LUA_SENTINEL
     };
 
     static const luaL_Reg functions[] = {
         {"Create",              Create},
+        {"Read",                Read},
+        {"ReadStream",          ReadStream},
+        {"ReadMem",             ReadMem},
         LUA_SENTINEL
     };
 

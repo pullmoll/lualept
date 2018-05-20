@@ -168,6 +168,8 @@ extern l_float64    ll_check_l_float64(const char *_fun, lua_State *L, int arg);
 extern l_float64    ll_check_l_float64_default(const char *_fun, lua_State *L, int arg, l_float32 dflt);
 extern l_int32      ll_check_tbl(const char *_fun, lua_State *L, int arg, l_int32 dflt, const lept_enums_t *tbl, size_t len);
 
+extern luaL_Stream *ll_check_stream(const char *_fun, lua_State *L, int arg);
+
 extern l_int32      ll_check_access_storage(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_access_storage(int flag);
 extern l_int32      ll_check_input_format(const char *_fun, lua_State *L, int arg, l_int32 dflt);

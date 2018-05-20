@@ -131,9 +131,8 @@ static int
 Copy(lua_State *L)
 {
     FUNC(LL_BOX ".Copy");
-    Box *boxs, *box;
-    boxs = ll_check_Box(_fun, L, 1);
-    box = boxCopy(boxs);
+    Box *boxs = ll_check_Box(_fun, L, 1);
+    Box *box = boxCopy(boxs);
     return ll_push_Box(_fun, L, box);
 }
 
@@ -149,9 +148,8 @@ static int
 Clone(lua_State *L)
 {
     FUNC(LL_BOX ".Clone");
-    Box *boxs, *box;
-    boxs = ll_check_Box(_fun, L, 1);
-    box = boxClone(boxs);
+    Box *boxs = ll_check_Box(_fun, L, 1);
+    Box *box = boxClone(boxs);
     return ll_push_Box(_fun, L, box);
 }
 
@@ -165,9 +163,10 @@ static int
 Destroy(lua_State *L)
 {
     FUNC(LL_BOX ".Destroy");
-    Box **pbox = reinterpret_cast<Box **>(ll_check_udata(_fun, L, 1, LL_BOX));
+    Box **pbox;
+    Box *box = ll_check_Box(_fun, L, 1);
     DBG(LOG_DESTROY, "%s: '%s' pbox=%p box=%p refcount=%d\n", _fun,
-        LL_BOX, pbox, *pbox, boxGetRefcount(*pbox));
+        LL_BOX, pbox, box, boxGetRefcount(box));
     boxDestroy(pbox);
     *pbox = nullptr;
     return 0;
