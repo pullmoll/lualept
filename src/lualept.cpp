@@ -1646,6 +1646,43 @@ ll_string_rotation(l_int32 rotation)
     return ll_string_tbl(rotation, tbl_rotation, ARRAYSIZE(tbl_rotation));
 }
 
+/**
+ * \brief Table of handle overlap by names and enumeration values
+ */
+static const lept_enums_t tbl_overlap[] = {
+    TBL_ENTRY("combine",        L_COMBINE),
+    TBL_ENTRY("comb",           L_COMBINE),
+    TBL_ENTRY("c",              L_COMBINE),
+    TBL_ENTRY("remove-small",   L_REMOVE_SMALL),
+    TBL_ENTRY("remove",         L_REMOVE_SMALL),
+    TBL_ENTRY("r",              L_REMOVE_SMALL)
+};
+
+/**
+ * \brief Check for a select min or max name
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \param dflt default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_overlap(const char *_fun, lua_State* L, int arg, l_int32 dflt)
+{
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_overlap, ARRAYSIZE(tbl_overlap));
+}
+
+/**
+ * \brief Return a string for the transform overlap
+ * \param overlap overlap value
+ * \return const string with the name
+ */
+const char*
+ll_string_overlap(l_int32 overlap)
+{
+    return ll_string_tbl(overlap, tbl_overlap, ARRAYSIZE(tbl_overlap));
+}
+
 /*====================================================================*
  *
  *  Lua LuaLept class

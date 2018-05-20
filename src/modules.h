@@ -208,6 +208,8 @@ extern l_int32      ll_check_order(const char *_fun, lua_State *L, int arg, l_in
 extern const char * ll_string_order(l_int32 order);
 extern l_int32      ll_check_rotation(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_rotation(l_int32 rotation);
+extern l_int32      ll_check_overlap(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_overlap(l_int32 rotation);
 
 extern LuaLept    * ll_check_LuaLept(const char *_fun, lua_State *L, int arg);
 extern int          ll_push_LuaLept(const char *_fun, lua_State *L, LuaLept *lept);

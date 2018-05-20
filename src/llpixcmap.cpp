@@ -94,8 +94,8 @@ Create(lua_State *L)
  * \brief Create a random PixColormap* (%cmap)
  *
  * Arg #1 is expected to be a l_int32 (depth).
- * Arg #2 is optional and, if specified, expected to be a boolean (hasblack).
- * Arg #3 is optional and, if specified, expected to be a boolean (haswhite).
+ * Arg #2 is optional and, if given, expected to be a boolean (hasblack).
+ * Arg #3 is optional and, if given, expected to be a boolean (haswhite).
  *
  * \param L pointer to the lua_State
  * \return 1 PixColormap* on the Lua stack

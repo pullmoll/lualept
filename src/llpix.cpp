@@ -2654,8 +2654,8 @@ ThresholdPixelSum(lua_State *L)
  * \brief Build the average by row of Pix* (%pixs)
  *
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is optional and, if specified, expected to be a Box* (box).
- * Arg #3 is optional and, if specified, expected to be a string (type: white-is-max or black-is-max).
+ * Arg #2 is optional and, if given, expected to be a Box* (box).
+ * Arg #3 is optional and, if given, expected to be a string (type: white-is-max or black-is-max).
  *
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -2675,8 +2675,8 @@ AverageByRow(lua_State *L)
  * \brief Build the average by column of Pix* (%pixs)
  *
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is optional and, if specified, expected to be a Box* (box).
- * Arg #3 is optional and, if specified, expected to be a string (type: white-is-max or black-is-max).
+ * Arg #2 is optional and, if given, expected to be a Box* (box).
+ * Arg #3 is optional and, if given, expected to be a string (type: white-is-max or black-is-max).
  *
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -2696,7 +2696,7 @@ AverageByColumn(lua_State *L)
  * \brief Build the average inside a Box* (%box) of Pix* (%pixs)
  *
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is optional and, if specified, expected to be a Box* (box).
+ * Arg #2 is optional and, if given, expected to be a Box* (box).
  *
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -2718,7 +2718,7 @@ AverageInRect(lua_State *L)
  * \brief Build the variance by row of Pix* (%pixs)
  *
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is optional and, if specified, expected to be a Box* (box).
+ * Arg #2 is optional and, if given, expected to be a Box* (box).
  *
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -2737,7 +2737,7 @@ VarianceByRow(lua_State *L)
  * \brief Build the variance by column of Pix* (%pixs)
  *
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is optional and, if specified, expected to be a Box* (box).
+ * Arg #2 is optional and, if given, expected to be a Box* (box).
  *
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -2756,7 +2756,7 @@ VarianceByColumn(lua_State *L)
  * \brief Build the square root of the variance inside a Box* (%box) of Pix* (%pixs)
  *
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is optional and, if specified, expected to be a Box* (box).
+ * Arg #2 is optional and, if given, expected to be a Box* (box).
  *
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -2778,7 +2778,7 @@ VarianceInRect(lua_State *L)
  * \brief Build the absolute difference by row of Pix* (%pixs)
  *
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is optional and, if specified, expected to be a Box* (box).
+ * Arg #2 is optional and, if given, expected to be a Box* (box).
  *
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -2797,7 +2797,7 @@ AbsDiffByRow(lua_State *L)
  * \brief Build the absolute difference by column of Pix* (%pixs)
  *
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is optional and, if specified, expected to be a Box* (box).
+ * Arg #2 is optional and, if given, expected to be a Box* (box).
  *
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -2816,8 +2816,8 @@ AbsDiffByColumn(lua_State *L)
  * \brief Build the absolute difference inside a Box* (%box) of Pix* (%pixs)
  *
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is optional and, if specified, expected to be a Box* (box).
- * Arg #2 is optional and, if specified, expected to be a string (dir: horizontal-line or vertical-line).
+ * Arg #2 is optional and, if given, expected to be a Box* (box).
+ * Arg #2 is optional and, if given, expected to be a string (dir: horizontal-line or vertical-line).
  *
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -2840,7 +2840,7 @@ AbsDiffInRect(lua_State *L)
  * \brief Build absolute difference on a line (%x1,%y1 to %x2,%y2) of Pix* (%pixs)
  *
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is optional and, if specified, expected to be a Box* (box).
+ * Arg #2 is optional and, if given, expected to be a Box* (box).
  *
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -2867,7 +2867,7 @@ AbsDiffOnLine(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (val).
  * Arg #3 is expected to be a l_int32 (factor).
- * Arg #4 is optional and, if specified, expected to be a Box* (box).
+ * Arg #4 is optional and, if given, expected to be a Box* (box).
  *
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -3545,7 +3545,7 @@ GetExtremeValue(lua_State *L)
  * \brief Get the maximum value for Pix* (%pixs) optionally in rect Box* (%box)
  *
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is optional an, if given, expected to be a Box*.
+ * Arg #2 is optional and, if given, expected to be a Box*.
  *
  * \param L pointer to the lua_State
  * \return 3 integers on the Lua stack (maxval, xmax, ymax)

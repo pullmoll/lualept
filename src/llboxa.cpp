@@ -544,6 +544,95 @@ IntersectsBoxCount(lua_State *L)
 }
 
 /**
+ * \brief Clip the boxes of Boxa* (%boxa) to a Box* (%box)
+ *
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * Arg #2 is expected to be a Box* (box).
+ *
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+ClipToBox(lua_State *L)
+{
+    FUNC(LL_BOXA ".ClipToBox");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
+    Box *box = ll_check_Box(_fun, L, 2);
+    lua_pushboolean(L, 0 == boxaClipToBox(boxa, box));
+    return 1;
+}
+
+/**
+ * \brief Combine overlaps in boxes of Boxa* (%boxas)
+ *
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ * Arg #2 is optional and, if given, expected to be a Pixa* (pixadb).
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Boxa* on the Lua stack
+ */
+static int
+CombineOverlaps(lua_State *L)
+{
+    FUNC(LL_BOXA ".CombineOverlaps");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    Pixa *pixadb = ll_check_Pixa_opt(_fun, L, 2);
+    Boxa *boxad = boxaCombineOverlaps(boxas, pixadb);
+    return ll_push_Boxa(_fun, L, boxad);
+}
+
+/**
+ * \brief Combine overlaps in pairs of boxes of two Boxa* (%boxa1, %boxa2)
+ *
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa1).
+ * Arg #2 is expected to be a another Boxa* (boxa2).
+ * Arg #3 is optional and, if given, expected to be a Pixa* (pixadb).
+ *
+ * \param L pointer to the lua_State
+ * \return 2 Boxa* on the Lua stack
+ */
+static int
+CombineOverlapsInPair(lua_State *L)
+{
+    FUNC(LL_BOXA ".CombineOverlapsInPair");
+    Boxa *boxa1 = ll_check_Boxa(_fun, L, 1);
+    Boxa *boxa2 = ll_check_Boxa(_fun, L, 2);
+    Pixa *pixadb = ll_check_Pixa_opt(_fun, L, 3);
+    Boxa *boxad1;
+    Boxa *boxad2;
+    if (boxaCombineOverlapsInPair(boxa1, boxa2, &boxad1, &boxad2, pixadb))
+        return ll_push_nil(L);
+    return ll_push_Boxa(_fun, L, boxad1) + ll_push_Boxa(_fun, L, boxad2);
+}
+
+/**
+ * \brief Handle overlaps in boxes of Boxa* (%boxas)
+ *
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ * Arg #2 is expected to be a string describing the operation (op)
+ * Arg #3 is expected to be a l_int32 (range)
+ * Arg #4 is expected to be a l_float32 (min_overlap)
+ * Arg #5 is expected to be a l_float32 (max_ratio)
+ * Arg #6 is optional and, if given, expected to be a Numa* (namap)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Boxa* on the Lua stack
+ */
+static int
+HandleOverlaps(lua_State *L)
+{
+    FUNC(LL_BOXA ".HandleOverlaps");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 op = ll_check_overlap(_fun, L, 2, L_COMBINE);
+    l_int32 range = ll_check_l_int32(_fun, L, 3);
+    l_float32 min_overlap = ll_check_l_float32(_fun, L, 4);
+    l_float32 max_ratio = ll_check_l_float32(_fun, L, 5);
+    Numa *namap = ll_check_Numa_opt(_fun, L, 6);
+    Boxa *boxad = boxaHandleOverlaps(boxas, op, range, min_overlap, max_ratio, &namap);
+    return ll_push_Boxa(_fun, L, boxad);
+}
+
+/**
  * \brief Rotate a Boxa* (%boxas)
  *
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
@@ -582,6 +671,41 @@ Read(lua_State *L)
 }
 
 /**
+ * \brief Read a Boxa* (%boxa) from a stream (%stream)
+ *
+ * Arg #1 is expected to be a luaL_Stream* (stream)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Box* on the Lua stack
+ */
+static int
+ReadStream(lua_State *L)
+{
+    FUNC(LL_BOXA ".ReadStream");
+    luaL_Stream *stream = ll_check_stream(_fun, L, 1);
+    Boxa *boxa = boxaReadStream(stream->f);
+    return ll_push_Boxa(_fun, L, boxa);
+}
+
+/**
+ * \brief Read a Boxa* (%boxa) from memory (%data)
+ *
+ * Arg #1 is expected to be a string (data)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Box* on the Lua stack
+ */
+static int
+ReadMem(lua_State *L)
+{
+    FUNC(LL_BOXA ".ReadMem");
+    const char *data = ll_check_string(_fun, L, 1);
+    lua_Integer size = luaL_len(L, 1);
+    Boxa *boxa = boxaReadMem(reinterpret_cast<const l_uint8 *>(data), static_cast<size_t>(size));
+    return ll_push_Boxa(_fun, L, boxa);
+}
+
+/**
  * \brief Write a Boxa* (%boxa) to a file (%filename)
  *
  * Arg #1 (i.e. self) is expected to be a Box* (box).
@@ -601,23 +725,6 @@ Write(lua_State *L)
 }
 
 /**
- * \brief Read a Boxa* (%boxa) from a stream (%stream)
- *
- * Arg #1 is expected to be a luaL_Stream* (stream)
- *
- * \param L pointer to the lua_State
- * \return 1 Box* on the Lua stack
- */
-static int
-ReadStream(lua_State *L)
-{
-    FUNC(LL_BOXA ".ReadStream");
-    luaL_Stream *stream = ll_check_stream(_fun, L, 1);
-    Boxa *boxa = boxaReadStream(stream->f);
-    return ll_push_Boxa(_fun, L, boxa);
-}
-
-/**
  * \brief Write a Boxa* (%boxa) to a stream (%stream)
  *
  * Arg #1 (i.e. self) is expected to be a Box* (box).
@@ -634,24 +741,6 @@ WriteStream(lua_State *L)
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
     lua_pushboolean(L, 0 == boxaWriteStream(stream->f, boxa));
     return 1;
-}
-
-/**
- * \brief Read a Boxa* (%boxa) from memory (%data)
- *
- * Arg #1 is expected to be a string (data)
- *
- * \param L pointer to the lua_State
- * \return 1 Box* on the Lua stack
- */
-static int
-ReadMem(lua_State *L)
-{
-    FUNC(LL_BOXA ".ReadMem");
-    const char *data = ll_check_string(_fun, L, 1);
-    lua_Integer size = luaL_len(L, 1);
-    Boxa *boxa = boxaReadMem(reinterpret_cast<const l_uint8 *>(data), static_cast<size_t>(size));
-    return ll_push_Boxa(_fun, L, boxa);
 }
 
 /**
@@ -742,45 +831,49 @@ int
 ll_register_BOXA(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},               /* garbage collect */
-        {"__new",               Create},                /* new Boxa */
-        {"__len",               GetCount},              /* #boxa */
-        {"__tostring",          toString},
-        {"Destroy",             Destroy},
-        {"Copy",                Copy},
-        {"AddBox",              AddBox},
-        {"ExtendArray",         ExtendArray},
-        {"ExtendArrayToSize",   ExtendArrayToSize},
-        {"GetValidCount",       GetValidCount},
-        {"GetBox",              GetBox},
-        {"GetValidBox",         GetValidBox},
-        {"FindInvalidBoxes",    FindInvalidBoxes},
-        {"GetBoxGeometry",      GetBoxGeometry},
-        {"IsFull",              IsFull},
-        {"ReplaceBox",          ReplaceBox},
-        {"InsertBox",           InsertBox},
-        {"RemoveBox",           RemoveBox},
-        {"RemoveBoxAndSave",    RemoveBoxAndSave},
-        {"TakeBox",             RemoveBoxAndSave},      /* alias */
-        {"SaveValid",           SaveValid},
-        {"Clear",               Clear},
-        {"ContainedInBox",      ContainedInBox},
-        {"ContainedInBoxCount", ContainedInBoxCount},
-        {"ContainedInBoxa",     ContainedInBoxa},
-        {"IntersectsBox",       IntersectsBox},
-        {"IntersectsBoxCount",  IntersectsBoxCount},
-        {"RotateOrth",          RotateOrth},
-        {"Write",               Write},
-        {"WriteStream",         WriteStream},
-        {"WriteStream",         WriteMem},
+        {"__gc",                    Destroy},               /* garbage collect */
+        {"__new",                   Create},                /* new Boxa */
+        {"__len",                   GetCount},              /* #boxa */
+        {"__tostring",              toString},
+        {"Destroy",                 Destroy},
+        {"Copy",                    Copy},
+        {"AddBox",                  AddBox},
+        {"ExtendArray",             ExtendArray},
+        {"ExtendArrayToSize",       ExtendArrayToSize},
+        {"GetValidCount",           GetValidCount},
+        {"GetBox",                  GetBox},
+        {"GetValidBox",             GetValidBox},
+        {"FindInvalidBoxes",        FindInvalidBoxes},
+        {"GetBoxGeometry",          GetBoxGeometry},
+        {"IsFull",                  IsFull},
+        {"ReplaceBox",              ReplaceBox},
+        {"InsertBox",               InsertBox},
+        {"RemoveBox",               RemoveBox},
+        {"RemoveBoxAndSave",        RemoveBoxAndSave},
+        {"TakeBox",                 RemoveBoxAndSave},      /* alias */
+        {"SaveValid",               SaveValid},
+        {"Clear",                   Clear},
+        {"ContainedInBox",          ContainedInBox},
+        {"ContainedInBoxCount",     ContainedInBoxCount},
+        {"ContainedInBoxa",         ContainedInBoxa},
+        {"IntersectsBox",           IntersectsBox},
+        {"IntersectsBoxCount",      IntersectsBoxCount},
+        {"ClipToBox",               ClipToBox},
+        {"CombineOverlaps",         CombineOverlaps},
+        {"CombineOverlapsInPair",   CombineOverlapsInPair},
+        {"HandleOverlaps",          HandleOverlaps},
+        {"RotateOrth",              RotateOrth},
+        {"Write",                   Write},
+        {"WriteStream",             WriteStream},
+        {"WriteMem",                WriteMem},
         LUA_SENTINEL
     };
 
     static const luaL_Reg functions[] = {
-        {"Create",              Create},
-        {"Read",                Read},
-        {"ReadStream",          ReadStream},
-        {"ReadMem",             ReadMem},
+        {"Create",                  Create},
+        {"Read",                    Read},
+        {"ReadStream",              ReadStream},
+        {"ReadMem",                 ReadMem},
         LUA_SENTINEL
     };
 
