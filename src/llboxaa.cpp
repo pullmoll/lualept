@@ -376,6 +376,29 @@ FlattenAligned(lua_State *L)
 }
 
 /**
+ * \brief Join Boxaa* (%boxaas) with Boxa* (%boxaad)
+ *
+ * Arg #1 (i.e. self) is expected to be a Box* (boxaad).
+ * Arg #2 is expected to be another Box* (boxaas).
+ * Arg #3 is optional and, if given, expected to be a l_int32 (istart)
+ * Arg #4 is optional and, if given, expected to be a l_int32 (iend)
+ *
+ * \param L pointer to the lua_State
+ * \return 2 boolean and Numa* on the Lua stack
+ */
+static int
+Join(lua_State *L)
+{
+    FUNC(LL_BOXAA ".Join");
+    Boxaa *boxaad = ll_check_Boxaa(_fun, L, 1);
+    Boxaa *boxaas = ll_check_Boxaa(_fun, L, 2);
+    l_int32 istart = ll_check_index(_fun, L, 3, 1);
+    l_int32 iend = ll_check_index(_fun, L, 3, boxaaGetCount(boxaas));
+    lua_pushboolean(L, 0 == boxaaJoin(boxaad, boxaas, istart, iend));
+    return 2;
+}
+
+/**
  * \brief Check Lua stack at index %arg for udata of class LL_BOXAA
  * \param _fun calling function's name
  * \param L pointer to the lua_State
@@ -459,6 +482,7 @@ ll_register_Boxaa(lua_State *L)
         {"RemoveBoxa",          RemoveBoxa},
         {"FlattenToBoxa",       FlattenToBoxa},
         {"FlattenAligned",      FlattenAligned},
+        {"Join",                Join},
         LUA_SENTINEL
     };
 

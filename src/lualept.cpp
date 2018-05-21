@@ -1492,11 +1492,28 @@ ll_string_select_min_max(l_int32 which)
  * \brief Table of sort by names and enumeration values
  */
 static const lept_enums_t tbl_sort_by[] = {
+    TBL_ENTRY("x",              L_SORT_BY_X),
+    TBL_ENTRY("y",              L_SORT_BY_Y),
+    TBL_ENTRY("right",          L_SORT_BY_RIGHT),
+    TBL_ENTRY("r",              L_SORT_BY_RIGHT),
+    TBL_ENTRY("bottom",         L_SORT_BY_BOT),
+    TBL_ENTRY("bot",            L_SORT_BY_BOT),
+    TBL_ENTRY("b",              L_SORT_BY_BOT),
     TBL_ENTRY("width",          L_SORT_BY_WIDTH),
+    TBL_ENTRY("w",              L_SORT_BY_WIDTH),
     TBL_ENTRY("height",         L_SORT_BY_HEIGHT),
+    TBL_ENTRY("h",              L_SORT_BY_HEIGHT),
+    TBL_ENTRY("min-dimension",  L_SORT_BY_MIN_DIMENSION),
+    TBL_ENTRY("min",            L_SORT_BY_MIN_DIMENSION),
     TBL_ENTRY("max-dimension",  L_SORT_BY_MAX_DIMENSION),
+    TBL_ENTRY("max",            L_SORT_BY_MAX_DIMENSION),
     TBL_ENTRY("perimeter",      L_SORT_BY_PERIMETER),
-    TBL_ENTRY("area",           L_SORT_BY_AREA)
+    TBL_ENTRY("perim",          L_SORT_BY_PERIMETER),
+    TBL_ENTRY("p",              L_SORT_BY_PERIMETER),
+    TBL_ENTRY("area",           L_SORT_BY_AREA),
+    TBL_ENTRY("a",              L_SORT_BY_AREA),
+    TBL_ENTRY("aspect-ratio",   L_SORT_BY_ASPECT_RATIO),
+    TBL_ENTRY("aspect",         L_SORT_BY_ASPECT_RATIO),
 };
 
 /**
@@ -1522,6 +1539,48 @@ const char*
 ll_string_sort_by(l_int32 sort_by)
 {
     return ll_string_tbl(sort_by, tbl_sort_by, ARRAYSIZE(tbl_sort_by));
+}
+
+/**
+ * \brief Table of set side names and enumeration values
+ */
+static const lept_enums_t tbl_set_side[] = {
+    TBL_ENTRY("left",           L_SET_LEFT),
+    TBL_ENTRY("lft",            L_SET_LEFT),
+    TBL_ENTRY("l",              L_SET_LEFT),
+    TBL_ENTRY("right",          L_SET_RIGHT),
+    TBL_ENTRY("rgt",            L_SET_RIGHT),
+    TBL_ENTRY("r",              L_SET_RIGHT),
+    TBL_ENTRY("top",            L_SET_TOP),
+    TBL_ENTRY("t",              L_SET_TOP),
+    TBL_ENTRY("bottom",         L_SET_BOT),
+    TBL_ENTRY("bot",            L_SET_BOT),
+    TBL_ENTRY("b",              L_SET_BOT)
+};
+
+/**
+ * \brief Check for a from side name
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \param dflt default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_set_side(const char *_fun, lua_State* L, int arg, l_int32 dflt)
+{
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_set_side, ARRAYSIZE(tbl_set_side));
+}
+
+/**
+ * \brief Return a string for the from side enumeration value
+ * \param which from side enumeration value
+ * \return const string with the name
+ */
+const char*
+ll_string_set_side(l_int32 which)
+{
+    return ll_string_tbl(which, tbl_set_side, ARRAYSIZE(tbl_set_side));
 }
 
 /**
@@ -1567,9 +1626,114 @@ ll_string_from_side(l_int32 which)
 }
 
 /**
+ * \brief Table of adjust side names and enumeration values
+ */
+static const lept_enums_t tbl_adjust_sides[] = {
+    TBL_ENTRY("adjust-skip",            L_ADJUST_SKIP),
+    TBL_ENTRY("skip",                   L_ADJUST_SKIP),
+    TBL_ENTRY("adjust-left",            L_ADJUST_LEFT),
+    TBL_ENTRY("left",                   L_ADJUST_LEFT),
+    TBL_ENTRY("lft",                    L_ADJUST_LEFT),
+    TBL_ENTRY("l",                      L_ADJUST_LEFT),
+    TBL_ENTRY("adjust-right",           L_ADJUST_RIGHT),
+    TBL_ENTRY("right",                  L_ADJUST_RIGHT),
+    TBL_ENTRY("rgt",                    L_ADJUST_RIGHT),
+    TBL_ENTRY("r",                      L_ADJUST_RIGHT),
+    TBL_ENTRY("adjust-left-and-right",  L_ADJUST_LEFT_AND_RIGHT),
+    TBL_ENTRY("left-and-right",         L_ADJUST_LEFT_AND_RIGHT),
+    TBL_ENTRY("l-r",                    L_ADJUST_LEFT_AND_RIGHT),
+    TBL_ENTRY("adjust-top",             L_ADJUST_TOP),
+    TBL_ENTRY("top",                    L_ADJUST_TOP),
+    TBL_ENTRY("t",                      L_ADJUST_TOP),
+    TBL_ENTRY("adjust-bottom",          L_ADJUST_BOT),
+    TBL_ENTRY("bottom",                 L_ADJUST_BOT),
+    TBL_ENTRY("bot",                    L_ADJUST_BOT),
+    TBL_ENTRY("b",                      L_ADJUST_BOT),
+    TBL_ENTRY("adjust-top-and-bottom",  L_ADJUST_TOP_AND_BOT),
+    TBL_ENTRY("top-and-bottom",         L_ADJUST_TOP_AND_BOT),
+    TBL_ENTRY("adjust-top-and-bot",     L_ADJUST_TOP_AND_BOT),
+    TBL_ENTRY("top-and-bot",            L_ADJUST_TOP_AND_BOT),
+    TBL_ENTRY("t-b",                    L_ADJUST_TOP_AND_BOT),
+    TBL_ENTRY("adjust-choose-min",      L_ADJUST_CHOOSE_MIN),
+    TBL_ENTRY("choose-min",             L_ADJUST_CHOOSE_MIN),
+    TBL_ENTRY("adjust-choose-max",      L_ADJUST_CHOOSE_MAX),
+    TBL_ENTRY("choose-max",             L_ADJUST_CHOOSE_MAX),
+    TBL_ENTRY("set-left",               L_SET_LEFT),
+    TBL_ENTRY("set-right",              L_SET_RIGHT),
+    TBL_ENTRY("set-top",                L_SET_TOP),
+    TBL_ENTRY("set-bot",                L_SET_BOT),
+    TBL_ENTRY("get-left",               L_GET_LEFT),
+    TBL_ENTRY("get-right",              L_GET_RIGHT),
+    TBL_ENTRY("get-top",                L_GET_TOP),
+    TBL_ENTRY("get-bot",                L_GET_BOT)
+};
+
+/**
+ * \brief Check for a from side name
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \param dflt default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_adjust_sides(const char *_fun, lua_State* L, int arg, l_int32 dflt)
+{
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_adjust_sides, ARRAYSIZE(tbl_adjust_sides));
+}
+
+/**
+ * \brief Return a string for the from side enumeration value
+ * \param which from side enumeration value
+ * \return const string with the name
+ */
+const char*
+ll_string_adjust_sides(l_int32 which)
+{
+    return ll_string_tbl(which, tbl_adjust_sides, ARRAYSIZE(tbl_adjust_sides));
+}
+
+/**
+ * \brief Table of sort order by names and enumeration values
+ */
+static const lept_enums_t tbl_sort_order[] = {
+    TBL_ENTRY("increasing",             L_SORT_INCREASING),
+    TBL_ENTRY("inc",                    L_SORT_INCREASING),
+    TBL_ENTRY("i",                      L_SORT_INCREASING),
+    TBL_ENTRY("decreasing",             L_SORT_DECREASING),
+    TBL_ENTRY("dec",                    L_SORT_DECREASING),
+    TBL_ENTRY("d",                      L_SORT_DECREASING)
+};
+
+/**
+ * \brief Check for a select min or max name (%L_SELECT_MIN, %L_SELECT_MAX)
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \param dflt default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_sort_order(const char *_fun, lua_State* L, int arg, l_int32 dflt)
+{
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_sort_order, ARRAYSIZE(tbl_sort_order));
+}
+
+/**
+ * \brief Return a string for the transform sort_order
+ * \param sort_order transform sort_order enumeration value
+ * \return const string with the name
+ */
+const char*
+ll_string_sort_order(l_int32 sort_order)
+{
+    return ll_string_tbl(sort_order, tbl_sort_order, ARRAYSIZE(tbl_sort_order));
+}
+
+/**
  * \brief Table of transform order by names and enumeration values
  */
-static const lept_enums_t tbl_order[] = {
+static const lept_enums_t tbl_trans_order[] = {
     TBL_ENTRY("translate,scale,rotate", L_TR_SC_RO),
     TBL_ENTRY("tr,sc,ro",               L_TR_SC_RO),
     TBL_ENTRY("scale,rotate,translate", L_SC_RO_TR),
@@ -1593,9 +1757,9 @@ static const lept_enums_t tbl_order[] = {
  * \return storage flag
  */
 l_int32
-ll_check_order(const char *_fun, lua_State* L, int arg, l_int32 dflt)
+ll_check_trans_order(const char *_fun, lua_State* L, int arg, l_int32 dflt)
 {
-    return ll_check_tbl(_fun, L, arg, dflt, tbl_order, ARRAYSIZE(tbl_order));
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_trans_order, ARRAYSIZE(tbl_trans_order));
 }
 
 /**
@@ -1604,9 +1768,9 @@ ll_check_order(const char *_fun, lua_State* L, int arg, l_int32 dflt)
  * \return const string with the name
  */
 const char*
-ll_string_order(l_int32 order)
+ll_string_trans_order(l_int32 order)
 {
-    return ll_string_tbl(order, tbl_order, ARRAYSIZE(tbl_order));
+    return ll_string_tbl(order, tbl_trans_order, ARRAYSIZE(tbl_trans_order));
 }
 
 /**
@@ -1681,6 +1845,53 @@ const char*
 ll_string_overlap(l_int32 overlap)
 {
     return ll_string_tbl(overlap, tbl_overlap, ARRAYSIZE(tbl_overlap));
+}
+
+/**
+ * \brief Table of dist select by names and enumeration values
+ */
+static const lept_enums_t tbl_value_flags[] = {
+    TBL_ENTRY("negative",       L_NEGATIVE),
+    TBL_ENTRY("neg",            L_NEGATIVE),
+    TBL_ENTRY("n",              L_NEGATIVE),
+    TBL_ENTRY("non-negative",   L_NON_NEGATIVE),
+    TBL_ENTRY("non-neg",        L_NON_NEGATIVE),
+    TBL_ENTRY("nn",             L_NON_NEGATIVE),
+    TBL_ENTRY("positive",       L_POSITIVE),
+    TBL_ENTRY("pos",            L_POSITIVE),
+    TBL_ENTRY("p",              L_POSITIVE),
+    TBL_ENTRY("non-positive",   L_NON_POSITIVE),
+    TBL_ENTRY("non-pos",        L_NON_POSITIVE),
+    TBL_ENTRY("np",             L_NON_POSITIVE),
+    TBL_ENTRY("zero",           L_ZERO),
+    TBL_ENTRY("z",              L_ZERO),
+    TBL_ENTRY("all",            L_ALL),
+    TBL_ENTRY("a",              L_ALL)
+};
+
+/**
+ * \brief Check for a select min or max name
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \param dflt default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_value_flags(const char *_fun, lua_State* L, int arg, l_int32 dflt)
+{
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_value_flags, ARRAYSIZE(tbl_value_flags));
+}
+
+/**
+ * \brief Return a string for the transform value_flags
+ * \param value_flags value_flags value
+ * \return const string with the name
+ */
+const char*
+ll_string_value_flags(l_int32 value_flags)
+{
+    return ll_string_tbl(value_flags, tbl_value_flags, ARRAYSIZE(tbl_value_flags));
 }
 
 /*====================================================================*

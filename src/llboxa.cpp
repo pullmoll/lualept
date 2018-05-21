@@ -633,6 +633,306 @@ HandleOverlaps(lua_State *L)
 }
 
 /**
+ * \brief Get Box* (box) of Boxa* (%boxa) which is nearest to point (x,y)
+ *
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ * Arg #2 is expected to be a l_int32 (x)
+ * Arg #3 is expected to be a l_int32 (y)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Boxa* on the Lua stack
+ */
+static int
+GetNearestToPt(lua_State *L)
+{
+    FUNC(LL_BOXA ".GetNearestToPt");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
+    l_int32 x = ll_check_l_int32(_fun, L, 2);
+    l_int32 y = ll_check_l_int32(_fun, L, 3);
+    Box *box = boxaGetNearestToPt(boxa, x, y);
+    return ll_push_Box(_fun, L, box);
+}
+
+/**
+ * \brief Get Box* (box) of Boxa* (%boxa) which is nearest to line (x,y)
+ *
+ * Note:
+ * x < 0 && y >= 0 horizontal line at y.
+ * x >= 0 && y < 0 vertical line at x.
+ *
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ * Arg #2 is expected to be a l_int32 (x)
+ * Arg #3 is expected to be a l_int32 (y)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Boxa* on the Lua stack
+ */
+static int
+GetNearestToLine(lua_State *L)
+{
+    FUNC(LL_BOXA ".GetNearestToLine");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
+    l_int32 x = ll_check_l_int32(_fun, L, 2);
+    l_int32 y = ll_check_l_int32(_fun, L, 3);
+    Box *box = boxaGetNearestToLine(boxa, x, y);
+    return ll_push_Box(_fun, L, box);
+}
+
+/**
+ * \brief Get Boxa* (%boxad) of nearest boxes from Boxa* (%boxas)
+ *
+ * Note:
+ * x < 0 && y >= 0 horizontal line at y.
+ * x >= 0 && y < 0 vertical line at x.
+ *
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ * Arg #2 is expected to be a l_int32 (x)
+ * Arg #3 is expected to be a l_int32 (y)
+ *
+ * \param L pointer to the lua_State
+ * \return 2 Numaa* on the Lua stack
+ */
+static int
+FindNearestBoxes(lua_State *L)
+{
+    FUNC(LL_BOXA ".FindNearestBoxes");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 dist_select = ll_check_value_flags(_fun, L, 2, L_NON_NEGATIVE);
+    l_int32 range = ll_check_l_int32(_fun, L, 3);
+    Numaa *naaindex = nullptr;
+    Numaa *naadist = nullptr;
+    if (boxaFindNearestBoxes(boxas, dist_select, range, &naaindex, &naadist))
+        return ll_push_nil(L);
+    return ll_push_Numaa(_fun, L, naaindex) + ll_push_Numaa(_fun, L, naadist);
+}
+
+/**
+ * \brief Get index and distance for Box* at (%i) from Boxa* (%boxa)
+ *
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * Arg #2 is expected to be a l_int32 (i)
+ * Arg #3 is expected to be a string describing the direction (dir)
+ * Arg #4 is expected to be a string describing the value flag (dist_select)
+ * Arg #5 is expected to be a l_int32 (range)
+ *
+ * \param L pointer to the lua_State
+ * \return 2 integers on the Lua stack
+ */
+static int
+GetNearestByDirection(lua_State *L)
+{
+    FUNC(LL_BOXA ".GetNearestByDirection");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
+    l_int32 i = ll_check_index(_fun, L, 2, boxaGetCount(boxa));
+    l_int32 dir = ll_check_direction(_fun, L, 3, L_FROM_LEFT);
+    l_int32 dist_select = ll_check_value_flags(_fun, L, 4, L_NON_NEGATIVE);
+    l_int32 range = ll_check_l_int32(_fun, L, 5);
+    l_int32 index = 0;
+    l_int32 dist = 0;
+    if (boxaGetNearestByDirection(boxa, i, dir, dist_select, range, &index, &dist))
+        return ll_push_nil(L);
+    lua_pushinteger(L, index);
+    lua_pushinteger(L, dist);
+    return 2;
+}
+
+/**
+ * \brief Adjust sides of boxes in a Boxa* (%boxas)
+ *
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * Arg #2 is expected to be a l_int32 (delleft)
+ * Arg #3 is expected to be a l_int32 (delright)
+ * Arg #4 is expected to be a l_int32 (deltop)
+ * Arg #5 is expected to be a l_int32 (delbot)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Boxa* on the Lua stack
+ */
+static int
+AdjustSides(lua_State *L)
+{
+    FUNC(LL_BOXA ".AdjustSides");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 delleft = ll_check_l_int32_default(_fun, L, 2, 0);
+    l_int32 delright = ll_check_l_int32_default(_fun, L, 3, 0);
+    l_int32 deltop = ll_check_l_int32_default(_fun, L, 4, 0);
+    l_int32 delbot = ll_check_l_int32_default(_fun, L, 5, 0);
+    Boxa *boxad = boxaAdjustSides(boxas, delleft, delright, deltop, delbot);
+    ll_push_Boxa(_fun, L, boxad);
+    return 1;
+}
+
+/**
+ * \brief Set a side of boxes in a Boxa* (%boxas)
+ *
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * Arg #2 is expected to be a string describing the side (side)
+ * Arg #3 is expected to be a l_int32 (val)
+ * Arg #4 is expected to be a l_int32 (thresh)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Boxa* on the Lua stack
+ */
+static int
+SetSide(lua_State *L)
+{
+    FUNC(LL_BOXA ".SetSide");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 side = ll_check_set_side(_fun, L, 2, 0);
+    l_int32 val = ll_check_l_int32_default(_fun, L, 3, 0);
+    l_int32 thresh = ll_check_l_int32_default(_fun, L, 4, 0);
+    Boxa *boxad = boxaSetSide(nullptr, boxas, side, val, thresh);
+    ll_push_Boxa(_fun, L, boxad);
+    return 1;
+}
+
+/**
+ * \brief Adjust width of boxes changing (%sides) in a Boxa* (%boxas) to a (%target)
+ *
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * Arg #2 is expected to be a string describing the side (sides)
+ * Arg #3 is expected to be a l_int32 (target)
+ * Arg #4 is expected to be a l_int32 (thresh)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Boxa* on the Lua stack
+ */
+static int
+AdjustWidthToTarget(lua_State *L)
+{
+    FUNC(LL_BOXA ".AdjustWidthToTarget");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 sides = ll_check_adjust_sides(_fun, L, 2, 0);
+    l_int32 target = ll_check_l_int32_default(_fun, L, 3, 0);
+    l_int32 thresh = ll_check_l_int32_default(_fun, L, 4, 0);
+    Boxa *boxad = boxaAdjustWidthToTarget(nullptr, boxas, sides, target, thresh);
+    ll_push_Boxa(_fun, L, boxad);
+    return 1;
+}
+
+/**
+ * \brief Adjust height of boxes changing (%sides) in a Boxa* (%boxas) to a (%target)
+ *
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * Arg #2 is expected to be a string describing the side (sides)
+ * Arg #3 is expected to be a l_int32 (target)
+ * Arg #4 is expected to be a l_int32 (thresh)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Boxa* on the Lua stack
+ */
+static int
+AdjustHeightToTarget(lua_State *L)
+{
+    FUNC(LL_BOXA ".AdjustHeightToTarget");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 sides = ll_check_adjust_sides(_fun, L, 2, 0);
+    l_int32 target = ll_check_l_int32_default(_fun, L, 3, 0);
+    l_int32 thresh = ll_check_l_int32_default(_fun, L, 4, 0);
+    Boxa *boxad = boxaAdjustWidthToTarget(nullptr, boxas, sides, target, thresh);
+    ll_push_Boxa(_fun, L, boxad);
+    return 1;
+}
+
+/**
+ * \brief Test similarity of a Boxa* (%boxa1) and another Boxa* (%boxa2)
+ *
+ * Arg #1 (i.e. self) is expected to be a Box* (boxa1).
+ * Arg #2 is expected to be another Box* (boxa2).
+ * Arg #3 is expected to be a l_int32 (leftdiff).
+ * Arg #4 is expected to be a l_int32 (rightdiff).
+ * Arg #5 is expected to be a l_int32 (topdiff).
+ * Arg #6 is expected to be a l_int32 (botdiff).
+ *
+ * \param L pointer to the lua_State
+ * \return 2 boolean and Numa* on the Lua stack
+ */
+static int
+Similar(lua_State *L)
+{
+    FUNC(LL_BOXA ".Similar");
+    Boxa *boxa1 = ll_check_Boxa(_fun, L, 1);
+    Boxa *boxa2 = ll_check_Boxa(_fun, L, 2);
+    l_int32 leftdiff = ll_check_l_int32(_fun, L, 3);
+    l_int32 rightdiff = ll_check_l_int32_default(_fun, L, 4, leftdiff);
+    l_int32 topdiff = ll_check_l_int32_default(_fun, L, 5, rightdiff);
+    l_int32 botdiff = ll_check_l_int32_default(_fun, L, 6, topdiff);
+    l_int32 similar = FALSE;
+    Numa *nasim = nullptr;
+    if (boxaSimilar(boxa1, boxa2, leftdiff, rightdiff, topdiff, botdiff, 0, &similar, &nasim))
+        return ll_push_nil(L);
+    lua_pushboolean(L, similar);
+    ll_push_Numa(_fun, L, nasim);
+    return 2;
+}
+
+/**
+ * \brief Join Boxa* (%boxas) with Boxa* (%boxad)
+ *
+ * Arg #1 (i.e. self) is expected to be a Box* (boxad).
+ * Arg #2 is expected to be another Box* (boxas).
+ * Arg #3 is optional and, if given, expected to be a l_int32 (istart)
+ * Arg #4 is optional and, if given, expected to be a l_int32 (iend)
+ *
+ * \param L pointer to the lua_State
+ * \return 2 boolean and Numa* on the Lua stack
+ */
+static int
+Join(lua_State *L)
+{
+    FUNC(LL_BOXA ".Join");
+    Boxa *boxad = ll_check_Boxa(_fun, L, 1);
+    Boxa *boxas = ll_check_Boxa(_fun, L, 2);
+    l_int32 istart = ll_check_index(_fun, L, 3, 1);
+    l_int32 iend = ll_check_index(_fun, L, 3, boxaGetCount(boxas));
+    lua_pushboolean(L, 0 == boxaJoin(boxad, boxas, istart, iend));
+    return 2;
+}
+
+/**
+ * \brief Split Boxa* (%boxa) into even and odd (%boxae, %boxao)
+ *
+ * Arg #1 (i.e. self) is expected to be a Box* (boxad).
+ * Arg #2 is optional and, if gived, expected to be a l_int32 (fillflag).
+ *
+ * \param L pointer to the lua_State
+ * \return 2 Boxa* on the Lua stack (boxae, boxao)
+ */
+static int
+SplitEvenOdd(lua_State *L)
+{
+    FUNC(LL_BOXA ".SplitEvenOdd ");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
+    l_int32 fillflag = ll_check_l_int32_default(_fun, L, 2, 0);
+    Boxa *boxae = nullptr;
+    Boxa *boxao = nullptr;
+    if (boxaSplitEvenOdd(boxa, fillflag, &boxae, &boxao))
+        return ll_push_nil(L);
+    return ll_push_Boxa(_fun, L, boxae) + ll_push_Boxa(_fun, L, boxao);
+}
+
+/**
+ * \brief Merge even and odd Boxa* (%boxae, %boxao) into one Boxa* (%boxad)
+ *
+ * Arg #1 (i.e. self) is expected to be a Box* (boxae).
+ * Arg #2 is expected to be a Box* (boxao).
+ * Arg #3 is optional and, if gived, expected to be a l_int32 (fillflag).
+ *
+ * \param L pointer to the lua_State
+ * \return 2 Boxa* on the Lua stack (boxae, boxao)
+ */
+static int
+MergeEvenOdd(lua_State *L)
+{
+    FUNC(LL_BOXA ".MergeEvenOdd ");
+    Boxa *boxae = ll_check_Boxa(_fun, L, 1);
+    Boxa *boxao = ll_check_Boxa(_fun, L, 2);
+    l_int32 fillflag = ll_check_l_int32_default(_fun, L, 3, 0);
+    Boxa *boxa = boxaMergeEvenOdd(boxae, boxao, fillflag);
+    return ll_push_Boxa(_fun, L, boxa);
+}
+
+/**
  * \brief Rotate a Boxa* (%boxas)
  *
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
@@ -651,6 +951,28 @@ RotateOrth(lua_State *L)
     Boxa *boxa = boxaRotateOrth(boxas, w, h, rotation);
     ll_push_Boxa(_fun, L, boxa);
     return 1;
+}
+
+/**
+ * \brief Sort a Boxa* (%boxas)
+ *
+ * Arg #1 (i.e. self) is expected to be a Box* (boxs).
+ * Arg #2 is expected to be a string defining the sort type (type)
+ * Arg #3 is expected to be a string defining the sort order (order)
+ *
+ * \param L pointer to the lua_State
+ * \return 2 Box* (boxa) and Numa* (naindex) on the Lua stack
+ */
+static int
+Sort(lua_State *L)
+{
+    FUNC(LL_BOXA ".Sort");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 type = ll_check_sort_by(_fun, L, 2, L_SORT_BY_X);
+    l_int32 order = ll_check_sort_order(_fun, L, 3, L_SORT_INCREASING);
+    Numa *naindex = nullptr;
+    Boxa *boxa = boxaSort(boxas, type, order, &naindex);
+    return ll_push_Boxa(_fun, L, boxa) + ll_push_Numa(_fun, L, naindex);
 }
 
 /**
@@ -862,7 +1184,20 @@ ll_register_BOXA(lua_State *L)
         {"CombineOverlaps",         CombineOverlaps},
         {"CombineOverlapsInPair",   CombineOverlapsInPair},
         {"HandleOverlaps",          HandleOverlaps},
+        {"GetNearestToPt",          GetNearestToPt},
+        {"GetNearestToLine",        GetNearestToLine},
+        {"FindNearestBoxes",        FindNearestBoxes},
+        {"GetNearestByDirection",   GetNearestByDirection},
+        {"AdjustSides",             AdjustSides},
+        {"SetSide",                 SetSide},
+        {"AdjustWidthToTarget",     AdjustWidthToTarget},
+        {"AdjustHeightToTarget",    AdjustHeightToTarget},
+        {"Similar",                 Similar},
+        {"Join",                    Join},
+        {"SplitEvenOdd",            SplitEvenOdd},
+        {"MergeEvenOdd",            MergeEvenOdd},
         {"RotateOrth",              RotateOrth},
+        {"Sort",                    Sort},
         {"Write",                   Write},
         {"WriteStream",             WriteStream},
         {"WriteMem",                WriteMem},

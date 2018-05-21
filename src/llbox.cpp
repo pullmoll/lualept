@@ -657,6 +657,10 @@ RelocateOneSide(lua_State *L)
  * \brief Adjust sides of a Box* (%boxs)
  *
  * Arg #1 (i.e. self) is expected to be a Box* (box).
+ * Arg #2 is expected to be a l_int32 (delleft)
+ * Arg #3 is expected to be a l_int32 (delright)
+ * Arg #4 is expected to be a l_int32 (deltop)
+ * Arg #5 is expected to be a l_int32 (delbot)
  *
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -776,7 +780,7 @@ TransformOrdered(lua_State *L)
     Box *boxs = ll_check_Box(_fun, L, 1);
     l_float32 xc, yc;
     l_int32 ok = boxGetCenter(boxs, &xc, &yc);
-    l_int32 order = ll_check_order(_fun, L, 2, L_TR_SC_RO);
+    l_int32 order = ll_check_trans_order(_fun, L, 2, L_TR_SC_RO);
     l_int32 shiftx = ll_check_l_int32_default(_fun, L, 3, 0);
     l_int32 shifty = ll_check_l_int32_default(_fun, L, 4, 0);
     l_float32 scalex = ll_check_l_float32_default(_fun, L, 5, 1.0f);
