@@ -39,6 +39,9 @@
 
 /**
  * \brief Printable string for a L_Dna*
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
  */
@@ -72,9 +75,9 @@ toString(lua_State *L)
 
 /**
  * \brief Create a new L_Dna*
- *
+ * <pre>
  * Arg #1 is expected to be a l_int32 (n).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 DNA* on the Lua stack
  */
@@ -89,7 +92,9 @@ Create(lua_State *L)
 
 /**
  * \brief Destroy a L_Dna*
- *
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
+ * </pre>
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack
  */
@@ -107,9 +112,9 @@ Destroy(lua_State *L)
 
 /**
  * \brief Get the number of numbers stored in the L_Dna*
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
  */
@@ -125,10 +130,10 @@ GetCount(lua_State *L)
 
 /**
  * \brief Set the number of stored numbers in the L_Dna*, i.e. resize L_Dna*
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
  * Arg #2 is expected to be a l_int32 (n).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
  */
@@ -144,9 +149,9 @@ SetCount(lua_State *L)
 
 /**
  * \brief Copy a L_Dna*
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 DNA* on the Lua stack
  */
@@ -161,7 +166,9 @@ Copy(lua_State *L)
 
 /**
  * \brief Clone a L_Dna*
- *
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 DNA* on the Lua stack
  */
@@ -176,9 +183,9 @@ Clone(lua_State *L)
 
 /**
  * \brief Set the number of stored numbes in the L_Dna* to zero
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -193,10 +200,10 @@ Empty(lua_State *L)
 
 /**
  * \brief Add one number to the L_Dna*
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
  * Arg #2 is expected to be a lua_Number to add to the array.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -213,11 +220,11 @@ AddNumber(lua_State *L)
 
 /**
  * \brief Insert one number to the L_Dna* at the given index %idx
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
  * Arg #2 is expected to be a lua_Integer in the range of l_int32 (idx).
  * Arg #3 is expected to be a lua_Number to insert into the array.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -236,10 +243,10 @@ InsertNumber(lua_State *L)
 
 /**
  * \brief Remove one number to the L_Dna* at the given index %idx
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
  * Arg #2 is expected to be a lua_Integer in the range of l_int32 (idx).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -255,11 +262,11 @@ RemoveNumber(lua_State *L)
 
 /**
  * \brief Replace one number to the L_Dna* at the given index %idx
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
  * Arg #2 is expected to be a lua_Integer in the range of l_int32 (idx).
  * Arg #3 is expected to be a lua_Number to use to replace.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -277,10 +284,10 @@ ReplaceNumber(lua_State *L)
 
 /**
  * \brief Get the l_float64 from the L_Dna* at index %idx
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
  * Arg #2 is expected to be a l_int32 (idx).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
  */
@@ -299,10 +306,10 @@ GetDValue(lua_State *L)
 
 /**
  * \brief Get the l_int32 from the L_Dna* at index %idx
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
  * Arg #2 is expected to be a l_int32 (idx).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
  */
@@ -321,11 +328,11 @@ GetIValue(lua_State *L)
 
 /**
  * \brief Set the value for the L_Dna* at the given index %idx
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
  * Arg #2 is expected to be a lua_Integer in the range of l_int32 (idx).
  * Arg #3 is expected to be a lua_Number to set in the array.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -343,11 +350,11 @@ SetValue(lua_State *L)
 
 /**
  * \brief Add a difference to the value for the L_Dna* at the given index %idx
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
  * Arg #2 is expected to be a lua_Integer in the range of l_int32 (idx).
  * Arg #3 is expected to be a lua_Number in the range of l_float32.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -365,9 +372,9 @@ ShiftValue(lua_State *L)
 
 /**
  * \brief Get the L_Dna* as table of lua_Number
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 DNA* on the Lua stack
  */
@@ -385,9 +392,9 @@ GetDArray(lua_State *L)
 
 /**
  * \brief Get the L_Dna* as a table of lua_Integer
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 DNA* on the Lua stack
  */
@@ -405,9 +412,9 @@ GetIArray(lua_State *L)
 
 /**
  * \brief Get the parameters of the L_Dna*
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 2 for L_Dna* starx and deltax
  */
@@ -427,11 +434,11 @@ GetParameters(lua_State *L)
 
 /**
  * \brief Set the parameters of the L_Dna*
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
  * Arg #2 is expected to be a lua_Number (startx).
  * Arg #3 is expected to be a lua_Number (deltax).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -449,10 +456,10 @@ SetParameters(lua_State *L)
 
 /**
  * \brief Copy the parameters of the L_Dna*
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dna* user data (destination).
  * Arg #2 is expected to be another L_Dna* user data (source).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -511,9 +518,6 @@ ll_push_Dna(const char *_fun, lua_State *L, L_Dna *da)
 
 /**
  * \brief Create and push a new DNA*
- *
- * Arg #1 is expected to be a l_int32 (n).
- *
  * \param L pointer to the lua_State
  * \return 1 DNA* on the Lua stack
  */

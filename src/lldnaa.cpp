@@ -39,6 +39,9 @@
 
 /**
  * \brief Printable string for a L_Dnaa*
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a L_Dnaa* user data.
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
  */
@@ -80,9 +83,9 @@ toString(lua_State *L)
 
 /**
  * \brief Create a new L_Dnaa*
- *
+ * <pre>
  * Arg #1 is expected to be a l_int32 (n).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 DNAA* on the Lua stack
  */
@@ -97,10 +100,10 @@ Create(lua_State *L)
 
 /**
  * \brief Create a full new L_Dnaa*
- *
+ * <pre>
  * Arg #1 is expected to be a l_int32 (nptr).
  * Arg #2 is expected to be a l_int32 (n).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 DNAA* on the Lua stack
  */
@@ -116,9 +119,9 @@ CreateFull(lua_State *L)
 
 /**
  * \brief Truncate the arrays stored in the L_Dnaa*
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dnaa* user data.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -133,7 +136,9 @@ Truncate(lua_State *L)
 
 /**
  * \brief Destroy a L_Dnaa*
- *
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a L_Dnaa* user data.
+ * </pre>
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack
  */
@@ -151,9 +156,9 @@ Destroy(lua_State *L)
 
 /**
  * \brief Get the number of arrays stored in the L_Dnaa*
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dnaa* user data.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
  */
@@ -169,10 +174,10 @@ GetCount(lua_State *L)
 
 /**
  * \brief Get the number of numbers stored in the L_Dnaa* at index %idx
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dnaa* user data.
  * Arg #2 is expected to be a l_int32 (idx).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
  */
@@ -189,9 +194,9 @@ GetDnaCount(lua_State *L)
 
 /**
  * \brief Get the number of numbers stored in the entire L_Dnaa*
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dnaa* user data.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
  */
@@ -206,11 +211,11 @@ GetNumberCount(lua_State *L)
 
 /**
  * \brief Add a L_Dna* to the L_Dnaa*
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dnaa* user data.
  * Arg #2 is expected to be a L_Dna* user data.
  * Arg #3 is an optional string defining the storage flags (copyflag).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -227,11 +232,11 @@ AddDna(lua_State *L)
 
 /**
  * \brief Get the L_Dna* in the L_Dnaa* at index %idx
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dnaa* user data.
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is an optional string defining the storage flags (accessflag).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
  */
@@ -248,11 +253,11 @@ GetDna(lua_State *L)
 
 /**
  * \brief Get the number in the L_Dnaa* at index %i, %j
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dnaa* user data.
  * Arg #2 is expected to be a l_int32 (i).
  * Arg #3 is expected to be a l_int32 (j).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
  */
@@ -272,11 +277,11 @@ GetValue(lua_State *L)
 
 /**
  * \brief Add a number to the L_Dnaa* at index %idx
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dnaa* user data.
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a lua_Number/l_float64 (val).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -294,9 +299,9 @@ AddNumber(lua_State *L)
 
 /**
  * \brief Read a L_DNAA from an external file
- *
+ * <pre>
  * Arg #1 is expected to be a string containing the filename.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 DNAA on the Lua stack, or nil on error
  */
@@ -310,11 +315,28 @@ Read(lua_State *L)
 }
 
 /**
+ * \brief Read a L_DNAA from a Lua io stream (%stream)
+ * <pre>
+ * Arg #1 is expected to be a luaL_Stream* (stream).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 DNAA on the Lua stack, or nil on error
+ */
+static int
+ReadStream(lua_State *L)
+{
+    FUNC(LL_DNAA ".ReadStream");
+    luaL_Stream *stream = ll_check_stream(_fun, L, 1);
+    L_Dnaa *daa = l_dnaaReadStream(stream->f);
+    return ll_push_Dnaa(_fun, L, daa);
+}
+
+/**
  * \brief Write the L_DNAA to an external file
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dnaa* user data.
  * Arg #2 is expected to be a string containing the filename.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -329,10 +351,29 @@ Write(lua_State *L)
 }
 
 /**
- * \brief Flatten a L_Dnaa* to a single L_Dna*
- *
+ * \brief Write the L_DNAA to a Lua io stream (%stream)
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dnaa* user data.
- *
+ * Arg #2 is expected to be a luaL_Stream* (stream).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+WriteStream(lua_State *L)
+{
+    FUNC(LL_DNAA ".WriteStream");
+    L_Dnaa *daa = ll_check_Dnaa(_fun, L, 1);
+    luaL_Stream *stream = ll_check_stream(_fun, L, 2);
+    lua_pushboolean(L, 0 == l_dnaaWriteStream(stream->f, daa));
+    return 1;
+}
+
+/**
+ * \brief Flatten a L_Dnaa* to a single L_Dna*
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a L_Dnaa* user data.
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 DNA on the Lua stack, or nil on error
  */
@@ -389,9 +430,6 @@ ll_push_Dnaa(const char *_fun, lua_State *L, L_Dnaa *daa)
 
 /**
  * \brief Create and push a new DNAA*
- *
- * Arg #1 is expected to be a l_int32 (n).
- *
  * \param L pointer to the lua_State
  * \return 1 DNAA* on the Lua stack
  */
@@ -421,13 +459,15 @@ ll_register_Dnaa(lua_State *L) {
         {"GetDna",          GetDna},
         {"GetValue",        GetValue},
         {"AddNumber",       AddNumber},
-        {"Read",            Read},
         {"Write",           Write},
+        {"WriteStream",     WriteStream},
         {"FlattenToDna",    FlattenToDna},
         LUA_SENTINEL
     };
 
     static const luaL_Reg functions[] = {
+        {"Read",            Read},
+        {"ReadStream",      ReadStream},
         {"Create",          Create},
         {"CreateFull",      CreateFull},
         LUA_SENTINEL
