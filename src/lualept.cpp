@@ -324,7 +324,7 @@ ll_push_sarray(lua_State *L, Sarray *sa)
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the table
- * \param plenn pointer to a l_int32 receiving the size of the array
+ * \param plen pointer to a l_int32 receiving the size of the array
  * \return allocated array l_int32* with *pn entries
  */
 l_int32 *

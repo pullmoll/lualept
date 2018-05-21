@@ -813,7 +813,7 @@ AdjustWidthToTarget(lua_State *L)
 /**
  * \brief Adjust height of boxes changing (%sides) in a Boxa* (%boxas) to a (%target)
  *
- * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a string describing the side (sides)
  * Arg #3 is expected to be a l_int32 (target)
  * Arg #4 is expected to be a l_int32 (thresh)
@@ -837,15 +837,15 @@ AdjustHeightToTarget(lua_State *L)
 /**
  * \brief Test similarity of a Boxa* (%boxa1) and another Boxa* (%boxa2)
  *
- * Arg #1 (i.e. self) is expected to be a Box* (boxa1).
- * Arg #2 is expected to be another Box* (boxa2).
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa1).
+ * Arg #2 is expected to be another Boxa* (boxa2).
  * Arg #3 is expected to be a l_int32 (leftdiff).
  * Arg #4 is expected to be a l_int32 (rightdiff).
  * Arg #5 is expected to be a l_int32 (topdiff).
  * Arg #6 is expected to be a l_int32 (botdiff).
  *
  * \param L pointer to the lua_State
- * \return 2 boolean and Numa* on the Lua stack
+ * \return 1 Numa* (nasim) on the Lua stack
  */
 static int
 Similar(lua_State *L)
@@ -869,13 +869,13 @@ Similar(lua_State *L)
 /**
  * \brief Join Boxa* (%boxas) with Boxa* (%boxad)
  *
- * Arg #1 (i.e. self) is expected to be a Box* (boxad).
- * Arg #2 is expected to be another Box* (boxas).
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxad).
+ * Arg #2 is expected to be another Boxa* (boxas).
  * Arg #3 is optional and, if given, expected to be a l_int32 (istart)
  * Arg #4 is optional and, if given, expected to be a l_int32 (iend)
  *
  * \param L pointer to the lua_State
- * \return 2 boolean and Numa* on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 Join(lua_State *L)
@@ -886,13 +886,13 @@ Join(lua_State *L)
     l_int32 istart = ll_check_index(_fun, L, 3, 1);
     l_int32 iend = ll_check_index(_fun, L, 3, boxaGetCount(boxas));
     lua_pushboolean(L, 0 == boxaJoin(boxad, boxas, istart, iend));
-    return 2;
+    return 1;
 }
 
 /**
  * \brief Split Boxa* (%boxa) into even and odd (%boxae, %boxao)
  *
- * Arg #1 (i.e. self) is expected to be a Box* (boxad).
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is optional and, if gived, expected to be a l_int32 (fillflag).
  *
  * \param L pointer to the lua_State
@@ -914,12 +914,12 @@ SplitEvenOdd(lua_State *L)
 /**
  * \brief Merge even and odd Boxa* (%boxae, %boxao) into one Boxa* (%boxad)
  *
- * Arg #1 (i.e. self) is expected to be a Box* (boxae).
- * Arg #2 is expected to be a Box* (boxao).
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxae).
+ * Arg #2 is expected to be a Boxa* (boxao).
  * Arg #3 is optional and, if gived, expected to be a l_int32 (fillflag).
  *
  * \param L pointer to the lua_State
- * \return 2 Boxa* on the Lua stack (boxae, boxao)
+ * \return 1 Boxa* on the Lua stack
  */
 static int
 MergeEvenOdd(lua_State *L)
@@ -935,10 +935,10 @@ MergeEvenOdd(lua_State *L)
 /**
  * \brief Rotate a Boxa* (%boxas)
  *
- * Arg #1 (i.e. self) is expected to be a Box* (boxs).
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  *
  * \param L pointer to the lua_State
- * \return 1 Box* on the Lua stack
+ * \return 1 Boxa* on the Lua stack
  */
 static int
 RotateOrth(lua_State *L)
@@ -954,14 +954,14 @@ RotateOrth(lua_State *L)
 }
 
 /**
- * \brief Sort a Boxa* (%boxas)
+ * \brief Sort a Boxa* (%boxas) by given type (%type) and order (%order)
  *
- * Arg #1 (i.e. self) is expected to be a Box* (boxs).
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a string defining the sort type (type)
  * Arg #3 is expected to be a string defining the sort order (order)
  *
  * \param L pointer to the lua_State
- * \return 2 Box* (boxa) and Numa* (naindex) on the Lua stack
+ * \return 2 Boxa* (boxa) and Numa* (naindex) on the Lua stack
  */
 static int
 Sort(lua_State *L)
@@ -973,6 +973,92 @@ Sort(lua_State *L)
     Numa *naindex = nullptr;
     Boxa *boxa = boxaSort(boxas, type, order, &naindex);
     return ll_push_Boxa(_fun, L, boxa) + ll_push_Numa(_fun, L, naindex);
+}
+
+/**
+ * \brief Sort a (large number of) Boxa* (%boxas) by given type (%type) and order (%order)
+ *
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ * Arg #2 is expected to be a string defining the sort type (type)
+ * Arg #3 is expected to be a string defining the sort order (order)
+ *
+ * \param L pointer to the lua_State
+ * \return 2 Boxa* (boxa) and Numa* (naindex) on the Lua stack
+ */
+static int
+BinSort(lua_State *L)
+{
+    FUNC(LL_BOXA ".BinSort");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 type = ll_check_sort_by(_fun, L, 2, L_SORT_BY_X);
+    l_int32 order = ll_check_sort_order(_fun, L, 3, L_SORT_INCREASING);
+    Numa *naindex = nullptr;
+    Boxa *boxa = boxaBinSort(boxas, type, order, &naindex);
+    return ll_push_Boxa(_fun, L, boxa) + ll_push_Numa(_fun, L, naindex);
+}
+
+/**
+ * \brief Sort a Boxa* (%boxas) by index
+ *
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ * Arg #2 is expected to be a Numa* (naindex)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Boxa* (boxa) on the Lua stack
+ */
+static int
+SortByIndex(lua_State *L)
+{
+    FUNC(LL_BOXA ".SortByIndex");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    Numa *naindex = ll_check_Numa(_fun, L, 2);
+    Boxa *boxa = boxaSortByIndex(boxas, naindex);
+    return ll_push_Boxa(_fun, L, boxa);
+}
+
+/**
+ * \brief Sort a Boxa* (%boxas) in two dimensions into Boxaa* (boxaa)
+ *
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ * Arg #2 is expected to be a l_int32 (delta1)
+ * Arg #3 is expected to be a l_int32 (delta2)
+ * Arg #4 is expected to be a l_int32 (minh1)
+ *
+ * \param L pointer to the lua_State
+ * \return 2 Boxaa* (boxaa) and Numaa* (naad) on the Lua stack
+ */
+static int
+Sort2d(lua_State *L)
+{
+    FUNC(LL_BOXA ".Sort2d");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 delta1 = ll_check_l_int32_default(_fun, L, 2, 0);
+    l_int32 delta2 = ll_check_l_int32_default(_fun, L, 3, 0);
+    l_int32 minh1 = ll_check_l_int32_default(_fun, L, 4, 5);
+    Numaa *naad = nullptr;
+    Boxaa *boxaa = boxaSort2d(boxas, &naad, delta1, delta2, minh1);
+    return ll_push_Boxaa(_fun, L, boxaa) + ll_push_Numaa(_fun, L, naad);
+}
+
+/**
+ * \brief Sort a Boxa* (%boxas) by index (%naa) in two dimensions into Boxaa* (boxaa)
+ *
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ * Arg #2 is expected to be a l_int32 (delta1)
+ * Arg #3 is expected to be a l_int32 (delta2)
+ * Arg #4 is expected to be a l_int32 (minh1)
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Boxaa* (boxa) on the Lua stack
+ */
+static int
+Sort2dByIndex(lua_State *L)
+{
+    FUNC(LL_BOXA ".Sort2dByIndex");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    Numaa *naa = ll_check_Numaa(_fun, L, 2);
+    Boxaa *boxaa = boxaSort2dByIndex(boxas, naa);
+    return ll_push_Boxaa(_fun, L, boxaa);
 }
 
 /**
@@ -1198,6 +1284,10 @@ ll_register_BOXA(lua_State *L)
         {"MergeEvenOdd",            MergeEvenOdd},
         {"RotateOrth",              RotateOrth},
         {"Sort",                    Sort},
+        {"BinSort",                 BinSort},
+        {"SortByIndex",             SortByIndex},
+        {"Sort2d",                  Sort2d},
+        {"Sort2dByIndex",           Sort2dByIndex},
         {"Write",                   Write},
         {"WriteStream",             WriteStream},
         {"WriteMem",                WriteMem},
