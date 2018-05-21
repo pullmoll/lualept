@@ -39,9 +39,9 @@
 
 /**
  * \brief Create a new Pixaa*
- *
+ * <pre>
  * Arg #1 is expected to be a l_int32 (n).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pixaa* on the Lua stack
  */
@@ -56,12 +56,12 @@ Create(lua_State *L)
 
 /**
  * \brief Create a new Pixaa* from a Pixa*
- *
- * Arg #1 is expected to be a Pixa* use data.
+ * <pre>
+ * Arg #1 is expected to be a Pixa* user data.
  * Arg #2 is expected to be a l_int32 (n).
  * Arg #3 is optional and, if given, expected to be a string (type).
  * Arg #4 is optional and, if given, expected to be a string (copyflag).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pixaa* on the Lua stack
  */
@@ -79,9 +79,9 @@ CreateFromPixa(lua_State *L)
 
 /**
  * \brief Destroy a Pixaa*
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack
  */
@@ -99,13 +99,13 @@ Destroy(lua_State *L)
 
 /**
  * \brief Add a Pix* and its Box* to a Pixaa*
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a Pix* user data (pix).
  * Arg #4 is expected to be a Box* user data (box).
  * Arg #5 is optionally a string defining the copyflag.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -124,11 +124,11 @@ AddPix(lua_State *L)
 
 /**
  * \brief Add a Box* to a Pixaa*
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * Arg #2 is expected to be a Box* user data (box).
  * Arg #3 is optionally a string defining the copyflag.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -145,11 +145,11 @@ AddBox(lua_State *L)
 
 /**
  * \brief Add a Pixa* to a Pixaa*
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * Arg #2 is expected to be a Pixa* user data.
  * Arg #3 is optionally a string defining the copyflag.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -166,12 +166,11 @@ AddPixa(lua_State *L)
 
 /**
  * \brief Get count for a Pixaa*
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
- *
+ * </pre>
  * \param L pointer to the lua_State
- * \return 1: integer on the Lua stack (count), or
- *         2: integer and a Numa* on the Lua stack (count, Pixa* counts)
+ * \return 2 integer (count) and Numa* (na) the Lua stack
  */
 static int
 GetCount(lua_State *L)
@@ -185,9 +184,9 @@ GetCount(lua_State *L)
 
 /**
  * \brief Extend array of a Pixaa*
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -202,9 +201,9 @@ ExtendArray(lua_State *L)
 
 /**
  * \brief Truncate array of a Pixaa*
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -219,11 +218,11 @@ Truncate(lua_State *L)
 
 /**
  * \brief Replace the Pixa* in a Pixaa* at index %idx
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a Pix* user data (pixa).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -240,9 +239,9 @@ ReplacePixa(lua_State *L)
 
 /**
  * \brief Clear the Pixaa*
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -257,12 +256,12 @@ Clear(lua_State *L)
 
 /**
  * \brief Join the Pixaa*
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * Arg #2 is expected to be another Pixaa* user data.
  * Arg #3 is optional and expected to be a l_int32 (istart).
  * Arg #4 is optional and expected to be a l_int32 (iend).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -280,11 +279,11 @@ Join(lua_State *L)
 
 /**
  * \brief Get a Pixa* from a Pixaa*
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is optionally a string defining the access flag (copy, clone).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1: Pixa* on the Lua stack , or 0 on error
  */
@@ -301,10 +300,10 @@ GetPixa(lua_State *L)
 
 /**
  * \brief Get a Boxa* from a Pixaa*
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * Arg #2 is optionally a string defining the access flag (copy, clone).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1: Boxa* on the Lua stack , or 0 on error
  */
@@ -316,6 +315,153 @@ GetBoxa(lua_State *L)
     l_int32 accesstype = ll_check_access_storage(_fun, L, 2, L_CLONE);
     Boxa *boxa = pixaaGetBoxa(pixaa, accesstype);
     return ll_push_Boxa(_fun, L, boxa);
+}
+
+/**
+ * \brief Read a Pixaa* from an external file
+ * <pre>
+ * Arg #1 is expected to be a string containing the filename.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pixaa* on the Lua stack
+ */
+static int
+Read(lua_State *L)
+{
+    FUNC(LL_PIXAA ".Read");
+    const char *filename = ll_check_string(_fun, L, 1);
+    Pixaa *pixaa = pixaaRead(filename);
+    return ll_push_Pixaa(_fun, L, pixaa);
+}
+
+/**
+ * \brief Read a Pixaa* (%pixaa) from a number of external files
+ * <pre>
+ * Arg #1 is expected to be a string containing the directory (dirname).
+ * Arg #2 is expected to be a string (substr).
+ * Arg #3 is expected to be a l_int32 (first)
+ * Arg #4 is expected to be a l_int32 (nfiles)
+ *
+ * Note:
+ * If %substr is ommited, %first and %nfiles are expected as #2 and #3.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pixaa* on the Lua stack
+ */
+static int
+ReadFromFiles(lua_State *L)
+{
+    FUNC(LL_PIXAA ".ReadFromFiles");
+    const char *dirname = ll_check_string(_fun, L, 1);
+    const char *substr = nullptr;
+    l_int32 first = 0;
+    l_int32 nfiles = 0;
+    Pixaa *pixaa = nullptr;
+    if (lua_isinteger(L, 2) && lua_isinteger(L, 3)) {
+        first = ll_check_l_int32_default(_fun, L, 2, 0);
+        nfiles = ll_check_l_int32_default(_fun, L, 3, 0);
+    } else {
+        substr = ll_check_string(_fun, L, 2);
+        first = ll_check_l_int32_default(_fun, L, 3, 0);
+        nfiles = ll_check_l_int32_default(_fun, L, 4, 0);
+    }
+    pixaa = pixaaReadFromFiles(dirname, substr, first, nfiles);
+    return ll_push_Pixaa(_fun, L, pixaa);
+}
+
+/**
+ * \brief Read a Pixaa* from a Lua io stream (%stream)
+ * <pre>
+ * Arg #1 is expected to be a luaL_Stream* (stream).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pixaa* on the Lua stack
+ */
+static int
+ReadStream(lua_State *L)
+{
+    FUNC(LL_PIXAA ".ReadStream");
+    luaL_Stream *stream = ll_check_stream(_fun, L, 1);
+    Pixaa *pixaa = pixaaReadStream(stream->f);
+    return ll_push_Pixaa(_fun, L, pixaa);
+}
+
+/**
+ * \brief Read a Pixaa* from a Lua string (%data)
+ * <pre>
+ * Arg #1 is expected to be a string (data).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pixaa* on the Lua stack
+ */
+static int
+ReadMem(lua_State *L)
+{
+    FUNC(LL_PIXAA ".ReadMem");
+    size_t len;
+    const char *data = ll_check_lstring(_fun, L, 1, &len);
+    Pixaa *pixaa = pixaaReadMem(reinterpret_cast<const l_uint8 *>(data), len);
+    return ll_push_Pixaa(_fun, L, pixaa);
+}
+
+/**
+ * \brief Write the Pixaa* (%pixaa) to an external file (%filename)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
+ * Arg #2 is expected to be string containing the filename.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+Write(lua_State *L)
+{
+    FUNC(LL_PIXAA ".Write");
+    Pixaa *pixaa = ll_check_Pixaa(_fun, L, 1);
+    const char *filename = ll_check_string(_fun, L, 2);
+    lua_pushboolean(L, 0 == pixaaWrite(filename, pixaa));
+    return 1;
+}
+
+/**
+ * \brief Write the Pixaa* to an external file
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
+ * Arg #2 is expected to be a luaL_Stream* (stream).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+WriteStream(lua_State *L)
+{
+    FUNC(LL_PIXAA ".WriteStream");
+    Pixaa *pixaa = ll_check_Pixaa(_fun, L, 1);
+    luaL_Stream *stream = ll_check_stream(_fun, L, 2);
+    lua_pushboolean(L, 0 == pixaaWriteStream(stream->f, pixaa));
+    return 1;
+}
+
+/**
+ * \brief Write the Pixaa* (%pixaa) to memory and return it as a Lua string
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+WriteMem(lua_State *L)
+{
+    FUNC(LL_PIXAA ".WriteMem");
+    Pixaa *pixaa = ll_check_Pixaa(_fun, L, 1);
+    l_uint8 *data = nullptr;
+    size_t size = 0;
+    if (pixaaWriteMem(&data, &size, pixaa))
+        return ll_push_nil(L);
+    lua_pushlstring(L, reinterpret_cast<const char *>(data), size);
+    LEPT_FREE(data);
+    return 1;
 }
 
 /**
@@ -363,9 +509,6 @@ ll_push_Pixaa(const char *_fun, lua_State *L, Pixaa *pixaa)
 
 /**
  * \brief Create a new Pixaa*
- *
- * Arg #1 is expected to be a l_int32 (n).
- *
  * \param L pointer to the lua_State
  * \return 1 Pixaa* on the Lua stack
  */
@@ -399,12 +542,19 @@ ll_register_Pixaa(lua_State *L)
         {"ReplacePixa",		ReplacePixa},
         {"Clear",               Clear},
         {"Join",                Join},
+        {"Write",               Write},
+        {"WriteStream",         WriteStream},
+        {"WriteMem",            WriteMem},
         LUA_SENTINEL
     };
 
     static const luaL_Reg functions[] = {
         {"Create",              Create},
         {"CreateFromPixa",      CreateFromPixa},
+        {"Read",                Read},
+        {"ReadFromFiles",       ReadFromFiles},
+        {"ReadStream",          ReadStream},
+        {"ReadMem",             ReadMem},
         LUA_SENTINEL
     };
 

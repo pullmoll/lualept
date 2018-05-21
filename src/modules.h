@@ -193,6 +193,8 @@ extern l_int32      ll_check_blackwhite(const char *_fun, lua_State *L, int arg,
 extern const char * ll_string_blackwhite(l_int32 which);
 extern l_int32      ll_check_rasterop(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_rasterop(l_int32 op);
+extern l_int32      ll_check_hint(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_hint(l_int32 dir);
 extern l_int32      ll_check_searchdir(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_searchir(l_int32 dir);
 extern l_int32      ll_check_stats_type(const char *_fun, lua_State *L, int arg, l_int32 dflt);

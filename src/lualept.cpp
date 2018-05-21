@@ -1350,6 +1350,46 @@ ll_string_rasterop(l_int32 op)
 }
 
 /**
+ * \brief Table of JPEG reader hint names and enumeration values
+ */
+static const lept_enums_t tbl_hint[] = {
+    TBL_ENTRY("none",               0),
+    TBL_ENTRY("read-luminance",     L_JPEG_READ_LUMINANCE),
+    TBL_ENTRY("luminance",          L_JPEG_READ_LUMINANCE),
+    TBL_ENTRY("lum",                L_JPEG_READ_LUMINANCE),
+    TBL_ENTRY("l",                  L_JPEG_READ_LUMINANCE),
+    TBL_ENTRY("fail-on-bad-data",   L_JPEG_FAIL_ON_BAD_DATA),
+    TBL_ENTRY("fail",               L_JPEG_FAIL_ON_BAD_DATA),
+    TBL_ENTRY("f",                  L_JPEG_FAIL_ON_BAD_DATA),
+    TBL_ENTRY("b",                  L_JPEG_READ_LUMINANCE | L_JPEG_FAIL_ON_BAD_DATA)
+};
+
+/**
+ * \brief Check for a search direction name
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \param dflt default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_hint(const char *_fun, lua_State *L, int arg, l_int32 dflt)
+{
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_hint, ARRAYSIZE(tbl_hint));
+}
+
+/**
+ * \brief Return a string for the search direction
+ * \param dir enumeration value of the search direction
+ * \return const string with the name
+ */
+const char*
+ll_string_hint(l_int32 dir)
+{
+    return ll_string_tbl(dir, tbl_hint, ARRAYSIZE(tbl_hint));
+}
+
+/**
  * \brief Table of search direction names and enumeration values
  */
 static const lept_enums_t tbl_searchdir[] = {
