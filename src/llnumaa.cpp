@@ -269,7 +269,7 @@ ReplaceNuma(lua_State *L)
 }
 
 /**
- * \brief Write the Numaa* to and external file
+ * \brief Write the Numaa* to an external file
  *
  * Arg #1 (i.e. self) is expected to be a Numaa*.
  * Arg #2 is expected to be string containing the filename.

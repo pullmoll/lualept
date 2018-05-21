@@ -222,7 +222,7 @@ AddNumber(lua_State *L)
  * \brief Insert one number to the L_Dna* at the given index %idx
  * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
- * Arg #2 is expected to be a lua_Integer in the range of l_int32 (idx).
+ * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a lua_Number to insert into the array.
  * </pre>
  * \param L pointer to the lua_State
@@ -245,7 +245,7 @@ InsertNumber(lua_State *L)
  * \brief Remove one number to the L_Dna* at the given index %idx
  * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
- * Arg #2 is expected to be a lua_Integer in the range of l_int32 (idx).
+ * Arg #2 is expected to be a l_int32 (idx).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -264,7 +264,7 @@ RemoveNumber(lua_State *L)
  * \brief Replace one number to the L_Dna* at the given index %idx
  * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
- * Arg #2 is expected to be a lua_Integer in the range of l_int32 (idx).
+ * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a lua_Number to use to replace.
  * </pre>
  * \param L pointer to the lua_State
@@ -330,7 +330,7 @@ GetIValue(lua_State *L)
  * \brief Set the value for the L_Dna* at the given index %idx
  * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
- * Arg #2 is expected to be a lua_Integer in the range of l_int32 (idx).
+ * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a lua_Number to set in the array.
  * </pre>
  * \param L pointer to the lua_State
@@ -352,8 +352,8 @@ SetValue(lua_State *L)
  * \brief Add a difference to the value for the L_Dna* at the given index %idx
  * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
- * Arg #2 is expected to be a lua_Integer in the range of l_int32 (idx).
- * Arg #3 is expected to be a lua_Number in the range of l_float32.
+ * Arg #2 is expected to be a l_int32 (idx).
+ * Arg #3 is expected to be a l_float32.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack

@@ -39,6 +39,9 @@
 
 /**
  * \brief Printable string for a Box*
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pta* user data.
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
  */
@@ -75,9 +78,9 @@ toString(lua_State *L)
 
 /**
  * \brief Create a new Pta*
- *
+ * <pre>
  * Arg #1 is expected to be a l_int32 (n).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pta* on the Lua stack
  */
@@ -92,7 +95,9 @@ Create(lua_State *L)
 
 /**
  * \brief Destroy a Pta*
- *
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pta* user data.
+ * </pre>
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack
  */
@@ -110,9 +115,9 @@ Destroy(lua_State *L)
 
 /**
  * \brief Get the number of stored numbers in the Pta*
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
  */
@@ -126,10 +131,10 @@ GetCount(lua_State *L)
 }
 
 /**
- * \brief Copy a Pta*
- *
+ * \brief Copy a Pta* (%ptas)
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pta* on the Lua stack
  */
@@ -144,7 +149,9 @@ Copy(lua_State *L)
 
 /**
  * \brief Clone a Pta*
- *
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pta* user data.
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pta* on the Lua stack
  */
@@ -158,12 +165,12 @@ Clone(lua_State *L)
 }
 
 /**
- * \brief Copy a range %istart - %iend from a Pta* %ptas
- *
+ * \brief Copy a range (%istart, %iend) from a Pta* (%ptas)
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
  * Arg #2 is expected to be a l_int32 (istart).
  * Arg #3 is expected to be a l_int32 (uend).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pta* on the Lua stack
  */
@@ -172,17 +179,17 @@ CopyRange(lua_State *L)
 {
     FUNC(LL_PTA ".CopyRange");
     Pta *ptas = ll_check_Pta(_fun, L, 1);
-    l_int32 istart = ll_check_l_int32_default(_fun, L, 2, 1);
-    l_int32 iend = ll_check_l_int32_default(_fun, L, 3, ptaGetCount(ptas));
+    l_int32 istart = ll_check_index(_fun, L, 2, ptaGetCount(ptas));
+    l_int32 iend = ll_check_index(_fun, L, 3, ptaGetCount(ptas));
     Pta *pta = ptaCopyRange(ptas, istart, iend);
     return ll_push_Pta(_fun, L, pta);
 }
 
 /**
  * \brief Set the number of stored numbes in the Pta* to zero
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -197,11 +204,11 @@ Empty(lua_State *L)
 
 /**
  * \brief Add one number to the Pta*
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
- * Arg #2 is expected to be a lua_Number in the range of l_float32 (x).
- * Arg #3 is expected to be a lua_Number in the range of l_float32 (y).
- *
+ * Arg #2 is expected to be a l_float32 (x).
+ * Arg #3 is expected to be a l_float32 (y).
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -217,13 +224,13 @@ AddPt(lua_State *L)
 }
 
 /**
- * \brief Insert one number to the Pta* at the given index %idx
- *
+ * \brief Insert one number to the Pta* (%pta) at the given index (%idx)
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
- * Arg #2 is expected to be a lua_Integer in the range of l_int32 (idx).
- * Arg #3 is expected to be a lua_Integer in the range of l_int32 (x).
- * Arg #4 is expected to be a lua_Integer in the range of l_int32 (y).
- *
+ * Arg #2 is expected to be a l_int32 (idx).
+ * Arg #3 is expected to be a l_int32 (x).
+ * Arg #4 is expected to be a l_int32 (y).
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -240,11 +247,11 @@ InsertPt(lua_State *L)
 }
 
 /**
- * \brief Remove one number to the Pta* at the given index %idx
- *
+ * \brief Remove one number from the Pta* (%pta) at the given index (%idx)
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
- * Arg #2 is expected to be a lua_Integer in the range of l_int32 (idx).
- *
+ * Arg #2 is expected to be a l_int32 (idx).
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -259,11 +266,11 @@ RemovePt(lua_State *L)
 }
 
 /**
- * \brief Get the Point from the Pta* at index %idx as two l_floa32 numbers
- *
+ * \brief Get the Point from the Pta* (%pta) at index (%idx) as two Lua numbers
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
  * Arg #2 is expected to be a l_int32 (idx).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
  */
@@ -283,11 +290,11 @@ GetPt(lua_State *L)
 }
 
 /**
- * \brief Get the Point from the Pta* at index %idx as two l_int32 numbers
- *
+ * \brief Get the Point from the Pta* (%pta) at index (%idx) as two Lua integers
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
  * Arg #2 is expected to be a l_int32 (idx).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
  */
@@ -301,19 +308,19 @@ GetIPt(lua_State *L)
     l_int32 y;
     if (ptaGetIPt(pta, idx, &x, &y))
         return ll_push_nil(L);
-    lua_pushnumber(L, static_cast<lua_Integer>(x));
-    lua_pushnumber(L, static_cast<lua_Integer>(y));
+    lua_pushinteger(L, static_cast<lua_Integer>(x));
+    lua_pushinteger(L, static_cast<lua_Integer>(y));
     return 2;
 }
 
 /**
- * \brief Set the value for the Pta* at the given index %idx
- *
+ * \brief Set the values for the Pta* (%pta) at the given index (%idx)
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
- * Arg #2 is expected to be a lua_Integer in the range of l_int32 (idx).
- * Arg #3 is expected to be a lua_Number in the range of l_float32 (x).
- * Arg #4 is expected to be a lua_Number in the range of l_float32 (y).
- *
+ * Arg #2 is expected to be a l_int32 (idx).
+ * Arg #3 is expected to be a l_float32 (x).
+ * Arg #4 is expected to be a l_float32 (y).
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -330,10 +337,10 @@ SetPt(lua_State *L)
 }
 
 /**
- * \brief Get the Pta* as an two Numa* for X and Y
- *
+ * \brief Get the Pta* (%pta) as an two Numa* (%ptax, %ptay) for X and Y
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 2 for two Numa* on the Lua stack, or 0 in case of error
  */
@@ -351,9 +358,9 @@ GetArrays(lua_State *L)
 
 /**
  * \brief Convert the Pta* (%pta) to a Box* (%box)
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 2 for two Numa* on the Lua stack, or 0 in case of error
  */
@@ -364,6 +371,124 @@ ConvertToBox(lua_State *L)
     Pta *pta = ll_check_Pta(_fun, L, 1);
     Box *box = ptaConvertToBox(pta);
     return ll_push_Box(_fun, L, box);
+}
+
+/**
+ * \brief Read a Pta* from an external file
+ * <pre>
+ * Arg #1 is expected to be a string containing the filename.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Ptaa* on the Lua stack
+ */
+static int
+Read(lua_State *L)
+{
+    FUNC(LL_PTA ".Read");
+    const char *filename = ll_check_string(_fun, L, 1);
+    Pta *pta = ptaRead(filename);
+    return ll_push_Pta(_fun, L, pta);
+}
+
+/**
+ * \brief Read a Pta* from a Lua io stream (%stream)
+ * <pre>
+ * Arg #1 is expected to be a luaL_Stream* (stream).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Ptaa* on the Lua stack
+ */
+static int
+ReadStream(lua_State *L)
+{
+    FUNC(LL_PTA ".ReadStream");
+    luaL_Stream *stream = ll_check_stream(_fun, L, 1);
+    Pta *pta = ptaReadStream(stream->f);
+    return ll_push_Pta(_fun, L, pta);
+}
+
+/**
+ * \brief Read a Ptaa* from a Lua string (%data)
+ * <pre>
+ * Arg #1 is expected to be a string (data).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Ptaa* on the Lua stack
+ */
+static int
+ReadMem(lua_State *L)
+{
+    FUNC(LL_PTA ".ReadMem");
+    size_t len;
+    const char *data = ll_check_lstring(_fun, L, 1, &len);
+    Pta *pta = ptaReadMem(reinterpret_cast<const l_uint8 *>(data), len);
+    return ll_push_Pta(_fun, L, pta);
+}
+
+/**
+ * \brief Write the Pta* (%pta) to an external file (%filename)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
+ * Arg #2 is expected to be string containing the filename.
+ * Arg #3 is an optional boolean; if true, the data is written as integers, otherwise as floats.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+Write(lua_State *L)
+{
+    FUNC(LL_PTA ".Write");
+    Pta *pta = ll_check_Pta(_fun, L, 1);
+    const char *filename = ll_check_string(_fun, L, 2);
+    int type = lua_toboolean(L, 3);
+    lua_pushboolean(L, 0 == ptaWrite(filename, pta, type));
+    return 1;
+}
+
+/**
+ * \brief Write the Pta* (%pta) to a Lua io stream (%stream)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
+ * Arg #2 is expected to be a luaL_Stream* (stream).
+ * Arg #3 is an optional boolean; if true, the data is written as integers, otherwise as floats.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+WriteStream(lua_State *L)
+{
+    FUNC(LL_PTA ".WriteStream");
+    Pta *pta = ll_check_Pta(_fun, L, 1);
+    luaL_Stream *stream = ll_check_stream(_fun, L, 2);
+    int type = lua_toboolean(L, 3);
+    lua_pushboolean(L, 0 == ptaWriteStream(stream->f, pta, type));
+    return 1;
+}
+
+/**
+ * \brief Write the Pta* (%pta) to memory and return it as a Lua string
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
+ * Arg #2 is an optional boolean; if true, the data is written as integers, otherwise as floats.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+WriteMem(lua_State *L)
+{
+    FUNC(LL_PTA ".WriteMem");
+    Pta *pta = ll_check_Pta(_fun, L, 1);
+    int type = lua_toboolean(L, 2);
+    l_uint8 *data = nullptr;
+    size_t size = 0;
+    if (ptaWriteMem(&data, &size, pta, type))
+        return ll_push_nil(L);
+    lua_pushlstring(L, reinterpret_cast<const char *>(data), size);
+    LEPT_FREE(data);
+    return 1;
 }
 
 /**
@@ -411,9 +536,6 @@ ll_push_Pta(const char *_fun, lua_State *L, Pta *pta)
 
 /**
  * \brief Create and push a new Pta*
- *
- * Arg #1 is expected to be a l_int32 (n).
- *
  * \param L pointer to the lua_State
  * \return 1 Pta* on the Lua stack
  */
@@ -449,11 +571,17 @@ ll_register_Pta(lua_State *L)
         {"SetPt",           SetPt},
         {"GetArrays",       GetArrays},
         {"ConvertToBox",    ConvertToBox},
+        {"Write",           Write},
+        {"WriteStream",     WriteStream},
+        {"WriteMem",        WriteMem},
         LUA_SENTINEL
     };
 
     static const luaL_Reg functions[] = {
-        {"Create",      Create},
+        {"Create",          Create},
+        {"Read",            Read},
+        {"ReadStream",      ReadStream},
+        {"ReadMem",         ReadMem},
         LUA_SENTINEL
     };
 

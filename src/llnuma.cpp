@@ -194,7 +194,7 @@ Empty(lua_State *L)
  * \brief Add one number to the Numa*
  *
  * Arg #1 (i.e. self) is expected to be a Numa*.
- * Arg #2 is expected to be a lua_Number in the range of l_float32.
+ * Arg #2 is expected to be a l_float32.
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -213,8 +213,8 @@ AddNumber(lua_State *L)
  * \brief Insert one number to the Numa* at the given index
  *
  * Arg #1 (i.e. self) is expected to be a Numa*.
- * Arg #2 is expected to be a lua_Integer in the range of l_int32 for the.
- * index Arg #3 is expected to be a lua_Number in the range of l_float32
+ * Arg #2 is expected to be a l_int32 for the.
+ * index Arg #3 is expected to be a l_float32
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -253,8 +253,8 @@ RemoveNumber(lua_State *L)
  * \brief Replace one number to the Numa* at the given index
  *
  * Arg #1 (i.e. self) is expected to be a Numa*.
- * Arg #2 is expected to be a lua_Integer in the range of l_int32 for the.
- * index Arg #3 is expected to be a lua_Number in the range of l_float32
+ * Arg #2 is expected to be a l_int32 for the.
+ * index Arg #3 is expected to be a l_float32
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -318,8 +318,8 @@ GetIValue(lua_State *L)
  * \brief Set the value for the Numa* at the given index
  *
  * Arg #1 (i.e. self) is expected to be a Numa*.
- * Arg #2 is expected to be a lua_Integer in the range of l_int32 for the.
- * index Arg #3 is expected to be a lua_Number in the range of l_float32
+ * Arg #2 is expected to be a l_int32 for the.
+ * index Arg #3 is expected to be a l_float32
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -339,8 +339,8 @@ SetValue(lua_State *L)
  * \brief Add a difference to the value for the Numa* at the given index
  *
  * Arg #1 (i.e. self) is expected to be a Numa*.
- * Arg #2 is expected to be a lua_Integer in the range of l_int32 for the.
- * index Arg #3 is expected to be a lua_Number in the range of l_float32
+ * Arg #2 is expected to be a l_int32 for the.
+ * index Arg #3 is expected to be a l_float32
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -425,8 +425,8 @@ GetParameters(lua_State *L)
  * \brief Set the parameters of the Numa*
  *
  * Arg #1 (i.e. self) is expected to be a Numa*.
- * Arg #2 is expected to be a lua_Number in the range of l_float32 (startx).
- * Arg #3 is expected to be a lua_Number in the range of l_float32 (deltax).
+ * Arg #2 is expected to be a l_float32 (startx).
+ * Arg #3 is expected to be a l_float32 (deltax).
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack

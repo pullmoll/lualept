@@ -737,8 +737,8 @@ CopyResolution(lua_State *L)
  * \brief Scale resolution of a Pix* by a factor
  *
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
- * Arg #2 is expected to be a lua_Number in the range of l_float32 (xscale).
- * Arg #2 is expected to be a lua_Number in the range of l_float32 (yscale).
+ * Arg #2 is expected to be a l_float32 (xscale).
+ * Arg #2 is expected to be a l_float32 (yscale).
  *
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack

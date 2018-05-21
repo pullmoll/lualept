@@ -606,8 +606,32 @@ ll_check_string(const char *_fun, lua_State *L, int arg)
     if (!str) {
         lua_pushfstring(L, "%s: string #%d not defined", _fun, arg);
         lua_error(L);
-        return 0;    /* NOTREACHED */
+        return nullptr;    /* NOTREACHED */
     }
+    return str;
+}
+
+/**
+ * \brief Check if an argument is a string and return its length
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \param plen optional pointer to a size_t where to store the string length
+ * \return l_int32 for the integer; lua_error if out of bounds
+ */
+const char *
+ll_check_lstring(const char *_fun, lua_State *L, int arg, size_t *plen)
+{
+    const char *str = lua_isstring(L, arg) ? lua_tostring(L, arg) : nullptr;
+    if (plen)
+        *plen = 0;
+    if (!str) {
+        lua_pushfstring(L, "%s: string #%d not defined", _fun, arg);
+        lua_error(L);
+        return nullptr;    /* NOTREACHED */
+    }
+    if (plen)
+        *plen = static_cast<size_t>(luaL_len(L, arg));
     return str;
 }
 

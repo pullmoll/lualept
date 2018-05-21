@@ -158,6 +158,7 @@ extern Sarray     * ll_unpack_sarray(const char *_fun, lua_State *L, int arg, l_
 extern l_int32      ll_check_index(const char *_fun, lua_State *L, int arg, l_int32 imax);
 extern char         ll_check_char(const char *_fun, lua_State *L, int arg);
 extern const char * ll_check_string(const char *_fun, lua_State *L, int arg);
+extern const char * ll_check_lstring(const char *_fun, lua_State *L, int arg, size_t *plen);
 extern l_int32      ll_check_l_int32(const char *_fun, lua_State *L, int arg);
 extern l_int32      ll_check_l_int32_default(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern l_uint32     ll_check_l_uint32(const char *_fun, lua_State *L, int arg);

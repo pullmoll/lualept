@@ -382,8 +382,8 @@ FlattenAligned(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxaad).
  * Arg #2 is expected to be another Box* (boxaas).
- * Arg #3 is optional and, if given, expected to be a l_int32 (istart)
- * Arg #4 is optional and, if given, expected to be a l_int32 (iend)
+ * Arg #3 is optional and, if given, expected to be a l_int32 (istart).
+ * Arg #4 is optional and, if given, expected to be a l_int32 (iend).
  * </pre>
  * \param L pointer to the lua_State
  * \return 2 boolean and Numa* on the Lua stack

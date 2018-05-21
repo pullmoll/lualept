@@ -659,10 +659,10 @@ RelocateOneSide(lua_State *L)
  * \brief Adjust sides of a Box* (%boxs)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box).
- * Arg #2 is expected to be a l_int32 (delleft)
- * Arg #3 is expected to be a l_int32 (delright)
- * Arg #4 is expected to be a l_int32 (deltop)
- * Arg #5 is expected to be a l_int32 (delbot)
+ * Arg #2 is expected to be a l_int32 (delleft).
+ * Arg #3 is expected to be a l_int32 (delright).
+ * Arg #4 is expected to be a l_int32 (deltop).
+ * Arg #5 is expected to be a l_int32 (delbot).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
