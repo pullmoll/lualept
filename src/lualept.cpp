@@ -101,6 +101,32 @@ void dbg(int enable, const char* format, ...)
 #endif
 
 /**
+ * \brief Die when memory allocation fails
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param format format string followed by parameters
+ */
+void die(const char* _fun, lua_State *L, const char *format, ...)
+{
+    static char str[256];
+    va_list ap;
+    va_start(ap, format);
+    vsnprintf(str, sizeof(str), format, ap);
+    va_end(ap);
+    lua_pushfstring(L, "%s: %s", _fun, str);
+    lua_error(L);
+}
+
+/**
+ * \brief Free memory allocated by LEPT_MALLOC/LEPT_CALLOC
+ * \param ptr pointer to memory
+ */
+void ll_free(void *ptr)
+{
+    LEPT_FREE(ptr);
+}
+
+/**
  * \brief Register a class for Lua
  * \param L pointer to the lua_State
  * \param name tname of the table to register
@@ -1432,6 +1458,42 @@ ll_string_searchir(l_int32 dir)
 /**
  * \brief Table of stats type names and enumeration values
  */
+static const lept_enums_t tbl_number_value[] = {
+    TBL_ENTRY("integer",            L_INTEGER_VALUE),
+    TBL_ENTRY("int",                L_INTEGER_VALUE),
+    TBL_ENTRY("i",                  L_INTEGER_VALUE),
+    TBL_ENTRY("float",              L_FLOAT_VALUE),
+    TBL_ENTRY("f",                  L_FLOAT_VALUE)
+};
+
+/**
+ * \brief Check for a stats type name
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \param dflt default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_number_value(const char *_fun, lua_State* L, int arg, l_int32 dflt)
+{
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_number_value, ARRAYSIZE(tbl_number_value));
+}
+
+/**
+ * \brief Return a string for the stats type enumeration value
+ * \param type enumeration value of the stats type
+ * \return const string with the name
+ */
+const char*
+ll_string_number_value(l_int32 type)
+{
+    return ll_string_tbl(type, tbl_number_value, ARRAYSIZE(tbl_number_value));
+}
+
+/**
+ * \brief Table of stats type names and enumeration values
+ */
 static const lept_enums_t tbl_stats_type[] = {
     TBL_ENTRY("mean-absval",         L_MEAN_ABSVAL),
     TBL_ENTRY("mean-abs",            L_MEAN_ABSVAL),
@@ -1960,16 +2022,16 @@ ll_string_value_flags(l_int32 value_flags)
 
 /*====================================================================*
  *
- *  Lua LuaLept class
+ *  Lua class LuaLept
  *
  *====================================================================*/
 
 static int
 Create(lua_State *L)
 {
-    FUNC("LuaLept.Create");
+    FUNC(LL_LEPT ".Create");
     static const char lept_prefix[] = "leptonica-";
-    LuaLept *lept = (LuaLept *) LEPT_CALLOC(1, sizeof(LuaLept));
+    LuaLept *lept = reinterpret_cast<LuaLept *>(LEPT_CALLOC(1, sizeof(LuaLept)));
     const char* lept_ver = getLeptonicaVersion();
     const lua_Number *lua_ver = lua_version(L);
 
@@ -1992,7 +2054,7 @@ Create(lua_State *L)
 static int
 Destroy(lua_State *L)
 {
-    FUNC("LuaLept.Destroy");
+    FUNC(LL_LEPT ".Destroy");
     LuaLept **plept = reinterpret_cast<LuaLept **>(ll_check_udata(_fun, L, 1, LL_LEPT));
     DBG(LOG_DESTROY, "%s: '%s' plept=%p lept=%p\n",
          _fun, LL_LEPT, plept, *plept);
@@ -2009,7 +2071,7 @@ Destroy(lua_State *L)
 static int
 Version(lua_State *L)
 {
-    FUNC("LuaLept.Version");
+    FUNC(LL_LEPT ".Version");
     LuaLept *lept = ll_check_LuaLept(_fun, L, 1);
     lua_pushstring(L, lept->str_version);
     return 1;
@@ -2023,7 +2085,7 @@ Version(lua_State *L)
 static int
 LuaVersion(lua_State *L)
 {
-    FUNC("LuaLept.LuaVersion");
+    FUNC(LL_LEPT ".LuaVersion");
     LuaLept *lept = ll_check_LuaLept(_fun, L, 1);
     lua_pushstring(L, lept->str_version_lua);
     return 1;
@@ -2037,7 +2099,7 @@ LuaVersion(lua_State *L)
 static int
 LeptVersion(lua_State *L)
 {
-    FUNC("LuaLept.LeptVersion");
+    FUNC(LL_LEPT ".LeptVersion");
     LuaLept *lept = ll_check_LuaLept(_fun, L, 1);
     lua_pushstring(L, lept->str_version_lept);
     return 1;
@@ -2056,7 +2118,7 @@ LeptVersion(lua_State *L)
 static int
 RGB(lua_State *L)
 {
-    FUNC("LuaLept.RGB");
+    FUNC(LL_LEPT ".RGB");
     l_int32 rval = ll_check_l_int32(_fun, L, 1);
     l_int32 gval = ll_check_l_int32(_fun, L, 2);
     l_int32 bval = ll_check_l_int32(_fun, L, 3);
@@ -2081,7 +2143,7 @@ RGB(lua_State *L)
 static int
 RGBA(lua_State *L)
 {
-    FUNC("LuaLept.RGBA");
+    FUNC(LL_LEPT ".RGBA");
     l_int32 rval = ll_check_l_int32(_fun, L, 1);
     l_int32 gval = ll_check_l_int32(_fun, L, 2);
     l_int32 bval = ll_check_l_int32(_fun, L, 3);
@@ -2104,7 +2166,7 @@ RGBA(lua_State *L)
 static int
 ToRGB(lua_State *L)
 {
-    FUNC("LuaLept.ToRGB");
+    FUNC(LL_LEPT ".ToRGB");
     l_uint32 pixel = ll_check_l_uint32(_fun, L, 1);
     l_int32 rval = 0;
     l_int32 gval = 0;
@@ -2127,7 +2189,7 @@ ToRGB(lua_State *L)
 static int
 ToRGBA(lua_State *L)
 {
-    FUNC("LuaLept.ToRGBA");
+    FUNC(LL_LEPT ".ToRGBA");
     l_uint32 pixel = ll_check_l_uint32(_fun, L, 1);
     l_int32 rval = 0;
     l_int32 gval = 0;
@@ -2153,7 +2215,7 @@ ToRGBA(lua_State *L)
 static int
 MinMaxComponent(lua_State *L)
 {
-    FUNC("LuaLept.MinMaxComponent");
+    FUNC(LL_LEPT ".MinMaxComponent");
     l_uint32 pixel = ll_check_l_uint32(_fun, L, 1);
     l_int32 type = ll_check_choose_min_max(_fun, L, 2, 0);
     lua_pushinteger(L, extractMinMaxComponent(pixel, type));
@@ -2172,7 +2234,7 @@ MinMaxComponent(lua_State *L)
 static int
 MinComponent(lua_State *L)
 {
-    FUNC("LuaLept.MinComponent");
+    FUNC(LL_LEPT ".MinComponent");
     l_uint32 pixel = ll_check_l_uint32(_fun, L, 1);
     lua_pushinteger(L, extractMinMaxComponent(pixel, L_CHOOSE_MIN));
     return 1;
@@ -2190,7 +2252,7 @@ MinComponent(lua_State *L)
 static int
 MaxComponent(lua_State *L)
 {
-    FUNC("LuaLept.MaxComponent");
+    FUNC(LL_LEPT ".MaxComponent");
     l_uint32 pixel = ll_check_l_uint32(_fun, L, 1);
     lua_pushinteger(L, extractMinMaxComponent(pixel, L_CHOOSE_MAX));
     return 1;
@@ -2239,7 +2301,9 @@ ll_new_LuaLept(lua_State *L)
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
-static int register_LuaLept(lua_State *L) {
+int
+ll_register_LuaLept(lua_State *L)
+{
     static const luaL_Reg methods[] = {
         {"__gc",                    Destroy},
         {"__new",                   Create},
@@ -2277,24 +2341,23 @@ static int register_LuaLept(lua_State *L) {
         LUA_SENTINEL
     };
 
+    ll_register_Amap(L);
+    ll_register_Aset(L);
+    ll_register_Bmf(L);
+    ll_register_DoubleLinkedList(L);
     ll_register_Numa(L);
     ll_register_Numaa(L);
     ll_register_Dna(L);
     ll_register_Dnaa(L);
     ll_register_Pta(L);
     ll_register_Ptaa(L);
-    ll_register_Amap(L);
-    ll_register_Aset(L);
-    ll_register_Bmf(L);
-    ll_register_DoubleLinkedList(L);
     ll_register_Box(L);
-    ll_register_BOXA(L);
+    ll_register_Boxa(L);
     ll_register_Boxaa(L);
     ll_register_PixColormap(L);
     ll_register_Pix(L);
     ll_register_Pixa(L);
     ll_register_Pixaa(L);
-
     return ll_register_class(L, LL_LEPT, methods, functions);
 }
 
@@ -2315,7 +2378,7 @@ ll_RunScript(const char *script)
     luaL_openlibs(L);
 
     /* Register our libraries */
-    register_LuaLept(L);
+    ll_register_LuaLept(L);
 
     res = luaL_loadfile(L, script);
     if (LUA_OK != res) {

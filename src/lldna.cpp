@@ -33,7 +33,7 @@
 
 /*====================================================================*
  *
- *  Lua class DNA
+ *  Lua class Dna
  *
  *====================================================================*/
 
@@ -474,6 +474,78 @@ CopyParameters(lua_State *L)
 }
 
 /**
+ * \brief Read a Dna* (%dna) from a file (%filename)
+ * <pre>
+ * Arg #1 is expected to be a string (filename).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Box* on the Lua stack
+ */
+static int
+Read(lua_State *L)
+{
+    FUNC(LL_DNA ".Read");
+    const char *filename = ll_check_string(_fun, L, 1);
+    L_Dna *dna = l_dnaRead(filename);
+    return ll_push_Dna(_fun, L, dna);
+}
+
+/**
+ * \brief Read a Dna* (%dna) from a stream (%stream)
+ * <pre>
+ * Arg #1 is expected to be a luaL_Stream* (stream).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Box* on the Lua stack
+ */
+static int
+ReadStream(lua_State *L)
+{
+    FUNC(LL_DNA ".ReadStream");
+    luaL_Stream *stream = ll_check_stream(_fun, L, 1);
+    L_Dna *dna = l_dnaReadStream(stream->f);
+    return ll_push_Dna(_fun, L, dna);
+}
+
+/**
+ * \brief Write a Dna* (%dna) to a file (%filename)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Dna* (dna).
+ * Arg #2 is expected to be a string (filename).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+Write(lua_State *L)
+{
+    FUNC(LL_DNA ".Write");
+    L_Dna *dna = ll_check_Dna(_fun, L, 1);
+    const char *filename = ll_check_string(_fun, L, 2);
+    lua_pushboolean(L, 0 == l_dnaWrite(filename, dna));
+    return 1;
+}
+
+/**
+ * \brief Write a Dna* (%dna) to a stream (%stream)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Box* (box).
+ * Arg #2 is expected to be a luaL_Stream* (stream).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+WriteStream(lua_State *L)
+{
+    FUNC(LL_DNA ".WriteStream");
+    L_Dna *dna = ll_check_Dna(_fun, L, 1);
+    luaL_Stream *stream = ll_check_stream(_fun, L, 2);
+    lua_pushboolean(L, 0 == l_dnaWriteStream(stream->f, dna));
+    return 1;
+}
+
+/**
  * \brief Check Lua stack at index %arg for udata of class LL_DNA
  * \param _fun calling function's name
  * \param L pointer to the lua_State
@@ -536,36 +608,38 @@ int
 ll_register_Dna(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},   /* Lua garbage collector */
-        {"__new",               Create},    /* Lua new object */
-        {"__len",               GetCount},  /* #dna */
-        {"__tostring",          toString},
-        {"Clone",               Clone},
-        {"Copy",                Copy},
-        {"Empty",               Empty},
-        {"AddNumber",           AddNumber},
-        {"InsertNumber",        InsertNumber},
-        {"RemoveNumber",        RemoveNumber},
-        {"ReplaceNumber",       ReplaceNumber},
-        {"SetCount",            SetCount},
-        {"GetFValue",           GetDValue},
-        {"GetIValue",           GetIValue},
-        {"SetValue",            SetValue},
-        {"ShiftValue",          ShiftValue},
-        {"GetDArray",           GetDArray},
-        {"GetIArray",           GetIArray},
-        {"GetParameters",       GetParameters},
-        {"SetParameters",       SetParameters},
-        {"CopyParameters",      CopyParameters},
+        {"__gc",                    Destroy},   /* Lua garbage collector */
+        {"__new",                   Create},    /* Lua new object */
+        {"__len",                   GetCount},  /* #dna */
+        {"__tostring",              toString},
+        {"Clone",                   Clone},
+        {"Copy",                    Copy},
+        {"Empty",                   Empty},
+        {"AddNumber",               AddNumber},
+        {"InsertNumber",            InsertNumber},
+        {"RemoveNumber",            RemoveNumber},
+        {"ReplaceNumber",           ReplaceNumber},
+        {"SetCount",                SetCount},
+        {"GetFValue",               GetDValue},
+        {"GetIValue",               GetIValue},
+        {"SetValue",                SetValue},
+        {"ShiftValue",              ShiftValue},
+        {"GetDArray",               GetDArray},
+        {"GetIArray",               GetIArray},
+        {"GetParameters",           GetParameters},
+        {"SetParameters",           SetParameters},
+        {"CopyParameters",          CopyParameters},
+        {"Read",                    Read},
+        {"ReadStream",              ReadStream},
+        {"Write",                   Write},
+        {"WriteStream",             WriteStream},
         LUA_SENTINEL
     };
 
     static const luaL_Reg functions[] = {
-        {"Create",              Create},
+        {"Create",                  Create},
         LUA_SENTINEL
     };
 
-    int res = ll_register_class(L, LL_DNA, methods, functions);
-    lua_setglobal(L, LL_DNA);
-    return res;
+    return ll_register_class(L, LL_DNA, methods, functions);
 }

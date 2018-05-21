@@ -106,6 +106,79 @@ extern void dbg(int enable, const char* format, ...);
 #define DBG(enable, format, ...)
 #endif
 
+typedef struct lua_State lua_State;
+extern void die(const char *_fun, lua_State* L, const char *format, ...);
+
+/**
+ * \brief Cast the result of LEPT_MALLOC() to the given type
+ * \param T typename of the result pointer
+ * \param size size of the memory block
+ * \result memory allocated and cast to T*
+ */
+template <typename T> T*
+ll_malloc(const char* _fun, lua_State *L, size_t size)
+{
+    void *ptr = LEPT_MALLOC(size);
+    if (!ptr) {
+        die(_fun, L, "failed to malloc(%d)", size);
+        return nullptr;
+    }
+    return reinterpret_cast<T *>(ptr);
+}
+
+/**
+ * \brief Cast the result of LEPT_CALLOC() to the given type
+ * \param T typename of the result pointer
+ * \param nmemb number of members
+ * \param size size of one member
+ * \result memory allocated, zeroed and cast to T*
+ */
+template <typename T> T*
+ll_calloc(const char* _fun, lua_State *L, size_t nmemb, size_t size)
+{
+    void *ptr = LEPT_CALLOC(nmemb, size);
+    if (!ptr) {
+        die(_fun, L, "failed to calloc(%d,%d)", nmemb, size);
+        return nullptr;
+    }
+    return reinterpret_cast<T *>(ptr);
+}
+
+/**
+ * \brief Alias with l_int32 nmemb and size
+ */
+template <typename T> T*
+ll_calloc(const char* _fun, lua_State *L, l_int32 nmemb, l_int32 size)
+{
+    return ll_calloc<T>(_fun, L, static_cast<size_t>(nmemb), static_cast<size_t>(size));
+}
+
+/**
+ * \brief Cast the result of LEPT_CALLOC() to the given type
+ * \param T typename of the result pointer
+ * \param nmemb number of members
+ * \result memory allocated, zeroed and cast to T*
+ */
+template <typename T> T*
+ll_calloc(const char* _fun, lua_State *L, size_t nmemb)
+{
+    void *ptr = LEPT_CALLOC(nmemb, sizeof(T));
+    if (!ptr) {
+        die(_fun, L, "failed to calloc(%d,%d)", nmemb, sizeof(T));
+        return nullptr;
+    }
+    return reinterpret_cast<T *>(ptr);
+}
+
+/**
+ * \brief Alias with l_int32 nmbeb
+ */
+template <typename T> T*
+ll_calloc(const char* _fun, lua_State *L, l_int32 nmemb)
+{
+    return ll_calloc<T>(_fun, L, static_cast<size_t>(nmemb), sizeof(T));
+}
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -137,6 +210,7 @@ typedef struct lept_enums_s {
 }   lept_enums_t;
 
 /* llept.c */
+extern void         ll_free(void *ptr);
 extern int          ll_register_class(lua_State *L, const char *name, const luaL_Reg *methods, const luaL_Reg *functions);
 extern void **      ll_check_udata(const char *_fun, lua_State *L, int arg, const char* name);
 extern int          ll_push_udata(const char *_fun, lua_State *L, const char* name, void *udata);
@@ -173,52 +247,79 @@ extern luaL_Stream *ll_check_stream(const char *_fun, lua_State *L, int arg);
 
 extern l_int32      ll_check_access_storage(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_access_storage(int flag);
+
 extern l_int32      ll_check_input_format(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_input_format(int format);
+
 extern l_int32      ll_check_keytype(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_keytype(l_int32 type);
+
 extern l_int32      ll_check_consecutive_skip_by(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_consecutive_skip_by(l_int32 choice);
+
 extern l_int32      ll_check_component(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_component(l_int32 component);
+
 extern l_int32      ll_check_choose_min_max(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_choose_min_max(l_int32 choice);
+
 extern l_int32      ll_check_what_is_max(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_what_is_max(l_int32 choice);
+
 extern l_int32      ll_check_getval(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_getval(l_int32 choice);
+
 extern l_int32      ll_check_direction(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_direction(l_int32 dir);
+
 extern l_int32      ll_check_blackwhite(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_blackwhite(l_int32 which);
+
 extern l_int32      ll_check_rasterop(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_rasterop(l_int32 op);
+
 extern l_int32      ll_check_hint(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_hint(l_int32 dir);
+
 extern l_int32      ll_check_searchdir(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_searchir(l_int32 dir);
+
+extern l_int32      ll_check_number_value(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_number_value(l_int32 dir);
+
 extern l_int32      ll_check_stats_type(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_stats_type(l_int32 dir);
+
 extern l_int32      ll_check_select_color(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_select_color(l_int32 color);
+
 extern l_int32      ll_check_select_min_max(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_select_min_max(l_int32 which);
+
 extern l_int32      ll_check_sort_by(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_sort_by(l_int32 sort_by);
+
 extern l_int32      ll_check_set_side(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_set_side(l_int32 which);
+
 extern l_int32      ll_check_from_side(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_from_side(l_int32 which);
+
 extern l_int32      ll_check_adjust_sides(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_adjust_sides(l_int32 which);
+
 extern l_int32      ll_check_sort_order(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_sort_order(l_int32 order);
+
 extern l_int32      ll_check_trans_order(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_trans_order(l_int32 order);
+
 extern l_int32      ll_check_rotation(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_rotation(l_int32 rotation);
+
 extern l_int32      ll_check_overlap(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_overlap(l_int32 rotation);
+
 extern l_int32      ll_check_value_flags(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_value_flags(l_int32 rotation);
 
@@ -226,6 +327,34 @@ extern LuaLept    * ll_check_LuaLept(const char *_fun, lua_State *L, int arg);
 extern int          ll_push_LuaLept(const char *_fun, lua_State *L, LuaLept *lept);
 extern int          ll_new_LuaLept(lua_State *L);
 extern int          ll_register_LuaLept(lua_State *L);
+
+/* llamap.cpp */
+extern L_AMAP     * ll_check_Amap(const char *_fun, lua_State *L, int arg);
+extern L_AMAP     * ll_check_Amap_opt(const char *_fun, lua_State *L, int arg);
+extern int          ll_push_Amap(const char *_fun, lua_State *L, L_AMAP *amap);
+extern int          ll_new_Amap(lua_State *L);
+extern int          ll_register_Amap(lua_State *L);
+
+/* llaset.cpp */
+extern L_ASET     * ll_check_Aset(const char *_fun, lua_State *L, int arg);
+extern L_ASET     * ll_check_Aset_opt(const char *_fun, lua_State *L, int arg);
+extern int          ll_push_Aset(const char *_fun, lua_State *L, L_ASET *aset);
+extern int          ll_new_Aset(lua_State *L);
+extern int          ll_register_Aset(lua_State *L);
+
+/* llbmf.cpp */
+extern L_Bmf      * ll_check_Bmf(const char *_fun, lua_State *L, int arg);
+extern L_Bmf      * ll_check_Bmf_opt(const char *_fun, lua_State *L, int arg);
+extern int          ll_push_Bmf(const char *_fun, lua_State *L, L_Bmf *bmf);
+extern int          ll_new_Bmf(lua_State *L);
+extern int          ll_register_Bmf(lua_State *L);
+
+/* lllist.cpp */
+extern DoubleLinkedList* ll_check_DoubleLinkedList(const char *_fun, lua_State *L, int arg);
+extern DoubleLinkedList* ll_check_DoubleLinkedList_opt(const char *_fun, lua_State *L, int arg);
+extern int          ll_push_DoubleLinkedList(const char *_fun, lua_State *L, DoubleLinkedList *list);
+extern int          ll_new_DoubleLinkedList(lua_State *L);
+extern int          ll_register_DoubleLinkedList(lua_State *L);
 
 /* llnuma.cpp */
 extern Numa       * ll_check_Numa(const char *_fun, lua_State *L, int arg);
@@ -269,34 +398,6 @@ extern int          ll_push_Ptaa(const char *_fun, lua_State *L, Ptaa *ptaa);
 extern int          ll_new_Ptaa(lua_State *L);
 extern int          ll_register_Ptaa(lua_State *L);
 
-/* llamap.cpp */
-extern L_AMAP     * ll_check_Amap(const char *_fun, lua_State *L, int arg);
-extern L_AMAP     * ll_check_Amap_opt(const char *_fun, lua_State *L, int arg);
-extern int          ll_push_Amap(const char *_fun, lua_State *L, L_AMAP *amap);
-extern int          ll_new_Amap(lua_State *L);
-extern int          ll_register_Amap(lua_State *L);
-
-/* llaset.cpp */
-extern L_ASET     * ll_check_Aset(const char *_fun, lua_State *L, int arg);
-extern L_ASET     * ll_check_Aset_opt(const char *_fun, lua_State *L, int arg);
-extern int          ll_push_Aset(const char *_fun, lua_State *L, L_ASET *aset);
-extern int          ll_new_Aset(lua_State *L);
-extern int          ll_register_Aset(lua_State *L);
-
-/* lllist.cpp */
-extern DoubleLinkedList* ll_check_DoubleLinkedList(const char *_fun, lua_State *L, int arg);
-extern DoubleLinkedList* ll_check_DoubleLinkedList_opt(const char *_fun, lua_State *L, int arg);
-extern int          ll_push_DoubleLinkedList(const char *_fun, lua_State *L, DoubleLinkedList *list);
-extern int          ll_new_DoubleLinkedList(lua_State *L);
-extern int          ll_register_DoubleLinkedList(lua_State *L);
-
-/* llbmf.cpp */
-extern L_Bmf      * ll_check_Bmf(const char *_fun, lua_State *L, int arg);
-extern L_Bmf      * ll_check_Bmf_opt(const char *_fun, lua_State *L, int arg);
-extern int          ll_push_Bmf(const char *_fun, lua_State *L, L_Bmf *bmf);
-extern int          ll_new_Bmf(lua_State *L);
-extern int          ll_register_Bmf(lua_State *L);
-
 /* llbox.cpp */
 extern Box        * ll_check_Box(const char *_fun, lua_State *L, int arg);
 extern Box        * ll_check_Box_opt(const char *_fun, lua_State *L, int arg);
@@ -309,7 +410,7 @@ extern Boxa       * ll_check_Boxa(const char *_fun, lua_State *L, int arg);
 extern Boxa       * ll_check_Boxa_opt(const char *_fun, lua_State *L, int arg);
 extern int          ll_push_Boxa(const char *_fun, lua_State *L, Boxa *boxa);
 extern int          ll_new_Boxa(lua_State *L);
-extern int          ll_register_BOXA(lua_State *L);
+extern int          ll_register_Boxa(lua_State *L);
 
 /* llboxaa.cpp */
 extern Boxaa      * ll_check_Boxaa(const char *_fun, lua_State *L, int arg);

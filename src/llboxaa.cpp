@@ -33,7 +33,7 @@
 
 /*====================================================================*
  *
- *  Lua class BOXAA
+ *  Lua class Boxaa
  *
  *====================================================================*/
 
@@ -401,6 +401,118 @@ Join(lua_State *L)
 }
 
 /**
+ * \brief Read a Boxaa* (%boxaa) from a file (%filename)
+ * <pre>
+ * Arg #1 is expected to be a string (filename).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Box* on the Lua stack
+ */
+static int
+Read(lua_State *L)
+{
+    FUNC(LL_BOXAA ".Read");
+    const char *filename = ll_check_string(_fun, L, 1);
+    Boxaa *boxaa = boxaaRead(filename);
+    return ll_push_Boxaa(_fun, L, boxaa);
+}
+
+/**
+ * \brief Read a Boxaa* (%boxaa) from a stream (%stream)
+ * <pre>
+ * Arg #1 is expected to be a luaL_Stream* (stream).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Box* on the Lua stack
+ */
+static int
+ReadStream(lua_State *L)
+{
+    FUNC(LL_BOXAA ".ReadStream");
+    luaL_Stream *stream = ll_check_stream(_fun, L, 1);
+    Boxaa *boxaa = boxaaReadStream(stream->f);
+    return ll_push_Boxaa(_fun, L, boxaa);
+}
+
+/**
+ * \brief Read a Boxaa* (%boxaa) from memory (%data)
+ * <pre>
+ * Arg #1 is expected to be a string (data).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Box* on the Lua stack
+ */
+static int
+ReadMem(lua_State *L)
+{
+    FUNC(LL_BOXAA ".ReadMem");
+    const char *data = ll_check_string(_fun, L, 1);
+    lua_Integer size = luaL_len(L, 1);
+    Boxaa *boxaa = boxaaReadMem(reinterpret_cast<const l_uint8 *>(data), static_cast<size_t>(size));
+    return ll_push_Boxaa(_fun, L, boxaa);
+}
+
+/**
+ * \brief Write a Boxaa* (%boxaa) to a file (%filename)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Box* (box).
+ * Arg #2 is expected to be a string (filename).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+Write(lua_State *L)
+{
+    FUNC(LL_BOXAA ".Write");
+    Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
+    const char *filename = ll_check_string(_fun, L, 2);
+    lua_pushboolean(L, 0 == boxaaWrite(filename, boxaa));
+    return 1;
+}
+
+/**
+ * \brief Write a Boxaa* (%boxaa) to a stream (%stream)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Box* (box).
+ * Arg #2 is expected to be a luaL_Stream* (stream).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+WriteStream(lua_State *L)
+{
+    FUNC(LL_BOXAA ".WriteStream");
+    Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
+    luaL_Stream *stream = ll_check_stream(_fun, L, 2);
+    lua_pushboolean(L, 0 == boxaaWriteStream(stream->f, boxaa));
+    return 1;
+}
+
+/**
+ * \brief Write a Boxaa* (%boxaa) to memory (%data)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Box* (box).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 string on the Lua stack
+ */
+static int
+WriteMem(lua_State *L)
+{
+    FUNC(LL_BOXAA ".WriteMem");
+    Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
+    l_uint8 *data = nullptr;
+    size_t size = 0;
+    if (boxaaWriteMem(&data, &size, boxaa))
+        return ll_push_nil(L);
+    lua_pushlstring(L, reinterpret_cast<const char *>(data), size);
+    LEPT_FREE(data);
+    return 1;
+}
+
+/**
  * \brief Check Lua stack at index %arg for udata of class LL_BOXAA
  * \param _fun calling function's name
  * \param L pointer to the lua_State
@@ -451,7 +563,9 @@ ll_push_Boxaa(const char *_fun, lua_State *L, Boxaa *boxaa)
 int
 ll_new_Boxaa(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_Boxaa");
+    Boxaa *boxaa = boxaaCreate(1);
+    return ll_push_Boxaa(_fun, L, boxaa);
 }
 
 /**
@@ -463,34 +577,38 @@ int
 ll_register_Boxaa(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},               /* garbage collect */
-        {"__new",               Create},                /* new Boxaa */
-        {"__len",               GetCount},              /* #boxa */
-        {"__tostring",          toString},
-        {"Destroy",             Destroy},
-        {"Copy",                Copy},
-        {"GetCount",            GetCount},
-        {"GetBoxCount",         GetBoxCount},
-        {"AddBoxa",             AddBoxa},
-        {"ExtendArray",         ExtendArray},
-        {"ExtendArrayToSize",   ExtendArrayToSize},
-        {"GetBoxa",             GetBoxa},
-        {"GetBox",              GetBox},
-        {"ReplaceBoxa",         ReplaceBoxa},
-        {"InsertBoxa",          InsertBoxa},
-        {"RemoveBoxa",          RemoveBoxa},
-        {"FlattenToBoxa",       FlattenToBoxa},
-        {"FlattenAligned",      FlattenAligned},
-        {"Join",                Join},
+        {"__gc",                    Destroy},               /* garbage collect */
+        {"__new",                   Create},                /* new Boxaa */
+        {"__len",                   GetCount},              /* #boxa */
+        {"__tostring",              toString},
+        {"Destroy",                 Destroy},
+        {"Copy",                    Copy},
+        {"GetCount",                GetCount},
+        {"GetBoxCount",             GetBoxCount},
+        {"AddBoxa",                 AddBoxa},
+        {"ExtendArray",             ExtendArray},
+        {"ExtendArrayToSize",       ExtendArrayToSize},
+        {"GetBoxa",                 GetBoxa},
+        {"GetBox",                  GetBox},
+        {"ReplaceBoxa",             ReplaceBoxa},
+        {"InsertBoxa",              InsertBoxa},
+        {"RemoveBoxa",              RemoveBoxa},
+        {"FlattenToBoxa",           FlattenToBoxa},
+        {"FlattenAligned",          FlattenAligned},
+        {"Join",                    Join},
+        {"Read",                    Read},
+        {"ReadStream",              ReadStream},
+        {"ReadMem",                 ReadMem},
+        {"Write",                   Write},
+        {"WriteStream",             WriteStream},
+        {"WriteMem",                WriteMem},
         LUA_SENTINEL
     };
 
     static const luaL_Reg functions[] = {
-        {"Create",              Create},
+        {"Create",                  Create},
         LUA_SENTINEL
     };
 
-    int res = ll_register_class(L, LL_BOXAA, methods, functions);
-    lua_setglobal(L, LL_BOXAA);
-    return res;
+    return ll_register_class(L, LL_BOXAA, methods, functions);
 }

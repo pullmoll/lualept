@@ -33,7 +33,7 @@
 
 /*====================================================================*
  *
- *  Lua class PTA
+ *  Lua class Pta
  *
  *====================================================================*/
 
@@ -571,6 +571,9 @@ ll_register_Pta(lua_State *L)
         {"SetPt",           SetPt},
         {"GetArrays",       GetArrays},
         {"ConvertToBox",    ConvertToBox},
+        {"Read",            Read},
+        {"ReadStream",      ReadStream},
+        {"ReadMem",         ReadMem},
         {"Write",           Write},
         {"WriteStream",     WriteStream},
         {"WriteMem",        WriteMem},
@@ -579,9 +582,6 @@ ll_register_Pta(lua_State *L)
 
     static const luaL_Reg functions[] = {
         {"Create",          Create},
-        {"Read",            Read},
-        {"ReadStream",      ReadStream},
-        {"ReadMem",         ReadMem},
         LUA_SENTINEL
     };
 

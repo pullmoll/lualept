@@ -33,7 +33,7 @@
 
 /*====================================================================*
  *
- *  Lua class L_AMAP
+ *  Lua class Amap
  *
  *====================================================================*/
 
@@ -441,7 +441,5 @@ ll_register_Amap(lua_State *L)
         LUA_SENTINEL
     };
 
-    int res = ll_register_class(L, LL_AMAP, methods, functions);
-    lua_setglobal(L, LL_AMAP);
-    return res;
+    return ll_register_class(L, LL_AMAP, methods, functions);
 }

@@ -44,7 +44,7 @@ static l_int32 tab8[256];
 
 /*====================================================================*
  *
- *  Lua class PIX
+ *  Lua class Pix
  *
  *====================================================================*/
 
@@ -126,6 +126,8 @@ toString(lua_State* L)
  * Arg #3 is optional and expected to be a l_int32 (depth; default = 1).
  * or
  * Arg #1 is expected to be a string (filename).
+ * or
+ * No Arg creates a 1x1 1bpp Pix*
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -143,9 +145,11 @@ Create(lua_State *L)
         l_int32 height = ll_check_l_int32_default(_fun, L, 2, 1);
         l_int32 depth = ll_check_l_int32_default(_fun, L, 3, 1);
         pix = pixCreate(width, height, depth);
-    } else {
+    } else if (lua_isstring(L, 1)) {
         const char* filename = ll_check_string(_fun, L, 1);
         pix = pixRead(filename);
+    } else {
+        pix = pixCreate(1, 1, 1);
     }
     return ll_push_Pix(_fun, L, pix);
 }
@@ -1002,16 +1006,9 @@ SetData(lua_State *L)
     l_int32 wpl = pixGetWpl(pix);
     l_int32 h = pixGetHeight(pix);
     size_t size = static_cast<size_t>(wpl) * static_cast<size_t>(h) * sizeof(l_uint32);
-    l_uint32 *data = reinterpret_cast<l_uint32 *>(LEPT_MALLOC(size));
-
-    if (data) {
-        /* copy the previous Pix->data in case only a part of data[][] is written */
-        memcpy(data, pixGetData(pix), size);
-    } else {
-        lua_pushfstring(L, "%s: failed to alloc data (%d)", _fun, size);
-        lua_error(L);
-        return 0;
-    }
+    l_uint32 *data = ll_malloc<l_uint32>(_fun, L, size);
+    /* copy the previous Pix->data in case only a part of data[][] is written */
+    memcpy(data, pixGetData(pix), size);
     data = ll_unpack_uarray_2d(_fun, L, 2, data, wpl, h);
     lua_pushboolean(L, 0 == pixSetData(pix, data));
     /* Do not free(data); it is owned by the Pix* now */
@@ -2035,29 +2032,21 @@ GetRGBLine(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 row = ll_check_l_int32(_fun, L, 2);
     size_t width = static_cast<size_t>(pixGetWidth(pixs));
-    l_uint8 *bufr = reinterpret_cast<l_uint8 *>(LEPT_CALLOC(width, sizeof(l_uint8)));
-    l_uint8 *bufg = reinterpret_cast<l_uint8 *>(LEPT_CALLOC(width, sizeof(l_uint8)));
-    l_uint8 *bufb = reinterpret_cast<l_uint8 *>(LEPT_CALLOC(width, sizeof(l_uint8)));
-    if (!bufr || !bufg || !bufb) {
-        LEPT_FREE(bufr);
-        LEPT_FREE(bufg);
-        LEPT_FREE(bufb);
-        lua_pushfstring(L, "%s: failed to allocate buffers (3 * %d)", _fun, width);
-        lua_error(L);
-        return 0;
-    }
+    l_uint8 *bufr = ll_calloc<l_uint8>(_fun, L, width);
+    l_uint8 *bufg = ll_calloc<l_uint8>(_fun, L, width);
+    l_uint8 *bufb = ll_calloc<l_uint8>(_fun, L, width);
     if (pixGetRGBLine(pixs, row, bufr, bufg, bufb)) {
-        LEPT_FREE(bufr);
-        LEPT_FREE(bufg);
-        LEPT_FREE(bufb);
+        ll_free(bufr);
+        ll_free(bufg);
+        ll_free(bufb);
         return ll_push_nil(L);
     }
     lua_pushlstring(L, reinterpret_cast<const char *>(bufr), width);
     lua_pushlstring(L, reinterpret_cast<const char *>(bufg), width);
     lua_pushlstring(L, reinterpret_cast<const char *>(bufb), width);
-    LEPT_FREE(bufr);
-    LEPT_FREE(bufg);
-    LEPT_FREE(bufb);
+    ll_free(bufr);
+    ll_free(bufg);
+    ll_free(bufb);
     return 3;
 }
 
@@ -2265,14 +2254,9 @@ MakeMaskFromLUT(lua_State *L)
     FUNC(LL_PIX ".MakeMaskFromLUT");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     size_t len = 0;
-    size_t i;
     const char* lut = ll_check_lstring(_fun, L, 2, &len);
-    l_int32* tab = tab = reinterpret_cast<l_int32 *>(LEPT_CALLOC(256, sizeof(l_int32)));
-    if (!tab) {
-        lua_pushfstring(L, "%s: failed to allocate table (%d)", _fun, 256 * sizeof(l_int32));
-        lua_error(L);
-        return 0;
-    }
+    l_int32* tab = tab = ll_calloc<l_int32>(_fun, L, 256);
+    size_t i;
     /* expand lookup-table (lut) to array of l_int32 (tab) */
     for (i = 0; i < 256 && i < len; i++)
         tab[i] = lut[i];
@@ -3734,7 +3718,7 @@ GetRowStats(lua_State *L)
     l_int32 type = ll_check_select_color(_fun, L, 2, L_SELECT_RED);
     l_int32 nbins = ll_check_l_int32(_fun, L, 3);
     l_int32 thresh = ll_check_l_int32_default(_fun, L, 4, 0);
-    l_float32 *colvect = reinterpret_cast<l_float32 *>(LEPT_CALLOC(nbins, sizeof(*colvect)));
+    l_float32 *colvect = ll_calloc<l_float32>(_fun, L, nbins);
     if (!colvect) {
         lua_pushfstring(L, "%s: could not allocate colvect (%d)",
                         _fun, static_cast<size_t>(nbins) * sizeof(*colvect));
@@ -4163,15 +4147,6 @@ ll_push_Pix(const char *_fun, lua_State *L, Pix *pix)
 
 /**
  * \brief Create and push a new Pix*
- *
- * Arg #1 is expected to be a l_int32 (width).
- * Arg #2 is expected to be a l_int32 (height).
- * Arg #3 is optional and expected to be a l_int32 (depth; default = 1).
- * or
- * Arg #1 is expected to be a string (filename).
- * or
- * Arg #1 is expected to be Pix*.
- *
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
  */
@@ -4362,6 +4337,9 @@ ll_register_Pix(lua_State *L)
         {"SplitDistributionFgBg",   SplitDistributionFgBg},
         {"FindAreaPerimRatio",      FindAreaPerimRatio},
         {"FindPerimToAreaRatio",    FindPerimToAreaRatio},
+        {"Read",                    Read},
+        {"ReadStream",              ReadStream},
+        {"ReadMem",                 ReadMem},
         {"Write",                   Write},
         {"WriteStream",             WriteStream},
         {"WriteMem",                WriteMem},
@@ -4372,14 +4350,10 @@ ll_register_Pix(lua_State *L)
     static const luaL_Reg functions[] = {
         {"Create",                  Create},
         {"CreateNoInit",            CreateNoInit},
-        {"Read",                    Read},
-        {"ReadStream",              ReadStream},
-        {"ReadMem",                 ReadMem},
         LUA_SENTINEL
     };
-    int i;
 
-    for (i = 0; i < 256; i++) {
+    for (int i = 0; i < 256; i++) {
         tab8[i] = ((i >> 7) & 1) +
                   ((i >> 6) & 1) +
                   ((i >> 5) & 1) +
@@ -4390,7 +4364,5 @@ ll_register_Pix(lua_State *L)
                   ((i >> 0) & 1);
     }
 
-    int res = ll_register_class(L, LL_PIX, methods, functions);
-    lua_setglobal(L, LL_PIX);
-    return res;
+    return ll_register_class(L, LL_PIX, methods, functions);
 }

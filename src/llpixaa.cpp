@@ -33,7 +33,7 @@
 
 /*====================================================================*
  *
- *  Lua class PIXAA
+ *  Lua class Pixaa
  *
  *====================================================================*/
 
@@ -542,6 +542,10 @@ ll_register_Pixaa(lua_State *L)
         {"ReplacePixa",		ReplacePixa},
         {"Clear",               Clear},
         {"Join",                Join},
+        {"Read",                Read},
+        {"ReadFromFiles",       ReadFromFiles},
+        {"ReadStream",          ReadStream},
+        {"ReadMem",             ReadMem},
         {"Write",               Write},
         {"WriteStream",         WriteStream},
         {"WriteMem",            WriteMem},
@@ -551,10 +555,6 @@ ll_register_Pixaa(lua_State *L)
     static const luaL_Reg functions[] = {
         {"Create",              Create},
         {"CreateFromPixa",      CreateFromPixa},
-        {"Read",                Read},
-        {"ReadFromFiles",       ReadFromFiles},
-        {"ReadStream",          ReadStream},
-        {"ReadMem",             ReadMem},
         LUA_SENTINEL
     };
 

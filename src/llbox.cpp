@@ -33,7 +33,7 @@
 
 /*====================================================================*
  *
- *  Lua class BOX
+ *  Lua class Box
  *
  *====================================================================*/
 
@@ -960,7 +960,5 @@ ll_register_Box(lua_State *L)
         LUA_SENTINEL
     };
 
-    int res = ll_register_class(L, LL_BOX, methods, functions);
-    lua_setglobal(L, LL_BOX);
-    return res;
+    return ll_register_class(L, LL_BOX, methods, functions);
 }

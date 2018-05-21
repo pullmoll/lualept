@@ -33,7 +33,7 @@
 
 /*====================================================================*
  *
- *  Lua class ASET
+ *  Lua class Aset
  *
  *====================================================================*/
 
@@ -426,7 +426,5 @@ ll_register_Aset(lua_State *L)
         LUA_SENTINEL
     };
 
-    int res = ll_register_class(L, LL_ASET, methods, functions);
-    lua_setglobal(L, LL_ASET);
-    return res;
+    return ll_register_class(L, LL_ASET, methods, functions);
 }

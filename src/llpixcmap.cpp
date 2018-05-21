@@ -33,7 +33,7 @@
 
 /*====================================================================*
  *
- *  Lua class PIXCMAP
+ *  Lua class PixColormap
  *
  *====================================================================*/
 
@@ -892,16 +892,11 @@ DeserializeFromMemory(lua_State *L)
     const char *str = ll_check_lstring(_fun, L, 1, &len);
     l_int32 cpc = ll_check_l_int32_default(_fun, L, 2, 4);
     l_int32 ncolors = static_cast<l_int32>(len / static_cast<size_t>(cpc));
-    l_uint8 *data = reinterpret_cast<l_uint8 *>(LEPT_MALLOC(len));
+    l_uint8 *data = ll_malloc<l_uint8>(_fun, L, len);
     PixColormap* cmap = nullptr;
-    if (!data) {
-        lua_pushfstring(L, "%s: allocating data failed (%d)", _fun, len);
-        lua_error(L);
-        return 0;
-    }
     memcpy(data, str, len);
     cmap = pixcmapDeserializeFromMemory(data, cpc, ncolors);
-    LEPT_FREE(data);
+    ll_free(data);
     return ll_push_PixColormap(_fun, L, cmap);
 }
 
@@ -1044,12 +1039,16 @@ ll_register_PixColormap(lua_State *L)
         {"IsOpaque",                IsOpaque},
         {"IsBlackAndWhite",         IsBlackAndWhite},
         {"CountGrayColors",         CountGrayColors},
+        {"Read",                    Read},
+        {"ReadStream",              ReadStream},
+        {"ReadMem",                 ReadMem},
         {"Write",                   Write},
         {"WriteStream",             WriteStream},
         {"WriteMem",                WriteMem},
         {"ToArrays",                ToArrays},
         {"ToRGBTable",              ToRGBTable},
         {"SerializeToMemory",       SerializeToMemory},
+        {"DeserializeFromMemory",   DeserializeFromMemory},
         {"ConvertToHex",            ConvertToHex},
         LUA_SENTINEL
     };
@@ -1058,14 +1057,8 @@ ll_register_PixColormap(lua_State *L)
         {"Create",                  Create},
         {"CreateRandom",            CreateRandom},
         {"CreateLinear",            CreateLinear},
-        {"Read",                    Read},
-        {"ReadStream",              ReadStream},
-        {"ReadMem",                 ReadMem},
-        {"DeserializeFromMemory",   DeserializeFromMemory},
         LUA_SENTINEL
     };
 
-    int res = ll_register_class(L, LL_PIXCMAP, methods, functions);
-    lua_setglobal(L, LL_PIXCMAP);
-    return res;
+    return ll_register_class(L, LL_PIXCMAP, methods, functions);
 }

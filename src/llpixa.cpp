@@ -33,7 +33,7 @@
 
 /*====================================================================*
  *
- *  Lua class PIXA
+ *  Lua class Pixa
  *
  *====================================================================*/
 
@@ -536,6 +536,10 @@ ll_register_Pixa(lua_State *L)
         {"Interleave",          Interleave},
         {"Clear",               Clear},
         {"GetAlignedStats",     GetAlignedStats},
+        {"Read",                Read},
+        {"ReadFiles",           ReadFiles},
+        {"ReadStream",          ReadStream},
+        {"ReadMem",             ReadMem},
         {"Write",               Write},
         {"WriteStream",         WriteStream},
         {"WriteMem",            WriteMem},
@@ -544,10 +548,6 @@ ll_register_Pixa(lua_State *L)
 
     static const luaL_Reg functions[] = {
         {"Create",              Create},
-        {"Read",                Read},
-        {"ReadFiles",           ReadFiles},
-        {"ReadStream",          ReadStream},
-        {"ReadMem",             ReadMem},
         LUA_SENTINEL
     };
 

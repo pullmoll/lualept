@@ -33,7 +33,7 @@
 
 /*====================================================================*
  *
- *  Lua class BMF
+ *  Lua class Bmf
  *
  *====================================================================*/
 
@@ -50,7 +50,7 @@ static int
 Create(lua_State *L)
 {
     FUNC(LL_BMF ".Create");
-    const char* dir = ll_check_string(_fun, L, 1);
+    const char* dir = lua_isstring(L, 1) ? ll_check_string(_fun, L, 1) : ".";
     l_int32 fontsize = ll_check_l_int32_default(_fun, L, 2, 6);
     L_Bmf *bmf = bmfCreate(dir, fontsize);
     return ll_push_Bmf(_fun, L, bmf);
@@ -181,7 +181,9 @@ GetLineStrings(lua_State *L)
     l_int32 h = 0;
     Sarray *sa = bmfGetLineStrings(bmf, str, maxw, firstident, &h);
     lua_pushinteger(L, h);
-    return 1 + ll_push_sarray(L, sa);
+    ll_push_sarray(L, sa);
+    sarrayDestroy(&sa);
+    return 2;
 }
 
 /**
@@ -267,7 +269,5 @@ ll_register_Bmf(lua_State *L)
         LUA_SENTINEL
     };
 
-    int res = ll_register_class(L, LL_BMF, methods, functions);
-    lua_setglobal(L, LL_BMF);
-    return res;
+    return ll_register_class(L, LL_BMF, methods, functions);
 }

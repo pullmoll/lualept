@@ -33,7 +33,7 @@
 
 /*====================================================================*
  *
- *  Lua class DNAA
+ *  Lua class Dnaa
  *
  *====================================================================*/
 
@@ -436,7 +436,9 @@ ll_push_Dnaa(const char *_fun, lua_State *L, L_Dnaa *daa)
 int
 ll_new_Dnaa(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_Dnaa");
+    L_Dnaa *daa = l_dnaaCreate(1);
+    return ll_push_Dnaa(_fun, L, daa);
 }
 
 /**
@@ -459,6 +461,8 @@ ll_register_Dnaa(lua_State *L) {
         {"GetDna",          GetDna},
         {"GetValue",        GetValue},
         {"AddNumber",       AddNumber},
+        {"Read",            Read},
+        {"ReadStream",      ReadStream},
         {"Write",           Write},
         {"WriteStream",     WriteStream},
         {"FlattenToDna",    FlattenToDna},
@@ -466,14 +470,10 @@ ll_register_Dnaa(lua_State *L) {
     };
 
     static const luaL_Reg functions[] = {
-        {"Read",            Read},
-        {"ReadStream",      ReadStream},
         {"Create",          Create},
         {"CreateFull",      CreateFull},
         LUA_SENTINEL
     };
 
-    int res = ll_register_class(L, LL_DNAA, methods, functions);
-    lua_setglobal(L, LL_DNAA);
-    return res;
+    return ll_register_class(L, LL_DNAA, methods, functions);
 }

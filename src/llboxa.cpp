@@ -33,7 +33,7 @@
 
 /*====================================================================*
  *
- *  Lua class BOXA
+ *  Lua class Boxa
  *
  *====================================================================*/
 
@@ -1235,7 +1235,7 @@ ll_new_Boxa(lua_State *L)
  * \return 1 table on the Lua stack
  */
 int
-ll_register_BOXA(lua_State *L)
+ll_register_Boxa(lua_State *L)
 {
     static const luaL_Reg methods[] = {
         {"__gc",                    Destroy},               /* garbage collect */
@@ -1287,6 +1287,9 @@ ll_register_BOXA(lua_State *L)
         {"SortByIndex",             SortByIndex},
         {"Sort2d",                  Sort2d},
         {"Sort2dByIndex",           Sort2dByIndex},
+        {"Read",                    Read},
+        {"ReadStream",              ReadStream},
+        {"ReadMem",                 ReadMem},
         {"Write",                   Write},
         {"WriteStream",             WriteStream},
         {"WriteMem",                WriteMem},
@@ -1295,13 +1298,8 @@ ll_register_BOXA(lua_State *L)
 
     static const luaL_Reg functions[] = {
         {"Create",                  Create},
-        {"Read",                    Read},
-        {"ReadStream",              ReadStream},
-        {"ReadMem",                 ReadMem},
         LUA_SENTINEL
     };
 
-    int res = ll_register_class(L, LL_BOXA, methods, functions);
-    lua_setglobal(L, LL_BOXA);
-    return res;
+    return ll_register_class(L, LL_BOXA, methods, functions);
 }

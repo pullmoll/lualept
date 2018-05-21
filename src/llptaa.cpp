@@ -33,7 +33,7 @@
 
 /*====================================================================*
  *
- *  Lua class PTAA
+ *  Lua class Ptaa
  *
  *====================================================================*/
 
@@ -387,14 +387,14 @@ ll_register_Ptaa(lua_State *L)
         {"AddPta",      AddPta},
         {"GetPta",      GetPta},
         {"ReplacePta",  ReplacePta},
+        {"Read",        Read},
+        {"ReadStream",  ReadStream},
         {"Write",       Write},
         {"WriteStream", WriteStream},
         LUA_SENTINEL
     };
 
     static const luaL_Reg functions[] = {
-        {"Read",        Read},
-        {"ReadStream",  ReadStream},
         {"Create",      Create},
         LUA_SENTINEL
     };
