@@ -1365,7 +1365,7 @@ static const lept_enums_t tbl_hint[] = {
 };
 
 /**
- * \brief Check for a search direction name
+ * \brief Check for a JPEG reader hint name
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
@@ -1379,7 +1379,7 @@ ll_check_hint(const char *_fun, lua_State *L, int arg, l_int32 dflt)
 }
 
 /**
- * \brief Return a string for the search direction
+ * \brief Return a string for the JPEG reader hint
  * \param dir enumeration value of the search direction
  * \return const string with the name
  */
