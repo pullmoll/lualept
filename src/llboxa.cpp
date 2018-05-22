@@ -1027,7 +1027,7 @@ SortByIndex(lua_State *L)
  * Arg #4 is expected to be a l_int32 (minh1).
  * </pre>
  * \param L pointer to the lua_State
- * \return 2 Boxaa* (boxaa) and Numaa* (naad) on the Lua stack
+ * \return 2 Boxaa* (%boxaa) and Numaa* (%naad) on the Lua stack
  */
 static int
 Sort2d(lua_State *L)
@@ -1051,7 +1051,7 @@ Sort2d(lua_State *L)
  * Arg #4 is expected to be a l_int32 (minh1).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 Boxaa* (boxa) on the Lua stack
+ * \return 1 Boxaa* (%boxaa) on the Lua stack
  */
 static int
 Sort2dByIndex(lua_State *L)
@@ -1061,6 +1061,261 @@ Sort2dByIndex(lua_State *L)
     Numaa *naa = ll_check_Numaa(_fun, L, 2);
     Boxaa *boxaa = boxaSort2dByIndex(boxas, naa);
     return ll_push_Boxaa(_fun, L, boxaa);
+}
+
+/**
+ * \brief Extract Boxa* (%boxa) as six Numa* (%nal, %nar, %nat, %nab, %naw, %nah)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * Arg #2 is expected to be a boolean (keepinvalid).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 6 Numa* on the Lua stack (%nal, %nar, %nat, %nab, %naw, %nah)
+ */
+static int
+ExtractAsNuma(lua_State *L)
+{
+    FUNC(LL_BOXA ".ExtractAsNuma");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
+    l_int32 keepinvalid = lua_toboolean(L, 2);
+    Numa *nal = nullptr;
+    Numa *nar = nullptr;
+    Numa *nat = nullptr;
+    Numa *nab = nullptr;
+    Numa *naw = nullptr;
+    Numa *nah = nullptr;
+    if (boxaExtractAsNuma(boxa, &nal, &nar, &nat, &nab, &naw, &nah, keepinvalid))
+        return ll_push_nil(L);
+    return ll_push_Numa(_fun, L, nal) + ll_push_Numa(_fun, L, nar) +
+            ll_push_Numa(_fun, L, nat) + ll_push_Numa(_fun, L, nab) +
+            ll_push_Numa(_fun, L, naw) + ll_push_Numa(_fun, L, nah);
+}
+
+/**
+ * \brief Extract Boxa* (%boxa) as six Pta* (%ptal, %ptar, %ptat, %ptab, %ptaw, %ptah)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * Arg #2 is expected to be a boolean (keepinvalid).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 6 Pta* on the Lua stack (%ptal, %ptar, %ptat, %ptab, %ptaw, %ptah)
+ */
+static int
+ExtractAsPta(lua_State *L)
+{
+    FUNC(LL_BOXA ".ExtractAsPta");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
+    l_int32 keepinvalid = lua_toboolean(L, 2);
+    Pta *ptal = nullptr;
+    Pta *ptar = nullptr;
+    Pta *ptat = nullptr;
+    Pta *ptab = nullptr;
+    Pta *ptaw = nullptr;
+    Pta *ptah = nullptr;
+    if (boxaExtractAsPta(boxa, &ptal, &ptar, &ptat, &ptab, &ptaw, &ptah, keepinvalid))
+        return ll_push_nil(L);
+    return ll_push_Pta(_fun, L, ptal) + ll_push_Pta(_fun, L, ptar) +
+            ll_push_Pta(_fun, L, ptat) + ll_push_Pta(_fun, L, ptab) +
+            ll_push_Pta(_fun, L, ptaw) + ll_push_Pta(_fun, L, ptah);
+}
+
+/**
+ * \brief Get rank values for Boxa* (%boxa) as four integers (%x,%y,%w,%h)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * Arg #2 is expected to be a l_float32 (fract).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 4 integers on the Lua stack (%x,%y,%w,%h)
+ */
+static int
+GetRankVals(lua_State *L)
+{
+    FUNC(LL_BOXA ".GetRankVals");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_float32 fract = ll_check_l_float32(_fun, L, 2);
+    l_int32 x = 0;
+    l_int32 y = 0;
+    l_int32 w = 0;
+    l_int32 h = 0;
+    if (boxaGetRankVals(boxas, fract, &x, &y, &w, &h))
+        return ll_push_nil(L);
+    lua_pushinteger(L, x);
+    lua_pushinteger(L, y);
+    lua_pushinteger(L, w);
+    lua_pushinteger(L, h);
+    return 4;
+}
+
+/**
+ * \brief Get median values for Boxa* (%boxa) as four integers (%x,%y,%w,%h)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 4 integers on the Lua stack (%x,%y,%w,%h)
+ */
+static int
+GetMedianVals(lua_State *L)
+{
+    FUNC(LL_BOXA ".GetMedianVals");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 x = 0;
+    l_int32 y = 0;
+    l_int32 w = 0;
+    l_int32 h = 0;
+    if (boxaGetMedianVals(boxas, &x, &y, &w, &h))
+        return ll_push_nil(L);
+    lua_pushinteger(L, x);
+    lua_pushinteger(L, y);
+    lua_pushinteger(L, w);
+    lua_pushinteger(L, h);
+    return 4;
+}
+
+/**
+ * \brief Get average size for Boxa* (%boxa) as two numbers (%w,%h)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 2 numbers on the Lua stack (%w,%h)
+ */
+static int
+GetAverageSize(lua_State *L)
+{
+    FUNC(LL_BOXA ".GetAverageSize");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_float32 w = 0.0f;
+    l_float32 h = 0.0f;
+    if (boxaGetAverageSize(boxas, &w, &h))
+        return ll_push_nil(L);
+    lua_pushnumber(L, static_cast<lua_Number>(w));
+    lua_pushnumber(L, static_cast<lua_Number>(h));
+    return 2;
+}
+
+/**
+ * \brief Encapsulate Boxa* (%boxa) aligned into a Boxaa* (%boxaa)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * Arg #2 is expected to be a l_int32 (num).
+ * Arg #3 is an optional string defining the storage flags (copyflag).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Boxaa* (%boxaa) on the Lua stack
+ */
+static int
+EncapsulateAligned(lua_State *L)
+{
+    FUNC(LL_BOXA ".EncapsulateAligned");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
+    l_int32 num = ll_check_l_int32(_fun, L, 2);
+    l_int32 copyflag = ll_check_access_storage(_fun, L, 3, L_COPY);
+    Boxaa *boxaa = boxaEncapsulateAligned(boxa, num, copyflag);
+    return ll_push_Boxaa(_fun, L, boxaa);
+}
+
+/**
+ * \brief Select a large box in the upper, left area of Boxa* (%boxa)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * Arg #2 is expected to be a l_float32 (areaslop).
+ * Arg #3 is expected to be a l_int32 (yslop).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Box* (%box) on the Lua stack
+ */
+static int
+SelectLargeULBox(lua_State *L)
+{
+    FUNC(LL_BOXA ".SelectLargeULBox");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
+    l_float32 areaslop = ll_check_l_float32(_fun, L, 2);
+    l_int32 yslop = ll_check_l_int32(_fun, L, 3);
+    Box *box = boxaSelectLargeULBox(boxa, areaslop, yslop);
+    return ll_push_Box(_fun, L, box);
+}
+
+/**
+ * \brief Compare regions of Boxa* (%boxa1) with Boxa* (%boxa2)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa1).
+ * Arg #2 is expected to be another Boxa* (boxa2).
+ * Arg #3 is expected to be a l_int32 (areathresh).
+ * Arg #3 is optional and, if given, expected to be a Pix* (pixdb).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 3 one integer (%nsame) and two numbers (%diffarea, %diffxor) on the Lua stack
+ */
+static int
+CompareRegions(lua_State *L)
+{
+    FUNC(LL_BOXA ".CompareRegions");
+    Boxa *boxa1 = ll_check_Boxa(_fun, L, 1);
+    Boxa *boxa2 = ll_check_Boxa(_fun, L, 2);
+    l_int32 areathresh = ll_check_l_int32(_fun, L, 3);
+    Pix *pixdb = ll_check_Pix_opt(_fun, L, 4);
+    l_int32 nsame = 0;
+    l_float32 diffarea = 0.0f;
+    l_float32 diffxor = 0.0f;
+    if (boxaCompareRegions(boxa1, boxa2, areathresh, &nsame, &diffarea, &diffxor, &pixdb))
+        return ll_push_nil(L);
+    lua_pushinteger(L, nsame);
+    lua_pushnumber(L, static_cast<lua_Number>(diffarea));
+    lua_pushnumber(L, static_cast<lua_Number>(diffxor));
+    return 3;
+}
+
+/**
+ * \brief Select a range (%istart, %iend) of boxes from Boxa* (%boxa)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * Arg #2 is expected to be a l_int32 (first).
+ * Arg #3 is expected to be a l_int32 (last).
+ * Arg #4 is an optional string defining the storage flags (copyflag).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Boxaa* (%boxaa) on the Lua stack
+ */
+static int
+SelectRange(lua_State *L)
+{
+    FUNC(LL_BOXA ".SelectRange");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 first = ll_check_index(_fun, L, 2, boxaGetCount(boxas));
+    l_int32 last = ll_check_index(_fun, L, 3, boxaGetCount(boxas));
+    l_int32 copyflag = ll_check_access_storage(_fun, L, 4, L_COPY);
+    Boxa *boxa = boxaSelectRange(boxas, first, last, copyflag);
+    return ll_push_Boxa(_fun, L, boxa);
+}
+
+/**
+ * \brief Select boxes from Boxa* (%boxa) by size
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * Arg #2 is expected to be a l_int32 (width).
+ * Arg #3 is expected to be a l_int32 (height).
+ * Arg #4 is expected to be a string describing the type (type).
+ * Arg #5 is expected to be a string describing the relation (relation).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 2 Boxa* (%boxa) and integer (%changed) on the Lua stack
+ */
+static int
+SelectBySize(lua_State *L)
+{
+    FUNC(LL_BOXA ".SelectBySize");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 width = ll_check_l_int32(_fun, L, 2);
+    l_int32 height = ll_check_l_int32(_fun, L, 3);
+    l_int32 type = 0;
+    l_int32 relation = 0;
+    l_int32 changed;
+    Boxa *boxa = boxaSelectBySize(boxas, width, height, type, relation, &changed);
+    ll_push_Boxa(_fun, L, boxa);
+    lua_pushinteger(L, changed);
+    return 2;
 }
 
 /**
@@ -1287,6 +1542,14 @@ ll_register_Boxa(lua_State *L)
         {"SortByIndex",             SortByIndex},
         {"Sort2d",                  Sort2d},
         {"Sort2dByIndex",           Sort2dByIndex},
+        {"ExtractAsNuma",           ExtractAsNuma},
+        {"ExtractAsPta",            ExtractAsPta},
+        {"GetRankVals",             GetRankVals},
+        {"GetMedianVals",           GetMedianVals},
+        {"GetAverageSize",          GetAverageSize},
+        {"EncapsulateAligned",      EncapsulateAligned},
+        {"SelectLargeULBox",        SelectLargeULBox},
+        {"SelectRange",             SelectRange},
         {"Read",                    Read},
         {"ReadStream",              ReadStream},
         {"ReadMem",                 ReadMem},
