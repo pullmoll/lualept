@@ -105,8 +105,8 @@ CreateRandom(lua_State *L)
 {
     FUNC(LL_PIXCMAP ".CreateRandom");
     l_int32 depth = ll_check_l_int32(_fun, L, 1);
-    l_int32 hasblack = lua_toboolean(L, 2);
-    l_int32 haswhite = lua_toboolean(L, 3);
+    l_int32 hasblack = ll_check_boolean_default(_fun, L, 2, FALSE);
+    l_int32 haswhite = ll_check_boolean_default(_fun, L, 3, FALSE);
     PixColormap *cmap = pixcmapCreateRandom(depth, hasblack, haswhite);
     return ll_push_PixColormap(_fun, L, cmap);
 }
@@ -331,8 +331,8 @@ SetBlackAndWhite(lua_State *L)
 {
     FUNC(LL_PIXCMAP ".SetBlackAndWhite");
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
-    l_int32 setblack = lua_toboolean(L, 2);
-    l_int32 setwhite = lua_toboolean(L, 3);
+    l_int32 setblack = ll_check_boolean_default(_fun, L, 2, FALSE);
+    l_int32 setwhite = ll_check_boolean_default(_fun, L, 3, FALSE);
     lua_pushboolean(L, 0 == pixcmapSetBlackAndWhite(cmap, setblack, setwhite));
     return 1;
 }

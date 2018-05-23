@@ -233,6 +233,8 @@ extern l_int32      ll_check_index(const char *_fun, lua_State *L, int arg, l_in
 extern char         ll_check_char(const char *_fun, lua_State *L, int arg);
 extern const char * ll_check_string(const char *_fun, lua_State *L, int arg);
 extern const char * ll_check_lstring(const char *_fun, lua_State *L, int arg, size_t *plen);
+extern l_int32      ll_check_boolean(const char *_fun, lua_State *L, int arg);
+extern l_int32      ll_check_boolean_default(const char *_fun, lua_State *L, int arg, int dflt);
 extern l_int32      ll_check_l_int32(const char *_fun, lua_State *L, int arg);
 extern l_int32      ll_check_l_int32_default(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern l_uint32     ll_check_l_uint32(const char *_fun, lua_State *L, int arg);
@@ -331,6 +333,9 @@ extern const char * ll_string_overlap(l_int32 rotation);
 
 extern l_int32      ll_check_subflag(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_subflag(l_int32 rotation);
+
+extern l_int32      ll_check_useflag(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_useflag(l_int32 rotation);
 
 extern l_int32      ll_check_value_flags(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_value_flags(l_int32 rotation);

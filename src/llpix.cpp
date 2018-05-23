@@ -316,8 +316,8 @@ TransferAllData(lua_State *L)
     void **ppixs = ll_check_udata(_fun, L, 2, LL_PIX);
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
-    int copytext = lua_isboolean(L, 3) ? lua_toboolean(L, 3) : TRUE;
-    int copyformat = lua_isboolean(L, 4) ? lua_toboolean(L, 4) : TRUE;
+    int copytext = ll_check_boolean_default(_fun, L, 3, TRUE);
+    int copyformat = ll_check_boolean_default(_fun, L, 4, TRUE);
     lua_pushboolean(L, 0 == pixTransferAllData(pixd, &pixs, copytext, copyformat));
     *ppixs = pixs;
     return 1;
@@ -2326,15 +2326,13 @@ MakeAlphaFromMask(lua_State *L)
     FUNC(LL_PIX ".MakeAlphaFromMask");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 dist = ll_check_l_int32(_fun, L, 2);
-    int getbox = lua_isboolean(L, 3) ?  lua_toboolean(L, 3) : FALSE;
+    int getbox = ll_check_boolean_default(_fun, L, 3, FALSE);
     Box* box = nullptr;
     Pix* pixd = pixMakeAlphaFromMask(pixs, dist, getbox ? &box : nullptr);
+    if (!pixd)
+        return ll_push_nil(L);
     ll_push_Pix(_fun, L, pixd);
-    if (nullptr != pixd && nullptr != box) {
-        ll_push_Box(_fun, L, box);
-        return 2;
-    }
-    return 1;
+    return 1 + box ? ll_push_Box(_fun, L, box) : 0;
 }
 
 /**

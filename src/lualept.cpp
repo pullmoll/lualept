@@ -662,6 +662,43 @@ ll_check_lstring(const char *_fun, lua_State *L, int arg, size_t *plen)
 }
 
 /**
+ * \brief Check if an argument is a boolean
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the integer
+ * \return l_int32 for the boolean (1 = true, 0 = false); lua_error if out of bounds
+ */
+l_int32
+ll_check_boolean(const char *_fun, lua_State *L, int arg)
+{
+    if (!lua_isboolean(L, arg)) {
+        lua_pushfstring(L, "%s: boolean expected for arg #%d (got '%s')", _fun, arg, lua_typename(L, lua_type(L, arg)));
+        lua_error(L);
+        return 0;    /* NOTREACHED */
+    }
+    return lua_toboolean(L, arg) ? TRUE : FALSE;
+}
+
+/**
+ * \brief Check if an argument is a boolean, or return the default
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the integer
+ * \return l_int32 for the boolean (1 = true, 0 = false); lua_error if out of bounds
+ */
+l_int32
+ll_check_boolean_default(const char *_fun, lua_State *L, int arg, int dflt)
+{
+    int val = lua_isboolean(L, arg) ? lua_toboolean(L, arg) : dflt;
+    if (val != 0 && val != 1) {
+        lua_pushfstring(L, "%s: boolean #%d out of bounds (%d)", _fun, arg, val);
+        lua_error(L);
+        return 0;    /* NOTREACHED */
+    }
+    return val ? TRUE : FALSE;
+}
+
+/**
  * \brief Check if an argument is a lua_Integer in the range of l_int32
  * \param _fun calling function's name
  * \param L pointer to the lua_State
@@ -1038,9 +1075,9 @@ ll_string_input_format(int format)
  * \brief Table of key type names for AMAP and ASET
  */
 static const lept_enums_t tbl_keytype[] = {
-    TBL_ENTRY("int",         L_INT_TYPE),
-    TBL_ENTRY("uint",        L_UINT_TYPE),
-    TBL_ENTRY("float",       L_FLOAT_TYPE)
+    TBL_ENTRY("int",        L_INT_TYPE),
+    TBL_ENTRY("uint",       L_UINT_TYPE),
+    TBL_ENTRY("float",      L_FLOAT_TYPE)
 };
 
 /**
@@ -2149,6 +2186,47 @@ const char*
 ll_string_subflag(l_int32 subflag)
 {
     return ll_string_tbl(subflag, tbl_subflag, ARRAYSIZE(tbl_subflag));
+}
+
+/**
+ * \brief Table of handle use flag by names and enumeration values
+ */
+static const lept_enums_t tbl_useflag[] = {
+    TBL_ENTRY("use-all-boxes",          L_USE_ALL_BOXES),
+    TBL_ENTRY("use-all",                L_USE_ALL_BOXES),
+    TBL_ENTRY("all",                    L_USE_ALL_BOXES),
+    TBL_ENTRY("a",                      L_USE_ALL_BOXES),
+    TBL_ENTRY("use-same-parity-boxes",  L_USE_SAME_PARITY_BOXES),
+    TBL_ENTRY("use-same-parity",        L_USE_SAME_PARITY_BOXES),
+    TBL_ENTRY("same-parity-boxes",      L_USE_SAME_PARITY_BOXES),
+    TBL_ENTRY("same-parity",            L_USE_SAME_PARITY_BOXES),
+    TBL_ENTRY("same",                   L_USE_SAME_PARITY_BOXES),
+    TBL_ENTRY("s",                      L_USE_SAME_PARITY_BOXES)
+};
+
+/**
+ * \brief Check for a use flag name
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \param dflt default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_useflag(const char *_fun, lua_State* L, int arg, l_int32 dflt)
+{
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_useflag, ARRAYSIZE(tbl_useflag));
+}
+
+/**
+ * \brief Return a string for the use flag
+ * \param useflag useflag value
+ * \return const string with the name
+ */
+const char*
+ll_string_useflag(l_int32 useflag)
+{
+    return ll_string_tbl(useflag, tbl_useflag, ARRAYSIZE(tbl_useflag));
 }
 
 /**

@@ -1078,7 +1078,7 @@ ExtractAsNuma(lua_State *L)
 {
     FUNC(LL_BOXA ".ExtractAsNuma");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
-    l_int32 keepinvalid = lua_toboolean(L, 2);
+    l_int32 keepinvalid = ll_check_boolean(_fun, L, 2);
     Numa *nal = nullptr;
     Numa *nar = nullptr;
     Numa *nat = nullptr;
@@ -1096,7 +1096,7 @@ ExtractAsNuma(lua_State *L)
  * \brief Extract Boxa* (%boxa) as six Pta* (%ptal, %ptar, %ptat, %ptab, %ptaw, %ptah)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
- * Arg #2 is expected to be a boolean (keepinvalid).
+ * Arg #2 is optional and, if given, expected to be a boolean (keepinvalid).
  * </pre>
  * \param L pointer to the lua_State
  * \return 6 Pta* on the Lua stack (%ptal, %ptar, %ptat, %ptab, %ptaw, %ptah)
@@ -1106,7 +1106,7 @@ ExtractAsPta(lua_State *L)
 {
     FUNC(LL_BOXA ".ExtractAsPta");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
-    l_int32 keepinvalid = lua_toboolean(L, 2);
+    l_int32 keepinvalid = ll_check_boolean_default(_fun, L, 2, FALSE);
     Pta *ptal = nullptr;
     Pta *ptar = nullptr;
     Pta *ptat = nullptr;
@@ -1509,7 +1509,7 @@ SmoothSequenceLS(lua_State *L)
     l_int32 subflag = ll_check_subflag(_fun, L, 3, L_USE_MINSIZE);
     l_int32 maxdiff = ll_check_l_int32_default(_fun, L, 4, 0);
     l_int32 extrapixels = ll_check_l_int32_default(_fun, L, 5, 0);
-    l_int32 debug = lua_toboolean(L, 6);
+    l_int32 debug = ll_check_boolean_default(_fun, L, 6, FALSE);
     Boxa *boxa = boxaSmoothSequenceLS(boxas, factor, subflag, maxdiff, extrapixels, debug);
     return ll_push_Boxa(_fun, L, boxa);
 }
@@ -1536,7 +1536,7 @@ SmoothSequenceMedian(lua_State *L)
     l_int32 subflag = ll_check_subflag(_fun, L, 3, L_USE_MINSIZE);
     l_int32 maxdiff = ll_check_l_int32_default(_fun, L, 4, 0);
     l_int32 extrapixels = ll_check_l_int32_default(_fun, L, 5, 0);
-    l_int32 debug = lua_toboolean(L, 6);
+    l_int32 debug = ll_check_boolean_default(_fun, L, 6, FALSE);
     Boxa *boxa = boxaSmoothSequenceMedian(boxas, halfwin, subflag, maxdiff, extrapixels, debug);
     return ll_push_Boxa(_fun, L, boxa);
 }
@@ -1557,7 +1557,7 @@ LinearFit(lua_State *L)
     FUNC(LL_BOXA ".LinearFit");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 factor = ll_check_l_int32_default(_fun, L, 2, 3);
-    l_int32 debug = lua_toboolean(L, 3);
+    l_int32 debug = ll_check_boolean_default(_fun, L, 3, FALSE);
     Boxa *boxa = boxaLinearFit(boxas, factor, debug);
     return ll_push_Boxa(_fun, L, boxa);
 }
@@ -1578,7 +1578,7 @@ WindowedMedian(lua_State *L)
     FUNC(LL_BOXA ".WindowedMedian");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 halfwin = ll_check_l_int32_default(_fun, L, 2, 3);
-    l_int32 debug = lua_toboolean(L, 3);
+    l_int32 debug = ll_check_boolean_default(_fun, L, 3, FALSE);
     Boxa *boxa = boxaWindowedMedian(boxas, halfwin, debug);
     return ll_push_Boxa(_fun, L, boxa);
 }
@@ -1683,6 +1683,130 @@ ReconcilePairWidth(lua_State *L)
     Numa *na = ll_check_Numa(_fun, L, 5);
     Boxa *boxa = boxaReconcilePairWidth(boxas, delw, op, factor, na);
     return ll_push_Boxa(_fun, L, boxa);
+}
+
+/**
+ * \brief Fill a sequence of boxes in a Boxa* (%boxas)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ * Arg #2 is expected to be a string describing the use flag (useflag).
+ * Arg #3 is optional and, if given, expected to be a boolean (debug).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Boxa* (%boxa) on the Lua stack
+ */
+static int
+FillSequence(lua_State *L)
+{
+    FUNC(LL_BOXA ".FillSequence");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 useflag = ll_check_useflag(_fun, L, 2, L_USE_ALL_BOXES);
+    l_int32 debug = ll_check_boolean_default(_fun, L, 3, FALSE);
+    Boxa *boxa = boxaFillSequence(boxas, useflag, debug);
+    return ll_push_Boxa(_fun, L, boxa);
+}
+
+/**
+ * \brief Determine the size variation of boxes in a Boxa* (%boxas)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ * Arg #2 is expected to be a string describing the select size (type).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 4 numbers on the Lua stack (%del_evenodd, %rms_even, %rms_odd, %rms_all)
+ */
+static int
+SizeVariation(lua_State *L)
+{
+    FUNC(LL_BOXA ".SizeVariation");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 type = ll_check_select_size(_fun, L, 2, L_SELECT_WIDTH);
+    l_float32 del_evenodd = 0.0f;
+    l_float32 rms_even = 0.0f;
+    l_float32 rms_odd = 0.0f;
+    l_float32 rms_all = 0.0f;
+    if (boxaSizeVariation(boxas, type, &del_evenodd, &rms_even, &rms_odd, &rms_all))
+        return ll_push_nil(L);
+    lua_pushnumber(L, static_cast<lua_Number>(del_evenodd));
+    lua_pushnumber(L, static_cast<lua_Number>(rms_even));
+    lua_pushnumber(L, static_cast<lua_Number>(rms_odd));
+    lua_pushnumber(L, static_cast<lua_Number>(rms_all));
+    return 4;
+}
+
+/**
+ * \brief Get the extent of boxes in a Boxa* (%boxas)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 3 two integers (%w, %h) and a Box* (%box) on the Lua stack
+ */
+static int
+GetExtent(lua_State *L)
+{
+    FUNC(LL_BOXA ".GetExtent");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 w = 0;
+    l_int32 h = 0;
+    Box *box = nullptr;
+    if (boxaGetExtent(boxas, &w, &h, &box))
+        return ll_push_nil(L);
+    lua_pushinteger(L, w);
+    lua_pushinteger(L, h);
+    return 2 + ll_push_Box(_fun, L, box);;
+}
+
+/**
+ * \brief Get the extent of boxes in a Boxa* (%boxas)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ * Arg #2 is expected to be a l_int32 (wc)
+ * Arg #3 is expected to be a l_int32 (hc)
+ * Arg #4 is optional and, if given, expected to be a boolean (exactflag)
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 number on the Lua stack (%fract)
+ */
+static int
+GetCoverage(lua_State *L)
+{
+    FUNC(LL_BOXA ".GetCoverage");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 wc = ll_check_l_int32(_fun, L, 2);
+    l_int32 hc = ll_check_l_int32(_fun, L, 3);
+    l_int32 exactflag = ll_check_boolean_default(_fun, L, 3, FALSE);
+    l_float32 fract = 0.0f;
+    if (boxaGetCoverage(boxas, wc, hc, exactflag, &fract))
+        return ll_push_nil(L);
+    lua_pushnumber(L, static_cast<lua_Number>(fract));
+    return 1;
+}
+
+/**
+ * \brief Get the size range of boxes in a Boxa* (%boxas)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 number on the Lua stack (%fract)
+ */
+static int
+SizeRange(lua_State *L)
+{
+    FUNC(LL_BOXA ".SizeRange");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 minw = 0;
+    l_int32 minh = 0;
+    l_int32 maxw = 0;
+    l_int32 maxh = 0;
+    if (boxaSizeRange(boxas, &minw, &minh, &maxw, &maxh))
+        return ll_push_nil(L);
+    lua_pushinteger(L, minw);
+    lua_pushinteger(L, minh);
+    lua_pushinteger(L, maxw);
+    lua_pushinteger(L, maxh);
+    return 4;
 }
 
 /**
@@ -1934,6 +2058,11 @@ ll_register_Boxa(lua_State *L)
         {"ConstrainSize",           ConstrainSize},
         {"ReconcileEvenOddHeight",  ReconcileEvenOddHeight},
         {"ReconcilePairWidth",      ReconcilePairWidth},
+        {"FillSequence",            FillSequence},
+        {"SizeVariation",           SizeVariation},
+        {"GetExtent",               GetExtent},
+        {"GetCoverage",             GetCoverage},
+        {"SizeRange",               SizeRange},
         {"Read",                    Read},
         {"ReadStream",              ReadStream},
         {"ReadMem",                 ReadMem},

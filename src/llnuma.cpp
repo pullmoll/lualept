@@ -470,10 +470,10 @@ CopyParameters(lua_State *L)
  * Arg #2 is expected to be a string describing the number type (type).
  * Arg #3 is expected to be a l_int32 (size1).
  * Arg #4 is expected to be a l_int32 (size2) for 'float'.
- * Arg #4 is expected to be a boolean (addzeroes) for 'integer'.
+ * Arg #5 is expected to be a boolean (addzeroes) for 'integer'.
  * </pre>
  * \param L pointer to the lua_State
- * \return 2 numbers (startx, deltax) on the Lua stack
+ * \return 1 Sarray* (%sa) on the Lua stack
  */
 static int
 ConvertToSarray(lua_State *L)
@@ -483,7 +483,7 @@ ConvertToSarray(lua_State *L)
     l_int32 type = ll_check_number_value(_fun, L, 2, L_FLOAT_VALUE);
     l_int32 size1 = ll_check_l_int32_default(_fun, L, 3, 0);
     l_int32 size2 = L_FLOAT_VALUE == type ? ll_check_l_int32_default(_fun, L, 4, 0) : 0;
-    l_int32 addzeroes = L_INTEGER_VALUE == type ? lua_toboolean(L, 4) : FALSE;
+    l_int32 addzeroes = ll_check_boolean_default(_fun, L, 5, FALSE);
     Sarray *sa = numaConvertToSarray(na, size1, size2, addzeroes, type);
     ll_push_sarray(L, sa);
     sarrayDestroy(&sa);

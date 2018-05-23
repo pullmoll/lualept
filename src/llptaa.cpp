@@ -256,7 +256,11 @@ ReadMem(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
  * Arg #2 is expected to be string containing the filename.
- * Arg #3 is an optional boolean; if true, the data is written as integers, otherwise as floats.
+ * Arg #3 is optional and, if given, expected to be a boolean (type)
+ *
+ * Note:
+ *      type = true means the data is written as integers.
+ *      type = false means the data is written as floats.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -267,7 +271,7 @@ Write(lua_State *L)
     FUNC(LL_PTAA ".Write");
     Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
-    int type = lua_toboolean(L, 3);
+    l_int32 type = ll_check_boolean_default(_fun, L, 3, FALSE);
     lua_pushboolean(L, 0 == ptaaWrite(filename, ptaa, type));
     return 1;
 }
@@ -277,7 +281,11 @@ Write(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
  * Arg #2 is expected to be a luaL_Stream* (stream).
- * Arg #3 is an optional boolean; if true, the data is written as integers, otherwise as floats.
+ * Arg #3 is optional and, if given, expected to be a boolean (type)
+ *
+ * Note:
+ *      type = true means the data is written as integers.
+ *      type = false means the data is written as floats.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -288,7 +296,7 @@ WriteStream(lua_State *L)
     FUNC(LL_PTAA ".WriteStream");
     Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    int type = lua_toboolean(L, 3);
+    l_int32 type = ll_check_boolean_default(_fun, L, 3, FALSE);
     lua_pushboolean(L, 0 == ptaaWriteStream(stream->f, ptaa, type));
     return 1;
 }
@@ -297,7 +305,11 @@ WriteStream(lua_State *L)
  * \brief Write the Ptaa* (%ptaa) to memory and return it as a Lua string
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
- * Arg #2 is an optional boolean; if true, the data is written as integers, otherwise as floats.
+ * Arg #2 is optional and, if given, expected to be a boolean (type)
+ *
+ * Note:
+ *      type = true means the data is written as integers.
+ *      type = false means the data is written as floats.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -307,7 +319,7 @@ WriteMem(lua_State *L)
 {
     FUNC(LL_PTAA ".WriteMem");
     Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
-    int type = lua_toboolean(L, 2);
+    l_int32 type = ll_check_boolean_default(_fun, L, 2, FALSE);
     l_uint8 *data = nullptr;
     size_t size = 0;
     if (ptaaWriteMem(&data, &size, ptaa, type))
@@ -390,8 +402,10 @@ ll_register_Ptaa(lua_State *L)
         {"ReplacePta",  ReplacePta},
         {"Read",        Read},
         {"ReadStream",  ReadStream},
+        {"ReadMem",     ReadMem},
         {"Write",       Write},
         {"WriteStream", WriteStream},
+        {"WriteMem",    WriteMem},
         LUA_SENTINEL
     };
 
