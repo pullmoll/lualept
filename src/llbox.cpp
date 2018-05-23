@@ -77,6 +77,20 @@ toString(lua_State *L)
  * Arg #2 is expected to be a l_int32 (y).
  * Arg #3 is expected to be a l_int32 (w).
  * Arg #4 is expected to be a l_int32 (h).
+ *
+ * Notes:
+ *      (1) This clips the box to the +quad.  If no part of the
+ *          box is in the +quad, this returns NULL.
+ *      (2) We allow you to make a box with w = 0 and/or h = 0.
+ *          This does not represent a valid region, but it is useful
+ *          as a placeholder in a Boxa* for which the index of the
+ *          box in the boxa is important.  This is an atypical
+ *          situation; usually you want to put only valid boxes with
+ *          nonzero width and height in a Boxa*.  If you have a Boxa*
+ *          with invalid boxes, the accessor Boxa:GetValidBox()
+ *          will return NULL on each invalid box.
+ *      (3) If you want to create only valid boxes, use CreateValid(),
+ *          which returns NULL if either w or h is 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -100,6 +114,9 @@ Create(lua_State *L)
  * Arg #2 is expected to be a l_int32 (y).
  * Arg #3 is expected to be a l_int32 (w).
  * Arg #4 is expected to be a l_int32 (h).
+ *
+ * Notes:
+ *     (1) This returns NULL if either w = 0 or h = 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -122,7 +139,7 @@ CreateValid(lua_State *L)
 /**
  * \brief Copy a Box*
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Box* user data.
+ * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -139,7 +156,7 @@ Copy(lua_State *L)
 /**
  * \brief Clone a Box*
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Box* user data.
+ * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -156,7 +173,7 @@ Clone(lua_State *L)
 /**
  * \brief Destroy a Box*
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Box* user data.
+ * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * </pre>
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack
@@ -165,11 +182,11 @@ static int
 Destroy(lua_State *L)
 {
     FUNC(LL_BOX ".Destroy");
-    Box **pbox;
-    Box *box = ll_check_Box(_fun, L, 1);
+    Box **pbox = reinterpret_cast<Box **>(ll_check_udata(_fun, L, 1, LL_BOX));
+    Box *box = *pbox;
     DBG(LOG_DESTROY, "%s: '%s' pbox=%p box=%p refcount=%d\n", _fun,
         LL_BOX, pbox, box, boxGetRefcount(box));
-    boxDestroy(pbox);
+    boxDestroy(&box);
     *pbox = nullptr;
     return 0;
 }
@@ -177,7 +194,7 @@ Destroy(lua_State *L)
 /**
  * \brief Get the Box* geometry
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Box* user data.
+ * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * </pre>
  * \param L pointer to the lua_State
  * \return 4 for four integers (or nil on error) on the stack
@@ -200,7 +217,7 @@ GetGeometry(lua_State *L)
 /**
  * \brief Set the BOX geometry
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Box* user data.
+ * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * Arg #2 is expected to be a lua_Integer (x).
  * Arg #3 is expected to be a lua_Integer (y).
  * Arg #4 is expected to be a lua_Integer (w).
@@ -225,7 +242,7 @@ SetGeometry(lua_State *L)
 /**
  * \brief Get the BOX side locations (left, right, top, bottom)
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Box* user data.
+ * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * </pre>
  * \param L pointer to the lua_State
  * \return 4 for four integers (or nil on error) on the stack
@@ -248,7 +265,7 @@ GetSideLocations(lua_State *L)
 /**
  * \brief Set the BOX side locations (left, right, top, bottom)
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Box* user data.
+ * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * Arg #2 is expected to be a lua_Integer (l).
  * Arg #3 is expected to be a lua_Integer (r).
  * Arg #4 is expected to be a lua_Integer (t).
@@ -273,7 +290,7 @@ SetSideLocations(lua_State *L)
 /**
  * \brief Get the Box* reference count
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Box* user data.
+ * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 integers (or nil on error) on the stack
@@ -290,7 +307,7 @@ GetRefcount(lua_State *L)
 /**
  * \brief Change the Box* reference count
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Box* user data.
+ * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * Arg #2 (i.e. self) is expected to be a l_int32 (delta).
  * </pre>
  * \param L pointer to the lua_State
@@ -309,7 +326,7 @@ ChangeRefcount(lua_State *L)
 /**
  * \brief Check if a Box* is valid
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Box* user data.
+ * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack

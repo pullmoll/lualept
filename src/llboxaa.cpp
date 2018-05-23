@@ -112,9 +112,10 @@ Destroy(lua_State *L)
 {
     FUNC(LL_BOXAA ".Destroy");
     Boxaa **pboxaa = reinterpret_cast<Boxaa **>(ll_check_udata(_fun, L, 1, LL_BOXAA));
-    DBG(LOG_DESTROY, "%s: '%s' pboxaa=%p boxaa=%p\n",
-        _fun, LL_BOXAA, pboxaa, *pboxaa);
-    boxaaDestroy(pboxaa);
+    Boxaa *boxaa = *pboxaa;
+    DBG(LOG_DESTROY, "%s: '%s' pboxaa=%p boxaa=%p count=%d\n",
+        _fun, LL_BOXAA, pboxaa, boxaa, boxaaGetCount(boxaa));
+    boxaaDestroy(&boxaa);
     *pboxaa = nullptr;
     return 0;
 }

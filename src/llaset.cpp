@@ -139,9 +139,10 @@ Destroy(lua_State *L)
 {
     FUNC(LL_ASET ".Destroy");
     L_Rbtree **paset = reinterpret_cast<L_Rbtree **>(ll_check_udata(_fun, L, 1, LL_ASET));
+    L_Rbtree *aset = *paset;
     DBG(LOG_DESTROY, "%s: '%s' paset=%p aset=%p size=%d\n", _fun,
-        LL_ASET, paset, *paset, l_asetSize(*paset));
-    l_asetDestroy(paset);
+        LL_ASET, paset, aset, l_asetSize(aset));
+    l_asetDestroy(&aset);
     *paset = nullptr;
     return 0;
 }

@@ -115,9 +115,10 @@ Destroy(lua_State *L)
 {
     FUNC(LL_DLLIST ".Destroy");
     DoubleLinkedList **plist = reinterpret_cast<DoubleLinkedList **>(ll_check_udata(_fun, L, 1, LL_DLLIST));
+    DoubleLinkedList *list = *plist;
     DBG(LOG_DESTROY, "%s: '%s' plist=%p head=%p size=%d\n",
-        _fun, LL_DLLIST, plist, *plist, listGetCount(*plist));
-    listDestroy(plist);
+        _fun, LL_DLLIST, plist, list, listGetCount(list));
+    listDestroy(&list);
     *plist = nullptr;
     return 0;
 }

@@ -90,9 +90,10 @@ Destroy(lua_State *L)
 {
     FUNC(LL_PIXAA ".Destroy");
     Pixaa **ppixaa = reinterpret_cast<Pixaa **>(ll_check_udata(_fun, L, 1, LL_PIXAA));
-    DBG(LOG_DESTROY, "%s: '%s' ppixaa=%p pixaa=%p\n",
-        _fun, LL_PIXAA, ppixaa, *ppixaa);
-    pixaaDestroy(ppixaa);
+    Pixaa *pixaa = *ppixaa;
+    DBG(LOG_DESTROY, "%s: '%s' ppixaa=%p pixaa=%p count=%d\n",
+        _fun, LL_PIXAA, ppixaa, pixaa, pixaaGetCount(pixaa, nullptr));
+    pixaaDestroy(&pixaa);
     *ppixaa = nullptr;
     return 0;
 }

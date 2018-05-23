@@ -126,9 +126,10 @@ Destroy(lua_State *L)
 {
     FUNC(LL_AMAP ".Destroy");
     L_Rbtree **pamap = reinterpret_cast<L_Rbtree **>(ll_check_udata(_fun, L, 1, LL_AMAP));
+    L_Rbtree *amap = *pamap;
     DBG(LOG_DESTROY, "%s: '%s' pamap=%p amap=%p size=%d\n", _fun,
-        LL_AMAP, pamap, *pamap, l_amapSize(*pamap));
-    l_amapDestroy(pamap);
+        LL_AMAP, pamap, amap, l_amapSize(amap));
+    l_amapDestroy(&amap);
     *pamap = nullptr;
     return 0;
 }

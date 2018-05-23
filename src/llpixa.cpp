@@ -67,9 +67,10 @@ Destroy(lua_State *L)
 {
     FUNC(LL_PIXA ".Destroy");
     Pixa **ppixa = reinterpret_cast<Pixa **>(ll_check_udata(_fun, L, 1, LL_PIXA));
-    DBG(LOG_DESTROY, "%s: '%s' ppa=%p pa=%p\n", _fun,
-        LL_PIXA, ppixa, *ppixa);
-    pixaDestroy(ppixa);
+    Pixa *pixa = *ppixa;
+    DBG(LOG_DESTROY, "%s: '%s' ppa=%p pa=%p count=%d\n", _fun,
+        LL_PIXA, ppixa, pixa, pixaGetCount(pixa));
+    pixaDestroy(&pixa);
     *ppixa = nullptr;
     return 0;
 }

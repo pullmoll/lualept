@@ -34,10 +34,10 @@
 #define LUALEPT_EXPORTS_H
 
 #define LLUA_DEBUG      0               /*!< set to 1 to enable debugging */
-#define LOG_REGISTER    1               /*!< set to 1 to enable debugging of Lua class registration */
-#define LOG_DESTROY     1               /*!< set to 1 to enable debugging of object destruction */
-#define LOG_PUSH_UDATA  1               /*!< set to 1 to enable debugging of pushing user data */
-#define LOG_PUSH_TABLE  1               /*!< set to 1 to enable debugging of pushing tables */
+#define LOG_REGISTER    1               /*!< set to 1 to log Lua class registration */
+#define LOG_DESTROY     1               /*!< set to 1 to log object destruction */
+#define LOG_PUSH_UDATA  1               /*!< set to 1 to log pushing user data */
+#define LOG_PUSH_TABLE  1               /*!< set to 1 to log pushing tables */
 
 #include "lualept.h"
 
@@ -310,6 +310,9 @@ extern const char * ll_string_from_side(l_int32 which);
 
 extern l_int32      ll_check_adjust_sides(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_adjust_sides(l_int32 which);
+
+extern l_int32      ll_check_sort_mode(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_sort_mode(l_int32 order);
 
 extern l_int32      ll_check_sort_order(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_sort_order(l_int32 order);

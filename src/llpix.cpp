@@ -83,7 +83,7 @@ toString(lua_State* L)
             yres = pixGetYRes(pix);
             format = ll_string_input_format(pixGetInputFormat(pix));
             snprintf(str, sizeof(str),
-                     "Pix* %p\n"
+                     "Pix: %p\n"
                      "    width = %d, height = %d, depth = %d, spp = %d\n"
                      "    wpl = %d, data = %p, size = %#" PRIx64 "\n"
                      "    xres = %d, yres = %d, refcount = %d\n", reinterpret_cast<void *>(pix),
@@ -200,9 +200,10 @@ Destroy(lua_State *L)
 {
     FUNC(LL_PIX ".Destroy");
     Pix **ppix = reinterpret_cast<Pix **>(ll_check_udata(_fun, L, 1, LL_PIX));
+    Pix *pix = *ppix;
     DBG(LOG_DESTROY, "%s: '%s' ppix=%p pix=%p refcount=%d\n",
-        _fun, LL_PIX, ppix, *ppix, pixGetRefcount(*ppix));
-    pixDestroy(reinterpret_cast<Pix **>(ppix));
+        _fun, LL_PIX, ppix, pix, pixGetRefcount(pix));
+    pixDestroy(&pix);
     *ppix = nullptr;
     return 0;
 }

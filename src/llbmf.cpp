@@ -67,9 +67,10 @@ Destroy(lua_State *L)
 {
     FUNC(LL_BMF ".Destroy");
     L_Bmf **pbmf = reinterpret_cast<L_Bmf **>(ll_check_udata(_fun, L, 1, LL_BMF));
+    L_Bmf *bmf = *pbmf;
     DBG(LOG_DESTROY, "%s: '%s' pbmf=%p bmf=%p\n",
-        _fun, LL_BMF, pbmf, *pbmf);
-    bmfDestroy(pbmf);
+        _fun, LL_BMF, pbmf, bmf);
+    bmfDestroy(&bmf);
     *pbmf = nullptr;
     return 0;
 }

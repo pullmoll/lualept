@@ -84,9 +84,10 @@ Destroy(lua_State *L)
 {
     FUNC(LL_PTAA ".Destroy");
     Ptaa **pptaa = reinterpret_cast<Ptaa **>(ll_check_udata(_fun, L, 1, LL_PTAA));
-    DBG(LOG_DESTROY, "%s: '%s' pptaa=%p ptaa=%p\n",
-        _fun, LL_PTAA, pptaa, *pptaa);
-    ptaaDestroy(pptaa);
+    Ptaa *ptaa = *pptaa;
+    DBG(LOG_DESTROY, "%s: '%s' pptaa=%p ptaa=%p count=%d\n",
+        _fun, LL_PTAA, pptaa, ptaa, ptaaGetCount(ptaa));
+    ptaaDestroy(&ptaa);
     *pptaa = nullptr;
     return 0;
 }

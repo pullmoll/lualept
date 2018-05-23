@@ -103,9 +103,10 @@ Destroy(lua_State *L)
 {
     FUNC(LL_BOXA ".Destroy");
     Boxa **pboxa = reinterpret_cast<Boxa **>(ll_check_udata(_fun, L, 1, LL_BOXA));
-    DBG(LOG_DESTROY, "%s: '%s' pboxa=%p boxa=%p\n",
-        _fun, LL_BOXA, pboxa, *pboxa);
-    boxaDestroy(pboxa);
+    Boxa *boxa = *pboxa;
+    DBG(LOG_DESTROY, "%s: '%s' pboxa=%p boxa=%p count=%d\n",
+        _fun, LL_BOXA, pboxa, boxa, boxaGetCount(boxa));
+    boxaDestroy(&boxa);
     *pboxa = nullptr;
     return 0;
 }
@@ -1497,7 +1498,7 @@ ConvertToPta(lua_State *L)
  * Arg #5 is optional and, if given, expected to be a boolean (debug).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 Pta* (%pta) on the Lua stack
+ * \return 1 Boxa* (%boxa) on the Lua stack
  */
 static int
 SmoothSequenceLS(lua_State *L)
@@ -1524,7 +1525,7 @@ SmoothSequenceLS(lua_State *L)
  * Arg #5 is optional and, if given, expected to be a boolean (debug).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 Pta* (%pta) on the Lua stack
+ * \return 1 Boxa* (%boxa) on the Lua stack
  */
 static int
 SmoothSequenceMedian(lua_State *L)
@@ -1537,6 +1538,150 @@ SmoothSequenceMedian(lua_State *L)
     l_int32 extrapixels = ll_check_l_int32_default(_fun, L, 5, 0);
     l_int32 debug = lua_toboolean(L, 6);
     Boxa *boxa = boxaSmoothSequenceMedian(boxas, halfwin, subflag, maxdiff, extrapixels, debug);
+    return ll_push_Boxa(_fun, L, boxa);
+}
+
+/**
+ * \brief Linear fit for Boxa* (%boxas) giving Boxa* (%boxa)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * Arg #2 is expected to be a l_int32 (factor).
+ * Arg #3 is optional and, if given, expected to be a boolean (debug).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Boxa* (%boxa) on the Lua stack
+ */
+static int
+LinearFit(lua_State *L)
+{
+    FUNC(LL_BOXA ".LinearFit");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 factor = ll_check_l_int32_default(_fun, L, 2, 3);
+    l_int32 debug = lua_toboolean(L, 3);
+    Boxa *boxa = boxaLinearFit(boxas, factor, debug);
+    return ll_push_Boxa(_fun, L, boxa);
+}
+
+/**
+ * \brief Windowed median for Boxa* (%boxas) giving Boxa* (%boxa)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * Arg #2 is expected to be a l_int32 (halfwin).
+ * Arg #3 is optional and, if given, expected to be a boolean (debug).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Boxa* (%boxa) on the Lua stack
+ */
+static int
+WindowedMedian(lua_State *L)
+{
+    FUNC(LL_BOXA ".WindowedMedian");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 halfwin = ll_check_l_int32_default(_fun, L, 2, 3);
+    l_int32 debug = lua_toboolean(L, 3);
+    Boxa *boxa = boxaWindowedMedian(boxas, halfwin, debug);
+    return ll_push_Boxa(_fun, L, boxa);
+}
+
+/**
+ * \brief Modify a Boxa* (%boxas) with another Boxa* (%boxam) giving Boxa* (%boxa)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ * Arg #2 is expected to be another Boxa* (boxam).
+ * Arg #3 is expected to be a string describing the sub flag (subflag).
+ * Arg #4 is expected to be a l_int32 (maxdiff).
+ * Arg #5 is expected to be a l_int32 (extrapixels).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Boxa* (%boxa) on the Lua stack
+ */
+static int
+ModifyWithBoxa(lua_State *L)
+{
+    FUNC(LL_BOXA ".ModifyWithBoxa");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    Boxa *boxam = ll_check_Boxa(_fun, L, 2);
+    l_int32 subflag = ll_check_subflag(_fun, L, 3, L_USE_MINSIZE);
+    l_int32 maxdiff = ll_check_l_int32_default(_fun, L, 4, 0);
+    l_int32 extrapixels = ll_check_l_int32_default(_fun, L, 5, 0);
+    Boxa *boxa = boxaModifyWithBoxa(boxas, boxam, subflag, maxdiff, extrapixels);
+    return ll_push_Boxa(_fun, L, boxa);
+}
+
+/**
+ * \brief Constrain the size of boxes in a Boxa* (%boxas)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ * Arg #2 is expected to be a l_int32 (width).
+ * Arg #3 is expected to be a string describing the adjust sides (widthflag).
+ * Arg #4 is expected to be a l_int32 (height).
+ * Arg #5 is expected to be a string describing the adjust sides (heightflag).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Boxa* (%boxa) on the Lua stack
+ */
+static int
+ConstrainSize(lua_State *L)
+{
+    FUNC(LL_BOXA ".ConstrainSize");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 width = ll_check_l_int32_default(_fun, L, 2, 0);
+    l_int32 widthflag = ll_check_adjust_sides(_fun, L, 3, L_ADJUST_LEFT_AND_RIGHT);
+    l_int32 height = ll_check_l_int32_default(_fun, L, 4, 0);
+    l_int32 heightflag = ll_check_adjust_sides(_fun, L, 5, L_ADJUST_TOP_AND_BOT);
+    Boxa *boxa = boxaConstrainSize(boxas, width, widthflag, height, heightflag);
+    return ll_push_Boxa(_fun, L, boxa);
+}
+
+/**
+ * \brief Reconcile the height of even/odd boxes in a Boxa* (%boxas)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ * Arg #2 is expected to be a string describing the adjust sides (sides).
+ * Arg #3 is expected to be a l_int32 (delh).
+ * Arg #4 is expected to be a string describing the adjust choice (op).
+ * Arg #5 is expected to be a l_float32 (factor).
+ * Arg #6 is expected to be a l_int32 (start).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Boxa* (%boxa) on the Lua stack
+ */
+static int
+ReconcileEvenOddHeight(lua_State *L)
+{
+    FUNC(LL_BOXA ".ReconcileEvenOddHeight");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 sides = ll_check_adjust_sides(_fun, L, 2, L_ADJUST_TOP_AND_BOT);
+    l_int32 delh = ll_check_l_int32(_fun, L, 3);
+    l_int32 op = ll_check_adjust_sides(_fun, L, 4, L_ADJUST_CHOOSE_MIN);
+    l_float32 factor = ll_check_l_float32_default(_fun, L, 5, 1.0f);
+    l_int32 start = ll_check_index(_fun, L, 6, 1);
+    Boxa *boxa = boxaReconcileEvenOddHeight(boxas, sides, delh, op, factor, start);
+    return ll_push_Boxa(_fun, L, boxa);
+}
+
+/**
+ * \brief Reconcile the width of box pairs in a Boxa* (%boxas)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ * Arg #2 is expected to be a l_int32 (delh).
+ * Arg #3 is expected to be a string describing the adjust choice (op).
+ * Arg #4 is expected to be a l_float32 (factor).
+ * Arg #5 is expected to be a Numa* (na).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Boxa* (%boxa) on the Lua stack
+ */
+static int
+ReconcilePairWidth(lua_State *L)
+{
+    FUNC(LL_BOXA ".ReconcilePairWidth");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 delw = ll_check_l_int32(_fun, L, 2);
+    l_int32 op = ll_check_adjust_sides(_fun, L, 3, L_ADJUST_CHOOSE_MIN);
+    l_float32 factor = ll_check_l_float32_default(_fun, L, 4, 1.0f);
+    Numa *na = ll_check_Numa(_fun, L, 5);
+    Boxa *boxa = boxaReconcilePairWidth(boxas, delw, op, factor, na);
     return ll_push_Boxa(_fun, L, boxa);
 }
 
@@ -1783,6 +1928,12 @@ ll_register_Boxa(lua_State *L)
         {"ConvertToPta",            ConvertToPta},
         {"SmoothSequenceLS",        SmoothSequenceLS},
         {"SmoothSequenceMedian",    SmoothSequenceMedian},
+        {"LinearFit",               LinearFit},
+        {"WindowedMedian",          WindowedMedian},
+        {"ModifyWithBoxa",          ModifyWithBoxa},
+        {"ConstrainSize",           ConstrainSize},
+        {"ReconcileEvenOddHeight",  ReconcileEvenOddHeight},
+        {"ReconcilePairWidth",      ReconcilePairWidth},
         {"Read",                    Read},
         {"ReadStream",              ReadStream},
         {"ReadMem",                 ReadMem},

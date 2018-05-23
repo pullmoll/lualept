@@ -143,9 +143,10 @@ Destroy(lua_State *L)
 {
     FUNC(LL_PIXCMAP ".Destroy");
     PixColormap **pcmap = reinterpret_cast<PixColormap **>(ll_check_udata(_fun, L, 1, LL_PIXCMAP));
-    DBG(LOG_DESTROY, "%s: '%s' pcmap=%p cmap=%p\n",
-        _fun, LL_PIXCMAP, pcmap, *pcmap);
-    pixcmapDestroy(pcmap);
+    PixColormap *cmap = *pcmap;
+    DBG(LOG_DESTROY, "%s: '%s' pcmap=%p cmap=%p count=%d\n",
+        _fun, LL_PIXCMAP, pcmap, cmap, pixcmapGetCount(cmap));
+    pixcmapDestroy(&cmap);
     *pcmap = nullptr;
     return 0;
 }

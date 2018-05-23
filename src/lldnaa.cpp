@@ -147,9 +147,10 @@ Destroy(lua_State *L)
 {
     FUNC(LL_DNAA ".Destroy");
     L_Dnaa **pdaa = reinterpret_cast<L_Dnaa **>(ll_check_udata(_fun, L, 1, LL_DNAA));
-    DBG(LOG_DESTROY, "%s: '%s' pdaa=%p daa=%p\n",
-        _fun, LL_DNAA, pdaa, *pdaa);
-    l_dnaaDestroy(pdaa);
+    L_Dnaa *daa = *pdaa;
+    DBG(LOG_DESTROY, "%s: '%s' pdaa=%p daa=%p count=%d\n",
+        _fun, LL_DNAA, pdaa, daa, l_dnaaGetCount(daa));
+    l_dnaaDestroy(&daa);
     *pdaa = nullptr;
     return 0;
 }

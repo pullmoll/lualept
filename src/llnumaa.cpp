@@ -145,9 +145,10 @@ Destroy(lua_State *L)
 {
     FUNC(LL_NUMAA ".Destroy");
     Numaa **pnaa = reinterpret_cast<Numaa **>(ll_check_udata(_fun, L, 1, LL_NUMAA));
-    DBG(LOG_DESTROY, "%s: '%s' pnaa=%p naa=%p\n",
-         _fun, LL_NUMAA, pnaa, *pnaa);
-    numaaDestroy(pnaa);
+    Numaa *naa = *pnaa;
+    DBG(LOG_DESTROY, "%s: '%s' pnaa=%p naa=%p count=%d\n",
+         _fun, LL_NUMAA, pnaa, naa, numaaGetCount(naa));
+    numaaDestroy(&naa);
     *pnaa = nullptr;
     return 0;
 }

@@ -1840,7 +1840,7 @@ static const lept_enums_t tbl_adjust_sides[] = {
 };
 
 /**
- * \brief Check for a from side name
+ * \brief Check for a adjust side name
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
@@ -1854,7 +1854,7 @@ ll_check_adjust_sides(const char *_fun, lua_State* L, int arg, l_int32 dflt)
 }
 
 /**
- * \brief Return a string for the from side enumeration value
+ * \brief Return a string for the from adjust side enumeration value
  * \param which from side enumeration value
  * \return const string with the name
  */
@@ -1862,6 +1862,43 @@ const char*
 ll_string_adjust_sides(l_int32 which)
 {
     return ll_string_tbl(which, tbl_adjust_sides, ARRAYSIZE(tbl_adjust_sides));
+}
+
+/**
+ * \brief Table of sort mode by names and enumeration values
+ */
+static const lept_enums_t tbl_sort_mode[] = {
+    TBL_ENTRY("shell-sort",             L_SHELL_SORT),
+    TBL_ENTRY("shell",                  L_SHELL_SORT),
+    TBL_ENTRY("s",                      L_SHELL_SORT),
+    TBL_ENTRY("bin-sort",               L_BIN_SORT),
+    TBL_ENTRY("bin",                    L_BIN_SORT),
+    TBL_ENTRY("b",                      L_BIN_SORT)
+};
+
+/**
+ * \brief Check for a sort mode name
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \param dflt default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_sort_mode(const char *_fun, lua_State* L, int arg, l_int32 dflt)
+{
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_sort_mode, ARRAYSIZE(tbl_sort_mode));
+}
+
+/**
+ * \brief Return a string for the sort mode
+ * \param sort_mode transform sort_mode enumeration value
+ * \return const string with the name
+ */
+const char*
+ll_string_sort_mode(l_int32 sort_mode)
+{
+    return ll_string_tbl(sort_mode, tbl_sort_mode, ARRAYSIZE(tbl_sort_mode));
 }
 
 /**
@@ -1877,7 +1914,7 @@ static const lept_enums_t tbl_sort_order[] = {
 };
 
 /**
- * \brief Check for a select min or max name (%L_SELECT_MIN, %L_SELECT_MAX)
+ * \brief Check for a sort order name
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
@@ -1891,7 +1928,7 @@ ll_check_sort_order(const char *_fun, lua_State* L, int arg, l_int32 dflt)
 }
 
 /**
- * \brief Return a string for the transform sort_order
+ * \brief Return a string for the sort order
  * \param sort_order transform sort_order enumeration value
  * \return const string with the name
  */
@@ -1920,7 +1957,7 @@ static const lept_enums_t tbl_trans_order[] = {
 };
 
 /**
- * \brief Check for a select min or max name (%L_SELECT_MIN, %L_SELECT_MAX)
+ * \brief Check for a transfort order name
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
@@ -1963,7 +2000,7 @@ static const lept_enums_t tbl_relation[] = {
 };
 
 /**
- * \brief Check for a select min or max name
+ * \brief Check for a transform relation name
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
@@ -2000,7 +2037,7 @@ static const lept_enums_t tbl_rotation[] = {
 };
 
 /**
- * \brief Check for a select min or max name
+ * \brief Check for a rotation name (actually a number)
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
@@ -2014,7 +2051,7 @@ ll_check_rotation(const char *_fun, lua_State* L, int arg, l_int32 dflt)
 }
 
 /**
- * \brief Return a string for the transform rotation
+ * \brief Return a string for the rotation
  * \param rotation rotation value
  * \return const string with the name
  */
@@ -2037,7 +2074,7 @@ static const lept_enums_t tbl_overlap[] = {
 };
 
 /**
- * \brief Check for a select min or max name
+ * \brief Check for a handle overlap name
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
@@ -2197,9 +2234,10 @@ Destroy(lua_State *L)
 {
     FUNC(LL_LEPT ".Destroy");
     LuaLept **plept = reinterpret_cast<LuaLept **>(ll_check_udata(_fun, L, 1, LL_LEPT));
+    LuaLept *lept = *plept;
     DBG(LOG_DESTROY, "%s: '%s' plept=%p lept=%p\n",
-         _fun, LL_LEPT, plept, *plept);
-    LEPT_FREE(*plept);
+         _fun, LL_LEPT, plept, lept);
+    LEPT_FREE(lept);
     *plept = nullptr;
     return 0;
 }

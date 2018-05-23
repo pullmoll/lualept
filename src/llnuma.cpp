@@ -99,15 +99,16 @@ Destroy(lua_State *L)
 {
     FUNC(LL_NUMA ".Destroy");
     Numa **pna = reinterpret_cast<Numa **>(ll_check_udata(_fun, L, 1, LL_NUMA));
-    DBG(LOG_DESTROY, "%s: '%s' pna=%p na=%p refcount=%d\n",
-         _fun, LL_NUMA, pna, *pna, numaGetRefcount(*pna));
-    numaDestroy(pna);
+    Numa *na = *pna;
+    DBG(LOG_DESTROY, "%s: '%s' pna=%p na=%p count=%d refcount=%d\n",
+         _fun, LL_NUMA, pna, na, numaGetCount(na), numaGetRefcount(na));
+    numaDestroy(&na);
     *pna = nullptr;
     return 0;
 }
 
 /**
- * \brief Get the number of stored numbers in the Numa* (%na)
+ * \brief Get the number of numbers stored in the Numa* (%na)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numa* (na).
  * </pre>
@@ -117,7 +118,7 @@ Destroy(lua_State *L)
 static int
 GetCount(lua_State *L)
 {
-    FUNC(LL_NUMA ".Destroy");
+    FUNC(LL_NUMA ".GetCount");
     Numa* na = ll_check_Numa(_fun, L, 1);
     l_int32 n = numaGetCount(na);
     lua_pushinteger(L, n);
@@ -125,7 +126,7 @@ GetCount(lua_State *L)
 }
 
 /**
- * \brief Set the number of stored numbers in the Numa* (%na), i.e. resize Numa*
+ * \brief Set the number of numbers stored in the Numa* (%na), i.e. resize Numa*
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numa* (na).
  * Arg #2 is expected to be a l_int32 (n).
