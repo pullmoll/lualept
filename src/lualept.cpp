@@ -1615,6 +1615,51 @@ ll_string_select_min_max(l_int32 which)
 }
 
 /**
+ * \brief Table of select size names and enumeration values
+ */
+static const lept_enums_t tbl_select_size[] = {
+    TBL_ENTRY("width",              L_SELECT_WIDTH),
+    TBL_ENTRY("w",                  L_SELECT_WIDTH),
+    TBL_ENTRY("height",             L_SELECT_HEIGHT),
+    TBL_ENTRY("h",                  L_SELECT_HEIGHT),
+    TBL_ENTRY("xval",               L_SELECT_XVAL),
+    TBL_ENTRY("x",                  L_SELECT_XVAL),
+    TBL_ENTRY("yval",               L_SELECT_YVAL),
+    TBL_ENTRY("y",                  L_SELECT_YVAL),
+    TBL_ENTRY("if-either",          L_SELECT_IF_EITHER),
+    TBL_ENTRY("either",             L_SELECT_IF_EITHER),
+    TBL_ENTRY("e",                  L_SELECT_IF_EITHER),
+    TBL_ENTRY("if-both",            L_SELECT_IF_BOTH),
+    TBL_ENTRY("both",               L_SELECT_IF_BOTH),
+    TBL_ENTRY("b",                  L_SELECT_IF_BOTH)
+};
+
+/**
+ * \brief Check for a select size name
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \param dflt default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_select_size(const char *_fun, lua_State* L, int arg, l_int32 dflt)
+{
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_select_size, ARRAYSIZE(tbl_select_size));
+}
+
+/**
+ * \brief Return a string for the select size enumeration value
+ * \param which select min or max enumeration value
+ * \return const string with the name
+ */
+const char*
+ll_string_select_size(l_int32 which)
+{
+    return ll_string_tbl(which, tbl_select_size, ARRAYSIZE(tbl_select_size));
+}
+
+/**
  * \brief Table of sort by names and enumeration values
  */
 static const lept_enums_t tbl_sort_by[] = {
@@ -1900,6 +1945,49 @@ ll_string_trans_order(l_int32 order)
 }
 
 /**
+ * \brief Table of transform relation by names and enumeration values
+ */
+static const lept_enums_t tbl_relation[] = {
+    TBL_ENTRY("less-than",              L_SELECT_IF_LT),
+    TBL_ENTRY("lt",                     L_SELECT_IF_LT),
+    TBL_ENTRY("<",                      L_SELECT_IF_LT),
+    TBL_ENTRY("greater-than",           L_SELECT_IF_GT),
+    TBL_ENTRY("gt",                     L_SELECT_IF_GT),
+    TBL_ENTRY(">",                      L_SELECT_IF_GT),
+    TBL_ENTRY("less-than-or-equal",     L_SELECT_IF_LTE),
+    TBL_ENTRY("lte",                    L_SELECT_IF_LTE),
+    TBL_ENTRY("<=",                     L_SELECT_IF_LTE),
+    TBL_ENTRY("greater-than-or-equal",  L_SELECT_IF_GTE),
+    TBL_ENTRY("gte",                    L_SELECT_IF_GTE),
+    TBL_ENTRY(">=",                     L_SELECT_IF_GTE)
+};
+
+/**
+ * \brief Check for a select min or max name
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \param dflt default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_relation(const char *_fun, lua_State* L, int arg, l_int32 dflt)
+{
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_relation, ARRAYSIZE(tbl_relation));
+}
+
+/**
+ * \brief Return a string for the transform relation
+ * \param relation relation value
+ * \return const string with the name
+ */
+const char*
+ll_string_relation(l_int32 relation)
+{
+    return ll_string_tbl(relation, tbl_relation, ARRAYSIZE(tbl_relation));
+}
+
+/**
  * \brief Table of transform rotation by names and enumeration values
  */
 static const lept_enums_t tbl_rotation[] = {
@@ -1971,6 +2059,59 @@ const char*
 ll_string_overlap(l_int32 overlap)
 {
     return ll_string_tbl(overlap, tbl_overlap, ARRAYSIZE(tbl_overlap));
+}
+
+/**
+ * \brief Table of handle subflag by names and enumeration values
+ */
+static const lept_enums_t tbl_subflag[] = {
+    TBL_ENTRY("use-minsize",        L_USE_MINSIZE),
+    TBL_ENTRY("minsize",            L_USE_MINSIZE),
+    TBL_ENTRY("min",                L_USE_MINSIZE),
+    TBL_ENTRY("use-maxsize",        L_USE_MAXSIZE),
+    TBL_ENTRY("maxsize",            L_USE_MAXSIZE),
+    TBL_ENTRY("max",                L_USE_MAXSIZE),
+    TBL_ENTRY("sub-on-loc-diff",    L_SUB_ON_LOC_DIFF),
+    TBL_ENTRY("loc-diff",           L_SUB_ON_LOC_DIFF),
+    TBL_ENTRY("ldiff",              L_SUB_ON_LOC_DIFF),
+    TBL_ENTRY("ld",                 L_SUB_ON_LOC_DIFF),
+    TBL_ENTRY("sub-on-size-diff",   L_SUB_ON_SIZE_DIFF),
+    TBL_ENTRY("size-diff",          L_SUB_ON_SIZE_DIFF),
+    TBL_ENTRY("sdiff",              L_SUB_ON_SIZE_DIFF),
+    TBL_ENTRY("sd",                 L_SUB_ON_SIZE_DIFF),
+    TBL_ENTRY("use-capped-min",     L_USE_CAPPED_MIN),
+    TBL_ENTRY("capped-min",         L_USE_CAPPED_MIN),
+    TBL_ENTRY("capmin",             L_USE_CAPPED_MIN),
+    TBL_ENTRY("cmin",               L_USE_CAPPED_MIN),
+    TBL_ENTRY("use-capped-max",     L_USE_CAPPED_MAX),
+    TBL_ENTRY("capped-max",         L_USE_CAPPED_MAX),
+    TBL_ENTRY("capmax",             L_USE_CAPPED_MAX),
+    TBL_ENTRY("cmax",               L_USE_CAPPED_MAX)
+};
+
+/**
+ * \brief Check for a subflag name
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \param dflt default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_subflag(const char *_fun, lua_State* L, int arg, l_int32 dflt)
+{
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_subflag, ARRAYSIZE(tbl_subflag));
+}
+
+/**
+ * \brief Return a string for the subflag
+ * \param subflag subflag value
+ * \return const string with the name
+ */
+const char*
+ll_string_subflag(l_int32 subflag)
+{
+    return ll_string_tbl(subflag, tbl_subflag, ARRAYSIZE(tbl_subflag));
 }
 
 /**

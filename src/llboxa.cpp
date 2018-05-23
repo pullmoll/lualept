@@ -1309,13 +1309,235 @@ SelectBySize(lua_State *L)
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 width = ll_check_l_int32(_fun, L, 2);
     l_int32 height = ll_check_l_int32(_fun, L, 3);
-    l_int32 type = 0;
-    l_int32 relation = 0;
+    l_int32 type = ll_check_select_size(_fun, L, 4, L_SELECT_WIDTH);
+    l_int32 relation = ll_check_relation(_fun, L, 5, L_SELECT_IF_LT);
     l_int32 changed;
     Boxa *boxa = boxaSelectBySize(boxas, width, height, type, relation, &changed);
     ll_push_Boxa(_fun, L, boxa);
     lua_pushinteger(L, changed);
     return 2;
+}
+
+/**
+ * \brief Make indicator for boxes from Boxa* (%boxa) by size
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * Arg #2 is expected to be a l_int32 (width).
+ * Arg #3 is expected to be a l_int32 (height).
+ * Arg #4 is expected to be a string describing the type (type).
+ * Arg #5 is expected to be a string describing the relation (relation).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Numa* (%na) on the Lua stack
+ */
+static int
+MakeSizeIndicator(lua_State *L)
+{
+    FUNC(LL_BOXA ".MakeSizeIndicator");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 width = ll_check_l_int32(_fun, L, 2);
+    l_int32 height = ll_check_l_int32(_fun, L, 3);
+    l_int32 type = ll_check_select_size(_fun, L, 4, L_SELECT_WIDTH);
+    l_int32 relation = ll_check_relation(_fun, L, 5, L_SELECT_IF_LT);
+    Numa *na = boxaMakeSizeIndicator(boxas, width, height, type, relation);
+    ll_push_Numa(_fun, L, na);
+    return 1;
+}
+
+/**
+ * \brief Select boxes from Boxa* (%boxa) with indicator (%na)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * Arg #2 is expected to be a Numa* (na)
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 2 Boxa* (%boxa) and integer (%changed) on the Lua stack
+ */
+static int
+SelectWithIndicator(lua_State *L)
+{
+    FUNC(LL_BOXA ".SelectWithIndicator");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    Numa *na = ll_check_Numa(_fun, L, 2);
+    l_int32 changed;
+    Boxa *boxa = boxaSelectWithIndicator(boxas, na, &changed);
+    ll_push_Boxa(_fun, L, boxa);
+    lua_pushinteger(L, changed);
+    return 2;
+}
+
+/**
+ * \brief Make indicator for boxes from Boxa* (%boxa) by width/height ratio
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * Arg #2 is expected to be a l_float32 (ratio).
+ * Arg #3 is expected to be a string describing the relation (relation).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Numa* (%na) on the Lua stack
+ */
+static int
+MakeWHRatioIndicator(lua_State *L)
+{
+    FUNC(LL_BOXA ".MakeWHRatioIndicator");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_float32 ratio = ll_check_l_float32(_fun, L, 2);
+    l_int32 relation = ll_check_relation(_fun, L, 3, L_SELECT_IF_LT);
+    Numa *na = boxaMakeWHRatioIndicator(boxas, ratio, relation);
+    ll_push_Numa(_fun, L, na);
+    return 1;
+}
+
+/**
+ * \brief Select boxes from Boxa* (%boxa) by size
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * Arg #2 is expected to be a l_float32 (ratio).
+ * Arg #3 is expected to be a string describing the relation (relation).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 2 Boxa* (%boxa) and integer (%changed) on the Lua stack
+ */
+static int
+SelectByWHRatio(lua_State *L)
+{
+    FUNC(LL_BOXA ".SelectByWHRatio");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_float32 ratio = ll_check_l_float32(_fun, L, 2);
+    l_int32 relation = ll_check_relation(_fun, L, 3, L_SELECT_IF_LT);
+    l_int32 changed;
+    Boxa *boxa = boxaSelectByWHRatio(boxas, ratio, relation, &changed);
+    ll_push_Boxa(_fun, L, boxa);
+    lua_pushinteger(L, changed);
+    return 2;
+}
+
+/**
+ * \brief Permute boxes in Boxa* (%boxas) by a pseudo random algorithm
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Boxa* (%boxa) on the Lua stack
+ */
+static int
+PermutePseudorandom(lua_State *L)
+{
+    FUNC(LL_BOXA ".PermutePseudorandom");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    Boxa *boxa = boxaPermutePseudorandom(boxas);
+    return ll_push_Boxa(_fun, L, boxa);
+}
+
+/**
+ * \brief Permute boxes in Boxa* (%boxas) by a random algorithm
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Boxa* (%boxad) on the Lua stack
+ */
+static int
+PermuteRandom(lua_State *L)
+{
+    FUNC(LL_BOXA ".PermuteRandom");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    Boxa *boxad = boxaPermuteRandom(nullptr, boxas);
+    return ll_push_Boxa(_fun, L, boxad);
+}
+
+/**
+ * \brief Swap boxes (%i, %j) in Boxa* (%boxa)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * Arg #2 is expected to be a l_int32 (i).
+ * Arg #3 is expected to be a l_int32 (j).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+SwapBoxes(lua_State *L)
+{
+    FUNC(LL_BOXA ".SwapBoxes");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
+    l_int32 i = ll_check_index(_fun, L, 2, boxaGetCount(boxa));
+    l_int32 j = ll_check_index(_fun, L, 3, boxaGetCount(boxa));
+    lua_pushboolean(L, 0 == boxaSwapBoxes(boxa, i, j));
+    return 1;
+}
+
+/**
+ * \brief Convert boxes from Boxa* (%boxa) to a Pta* (%pta)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * Arg #2 is expected to be a l_int32 (ncorners).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pta* (%pta) on the Lua stack
+ */
+static int
+ConvertToPta(lua_State *L)
+{
+    FUNC(LL_BOXA ".ConvertToPta");
+    Boxa *boxa = ll_check_Boxa(_fun, L, 1);
+    l_int32 ncorners = ll_check_l_int32(_fun, L, 2);
+    Pta *pta = boxaConvertToPta(boxa, ncorners);
+    return ll_push_Pta(_fun, L, pta);
+}
+
+/**
+ * \brief Smooth sequence by least square fit for Boxa* (%boxas)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * Arg #2 is expected to be a l_int32 (factor).
+ * Arg #3 is expected to be a string describing the sub flag (subflag).
+ * Arg #4 is expected to be a l_int32 (maxdiff).
+ * Arg #5 is expected to be a l_int32 (extrapixels).
+ * Arg #5 is optional and, if given, expected to be a boolean (debug).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pta* (%pta) on the Lua stack
+ */
+static int
+SmoothSequenceLS(lua_State *L)
+{
+    FUNC(LL_BOXA ".SmoothSequenceLS");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 factor = ll_check_l_int32_default(_fun, L, 2, 3);
+    l_int32 subflag = ll_check_subflag(_fun, L, 3, L_USE_MINSIZE);
+    l_int32 maxdiff = ll_check_l_int32_default(_fun, L, 4, 0);
+    l_int32 extrapixels = ll_check_l_int32_default(_fun, L, 5, 0);
+    l_int32 debug = lua_toboolean(L, 6);
+    Boxa *boxa = boxaSmoothSequenceLS(boxas, factor, subflag, maxdiff, extrapixels, debug);
+    return ll_push_Boxa(_fun, L, boxa);
+}
+
+/**
+ * \brief Smooth sequence by median for Boxa* (%boxas)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * Arg #2 is expected to be a l_int32 (halfwin).
+ * Arg #3 is expected to be a string describing the sub flag (subflag).
+ * Arg #4 is expected to be a l_int32 (maxdiff).
+ * Arg #5 is expected to be a l_int32 (extrapixels).
+ * Arg #5 is optional and, if given, expected to be a boolean (debug).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pta* (%pta) on the Lua stack
+ */
+static int
+SmoothSequenceMedian(lua_State *L)
+{
+    FUNC(LL_BOXA ".SmoothSequenceMedian");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 halfwin = ll_check_l_int32_default(_fun, L, 2, 20);
+    l_int32 subflag = ll_check_subflag(_fun, L, 3, L_USE_MINSIZE);
+    l_int32 maxdiff = ll_check_l_int32_default(_fun, L, 4, 0);
+    l_int32 extrapixels = ll_check_l_int32_default(_fun, L, 5, 0);
+    l_int32 debug = lua_toboolean(L, 6);
+    Boxa *boxa = boxaSmoothSequenceMedian(boxas, halfwin, subflag, maxdiff, extrapixels, debug);
+    return ll_push_Boxa(_fun, L, boxa);
 }
 
 /**
@@ -1550,6 +1772,17 @@ ll_register_Boxa(lua_State *L)
         {"EncapsulateAligned",      EncapsulateAligned},
         {"SelectLargeULBox",        SelectLargeULBox},
         {"SelectRange",             SelectRange},
+        {"SelectBySize",            SelectBySize},
+        {"MakeSizeIndicator",       MakeSizeIndicator},
+        {"SelectWithIndicator",     SelectWithIndicator},
+        {"MakeWHRatioIndicator",    MakeWHRatioIndicator},
+        {"SelectByWHRatio",         SelectByWHRatio},
+        {"PermutePseudorandom",     PermutePseudorandom},
+        {"PermuteRandom",           PermuteRandom},
+        {"SwapBoxes",               SwapBoxes},
+        {"ConvertToPta",            ConvertToPta},
+        {"SmoothSequenceLS",        SmoothSequenceLS},
+        {"SmoothSequenceMedian",    SmoothSequenceMedian},
         {"Read",                    Read},
         {"ReadStream",              ReadStream},
         {"ReadMem",                 ReadMem},

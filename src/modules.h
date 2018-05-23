@@ -296,6 +296,9 @@ extern const char * ll_string_select_color(l_int32 color);
 extern l_int32      ll_check_select_min_max(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_select_min_max(l_int32 which);
 
+extern l_int32      ll_check_select_size(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_select_size(l_int32 which);
+
 extern l_int32      ll_check_sort_by(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_sort_by(l_int32 sort_by);
 
@@ -314,11 +317,17 @@ extern const char * ll_string_sort_order(l_int32 order);
 extern l_int32      ll_check_trans_order(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_trans_order(l_int32 order);
 
+extern l_int32      ll_check_relation(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_relation(l_int32 rotation);
+
 extern l_int32      ll_check_rotation(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_rotation(l_int32 rotation);
 
 extern l_int32      ll_check_overlap(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_overlap(l_int32 rotation);
+
+extern l_int32      ll_check_subflag(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_subflag(l_int32 rotation);
 
 extern l_int32      ll_check_value_flags(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_value_flags(l_int32 rotation);
