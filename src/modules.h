@@ -108,6 +108,7 @@ extern void dbg(int enable, const char* format, ...);
 
 typedef struct lua_State lua_State;
 extern void die(const char *_fun, lua_State* L, const char *format, ...);
+extern void **ll_udata(const char *_fun, lua_State* L, int arg, const char *tname);
 
 /**
  * \brief Cast the result of LEPT_MALLOC() to the given type
@@ -171,12 +172,27 @@ ll_calloc(const char* _fun, lua_State *L, size_t nmemb)
 }
 
 /**
- * \brief Alias with l_int32 nmbeb
+ * \brief Alias ll_calloc() with l_int32 nmemb
  */
 template <typename T> T*
 ll_calloc(const char* _fun, lua_State *L, l_int32 nmemb)
 {
     return ll_calloc<T>(_fun, L, static_cast<size_t>(nmemb), sizeof(T));
+}
+
+/**
+ * \brief Check Lua stack at index %arg for udata with %name
+ * \param T typename of the expected return value
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg argument index
+ * \param tname tname of the expected udata
+ * \return pointer to the udata
+ */
+template<typename T> T **
+ll_check_udata(const char *_fun, lua_State *L, int arg, const char* tname)
+{
+    return reinterpret_cast<T **>(ll_udata(_fun, L, arg, tname));
 }
 
 #ifdef __cplusplus
@@ -185,10 +201,6 @@ extern "C" {
 
 #include <lauxlib.h>
 #include <lualib.h>
-
-#if !defined(__cplusplus)
-#define nullptr NULL
-#endif
 
 /** Lua function table (luaL_Reg array[]) sentinel */
 #define LUA_SENTINEL    {nullptr,nullptr}
@@ -212,7 +224,7 @@ typedef struct lept_enums_s {
 /* llept.c */
 extern void         ll_free(void *ptr);
 extern int          ll_register_class(lua_State *L, const char *name, const luaL_Reg *methods, const luaL_Reg *functions);
-extern void **      ll_check_udata(const char *_fun, lua_State *L, int arg, const char* name);
+
 extern int          ll_push_udata(const char *_fun, lua_State *L, const char* name, void *udata);
 extern int          ll_push_nil(lua_State *L);
 extern int          ll_push_iarray(lua_State *L, const l_int32* ia, l_int32 n);
@@ -239,6 +251,10 @@ extern l_int32      ll_check_l_int32(const char *_fun, lua_State *L, int arg);
 extern l_int32      ll_check_l_int32_default(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern l_uint32     ll_check_l_uint32(const char *_fun, lua_State *L, int arg);
 extern l_uint32     ll_check_l_uint32_default(const char *_fun, lua_State *L, int arg, l_uint32 dflt);
+extern l_int64      ll_check_l_int64(const char *_fun, lua_State *L, int arg);
+extern l_int64      ll_check_l_int64_default(const char *_fun, lua_State *L, int arg, l_int64 dflt);
+extern l_uint64     ll_check_l_uint64(const char *_fun, lua_State *L, int arg);
+extern l_uint64     ll_check_l_uint64_default(const char *_fun, lua_State *L, int arg, l_uint64 dflt);
 extern l_float32    ll_check_l_float32(const char *_fun, lua_State *L, int arg);
 extern l_float32    ll_check_l_float32_default(const char *_fun, lua_State *L, int arg, l_float32 dflt);
 extern l_float64    ll_check_l_float64(const char *_fun, lua_State *L, int arg);

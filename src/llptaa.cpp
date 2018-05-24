@@ -37,6 +37,28 @@
  *
  *====================================================================*/
 
+
+/**
+ * \brief Destroy a Ptaa*
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 0 for nothing on the Lua stack
+ */
+static int
+Destroy(lua_State *L)
+{
+    FUNC(LL_PTAA ".Destroy");
+    Ptaa **pptaa = ll_check_udata<Ptaa>(_fun, L, 1, LL_PTAA);
+    Ptaa *ptaa = *pptaa;
+    DBG(LOG_DESTROY, "%s: '%s' pptaa=%p ptaa=%p count=%d\n",
+        _fun, LL_PTAA, pptaa, ptaa, ptaaGetCount(ptaa));
+    ptaaDestroy(&ptaa);
+    *pptaa = nullptr;
+    return 0;
+}
+
 /**
  * \brief Create a new Ptaa*
  * <pre>
@@ -55,44 +77,6 @@ Create(lua_State *L)
 }
 
 /**
- * \brief Truncate the arrays stored in the Ptaa*
- * <pre>
- * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 boolean on the Lua stack
- */
-static int
-Truncate(lua_State *L)
-{
-    FUNC(LL_PTAA ".Truncate");
-    Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
-    lua_pushboolean(L, 0 == ptaaTruncate(ptaa));
-    return 1;
-}
-
-/**
- * \brief Destroy a Ptaa*
- * <pre>
- * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
- * </pre>
- * \param L pointer to the lua_State
- * \return 0 for nothing on the Lua stack
- */
-static int
-Destroy(lua_State *L)
-{
-    FUNC(LL_PTAA ".Destroy");
-    Ptaa **pptaa = reinterpret_cast<Ptaa **>(ll_check_udata(_fun, L, 1, LL_PTAA));
-    Ptaa *ptaa = *pptaa;
-    DBG(LOG_DESTROY, "%s: '%s' pptaa=%p ptaa=%p count=%d\n",
-        _fun, LL_PTAA, pptaa, ptaa, ptaaGetCount(ptaa));
-    ptaaDestroy(&ptaa);
-    *pptaa = nullptr;
-    return 0;
-}
-
-/**
  * \brief Get the number of arrays stored in the Ptaa*
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
@@ -107,6 +91,27 @@ GetCount(lua_State *L)
     Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
     l_int32 n = ptaaGetCount(ptaa);
     lua_pushinteger(L, n);
+    return 1;
+}
+
+/**
+ * \brief Get the Pta* in the Ptaa* at index %idx
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
+ * Arg #2 is expected to be a Pta* user data.
+ * Arg #3 is an optional string defining the storage flags (copyflag).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+AddPta(lua_State *L)
+{
+    FUNC(LL_PTAA ".AddPta");
+    Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
+    Pta *pta = ll_check_Pta(_fun, L, 2);
+    l_int32 copyflag = ll_check_access_storage(_fun, L, 3, L_COPY);
+    lua_pushboolean(L, 0 == ptaaAddPta(ptaa, pta, copyflag));
     return 1;
 }
 
@@ -158,24 +163,55 @@ GetPta(lua_State *L)
 }
 
 /**
- * \brief Get the Pta* in the Ptaa* at index %idx
+ * \brief Read a Ptaa* from an external file
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
- * Arg #2 is expected to be a Pta* user data.
- * Arg #3 is an optional string defining the storage flags (copyflag).
+ * Arg #1 is expected to be a string containing the filename.
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 boolean on the Lua stack
+ * \return 1 Ptaa* on the Lua stack
  */
 static int
-AddPta(lua_State *L)
+Read(lua_State *L)
 {
-    FUNC(LL_PTAA ".AddPta");
-    Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
-    Pta *pta = ll_check_Pta(_fun, L, 2);
-    l_int32 copyflag = ll_check_access_storage(_fun, L, 3, L_COPY);
-    lua_pushboolean(L, 0 == ptaaAddPta(ptaa, pta, copyflag));
-    return 1;
+    FUNC(LL_PTAA ".Read");
+    const char *filename = ll_check_string(_fun, L, 1);
+    Ptaa *ptaa = ptaaRead(filename);
+    return ll_push_Ptaa(_fun, L, ptaa);
+}
+
+/**
+ * \brief Read a Ptaa* from a Lua string (%data)
+ * <pre>
+ * Arg #1 is expected to be a string (data).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Ptaa* on the Lua stack
+ */
+static int
+ReadMem(lua_State *L)
+{
+    FUNC(LL_PTAA ".ReadMem");
+    size_t len;
+    const char *data = ll_check_lstring(_fun, L, 1, &len);
+    Ptaa *ptaa = ptaaReadMem(reinterpret_cast<const l_uint8 *>(data), len);
+    return ll_push_Ptaa(_fun, L, ptaa);
+}
+
+/**
+ * \brief Read a Ptaa* from a Lua io stream (%stream)
+ * <pre>
+ * Arg #1 is expected to be a luaL_Stream* (stream).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Ptaa* on the Lua stack
+ */
+static int
+ReadStream(lua_State *L)
+{
+    FUNC(LL_PTAA ".ReadStream");
+    luaL_Stream *stream = ll_check_stream(_fun, L, 1);
+    Ptaa *ptaa = ptaaReadStream(stream->f);
+    return ll_push_Ptaa(_fun, L, ptaa);
 }
 
 /**
@@ -200,55 +236,20 @@ ReplacePta(lua_State *L)
 }
 
 /**
- * \brief Read a Ptaa* from an external file
+ * \brief Truncate the arrays stored in the Ptaa*
  * <pre>
- * Arg #1 is expected to be a string containing the filename.
+ * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 Ptaa* on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
-Read(lua_State *L)
+Truncate(lua_State *L)
 {
-    FUNC(LL_PTAA ".Read");
-    const char *filename = ll_check_string(_fun, L, 1);
-    Ptaa *ptaa = ptaaRead(filename);
-    return ll_push_Ptaa(_fun, L, ptaa);
-}
-
-/**
- * \brief Read a Ptaa* from a Lua io stream (%stream)
- * <pre>
- * Arg #1 is expected to be a luaL_Stream* (stream).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Ptaa* on the Lua stack
- */
-static int
-ReadStream(lua_State *L)
-{
-    FUNC(LL_PTAA ".ReadStream");
-    luaL_Stream *stream = ll_check_stream(_fun, L, 1);
-    Ptaa *ptaa = ptaaReadStream(stream->f);
-    return ll_push_Ptaa(_fun, L, ptaa);
-}
-
-/**
- * \brief Read a Ptaa* from a Lua string (%data)
- * <pre>
- * Arg #1 is expected to be a string (data).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Ptaa* on the Lua stack
- */
-static int
-ReadMem(lua_State *L)
-{
-    FUNC(LL_PTAA ".ReadMem");
-    size_t len;
-    const char *data = ll_check_lstring(_fun, L, 1, &len);
-    Ptaa *ptaa = ptaaReadMem(reinterpret_cast<const l_uint8 *>(data), len);
-    return ll_push_Ptaa(_fun, L, ptaa);
+    FUNC(LL_PTAA ".Truncate");
+    Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
+    lua_pushboolean(L, 0 == ptaaTruncate(ptaa));
+    return 1;
 }
 
 /**
@@ -273,31 +274,6 @@ Write(lua_State *L)
     const char *filename = ll_check_string(_fun, L, 2);
     l_int32 type = ll_check_boolean_default(_fun, L, 3, FALSE);
     lua_pushboolean(L, 0 == ptaaWrite(filename, ptaa, type));
-    return 1;
-}
-
-/**
- * \brief Write the Ptaa* to an external file
- * <pre>
- * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
- * Arg #2 is expected to be a luaL_Stream* (stream).
- * Arg #3 is optional and, if given, expected to be a boolean (type)
- *
- * Note:
- *      type = true means the data is written as integers.
- *      type = false means the data is written as floats.
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 boolean on the Lua stack
- */
-static int
-WriteStream(lua_State *L)
-{
-    FUNC(LL_PTAA ".WriteStream");
-    Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
-    luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    l_int32 type = ll_check_boolean_default(_fun, L, 3, FALSE);
-    lua_pushboolean(L, 0 == ptaaWriteStream(stream->f, ptaa, type));
     return 1;
 }
 
@@ -330,6 +306,31 @@ WriteMem(lua_State *L)
 }
 
 /**
+ * \brief Write the Ptaa* to an external file
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
+ * Arg #2 is expected to be a luaL_Stream* (stream).
+ * Arg #3 is optional and, if given, expected to be a boolean (type)
+ *
+ * Note:
+ *      type = true means the data is written as integers.
+ *      type = false means the data is written as floats.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+WriteStream(lua_State *L)
+{
+    FUNC(LL_PTAA ".WriteStream");
+    Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
+    luaL_Stream *stream = ll_check_stream(_fun, L, 2);
+    l_int32 type = ll_check_boolean_default(_fun, L, 3, FALSE);
+    lua_pushboolean(L, 0 == ptaaWriteStream(stream->f, ptaa, type));
+    return 1;
+}
+
+/**
  * \brief Check Lua stack at index %arg for udata of class LL_PTAA
  * \param _fun calling function's name
  * \param L pointer to the lua_State
@@ -339,7 +340,7 @@ WriteMem(lua_State *L)
 Ptaa *
 ll_check_Ptaa(const char *_fun, lua_State *L, int arg)
 {
-    return *(reinterpret_cast<Ptaa **>(ll_check_udata(_fun, L, arg, LL_PTAA)));
+    return *ll_check_udata<Ptaa>(_fun, L, arg, LL_PTAA);
 }
 
 /**
@@ -382,7 +383,6 @@ ll_new_Ptaa(lua_State *L)
 {
     return Create(L);
 }
-
 /**
  * \brief Register the PTAA methods and functions in the LL_PTAA meta table
  * \param L pointer to the lua_State
@@ -395,17 +395,17 @@ ll_register_Ptaa(lua_State *L)
         {"__gc",        Destroy},      /* garbage collector */
         {"__new",       Create},       /* new Ptaa */
         {"__len",       GetCount},     /* #ptaa */
-        {"Truncate",    Truncate},
-        {"GetPt",       GetPt},
         {"AddPta",      AddPta},
+        {"GetPt",       GetPt},
         {"GetPta",      GetPta},
-        {"ReplacePta",  ReplacePta},
         {"Read",        Read},
-        {"ReadStream",  ReadStream},
         {"ReadMem",     ReadMem},
+        {"ReadStream",  ReadStream},
+        {"ReplacePta",  ReplacePta},
+        {"Truncate",    Truncate},
         {"Write",       Write},
-        {"WriteStream", WriteStream},
         {"WriteMem",    WriteMem},
+        {"WriteStream", WriteStream},
         LUA_SENTINEL
     };
 

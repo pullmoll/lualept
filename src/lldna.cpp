@@ -37,10 +37,91 @@
  *
  *====================================================================*/
 
+typedef L_Dna       Dna;        /*!< Local type name for the ugly L_Dna */
+
+
 /**
- * \brief Printable string for a L_Dna*
+ * \brief Destroy a Dna*
  * <pre>
- * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
+ * Arg #1 (i.e. self) is expected to be a Dna* user data.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 0 for nothing on the Lua stack
+ */
+static int
+Destroy(lua_State *L)
+{
+    FUNC(LL_DNA ".Destroy");
+    Dna **pda = ll_check_udata<Dna>(_fun, L, 1, LL_DNA);
+    Dna *da = *pda;
+    DBG(LOG_DESTROY, "%s: '%s' pda=%p da=%p count=%d refcount=%d\n",
+         _fun, LL_DNA, pda, da, l_dnaGetCount(da), l_dnaGetRefcount(da));
+    l_dnaDestroy(&da);
+    *pda = nullptr;
+    return 0;
+}
+
+/**
+ * \brief Create a new Dna*
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (n).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 DNA* on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    FUNC(LL_DNA ".Create");
+    l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+    Dna *da = l_dnaCreate(n);
+    return ll_push_Dna(_fun, L, da);
+}
+
+/**
+ * \brief Get the number of numbers stored in the Dna*
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Dna* user data.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 integer on the Lua stack
+ */
+static int
+GetCount(lua_State *L)
+{
+    FUNC(LL_DNA ".GetCount");
+    Dna *da = ll_check_Dna(_fun, L, 1);
+    l_int32 n = l_dnaGetCount(da);
+    lua_pushinteger(L, n);
+    return 1;
+}
+
+/**
+ * \brief Replace one number to the Dna* at the given index %idx
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Dna* user data.
+ * Arg #2 is expected to be a l_int32 (idx).
+ * Arg #3 is expected to be a lua_Number to use to replace.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+ReplaceNumber(lua_State *L)
+{
+    FUNC(LL_DNA ".ReplaceNumber");
+    Dna *da = ll_check_Dna(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
+    int isnumber = 0;
+    lua_Number val = lua_tonumberx(L, 3, &isnumber);
+    lua_pushboolean(L, isnumber && 0 == l_dnaReplaceNumber(da, idx, val) ? TRUE : FALSE);
+    return 1;
+}
+
+/**
+ * \brief Printable string for a Dna*
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Dna* user data.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
@@ -50,7 +131,7 @@ toString(lua_State *L)
 {
     FUNC(LL_DNA ".toString");
     static char str[256];
-    L_Dna *da = ll_check_Dna(_fun, L, 1);
+    Dna *da = ll_check_Dna(_fun, L, 1);
     luaL_Buffer B;
     l_int32 i;
     l_float64 val;
@@ -74,20 +155,93 @@ toString(lua_State *L)
 }
 
 /**
- * \brief Create a new L_Dna*
+ * \brief Add one number to the Dna*
  * <pre>
- * Arg #1 is expected to be a l_int32 (n).
+ * Arg #1 (i.e. self) is expected to be a Dna* user data.
+ * Arg #2 is expected to be a lua_Number to add to the array.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+AddNumber(lua_State *L)
+{
+    FUNC(LL_DNA ".AddNumber");
+    Dna *da = ll_check_Dna(_fun, L, 1);
+    int isnumber = 0;
+    lua_Number val = lua_tonumberx(L, 2, &isnumber);
+    lua_pushboolean(L, isnumber && 0 == l_dnaAddNumber(da, val));
+    return 1;
+}
+
+/**
+ * \brief Clone a Dna*
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Dna* user data.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 DNA* on the Lua stack
  */
 static int
-Create(lua_State *L)
+Clone(lua_State *L)
 {
-    FUNC(LL_DNA ".Create");
-    l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
-    L_Dna *da = l_dnaCreate(n);
+    FUNC(LL_DNA ".Clone");
+    Dna *das = ll_check_Dna(_fun, L, 1);
+    Dna *da = l_dnaClone(das);
     return ll_push_Dna(_fun, L, da);
+}
+
+/**
+ * \brief Copy a Dna*
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Dna* user data.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 DNA* on the Lua stack
+ */
+static int
+Copy(lua_State *L)
+{
+    FUNC(LL_DNA ".Copy");
+    Dna *das = ll_check_Dna(_fun, L, 1);
+    Dna *da = l_dnaCopy(das);
+    return ll_push_Dna(_fun, L, da);
+}
+
+/**
+ * \brief Copy the parameters of the Dna*
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Dna* user data (destination).
+ * Arg #2 is expected to be another Dna* user data (source).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+CopyParameters(lua_State *L)
+{
+    FUNC(LL_DNA ".CopyParameters");
+    Dna *dad = ll_check_Dna(_fun, L, 1);
+    Dna *das = ll_check_Dna(_fun, L, 2);
+    lua_pushboolean(L, 0 == l_dnaCopyParameters(dad, das));
+    return 1;
+}
+
+/**
+ * \brief Set the number of stored numbes in the Dna* to zero
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Dna* user data.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+Empty(lua_State *L)
+{
+    FUNC(LL_DNA ".Empty");
+    Dna *da = ll_check_Dna(_fun, L, 1);
+    lua_pushboolean(L, 0 == l_dnaEmpty(da));
+    return 1;
 }
 
 /**
@@ -104,7 +258,7 @@ FromArray(lua_State *L)
     FUNC(LL_NUMA ".FromArray");
     l_int32 i, n;
     l_float64 *tbl = ll_unpack_darray(_fun, L, 1, &n);
-    L_Dna* da = l_dnaCreate(n);
+    Dna* da = l_dnaCreate(n);
     if (!da)
         return ll_push_nil(L);
     for (i = 0; i < n; i++)
@@ -114,202 +268,29 @@ FromArray(lua_State *L)
 }
 
 /**
- * \brief Destroy a L_Dna*
+ * \brief Get the Dna* as table of lua_Number
  * <pre>
- * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
+ * Arg #1 (i.e. self) is expected to be a Dna* user data.
  * </pre>
  * \param L pointer to the lua_State
- * \return 0 for nothing on the Lua stack
+ * \return 1 DNA* on the Lua stack
  */
 static int
-Destroy(lua_State *L)
+GetDArray(lua_State *L)
 {
-    FUNC(LL_DNA ".Destroy");
-    L_Dna **pda = reinterpret_cast<L_Dna**>(ll_check_udata(_fun, L, 1, LL_DNA));
-    L_Dna *da = *pda;
-    DBG(LOG_DESTROY, "%s: '%s' pda=%p da=%p count=%d refcount=%d\n",
-         _fun, LL_DNA, pda, da, l_dnaGetCount(da), l_dnaGetRefcount(da));
-    l_dnaDestroy(&da);
-    *pda = nullptr;
-    return 0;
-}
-
-/**
- * \brief Get the number of numbers stored in the L_Dna*
- * <pre>
- * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 integer on the Lua stack
- */
-static int
-GetCount(lua_State *L)
-{
-    FUNC(LL_DNA ".GetCount");
-    L_Dna *da = ll_check_Dna(_fun, L, 1);
+    FUNC(LL_DNA ".GetDArray");
+    Dna *da = ll_check_Dna(_fun, L, 1);
+    l_float64 *darray = l_dnaGetDArray(da, L_COPY);
     l_int32 n = l_dnaGetCount(da);
-    lua_pushinteger(L, n);
-    return 1;
+    int res = ll_push_darray(L, darray, n);
+    LEPT_FREE(darray);
+    return res;
 }
 
 /**
- * \brief Set the number of stored numbers in the L_Dna*, i.e. resize L_Dna*
+ * \brief Get the l_float64 from the Dna* at index %idx
  * <pre>
- * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
- * Arg #2 is expected to be a l_int32 (n).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 integer on the Lua stack
- */
-static int
-SetCount(lua_State *L)
-{
-    FUNC(LL_DNA ".SetCount");
-    L_Dna *da = ll_check_Dna(_fun, L, 1);
-    l_int32 n = ll_check_l_int32(_fun, L, 2);
-    lua_pushboolean(L, 0 == l_dnaSetCount(da, n));
-    return 1;
-}
-
-/**
- * \brief Copy a L_Dna*
- * <pre>
- * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 DNA* on the Lua stack
- */
-static int
-Copy(lua_State *L)
-{
-    FUNC(LL_DNA ".Copy");
-    L_Dna *das = ll_check_Dna(_fun, L, 1);
-    L_Dna *da = l_dnaCopy(das);
-    return ll_push_Dna(_fun, L, da);
-}
-
-/**
- * \brief Clone a L_Dna*
- * <pre>
- * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 DNA* on the Lua stack
- */
-static int
-Clone(lua_State *L)
-{
-    FUNC(LL_DNA ".Clone");
-    L_Dna *das = ll_check_Dna(_fun, L, 1);
-    L_Dna *da = l_dnaClone(das);
-    return ll_push_Dna(_fun, L, da);
-}
-
-/**
- * \brief Set the number of stored numbes in the L_Dna* to zero
- * <pre>
- * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 boolean on the Lua stack
- */
-static int
-Empty(lua_State *L)
-{
-    FUNC(LL_DNA ".Empty");
-    L_Dna *da = ll_check_Dna(_fun, L, 1);
-    lua_pushboolean(L, 0 == l_dnaEmpty(da));
-    return 1;
-}
-
-/**
- * \brief Add one number to the L_Dna*
- * <pre>
- * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
- * Arg #2 is expected to be a lua_Number to add to the array.
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 boolean on the Lua stack
- */
-static int
-AddNumber(lua_State *L)
-{
-    FUNC(LL_DNA ".AddNumber");
-    L_Dna *da = ll_check_Dna(_fun, L, 1);
-    int isnumber = 0;
-    lua_Number val = lua_tonumberx(L, 2, &isnumber);
-    lua_pushboolean(L, isnumber && 0 == l_dnaAddNumber(da, val));
-    return 1;
-}
-
-/**
- * \brief Insert one number to the L_Dna* at the given index %idx
- * <pre>
- * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
- * Arg #2 is expected to be a l_int32 (idx).
- * Arg #3 is expected to be a lua_Number to insert into the array.
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 boolean on the Lua stack
- */
-static int
-InsertNumber(lua_State *L)
-{
-    FUNC(LL_DNA ".InsertNumber");
-    L_Dna *da = ll_check_Dna(_fun, L, 1);
-    l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
-    int isnumber = 0;
-    lua_Number val = lua_tonumberx(L, 3, &isnumber);
-    lua_pushboolean(
-        L, isnumber && 0 == l_dnaInsertNumber(da, idx, val) ? TRUE : FALSE);
-    return 1;
-}
-
-/**
- * \brief Remove one number to the L_Dna* at the given index %idx
- * <pre>
- * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
- * Arg #2 is expected to be a l_int32 (idx).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 boolean on the Lua stack
- */
-static int
-RemoveNumber(lua_State *L)
-{
-    FUNC(LL_DNA ".RemoveNumber");
-    L_Dna *da = ll_check_Dna(_fun, L, 1);
-    l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
-    lua_pushboolean(L, 0 == l_dnaRemoveNumber(da, idx));
-    return 1;
-}
-
-/**
- * \brief Replace one number to the L_Dna* at the given index %idx
- * <pre>
- * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
- * Arg #2 is expected to be a l_int32 (idx).
- * Arg #3 is expected to be a lua_Number to use to replace.
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 boolean on the Lua stack
- */
-static int
-ReplaceNumber(lua_State *L)
-{
-    FUNC(LL_DNA ".ReplaceNumber");
-    L_Dna *da = ll_check_Dna(_fun, L, 1);
-    l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
-    int isnumber = 0;
-    lua_Number val = lua_tonumberx(L, 3, &isnumber);
-    lua_pushboolean(L, isnumber && 0 == l_dnaReplaceNumber(da, idx, val) ? TRUE : FALSE);
-    return 1;
-}
-
-/**
- * \brief Get the l_float64 from the L_Dna* at index %idx
- * <pre>
- * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
+ * Arg #1 (i.e. self) is expected to be a Dna* user data.
  * Arg #2 is expected to be a l_int32 (idx).
  * </pre>
  * \param L pointer to the lua_State
@@ -319,7 +300,7 @@ static int
 GetDValue(lua_State *L)
 {
     FUNC(LL_DNA ".GetDValue");
-    L_Dna *da = ll_check_Dna(_fun, L, 1);
+    Dna *da = ll_check_Dna(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
     lua_Number val;
     if (l_dnaGetDValue(da, idx, &val))
@@ -329,9 +310,29 @@ GetDValue(lua_State *L)
 }
 
 /**
- * \brief Get the l_int32 from the L_Dna* at index %idx
+ * \brief Get the Dna* as a table of lua_Integer
  * <pre>
- * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
+ * Arg #1 (i.e. self) is expected to be a Dna* user data.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 DNA* on the Lua stack
+ */
+static int
+GetIArray(lua_State *L)
+{
+    FUNC(LL_DNA ".GetIArray");
+    Dna *dna = ll_check_Dna(_fun, L, 1);
+    l_int32 *ia = l_dnaGetIArray(dna);
+    l_int32 n = l_dnaGetCount(dna);
+    int res = ll_push_iarray(L, ia, n);
+    LEPT_FREE(ia);
+    return res;
+}
+
+/**
+ * \brief Get the l_int32 from the Dna* at index %idx
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Dna* user data.
  * Arg #2 is expected to be a l_int32 (idx).
  * </pre>
  * \param L pointer to the lua_State
@@ -341,7 +342,7 @@ static int
 GetIValue(lua_State *L)
 {
     FUNC(LL_DNA ".GetIValue");
-    L_Dna *da = ll_check_Dna(_fun, L, 1);
+    Dna *da = ll_check_Dna(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
     l_int32 val;
     if (l_dnaGetIValue(da, idx, &val))
@@ -351,102 +352,18 @@ GetIValue(lua_State *L)
 }
 
 /**
- * \brief Set the value for the L_Dna* at the given index %idx
+ * \brief Get the parameters of the Dna*
  * <pre>
- * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
- * Arg #2 is expected to be a l_int32 (idx).
- * Arg #3 is expected to be a lua_Number to set in the array.
+ * Arg #1 (i.e. self) is expected to be a Dna* user data.
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 boolean on the Lua stack
- */
-static int
-SetValue(lua_State *L)
-{
-    FUNC(LL_DNA ".SetValue");
-    L_Dna *da = ll_check_Dna(_fun, L, 1);
-    l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
-    int isnumber = 0;
-    lua_Number val = lua_tonumberx(L, 3, &isnumber);
-    lua_pushboolean(L, isnumber && 0 == l_dnaSetValue(da, idx, val));
-    return 1;
-}
-
-/**
- * \brief Add a difference to the value for the L_Dna* at the given index %idx
- * <pre>
- * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
- * Arg #2 is expected to be a l_int32 (idx).
- * Arg #3 is expected to be a l_float32.
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 boolean on the Lua stack
- */
-static int
-ShiftValue(lua_State *L)
-{
-    FUNC(LL_DNA ".ShiftValue");
-    L_Dna *da = ll_check_Dna(_fun, L, 1);
-    l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
-    int isnumber = 0;
-    lua_Number diff = lua_tonumberx(L, 3, &isnumber);
-    lua_pushboolean(L, isnumber && 0 == l_dnaShiftValue(da, idx, diff));
-    return 1;
-}
-
-/**
- * \brief Get the L_Dna* as table of lua_Number
- * <pre>
- * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 DNA* on the Lua stack
- */
-static int
-GetDArray(lua_State *L)
-{
-    FUNC(LL_DNA ".GetDArray");
-    L_Dna *da = ll_check_Dna(_fun, L, 1);
-    l_float64 *darray = l_dnaGetDArray(da, L_COPY);
-    l_int32 n = l_dnaGetCount(da);
-    int res = ll_push_darray(L, darray, n);
-    LEPT_FREE(darray);
-    return res;
-}
-
-/**
- * \brief Get the L_Dna* as a table of lua_Integer
- * <pre>
- * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 DNA* on the Lua stack
- */
-static int
-GetIArray(lua_State *L)
-{
-    FUNC(LL_DNA ".GetIArray");
-    L_Dna *dna = ll_check_Dna(_fun, L, 1);
-    l_int32 *ia = l_dnaGetIArray(dna);
-    l_int32 n = l_dnaGetCount(dna);
-    int res = ll_push_iarray(L, ia, n);
-    LEPT_FREE(ia);
-    return res;
-}
-
-/**
- * \brief Get the parameters of the L_Dna*
- * <pre>
- * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
- * </pre>
- * \param L pointer to the lua_State
- * \return 2 for L_Dna* starx and deltax
+ * \return 2 for Dna* starx and deltax
  */
 static int
 GetParameters(lua_State *L)
 {
     FUNC(LL_DNA ".GetParameters");
-    L_Dna *da = ll_check_Dna(_fun, L, 1);
+    Dna *da = ll_check_Dna(_fun, L, 1);
     lua_Number startx = 0;
     lua_Number deltax = 0;
     if (l_dnaGetParameters(da, &startx, &deltax))
@@ -457,43 +374,25 @@ GetParameters(lua_State *L)
 }
 
 /**
- * \brief Set the parameters of the L_Dna*
+ * \brief Insert one number to the Dna* at the given index %idx
  * <pre>
- * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
- * Arg #2 is expected to be a lua_Number (startx).
- * Arg #3 is expected to be a lua_Number (deltax).
+ * Arg #1 (i.e. self) is expected to be a Dna* user data.
+ * Arg #2 is expected to be a l_int32 (idx).
+ * Arg #3 is expected to be a lua_Number to insert into the array.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
 static int
-SetParameters(lua_State *L)
+InsertNumber(lua_State *L)
 {
-    FUNC(LL_DNA ".SetParameters");
-    L_Dna *da = ll_check_Dna(_fun, L, 1);
-    int isnumber1 = 0, isnumber2 = 0;
-    lua_Number startx = lua_tonumberx(L, 2, &isnumber1);
-    lua_Number deltax = lua_tonumberx(L, 3, &isnumber2);
-    lua_pushboolean(L, isnumber1 && isnumber2 && 0 == l_dnaSetParameters(da, startx, deltax));
-    return 1;
-}
-
-/**
- * \brief Copy the parameters of the L_Dna*
- * <pre>
- * Arg #1 (i.e. self) is expected to be a L_Dna* user data (destination).
- * Arg #2 is expected to be another L_Dna* user data (source).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 boolean on the Lua stack
- */
-static int
-CopyParameters(lua_State *L)
-{
-    FUNC(LL_DNA ".CopyParameters");
-    L_Dna *dad = ll_check_Dna(_fun, L, 1);
-    L_Dna *das = ll_check_Dna(_fun, L, 2);
-    lua_pushboolean(L, 0 == l_dnaCopyParameters(dad, das));
+    FUNC(LL_DNA ".InsertNumber");
+    Dna *da = ll_check_Dna(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
+    int isnumber = 0;
+    lua_Number val = lua_tonumberx(L, 3, &isnumber);
+    lua_pushboolean(
+        L, isnumber && 0 == l_dnaInsertNumber(da, idx, val) ? TRUE : FALSE);
     return 1;
 }
 
@@ -510,7 +409,7 @@ Read(lua_State *L)
 {
     FUNC(LL_DNA ".Read");
     const char *filename = ll_check_string(_fun, L, 1);
-    L_Dna *dna = l_dnaRead(filename);
+    Dna *dna = l_dnaRead(filename);
     return ll_push_Dna(_fun, L, dna);
 }
 
@@ -527,8 +426,112 @@ ReadStream(lua_State *L)
 {
     FUNC(LL_DNA ".ReadStream");
     luaL_Stream *stream = ll_check_stream(_fun, L, 1);
-    L_Dna *dna = l_dnaReadStream(stream->f);
+    Dna *dna = l_dnaReadStream(stream->f);
     return ll_push_Dna(_fun, L, dna);
+}
+
+/**
+ * \brief Remove one number to the Dna* at the given index %idx
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Dna* user data.
+ * Arg #2 is expected to be a l_int32 (idx).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+RemoveNumber(lua_State *L)
+{
+    FUNC(LL_DNA ".RemoveNumber");
+    Dna *da = ll_check_Dna(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
+    lua_pushboolean(L, 0 == l_dnaRemoveNumber(da, idx));
+    return 1;
+}
+
+/**
+ * \brief Set the number of stored numbers in the Dna*, i.e. resize Dna*
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Dna* user data.
+ * Arg #2 is expected to be a l_int32 (n).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 integer on the Lua stack
+ */
+static int
+SetCount(lua_State *L)
+{
+    FUNC(LL_DNA ".SetCount");
+    Dna *da = ll_check_Dna(_fun, L, 1);
+    l_int32 n = ll_check_l_int32(_fun, L, 2);
+    lua_pushboolean(L, 0 == l_dnaSetCount(da, n));
+    return 1;
+}
+
+/**
+ * \brief Set the parameters of the Dna*
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Dna* user data.
+ * Arg #2 is expected to be a lua_Number (startx).
+ * Arg #3 is expected to be a lua_Number (deltax).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+SetParameters(lua_State *L)
+{
+    FUNC(LL_DNA ".SetParameters");
+    Dna *da = ll_check_Dna(_fun, L, 1);
+    int isnumber1 = 0, isnumber2 = 0;
+    lua_Number startx = lua_tonumberx(L, 2, &isnumber1);
+    lua_Number deltax = lua_tonumberx(L, 3, &isnumber2);
+    lua_pushboolean(L, isnumber1 && isnumber2 && 0 == l_dnaSetParameters(da, startx, deltax));
+    return 1;
+}
+
+/**
+ * \brief Set the value for the Dna* at the given index %idx
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Dna* user data.
+ * Arg #2 is expected to be a l_int32 (idx).
+ * Arg #3 is expected to be a lua_Number to set in the array.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+SetValue(lua_State *L)
+{
+    FUNC(LL_DNA ".SetValue");
+    Dna *da = ll_check_Dna(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
+    int isnumber = 0;
+    lua_Number val = lua_tonumberx(L, 3, &isnumber);
+    lua_pushboolean(L, isnumber && 0 == l_dnaSetValue(da, idx, val));
+    return 1;
+}
+
+/**
+ * \brief Add a difference to the value for the Dna* at the given index %idx
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Dna* user data.
+ * Arg #2 is expected to be a l_int32 (idx).
+ * Arg #3 is expected to be a l_float32.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+ShiftValue(lua_State *L)
+{
+    FUNC(LL_DNA ".ShiftValue");
+    Dna *da = ll_check_Dna(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
+    int isnumber = 0;
+    lua_Number diff = lua_tonumberx(L, 3, &isnumber);
+    lua_pushboolean(L, isnumber && 0 == l_dnaShiftValue(da, idx, diff));
+    return 1;
 }
 
 /**
@@ -544,7 +547,7 @@ static int
 Write(lua_State *L)
 {
     FUNC(LL_DNA ".Write");
-    L_Dna *dna = ll_check_Dna(_fun, L, 1);
+    Dna *dna = ll_check_Dna(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
     lua_pushboolean(L, 0 == l_dnaWrite(filename, dna));
     return 1;
@@ -563,7 +566,7 @@ static int
 WriteStream(lua_State *L)
 {
     FUNC(LL_DNA ".WriteStream");
-    L_Dna *dna = ll_check_Dna(_fun, L, 1);
+    Dna *dna = ll_check_Dna(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
     lua_pushboolean(L, 0 == l_dnaWriteStream(stream->f, dna));
     return 1;
@@ -574,12 +577,12 @@ WriteStream(lua_State *L)
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the L_Dna* contained in the user data
+ * \return pointer to the Dna* contained in the user data
  */
-L_Dna *
+Dna *
 ll_check_Dna(const char *_fun, lua_State *L, int arg)
 {
-    return *(reinterpret_cast<L_Dna **>(ll_check_udata(_fun, L, arg, LL_DNA)));
+    return *ll_check_udata<Dna>(_fun, L, arg, LL_DNA);
 }
 
 /**
@@ -587,9 +590,9 @@ ll_check_Dna(const char *_fun, lua_State *L, int arg)
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the L_Dna* contained in the user data
+ * \return pointer to the Dna* contained in the user data
  */
-L_Dna *
+Dna *
 ll_check_Dna_opt(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
@@ -605,7 +608,7 @@ ll_check_Dna_opt(const char *_fun, lua_State *L, int arg)
  * \return 1 DNA* on the Lua stack
  */
 int
-ll_push_Dna(const char *_fun, lua_State *L, L_Dna *da)
+ll_push_Dna(const char *_fun, lua_State *L, Dna *da)
 {
     if (!da)
         return ll_push_nil(L);
@@ -622,7 +625,6 @@ ll_new_Dna(lua_State *L)
 {
     return Create(L);
 }
-
 /**
  * \brief Register the L_DNA methods and functions in the LL_L_DNA meta table
  * \param L pointer to the lua_State
@@ -637,27 +639,27 @@ ll_register_Dna(lua_State *L)
         {"__len",                   GetCount},      /* #dna */
         {"__newitem",               ReplaceNumber}, /* dna[index] = number */
         {"__tostring",              toString},
-        {"Create",                  Create},
-        {"FromArray",               FromArray},
+        {"AddNumber",               AddNumber},
         {"Clone",                   Clone},
         {"Copy",                    Copy},
+        {"CopyParameters",          CopyParameters},
+        {"Create",                  Create},
         {"Empty",                   Empty},
-        {"AddNumber",               AddNumber},
+        {"FromArray",               FromArray},
+        {"GetDArray",               GetDArray},
+        {"GetFValue",               GetDValue},
+        {"GetIArray",               GetIArray},
+        {"GetIValue",               GetIValue},
+        {"GetParameters",           GetParameters},
         {"InsertNumber",            InsertNumber},
+        {"Read",                    Read},
+        {"ReadStream",              ReadStream},
         {"RemoveNumber",            RemoveNumber},
         {"ReplaceNumber",           ReplaceNumber},
         {"SetCount",                SetCount},
-        {"GetFValue",               GetDValue},
-        {"GetIValue",               GetIValue},
+        {"SetParameters",           SetParameters},
         {"SetValue",                SetValue},
         {"ShiftValue",              ShiftValue},
-        {"GetDArray",               GetDArray},
-        {"GetIArray",               GetIArray},
-        {"GetParameters",           GetParameters},
-        {"SetParameters",           SetParameters},
-        {"CopyParameters",          CopyParameters},
-        {"Read",                    Read},
-        {"ReadStream",              ReadStream},
         {"Write",                   Write},
         {"WriteStream",             WriteStream},
         LUA_SENTINEL

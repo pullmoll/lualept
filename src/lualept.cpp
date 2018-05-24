@@ -118,6 +118,26 @@ void die(const char* _fun, lua_State *L, const char *format, ...)
 }
 
 /**
+ * \brief Check Lua stack at index %arg for udata with %name
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg argument index
+ * \param tname tname of the expected udata
+ * \return pointer to the udata
+ */
+void **
+ll_udata(const char *_fun, lua_State *L, int arg, const char* tname)
+{
+    char msg[128];
+    void **ppptr = reinterpret_cast<void **>(luaL_checkudata(L, arg, tname));
+    if (nullptr == ppptr) {
+        snprintf(msg, sizeof(msg), "%s: expected '%s'", _fun, tname);
+    }
+    luaL_argcheck(L, ppptr != nullptr, arg, msg);
+    return ppptr;
+}
+
+/**
  * \brief Free memory allocated by LEPT_MALLOC/LEPT_CALLOC
  * \param ptr pointer to memory
  */
@@ -153,25 +173,6 @@ ll_register_class(lua_State *L, const char *name, const luaL_Reg *methods, const
     DBG(LOG_REGISTER, "'%s' registered with %d methods and %d functions\n",
          name, nmethods, nfunctions);
     return 1;
-}
-
-/**
- * \brief Check Lua stack at index %arg for udata with %name
- * \param _fun calling function's name
- * \param L pointer to the lua_State
- * \param arg argument index
- * \param name tname of the expected udata
- * \return pointer to the udata
- */
-void **
-ll_check_udata(const char *_fun, lua_State *L, int arg, const char* name)
-{
-    static char msg[128];
-    void **ppvoid = reinterpret_cast<void **>(luaL_checkudata(L, arg, name));
-    snprintf(msg, sizeof(msg), "%s: '%s' expected", _fun, name);
-    luaL_argcheck(L, ppvoid != nullptr, arg, msg);
-    return ppvoid;
-
 }
 
 /**
@@ -734,7 +735,7 @@ ll_check_l_int32_default(const char *_fun, lua_State *L, int arg, l_int32 dflt)
     if (val < INT32_MIN || val > INT32_MAX) {
         lua_pushfstring(L, "%s: l_int32 #%d out of bounds (%d)", _fun, arg, val);
         lua_error(L);
-        return 0;    /* NOTREACHED */
+        return dflt;    /* NOTREACHED */
     }
     return static_cast<l_int32>(val);
 }
@@ -752,7 +753,7 @@ ll_check_l_uint32(const char *_fun, lua_State *L, int arg)
     lua_Integer val = luaL_checkinteger(L, arg);
 
     if (val < 0 || val > UINT32_MAX) {
-        lua_pushfstring(L, "%s: l_uint32 #$d out of bounds (%d)", _fun, arg, val);
+        lua_pushfstring(L, "%s: l_uint32 #%d out of bounds (%d)", _fun, arg, val);
         lua_error(L);
         return 0;    /* NOTREACHED */
     }
@@ -778,6 +779,94 @@ ll_check_l_uint32_default(const char *_fun, lua_State *L, int arg, l_uint32 dflt
         return dflt;    /* NOTREACHED */
     }
     return static_cast<l_uint32>(val);
+}
+
+/**
+ * \brief Check if an argument is a lua_Integer in the range of l_int64
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the integer
+ * \return l_int64 for the integer; lua_error if out of bounds
+ */
+l_int64
+ll_check_l_int64(const char *_fun, lua_State *L, int arg)
+{
+    lua_Integer val = luaL_checkinteger(L, arg);
+
+    if (val < INT64_MIN || val > INT64_MAX) {
+        /* XXX: can't happen */
+        lua_pushfstring(L, "%s: l_int64 #%d out of bounds (%d)", _fun, arg, val);
+        lua_error(L);
+        return 0;    /* NOTREACHED */
+    }
+    return static_cast<l_int64>(val);
+}
+
+/**
+ * \brief Return an argument lua_Integer in the range of l_int64 or the default
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the integer
+ * \param dflt default value
+ * \return l_int64 for the integer; lua_error if out of bounds
+ */
+l_int64
+ll_check_l_int64_default(const char *_fun, lua_State *L, int arg, l_int64 dflt)
+{
+    lua_Integer val = luaL_optinteger(L, arg, dflt);
+
+    if (val < INT64_MIN || val > INT64_MAX) {
+        /* XXX: can't happen */
+        lua_pushfstring(L, "%s: l_int64 #%d out of bounds (%d)", _fun, arg, val);
+        lua_error(L);
+        return dflt;    /* NOTREACHED */
+    }
+    return static_cast<l_int64>(val);
+}
+
+/**
+ * \brief Check if an argument is a lua_Integer in the range of l_uint64
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the integer
+ * \return l_uint64 for the integer; lua_error if out of bounds
+ */
+l_uint64
+ll_check_l_uint64(const char *_fun, lua_State *L, int arg)
+{
+    lua_Integer val = luaL_checkinteger(L, arg);
+    l_uint64 ret = static_cast<l_uint64>(val);
+
+    if (ret > UINT64_MAX) {
+        /* XXX: can't happen ? */
+        lua_pushfstring(L, "%s: l_uint64 #%d out of bounds (%d)", _fun, arg, val);
+        lua_error(L);
+        return 0;    /* NOTREACHED */
+    }
+    return ret;
+}
+
+/**
+ * \brief Return an argument lua_Integer in the range of l_uint64 or the default
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the integer
+ * \param dflt default value
+ * \return l_uint64 for the integer; lua_error if out of bounds
+ */
+l_uint64
+ll_check_l_uint64_default(const char *_fun, lua_State *L, int arg, l_uint64 dflt)
+{
+    lua_Integer val = luaL_optinteger(L, arg, static_cast<lua_Integer>(dflt));
+    l_uint64 ret = static_cast<l_uint64>(val);
+
+    if (ret > UINT64_MAX) {
+        /* XXX: can't happen ? */
+        lua_pushfstring(L, "%s: l_uint64 #%d out of bounds (%d)", _fun, arg, val);
+        lua_error(L);
+        return dflt;    /* NOTREACHED */
+    }
+    return ret;
 }
 
 /**
@@ -2311,7 +2400,7 @@ static int
 Destroy(lua_State *L)
 {
     FUNC(LL_LEPT ".Destroy");
-    LuaLept **plept = reinterpret_cast<LuaLept **>(ll_check_udata(_fun, L, 1, LL_LEPT));
+    LuaLept **plept = ll_check_udata<LuaLept>(_fun, L, 1, LL_LEPT);
     LuaLept *lept = *plept;
     DBG(LOG_DESTROY, "%s: '%s' plept=%p lept=%p\n",
          _fun, LL_LEPT, plept, lept);
@@ -2524,7 +2613,7 @@ MaxComponent(lua_State *L)
 LuaLept *
 ll_check_LuaLept(const char *_fun, lua_State *L, int arg)
 {
-    return *(reinterpret_cast<LuaLept **>(ll_check_udata(_fun, L, arg, LL_LEPT)));
+    return *ll_check_udata<LuaLept>(_fun, L, arg, LL_LEPT);
 }
 
 /**

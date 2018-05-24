@@ -37,8 +37,123 @@
  *
  *====================================================================*/
 
+typedef L_AMAP      Amap;       /*!< Local type name for the ugly L_AMAP */
+typedef L_AMAP_NODE AmapNode;   /*!< Local type name for the ugly L_AMAP_NODE */
+
+
 /**
- * \brief Printable string for a L_AMAP*
+ * \brief Destroy a Amap*
+ *
+ * \param L pointer to the lua_State
+ * \return 0 for nothing on the Lua stack
+ */
+static int
+Destroy(lua_State *L)
+{
+    FUNC(LL_AMAP ".Destroy");
+    L_Rbtree **pamap = ll_check_udata<L_Rbtree>(_fun, L, 1, LL_AMAP);
+    L_Rbtree *amap = *pamap;
+    DBG(LOG_DESTROY, "%s: '%s' pamap=%p amap=%p size=%d\n", _fun,
+        LL_AMAP, pamap, amap, l_amapSize(amap));
+    l_amapDestroy(&amap);
+    *pamap = nullptr;
+    return 0;
+}
+
+/**
+ * \brief Size of an Amap*
+ *
+ * Arg #1 is expected to be a string describing the key type (int,uint,float).
+ *
+ * \param L pointer to the lua_State
+ * \return 1 integer on the Lua stack
+ */
+static int
+Size(lua_State *L)
+{
+    FUNC(LL_AMAP ".Size");
+    Amap *amap = ll_check_Amap(_fun, L, 1);
+    lua_pushinteger(L, l_amapSize(amap));
+    return 1;
+}
+
+/**
+ * \brief Create a new Amap*
+ *
+ * Arg #1 is expected to be a string describing the key type (int,uint,float).
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Amap* on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    FUNC(LL_AMAP ".Create");
+    l_int32 keytype = ll_check_keytype(_fun, L, 1, L_INT_TYPE);
+    Amap *amap = l_amapCreate(keytype);
+    return ll_push_Amap(_fun, L, amap);
+}
+
+/**
+ * \brief Insert a node into an Amap* (%amap)
+ *
+ * Arg #1 (i.e. self) is expected to be a Amap* (amap).
+ * Arg #2 is expected to be a key (int, uint or float).
+ * Arg #3 is expected to be a value (int, uint or float).
+ *
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+Insert(lua_State *L)
+{
+    FUNC(LL_AMAP ".Insert");
+    Amap *amap = ll_check_Amap(_fun, L, 1);
+    RB_TYPE key, value;
+    int isnum;
+    int result = FALSE;
+
+    switch (amap->keytype) {
+    case L_INT_TYPE:
+        key.itype = ll_check_l_int64(_fun, L, 2);
+        if (lua_isnil(L, 3)) {
+            l_amapDelete(amap, key);
+        } else {
+            value.itype = lua_tointeger(L, 3);
+            l_amapInsert(amap, key, value);
+        }
+        result = TRUE;
+        break;
+    case L_UINT_TYPE:
+        key.itype = ll_check_l_uint64(_fun, L, 2);
+        if (lua_isnil(L, 3)) {
+            l_amapDelete(amap, key);
+        } else {
+            value.itype = lua_tointeger(L, 3);
+            l_amapInsert(amap, key, value);
+        }
+        result = TRUE;
+        break;
+    case L_FLOAT_TYPE:
+        key.ftype = ll_check_l_float64(_fun, L, 2);
+        if (lua_isnil(L, 3)) {
+            l_amapDelete(amap, key);
+        } else {
+            value.ftype = lua_tonumber(L, 3);
+            l_amapInsert(amap, key, value);
+        }
+        result = TRUE;
+        break;
+    }
+    lua_pushboolean(L, result);
+    return 1;
+}
+
+/**
+ * \brief Printable string for a Amap*
+ *
+ * Arg #1 (i.e. self) is expected to be a Amap* (amap).
+ *
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
  */
@@ -47,8 +162,8 @@ toString(lua_State *L)
 {
     FUNC(LL_ASET ".toString");
     static char str[256];
-    L_AMAP *amap = ll_check_Amap(_fun, L, 1);
-    L_AMAP_NODE *node = nullptr;
+    Amap *amap = ll_check_Amap(_fun, L, 1);
+    AmapNode *node = nullptr;
     luaL_Buffer B;
     int first = 1;
 
@@ -56,7 +171,7 @@ toString(lua_State *L)
     if (!amap) {
         luaL_addstring(&B, "nil");
     } else {
-        snprintf(str, sizeof(str), "[%d: %s] L_AMAP* %p",
+        snprintf(str, sizeof(str), "[%d: %s] " LL_AMAP "* %p",
                  amap->keytype,
                  ll_string_keytype(amap->keytype),
                  reinterpret_cast<void *>(amap));
@@ -99,118 +214,9 @@ toString(lua_State *L)
 }
 
 /**
- * \brief Create a new L_AMAP*
+ * \brief Delete a node from an Amap* (%amap)
  *
- * Arg #1 is expected to be a string describing the key type (int,uint,float).
- *
- * \param L pointer to the lua_State
- * \return 1 L_AMAP* on the Lua stack
- */
-static int
-Create(lua_State *L)
-{
-    FUNC(LL_AMAP ".Create");
-    l_int32 keytype = ll_check_keytype(_fun, L, 1, L_INT_TYPE);
-    L_AMAP *amap = l_amapCreate(keytype);
-    return ll_push_Amap(_fun, L, amap);
-}
-
-/**
- * \brief Destroy a L_AMAP*
- *
- * \param L pointer to the lua_State
- * \return 0 for nothing on the Lua stack
- */
-static int
-Destroy(lua_State *L)
-{
-    FUNC(LL_AMAP ".Destroy");
-    L_Rbtree **pamap = reinterpret_cast<L_Rbtree **>(ll_check_udata(_fun, L, 1, LL_AMAP));
-    L_Rbtree *amap = *pamap;
-    DBG(LOG_DESTROY, "%s: '%s' pamap=%p amap=%p size=%d\n", _fun,
-        LL_AMAP, pamap, amap, l_amapSize(amap));
-    l_amapDestroy(&amap);
-    *pamap = nullptr;
-    return 0;
-}
-
-/**
- * \brief Size of an AMAP*
- *
- * Arg #1 is expected to be a string describing the key type (int,uint,float).
- *
- * \param L pointer to the lua_State
- * \return 1 integer on the Lua stack
- */
-static int
-Size(lua_State *L)
-{
-    FUNC(LL_AMAP ".Size");
-    L_AMAP *amap = ll_check_Amap(_fun, L, 1);
-    lua_pushinteger(L, l_amapSize(amap));
-    return 1;
-}
-
-/**
- * \brief Insert a node into an L_AMAP* (%amap)
- *
- * Arg #1 (i.e. self) is expected to be a L_AMAP* (amap).
- * Arg #2 is expected to be a key (int, uint or float).
- * Arg #3 is expected to be a value (int, uint or float).
- *
- * \param L pointer to the lua_State
- * \return 1 boolean on the Lua stack
- */
-static int
-Insert(lua_State *L)
-{
-    FUNC(LL_AMAP ".Insert");
-    L_AMAP *amap = ll_check_Amap(_fun, L, 1);
-    RB_TYPE key, value;
-    int isnum;
-    int result = FALSE;
-
-    switch (amap->keytype) {
-    case L_INT_TYPE:
-    case L_UINT_TYPE:
-        key.itype = lua_tointegerx(L, 2, &isnum);
-        if (isnum) {
-            if (lua_isnil(L, 3)) {
-                l_amapDelete(amap, key);
-            } else {
-                value.itype = lua_tointeger(L, 3);
-                l_amapInsert(amap, key, value);
-            }
-            result = TRUE;
-        } else {
-            lua_pushfstring(L, LL_AMAP " key is not a number: '%s'", lua_tostring(L, 2));
-            lua_error(L);
-        }
-        break;
-    case L_FLOAT_TYPE:
-        key.ftype = lua_tonumberx(L, 2, &isnum);
-        if (isnum) {
-            if (lua_isnil(L, 3)) {
-                l_amapDelete(amap, key);
-            } else {
-                value.ftype = lua_tonumber(L, 3);
-                l_amapInsert(amap, key, value);
-            }
-            result = TRUE;
-        } else {
-            lua_pushfstring(L, LL_AMAP " key is not a number: '%s'", lua_tostring(L, 2));
-            lua_error(L);
-        }
-        break;
-    }
-    lua_pushboolean(L, result);
-    return 1;
-}
-
-/**
- * \brief Delete a node from an L_AMAP* (%amap)
- *
- * Arg #1 (i.e. self) is expected to be a L_AMAP* (amap).
+ * Arg #1 (i.e. self) is expected to be a Amap* (amap).
  * Arg #2 is expected to be a key (int, uint or float).
  *
  * \param L pointer to the lua_State
@@ -220,7 +226,7 @@ static int
 Delete(lua_State *L)
 {
     FUNC(LL_AMAP ".Delete");
-    L_AMAP *amap = ll_check_Amap(_fun, L, 1);
+    Amap *amap = ll_check_Amap(_fun, L, 1);
     RB_TYPE key;
     int result = FALSE;
 
@@ -242,9 +248,9 @@ Delete(lua_State *L)
 }
 
 /**
- * \brief Find a key in an L_AMAP* (%amap)
+ * \brief Find a key in an Amap* (%amap)
  *
- * Arg #1 (i.e. self) is expected to be a L_AMAP* (amap).
+ * Arg #1 (i.e. self) is expected to be a Amap* (amap).
  * Arg #2 is expected to be a key (int, uint or float).
  *
  * \param L pointer to the lua_State
@@ -254,7 +260,7 @@ static int
 Find(lua_State *L)
 {
     FUNC(LL_AMAP ".Find");
-    L_AMAP *amap = ll_check_Amap(_fun, L, 1);
+    Amap *amap = ll_check_Amap(_fun, L, 1);
     RB_TYPE key;
     RB_TYPE *value;
     int result = 0;
@@ -282,9 +288,9 @@ Find(lua_State *L)
 }
 
 /**
- * \brief Get first node in an L_AMAP* (%amap)
+ * \brief Get first node in an Amap* (%amap)
  *
- * Arg #1 (i.e. self) is expected to be a L_AMAP* (amap).
+ * Arg #1 (i.e. self) is expected to be a Amap* (amap).
  *
  * \param L pointer to the lua_State
  * \return 1 light user data on the Lua stack
@@ -293,16 +299,34 @@ static int
 GetFirst(lua_State *L)
 {
     FUNC(LL_AMAP ".GetFirst");
-    L_AMAP *amap = ll_check_Amap(_fun, L, 1);
-    L_AMAP_NODE *node = l_amapGetFirst(amap);
+    Amap *amap = ll_check_Amap(_fun, L, 1);
+    AmapNode *node = l_amapGetFirst(amap);
     lua_pushlightuserdata(L, node);
     return 1;
 }
 
 /**
- * \brief Get next node of an L_AMAP_NODE* (%node)
+ * \brief Get last node in an Amap* (%amap)
  *
- * Arg #1 is expected to be a L_AMAP_NODE* (node).
+ * Arg #1 is expected to be a Amap* (amap).
+ *
+ * \param L pointer to the lua_State
+ * \return 1 light user data on the Lua stack
+ */
+static int
+GetLast(lua_State *L)
+{
+    FUNC(LL_AMAP ".GetLast");
+    Amap *amap = ll_check_Amap(_fun, L, 1);
+    AmapNode *node = l_amapGetLast(amap);
+    lua_pushlightuserdata(L, node);
+    return 1;
+}
+
+/**
+ * \brief Get next node of an AmapNode* (%node)
+ *
+ * Arg #1 is expected to be a AmapNode* (node).
  *
  * \param L pointer to the lua_State
  * \return 1 light user data on the Lua stack
@@ -312,16 +336,16 @@ GetNext(lua_State *L)
 {
     FUNC(LL_AMAP ".GetNext");
     /* HACK: deconstify */
-    L_AMAP_NODE *node = reinterpret_cast<L_AMAP_NODE *>(reinterpret_cast<intptr_t>(lua_topointer(L, 2)));
-    L_AMAP_NODE *next = l_amapGetNext(node);
+    AmapNode *node = reinterpret_cast<AmapNode *>(reinterpret_cast<intptr_t>(lua_topointer(L, 2)));
+    AmapNode *next = l_amapGetNext(node);
     lua_pushlightuserdata(L, next);
     return 1;
 }
 
 /**
- * \brief Get previous node of an L_AMAP_NODE* (%node)
+ * \brief Get previous node of an AmapNode* (%node)
  *
- * Arg #1 is expected to be a L_AMAP_NODE* (node).
+ * Arg #1 is expected to be a AmapNode* (node).
  *
  * \param L pointer to the lua_State
  * \return 1 light user data on the Lua stack
@@ -331,27 +355,9 @@ GetPrev(lua_State *L)
 {
     FUNC(LL_AMAP ".GetPrev");
     /* HACK: deconstify */
-    L_AMAP_NODE *node = reinterpret_cast<L_AMAP_NODE *>(reinterpret_cast<intptr_t>(lua_topointer(L, 2)));
-    L_AMAP_NODE *prev = l_amapGetPrev(node);
+    AmapNode *node = reinterpret_cast<AmapNode *>(reinterpret_cast<intptr_t>(lua_topointer(L, 2)));
+    AmapNode *prev = l_amapGetPrev(node);
     lua_pushlightuserdata(L, prev);
-    return 1;
-}
-
-/**
- * \brief Get last node in an L_AMAP* (%amap)
- *
- * Arg #1 is expected to be a L_AMAP* (amap).
- *
- * \param L pointer to the lua_State
- * \return 1 light user data on the Lua stack
- */
-static int
-GetLast(lua_State *L)
-{
-    FUNC(LL_AMAP ".GetLast");
-    L_AMAP *amap = ll_check_Amap(_fun, L, 1);
-    L_AMAP_NODE *node = l_amapGetLast(amap);
-    lua_pushlightuserdata(L, node);
     return 1;
 }
 
@@ -360,12 +366,12 @@ GetLast(lua_State *L)
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the L_AMAP* contained in the user data
+ * \return pointer to the Amap* contained in the user data
  */
-L_AMAP *
+Amap *
 ll_check_Amap(const char *_fun, lua_State *L, int arg)
 {
-    return *(reinterpret_cast<L_AMAP **>(ll_check_udata(_fun, L, arg, LL_AMAP)));
+    return *ll_check_udata<Amap>(_fun, L, arg, LL_AMAP);
 }
 
 /**
@@ -373,9 +379,9 @@ ll_check_Amap(const char *_fun, lua_State *L, int arg)
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the L_AMAP* contained in the user data
+ * \return pointer to the Amap* contained in the user data
  */
-L_AMAP *
+Amap *
 ll_check_Amap_opt(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
@@ -384,36 +390,34 @@ ll_check_Amap_opt(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Push L_AMAP user data to the Lua stack and set its meta table
+ * \brief Push Amap user data to the Lua stack and set its meta table
  * \param _fun calling function's name
  * \param L pointer to the lua_State
- * \param amap pointer to the L_AMAP
- * \return 1 L_AMAP* on the Lua stack
+ * \param amap pointer to the Amap
+ * \return 1 Amap* on the Lua stack
  */
 int
-ll_push_Amap(const char *_fun, lua_State *L, L_AMAP *amap)
+ll_push_Amap(const char *_fun, lua_State *L, Amap *amap)
 {
     if (!amap)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, LL_AMAP, amap);
 }
-
 /**
- * \brief Create and push a new L_AMAP*
+ * \brief Create and push a new Amap*
  *
  * Arg #1 is expected to be a key type name (int, uint, or float).
  *
  * \param L pointer to the lua_State
- * \return 1 L_AMAP* on the Lua stack
+ * \return 1 Amap* on the Lua stack
  */
 int
 ll_new_Amap(lua_State *L)
 {
     return Create(L);
 }
-
 /**
- * \brief Register the L_AMAP methods and functions in the LL_AMAP meta table
+ * \brief Register the Amap methods and functions in the LL_AMAP meta table
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
@@ -426,19 +430,19 @@ ll_register_Amap(lua_State *L)
         {"__new",               Create},
         {"__newindex",          Insert},
         {"__tostring",          toString},
-        {"Destroy",             Destroy},
-        {"Insert",              Insert},
+        {"Create",              Create},
         {"Delete",              Delete},
+        {"Destroy",             Destroy},
         {"Find",                Find},
         {"GetFirst",            GetFirst},
         {"GetLast",             GetLast},
+        {"GetNext",             GetNext},
+        {"GetPrev",             GetPrev},
+        {"Insert",              Insert},
         LUA_SENTINEL
     };
 
     static const luaL_Reg functions[] = {
-        {"Create",              Create},
-        {"GetNext",             GetNext},
-        {"GetPrev",             GetPrev},
         LUA_SENTINEL
     };
 

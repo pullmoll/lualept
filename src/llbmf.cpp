@@ -37,6 +37,27 @@
  *
  *====================================================================*/
 
+
+
+/**
+ * \brief Destroy a Bmf*
+ *
+ * \param L pointer to the lua_State
+ * \return 0 for nothing on the Lua stack
+ */
+static int
+Destroy(lua_State *L)
+{
+    FUNC(LL_BMF ".Destroy");
+    L_Bmf **pbmf = ll_check_udata<L_Bmf>(_fun, L, 1, LL_BMF);
+    L_Bmf *bmf = *pbmf;
+    DBG(LOG_DESTROY, "%s: '%s' pbmf=%p bmf=%p\n",
+        _fun, LL_BMF, pbmf, bmf);
+    bmfDestroy(&bmf);
+    *pbmf = nullptr;
+    return 0;
+}
+
 /**
  * \brief Create a new Bmf*
  *
@@ -54,66 +75,6 @@ Create(lua_State *L)
     l_int32 fontsize = ll_check_l_int32_default(_fun, L, 2, 6);
     L_Bmf *bmf = bmfCreate(dir, fontsize);
     return ll_push_Bmf(_fun, L, bmf);
-}
-
-/**
- * \brief Destroy a Bmf*
- *
- * \param L pointer to the lua_State
- * \return 0 for nothing on the Lua stack
- */
-static int
-Destroy(lua_State *L)
-{
-    FUNC(LL_BMF ".Destroy");
-    L_Bmf **pbmf = reinterpret_cast<L_Bmf **>(ll_check_udata(_fun, L, 1, LL_BMF));
-    L_Bmf *bmf = *pbmf;
-    DBG(LOG_DESTROY, "%s: '%s' pbmf=%p bmf=%p\n",
-        _fun, LL_BMF, pbmf, bmf);
-    bmfDestroy(&bmf);
-    *pbmf = nullptr;
-    return 0;
-}
-
-/**
- * \brief Get the Pix* for a character from the Bmf* (%bmf)
- *
- * Arg #1 is expected to be a Bmf* (bmf).
- * Arg #2 is expected to be a character (chr).
- *
- * \param L pointer to the lua_State
- * \return 1 Pix* on the Lua stack
- */
-static int
-GetPix(lua_State *L)
-{
-    FUNC(LL_BMF ".GetPix");
-    L_Bmf *bmf = ll_check_Bmf(_fun, L, 1);
-    char chr = ll_check_char(_fun, L, 2);
-    Pix *pix = bmfGetPix(bmf, chr);
-    return ll_push_Pix(_fun, L, pix);
-}
-
-/**
- * \brief Get the width for a character from the Bmf* (%bmf)
- *
- * Arg #1 is expected to be a Bmf* (bmf).
- * Arg #2 is expected to be a character (chr).
- *
- * \param L pointer to the lua_State
- * \return 1 integer on the Lua stack
- */
-static int
-GetWidth(lua_State *L)
-{
-    FUNC(LL_BMF ".GetWidth");
-    L_Bmf *bmf = ll_check_Bmf(_fun, L, 1);
-    char chr = ll_check_char(_fun, L, 2);
-    l_int32 w = 0;
-    if (bmfGetWidth(bmf, chr, &w))
-        return ll_push_nil(L);
-    lua_pushinteger(L, w);
-    return 1;
 }
 
 /**
@@ -135,28 +96,6 @@ GetBaseline(lua_State *L)
     if (bmfGetBaseline(bmf, chr, &baseline))
         return ll_push_nil(L);
     lua_pushinteger(L, baseline);
-    return 1;
-}
-
-/**
- * \brief Get the baseline for a character from the Bmf* (%bmf)
- *
- * Arg #1 is expected to be a Bmf* (bmf).
- * Arg #2 is expected to be a string (str).
- *
- * \param L pointer to the lua_State
- * \return 1 integer on the Lua stack
- */
-static int
-GetStringWidth(lua_State *L)
-{
-    FUNC(LL_BMF ".GetStringWidth");
-    L_Bmf *bmf = ll_check_Bmf(_fun, L, 1);
-    const char* str = ll_check_string(_fun, L, 2);
-    l_int32 w;
-    if (bmfGetStringWidth(bmf, str, &w))
-        return ll_push_nil(L);
-    lua_pushinteger(L, w);
     return 1;
 }
 
@@ -188,6 +127,69 @@ GetLineStrings(lua_State *L)
 }
 
 /**
+ * \brief Get the Pix* for a character from the Bmf* (%bmf)
+ *
+ * Arg #1 is expected to be a Bmf* (bmf).
+ * Arg #2 is expected to be a character (chr).
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+GetPix(lua_State *L)
+{
+    FUNC(LL_BMF ".GetPix");
+    L_Bmf *bmf = ll_check_Bmf(_fun, L, 1);
+    char chr = ll_check_char(_fun, L, 2);
+    Pix *pix = bmfGetPix(bmf, chr);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Get the baseline for a character from the Bmf* (%bmf)
+ *
+ * Arg #1 is expected to be a Bmf* (bmf).
+ * Arg #2 is expected to be a string (str).
+ *
+ * \param L pointer to the lua_State
+ * \return 1 integer on the Lua stack
+ */
+static int
+GetStringWidth(lua_State *L)
+{
+    FUNC(LL_BMF ".GetStringWidth");
+    L_Bmf *bmf = ll_check_Bmf(_fun, L, 1);
+    const char* str = ll_check_string(_fun, L, 2);
+    l_int32 w;
+    if (bmfGetStringWidth(bmf, str, &w))
+        return ll_push_nil(L);
+    lua_pushinteger(L, w);
+    return 1;
+}
+
+/**
+ * \brief Get the width for a character from the Bmf* (%bmf)
+ *
+ * Arg #1 is expected to be a Bmf* (bmf).
+ * Arg #2 is expected to be a character (chr).
+ *
+ * \param L pointer to the lua_State
+ * \return 1 integer on the Lua stack
+ */
+static int
+GetWidth(lua_State *L)
+{
+    FUNC(LL_BMF ".GetWidth");
+    L_Bmf *bmf = ll_check_Bmf(_fun, L, 1);
+    char chr = ll_check_char(_fun, L, 2);
+    l_int32 w = 0;
+    if (bmfGetWidth(bmf, chr, &w))
+        return ll_push_nil(L);
+    lua_pushinteger(L, w);
+    return 1;
+}
+
+/**
  * \brief Check Lua stack at index %arg for udata of class LL_BMF
  * \param _fun calling function's name
  * \param L pointer to the lua_State
@@ -197,7 +199,7 @@ GetLineStrings(lua_State *L)
 L_Bmf *
 ll_check_Bmf(const char *_fun, lua_State *L, int arg)
 {
-    return *(reinterpret_cast<L_Bmf **>(ll_check_udata(_fun, L, arg, LL_BMF)));
+    return *ll_check_udata<L_Bmf>(_fun, L, arg, LL_BMF);
 }
 
 /**
@@ -229,7 +231,6 @@ ll_push_Bmf(const char *_fun, lua_State *L, L_Bmf *bmf)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, LL_BMF, bmf);
 }
-
 /**
  * \brief Create and push a new Bmf*
  *
@@ -244,7 +245,6 @@ ll_new_Bmf(lua_State *L)
 {
     return Create(L);
 }
-
 /**
  * \brief Register the BMF methods and functions in the LL_BMF meta table
  * \param L pointer to the lua_State
@@ -257,11 +257,11 @@ ll_register_Bmf(lua_State *L)
         {"__gc",                Destroy},   /* garbage collector */
         {"__new",               Create},
         {"Destroy",             Destroy},
-        {"GetPix",              GetPix},
-        {"GetWidth",            GetWidth},
         {"GetBaseline",         GetBaseline},
-        {"GetStringWidth",      GetStringWidth},
         {"GetLineStrings",      GetLineStrings},
+        {"GetPix",              GetPix},
+        {"GetStringWidth",      GetStringWidth},
+        {"GetWidth",            GetWidth},
         LUA_SENTINEL
     };
 
