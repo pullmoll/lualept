@@ -443,6 +443,108 @@ Clear(lua_State *L)
 }
 
 /**
+ * \brief Translate the boxes in the Boxa* (%boxas)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ * Arg #2 is expected to be a l_int32 (transx).
+ * Arg #3 is expected to be a l_int32 (transy).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Boxa* on the Lua stack (%boxa)
+ */
+static int
+Translate(lua_State *L)
+{
+    FUNC(LL_BOXA ".Translate");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 transx = ll_check_l_int32_default(_fun, L, 2, 0);
+    l_int32 transy = ll_check_l_int32_default(_fun, L, 3, 0);
+    Boxa *boxa = boxaTranslate(boxas, transx, transy);
+    return ll_push_Boxa(_fun, L, boxa);
+}
+
+/**
+ * \brief Scale the boxes in the Boxa* (%boxas)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ * Arg #2 is expected to be a l_float32 (scalex).
+ * Arg #3 is expected to be a l_float32 (scaley).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Boxa* on the Lua stack (%boxa)
+ */
+static int
+Scale(lua_State *L)
+{
+    FUNC(LL_BOXA ".Scale");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_float32 scalex = ll_check_l_float32_default(_fun, L, 2, 1.0f);
+    l_float32 scaley = ll_check_l_float32_default(_fun, L, 3, 1.0f);
+    Boxa *boxa = boxaScale(boxas, scalex, scaley);
+    return ll_push_Boxa(_fun, L, boxa);
+}
+
+/**
+ * \brief Rotate the boxes in the Boxa* (%boxas)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ * Arg #2 is expected to be a l_float32 (xc).
+ * Arg #3 is expected to be a l_float32 (yc).
+ * Arg #4 is expected to be a l_float32 (angle).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Boxa* on the Lua stack (%boxa)
+ */
+static int
+Rotate(lua_State *L)
+{
+    FUNC(LL_BOXA ".Rotate");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_float32 xc = ll_check_l_float32_default(_fun, L, 2, 1.0f);
+    l_float32 yc = ll_check_l_float32_default(_fun, L, 3, 1.0f);
+    l_float32 angle = ll_check_l_float32_default(_fun, L, 4, 1.0f);
+    Boxa *boxa = boxaRotate(boxas, xc, yc, angle);
+    return ll_push_Boxa(_fun, L, boxa);
+}
+
+/**
+ * \brief Affine transformation of the boxes in the Boxa* (%boxas)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ * Arg #2 is expected to be a table of 3x3 l_float32 (mat).
+ * or
+ * Arg #2 .. 10 is expected to be l_float32 (mat[0..8]).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Boxa* on the Lua stack (%boxa)
+ */
+static int
+AffineTransform(lua_State *L)
+{
+    FUNC(LL_BOXA ".AffineTransform");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 i, n;
+    l_float32 *mat;
+    if (lua_istable(L, 2)) {
+        /* expect a table of 9 numbers */
+        ll_unpack_farray(_fun, L, 2, &n);
+    } else {
+        /* expect 9 numbers */
+        n = 9;
+        mat = ll_calloc<l_float32>(_fun, L, n);
+        for (i = 0; i < n; i++)
+            mat[i] = ll_check_l_float32(_fun, L, 2+i);
+    }
+    if (n < 9) {
+        lua_pushfstring(L, "%s: wrong matrix size (%d), expected 3x3", _fun, n);
+        lua_error(L);
+        return 0;
+    }
+    Boxa *boxa = boxaAffineTransform(boxas, mat);
+    return ll_push_Boxa(_fun, L, boxa);
+}
+
+/**
  * \brief Return a Boxa* (%boxad) of boxes from Boxa* (%boxas) contained within Box* (%box)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
@@ -2012,6 +2114,25 @@ GetWhiteblocks(lua_State *L)
 }
 
 /**
+ * \brief Get the area of boxes in a Boxa* (%boxas)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ * Arg #2 is expected to be a l_int32 (maxoverlap).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Boxa* on the Lua stack (%boxa)
+ */
+static int
+PruneSortedOnOverlap(lua_State *L)
+{
+    FUNC(LL_BOXA ".PruneSortedOnOverlap");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    l_int32 maxoverlap = ll_check_l_int32(_fun, L, 2);
+    Boxa *boxa = boxaPruneSortedOnOverlap(boxas, maxoverlap);
+    return ll_push_Boxa(_fun, L, boxa);
+}
+
+/**
  * \brief Read a Boxa* (%boxa) from a file (%filename)
  * <pre>
  * Arg #1 is expected to be a string (filename).
@@ -2208,6 +2329,10 @@ ll_register_Boxa(lua_State *L)
         {"TakeBox",                 RemoveBoxAndSave},      /* alias */
         {"SaveValid",               SaveValid},
         {"Clear",                   Clear},
+        {"Translate",               Translate},
+        {"Scale",                   Scale},
+        {"Rotate",                  Rotate},
+        {"AffineTransform",         AffineTransform},
         {"ContainedInBox",          ContainedInBox},
         {"ContainedInBoxCount",     ContainedInBoxCount},
         {"ContainedInBoxa",         ContainedInBoxa},
@@ -2270,6 +2395,7 @@ ll_register_Boxa(lua_State *L)
         {"GetArea",                 GetArea},
         {"ExtractSortedPattern",    ExtractSortedPattern},
         {"GetWhiteblocks",          GetWhiteblocks},
+        {"PruneSortedOnOverlap",    PruneSortedOnOverlap},
         {"Read",                    Read},
         {"ReadStream",              ReadStream},
         {"ReadMem",                 ReadMem},
