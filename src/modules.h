@@ -193,7 +193,7 @@ extern "C" {
 /** Lua function table (luaL_Reg array[]) sentinel */
 #define LUA_SENTINEL    {nullptr,nullptr}
 
-#define FUNC(name) static const char _fun[] = name
+#define FUNC(name) static const char _fun[] = name; (void)_fun
 
 /*! Dummy structure for the top level Lua class LL_LEPT */
 typedef struct LuaLept {

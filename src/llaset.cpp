@@ -416,14 +416,14 @@ ll_register_Aset(lua_State *L)
         {"Delete",              Delete},
         {"Find",                Find},
         {"GetFirst",            GetFirst},
+        {"GetNext",             GetNext},
+        {"GetPrev",             GetPrev},
         {"GetLast",             GetLast},
         LUA_SENTINEL
     };
 
     static const luaL_Reg functions[] = {
         {"Create",              Create},
-        {"GetNext",             GetNext},
-        {"GetPrev",             GetPrev},
         LUA_SENTINEL
     };
 

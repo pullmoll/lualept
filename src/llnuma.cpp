@@ -82,7 +82,30 @@ Create(lua_State *L)
 {
     FUNC(LL_NUMA ".Create");
     l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
-    Numa *na = numaCreate(n);
+    Numa* na = numaCreate(n);
+    return ll_push_Numa(_fun, L, na);
+}
+
+/**
+ * \brief Create a new Numa* from an array table of numbers
+ * <pre>
+ * Arg #1 is expected to be a table (tbl).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Numa* on the Lua stack
+ */
+static int
+FromArray(lua_State *L)
+{
+    FUNC(LL_NUMA ".FromArray");
+    l_int32 i, n;
+    l_float32 *tbl = ll_unpack_farray(_fun, L, 1, &n);
+    Numa* na = numaCreate(n);
+    if (!na)
+        return ll_push_nil(L);
+    for (i = 0; i < n; i++)
+        numaAddNumber(na, tbl[i]);
+    ll_free(tbl);
     return ll_push_Numa(_fun, L, na);
 }
 
@@ -665,11 +688,13 @@ int
 ll_register_Numa(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},          /* garbage collector */
-        {"__new",               Create},           /* new Numa */
-        {"__len",               GetCount},         /* #numa */
-        {"__newitem",           ReplaceNumber},    /* numa[index] = number */
+        {"__gc",                Destroy},           /* garbage collector */
+        {"__new",               Create},            /* TODO: smart create via Create, FromArray, Read ? */
+        {"__len",               GetCount},          /* #numa */
+        {"__newitem",           ReplaceNumber},     /* numa[index] = number */
         {"__tostring",          toString},
+        {"Create",              Create},
+        {"FromArray",           FromArray},
         {"Clone",               Clone},
         {"Copy",                Copy},
         {"Empty",               Empty},

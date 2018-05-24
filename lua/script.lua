@@ -45,6 +45,7 @@ function aset_test()
 	aset[-1000] = true
 	aset[99] = true
 	aset[1] = true
+	print("... after adding some slots")
 	print(pad("aset"), '#'..#aset, aset)
 	print(pad("aset:Find(5)"), aset:Find(5))
 	print(pad("aset:Find(99)"), aset:Find(99))
@@ -201,7 +202,7 @@ function numa_test()
 	print(pad("naa:Write('" .. filename .. "')"), ok)
 
 	naa = Numaa().Read(filename)
-	print(pad("naa.Read('" .. filename .. "')"), ok)
+	print(pad("Numa().Read('" .. filename .. "')"), ok)
 
 	local na = naa:FlattenToNuma()
 	print("... after na = naa:FlattenToNuma()")
@@ -209,6 +210,12 @@ function numa_test()
 	print(pad("na"), na)
 	print("na:GetFArray():", tbl(na:GetFArray()))
 	print("na:GetIArray():", tbl(na:GetIArray()))
+
+	-- Create a Numa* from a table of floats
+	local na = na.FromArray({1.1, 2.22, 3.333, 4.4444, 5.55555, 6.66666})
+	print(pad("#na"), #na)
+	print(pad("na"), na)
+
 end
 
 function dna_test()
@@ -398,14 +405,14 @@ function pix2_test()
 	print (pad("dimensions"), pixm:GetDimensions())
 
 	print (pad("pixels"), pixm:CountPixels())
-	local box = Box(10,w-20,h-30,30)
+	local box = Box(10,w-20,h-100,100)
 	print (pad("rect"), box)
 	print (pad("pixels in rect"), pixm:CountPixelsInRect(box))
 	print (pad("foreground fract"), pixm:ForegroundFraction())
 
 	local ok = pixm:Write(filename2,'g4')
 	print (pad("pixm:Write('" .. filename2 .. "','g4')"), ok)
-	pix:PaintThroughMask(pixm, 0, 0, LuaLept.RGB(255,128,128))
+	pix:PaintThroughMask(pixm, 0, 0, LuaLept.RGB(255,48,48))
 	local ok = pix:Write(filename3,'png')
 	print (pad("pix:Write('" .. filename3 .. "','png')"), ok)
 end

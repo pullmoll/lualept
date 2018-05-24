@@ -91,6 +91,29 @@ Create(lua_State *L)
 }
 
 /**
+ * \brief Create a new Dna* from an array table of numbers
+ * <pre>
+ * Arg #1 is expected to be a table (tbl).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Numa* on the Lua stack
+ */
+static int
+FromArray(lua_State *L)
+{
+    FUNC(LL_NUMA ".FromArray");
+    l_int32 i, n;
+    l_float64 *tbl = ll_unpack_darray(_fun, L, 1, &n);
+    L_Dna* da = l_dnaCreate(n);
+    if (!da)
+        return ll_push_nil(L);
+    for (i = 0; i < n; i++)
+        l_dnaAddNumber(da, tbl[i]);
+    ll_free(tbl);
+    return ll_push_Dna(_fun, L, da);
+}
+
+/**
  * \brief Destroy a L_Dna*
  * <pre>
  * Arg #1 (i.e. self) is expected to be a L_Dna* user data.
@@ -609,10 +632,13 @@ int
 ll_register_Dna(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                    Destroy},   /* Lua garbage collector */
-        {"__new",                   Create},    /* Lua new object */
-        {"__len",                   GetCount},  /* #dna */
+        {"__gc",                    Destroy},       /* Lua garbage collector */
+        {"__new",                   Create},        /* TODO: smart create via Create, FromArray, Read ? */
+        {"__len",                   GetCount},      /* #dna */
+        {"__newitem",               ReplaceNumber}, /* dna[index] = number */
         {"__tostring",              toString},
+        {"Create",                  Create},
+        {"FromArray",               FromArray},
         {"Clone",                   Clone},
         {"Copy",                    Copy},
         {"Empty",                   Empty},
