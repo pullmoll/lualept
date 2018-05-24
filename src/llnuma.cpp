@@ -702,5 +702,7 @@ ll_register_Numa(lua_State *L)
         LUA_SENTINEL
     };
 
+    lua_pushcfunction(L, Create);
+    lua_setglobal(L, LL_NUMA);
     return ll_register_class(L, LL_NUMA, methods, functions);
 }

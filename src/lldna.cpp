@@ -642,5 +642,7 @@ ll_register_Dna(lua_State *L)
         LUA_SENTINEL
     };
 
+    lua_pushcfunction(L, Create);
+    lua_setglobal(L, LL_DNA);
     return ll_register_class(L, LL_DNA, methods, functions);
 }

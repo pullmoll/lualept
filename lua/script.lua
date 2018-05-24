@@ -25,7 +25,7 @@ end
 
 function bmf_test()
 	local dir = "fonts";
-	local bmf = LuaLept.Bmf(dir, 10);
+	local bmf = Bmf(dir, 10);
 	print(pad("bmf"), bmf)
 	local chr = string.byte('x')
 	print(pad("bmf:GetWidth("..chr..")"), bmf:GetWidth(chr))
@@ -37,7 +37,7 @@ end
 
 function aset_test()
 	header("Aset")
-	local aset = LuaLept.Aset("int")
+	local aset = Aset("int")
 	print(pad("aset"), '#'..#aset, aset)
 	aset:Insert(2)
 	aset[17] = true
@@ -56,7 +56,7 @@ end
 
 function amap_test()
 	header("Amap")
-	local amap = LuaLept.Amap("int")
+	local amap = Amap("int")
 	print(pad("amap"), '#'..#amap, amap)
 	amap[2] = 22
 	amap[17] = 100
@@ -76,8 +76,8 @@ end
 function pta_test()
 	header("Pta/Ptaa")
 	-- Create a new Pta
-	local pa = LuaLept.Pta(8)
-	print(pad("pa = LuaLept.Pta(8)"), pa)
+	local pa = Pta(8)
+	print(pad("pa = Pta(8)"), pa)
 
 	-- Add some points
 	pa:AddPt(2.71,3.14)
@@ -88,7 +88,7 @@ function pta_test()
 	print(pad("#pa"), #pa)
 	print(pad("pa"), pa)
 
-	local paa = LuaLept.Ptaa()
+	local paa = Ptaa()
 	paa:AddPta(pa)
 	paa:AddPta(pa)
 	paa:AddPta(pa)
@@ -99,12 +99,12 @@ end
 function box_test()
 	header("Box/Boxa/Boxaa")
 	-- Create a new Box
-	local b = LuaLept.Box(10,10,40,80)
+	local b = Box(10,10,40,80)
 	print(pad("b = Box(10,10,40,80)"), b)
 
 	-- Create a new Boxa
-	local ba = LuaLept.Boxa(1)
-	print(pad("ba = LuaLept.Boxa(1)"), ba)
+	local ba = Boxa(1)
+	print(pad("ba = Boxa(1)"), ba)
 	print(pad("#ba"), #ba)
 
 	-- Add box b using default, clone, copy
@@ -120,8 +120,8 @@ function box_test()
 	print(pad("ba"), ba)
 
 	-- Insert before the third Box in Boxa
-	ba:InsertBox(3, LuaLept.Box(3,4,19,18))
-	print("... after ba:InsertBox(3, LuaLept.Box(3,4,19,18))")
+	ba:InsertBox(3, Box(3,4,19,18))
+	print("... after ba:InsertBox(3, Box(3,4,19,18))")
 	print(pad("#ba"), #ba)
 	print(pad("ba"), ba)
 
@@ -139,8 +139,8 @@ function box_test()
 	b = ba:GetBox(4)
 	print(pad("b = ba:GetBox(4)"), b)
 
-	baa = LuaLept.Boxaa()
-	print(pad("baa = LuaLept.Boxaa()"), baa)
+	baa = Boxaa()
+	print(pad("baa = Boxaa()"), baa)
 	print(pad("#baa"), #baa)
 	local count = 7
 	for i = 1,count do baa:AddBoxa(ba) end
@@ -161,8 +161,8 @@ function numa_test()
 	local E = 2.7182818284590452354
 
 	-- Create a new Numa
-	local na = LuaLept.Numa()
-	print(pad("na = LuaLept.Numa()"), na)
+	local na = Numa()
+	print(pad("na = Numa()"), na)
 
 	-- Add some numbers
 	na:AddNumber(PI)
@@ -183,8 +183,8 @@ function numa_test()
 	print("na:GetIArray()", tbl(na:GetIArray()))
 
 	-- Create a new MUMAA
-	local naa = LuaLept.Numaa(1)
-	print(pad("naa = LuaLept.Numaa(1)"), naa)
+	local naa = Numaa(1)
+	print(pad("naa = Numaa(1)"), naa)
 
 	local count = 4
 	for i = 1, count do naa:AddNuma(na) end
@@ -200,7 +200,7 @@ function numa_test()
 	local ok = naa:Write(filename)
 	print(pad("naa:Write('" .. filename .. "')"), ok)
 
-	naa = LuaLept.Numaa().Read(filename)
+	naa = Numaa().Read(filename)
 	print(pad("naa.Read('" .. filename .. "')"), ok)
 
 	local na = naa:FlattenToNuma()
@@ -218,8 +218,8 @@ function dna_test()
 	local E = 2.7182818284590452354
 
 	-- Create a new Dna
-	local da = LuaLept.Dna()
-	print(pad("da = LuaLept.Dna()"), da)
+	local da = Dna()
+	print(pad("da = Dna()"), da)
 
 	-- Add some numbers
 	da:AddNumber(PI)
@@ -238,8 +238,8 @@ function dna_test()
 	tbl(da:GetDArray())
 
 	-- Create a new Dnaa
-	local daa = LuaLept.Dnaa(1)
-	print(pad("daa = LuaLept.Dnaa(1)"), daa)
+	local daa = Dnaa(1)
+	print(pad("daa = Dnaa(1)"), daa)
 
 	local count = 5
 	for i = 1, count do daa:AddDna(da) end
@@ -276,12 +276,12 @@ function pix_test()
 	local filename = "/tmp/test.png"
 	header("Pix")
 	local width, height, depth = 320, 240, 2
-	local pix = LuaLept.Pix(width,height,depth)
+	local pix = Pix(width,height,depth)
 	pix:SetText("Created with LuaLept-" .. LuaLept:Version())
-	print(pad("pix = LuaLept.Pix("..width..","..height..","..depth..")"), pix)
+	print(pad("pix = Pix("..width..","..height..","..depth..")"), pix)
 
-	local cmap = LuaLept.PixColormap(2)
-	print(pad("cmap = LuaLept.PixColormap(2)"), cmap)
+	local cmap = PixColormap(2)
+	print(pad("cmap = PixColormap(2)"), cmap)
 	print(pad("#cmap"), #cmap)
 
 	print(pad("cmap:GetFreeCount()"), cmap:GetFreeCount())
@@ -329,8 +329,8 @@ function pix_test()
 	print(pad("data = cmap:SerializeToMemory(4)"), data)
 	hex_dump(data)
 
-	local pix2 = LuaLept.Pix(filename)
-	print(pad("pix2 = LuaLept.Pix('" .. filename .. "')"), pix2);
+	local pix2 = Pix(filename)
+	print(pad("pix2 = Pix('" .. filename .. "')"), pix2);
 
 
 	-- get the pixel data of pix2 as two dimensional array of integers
@@ -368,14 +368,7 @@ function pix_test()
 		0xcccccc00, 0xdddddd00, 0xeeeeee00, 0xffffff00,
 		0x32847100, 0xc8411200, 0x01928200, 0x12479a00,
 		0x81ff2a00, 0x19f9fa00, 0x8a818b00, 0x586a9400}
-	--[[
-	      FIXME: how to access functions of LuaLept.Pix()
-	      Right now I need to create a dummy pix3 to have
-	      access to pix3.DisplayColorArray(...).
-	      Should I be using global function names.
-	--]]
-	local pix3 = LuaLept.Pix(1,1)
-	local pix3 = pix3.DisplayColorArray(240, 4, 6, carray)
+	local pix3 = Pix().DisplayColorArray(240, 4, 6, carray)
 	local pix3 = pix3:AddBorder(20, LuaLept.RGB(255,255,255))
 	print(pad("pix3"), pix3)
 	local ok = pix3:Write("/tmp/carray.tiff", "lzw")
@@ -386,7 +379,7 @@ function pix2_test()
 	local filename2 = "/tmp/lualept-mask.tif"
 	local filename3 = "/tmp/lualept-masked.png"
 	header("Pix2")
-	local pix = LuaLept.Pix('lualept.jpg')
+	local pix = Pix('lualept.jpg')
 	print (pad("pix"), pix)
 
 	local ok = pix:Write(filename, 'png')
@@ -405,7 +398,7 @@ function pix2_test()
 	print (pad("dimensions"), pixm:GetDimensions())
 
 	print (pad("pixels"), pixm:CountPixels())
-	local box = LuaLept.Box(10,w-20,h-30,30)
+	local box = Box(10,w-20,h-30,30)
 	print (pad("rect"), box)
 	print (pad("pixels in rect"), pixm:CountPixelsInRect(box))
 	print (pad("foreground fract"), pixm:ForegroundFraction())
@@ -448,14 +441,14 @@ print(pad("LuaLept:Version()"), LuaLept:Version())
 print(pad("LuaLept:LuaVersion()"), LuaLept:LuaVersion())
 print(pad("LuaLept:LeptVersion()"), LuaLept:LeptVersion())
 
--- bmf_test()
--- aset_test()
--- amap_test()
--- pta_test()
--- box_test()
+bmf_test()
+aset_test()
+amap_test()
+pta_test()
+box_test()
 numa_test()
--- dna_test()
--- pix_test()
+dna_test()
+pix_test()
 pix2_test()
 
 header()

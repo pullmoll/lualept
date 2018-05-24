@@ -490,5 +490,7 @@ ll_register_Numaa(lua_State *L) {
         LUA_SENTINEL
     };
 
+    lua_pushcfunction(L, Create);
+    lua_setglobal(L, LL_NUMAA);
     return ll_register_class(L, LL_NUMAA, methods, functions);
 }

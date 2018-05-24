@@ -270,5 +270,7 @@ ll_register_Bmf(lua_State *L)
         LUA_SENTINEL
     };
 
+    lua_pushcfunction(L, Create);
+    lua_setglobal(L, LL_BMF);
     return ll_register_class(L, LL_BMF, methods, functions);
 }

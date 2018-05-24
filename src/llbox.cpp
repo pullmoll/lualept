@@ -931,6 +931,7 @@ ll_new_Box(lua_State *L)
 int
 ll_register_Box(lua_State *L)
 {
+    FUNC("ll_register_Box");
     static const luaL_Reg methods[] = {
         {"__gc",                    Destroy},   /* garbage collector */
         {"__new",                   Create},    /* new Box */
@@ -977,5 +978,7 @@ ll_register_Box(lua_State *L)
         LUA_SENTINEL
     };
 
+    lua_pushcfunction(L, Create);
+    lua_setglobal(L, LL_BOX);
     return ll_register_class(L, LL_BOX, methods, functions);
 }

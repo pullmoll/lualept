@@ -4363,5 +4363,7 @@ ll_register_Pix(lua_State *L)
                   ((i >> 0) & 1);
     }
 
+    lua_pushcfunction(L, Create);
+    lua_setglobal(L, LL_PIX);
     return ll_register_class(L, LL_PIX, methods, functions);
 }

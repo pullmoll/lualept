@@ -1061,5 +1061,7 @@ ll_register_PixColormap(lua_State *L)
         LUA_SENTINEL
     };
 
+    lua_pushcfunction(L, Create);
+    lua_setglobal(L, LL_PIXCMAP);
     return ll_register_class(L, LL_PIXCMAP, methods, functions);
 }

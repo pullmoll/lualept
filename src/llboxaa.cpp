@@ -611,5 +611,7 @@ ll_register_Boxaa(lua_State *L)
         LUA_SENTINEL
     };
 
+    lua_pushcfunction(L, Create);
+    lua_setglobal(L, LL_BOXAA);
     return ll_register_class(L, LL_BOXAA, methods, functions);
 }

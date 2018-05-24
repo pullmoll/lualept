@@ -552,5 +552,7 @@ ll_register_Pixa(lua_State *L)
         LUA_SENTINEL
     };
 
+    lua_pushcfunction(L, Create);
+    lua_setglobal(L, LL_PIXA);
     return ll_register_class(L, LL_PIXA, methods, functions);
 }

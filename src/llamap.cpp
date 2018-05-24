@@ -442,5 +442,7 @@ ll_register_Amap(lua_State *L)
         LUA_SENTINEL
     };
 
+    lua_pushcfunction(L, Create);
+    lua_setglobal(L, LL_AMAP);
     return ll_register_class(L, LL_AMAP, methods, functions);
 }

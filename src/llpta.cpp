@@ -598,5 +598,7 @@ ll_register_Pta(lua_State *L)
         LUA_SENTINEL
     };
 
+    lua_pushcfunction(L, Create);
+    lua_setglobal(L, LL_PTA);
     return ll_register_class(L, LL_PTA, methods, functions);
 }
