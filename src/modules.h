@@ -227,6 +227,7 @@ extern int          ll_register_class(lua_State *L, const char *name, const luaL
 
 extern int          ll_push_udata(const char *_fun, lua_State *L, const char* name, void *udata);
 extern int          ll_push_nil(lua_State *L);
+extern int          ll_push_bool(lua_State *L, bool b);
 extern int          ll_push_iarray(lua_State *L, const l_int32* ia, l_int32 n);
 extern int          ll_push_uarray(lua_State *L, const l_uint32* ua, l_int32 n);
 extern int          ll_push_uarray_2d(lua_State *L, const l_uint32* data, l_int32 wpl, l_int32 h);

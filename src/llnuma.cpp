@@ -111,8 +111,7 @@ ReplaceNumber(lua_State *L)
     Numa *na = ll_check_Numa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, numaGetCount(na));
     l_float32 val = ll_check_l_float32(_fun, L, 3);
-    lua_pushboolean(L, 0 == numaReplaceNumber(na, idx, val));
-    return 1;
+    return ll_push_bool(L, 0 == numaReplaceNumber(na, idx, val));
 }
 
 /**
@@ -162,8 +161,7 @@ AddNumber(lua_State *L)
     FUNC(LL_NUMA ".AddNumber");
     Numa *na = ll_check_Numa(_fun, L, 1);
     l_float32 val = ll_check_l_float32(_fun, L, 2);
-    lua_pushboolean(L, 0 == numaAddNumber(na, val));
-    return 1;
+    return ll_push_bool(L, 0 == numaAddNumber(na, val));
 }
 
 /**
@@ -242,8 +240,7 @@ CopyParameters(lua_State *L)
     FUNC(LL_NUMA ".CopyParameters");
     Numa *nad = ll_check_Numa(_fun, L, 1);
     Numa *nas = ll_check_Numa(_fun, L, 2);
-    lua_pushboolean(L, 0 == numaCopyParameters(nad, nas));
-    return 1;
+    return ll_push_bool(L, 0 == numaCopyParameters(nad, nas));
 }
 
 /**
@@ -259,8 +256,7 @@ Empty(lua_State *L)
 {
     FUNC(LL_NUMA ".Empty");
     Numa *na = ll_check_Numa(_fun, L, 1);
-    lua_pushboolean(L, 0 == numaEmpty(na));
-    return 1;
+    return ll_push_bool(L, 0 == numaEmpty(na));
 }
 
 /**
@@ -409,8 +405,7 @@ InsertNumber(lua_State *L)
     Numa *na = ll_check_Numa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, numaGetCount(na));
     l_float32 val = ll_check_l_float32(_fun, L, 3);
-    lua_pushboolean(L, 0 == numaInsertNumber(na, idx, val));
-    return 1;
+    return ll_push_bool(L, 0 == numaInsertNumber(na, idx, val));
 }
 
 /**
@@ -480,8 +475,7 @@ RemoveNumber(lua_State *L)
     FUNC(LL_NUMA ".RemoveNumber");
     Numa *na = ll_check_Numa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, numaGetCount(na));
-    lua_pushboolean(L, 0 == numaRemoveNumber(na, idx));
-    return 1;
+    return ll_push_bool(L, 0 == numaRemoveNumber(na, idx));
 }
 
 /**
@@ -499,8 +493,7 @@ SetCount(lua_State *L)
     FUNC(LL_NUMA ".SetCount");
     Numa* na = ll_check_Numa(_fun, L, 1);
     l_int32 n = ll_check_l_int32(_fun, L, 2);
-    lua_pushboolean(L, 0 == numaSetCount(na, n));
-    return 1;
+    return ll_push_bool(L, 0 == numaSetCount(na, n));
 }
 
 /**
@@ -520,8 +513,7 @@ SetParameters(lua_State *L)
     Numa *na = ll_check_Numa(_fun, L, 1);
     l_float32 startx = ll_check_l_float32(_fun, L, 2);
     l_float32 deltax = ll_check_l_float32(_fun, L, 3);
-    lua_pushboolean(L, 0 == numaSetParameters(na, startx, deltax));
-    return 1;
+    return ll_push_bool(L, 0 == numaSetParameters(na, startx, deltax));
 }
 
 /**
@@ -541,8 +533,7 @@ SetValue(lua_State *L)
     Numa *na = ll_check_Numa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, numaGetCount(na));
     l_float32 val = ll_check_l_float32(_fun, L, 3);
-    lua_pushboolean(L, 0 == numaSetValue(na, idx, val));
-    return 1;
+    return ll_push_bool(L, 0 == numaSetValue(na, idx, val));
 }
 
 /**
@@ -562,8 +553,7 @@ ShiftValue(lua_State *L)
     Numa *na = ll_check_Numa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, numaGetCount(na));
     l_float32 diff = ll_check_l_float32(_fun, L, 3);
-    lua_pushboolean(L, 0 == numaShiftValue(na, idx, diff));
-    return 1;
+    return ll_push_bool(L, 0 == numaShiftValue(na, idx, diff));
 }
 
 /**
@@ -581,8 +571,7 @@ Write(lua_State *L)
     FUNC(LL_NUMA ".Write");
     Numa *na = ll_check_Numa(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
-    lua_pushboolean(L, 0 == numaWrite(filename, na));
-    return 1;
+    return ll_push_bool(L, 0 == numaWrite(filename, na));
 }
 
 /**
@@ -622,8 +611,7 @@ WriteStream(lua_State *L)
     FUNC(LL_NUMA ".WriteStream");
     Numa *na = ll_check_Numa(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    lua_pushboolean(L, 0 == numaWriteStream(stream->f, na));
-    return 1;
+    return ll_push_bool(L, 0 == numaWriteStream(stream->f, na));
 }
 
 /**

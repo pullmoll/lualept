@@ -111,8 +111,7 @@ AddPta(lua_State *L)
     Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
     Pta *pta = ll_check_Pta(_fun, L, 2);
     l_int32 copyflag = ll_check_access_storage(_fun, L, 3, L_COPY);
-    lua_pushboolean(L, 0 == ptaaAddPta(ptaa, pta, copyflag));
-    return 1;
+    return ll_push_bool(L, 0 == ptaaAddPta(ptaa, pta, copyflag));
 }
 
 /**
@@ -231,8 +230,7 @@ ReplacePta(lua_State *L)
     Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, ptaaGetCount(ptaa));
     Pta *pta = ll_check_Pta(_fun, L, 3);
-    lua_pushboolean(L, 0 == ptaaReplacePta(ptaa, idx, pta));
-    return 1;
+    return ll_push_bool(L, 0 == ptaaReplacePta(ptaa, idx, pta));
 }
 
 /**
@@ -248,8 +246,7 @@ Truncate(lua_State *L)
 {
     FUNC(LL_PTAA ".Truncate");
     Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
-    lua_pushboolean(L, 0 == ptaaTruncate(ptaa));
-    return 1;
+    return ll_push_bool(L, 0 == ptaaTruncate(ptaa));
 }
 
 /**
@@ -273,8 +270,7 @@ Write(lua_State *L)
     Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
     l_int32 type = ll_check_boolean_default(_fun, L, 3, FALSE);
-    lua_pushboolean(L, 0 == ptaaWrite(filename, ptaa, type));
-    return 1;
+    return ll_push_bool(L, 0 == ptaaWrite(filename, ptaa, type));
 }
 
 /**
@@ -326,8 +322,7 @@ WriteStream(lua_State *L)
     Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
     l_int32 type = ll_check_boolean_default(_fun, L, 3, FALSE);
-    lua_pushboolean(L, 0 == ptaaWriteStream(stream->f, ptaa, type));
-    return 1;
+    return ll_push_bool(L, 0 == ptaaWriteStream(stream->f, ptaa, type));
 }
 
 /**

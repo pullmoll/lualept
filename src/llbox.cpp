@@ -212,8 +212,7 @@ ChangeRefcount(lua_State *L)
     FUNC(LL_BOX ".ChangeRefcount");
     Box *box = ll_check_Box(_fun, L, 1);
     l_int32 delta = ll_check_l_int32(_fun, L, 2);
-    lua_pushboolean(L, 0 == boxChangeRefcount(box, delta));
-    return 1;
+    return ll_push_bool(L, 0 == boxChangeRefcount(box, delta));
 }
 
 /**
@@ -661,8 +660,7 @@ PrintStreamInfo(lua_State *L)
     FUNC(LL_BOX ".PrintStreamInfo");
     Box *box = ll_check_Box(_fun, L, 1);
     luaL_Stream *stream = reinterpret_cast<luaL_Stream *>(luaL_checkudata(L, 2, LUA_FILEHANDLE));
-    lua_pushboolean(L, 0 == boxPrintStreamInfo(stream->f, box));
-    return 1;
+    return ll_push_bool(L, 0 == boxPrintStreamInfo(stream->f, box));
 }
 
 /**
@@ -753,8 +751,7 @@ SetGeometry(lua_State *L)
     l_int32 y = ll_check_l_int32_default(_fun, L, 3, 0);
     l_int32 w = ll_check_l_int32_default(_fun, L, 4, 1);
     l_int32 h = ll_check_l_int32_default(_fun, L, 5, 1);
-    lua_pushboolean(L, 0 == boxSetGeometry(box, x, y, w, h));
-    return 1;
+    return ll_push_bool(L, 0 == boxSetGeometry(box, x, y, w, h));
 }
 
 /**
@@ -778,8 +775,7 @@ SetSideLocations(lua_State *L)
     l_int32 r = ll_check_l_int32_default(_fun, L, 3, 0);
     l_int32 t = ll_check_l_int32_default(_fun, L, 4, 0);
     l_int32 b = ll_check_l_int32_default(_fun, L, 5, 0);
-    lua_pushboolean(L, 0 == boxSetSideLocations(box, l, r, t, b));
-    return 1;
+    return ll_push_bool(L, 0 == boxSetSideLocations(box, l, r, t, b));
 }
 
 /**

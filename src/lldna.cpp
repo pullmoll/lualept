@@ -39,7 +39,6 @@
 
 typedef L_Dna       Dna;        /*!< Local type name for the ugly L_Dna */
 
-
 /**
  * \brief Destroy a Dna*
  * <pre>
@@ -223,8 +222,7 @@ CopyParameters(lua_State *L)
     FUNC(LL_DNA ".CopyParameters");
     Dna *dad = ll_check_Dna(_fun, L, 1);
     Dna *das = ll_check_Dna(_fun, L, 2);
-    lua_pushboolean(L, 0 == l_dnaCopyParameters(dad, das));
-    return 1;
+    return ll_push_bool(L, 0 == l_dnaCopyParameters(dad, das));
 }
 
 /**
@@ -240,8 +238,7 @@ Empty(lua_State *L)
 {
     FUNC(LL_DNA ".Empty");
     Dna *da = ll_check_Dna(_fun, L, 1);
-    lua_pushboolean(L, 0 == l_dnaEmpty(da));
-    return 1;
+    return ll_push_bool(L, 0 == l_dnaEmpty(da));
 }
 
 /**
@@ -445,8 +442,7 @@ RemoveNumber(lua_State *L)
     FUNC(LL_DNA ".RemoveNumber");
     Dna *da = ll_check_Dna(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
-    lua_pushboolean(L, 0 == l_dnaRemoveNumber(da, idx));
-    return 1;
+    return ll_push_bool(L, 0 == l_dnaRemoveNumber(da, idx));
 }
 
 /**
@@ -464,8 +460,7 @@ SetCount(lua_State *L)
     FUNC(LL_DNA ".SetCount");
     Dna *da = ll_check_Dna(_fun, L, 1);
     l_int32 n = ll_check_l_int32(_fun, L, 2);
-    lua_pushboolean(L, 0 == l_dnaSetCount(da, n));
-    return 1;
+    return ll_push_bool(L, 0 == l_dnaSetCount(da, n));
 }
 
 /**
@@ -549,8 +544,7 @@ Write(lua_State *L)
     FUNC(LL_DNA ".Write");
     Dna *dna = ll_check_Dna(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
-    lua_pushboolean(L, 0 == l_dnaWrite(filename, dna));
-    return 1;
+    return ll_push_bool(L, 0 == l_dnaWrite(filename, dna));
 }
 
 /**
@@ -568,8 +562,7 @@ WriteStream(lua_State *L)
     FUNC(LL_DNA ".WriteStream");
     Dna *dna = ll_check_Dna(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    lua_pushboolean(L, 0 == l_dnaWriteStream(stream->f, dna));
-    return 1;
+    return ll_push_bool(L, 0 == l_dnaWriteStream(stream->f, dna));
 }
 
 /**

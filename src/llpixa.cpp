@@ -109,8 +109,7 @@ AddPix(lua_State *L)
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
     Pix *pix = ll_check_Pix(_fun, L, 2);
     l_int32 flag = ll_check_access_storage(_fun, L, 3, L_COPY);
-    lua_pushboolean(L, 0 == pixaAddPix(pixa, pix, flag));
-    return 1;
+    return ll_push_bool(L, 0 == pixaAddPix(pixa, pix, flag));
 }
 
 /**
@@ -126,8 +125,7 @@ Clear(lua_State *L)
 {
     FUNC(LL_PIXA ".Clear");
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
-    lua_pushboolean(L, 0 == pixaClear(pixa));
-    return 1;
+    return ll_push_bool(L, 0 == pixaClear(pixa));
 }
 
 /**
@@ -257,8 +255,7 @@ Join(lua_State *L)
     Pixa *pixas = ll_check_Pixa(_fun, L, 2);
     l_int32 istart = ll_check_l_int32_default(_fun, L, 3, 1);
     l_int32 iend = ll_check_l_int32_default(_fun, L, 3, pixaGetCount(pixas));
-    lua_pushboolean(L, 0 == pixaJoin(pixad, pixas, istart, iend));
-    return 1;
+    return ll_push_bool(L, 0 == pixaJoin(pixad, pixas, istart, iend));
 }
 
 /**
@@ -347,8 +344,7 @@ RemovePix(lua_State *L)
     FUNC(LL_PIXA ".RemovePix");
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, pixaGetCount(pixa));
-    lua_pushboolean(L, 0 == pixaRemovePix(pixa, idx));
-    return 1;
+    return ll_push_bool(L, 0 == pixaRemovePix(pixa, idx));
 }
 
 /**
@@ -413,8 +409,7 @@ Write(lua_State *L)
     FUNC(LL_PIXA ".Write");
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
-    lua_pushboolean(L, 0 == pixaWrite(filename, pixa));
-    return 1;
+    return ll_push_bool(L, 0 == pixaWrite(filename, pixa));
 }
 
 /**
@@ -454,8 +449,7 @@ WriteStream(lua_State *L)
     FUNC(LL_PIXA ".WriteStream");
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    lua_pushboolean(L, 0 == pixaWriteStream(stream->f, pixa));
-    return 1;
+    return ll_push_bool(L, 0 == pixaWriteStream(stream->f, pixa));
 }
 
 /**

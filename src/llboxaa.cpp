@@ -154,7 +154,7 @@ AddBoxa(lua_State *L)
     Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
     Boxa *boxa = ll_check_Boxa(_fun, L, 2);
     l_int32 flag = ll_check_access_storage(_fun, L, 3, L_COPY);
-    lua_pushboolean(L, 0 == boxaaAddBoxa(boxaa, boxa, flag));
+    return ll_push_bool(L, 0 == boxaaAddBoxa(boxaa, boxa, flag));
     return 1;
 }
 
@@ -190,8 +190,7 @@ ExtendArray(lua_State *L)
 {
     FUNC(LL_BOXAA ".ExtendArray");
     Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
-    lua_pushboolean(L, 0 == boxaaExtendArray(boxaa));
-    return 1;
+    return ll_push_bool(L, 0 == boxaaExtendArray(boxaa));
 }
 
 /**
@@ -209,8 +208,7 @@ ExtendArrayToSize(lua_State *L)
     FUNC(LL_BOXAA ".ExtendArrayToSize");
     Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
     l_int32 n = ll_check_l_int32(_fun, L, 2);
-    lua_pushboolean(L, 0 == boxaaExtendArrayToSize(boxaa, n));
-    return 1;
+    return ll_push_bool(L, 0 == boxaaExtendArrayToSize(boxaa, n));
 }
 
 /**
@@ -358,8 +356,7 @@ Join(lua_State *L)
     Boxaa *boxaas = ll_check_Boxaa(_fun, L, 2);
     l_int32 istart = ll_check_index(_fun, L, 3, 1);
     l_int32 iend = ll_check_index(_fun, L, 3, boxaaGetCount(boxaas));
-    lua_pushboolean(L, 0 == boxaaJoin(boxaad, boxaas, istart, iend));
-    return 2;
+    return ll_push_bool(L, 0 == boxaaJoin(boxaad, boxaas, istart, iend));
 }
 
 /**
@@ -429,8 +426,7 @@ RemoveBoxa(lua_State *L)
     FUNC(LL_BOXAA ".RemoveBoxa");
     Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, boxaaGetCount(boxaa));
-    lua_pushboolean(L, 0 == boxaaRemoveBoxa(boxaa, idx));
-    return 1;
+    return ll_push_bool(L, 0 == boxaaRemoveBoxa(boxaa, idx));
 }
 
 /**
@@ -469,8 +465,7 @@ Write(lua_State *L)
     FUNC(LL_BOXAA ".Write");
     Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
-    lua_pushboolean(L, 0 == boxaaWrite(filename, boxaa));
-    return 1;
+    return ll_push_bool(L, 0 == boxaaWrite(filename, boxaa));
 }
 
 /**
@@ -510,8 +505,7 @@ WriteStream(lua_State *L)
     FUNC(LL_BOXAA ".WriteStream");
     Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    lua_pushboolean(L, 0 == boxaaWriteStream(stream->f, boxaa));
-    return 1;
+    return ll_push_bool(L, 0 == boxaaWriteStream(stream->f, boxaa));
 }
 
 /**
@@ -584,6 +578,7 @@ ll_register_Boxaa(lua_State *L)
         {"__tostring",              toString},
         {"AddBoxa",                 AddBoxa},
         {"Copy",                    Copy},
+        {"Create",                  Create},
         {"Destroy",                 Destroy},
         {"ExtendArray",             ExtendArray},
         {"ExtendArrayToSize",       ExtendArrayToSize},
@@ -607,7 +602,6 @@ ll_register_Boxaa(lua_State *L)
     };
 
     static const luaL_Reg functions[] = {
-        {"Create",                  Create},
         LUA_SENTINEL
     };
 

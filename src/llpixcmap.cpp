@@ -171,8 +171,7 @@ AddColor(lua_State *L)
     l_int32 rval = ll_check_l_int32(_fun, L, 2);
     l_int32 gval = ll_check_l_int32(_fun, L, 3);
     l_int32 bval = ll_check_l_int32(_fun, L, 4);
-    lua_pushboolean(L, 0 == pixcmapAddColor(cmap, rval, gval, bval));
-    return 1;
+    return ll_push_bool(L, 0 == pixcmapAddColor(cmap, rval, gval, bval));
 }
 
 /**
@@ -248,8 +247,7 @@ AddRGBA(lua_State *L)
     l_int32 gval = ll_check_l_int32(_fun, L, 3);
     l_int32 bval = ll_check_l_int32(_fun, L, 4);
     l_int32 aval = ll_check_l_int32(_fun, L, 5);
-    lua_pushboolean(L, 0 == pixcmapAddRGBA(cmap, rval, gval, bval, aval));
-    return 1;
+    return ll_push_bool(L, 0 == pixcmapAddRGBA(cmap, rval, gval, bval, aval));
 }
 
 /**
@@ -265,8 +263,7 @@ Clear(lua_State *L)
 {
     FUNC(LL_PIXCMAP ".Clear");
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
-    lua_pushboolean(L, 0 == pixcmapClear(cmap));
-    return 1;
+    return ll_push_bool(L, 0 == pixcmapClear(cmap));
 }
 
 /**
@@ -669,8 +666,7 @@ ResetColor(lua_State *L)
     l_int32 rval = ll_check_l_int32(_fun, L, 3);
     l_int32 gval = ll_check_l_int32(_fun, L, 4);
     l_int32 bval = ll_check_l_int32(_fun, L, 5);
-    lua_pushboolean(L, 0 == pixcmapResetColor(cmap, idx, rval, gval, bval));
-    return 1;
+    return ll_push_bool(L, 0 == pixcmapResetColor(cmap, idx, rval, gval, bval));
 }
 
 /**
@@ -714,8 +710,7 @@ SetAlpha(lua_State *L)
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, 1 << pixcmapGetDepth(cmap));
     l_int32 aval = ll_check_l_int32(_fun, L, 2);
-    lua_pushboolean(L, 0 == pixcmapSetAlpha(cmap, idx, aval));
-    return 1;
+    return ll_push_bool(L, 0 == pixcmapSetAlpha(cmap, idx, aval));
 }
 
 /**
@@ -735,8 +730,7 @@ SetBlackAndWhite(lua_State *L)
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
     l_int32 setblack = ll_check_boolean_default(_fun, L, 2, FALSE);
     l_int32 setwhite = ll_check_boolean_default(_fun, L, 3, FALSE);
-    lua_pushboolean(L, 0 == pixcmapSetBlackAndWhite(cmap, setblack, setwhite));
-    return 1;
+    return ll_push_bool(L, 0 == pixcmapSetBlackAndWhite(cmap, setblack, setwhite));
 }
 
 /**

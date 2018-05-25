@@ -153,8 +153,7 @@ AddNuma(lua_State *L)
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
     Numa *na = ll_check_Numa(_fun, L, 2);
     l_int32 copyflag = ll_check_access_storage(_fun, L, 3, L_CLONE);
-    lua_pushboolean(L, 0 == numaaAddNuma(naa, na, copyflag));
-    return 1;
+    return ll_push_bool(L, 0 == numaaAddNuma(naa, na, copyflag));
 }
 
 /**
@@ -300,10 +299,9 @@ ReplaceNuma(lua_State *L)
 {
     FUNC(LL_NUMAA ".ReplaceNuma");
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
-    l_int32 idx = ll_check_l_int32(_fun, L, 2);
+    l_int32 idx = ll_check_index(_fun, L, 2, numaaGetCount(naa));
     Numa *na = ll_check_Numa(_fun, L, 3);
-    lua_pushboolean(L, 0 == numaaReplaceNuma(naa, idx, na));
-    return 1;
+    return ll_push_bool(L, 0 == numaaReplaceNuma(naa, idx, na));
 }
 
 /**
@@ -319,8 +317,7 @@ Truncate(lua_State *L)
 {
     FUNC(LL_NUMAA ".Truncate");
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
-    lua_pushboolean(L, 0 == numaaTruncate(naa));
-    return 1;
+    return ll_push_bool(L, 0 == numaaTruncate(naa));
 }
 
 /**
@@ -338,8 +335,7 @@ Write(lua_State *L)
     FUNC(LL_NUMAA ".Write");
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
-    lua_pushboolean(L, 0 == numaaWrite(filename, naa));
-    return 1;
+    return ll_push_bool(L, 0 == numaaWrite(filename, naa));
 }
 
 /**
@@ -379,8 +375,7 @@ WriteStream(lua_State *L)
     FUNC(LL_NUMAA ".WriteStream");
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    lua_pushboolean(L, 0 == numaaWriteStream(stream->f, naa));
-    return 1;
+    return ll_push_bool(L, 0 == numaaWriteStream(stream->f, naa));
 }
 
 /**

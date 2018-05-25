@@ -39,7 +39,6 @@
 
 typedef L_Dnaa      Dnaa;       /*!< Local type name for the ugly L_Dnaa */
 
-
 /**
  * \brief Destroy a Dnaa*
  * <pre>
@@ -157,8 +156,7 @@ AddDna(lua_State *L)
     Dnaa *daa = ll_check_Dnaa(_fun, L, 1);
     L_Dna *da = ll_check_Dna(_fun, L, 2);
     l_int32 copyflag = ll_check_access_storage(_fun, L, 3, L_COPY);
-    lua_pushboolean(L, 0 == l_dnaaAddDna(daa, da, copyflag));
-    return 1;
+    return ll_push_bool(L, 0 == l_dnaaAddDna(daa, da, copyflag));
 }
 
 /**
@@ -316,6 +314,26 @@ ReadStream(lua_State *L)
 }
 
 /**
+ * \brief Replace a L_Dna* int the Dnaa*
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Dnaa* user data.
+ * Arg #2 is expected to be a l_int32 (idx).
+ * Arg #3 is expected to be a L_Dna* user data.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+ReplaceDna(lua_State *L)
+{
+    FUNC(LL_DNAA ".ReplaceDna");
+    Dnaa *daa = ll_check_Dnaa(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, l_dnaaGetCount(daa));
+    L_Dna *da = ll_check_Dna(_fun, L, 3);
+    return ll_push_bool(L, 0 == l_dnaaReplaceDna(daa, idx, da));
+}
+
+/**
  * \brief Truncate the arrays stored in the Dnaa*
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dnaa* user data.
@@ -328,8 +346,7 @@ Truncate(lua_State *L)
 {
     FUNC(LL_DNAA ".Truncate");
     Dnaa *daa = ll_check_Dnaa(_fun, L, 1);
-    lua_pushboolean(L, 0 == l_dnaaTruncate(daa));
-    return 1;
+    return ll_push_bool(L, 0 == l_dnaaTruncate(daa));
 }
 
 /**
@@ -347,8 +364,7 @@ Write(lua_State *L)
     FUNC(LL_DNAA ".Write");
     Dnaa *daa = ll_check_Dnaa(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
-    lua_pushboolean(L, 0 == l_dnaaWrite(filename, daa));
-    return 1;
+    return ll_push_bool(L, 0 == l_dnaaWrite(filename, daa));
 }
 
 /**
@@ -366,8 +382,7 @@ WriteStream(lua_State *L)
     FUNC(LL_DNAA ".WriteStream");
     Dnaa *daa = ll_check_Dnaa(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    lua_pushboolean(L, 0 == l_dnaaWriteStream(stream->f, daa));
-    return 1;
+    return ll_push_bool(L, 0 == l_dnaaWriteStream(stream->f, daa));
 }
 
 /**
@@ -452,29 +467,31 @@ ll_new_Dnaa(lua_State *L)
 int
 ll_register_Dnaa(lua_State *L) {
     static const luaL_Reg methods[] = {
-        {"__gc",            Destroy},      /* garbage collector */
-        {"__new",           Create},       /* new DNAA */
-        {"__len",           GetCount},     /* #dnaa */
-        {"__tostring",      toString},
-        {"AddDna",          AddDna},
-        {"AddNumber",       AddNumber},
-        {"FlattenToDna",    FlattenToDna},
-        {"GetCount",        GetCount},
-        {"GetDna",          GetDna},
-        {"GetDnaCount",     GetDnaCount},
-        {"GetNumberCount",  GetNumberCount},
-        {"GetValue",        GetValue},
-        {"Read",            Read},
-        {"ReadStream",      ReadStream},
-        {"Truncate",        Truncate},
-        {"Write",           Write},
-        {"WriteStream",     WriteStream},
+        {"__gc",                Destroy},       /* garbage collector */
+        {"__new",               Create},        /* dnaa = Dnaa(n) */
+        {"__len",               GetCount},      /* #dnaa */
+        {"__newindex",          ReplaceDna},    /* dnaa[idx] = dna */
+        {"__tostring",          toString},      /* print(dnaa) */
+        {"AddDna",              AddDna},
+        {"AddNumber",           AddNumber},
+        {"Create",              Create},
+        {"CreateFull",          CreateFull},
+        {"FlattenToDna",        FlattenToDna},
+        {"GetCount",            GetCount},
+        {"GetDna",              GetDna},
+        {"GetDnaCount",         GetDnaCount},
+        {"GetNumberCount",      GetNumberCount},
+        {"GetValue",            GetValue},
+        {"Read",                Read},
+        {"ReadStream",          ReadStream},
+        {"ReplaceDna",          ReplaceDna},
+        {"Truncate",            Truncate},
+        {"Write",               Write},
+        {"WriteStream",         WriteStream},
         LUA_SENTINEL
     };
 
     static const luaL_Reg functions[] = {
-        {"Create",          Create},
-        {"CreateFull",      CreateFull},
         LUA_SENTINEL
     };
 

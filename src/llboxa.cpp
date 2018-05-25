@@ -146,8 +146,7 @@ AddBox(lua_State *L)
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
     l_int32 flag = ll_check_access_storage(_fun, L, 3, L_COPY);
-    lua_pushboolean(L, 0 == boxaAddBox(boxa, box, flag));
-    return 1;
+    return ll_push_bool(L, 0 == boxaAddBox(boxa, box, flag));
 }
 
 /**
@@ -296,8 +295,7 @@ Clear(lua_State *L)
 {
     FUNC(LL_BOXA ".Clear");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
-    lua_pushboolean(L, 0 == boxaClear(boxa));
-    return 1;
+    return ll_push_bool(L, 0 == boxaClear(boxa));
 }
 
 /**
@@ -315,8 +313,7 @@ ClipToBox(lua_State *L)
     FUNC(LL_BOXA ".ClipToBox");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
-    lua_pushboolean(L, 0 == boxaClipToBox(boxa, box));
-    return 1;
+    return ll_push_bool(L, 0 == boxaClipToBox(boxa, box));
 }
 
 /**
@@ -552,8 +549,7 @@ ExtendArray(lua_State *L)
 {
     FUNC(LL_BOXA ".ExtendArray");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
-    lua_pushboolean(L, 0 == boxaExtendArray(boxa));
-    return 1;
+    return ll_push_bool(L, 0 == boxaExtendArray(boxa));
 }
 
 /**
@@ -571,8 +567,7 @@ ExtendArrayToSize(lua_State *L)
     FUNC(LL_BOXA ".ExtendArrayToSize");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     l_int32 n = ll_check_l_int32(_fun, L, 2);
-    lua_pushboolean(L, 0 == boxaExtendArrayToSize(boxa, n));
-    return 1;
+    return ll_push_bool(L, 0 == boxaExtendArrayToSize(boxa, n));
 }
 
 /**
@@ -1262,8 +1257,7 @@ IsFull(lua_State *L)
     FUNC(LL_BOXA ".IsFull");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     int isfull = 0;
-    lua_pushboolean(L, 0 == boxaIsFull(boxa, &isfull) && isfull);
-    return 1;
+    return ll_push_bool(L, 0 == boxaIsFull(boxa, &isfull) && isfull);
 }
 
 /**
@@ -1285,8 +1279,7 @@ Join(lua_State *L)
     Boxa *boxas = ll_check_Boxa(_fun, L, 2);
     l_int32 istart = ll_check_index(_fun, L, 3, 1);
     l_int32 iend = ll_check_index(_fun, L, 3, boxaGetCount(boxas));
-    lua_pushboolean(L, 0 == boxaJoin(boxad, boxas, istart, iend));
-    return 1;
+    return ll_push_bool(L, 0 == boxaJoin(boxad, boxas, istart, iend));
 }
 
 /**
@@ -1602,8 +1595,7 @@ RemoveBox(lua_State *L)
     FUNC(LL_BOXA ".RemoveBox");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, boxaGetCount(boxa));
-    lua_pushboolean(L, 0 == boxaRemoveBox(boxa, idx));
-    return 1;
+    return ll_push_bool(L, 0 == boxaRemoveBox(boxa, idx));
 }
 
 /**
@@ -2140,8 +2132,7 @@ SwapBoxes(lua_State *L)
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     l_int32 i = ll_check_index(_fun, L, 2, boxaGetCount(boxa));
     l_int32 j = ll_check_index(_fun, L, 3, boxaGetCount(boxa));
-    lua_pushboolean(L, 0 == boxaSwapBoxes(boxa, i, j));
-    return 1;
+    return ll_push_bool(L, 0 == boxaSwapBoxes(boxa, i, j));
 }
 
 /**
@@ -2201,8 +2192,7 @@ Write(lua_State *L)
     FUNC(LL_BOXA ".Write");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
-    lua_pushboolean(L, 0 == boxaWrite(filename, boxa));
-    return 1;
+    return ll_push_bool(L, 0 == boxaWrite(filename, boxa));
 }
 
 /**
@@ -2242,8 +2232,7 @@ WriteStream(lua_State *L)
     FUNC(LL_BOXA ".WriteStream");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    lua_pushboolean(L, 0 == boxaWriteStream(stream->f, boxa));
-    return 1;
+    return ll_push_bool(L, 0 == boxaWriteStream(stream->f, boxa));
 }
 
 /**

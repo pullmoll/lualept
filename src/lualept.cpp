@@ -199,12 +199,25 @@ ll_push_udata(const char *_fun, lua_State *L, const char* name, void *udata)
 /**
  * \brief Push nil to the Lua stack and return 1
  * \param L pointer to the lua_State
- * \return 1 nil on the stack
+ * \return 1 nil on the Lua stack
  */
 int
 ll_push_nil(lua_State *L)
 {
     lua_pushnil(L);
+    return 1;
+}
+
+/**
+ * \brief Push boolean (%b) to the Lua stack and return 1
+ * \param L pointer to the lua_State
+ * \param b boolean value TRUE or FALSE
+ * \return 1 boolean on the Lua stack
+ */
+int
+ll_push_bool(lua_State *L, bool b)
+{
+    lua_pushboolean(L, b ? TRUE : FALSE);
     return 1;
 }
 
