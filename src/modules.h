@@ -248,6 +248,10 @@ extern const char * ll_check_string(const char *_fun, lua_State *L, int arg);
 extern const char * ll_check_lstring(const char *_fun, lua_State *L, int arg, size_t *plen);
 extern l_int32      ll_check_boolean(const char *_fun, lua_State *L, int arg);
 extern l_int32      ll_check_boolean_default(const char *_fun, lua_State *L, int arg, int dflt);
+extern l_uint8      ll_check_l_uint8(const char *_fun, lua_State *L, int arg);
+extern l_uint8      ll_check_l_uint8_default(const char *_fun, lua_State *L, int arg, l_uint32 dflt);
+extern l_uint16     ll_check_l_uint16(const char *_fun, lua_State *L, int arg);
+extern l_uint16     ll_check_l_uint16_default(const char *_fun, lua_State *L, int arg, l_uint32 dflt);
 extern l_int32      ll_check_l_int32(const char *_fun, lua_State *L, int arg);
 extern l_int32      ll_check_l_int32_default(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern l_uint32     ll_check_l_uint32(const char *_fun, lua_State *L, int arg);
@@ -266,6 +270,9 @@ extern luaL_Stream *ll_check_stream(const char *_fun, lua_State *L, int arg);
 
 extern l_int32      ll_check_access_storage(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_access_storage(int flag);
+
+extern l_int32      ll_check_more_less_clip(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_more_less_clip(int flag);
 
 extern l_int32      ll_check_input_format(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_input_format(int format);

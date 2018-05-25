@@ -694,6 +694,88 @@ ll_check_boolean(const char *_fun, lua_State *L, int arg)
 }
 
 /**
+ * \brief Check if an argument is a lua_Integer in the range of l_uint8
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the integer
+ * \return l_uint8 for the integer; lua_error if out of bounds
+ */
+l_uint8
+ll_check_l_uint8(const char *_fun, lua_State *L, int arg)
+{
+    lua_Integer val = luaL_checkinteger(L, arg);
+
+    if (val < 0 || val > UINT8_MAX) {
+        lua_pushfstring(L, "%s: l_uint8 #%d out of bounds (%d)", _fun, arg, val);
+        lua_error(L);
+        return 0;    /* NOTREACHED */
+    }
+    return static_cast<l_uint8>(val);
+}
+
+/**
+ * \brief Return an argument lua_Integer in the range of l_uint8 or the default
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the integer
+ * \param dflt default value
+ * \return l_uint8 for the integer; lua_error if out of bounds
+ */
+l_uint8
+ll_check_l_uint8_default(const char *_fun, lua_State *L, int arg, l_uint8 dflt)
+{
+    lua_Integer val = luaL_optinteger(L, arg, dflt);
+
+    if (val < 0 || val > UINT8_MAX) {
+        lua_pushfstring(L, "%s: l_uint8 #%d out of bounds (%d)", _fun, arg, val);
+        lua_error(L);
+        return dflt;    /* NOTREACHED */
+    }
+    return static_cast<l_uint8>(val);
+}
+
+/**
+ * \brief Check if an argument is a lua_Integer in the range of l_uint16
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the integer
+ * \return l_uint16 for the integer; lua_error if out of bounds
+ */
+l_uint16
+ll_check_l_uint16(const char *_fun, lua_State *L, int arg)
+{
+    lua_Integer val = luaL_checkinteger(L, arg);
+
+    if (val < 0 || val > UINT16_MAX) {
+        lua_pushfstring(L, "%s: l_uint16 #%d out of bounds (%d)", _fun, arg, val);
+        lua_error(L);
+        return 0;    /* NOTREACHED */
+    }
+    return static_cast<l_uint16>(val);
+}
+
+/**
+ * \brief Return an argument lua_Integer in the range of l_uint16 or the default
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the integer
+ * \param dflt default value
+ * \return l_uint16 for the integer; lua_error if out of bounds
+ */
+l_uint16
+ll_check_l_uint16_default(const char *_fun, lua_State *L, int arg, l_uint16 dflt)
+{
+    lua_Integer val = luaL_optinteger(L, arg, dflt);
+
+    if (val < 0 || val > UINT16_MAX) {
+        lua_pushfstring(L, "%s: l_uint16 #%d out of bounds (%d)", _fun, arg, val);
+        lua_error(L);
+        return dflt;    /* NOTREACHED */
+    }
+    return static_cast<l_uint16>(val);
+}
+
+/**
  * \brief Check if an argument is a boolean, or return the default
  * \param _fun calling function's name
  * \param L pointer to the lua_State
@@ -1100,6 +1182,60 @@ ll_string_access_storage(int flag)
 }
 
 /**
+ * \brief Table of access/storage flag names and enumeration values
+ */
+static const lept_enums_t tbl_more_less_clip[] = {
+    TBL_ENTRY("ls-byte",        L_LS_BYTE),
+    TBL_ENTRY("lsb",            L_LS_BYTE),
+    TBL_ENTRY("l",              L_LS_BYTE),
+    TBL_ENTRY("ms-byte",        L_MS_BYTE),
+    TBL_ENTRY("msb",            L_MS_BYTE),
+    TBL_ENTRY("m",              L_MS_BYTE),
+    TBL_ENTRY("auto-byte",      L_AUTO_BYTE),
+    TBL_ENTRY("auto",           L_AUTO_BYTE),
+    TBL_ENTRY("a",              L_AUTO_BYTE),
+    TBL_ENTRY("clip-to-ff",     L_CLIP_TO_FF),
+    TBL_ENTRY("clip-ff",        L_CLIP_TO_FF),
+    TBL_ENTRY("ff",             L_CLIP_TO_FF),
+    TBL_ENTRY("ls-two-bytes",   L_LS_TWO_BYTES),
+    TBL_ENTRY("ls-2-bytes",     L_LS_TWO_BYTES),
+    TBL_ENTRY("ls2b",           L_LS_TWO_BYTES),
+    TBL_ENTRY("l2",             L_LS_TWO_BYTES),
+    TBL_ENTRY("ms-two-bytes",   L_MS_TWO_BYTES),
+    TBL_ENTRY("ms-2-bytes",     L_MS_TWO_BYTES),
+    TBL_ENTRY("ms2b",           L_MS_TWO_BYTES),
+    TBL_ENTRY("m2",             L_MS_TWO_BYTES),
+    TBL_ENTRY("clip-to-ffff",   L_CLIP_TO_FFFF),
+    TBL_ENTRY("clip-ffff",      L_CLIP_TO_FFFF),
+    TBL_ENTRY("ffff",           L_CLIP_TO_FFFF)
+};
+
+/**
+ * \brief Check for a byte type as string
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \param dflt default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_more_less_clip(const char *_fun, lua_State *L, int arg, l_int32 dflt)
+{
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_more_less_clip, ARRAYSIZE(tbl_more_less_clip));
+}
+
+/**
+ * \brief Return the name for byte type value
+ * \param flag access/storage flag
+ * \return pointer to const string
+ */
+const char*
+ll_string_more_less_clip(int flag)
+{
+    return ll_string_tbl(flag, tbl_more_less_clip, ARRAYSIZE(tbl_more_less_clip));
+}
+
+/**
  * \brief Table of input file format names and enumeration values
  */
 static const lept_enums_t tbl_input_format[] = {
@@ -1288,8 +1424,18 @@ ll_string_component(l_int32 component)
  * \brief Table of choice min/max names and enumeration values
  */
 static const lept_enums_t tbl_choose_min_max[] = {
-    TBL_ENTRY("min",             L_CHOOSE_MIN),
-    TBL_ENTRY("max",             L_CHOOSE_MAX)
+    TBL_ENTRY("choose-min",         L_CHOOSE_MIN),
+    TBL_ENTRY("min",                L_CHOOSE_MIN),
+    TBL_ENTRY("choose-max",         L_CHOOSE_MAX),
+    TBL_ENTRY("max",                L_CHOOSE_MAX),
+    TBL_ENTRY("choose-maxdiff",     L_CHOOSE_MAXDIFF),
+    TBL_ENTRY("maxdiff",            L_CHOOSE_MAXDIFF),
+    TBL_ENTRY("choose-min-boost",   L_CHOOSE_MIN_BOOST),
+    TBL_ENTRY("min-boost",          L_CHOOSE_MIN_BOOST),
+    TBL_ENTRY("minb",               L_CHOOSE_MIN_BOOST),
+    TBL_ENTRY("choose-max-boost",   L_CHOOSE_MAX_BOOST),
+    TBL_ENTRY("max-boost",          L_CHOOSE_MAX_BOOST),
+    TBL_ENTRY("maxb",               L_CHOOSE_MAX_BOOST)
 };
 
 /**

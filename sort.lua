@@ -61,7 +61,7 @@ function sortfile(fs, fd)
 
 	local f = 0			-- parsing state
 
-	for i = 1,99999 do
+	while true do
 		line = fs:read()
 		if line == nil then
 			-- end of file

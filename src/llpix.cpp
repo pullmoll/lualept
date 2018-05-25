@@ -49,6 +49,8 @@ static l_int32 tab8[256];
  *====================================================================*/
 
 
+
+
 /**
  * \brief Destroy a Pix*
  * <pre>
@@ -742,6 +744,27 @@ Clone(lua_State *L)
 }
 
 /**
+ * \brief Colorize a gray 8bpp Pix* (%pixs) to a 32bpp or 8bpp colormapped Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_uint32 (color).
+ * Arg #3 is expected to be a boolean (cmapflag).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+ColorizeGray(lua_State *L)
+{
+    FUNC(LL_PIX ".ColorizeGray");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_uint32 color = ll_check_l_uint32(_fun, L, 2);
+    l_int32 cmapflag = ll_check_boolean(_fun, L, 3);
+    Pix *pix = pixColorizeGray(pixs, color, cmapflag);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
  * \brief Get the column stats for Pix* (%pixs) as six Numa*
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
@@ -817,6 +840,591 @@ CombineMaskedGeneral(lua_State *L)
 }
 
 /**
+ * \brief Convert a gray 16bpp Pix* (%pixs) to a gray 8bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a string describing the byte selection type (type).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+Convert16To8(lua_State *L)
+{
+    FUNC(LL_PIX ".Convert16To8");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 type = ll_check_more_less_clip(_fun, L, 2, L_LS_BYTE);
+    return ll_push_Pix(_fun, L, pixConvert16To8(pixs, type));
+}
+
+/**
+ * \brief Convert a binary 1bpp Pix* (%pixs) to a 16 bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_uint16 (val0).
+ * Arg #3 is expected to be a l_uint16 (val1).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+Convert1To16(lua_State *L)
+{
+    FUNC(LL_PIX ".Convert1To16");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_uint16 val0 = ll_check_l_uint16(_fun, L, 2);
+    l_uint16 val1 = ll_check_l_uint16(_fun, L, 3);
+    return ll_push_Pix(_fun, L, pixConvert1To16(nullptr, pixs, val0, val1));
+}
+
+/**
+ * \brief Convert a binary 1bpp Pix* (%pixs) to a gray 2bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_int32 (val0).
+ * Arg #3 is expected to be a l_int32 (val1).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+Convert1To2(lua_State *L)
+{
+    FUNC(LL_PIX ".Convert1To2");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 val0 = ll_check_l_int32(_fun, L, 2);
+    l_int32 val1 = ll_check_l_int32(_fun, L, 3);
+    return ll_push_Pix(_fun, L, pixConvert1To2(nullptr, pixs, val0, val1));
+}
+
+/**
+ * \brief Convert a binary 1bpp Pix* (%pixs) to a colormapped 2bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+Convert1To2Cmap(lua_State *L)
+{
+    FUNC(LL_PIX ".Convert1To2Cmap");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    return ll_push_Pix(_fun, L, pixConvert1To2Cmap(pixs));
+}
+
+/**
+ * \brief Convert a binary 1bpp Pix* (%pixs) to a 32bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_uint32 (val0).
+ * Arg #3 is expected to be a l_uint32 (val1).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+Convert1To32(lua_State *L)
+{
+    FUNC(LL_PIX ".Convert1To32");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_uint32 val0 = ll_check_l_uint32(_fun, L, 2);
+    l_uint32 val1 = ll_check_l_uint32(_fun, L, 3);
+    return ll_push_Pix(_fun, L, pixConvert1To32(nullptr, pixs, val0, val1));
+}
+
+/**
+ * \brief Convert a binary 1bpp Pix* (%pixs) to a 4bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_uint32 (val0).
+ * Arg #3 is expected to be a l_uint32 (val1).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+Convert1To4(lua_State *L)
+{
+    FUNC(LL_PIX ".Convert1To4");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 val0 = ll_check_l_int32(_fun, L, 2);
+    l_int32 val1 = ll_check_l_int32(_fun, L, 3);
+    return ll_push_Pix(_fun, L, pixConvert1To4(nullptr, pixs, val0, val1));
+}
+
+/**
+ * \brief Convert a binary 1bpp Pix* (%pixs) to a colormapped 4bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+Convert1To4Cmap(lua_State *L)
+{
+    FUNC(LL_PIX ".Convert1To4Cmap");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    return ll_push_Pix(_fun, L, pixConvert1To4Cmap(pixs));
+}
+
+/**
+ * \brief Convert a binary 1bpp Pix* (%pixs) to a 8bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_uint8 (val0).
+ * Arg #3 is expected to be a l_uint8 (val1).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+Convert1To8(lua_State *L)
+{
+    FUNC(LL_PIX ".Convert1To8");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_uint8 val0 = ll_check_l_uint8(_fun, L, 2);
+    l_uint8 val1 = ll_check_l_uint8(_fun, L, 3);
+    return ll_push_Pix(_fun, L, pixConvert1To8(nullptr, pixs, val0, val1));
+}
+
+/**
+ * \brief Convert a binary 1bpp Pix* (%pixs) to a colormapped 8bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+Convert1To8Cmap(lua_State *L)
+{
+    FUNC(LL_PIX ".Convert1To8Cmap");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    return ll_push_Pix(_fun, L, pixConvert1To8Cmap(pixs));
+}
+
+/**
+ * \brief Convert a 24bpp Pix* (%pixs) to a 32bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+Convert24To32(lua_State *L)
+{
+    FUNC(LL_PIX ".Convert24To32");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    return ll_push_Pix(_fun, L, pixConvert24To32(pixs));
+}
+
+/**
+ * \brief Convert a 2bpp Pix* (%pixs) to a 8bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_uint8 (val0).
+ * Arg #3 is expected to be a l_uint8 (val1).
+ * Arg #4 is expected to be a l_uint8 (val2).
+ * Arg #5 is expected to be a l_uint8 (val3).
+ * Arg #6 is expected to be a boolean (cmapflag).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+Convert2To8(lua_State *L)
+{
+    FUNC(LL_PIX ".Convert2To8");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_uint8 val0 = ll_check_l_uint8(_fun, L, 2);
+    l_uint8 val1 = ll_check_l_uint8(_fun, L, 3);
+    l_uint8 val2 = ll_check_l_uint8(_fun, L, 4);
+    l_uint8 val3 = ll_check_l_uint8(_fun, L, 5);
+    l_int32 cmapflag = ll_check_boolean(_fun, L, 6);
+    return ll_push_Pix(_fun, L, pixConvert2To8(pixs, val0, val1, val2, val3, cmapflag));
+}
+
+/**
+ * \brief Convert a 32bpp Pix* (%pixs) to a 16bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a string describing the ms/ls 2 byte selection (type).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+Convert32To16(lua_State *L)
+{
+    FUNC(LL_PIX ".Convert32To16");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 type = ll_check_more_less_clip(_fun, L, 2, L_LS_TWO_BYTES);
+    return ll_push_Pix(_fun, L, pixConvert32To16(pixs, type));
+}
+
+/**
+ * \brief Convert a 24bpp Pix* (%pixs) to a 32bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+Convert32To24(lua_State *L)
+{
+    FUNC(LL_PIX ".Convert32To24");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    return ll_push_Pix(_fun, L, pixConvert24To32(pixs));
+}
+
+/**
+ * \brief Convert a 32bpp Pix* (%pixs) to a 16bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a string describing the ms/ls 2 byte selection (type16).
+ * Arg #2 is expected to be a string describing the ms/ls byte selection (type8).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+Convert32To8(lua_State *L)
+{
+    FUNC(LL_PIX ".Convert32To8");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 type16 = ll_check_more_less_clip(_fun, L, 2, L_LS_TWO_BYTES);
+    l_int32 type8 = ll_check_more_less_clip(_fun, L, 2, L_LS_BYTE);
+    return ll_push_Pix(_fun, L, pixConvert32To8(pixs, type16, type8));
+}
+
+/**
+ * \brief Convert a 2bpp Pix* (%pixs) to a 8bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_uint32 (val0).
+ * Arg #3 is expected to be a l_uint32 (val1).
+ * Arg #4 is expected to be a l_uint32 (val2).
+ * Arg #5 is expected to be a l_uint32 (val3).
+ * Arg #6 is expected to be a boolean (cmapflag).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+Convert4To8(lua_State *L)
+{
+    FUNC(LL_PIX ".Convert4To8");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 cmapflag = ll_check_boolean(_fun, L, 2);
+    return ll_push_Pix(_fun, L, pixConvert4To8(pixs, cmapflag));
+}
+
+/**
+ * \brief Convert a 8bpp Pix* (%pixs) to a 16bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_int32 (leftshift).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+Convert8To16(lua_State *L)
+{
+    FUNC(LL_PIX ".Convert4To8");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 leftshift = ll_check_l_int32_default(_fun, L, 2, 0);
+    return ll_push_Pix(_fun, L, pixConvert8To16(pixs, leftshift));
+}
+
+/**
+ * \brief Convert a 8bpp Pix* (%pixs) to a 2bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+Convert8To2(lua_State *L)
+{
+    FUNC(LL_PIX ".Convert8To2");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    return ll_push_Pix(_fun, L, pixConvert8To2(pixs));
+}
+
+/**
+ * \brief Convert a 8bpp Pix* (%pixs) to a 32bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+Convert8To32(lua_State *L)
+{
+    FUNC(LL_PIX ".Convert8To32");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    return ll_push_Pix(_fun, L, pixConvert8To32(pixs));
+}
+
+/**
+ * \brief Convert a 8bpp Pix* (%pixs) to a 4bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+Convert8To4(lua_State *L)
+{
+    FUNC(LL_PIX ".Convert8To4");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    return ll_push_Pix(_fun, L, pixConvert8To4(pixs));
+}
+
+/**
+ * \brief Convert a colormapped Pix* (%pixs) to a binary 1bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+ConvertCmapTo1(lua_State *L)
+{
+    FUNC(LL_PIX ".ConvertCmapTo1");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Pix *pix = pixConvertCmapTo1(pixs);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Convert a gray 8bpp Pix* (%pixs) to a colormapped Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+ConvertGrayToColormap(lua_State *L)
+{
+    FUNC(LL_PIX ".ConvertGrayToColormap");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Pix *pix = pixConvertGrayToColormap(pixs);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Convert a gray 8bpp Pix* (%pixs) to a colormapped Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_int32 (mindepth).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+ConvertGrayToColormap8(lua_State *L)
+{
+    FUNC(LL_PIX ".ConvertGrayToColormap8");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 mindepth = ll_check_l_int32(_fun, L, 2);
+    Pix *pix = pixConvertGrayToColormap8(pixs, mindepth);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Convert a colormapped Pix* (%pixs) to a binary 1bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_float32 (gamma).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+ConvertGrayToFalseColor(lua_State *L)
+{
+    FUNC(LL_PIX ".ConvertGrayToFalseColor");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_float32 gamma = ll_check_l_float32_default(_fun, L, 2, 1.0f);
+    return ll_push_Pix(_fun, L, pixConvertGrayToFalseColor(pixs, gamma));
+}
+
+/**
+ * \brief Convert a 32bpp Pix* (%pixs) to a binary 1bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_float32 (rc).
+ * Arg #3 is expected to be a l_float32 (gc).
+ * Arg #4 is expected to be a l_float32 (bc).
+ * Arg #5 is expected to be a l_int32 (thresh).
+ * Arg #6 is expected to be a string describing the relation (relation).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+ConvertRGBToBinaryArb(lua_State *L)
+{
+    FUNC(LL_PIX ".ConvertRGBToBinaryArb");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_float32 rc = ll_check_l_float32_default(_fun, L, 2, 0.3f);
+    l_float32 gc = ll_check_l_float32_default(_fun, L, 3, 0.5f);
+    l_float32 bc = ll_check_l_float32_default(_fun, L, 4, 0.2f);
+    l_int32 thresh = ll_check_l_int32_default(_fun, L, 5, 128);
+    l_int32 relation = ll_check_relation(_fun, L, 6, L_SELECT_IF_LT);
+    Pix *pix = pixConvertRGBToBinaryArb(pixs, rc, gc, bc, thresh, relation);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Convert a 32bpp Pix* (%pixs) to a colormapped 8bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a boolean (ditherflag).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+ConvertRGBToColormap(lua_State *L)
+{
+    FUNC(LL_PIX ".ConvertRGBToColormap");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 ditherflag = ll_check_boolean(_fun, L, 2);
+    Pix *pix = pixConvertRGBToColormap(pixs, ditherflag);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Convert a 32bpp Pix* (%pixs) to a gray 8bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_float32 (rwt).
+ * Arg #3 is expected to be a l_float32 (gwt).
+ * Arg #4 is expected to be a l_float32 (bwt).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+ConvertRGBToGray(lua_State *L)
+{
+    FUNC(LL_PIX ".ConvertRGBToGray");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_float32 rwt = ll_check_l_float32_default(_fun, L, 2, 0.3f);
+    l_float32 gwt = ll_check_l_float32_default(_fun, L, 2, 0.5f);
+    l_float32 bwt = ll_check_l_float32_default(_fun, L, 2, 0.2f);
+    Pix *pix = pixConvertRGBToGray(pixs, rwt, gwt, bwt);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Convert a 32bpp Pix* (%pixs) to a gray 8bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_float32 (rc).
+ * Arg #3 is expected to be a l_float32 (gc).
+ * Arg #4 is expected to be a l_float32 (bc).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+ConvertRGBToGrayArb(lua_State *L)
+{
+    FUNC(LL_PIX ".ConvertRGBToGrayArb");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_float32 rc = ll_check_l_float32_default(_fun, L, 2, 0.3f);
+    l_float32 gc = ll_check_l_float32_default(_fun, L, 2, 0.5f);
+    l_float32 bc = ll_check_l_float32_default(_fun, L, 2, 0.2f);
+    Pix *pix = pixConvertRGBToGrayArb(pixs, rc, gc, bc);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Convert a 32bpp Pix* (%pixs) to a gray 8bpp Pix* (%pix); fast version
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+ConvertRGBToGrayFast(lua_State *L)
+{
+    FUNC(LL_PIX ".ConvertRGBToGrayFast");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Pix *pix = pixConvertRGBToGrayFast(pixs);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Convert a 32bpp Pix* (%pixs) to a gray 8bpp Pix* (%pix); min/max/diff version
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a string defining the min/max type (type).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+ConvertRGBToGrayMinMax(lua_State *L)
+{
+    FUNC(LL_PIX ".ConvertRGBToGrayMinMax");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 type = ll_check_choose_min_max(_fun, L, 2, L_CHOOSE_MIN);
+    Pix *pix = pixConvertRGBToGrayMinMax(pixs, type);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Convert a 32bpp Pix* (%pixs) to a gray 8bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_int32 (refval).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+ConvertRGBToGraySatBoost(lua_State *L)
+{
+    FUNC(LL_PIX ".ConvertRGBToGraySatBoost");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 refval = ll_check_l_int32(_fun, L, 2);
+    Pix *pix = pixConvertRGBToGraySatBoost(pixs, refval);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Convert a 32bpp Pix* (%pixs) to a luminance 8bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+ConvertRGBToLuminance(lua_State *L)
+{
+    FUNC(LL_PIX ".ConvertRGBToLuminance");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Pix *pix = pixConvertRGBToLuminance(pixs);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
  * \brief Convert a Pix* (%pixs) to a 1 bpp Pix* (%pix)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
@@ -833,6 +1441,184 @@ ConvertTo1(lua_State *L)
     l_int32 threshold = ll_check_l_int32_default(_fun, L, 4, 128);
     Pix *pix = pixConvertTo1(pixs, threshold);
     return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Convert a Pix* (%pixs) to a 16bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+ConvertTo16(lua_State *L)
+{
+    FUNC(LL_PIX ".ConvertTo16");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    return ll_push_Pix(_fun, L, pixConvertTo16(pixs));
+}
+
+/**
+ * \brief Convert a Pix* (%pixs) to a binary 1bpp Pix* (%pix) by sampling
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_int32 (factor).
+ * Arg #3 is expected to be a l_int32 (threshold).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+ConvertTo1BySampling(lua_State *L)
+{
+    FUNC(LL_PIX ".ConvertTo1BySampling");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 factor = ll_check_l_int32(_fun, L, 2);
+    l_int32 threshold = ll_check_l_int32(_fun, L, 3);
+    return ll_push_Pix(_fun, L, pixConvertTo1BySampling(pixs, factor, threshold));
+}
+
+/**
+ * \brief Convert a Pix* (%pixs) to a 2bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+ConvertTo2(lua_State *L)
+{
+    FUNC(LL_PIX ".ConvertTo2");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    return ll_push_Pix(_fun, L, pixConvertTo2(pixs));
+}
+
+/**
+ * \brief Convert a Pix* (%pixs) to a 32bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+ConvertTo32(lua_State *L)
+{
+    FUNC(LL_PIX ".ConvertTo32");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    return ll_push_Pix(_fun, L, pixConvertTo32(pixs));
+}
+
+/**
+ * \brief Convert a Pix* (%pixs) to a 32bpp Pix* (%pix) by sampling
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_int32 (factor).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+ConvertTo32BySampling(lua_State *L)
+{
+    FUNC(LL_PIX ".ConvertTo32BySampling");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 factor = ll_check_l_int32(_fun, L, 2);
+    return ll_push_Pix(_fun, L, pixConvertTo32BySampling(pixs, factor));
+}
+
+/**
+ * \brief Convert a Pix* (%pixs) to a 4bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+ConvertTo4(lua_State *L)
+{
+    FUNC(LL_PIX ".ConvertTo4");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    return ll_push_Pix(_fun, L, pixConvertTo4(pixs));
+}
+
+/**
+ * \brief Convert a Pix* (%pixs) to a 8bpp Pix* (%pix); colormapped or gray
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a boolean (cmapflag).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+ConvertTo8(lua_State *L)
+{
+    FUNC(LL_PIX ".ConvertTo8");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 cmapflag = ll_check_boolean(_fun, L, 2);
+    return ll_push_Pix(_fun, L, pixConvertTo8(pixs, cmapflag));
+}
+
+/**
+ * \brief Convert a Pix* (%pixs) to a binary 1bpp Pix* (%pix) by sampling
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_int32 (factor).
+ * Arg #3 is expected to be a boolean (cmapflag).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+ConvertTo8BySampling(lua_State *L)
+{
+    FUNC(LL_PIX ".ConvertTo8BySampling");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 factor = ll_check_l_int32(_fun, L, 2);
+    l_int32 cmapflag = ll_check_boolean(_fun, L, 3);
+    return ll_push_Pix(_fun, L, pixConvertTo8BySampling(pixs, factor, cmapflag));
+}
+
+/**
+ * \brief Convert a Pix* (%pixs) to a colormapped 8bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a boolean (ditherflag).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+ConvertTo8Colormap(lua_State *L)
+{
+    FUNC(LL_PIX ".ConvertTo8Colormap");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 ditherflag = ll_check_boolean(_fun, L, 2);
+    return ll_push_Pix(_fun, L, pixConvertTo8Colormap(pixs, ditherflag));
+}
+
+/**
+ * \brief Convert a Pix* (%pixs) to a 8bpp or 32bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is exptected to be a string describing the copy/clone mode (copyflag).
+ * Arg #3 is exptected to be a boolean (wanrflag).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+ConvertTo8Or32(lua_State *L)
+{
+    FUNC(LL_PIX ".ConvertTo8Or32");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 copyflag = ll_check_access_storage(_fun, L, 2, L_COPY);
+    l_int32 warnflag = ll_check_boolean(_fun, L, 3);
+    return ll_push_Pix(_fun, L, pixConvertTo8Or32(pixs, copyflag, warnflag));
 }
 
 /**
@@ -1201,50 +1987,6 @@ CreateRGBImage(lua_State *L)
     return ll_push_Pix(_fun, L, pixd);
 }
 
-/**
- * \brief Destroy the colormap of a Pix*
- * <pre>
- * Arg #1 (i.e. self) is expected to be a Pix* (pix).
- * Arg #2 is expected to be a PixColormap* (colormap).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 PixColormap* on the Lua stack
- */
-static int
-DestroyColormap(lua_State *L)
-{
-    FUNC(LL_PIX ".DestroyColormap");
-    Pix *pix = ll_check_Pix(_fun, L, 1);
-    PixColormap* colormap = ll_take_PixColormap(L, 2);
-    (void)colormap;
-    return ll_push_bool(L, 0 == pixDestroyColormap(pix));
-}
-
-/**
- * \brief Display a color array creating a Pix* (%pix)
- * <pre>
- * Arg #1 is expected to be a l_int32 (side).
- * Arg #2 is expected to be a l_int32 (ncols).
- * Arg #3 is expected to be a l_int32 (fontsize).
- * Arg #4 is expected to be a Lua array table (carray).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Pix* on the Lua stack
- */
-static int
-DisplayColorArray(lua_State *L)
-{
-    FUNC(LL_PIX ".DisplayColorArray");
-    l_int32 side = ll_check_l_int32(_fun, L, 1);
-    l_int32 ncols = ll_check_l_int32(_fun, L, 2);
-    l_int32 fontsize = ll_check_l_int32_default(_fun, L, 3, 0);
-    l_int32 ncolors = 0;
-    l_uint32 *carray = ll_unpack_uarray(_fun, L, 4, &ncolors);
-    Pix *pixd = pixDisplayColorArray(carray, ncolors, side, ncols, fontsize);
-    LEPT_FREE(carray);
-    return ll_push_Pix(_fun, L, pixd);
-}
-
 /*
 *
 *    This file has these operations:
@@ -1310,6 +2052,50 @@ DisplayColorArray(lua_State *L)
 *           Pix        *pixRankRowTransform()
 *           Pix        *pixRankColumnTransform()
 */
+
+/**
+ * \brief Destroy the colormap of a Pix*
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pix).
+ * Arg #2 is expected to be a PixColormap* (colormap).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 PixColormap* on the Lua stack
+ */
+static int
+DestroyColormap(lua_State *L)
+{
+    FUNC(LL_PIX ".DestroyColormap");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    PixColormap* colormap = ll_take_PixColormap(L, 2);
+    (void)colormap;
+    return ll_push_bool(L, 0 == pixDestroyColormap(pix));
+}
+
+/**
+ * \brief Display a color array creating a Pix* (%pix)
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (side).
+ * Arg #2 is expected to be a l_int32 (ncols).
+ * Arg #3 is expected to be a l_int32 (fontsize).
+ * Arg #4 is expected to be a Lua array table (carray).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+DisplayColorArray(lua_State *L)
+{
+    FUNC(LL_PIX ".DisplayColorArray");
+    l_int32 side = ll_check_l_int32(_fun, L, 1);
+    l_int32 ncols = ll_check_l_int32(_fun, L, 2);
+    l_int32 fontsize = ll_check_l_int32_default(_fun, L, 3, 0);
+    l_int32 ncolors = 0;
+    l_uint32 *carray = ll_unpack_uarray(_fun, L, 4, &ncolors);
+    Pix *pixd = pixDisplayColorArray(carray, ncolors, side, ncols, fontsize);
+    LEPT_FREE(carray);
+    return ll_push_Pix(_fun, L, pixd);
+}
 
 /**
  * \brief Display the layers of a Pix* (pixd)
@@ -1498,9 +2284,9 @@ GetAverageMaskedRGB(lua_State *L)
     l_float32 rval = 0.0, gval = 0.0, bval = 0.0;
     if (pixGetAverageMaskedRGB(pixs, pixm, x, y, factor, type, &rval, &gval, &bval))
         return ll_push_nil(L);
-    lua_pushnumber(L, (lua_Number)rval);
-    lua_pushnumber(L, (lua_Number)gval);
-    lua_pushnumber(L, (lua_Number)bval);
+    lua_pushnumber(L, static_cast<lua_Number>(rval));
+    lua_pushnumber(L, static_cast<lua_Number>(gval));
+    lua_pushnumber(L, static_cast<lua_Number>(bval));
     return 3;
 }
 
@@ -2223,7 +3009,7 @@ GetRGBComponent(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 boolean on the Lua stack
+ * \return 3 lstrings on the Lua stack (%bufr, %bufg, %bufb)
  */
 static int
 GetRGBLine(lua_State *L)
@@ -2382,7 +3168,7 @@ GetRankValueMasked(lua_State *L)
     Numa *na = nullptr;
     if (pixGetRankValueMasked(pixs, pixm, x, y, factor, rank, &value, &na))
         return ll_push_nil(L);
-    lua_pushnumber(L, (lua_Number)value);
+    lua_pushnumber(L, static_cast<lua_Number>(value));
     ll_push_Numa(_fun, L, na);
     return 1;
 }
@@ -2413,9 +3199,9 @@ GetRankValueMaskedRGB(lua_State *L)
     l_float32 rval = 0.0f, gval = 0.0f, bval = 0.0f;
     if (pixGetRankValueMaskedRGB(pixs, pixm, x, y, factor, rank, &rval, &gval, &bval))
         return ll_push_nil(L);
-    lua_pushnumber(L, (lua_Number)rval);
-    lua_pushnumber(L, (lua_Number)gval);
-    lua_pushnumber(L, (lua_Number)bval);
+    lua_pushnumber(L, static_cast<lua_Number>(rval));
+    lua_pushnumber(L, static_cast<lua_Number>(gval));
+    lua_pushnumber(L, static_cast<lua_Number>(bval));
     return 3;
 }
 
@@ -2622,7 +3408,7 @@ MakeAlphaFromMask(lua_State *L)
     if (!pixd)
         return ll_push_nil(L);
     ll_push_Pix(_fun, L, pixd);
-    return 1 + box ? ll_push_Box(_fun, L, box) : 0;
+    return 1 + (box ? ll_push_Box(_fun, L, box) : 0);
 }
 
 /**
@@ -2789,6 +3575,28 @@ PrintStreamInfo(lua_State *L)
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
     snprintf(str, sizeof(str), "%p\n", reinterpret_cast<void *>(pix));
     return ll_push_bool(L, 0 == pixPrintStreamInfo(stream->f, pix, str));
+}
+
+/**
+ * \brief Convert a colormapped Pix* (%pixs) to a binary 1bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+QuantizeIfFewColors(lua_State *L)
+{
+    FUNC(LL_PIX ".QuantizeIfFewColors");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 maxcolors = ll_check_l_int32_default(_fun, L, 2, 256);
+    l_int32 mingraycolors = ll_check_l_int32_default(_fun, L, 3, 0);
+    l_int32 octlevel = ll_check_l_int32_default(_fun, L, 3, 3);
+    Pix *pixd = nullptr;
+    if (pixQuantizeIfFewColors(pixs, maxcolors, mingraycolors, octlevel, &pixd))
+        return ll_push_nil(L);
+    return ll_push_Pix(_fun, L, pixd);
 }
 
 /**
@@ -3895,6 +4703,26 @@ TransferAllData(lua_State *L)
 }
 
 /**
+ * \brief Convert a binary 1bpp Pix* (%pixs) to a depth bpp Pix* (%pix)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_int32 (depth).
+ * Arg #2 is expected to be a boolean (invert).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+UnpackBinary(lua_State *L)
+{
+    FUNC(LL_PIX ".UnpackBinary");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 depth = ll_check_l_int32_default(_fun, L, 2, 8);
+    l_int32 invert = ll_check_boolean(_fun, L, 3);
+    return ll_push_Pix(_fun, L, pixUnpackBinary(pixs, depth, invert));
+}
+
+/**
  * \brief Build the variance by column of Pix* (%pixs)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
@@ -4063,7 +4891,6 @@ GetRangeValues(lua_State *L)
     lua_pushinteger(L, maxval);
     return 2;
 }
-
 /**
  * \brief Check Lua stack at index %arg for udata of class LL_PIX
  * \param _fun calling function's name
@@ -4076,7 +4903,6 @@ ll_check_Pix(const char *_fun, lua_State *L, int arg)
 {
     return *ll_check_udata<Pix>(_fun, L, arg, LL_PIX);
 }
-
 /**
  * \brief Optionally expect a LL_PIX at index %arg on the Lua stack
  * \param _fun calling function's name
@@ -4154,10 +4980,53 @@ ll_register_Pix(lua_State *L)
         {"ClearInRect",             ClearInRect},
         {"ClearPixel",              ClearPixel},
         {"Clone",                   Clone},
+        {"ColorizeGray",            ColorizeGray},
         {"ColumnStats",             ColumnStats},
         {"CombineMasked",           CombineMasked},
         {"CombineMaskedGeneral",    CombineMaskedGeneral},
+        {"Convert16To8",            Convert16To8},
+        {"Convert1To16",            Convert1To16},
+        {"Convert1To2",             Convert1To2},
+        {"Convert1To2Cmap",         Convert1To2Cmap},
+        {"Convert1To32",            Convert1To32},
+        {"Convert1To4",             Convert1To4},
+        {"Convert1To4Cmap",         Convert1To4Cmap},
+        {"Convert1To8",             Convert1To8},
+        {"Convert1To8Cmap",         Convert1To8Cmap},
+        {"Convert24To32",           Convert24To32},
+        {"Convert2To8",             Convert2To8},
+        {"Convert32To16",           Convert32To16},
+        {"Convert32To24",           Convert32To24},
+        {"Convert32To8",            Convert32To8},
+        {"Convert4To8",             Convert4To8},
+        {"Convert8To16",            Convert8To16},
+        {"Convert8To2",             Convert8To2},
+        {"Convert8To32",            Convert8To32},
+        {"Convert8To4",             Convert8To4},
+        {"ConvertCmapTo1",          ConvertCmapTo1},
+        {"ConvertGrayToColormap",   ConvertGrayToColormap},
+        {"ConvertGrayToColormap8",  ConvertGrayToColormap8},
+        {"ConvertGrayToFalseColor", ConvertGrayToFalseColor},
+        {"ConvertRGBToBinaryArb",   ConvertRGBToBinaryArb},
+        {"ConvertRGBToColormap",    ConvertRGBToColormap},
+        {"ConvertRGBToGray",        ConvertRGBToGray},
+        {"ConvertRGBToGrayArb",     ConvertRGBToGrayArb},
+        {"ConvertRGBToGrayFast",    ConvertRGBToGrayFast},
+        {"ConvertRGBToGrayMinMax",  ConvertRGBToGrayMinMax},
+        {"ConvertRGBToGraySatBoost",ConvertRGBToGraySatBoost},
+        {"ConvertRGBToLuminance",   ConvertRGBToLuminance},
         {"ConvertTo1",              ConvertTo1},
+        {"ConvertTo1",              ConvertTo1},
+        {"ConvertTo16",             ConvertTo16},
+        {"ConvertTo1BySampling",    ConvertTo1BySampling},
+        {"ConvertTo2",              ConvertTo2},
+        {"ConvertTo32",             ConvertTo32},
+        {"ConvertTo32BySampling",   ConvertTo32BySampling},
+        {"ConvertTo4",              ConvertTo4},
+        {"ConvertTo8",              ConvertTo8},
+        {"ConvertTo8BySampling",    ConvertTo8BySampling},
+        {"ConvertTo8Colormap",      ConvertTo8Colormap},
+        {"ConvertTo8Or32",          ConvertTo8Or32},
         {"Copy",                    Copy},
         {"CopyBorder",              CopyBorder},
         {"CopyColormap",            CopyColormap},
@@ -4192,7 +5061,7 @@ ll_register_Pix(lua_State *L)
         {"GetBinnedColor",          GetBinnedColor},
         {"GetBinnedComponentRange", GetBinnedComponentRange},
         {"GetBlackOrWhiteVal",      GetBlackOrWhiteVal},
-        {"GetBlackVal",             GetBlackVal},       /* alias without 2nd parameter */
+        {"GetBlackVal",             GetBlackVal},       /* alias for GetBlackOrWhiteVal with 2nd parameter L_SELECT_BLACK */
         {"GetCmapHistogram",        GetCmapHistogram},
         {"GetCmapHistogramInRect",  GetCmapHistogramInRect},
         {"GetCmapHistogramMasked",  GetCmapHistogramMasked},
@@ -4229,7 +5098,7 @@ ll_register_Pix(lua_State *L)
         {"GetRowStats",             GetRowStats},
         {"GetSpp",                  GetSpp},
         {"GetText",                 GetText},
-        {"GetWhiteVal",             GetWhiteVal},       /* alias without 2nd parameter */
+        {"GetWhiteVal",             GetWhiteVal},       /* alias for GetBlackOrWhiteVal with 2nd parameter L_SELECT_WHITE */
         {"GetWidth",                GetWidth},
         {"GetWpl",                  GetWpl},
         {"GetXRes",                 GetXRes},
@@ -4244,6 +5113,7 @@ ll_register_Pix(lua_State *L)
         {"PaintSelfThroughMask",    PaintSelfThroughMask},
         {"PaintThroughMask",        PaintThroughMask},
         {"PrintStreamInfo",         PrintStreamInfo},
+        {"QuantizeIfFewColors",     QuantizeIfFewColors},
         {"RankBinByStrip",          RankBinByStrip},
         {"Read",                    Read},
         {"ReadMem",                 ReadMem},
@@ -4298,6 +5168,7 @@ ll_register_Pix(lua_State *L)
         {"ThresholdForFgBg",        ThresholdForFgBg},
         {"ThresholdPixelSum",       ThresholdPixelSum},
         {"TransferAllData",         TransferAllData},
+        {"UnpackBinary",            UnpackBinary},
         {"VarianceByColumn",        VarianceByColumn},
         {"VarianceByRow",           VarianceByRow},
         {"VarianceInRect",          VarianceInRect},
