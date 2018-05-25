@@ -51,6 +51,7 @@ static l_int32 tab8[256];
 /** Define a function's name (_fun) with prefix LL_PIX */
 #define LL_FUNC(x) FUNC(LL_PIX "." x)
 
+
 /**
  * \brief Destroy a Pix*.
  * <pre>
@@ -651,6 +652,190 @@ AverageInRect(lua_State *L)
 }
 
 /**
+ * \brief Comment here
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a Pix* (pixim).
+ * Arg #3 is expected to be a Pix* (pixg).
+ * Arg #4 is expected to be a l_int32 (sx).
+ * Arg #5 is expected to be a l_int32 (sy).
+ * Arg #6 is expected to be a l_int32 (thresh).
+ * Arg #7 is expected to be a l_int32 (mincount).
+ * Arg #8 is expected to be a l_int32 (bgval).
+ * Arg #9 is expected to be a l_int32 (smoothx).
+ * Arg #10 is expected to be a l_int32 (smoothy).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 for Pix * on the Lua stack
+ */
+static int
+BackgroundNorm(lua_State *L)
+{
+        LL_FUNC("BackgroundNorm");
+        Pix *pixs = ll_check_Pix(_fun, L, 1);
+        Pix *pixim = ll_check_Pix(_fun, L, 2);
+        Pix *pixg = ll_check_Pix(_fun, L, 3);
+        l_int32 sx = ll_check_l_int32 (_fun, L, 4);
+        l_int32 sy = ll_check_l_int32 (_fun, L, 5);
+        l_int32 thresh = ll_check_l_int32 (_fun, L, 6);
+        l_int32 mincount = ll_check_l_int32 (_fun, L, 7);
+        l_int32 bgval = ll_check_l_int32 (_fun, L, 8);
+        l_int32 smoothx = ll_check_l_int32 (_fun, L, 9);
+        l_int32 smoothy = ll_check_l_int32 (_fun, L, 10);
+
+        Pix *pix = pixBackgroundNorm(pixs, pixim, pixg, sx, sy, thresh, mincount, bgval, smoothx, smoothy);
+        return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Comment here
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a Pix* (pixim).
+ * Arg #3 is expected to be a l_int32 (sx).
+ * Arg #4 is expected to be a l_int32 (sy).
+ * Arg #5 is expected to be a l_int32 (thresh).
+ * Arg #6 is expected to be a l_int32 (mincount).
+ * Arg #7 is expected to be a l_int32 (bgval).
+ * Arg #8 is expected to be a l_int32 (smoothx).
+ * Arg #9 is expected to be a l_int32 (smoothy).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 for l_int32 on the Lua stack
+ */
+static int
+BackgroundNormGrayArray(lua_State *L)
+{
+        LL_FUNC("BackgroundNormGrayArray");
+        Pix *pixs = ll_check_Pix(_fun, L, 1);
+        Pix *pixim = ll_check_Pix(_fun, L, 2);
+        l_int32 sx = ll_check_l_int32 (_fun, L, 3);
+        l_int32 sy = ll_check_l_int32 (_fun, L, 4);
+        l_int32 thresh = ll_check_l_int32 (_fun, L, 5);
+        l_int32 mincount = ll_check_l_int32 (_fun, L, 6);
+        l_int32 bgval = ll_check_l_int32 (_fun, L, 7);
+        l_int32 smoothx = ll_check_l_int32 (_fun, L, 8);
+        l_int32 smoothy = ll_check_l_int32 (_fun, L, 9);
+        Pix *pixd = nullptr;
+
+        l_int32 result = pixBackgroundNormGrayArray(pixs, pixim, sx, sy, thresh, mincount, bgval, smoothx, smoothy, &pixd);
+        lua_pushinteger(L, result);
+        return 1;
+}
+/**
+ * \brief Comment here
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a Pix* (pixim).
+ * Arg #3 is expected to be a l_int32 (reduction).
+ * Arg #4 is expected to be a l_int32 (size).
+ * Arg #5 is expected to be a l_int32 (bgval).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 for l_int32 on the Lua stack
+ */
+static int
+BackgroundNormGrayArrayMorph(lua_State *L)
+{
+        LL_FUNC("BackgroundNormGrayArrayMorph");
+        Pix *pixs = ll_check_Pix(_fun, L, 1);
+        Pix *pixim = ll_check_Pix(_fun, L, 2);
+        l_int32 reduction = ll_check_l_int32 (_fun, L, 3);
+        l_int32 size = ll_check_l_int32 (_fun, L, 4);
+        l_int32 bgval = ll_check_l_int32 (_fun, L, 5);
+        Pix *pixd = nullptr;
+        if (pixBackgroundNormGrayArrayMorph(pixs, pixim, reduction, size, bgval, &pixd))
+            return ll_push_nil(L);
+        return ll_push_Pix(_fun, L, pixd);
+}
+
+/**
+ * \brief Comment here
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a Pix* (pixim).
+ * Arg #3 is expected to be a l_int32 (reduction).
+ * Arg #4 is expected to be a l_int32 (size).
+ * Arg #5 is expected to be a l_int32 (bgval).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 for Pix * on the Lua stack
+ */
+static int
+BackgroundNormMorph(lua_State *L)
+{
+        LL_FUNC("BackgroundNormMorph");
+        Pix *pixs = ll_check_Pix(_fun, L, 1);
+        Pix *pixim = ll_check_Pix(_fun, L, 2);
+        l_int32 reduction = ll_check_l_int32 (_fun, L, 3);
+        l_int32 size = ll_check_l_int32 (_fun, L, 4);
+        l_int32 bgval = ll_check_l_int32 (_fun, L, 5);
+        Pix *pix = pixBackgroundNormMorph(pixs, pixim, reduction, size, bgval);
+        return ll_push_Pix(_fun, L, pix);
+}
+/**
+ * \brief Comment here
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a Pix* (pixim).
+ * Arg #3 is expected to be a Pix* (pixg).
+ * Arg #4 is expected to be a l_int32 (sx).
+ * Arg #5 is expected to be a l_int32 (sy).
+ * Arg #6 is expected to be a l_int32 (thresh).
+ * Arg #7 is expected to be a l_int32 (mincount).
+ * Arg #8 is expected to be a l_int32 (bgval).
+ * Arg #9 is expected to be a l_int32 (smoothx).
+ * Arg #10 is expected to be a l_int32 (smoothy).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 3 Pix* on the Lua stack (%pix_r, %pix_g, %pix_b)
+ */
+static int
+BackgroundNormRGBArrays(lua_State *L)
+{
+        LL_FUNC("BackgroundNormRGBArrays");
+        Pix *pixs = ll_check_Pix(_fun, L, 1);
+        Pix *pixim = ll_check_Pix(_fun, L, 2);
+        Pix *pixg = ll_check_Pix(_fun, L, 3);
+        l_int32 sx = ll_check_l_int32 (_fun, L, 4);
+        l_int32 sy = ll_check_l_int32 (_fun, L, 5);
+        l_int32 thresh = ll_check_l_int32 (_fun, L, 6);
+        l_int32 mincount = ll_check_l_int32 (_fun, L, 7);
+        l_int32 bgval = ll_check_l_int32 (_fun, L, 8);
+        l_int32 smoothx = ll_check_l_int32 (_fun, L, 9);
+        l_int32 smoothy = ll_check_l_int32 (_fun, L, 10);
+        Pix *pix_r = ll_check_Pix(_fun, L, 11);
+        Pix *pix_g = ll_check_Pix(_fun, L, 12);
+        Pix *pix_b = ll_check_Pix(_fun, L, 13);
+
+        if (pixBackgroundNormRGBArrays(pixs, pixim, pixg, sx, sy, thresh, mincount, bgval, smoothx, smoothy, &pix_r, &pix_g, &pix_b))
+            return ll_push_nil(L);
+        return ll_push_Pix(_fun, L, pix_r) + ll_push_Pix(_fun, L, pix_g) + ll_push_Pix(_fun, L, pix_b);
+}
+
+/**
+ * \brief Comment here
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a Pix* (pixim).
+ * Arg #3 is expected to be a Pix* (pixg).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 for Pix * on the Lua stack
+ */
+static int
+BackgroundNormSimple(lua_State *L)
+{
+        LL_FUNC("BackgroundNormSimple");
+        Pix *pixs = ll_check_Pix(_fun, L, 1);
+        Pix *pixim = ll_check_Pix(_fun, L, 2);
+        Pix *pixg = ll_check_Pix(_fun, L, 3);
+
+        Pix *result = pixBackgroundNormSimple(pixs, pixim, pixg);
+        return ll_push_Pix(_fun, L, result);
+}
+
+/**
  * \brief Blend all pixels inside a Box* (%box) in a Pix* (%pix) with value fraction (%val, %fract).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
@@ -670,6 +855,33 @@ BlendInRect(lua_State *L)
     l_uint32 val = ll_check_l_uint32(_fun, L, 3);
     l_float32 fract = ll_check_l_float32(_fun, L, 4);
     return ll_push_bool(L, 0 == pixBlendInRect(pix, box, val, fract));
+}
+
+/**
+ * \brief Clean a Pix* (%pixs) background to white.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a Pix* (pixim).
+ * Arg #3 is expected to be a Pix* (pixg).
+ * Arg #4 is expected to be a l_float32 (gamma).
+ * Arg #5 is expected to be a l_int32 (blackval).
+ * Arg #6 is expected to be a l_int32 (whiteval).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 for Pix * on the Lua stack
+ */
+static int
+CleanBackgroundToWhite(lua_State *L)
+{
+        LL_FUNC("CleanBackgroundToWhite");
+        Pix *pixs = ll_check_Pix(_fun, L, 1);
+        Pix *pixim = ll_check_Pix(_fun, L, 2);
+        Pix *pixg = ll_check_Pix(_fun, L, 3);
+        l_float32 gamma = ll_check_l_float32(_fun, L, 4);
+        l_int32 blackval = ll_check_l_int32(_fun, L, 5);
+        l_int32 whiteval = ll_check_l_int32(_fun, L, 6);
+        Pix *pix = pixCleanBackgroundToWhite(pixs, pixim, pixg, gamma, blackval, whiteval);
+        return ll_push_Pix(_fun, L, pix);
 }
 
 /**
@@ -1987,72 +2199,6 @@ CreateRGBImage(lua_State *L)
     return ll_push_Pix(_fun, L, pixd);
 }
 
-/*
-*
-*    This file has these operations:
-*
-*      (1) Measurement of 1 bpp image properties
-*      (2) Extract rectangular regions
-*      (3) Clip to foreground
-*      (4) Extract pixel averages, reversals and variance along lines
-*      (5) Rank row and column transforms
-*
-*    Measurement of properties
-*           l_int32     pixaFindDimensions()
-*           l_int32     pixFindAreaPerimRatio()
-*           Numa       *pixaFindPerimToAreaRatio()
-*           l_int32     pixFindPerimToAreaRatio()
-*           Numa       *pixaFindPerimSizeRatio()
-*           l_int32     pixFindPerimSizeRatio()
-*           Numa       *pixaFindAreaFraction()
-*           l_int32     pixFindAreaFraction()
-*           Numa       *pixaFindAreaFractionMasked()
-*           l_int32     pixFindAreaFractionMasked()
-*           Numa       *pixaFindWidthHeightRatio()
-*           Numa       *pixaFindWidthHeightProduct()
-*           l_int32     pixFindOverlapFraction()
-*           Boxa       *pixFindRectangleComps()
-*           l_int32     pixConformsToRectangle()
-*
-*    Extract rectangular region
-*           Pixa       *pixClipRectangles()
-*           Pix        *pixClipRectangle()
-*           Pix        *pixClipMasked()
-*           l_int32     pixCropToMatch()
-*           Pix        *pixCropToSize()
-*           Pix        *pixResizeToMatch()
-*
-*    Make a frame mask
-*           Pix        *pixMakeFrameMask()
-*
-*    Fraction of Fg pixels under a mask
-*           l_int32     pixFractionFgInMask()
-*
-*    Clip to foreground
-*           Pix        *pixClipToForeground()
-*           l_int32     pixTestClipToForeground()
-*           l_int32     pixClipBoxToForeground()
-*           l_int32     pixScanForForeground()
-*           l_int32     pixClipBoxToEdges()
-*           l_int32     pixScanForEdge()
-*
-*    Extract pixel averages and reversals along lines
-*           Numa       *pixExtractOnLine()
-*           l_float32   pixAverageOnLine()
-*           Numa       *pixAverageIntensityProfile()
-*           Numa       *pixReversalProfile()
-*
-*    Extract windowed variance along a line
-*           Numa       *pixWindowedVarianceOnLine()
-*
-*    Extract min/max of pixel values near lines
-*           l_int32     pixMinMaxNearLine()
-*
-*    Rank row and column transforms
-*           Pix        *pixRankRowTransform()
-*           Pix        *pixRankColumnTransform()
-*/
-
 /**
  * \brief Destroy the colormap of a Pix*.
  * <pre>
@@ -2136,6 +2282,31 @@ FindAreaPerimRatio(lua_State *L)
         return ll_push_nil(L);
     lua_pushnumber(L, (lua_Number)fract);
     return 1;
+}
+
+/**
+ * \brief Find the page foreground in Pix* (%pixs).
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_int32 (threshold).
+ * Arg #3 is expected to be a l_int32 (mindist).
+ * Arg #4 is expected to be a l_int32 (erasedist).
+ * Arg #5 is expected to be a boolean (showmorph).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 3 integers on the Lua stack (thresh, fgbal, bgval)
+ */
+static int
+FindPageForeground(lua_State *L)
+{
+    LL_FUNC("FindPageForeground");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 threshold = ll_check_l_int32_default(_fun, L, 2, 128);
+    l_int32 mindist = ll_check_l_int32_default(_fun, L, 3, 50);
+    l_int32 erasedist = ll_check_l_int32_default(_fun, L, 4, 30);
+    l_int32 showmorph = ll_check_boolean_default(_fun, L, 5, FALSE);
+    Box *box = pixFindPageForeground(pixs, threshold, mindist, erasedist, showmorph, nullptr);
+    return ll_push_Box(_fun, L, box);
 }
 
 /**
@@ -3086,6 +3257,31 @@ GetRandomPixel(lua_State *L)
     lua_pushinteger(L, x);
     lua_pushinteger(L, y);
     return 3;
+}
+/**
+ * \brief Get the range values for Pix* (%pixs).
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_int32 (factor).
+ * Arg #3 is expected to be a l_int32 (color).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 2 integers on the Lua stack (minval, maxval)
+ */
+static int
+GetRangeValues(lua_State *L)
+{
+    LL_FUNC("GetRangeValues");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 factor = ll_check_l_int32_default(_fun, L, 2, 1);
+    l_int32 color = ll_check_select_color(_fun, L, 3, L_SELECT_RED);
+    l_int32 minval = 0;
+    l_int32 maxval = 0;
+    if (pixGetRangeValues(pixs, factor, color, &minval, &maxval))
+        return ll_push_nil(L);
+    lua_pushinteger(L, minval);
+    lua_pushinteger(L, maxval);
+    return 2;
 }
 
 /**
@@ -4867,30 +5063,81 @@ Zero(lua_State *L)
 }
 
 /**
- * \brief Get the range values for Pix* (%pixs).
+ * \brief Create a new Pix* but don't initialize it.
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is expected to be a l_int32 (factor).
- * Arg #3 is expected to be a l_int32 (color).
+ * Arg #1 is expected to be Pix*.
+ * or
+ * Arg #1 is expected to be a l_int32 (width).
+ * Arg #2 is expected to be a l_int32 (height).
+ * Arg #3 is optional and expected to be a l_int32 (depth; default = 1).
+ * or
+ * No Arg creates a 1x1 1bpp uninitialized Pix*.
  * </pre>
  * \param L pointer to the lua_State
- * \return 2 integers on the Lua stack (minval, maxval)
+ * \return 1 Pix* on the Lua stack
  */
 static int
-GetRangeValues(lua_State *L)
+CreateTemplate(lua_State *L)
 {
-    LL_FUNC("GetRangeValues");
+    LL_FUNC("CreateTemplate");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 factor = ll_check_l_int32_default(_fun, L, 2, 1);
-    l_int32 color = ll_check_select_color(_fun, L, 3, L_SELECT_RED);
-    l_int32 minval = 0;
-    l_int32 maxval = 0;
-    if (pixGetRangeValues(pixs, factor, color, &minval, &maxval))
-        return ll_push_nil(L);
-    lua_pushinteger(L, minval);
-    lua_pushinteger(L, maxval);
-    return 2;
+    Pix *pix = pixCreateTemplate(pixs);
+    return ll_push_Pix(_fun, L, pix);
 }
+
+/**
+ * \brief Create a new Pix* but don't initialize it.
+ * <pre>
+ * Arg #1 is expected to be Pix*.
+ * or
+ * Arg #1 is expected to be a l_int32 (width).
+ * Arg #2 is expected to be a l_int32 (height).
+ * Arg #3 is optional and expected to be a l_int32 (depth; default = 1).
+ * or
+ * No Arg creates a 1x1 1bpp uninitialized Pix*.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+CreateTemplateNoInit(lua_State *L)
+{
+    LL_FUNC("CreateTemplateNoInit");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Pix *pix = pixCreateTemplateNoInit(pixs);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Comment here
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a Pix* (pixim).
+ * Arg #3 is expected to be a l_int32 (reduction).
+ * Arg #4 is expected to be a l_int32 (size).
+ * Arg #5 is expected to be a l_int32 (bgval).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 3 Pix* on the Lua stack (%pixr, %pixg, %pixb)
+ */
+static int
+BackgroundNormRGBArraysMorph(lua_State *L)
+{
+        LL_FUNC("BackgroundNormRGBArraysMorph");
+        Pix *pixs = ll_check_Pix(_fun, L, 1);
+        Pix *pixim = ll_check_Pix(_fun, L, 2);
+        l_int32 reduction = ll_check_l_int32 (_fun, L, 3);
+        l_int32 size = ll_check_l_int32 (_fun, L, 4);
+        l_int32 bgval = ll_check_l_int32 (_fun, L, 5);
+        Pix *pixr = nullptr;
+        Pix *pixg = nullptr;
+        Pix *pixb = nullptr;
+
+        if (pixBackgroundNormRGBArraysMorph(pixs, pixim, reduction, size, bgval, &pixr, &pixg, &pixb))
+            return ll_push_nil(L);
+        return ll_push_Pix(_fun, L, pixr) + ll_push_Pix(_fun, L, pixg) + ll_push_Pix(_fun, L, pixb);
+}
+
 /**
  * \brief Check Lua stack at index %arg for udata of class LL_PIX.
  * \param _fun calling function's name
@@ -4917,6 +5164,7 @@ ll_check_Pix_opt(const char *_fun, lua_State *L, int arg)
         return nullptr;
     return ll_check_Pix(_fun, L, arg);
 }
+
 /**
  * \brief Push PIX to the Lua stack and set its meta table.
  * \param _fun calling function's name
@@ -4931,6 +5179,7 @@ ll_push_Pix(const char *_fun, lua_State *L, Pix *pix)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, LL_PIX, pix);
 }
+
 /**
  * \brief Create and push a new Pix*.
  * \param L pointer to the lua_State
@@ -4950,233 +5199,242 @@ int
 ll_register_Pix(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                    Destroy},           /* garbage collector */
-        {"__new",                   Create},            /* new Pix */
-        {"__sub",                   Subtract},
-        {"__bnot",                  Invert},
-        {"__band",                  And},
-        {"__bor",                   Or},
-        {"__bxor",                  Xor},
-        {"__tostring",              toString},
-        {"AbsDiffByColumn",         AbsDiffByColumn},
-        {"AbsDiffByRow",            AbsDiffByRow},
-        {"AbsDiffInRect",           AbsDiffInRect},
-        {"AbsDiffOnLine",           AbsDiffOnLine},
-        {"AddBlackOrWhiteBorder",   AddBlackOrWhiteBorder},
-        {"AddBorder",               AddBorder},
-        {"AddBorderGeneral",        AddBorderGeneral},
-        {"AddContinuedBorder",      AddContinuedBorder},
-        {"AddMirroredBorder",       AddMirroredBorder},
-        {"AddMixedBorder",          AddMixedBorder},
-        {"AddRepeatedBorder",       AddRepeatedBorder},
-        {"AddText",                 AddText},
-        {"AlphaIsOpaque",           AlphaIsOpaque},
-        {"And",                     And},
-        {"AverageByColumn",         AverageByColumn},
-        {"AverageByRow",            AverageByRow},
-        {"AverageInRect",           AverageInRect},
-        {"BlendInRect",             BlendInRect},
-        {"ClearAll",                ClearAll},
-        {"ClearInRect",             ClearInRect},
-        {"ClearPixel",              ClearPixel},
-        {"Clone",                   Clone},
-        {"ColorizeGray",            ColorizeGray},
-        {"ColumnStats",             ColumnStats},
-        {"CombineMasked",           CombineMasked},
-        {"CombineMaskedGeneral",    CombineMaskedGeneral},
-        {"Convert16To8",            Convert16To8},
-        {"Convert1To16",            Convert1To16},
-        {"Convert1To2",             Convert1To2},
-        {"Convert1To2Cmap",         Convert1To2Cmap},
-        {"Convert1To32",            Convert1To32},
-        {"Convert1To4",             Convert1To4},
-        {"Convert1To4Cmap",         Convert1To4Cmap},
-        {"Convert1To8",             Convert1To8},
-        {"Convert1To8Cmap",         Convert1To8Cmap},
-        {"Convert24To32",           Convert24To32},
-        {"Convert2To8",             Convert2To8},
-        {"Convert32To16",           Convert32To16},
-        {"Convert32To24",           Convert32To24},
-        {"Convert32To8",            Convert32To8},
-        {"Convert4To8",             Convert4To8},
-        {"Convert8To16",            Convert8To16},
-        {"Convert8To2",             Convert8To2},
-        {"Convert8To32",            Convert8To32},
-        {"Convert8To4",             Convert8To4},
-        {"ConvertCmapTo1",          ConvertCmapTo1},
-        {"ConvertGrayToColormap",   ConvertGrayToColormap},
-        {"ConvertGrayToColormap8",  ConvertGrayToColormap8},
-        {"ConvertGrayToFalseColor", ConvertGrayToFalseColor},
-        {"ConvertRGBToBinaryArb",   ConvertRGBToBinaryArb},
-        {"ConvertRGBToColormap",    ConvertRGBToColormap},
-        {"ConvertRGBToGray",        ConvertRGBToGray},
-        {"ConvertRGBToGrayArb",     ConvertRGBToGrayArb},
-        {"ConvertRGBToGrayFast",    ConvertRGBToGrayFast},
-        {"ConvertRGBToGrayMinMax",  ConvertRGBToGrayMinMax},
-        {"ConvertRGBToGraySatBoost",ConvertRGBToGraySatBoost},
-        {"ConvertRGBToLuminance",   ConvertRGBToLuminance},
-        {"ConvertTo1",              ConvertTo1},
-        {"ConvertTo1",              ConvertTo1},
-        {"ConvertTo16",             ConvertTo16},
-        {"ConvertTo1BySampling",    ConvertTo1BySampling},
-        {"ConvertTo2",              ConvertTo2},
-        {"ConvertTo32",             ConvertTo32},
-        {"ConvertTo32BySampling",   ConvertTo32BySampling},
-        {"ConvertTo4",              ConvertTo4},
-        {"ConvertTo8",              ConvertTo8},
-        {"ConvertTo8BySampling",    ConvertTo8BySampling},
-        {"ConvertTo8Colormap",      ConvertTo8Colormap},
-        {"ConvertTo8Or32",          ConvertTo8Or32},
-        {"Copy",                    Copy},
-        {"CopyBorder",              CopyBorder},
-        {"CopyColormap",            CopyColormap},
-        {"CopyDimensions",          CopyDimensions},
-        {"CopyInputFormat",         CopyInputFormat},
-        {"CopyRGBComponent",        CopyRGBComponent},
-        {"CopyResolution",          CopyResolution},
-        {"CopySpp",                 CopySpp},
-        {"CopyText",                CopyText},
-        {"CountArbInRect",          CountArbInRect},
-        {"CountPixels",             CountPixels},
-        {"CountPixelsByColumn",     CountPixelsByColumn},
-        {"CountPixelsByRow",        CountPixelsByRow},
-        {"CountPixelsInRect",       CountPixelsInRect},
-        {"CountPixelsInRow",        CountPixelsInRow},
-        {"CountRGBColors",          CountRGBColors},
-        {"Create",                  Create},
-        {"CreateNoInit",            CreateNoInit},
-        {"CreateRGBImage",          CreateRGBImage},
-        {"DestroyColormap",         DestroyColormap},
-        {"DisplayColorArray",       DisplayColorArray},
-        {"DisplayLayersRGBA",       DisplayLayersRGBA},
-        {"FindAreaPerimRatio",      FindAreaPerimRatio},
-        {"FindPerimToAreaRatio",    FindPerimToAreaRatio},
-        {"FindRepCloseTile",        FindRepCloseTile},
-        {"FlipPixel",               FlipPixel},
-        {"ForegroundFraction",      ForegroundFraction},
-        {"GetAverageMasked",        GetAverageMasked},
-        {"GetAverageMaskedRGB",     GetAverageMaskedRGB},
-        {"GetAverageTiled",         GetAverageTiled},
-        {"GetAverageTiledRGB",      GetAverageTiledRGB},
-        {"GetBinnedColor",          GetBinnedColor},
-        {"GetBinnedComponentRange", GetBinnedComponentRange},
-        {"GetBlackOrWhiteVal",      GetBlackOrWhiteVal},
-        {"GetBlackVal",             GetBlackVal},       /* alias for GetBlackOrWhiteVal with 2nd parameter L_SELECT_BLACK */
-        {"GetCmapHistogram",        GetCmapHistogram},
-        {"GetCmapHistogramInRect",  GetCmapHistogramInRect},
-        {"GetCmapHistogramMasked",  GetCmapHistogramMasked},
-        {"GetColorAmapHistogram",   GetColorAmapHistogram},
-        {"GetColorHistogram",       GetColorHistogram},
-        {"GetColorHistogramMasked", GetColorHistogramMasked},
-        {"GetColorNearMaskBoundary",GetColorNearMaskBoundary},
-        {"GetColormap",             GetColormap},
-        {"GetColumnStats",          GetColumnStats},
-        {"GetData",                 GetData},
-        {"GetDepth",                GetDepth},
-        {"GetDimensions",           GetDimensions},
-        {"GetExtremeValue",         GetExtremeValue},
-        {"GetGrayHistogram",        GetGrayHistogram},
-        {"GetGrayHistogramInRect",  GetGrayHistogramInRect},
-        {"GetGrayHistogramMasked",  GetGrayHistogramMasked},
-        {"GetGrayHistogramTiled",   GetGrayHistogramTiled},
-        {"GetHeight",               GetHeight},
-        {"GetInputFormat",          GetInputFormat},
-        {"GetMaxValueInRect",       GetMaxValueInRect},
-        {"GetMomentByColumn",       GetMomentByColumn},
-        {"GetPixel",                GetPixel},
-        {"GetPixelAverage",         GetPixelAverage},
-        {"GetPixelStats",           GetPixelStats},
-        {"GetRGBComponent",         GetRGBComponent},
-        {"GetRGBLine",              GetRGBLine},
-        {"GetRGBPixel",             GetRGBPixel},
-        {"GetRandomPixel",          GetRandomPixel},
-        {"GetRankColorArray",       GetRankColorArray},
-        {"GetRankValue",            GetRankValue},
-        {"GetRankValueMasked",      GetRankValueMasked},
-        {"GetRankValueMaskedRGB",   GetRankValueMaskedRGB},
-        {"GetResolution",           GetResolution},
-        {"GetRowStats",             GetRowStats},
-        {"GetSpp",                  GetSpp},
-        {"GetText",                 GetText},
-        {"GetWhiteVal",             GetWhiteVal},       /* alias for GetBlackOrWhiteVal with 2nd parameter L_SELECT_WHITE */
-        {"GetWidth",                GetWidth},
-        {"GetWpl",                  GetWpl},
-        {"GetXRes",                 GetXRes},
-        {"GetYRes",                 GetYRes},
-        {"Invert",                  Invert},
-        {"MakeAlphaFromMask",       MakeAlphaFromMask},
-        {"MakeArbMaskFromRGB",      MakeArbMaskFromRGB},
-        {"MakeMaskFromLUT",         MakeMaskFromLUT},
-        {"MakeMaskFromVal",         MakeMaskFromVal},
-        {"MirroredTiling",          MirroredTiling},
-        {"Or",                      Or},
-        {"PaintSelfThroughMask",    PaintSelfThroughMask},
-        {"PaintThroughMask",        PaintThroughMask},
-        {"PrintStreamInfo",         PrintStreamInfo},
-        {"QuantizeIfFewColors",     QuantizeIfFewColors},
-        {"RankBinByStrip",          RankBinByStrip},
-        {"Read",                    Read},
-        {"ReadMem",                 ReadMem},
-        {"ReadStream",              ReadStream},
-        {"RemoveBorder",            RemoveBorder},
-        {"RemoveBorderGeneral",     RemoveBorderGeneral},
-        {"RemoveBorderToSize",      RemoveBorderToSize},
-        {"ResizeImageData",         ResizeImageData},
-        {"RowStats",                RowStats},
-        {"ScaleResolution",         ScaleResolution},
-        {"SetAll",                  SetAll},
-        {"SetAllArbitrary",         SetAllArbitrary},
-        {"SetAllGray",              SetAllGray},
-        {"SetBlack",                SetBlack},
-        {"SetBlackOrWhite",         SetBlackOrWhite},
-        {"SetBorderRingVal",        SetBorderRingVal},
-        {"SetBorderVal",            SetBorderVal},
-        {"SetColormap",             SetColormap},
-        {"SetComponentArbitrary",   SetComponentArbitrary},
-        {"SetData",                 SetData},
-        {"SetDepth",                SetDepth},
-        {"SetDimensions",           SetDimensions},
-        {"SetHeight",               SetHeight},
-        {"SetInRect",               SetInRect},
-        {"SetInRectArbitrary",      SetInRectArbitrary},
-        {"SetInputFormat",          SetInputFormat},
-        {"SetMasked",               SetMasked},
-        {"SetMaskedGeneral",        SetMaskedGeneral},
-        {"SetMirroredBorder",       SetMirroredBorder},
-        {"SetOrClearBorder",        SetOrClearBorder},
-        {"SetPadBits",              SetPadBits},
-        {"SetPadBitsBand",          SetPadBitsBand},
-        {"SetPixel",                SetPixel},
-        {"SetPixelColumn",          SetPixelColumn},
-        {"SetRGBComponent",         SetRGBComponent},
-        {"SetRGBPixel",             SetRGBPixel},
-        {"SetResolution",           SetResolution},
-        {"SetSpecial",              SetSpecial},
-        {"SetSpp",                  SetSpp},
-        {"SetText",                 SetText},
-        {"SetUnderTransparency",    SetUnderTransparency},
-        {"SetWhite",                SetWhite},
-        {"SetWidth",                SetWidth},
-        {"SetWpl",                  SetWpl},
-        {"SetXRes",                 SetXRes},
-        {"SetYRes",                 SetYRes},
-        {"ShiftAndTransferAlpha",   ShiftAndTransferAlpha},
-        {"SizesEqual",              SizesEqual},
-        {"SplitDistributionFgBg",   SplitDistributionFgBg},
-        {"Subtract",                Subtract},
-        {"SwapAndDestroy",          SwapAndDestroy},
-        {"ThresholdForFgBg",        ThresholdForFgBg},
-        {"ThresholdPixelSum",       ThresholdPixelSum},
-        {"TransferAllData",         TransferAllData},
-        {"UnpackBinary",            UnpackBinary},
-        {"VarianceByColumn",        VarianceByColumn},
-        {"VarianceByRow",           VarianceByRow},
-        {"VarianceInRect",          VarianceInRect},
-        {"Write",                   Write},
-        {"WriteMem",                WriteMem},
-        {"WriteStream",             WriteStream},
-        {"Xor",                     Xor},
-        {"Zero",                    Zero},
+        {"__gc",                            Destroy},           /* garbage collector */
+        {"__new",                           Create},            /* new Pix */
+        {"__sub",                           Subtract},          /* Pix* = Pix* - Pix* */
+        {"__bnot",                          Invert},            /* Pix* = not Pix* */
+        {"__band",                          And},               /* Pix* = Pix* and Pix */
+        {"__bor",                           Or},                /* Pix* = Pix* or Pix */
+        {"__bxor",                          Xor},               /* Pix* = Pix* xor Pix */
+        {"__tostring",                      toString},
+        {"AbsDiffByColumn",                 AbsDiffByColumn},
+        {"AbsDiffByRow",                    AbsDiffByRow},
+        {"AbsDiffInRect",                   AbsDiffInRect},
+        {"AbsDiffOnLine",                   AbsDiffOnLine},
+        {"AddBlackOrWhiteBorder",           AddBlackOrWhiteBorder},
+        {"AddBorder",                       AddBorder},
+        {"AddBorderGeneral",                AddBorderGeneral},
+        {"AddContinuedBorder",              AddContinuedBorder},
+        {"AddMirroredBorder",               AddMirroredBorder},
+        {"AddMixedBorder",                  AddMixedBorder},
+        {"AddRepeatedBorder",               AddRepeatedBorder},
+        {"AddText",                         AddText},
+        {"AlphaIsOpaque",                   AlphaIsOpaque},
+        {"And",                             And},
+        {"AverageByColumn",                 AverageByColumn},
+        {"AverageByRow",                    AverageByRow},
+        {"AverageInRect",                   AverageInRect},
+        {"BackgroundNorm",                  BackgroundNorm},
+        {"BackgroundNormGrayArray",         BackgroundNormGrayArray},
+        {"BackgroundNormGrayArrayMorph",    BackgroundNormGrayArrayMorph},
+        {"BackgroundNormMorph",             BackgroundNormMorph},
+        {"BackgroundNormRGBArrays",         BackgroundNormRGBArrays},
+        {"BackgroundNormSimple",            BackgroundNormSimple},
+        {"BlendInRect",                     BlendInRect},
+        {"CleanBackgroundToWhite",          CleanBackgroundToWhite},
+        {"ClearAll",                        ClearAll},
+        {"ClearInRect",                     ClearInRect},
+        {"ClearPixel",                      ClearPixel},
+        {"Clone",                           Clone},
+        {"ColorizeGray",                    ColorizeGray},
+        {"ColumnStats",                     ColumnStats},
+        {"CombineMasked",                   CombineMasked},
+        {"CombineMaskedGeneral",            CombineMaskedGeneral},
+        {"Convert16To8",                    Convert16To8},
+        {"Convert1To16",                    Convert1To16},
+        {"Convert1To2",                     Convert1To2},
+        {"Convert1To2Cmap",                 Convert1To2Cmap},
+        {"Convert1To32",                    Convert1To32},
+        {"Convert1To4",                     Convert1To4},
+        {"Convert1To4Cmap",                 Convert1To4Cmap},
+        {"Convert1To8",                     Convert1To8},
+        {"Convert1To8Cmap",                 Convert1To8Cmap},
+        {"Convert24To32",                   Convert24To32},
+        {"Convert2To8",                     Convert2To8},
+        {"Convert32To16",                   Convert32To16},
+        {"Convert32To24",                   Convert32To24},
+        {"Convert32To8",                    Convert32To8},
+        {"Convert4To8",                     Convert4To8},
+        {"Convert8To16",                    Convert8To16},
+        {"Convert8To2",                     Convert8To2},
+        {"Convert8To32",                    Convert8To32},
+        {"Convert8To4",                     Convert8To4},
+        {"ConvertCmapTo1",                  ConvertCmapTo1},
+        {"ConvertGrayToColormap",           ConvertGrayToColormap},
+        {"ConvertGrayToColormap8",          ConvertGrayToColormap8},
+        {"ConvertGrayToFalseColor",         ConvertGrayToFalseColor},
+        {"ConvertRGBToBinaryArb",           ConvertRGBToBinaryArb},
+        {"ConvertRGBToColormap",            ConvertRGBToColormap},
+        {"ConvertRGBToGray",                ConvertRGBToGray},
+        {"ConvertRGBToGrayArb",             ConvertRGBToGrayArb},
+        {"ConvertRGBToGrayFast",            ConvertRGBToGrayFast},
+        {"ConvertRGBToGrayMinMax",          ConvertRGBToGrayMinMax},
+        {"ConvertRGBToGraySatBoost",        ConvertRGBToGraySatBoost},
+        {"ConvertRGBToLuminance",           ConvertRGBToLuminance},
+        {"ConvertTo1",                      ConvertTo1},
+        {"ConvertTo1",                      ConvertTo1},
+        {"ConvertTo16",                     ConvertTo16},
+        {"ConvertTo1BySampling",            ConvertTo1BySampling},
+        {"ConvertTo2",                      ConvertTo2},
+        {"ConvertTo32",                     ConvertTo32},
+        {"ConvertTo32BySampling",           ConvertTo32BySampling},
+        {"ConvertTo4",                      ConvertTo4},
+        {"ConvertTo8",                      ConvertTo8},
+        {"ConvertTo8BySampling",            ConvertTo8BySampling},
+        {"ConvertTo8Colormap",              ConvertTo8Colormap},
+        {"ConvertTo8Or32",                  ConvertTo8Or32},
+        {"Copy",                            Copy},
+        {"CopyBorder",                      CopyBorder},
+        {"CopyColormap",                    CopyColormap},
+        {"CopyDimensions",                  CopyDimensions},
+        {"CopyInputFormat",                 CopyInputFormat},
+        {"CopyRGBComponent",                CopyRGBComponent},
+        {"CopyResolution",                  CopyResolution},
+        {"CopySpp",                         CopySpp},
+        {"CopyText",                        CopyText},
+        {"CountArbInRect",                  CountArbInRect},
+        {"CountPixels",                     CountPixels},
+        {"CountPixelsByColumn",             CountPixelsByColumn},
+        {"CountPixelsByRow",                CountPixelsByRow},
+        {"CountPixelsInRect",               CountPixelsInRect},
+        {"CountPixelsInRow",                CountPixelsInRow},
+        {"CountRGBColors",                  CountRGBColors},
+        {"Create",                          Create},
+        {"CreateNoInit",                    CreateNoInit},
+        {"CreateRGBImage",                  CreateRGBImage},
+        {"DestroyColormap",                 DestroyColormap},
+        {"DisplayColorArray",               DisplayColorArray},
+        {"DisplayLayersRGBA",               DisplayLayersRGBA},
+        {"FindAreaPerimRatio",              FindAreaPerimRatio},
+        {"FindPageForeground",              FindPageForeground},
+        {"FindPerimToAreaRatio",            FindPerimToAreaRatio},
+        {"FindRepCloseTile",                FindRepCloseTile},
+        {"FlipPixel",                       FlipPixel},
+        {"ForegroundFraction",              ForegroundFraction},
+        {"GetAverageMasked",                GetAverageMasked},
+        {"GetAverageMaskedRGB",             GetAverageMaskedRGB},
+        {"GetAverageTiled",                 GetAverageTiled},
+        {"GetAverageTiledRGB",              GetAverageTiledRGB},
+        {"GetBinnedColor",                  GetBinnedColor},
+        {"GetBinnedComponentRange",         GetBinnedComponentRange},
+        {"GetBlackOrWhiteVal",              GetBlackOrWhiteVal},
+        {"GetBlackVal",                     GetBlackVal},       /* alias for GetBlackOrWhiteVal with 2nd parameter L_SELECT_BLACK */
+        {"GetCmapHistogram",                GetCmapHistogram},
+        {"GetCmapHistogramInRect",          GetCmapHistogramInRect},
+        {"GetCmapHistogramMasked",          GetCmapHistogramMasked},
+        {"GetColorAmapHistogram",           GetColorAmapHistogram},
+        {"GetColorHistogram",               GetColorHistogram},
+        {"GetColorHistogramMasked",         GetColorHistogramMasked},
+        {"GetColorNearMaskBoundary",        GetColorNearMaskBoundary},
+        {"GetColormap",                     GetColormap},
+        {"GetColumnStats",                  GetColumnStats},
+        {"GetData",                         GetData},
+        {"GetDepth",                        GetDepth},
+        {"GetDimensions",                   GetDimensions},
+        {"GetExtremeValue",                 GetExtremeValue},
+        {"GetGrayHistogram",                GetGrayHistogram},
+        {"GetGrayHistogramInRect",          GetGrayHistogramInRect},
+        {"GetGrayHistogramMasked",          GetGrayHistogramMasked},
+        {"GetGrayHistogramTiled",           GetGrayHistogramTiled},
+        {"GetHeight",                       GetHeight},
+        {"GetInputFormat",                  GetInputFormat},
+        {"GetMaxValueInRect",               GetMaxValueInRect},
+        {"GetMomentByColumn",               GetMomentByColumn},
+        {"GetPixel",                        GetPixel},
+        {"GetPixelAverage",                 GetPixelAverage},
+        {"GetPixelStats",                   GetPixelStats},
+        {"GetRGBComponent",                 GetRGBComponent},
+        {"GetRGBLine",                      GetRGBLine},
+        {"GetRGBPixel",                     GetRGBPixel},
+        {"GetRandomPixel",                  GetRandomPixel},
+        {"GetRangeValues",                  GetRangeValues},
+        {"GetRankColorArray",               GetRankColorArray},
+        {"GetRankValue",                    GetRankValue},
+        {"GetRankValueMasked",              GetRankValueMasked},
+        {"GetRankValueMaskedRGB",           GetRankValueMaskedRGB},
+        {"GetResolution",                   GetResolution},
+        {"GetRowStats",                     GetRowStats},
+        {"GetSpp",                          GetSpp},
+        {"GetText",                         GetText},
+        {"GetWhiteVal",                     GetWhiteVal},       /* alias for GetBlackOrWhiteVal with 2nd parameter L_SELECT_WHITE */
+        {"GetWidth",                        GetWidth},
+        {"GetWpl",                          GetWpl},
+        {"GetXRes",                         GetXRes},
+        {"GetYRes",                         GetYRes},
+        {"Invert",                          Invert},
+        {"MakeAlphaFromMask",               MakeAlphaFromMask},
+        {"MakeArbMaskFromRGB",              MakeArbMaskFromRGB},
+        {"MakeMaskFromLUT",                 MakeMaskFromLUT},
+        {"MakeMaskFromVal",                 MakeMaskFromVal},
+        {"MirroredTiling",                  MirroredTiling},
+        {"Or",                              Or},
+        {"PaintSelfThroughMask",            PaintSelfThroughMask},
+        {"PaintThroughMask",                PaintThroughMask},
+        {"PrintStreamInfo",                 PrintStreamInfo},
+        {"QuantizeIfFewColors",             QuantizeIfFewColors},
+        {"RankBinByStrip",                  RankBinByStrip},
+        {"Read",                            Read},
+        {"ReadMem",                         ReadMem},
+        {"ReadStream",                      ReadStream},
+        {"RemoveBorder",                    RemoveBorder},
+        {"RemoveBorderGeneral",             RemoveBorderGeneral},
+        {"RemoveBorderToSize",              RemoveBorderToSize},
+        {"ResizeImageData",                 ResizeImageData},
+        {"RowStats",                        RowStats},
+        {"ScaleResolution",                 ScaleResolution},
+        {"SetAll",                          SetAll},
+        {"SetAllArbitrary",                 SetAllArbitrary},
+        {"SetAllGray",                      SetAllGray},
+        {"SetBlack",                        SetBlack},
+        {"SetBlackOrWhite",                 SetBlackOrWhite},
+        {"SetBorderRingVal",                SetBorderRingVal},
+        {"SetBorderVal",                    SetBorderVal},
+        {"SetColormap",                     SetColormap},
+        {"SetComponentArbitrary",           SetComponentArbitrary},
+        {"SetData",                         SetData},
+        {"SetDepth",                        SetDepth},
+        {"SetDimensions",                   SetDimensions},
+        {"SetHeight",                       SetHeight},
+        {"SetInRect",                       SetInRect},
+        {"SetInRectArbitrary",              SetInRectArbitrary},
+        {"SetInputFormat",                  SetInputFormat},
+        {"SetMasked",                       SetMasked},
+        {"SetMaskedGeneral",                SetMaskedGeneral},
+        {"SetMirroredBorder",               SetMirroredBorder},
+        {"SetOrClearBorder",                SetOrClearBorder},
+        {"SetPadBits",                      SetPadBits},
+        {"SetPadBitsBand",                  SetPadBitsBand},
+        {"SetPixel",                        SetPixel},
+        {"SetPixelColumn",                  SetPixelColumn},
+        {"SetRGBComponent",                 SetRGBComponent},
+        {"SetRGBPixel",                     SetRGBPixel},
+        {"SetResolution",                   SetResolution},
+        {"SetSpecial",                      SetSpecial},
+        {"SetSpp",                          SetSpp},
+        {"SetText",                         SetText},
+        {"SetUnderTransparency",            SetUnderTransparency},
+        {"SetWhite",                        SetWhite},
+        {"SetWidth",                        SetWidth},
+        {"SetWpl",                          SetWpl},
+        {"SetXRes",                         SetXRes},
+        {"SetYRes",                         SetYRes},
+        {"ShiftAndTransferAlpha",           ShiftAndTransferAlpha},
+        {"SizesEqual",                      SizesEqual},
+        {"SplitDistributionFgBg",           SplitDistributionFgBg},
+        {"Subtract",                        Subtract},
+        {"SwapAndDestroy",                  SwapAndDestroy},
+        {"ThresholdForFgBg",                ThresholdForFgBg},
+        {"ThresholdPixelSum",               ThresholdPixelSum},
+        {"TransferAllData",                 TransferAllData},
+        {"UnpackBinary",                    UnpackBinary},
+        {"VarianceByColumn",                VarianceByColumn},
+        {"VarianceByRow",                   VarianceByRow},
+        {"VarianceInRect",                  VarianceInRect},
+        {"Write",                           Write},
+        {"WriteMem",                        WriteMem},
+        {"WriteStream",                     WriteStream},
+        {"Xor",                             Xor},
+        {"Zero",                            Zero},
         LUA_SENTINEL
     };
 

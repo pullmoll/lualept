@@ -45,7 +45,9 @@ typedef L_AMAP_NODE AmapNode;   /*!< Local type name for the ugly L_AMAP_NODE */
 
 /**
  * \brief Destroy a Amap*.
- *
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Amap* (amap).
+ * </pre>
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack
  */
@@ -64,9 +66,9 @@ Destroy(lua_State *L)
 
 /**
  * \brief Size of an Amap*.
- *
- * Arg #1 is expected to be a string describing the key type (int,uint,float).
- *
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Amap* (amap).
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
  */
@@ -81,9 +83,9 @@ Size(lua_State *L)
 
 /**
  * \brief Create a new Amap*.
- *
+ * <pre>
  * Arg #1 is expected to be a string describing the key type (int,uint,float).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 Amap* on the Lua stack
  */
@@ -98,11 +100,11 @@ Create(lua_State *L)
 
 /**
  * \brief Insert a node into an Amap* (%amap).
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Amap* (amap).
  * Arg #2 is expected to be a key (int, uint or float).
  * Arg #3 is expected to be a value (int, uint or float).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -153,9 +155,9 @@ Insert(lua_State *L)
 
 /**
  * \brief Printable string for a Amap*.
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Amap* (amap).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
  */
@@ -217,10 +219,10 @@ toString(lua_State *L)
 
 /**
  * \brief Delete a node from an Amap* (%amap).
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Amap* (amap).
  * Arg #2 is expected to be a key (int, uint or float).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
  */
@@ -255,10 +257,10 @@ Delete(lua_State *L)
 
 /**
  * \brief Find a key in an Amap* (%amap).
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Amap* (amap).
  * Arg #2 is expected to be a key (int, uint or float).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 value on the Lua stack (either lua_Integer or lua_Number)
  */
@@ -277,7 +279,7 @@ Find(lua_State *L)
         value = l_amapFind(amap, key);
         if (value) {
             lua_pushinteger(L, static_cast<lua_Integer>(value->itype));
-            result = TRUE;
+            result = 1;
         }
         break;
     case L_UINT_TYPE:
@@ -285,7 +287,7 @@ Find(lua_State *L)
         value = l_amapFind(amap, key);
         if (value) {
             lua_pushinteger(L, static_cast<lua_Integer>(value->utype));
-            result = TRUE;
+            result = 1;
         }
         break;
     case L_FLOAT_TYPE:
@@ -293,7 +295,7 @@ Find(lua_State *L)
         value = l_amapFind(amap, key);
         if (value) {
             lua_pushnumber(L, static_cast<lua_Number>(value->ftype));
-            result = TRUE;
+            result = 1;
         }
         break;
     }
@@ -302,9 +304,9 @@ Find(lua_State *L)
 
 /**
  * \brief Get first node in an Amap* (%amap).
- *
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Amap* (amap).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 light user data on the Lua stack
  */
@@ -320,9 +322,9 @@ GetFirst(lua_State *L)
 
 /**
  * \brief Get last node in an Amap* (%amap).
- *
- * Arg #1 is expected to be a Amap* (amap).
- *
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Amap* (amap).
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 light user data on the Lua stack
  */
@@ -338,9 +340,9 @@ GetLast(lua_State *L)
 
 /**
  * \brief Get next node of an AmapNode* (%node).
- *
+ * <pre>
  * Arg #1 is expected to be a AmapNode* (node).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 light user data on the Lua stack
  */
@@ -357,9 +359,9 @@ GetNext(lua_State *L)
 
 /**
  * \brief Get previous node of an AmapNode* (%node).
- *
+ * <pre>
  * Arg #1 is expected to be a AmapNode* (node).
- *
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 light user data on the Lua stack
  */
@@ -456,6 +458,7 @@ ll_register_Amap(lua_State *L)
     };
 
     static const luaL_Reg functions[] = {
+        {"__index",             Find},
         LUA_SENTINEL
     };
 
