@@ -111,7 +111,7 @@ extern void die(const char *_fun, lua_State* L, const char *format, ...);
 extern void **ll_udata(const char *_fun, lua_State* L, int arg, const char *tname);
 
 /**
- * \brief Cast the result of LEPT_MALLOC() to the given type
+ * \brief Cast the result of LEPT_MALLOC() to the given type.
  * \param T typename of the result pointer
  * \param size size of the memory block
  * \result memory allocated and cast to T*
@@ -128,7 +128,7 @@ ll_malloc(const char* _fun, lua_State *L, size_t size)
 }
 
 /**
- * \brief Cast the result of LEPT_CALLOC() to the given type
+ * \brief Cast the result of LEPT_CALLOC() to the given type.
  * \param T typename of the result pointer
  * \param nmemb number of members
  * \param size size of one member
@@ -146,7 +146,7 @@ ll_calloc(const char* _fun, lua_State *L, size_t nmemb, size_t size)
 }
 
 /**
- * \brief Alias with l_int32 nmemb and size
+ * \brief Alias with l_int32 nmemb and size.
  */
 template <typename T> T*
 ll_calloc(const char* _fun, lua_State *L, l_int32 nmemb, l_int32 size)
@@ -155,7 +155,7 @@ ll_calloc(const char* _fun, lua_State *L, l_int32 nmemb, l_int32 size)
 }
 
 /**
- * \brief Cast the result of LEPT_CALLOC() to the given type
+ * \brief Cast the result of LEPT_CALLOC() to the given type.
  * \param T typename of the result pointer
  * \param nmemb number of members
  * \result memory allocated, zeroed and cast to T*
@@ -172,7 +172,7 @@ ll_calloc(const char* _fun, lua_State *L, size_t nmemb)
 }
 
 /**
- * \brief Alias ll_calloc() with l_int32 nmemb
+ * \brief Alias ll_calloc() with l_int32 nmemb.
  */
 template <typename T> T*
 ll_calloc(const char* _fun, lua_State *L, l_int32 nmemb)
@@ -181,7 +181,7 @@ ll_calloc(const char* _fun, lua_State *L, l_int32 nmemb)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata with %name
+ * \brief Check Lua stack at index %arg for udata with %name.
  * \param T typename of the expected return value
  * \param _fun calling function's name
  * \param L pointer to the lua_State
@@ -463,7 +463,7 @@ extern int          ll_register_Boxaa(lua_State *L);
 /* llpixcmap.cpp */
 extern PixColormap* ll_check_PixColormap(const char *_fun, lua_State *L, int arg);
 extern PixColormap* ll_check_PixColormap_opt(const char *_fun, lua_State *L, int arg);
-extern PixColormap* ll_take_PixColormap(lua_State *L, int arg);
+extern PixColormap* ll_take_PixColormap(const char* _fun, lua_State *L, int arg);
 extern int          ll_push_PixColormap(const char *_fun, lua_State *L, PixColormap *cmap);
 extern int          ll_new_PixColormap(lua_State *L);
 extern int          ll_register_PixColormap(lua_State *L);

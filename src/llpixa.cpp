@@ -37,9 +37,11 @@
  *
  *====================================================================*/
 
+/** Define a function's name (_fun) with prefix LL_PIXA */
+#define LL_FUNC(x) FUNC(LL_PIXA "." x)
 
 /**
- * \brief Destroy a Pixa*
+ * \brief Destroy a Pixa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa*.
  * </pre>
@@ -49,7 +51,7 @@
 static int
 Destroy(lua_State *L)
 {
-    FUNC(LL_PIXA ".Destroy");
+    LL_FUNC("Destroy");
     Pixa **ppixa = ll_check_udata<Pixa>(_fun, L, 1, LL_PIXA);
     Pixa *pixa = *ppixa;
     DBG(LOG_DESTROY, "%s: '%s' ppa=%p pa=%p count=%d\n", _fun,
@@ -60,7 +62,7 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Create a new Pixa*
+ * \brief Create a new Pixa*.
  * <pre>
  * Arg #1 is expected to be a l_int32 (n).
  * </pre>
@@ -70,14 +72,14 @@ Destroy(lua_State *L)
 static int
 Create(lua_State *L)
 {
-    FUNC(LL_PIXA ".Create");
+    LL_FUNC("Create");
     l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
     Pixa *pixa = pixaCreate(n);
     return ll_push_Pixa(_fun, L, pixa);
 }
 
 /**
- * \brief Get count for a Pixa* (%pixa)
+ * \brief Get count for a Pixa* (%pixa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa*.
  * </pre>
@@ -87,14 +89,14 @@ Create(lua_State *L)
 static int
 GetCount(lua_State *L)
 {
-    FUNC(LL_PIXA ".GetCount");
+    LL_FUNC("GetCount");
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
     lua_pushinteger(L, pixaGetCount(pixa));
     return 1;
 }
 
 /**
- * \brief Add a Pix* (%pix) to a Pixa* (%pixa)
+ * \brief Add a Pix* (%pix) to a Pixa* (%pixa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa*.
  * Arg #2 is expected to be a Pix*.
@@ -105,7 +107,7 @@ GetCount(lua_State *L)
 static int
 AddPix(lua_State *L)
 {
-    FUNC(LL_PIXA ".AddPix");
+    LL_FUNC("AddPix");
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
     Pix *pix = ll_check_Pix(_fun, L, 2);
     l_int32 flag = ll_check_access_storage(_fun, L, 3, L_COPY);
@@ -113,7 +115,7 @@ AddPix(lua_State *L)
 }
 
 /**
- * \brief Clear the Pixa* (%pixa)
+ * \brief Clear the Pixa* (%pixa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
  * </pre>
@@ -123,13 +125,13 @@ AddPix(lua_State *L)
 static int
 Clear(lua_State *L)
 {
-    FUNC(LL_PIXA ".Clear");
+    LL_FUNC("Clear");
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
     return ll_push_bool(L, 0 == pixaClear(pixa));
 }
 
 /**
- * \brief Copy a Pixa* (%pixas)
+ * \brief Copy a Pixa* (%pixas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa*.
  * Arg #2 is an optional string defining the storage flags (copy, clone, copy_clone).
@@ -140,7 +142,7 @@ Clear(lua_State *L)
 static int
 Copy(lua_State *L)
 {
-    FUNC(LL_PIXA ".Copy");
+    LL_FUNC("Copy");
     Pixa *pixas = ll_check_Pixa(_fun, L, 1);
     l_int32 copyflag = ll_check_access_storage(_fun, L, 2, L_COPY);
     Pixa *pixa = pixaCopy(pixas, copyflag);
@@ -148,7 +150,7 @@ Copy(lua_State *L)
 }
 
 /**
- * \brief Get pixel aligned statistics for Pixa* (%pixa)
+ * \brief Get pixel aligned statistics for Pixa* (%pixa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
  * </pre>
@@ -158,7 +160,7 @@ Copy(lua_State *L)
 static int
 GetAlignedStats(lua_State *L)
 {
-    FUNC(LL_PIXA ".GetAlignedStats");
+    LL_FUNC("GetAlignedStats");
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
     l_int32 type = ll_check_stats_type(_fun, L, 2, L_MEAN_ABSVAL);
     l_int32 nbins = ll_check_l_int32_default(_fun, L, 3, 2);
@@ -168,7 +170,7 @@ GetAlignedStats(lua_State *L)
 }
 
 /**
- * \brief Get box geometry for a Pix* from a Pixa* (%pixa) at index (%idx)
+ * \brief Get box geometry for a Pix* from a Pixa* (%pixa) at index (%idx).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa*.
  * Arg #2 is expected to be a l_int32 (idx).
@@ -179,7 +181,7 @@ GetAlignedStats(lua_State *L)
 static int
 GetBoxGeometry(lua_State *L)
 {
-    FUNC(LL_PIXA ".GetBoxGeometry");
+    LL_FUNC("GetBoxGeometry");
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, pixaGetCount(pixa));
     l_int32 x, y, w, h;
@@ -193,7 +195,7 @@ GetBoxGeometry(lua_State *L)
 }
 
 /**
- * \brief Insert the Pix* (%pixs) in a Pixa* (%pixa) at index (%idx)
+ * \brief Insert the Pix* (%pixs) in a Pixa* (%pixa) at index (%idx).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa*.
  * Arg #2 is expected to be a l_int32 (idx).
@@ -206,7 +208,7 @@ GetBoxGeometry(lua_State *L)
 static int
 InsertPix(lua_State *L)
 {
-    FUNC(LL_PIXA ".InsertPix");
+    LL_FUNC("InsertPix");
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, pixaGetCount(pixa));
     Pix *pixs = ll_check_Pix(_fun, L, 3);
@@ -218,7 +220,7 @@ InsertPix(lua_State *L)
 }
 
 /**
- * \brief Interleave two Pixa* (%pixa1, %pixa2)
+ * \brief Interleave two Pixa* (%pixa1, %pixa2).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa* (pixa1).
  * Arg #2 is expected to be another Pixa* (pixa2).
@@ -230,7 +232,7 @@ InsertPix(lua_State *L)
 static int
 Interleave(lua_State *L)
 {
-    FUNC(LL_PIXA ".Interleave");
+    LL_FUNC("Interleave");
     Pixa *pixa1 = ll_check_Pixa(_fun, L, 1);
     Pixa *pixa2 = ll_check_Pixa(_fun, L, 2);
     l_int32 copyflag = ll_check_access_storage(_fun, L, 3, L_CLONE);
@@ -239,7 +241,7 @@ Interleave(lua_State *L)
 }
 
 /**
- * \brief Join Pixa* (%pixas) to Pixa* (%pixad)
+ * \brief Join Pixa* (%pixas) to Pixa* (%pixad).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa* (pixad).
  * Arg #2 is expected to be another Pixa* (pixas).
@@ -250,7 +252,7 @@ Interleave(lua_State *L)
 static int
 Join(lua_State *L)
 {
-    FUNC(LL_PIXA ".Join");
+    LL_FUNC("Join");
     Pixa *pixad = ll_check_Pixa(_fun, L, 1);
     Pixa *pixas = ll_check_Pixa(_fun, L, 2);
     l_int32 istart = ll_check_l_int32_default(_fun, L, 3, 1);
@@ -259,7 +261,7 @@ Join(lua_State *L)
 }
 
 /**
- * \brief Read a Pixa* from an external file
+ * \brief Read a Pixa* from an external file.
  * <pre>
  * Arg #1 is expected to be a string containing the filename.
  * </pre>
@@ -269,14 +271,14 @@ Join(lua_State *L)
 static int
 Read(lua_State *L)
 {
-    FUNC(LL_PIXA ".Read");
+    LL_FUNC("Read");
     const char *filename = ll_check_string(_fun, L, 1);
     Pixa *pixa = pixaRead(filename);
     return ll_push_Pixa(_fun, L, pixa);
 }
 
 /**
- * \brief Read a Pixa* (%pixa) from a number of external files
+ * \brief Read a Pixa* (%pixa) from a number of external files.
  * <pre>
  * Arg #1 is expected to be a string containing the directory (dirname).
  * Arg #2 is expected to be a string (substr).
@@ -287,7 +289,7 @@ Read(lua_State *L)
 static int
 ReadFiles(lua_State *L)
 {
-    FUNC(LL_PIXA ".ReadFiles");
+    LL_FUNC("ReadFiles");
     const char *dirname = ll_check_string(_fun, L, 1);
     const char *substr = ll_check_string(_fun, L, 2);
     Pixa *pixa = pixaReadFiles(dirname, substr);
@@ -295,7 +297,7 @@ ReadFiles(lua_State *L)
 }
 
 /**
- * \brief Read a Pixa* from a Lua string (%data)
+ * \brief Read a Pixa* from a Lua string (%data).
  * <pre>
  * Arg #1 is expected to be a string (data).
  * </pre>
@@ -305,7 +307,7 @@ ReadFiles(lua_State *L)
 static int
 ReadMem(lua_State *L)
 {
-    FUNC(LL_PIXA ".ReadMem");
+    LL_FUNC("ReadMem");
     size_t len;
     const char *data = ll_check_lstring(_fun, L, 1, &len);
     Pixa *pixa = pixaReadMem(reinterpret_cast<const l_uint8 *>(data), len);
@@ -313,7 +315,7 @@ ReadMem(lua_State *L)
 }
 
 /**
- * \brief Read a Pixa* from a Lua io stream (%stream)
+ * \brief Read a Pixa* from a Lua io stream (%stream).
  * <pre>
  * Arg #1 is expected to be a luaL_Stream* (stream).
  * </pre>
@@ -323,14 +325,14 @@ ReadMem(lua_State *L)
 static int
 ReadStream(lua_State *L)
 {
-    FUNC(LL_PIXA ".ReadStream");
+    LL_FUNC("ReadStream");
     luaL_Stream *stream = ll_check_stream(_fun, L, 1);
     Pixa *pixa = pixaReadStream(stream->f);
     return ll_push_Pixa(_fun, L, pixa);
 }
 
 /**
- * \brief Remove the Pix* from a Pixa* (%pixa) at index (%idx)
+ * \brief Remove the Pix* from a Pixa* (%pixa) at index (%idx).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
  * Arg #2 is expected to be a l_int32 (idx).
@@ -341,14 +343,14 @@ ReadStream(lua_State *L)
 static int
 RemovePix(lua_State *L)
 {
-    FUNC(LL_PIXA ".RemovePix");
+    LL_FUNC("RemovePix");
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, pixaGetCount(pixa));
     return ll_push_bool(L, 0 == pixaRemovePix(pixa, idx));
 }
 
 /**
- * \brief Remove the Pix* (%pix) from a Pixa* (%pixa) at index (%idx) and return it and its box
+ * \brief Remove the Pix* (%pix) from a Pixa* (%pixa) at index (%idx) and return it and its box.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa*.
  * Arg #2 is expected to be a l_int32 (%idx).
@@ -359,7 +361,7 @@ RemovePix(lua_State *L)
 static int
 RemovePixAndSave(lua_State *L)
 {
-    FUNC(LL_PIXA ".RemovePixAndSave");
+    LL_FUNC("RemovePixAndSave");
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, pixaGetCount(pixa));
     Pix *pix = nullptr;
@@ -370,7 +372,7 @@ RemovePixAndSave(lua_State *L)
 }
 
 /**
- * \brief Replace the Pix* in a Pixa* at index %idx
+ * \brief Replace the Pix* in a Pixa* at index %idx.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
  * Arg #2 is expected to be a l_int32 (idx).
@@ -383,7 +385,7 @@ RemovePixAndSave(lua_State *L)
 static int
 ReplacePix(lua_State *L)
 {
-    FUNC(LL_PIXA ".ReplacePix");
+    LL_FUNC("ReplacePix");
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, pixaGetCount(pixa));
     Pix *pixs = ll_check_Pix(_fun, L, 3);
@@ -395,7 +397,7 @@ ReplacePix(lua_State *L)
 }
 
 /**
- * \brief Write the Pixa* (%pixa) to an external file (%filename)
+ * \brief Write the Pixa* (%pixa) to an external file (%filename).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa* user data.
  * Arg #2 is expected to be string containing the filename.
@@ -406,14 +408,14 @@ ReplacePix(lua_State *L)
 static int
 Write(lua_State *L)
 {
-    FUNC(LL_PIXA ".Write");
+    LL_FUNC("Write");
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
     return ll_push_bool(L, 0 == pixaWrite(filename, pixa));
 }
 
 /**
- * \brief Write the Pixa* (%pixa) to memory and return it as a Lua string
+ * \brief Write the Pixa* (%pixa) to memory and return it as a Lua string.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa* user data.
  * </pre>
@@ -423,7 +425,7 @@ Write(lua_State *L)
 static int
 WriteMem(lua_State *L)
 {
-    FUNC(LL_PIXA ".WriteMem");
+    LL_FUNC("WriteMem");
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
     l_uint8 *data = nullptr;
     size_t size = 0;
@@ -435,7 +437,7 @@ WriteMem(lua_State *L)
 }
 
 /**
- * \brief Write the Pixa* to an Lua io stream (%stream)
+ * \brief Write the Pixa* to an Lua io stream (%stream).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa* user data.
  * Arg #2 is expected to be a luaL_Stream* (stream).
@@ -446,14 +448,14 @@ WriteMem(lua_State *L)
 static int
 WriteStream(lua_State *L)
 {
-    FUNC(LL_PIXA ".WriteStream");
+    LL_FUNC("WriteStream");
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
     return ll_push_bool(L, 0 == pixaWriteStream(stream->f, pixa));
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class LL_PIXA
+ * \brief Check Lua stack at index %arg for udata of class LL_PIXA.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -466,7 +468,7 @@ ll_check_Pixa(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Optionally expect a LL_PIXA at index %arg on the Lua stack
+ * \brief Optionally expect a LL_PIXA at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -481,7 +483,7 @@ ll_check_Pixa_opt(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Push Pixa* to the Lua stack and set its meta table
+ * \brief Push Pixa* to the Lua stack and set its meta table.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param pixa pointer to the PIXA
@@ -496,7 +498,7 @@ ll_push_Pixa(const char *_fun, lua_State *L, Pixa *pixa)
 }
 
 /**
- * \brief Create a new Pixa*
+ * \brief Create a new Pixa*.
  * \param L pointer to the lua_State
  * \return 1 Pixa* on the Lua stack
  */
@@ -506,7 +508,7 @@ ll_new_Pixa(lua_State *L)
     return Create(L);
 }
 /**
- * \brief Register the PIX methods and functions in the LL_PIX meta table
+ * \brief Register the PIX methods and functions in the LL_PIX meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */

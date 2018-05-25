@@ -37,9 +37,11 @@
  *
  *====================================================================*/
 
+/** Define a function's name (_fun) with prefix LL_PIXAA */
+#define LL_FUNC(x) FUNC(LL_PIXAA "." x)
 
 /**
- * \brief Destroy a Pixaa*
+ * \brief Destroy a Pixaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * </pre>
@@ -49,7 +51,7 @@
 static int
 Destroy(lua_State *L)
 {
-    FUNC(LL_PIXAA ".Destroy");
+    LL_FUNC("Destroy");
     Pixaa **ppixaa = ll_check_udata<Pixaa>(_fun, L, 1, LL_PIXAA);
     Pixaa *pixaa = *ppixaa;
     DBG(LOG_DESTROY, "%s: '%s' ppixaa=%p pixaa=%p count=%d\n",
@@ -60,7 +62,7 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Create a new Pixaa*
+ * \brief Create a new Pixaa*.
  * <pre>
  * Arg #1 is expected to be a l_int32 (n).
  * </pre>
@@ -70,14 +72,14 @@ Destroy(lua_State *L)
 static int
 Create(lua_State *L)
 {
-    FUNC(LL_PIXAA ".Create");
+    LL_FUNC("Create");
     l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
     Pixaa *pixaa = pixaaCreate(n);
     return ll_push_Pixaa(_fun, L, pixaa);
 }
 
 /**
- * \brief Get count for a Pixaa*
+ * \brief Get count for a Pixaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * </pre>
@@ -87,7 +89,7 @@ Create(lua_State *L)
 static int
 GetCount(lua_State *L)
 {
-    FUNC(LL_PIXAA ".GetCount");
+    LL_FUNC("GetCount");
     Pixaa *pixaa = ll_check_Pixaa(_fun, L, 1);
     Numa *na = nullptr;
     lua_pushinteger(L, pixaaGetCount(pixaa, &na));
@@ -95,7 +97,7 @@ GetCount(lua_State *L)
 }
 
 /**
- * \brief Add a Box* to a Pixaa*
+ * \brief Add a Box* to a Pixaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * Arg #2 is expected to be a Box* user data (box).
@@ -107,7 +109,7 @@ GetCount(lua_State *L)
 static int
 AddBox(lua_State *L)
 {
-    FUNC(LL_PIXAA ".AddBox");
+    LL_FUNC("AddBox");
     Pixaa *pixaa = ll_check_Pixaa(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
     l_int32 copyflag = ll_check_access_storage(_fun, L, 3, L_COPY);
@@ -115,7 +117,7 @@ AddBox(lua_State *L)
 }
 
 /**
- * \brief Add a Pix* and its Box* to a Pixaa*
+ * \brief Add a Pix* and its Box* to a Pixaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * Arg #2 is expected to be a l_int32 (idx).
@@ -129,7 +131,7 @@ AddBox(lua_State *L)
 static int
 AddPix(lua_State *L)
 {
-    FUNC(LL_PIXAA ".AddPix");
+    LL_FUNC("AddPix");
     Pixaa *pixaa = ll_check_Pixaa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, pixaaGetCount(pixaa, nullptr));
     Pix *pix = ll_check_Pix(_fun, L, 3);
@@ -139,7 +141,7 @@ AddPix(lua_State *L)
 }
 
 /**
- * \brief Add a Pixa* to a Pixaa*
+ * \brief Add a Pixa* to a Pixaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * Arg #2 is expected to be a Pixa* user data.
@@ -151,7 +153,7 @@ AddPix(lua_State *L)
 static int
 AddPixa(lua_State *L)
 {
-    FUNC(LL_PIXAA ".AddPixa");
+    LL_FUNC("AddPixa");
     Pixaa *pixaa = ll_check_Pixaa(_fun, L, 1);
     Pixa *pixa = ll_check_Pixa(_fun, L, 2);
     l_int32 flag = ll_check_access_storage(_fun, L, 3, L_COPY);
@@ -159,7 +161,7 @@ AddPixa(lua_State *L)
 }
 
 /**
- * \brief Clear the Pixaa*
+ * \brief Clear the Pixaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * </pre>
@@ -169,13 +171,13 @@ AddPixa(lua_State *L)
 static int
 Clear(lua_State *L)
 {
-    FUNC(LL_PIXAA ".Clear");
+    LL_FUNC("Clear");
     Pixaa *paa = ll_check_Pixaa(_fun, L, 1);
     return ll_push_bool(L, 0 == pixaaClear(paa));
 }
 
 /**
- * \brief Extend array of a Pixaa*
+ * \brief Extend array of a Pixaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * </pre>
@@ -185,13 +187,13 @@ Clear(lua_State *L)
 static int
 ExtendArray(lua_State *L)
 {
-    FUNC(LL_PIXAA ".ExtendArray");
+    LL_FUNC("ExtendArray");
     Pixaa *pixaa = ll_check_Pixaa(_fun, L, 1);
     return ll_push_bool(L, 0 == pixaaExtendArray(pixaa));
 }
 
 /**
- * \brief Get a Boxa* from a Pixaa*
+ * \brief Get a Boxa* from a Pixaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * Arg #2 is optionally a string defining the access flag (copy, clone).
@@ -202,7 +204,7 @@ ExtendArray(lua_State *L)
 static int
 GetBoxa(lua_State *L)
 {
-    FUNC(LL_PIXAA ".GetBoxa");
+    LL_FUNC("GetBoxa");
     Pixaa *pixaa = ll_check_Pixaa(_fun, L, 1);
     l_int32 accesstype = ll_check_access_storage(_fun, L, 2, L_CLONE);
     Boxa *boxa = pixaaGetBoxa(pixaa, accesstype);
@@ -210,7 +212,7 @@ GetBoxa(lua_State *L)
 }
 
 /**
- * \brief Get a Pixa* from a Pixaa*
+ * \brief Get a Pixa* from a Pixaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * Arg #2 is expected to be a l_int32 (idx).
@@ -222,7 +224,7 @@ GetBoxa(lua_State *L)
 static int
 GetPixa(lua_State *L)
 {
-    FUNC(LL_PIXAA ".GetPixa");
+    LL_FUNC("GetPixa");
     Pixaa *pixaa = ll_check_Pixaa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, pixaaGetCount(pixaa, nullptr));
     l_int32 accesstype = ll_check_access_storage(_fun, L, 3, L_CLONE);
@@ -231,7 +233,7 @@ GetPixa(lua_State *L)
 }
 
 /**
- * \brief Join the Pixaa*
+ * \brief Join the Pixaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * Arg #2 is expected to be another Pixaa* user data.
@@ -244,7 +246,7 @@ GetPixa(lua_State *L)
 static int
 Join(lua_State *L)
 {
-    FUNC(LL_PIXAA ".Join");
+    LL_FUNC("Join");
     Pixaa *pixaad = ll_check_Pixaa(_fun, L, 1);
     Pixaa *pixaas = ll_check_Pixaa(_fun, L, 2);
     l_int32 istart = ll_check_l_int32_default(_fun, L, 3, 1) - 1;
@@ -253,7 +255,7 @@ Join(lua_State *L)
 }
 
 /**
- * \brief Read a Pixaa* from an external file
+ * \brief Read a Pixaa* from an external file.
  * <pre>
  * Arg #1 is expected to be a string containing the filename.
  * </pre>
@@ -263,14 +265,14 @@ Join(lua_State *L)
 static int
 Read(lua_State *L)
 {
-    FUNC(LL_PIXAA ".Read");
+    LL_FUNC("Read");
     const char *filename = ll_check_string(_fun, L, 1);
     Pixaa *pixaa = pixaaRead(filename);
     return ll_push_Pixaa(_fun, L, pixaa);
 }
 
 /**
- * \brief Read a Pixaa* (%pixaa) from a number of external files
+ * \brief Read a Pixaa* (%pixaa) from a number of external files.
  * <pre>
  * Arg #1 is expected to be a string containing the directory (dirname).
  * Arg #2 is expected to be a string (substr).
@@ -286,7 +288,7 @@ Read(lua_State *L)
 static int
 ReadFromFiles(lua_State *L)
 {
-    FUNC(LL_PIXAA ".ReadFromFiles");
+    LL_FUNC("ReadFromFiles");
     const char *dirname = ll_check_string(_fun, L, 1);
     const char *substr = nullptr;
     l_int32 first = 0;
@@ -305,7 +307,7 @@ ReadFromFiles(lua_State *L)
 }
 
 /**
- * \brief Read a Pixaa* from a Lua string (%data)
+ * \brief Read a Pixaa* from a Lua string (%data).
  * <pre>
  * Arg #1 is expected to be a string (data).
  * </pre>
@@ -315,7 +317,7 @@ ReadFromFiles(lua_State *L)
 static int
 ReadMem(lua_State *L)
 {
-    FUNC(LL_PIXAA ".ReadMem");
+    LL_FUNC("ReadMem");
     size_t len;
     const char *data = ll_check_lstring(_fun, L, 1, &len);
     Pixaa *pixaa = pixaaReadMem(reinterpret_cast<const l_uint8 *>(data), len);
@@ -323,7 +325,7 @@ ReadMem(lua_State *L)
 }
 
 /**
- * \brief Read a Pixaa* from a Lua io stream (%stream)
+ * \brief Read a Pixaa* from a Lua io stream (%stream).
  * <pre>
  * Arg #1 is expected to be a luaL_Stream* (stream).
  * </pre>
@@ -333,14 +335,14 @@ ReadMem(lua_State *L)
 static int
 ReadStream(lua_State *L)
 {
-    FUNC(LL_PIXAA ".ReadStream");
+    LL_FUNC("ReadStream");
     luaL_Stream *stream = ll_check_stream(_fun, L, 1);
     Pixaa *pixaa = pixaaReadStream(stream->f);
     return ll_push_Pixaa(_fun, L, pixaa);
 }
 
 /**
- * \brief Replace the Pixa* in a Pixaa* at index %idx
+ * \brief Replace the Pixa* in a Pixaa* at index %idx.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * Arg #2 is expected to be a l_int32 (idx).
@@ -352,7 +354,7 @@ ReadStream(lua_State *L)
 static int
 ReplacePixa(lua_State *L)
 {
-    FUNC(LL_PIXAA ".ReplacePixa");
+    LL_FUNC("ReplacePixa");
     Pixaa *paa = ll_check_Pixaa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, pixaaGetCount(paa, nullptr));
     Pixa *pa = ll_check_Pixa(_fun, L, 3);
@@ -360,7 +362,7 @@ ReplacePixa(lua_State *L)
 }
 
 /**
- * \brief Truncate array of a Pixaa*
+ * \brief Truncate array of a Pixaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * </pre>
@@ -370,13 +372,13 @@ ReplacePixa(lua_State *L)
 static int
 Truncate(lua_State *L)
 {
-    FUNC(LL_PIXAA ".Truncate");
+    LL_FUNC("Truncate");
     Pixaa *pixaa = ll_check_Pixaa(_fun, L, 1);
     return ll_push_bool(L, 0 == pixaaTruncate(pixaa));
 }
 
 /**
- * \brief Write the Pixaa* (%pixaa) to an external file (%filename)
+ * \brief Write the Pixaa* (%pixaa) to an external file (%filename).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * Arg #2 is expected to be string containing the filename.
@@ -387,14 +389,14 @@ Truncate(lua_State *L)
 static int
 Write(lua_State *L)
 {
-    FUNC(LL_PIXAA ".Write");
+    LL_FUNC("Write");
     Pixaa *pixaa = ll_check_Pixaa(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
     return ll_push_bool(L, 0 == pixaaWrite(filename, pixaa));
 }
 
 /**
- * \brief Write the Pixaa* (%pixaa) to memory and return it as a Lua string
+ * \brief Write the Pixaa* (%pixaa) to memory and return it as a Lua string.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * </pre>
@@ -404,7 +406,7 @@ Write(lua_State *L)
 static int
 WriteMem(lua_State *L)
 {
-    FUNC(LL_PIXAA ".WriteMem");
+    LL_FUNC("WriteMem");
     Pixaa *pixaa = ll_check_Pixaa(_fun, L, 1);
     l_uint8 *data = nullptr;
     size_t size = 0;
@@ -416,7 +418,7 @@ WriteMem(lua_State *L)
 }
 
 /**
- * \brief Write the Pixaa* to an external file
+ * \brief Write the Pixaa* to an external file.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * Arg #2 is expected to be a luaL_Stream* (stream).
@@ -427,14 +429,14 @@ WriteMem(lua_State *L)
 static int
 WriteStream(lua_State *L)
 {
-    FUNC(LL_PIXAA ".WriteStream");
+    LL_FUNC("WriteStream");
     Pixaa *pixaa = ll_check_Pixaa(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
     return ll_push_bool(L, 0 == pixaaWriteStream(stream->f, pixaa));
 }
 
 /**
- * \brief Create a new Pixaa* from a Pixa*
+ * \brief Create a new Pixaa* from a Pixa*.
  * <pre>
  * Arg #1 is expected to be a Pixa* user data.
  * Arg #2 is expected to be a l_int32 (n).
@@ -447,7 +449,7 @@ WriteStream(lua_State *L)
 static int
 CreateFromPixa(lua_State *L)
 {
-    FUNC(LL_PIXAA ".CreateFromPixa");
+    LL_FUNC("CreateFromPixa");
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
     l_int32 n = ll_check_l_int32_default(_fun, L, 2, 1);
     l_int32 type = ll_check_consecutive_skip_by(_fun, L, 3, L_CHOOSE_CONSECUTIVE);
@@ -457,7 +459,7 @@ CreateFromPixa(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class LL_PIXAA
+ * \brief Check Lua stack at index %arg for udata of class LL_PIXAA.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -470,7 +472,7 @@ ll_check_Pixaa(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Optionally expect a LL_PIXAA at index %arg on the Lua stack
+ * \brief Optionally expect a LL_PIXAA at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -485,7 +487,7 @@ ll_check_Pixaa_opt(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Push Pixaa* user data to the Lua stack and set its meta table
+ * \brief Push Pixaa* user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param pixaa pointer to the PIXAA
@@ -500,7 +502,7 @@ ll_push_Pixaa(const char *_fun, lua_State *L, Pixaa *pixaa)
 }
 
 /**
- * \brief Create a new Pixaa*
+ * \brief Create a new Pixaa*.
  * \param L pointer to the lua_State
  * \return 1 Pixaa* on the Lua stack
  */
@@ -510,7 +512,7 @@ ll_new_Pixaa(lua_State *L)
     return Create(L);
 }
 /**
- * \brief Register the PIX methods and functions in the LL_PIX meta table
+ * \brief Register the PIX methods and functions in the LL_PIX meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */

@@ -37,9 +37,11 @@
  *
  *====================================================================*/
 
+/** Define a function's name (_fun) with prefix LL_BOX */
+#define LL_FUNC(x) FUNC(LL_BOX "." x)
 
 /**
- * \brief Destroy a Box*
+ * \brief Destroy a Box*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * </pre>
@@ -49,7 +51,7 @@
 static int
 Destroy(lua_State *L)
 {
-    FUNC(LL_BOX ".Destroy");
+    LL_FUNC("Destroy");
     Box **pbox = ll_check_udata<Box>(_fun, L, 1, LL_BOX);
     Box *box = *pbox;
     DBG(LOG_DESTROY, "%s: '%s' pbox=%p box=%p refcount=%d\n", _fun,
@@ -60,7 +62,7 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Create a new Box*
+ * \brief Create a new Box*.
  * <pre>
  * Arg #1 is expected to be a l_int32 (x).
  * Arg #2 is expected to be a l_int32 (y).
@@ -87,7 +89,7 @@ Destroy(lua_State *L)
 static int
 Create(lua_State *L)
 {
-    FUNC(LL_BOX ".Create");
+    LL_FUNC("Create");
     l_int32 x = ll_check_l_int32_default(_fun, L, 1, 0);
     l_int32 y = ll_check_l_int32_default(_fun, L, 2, 0);
     l_int32 w = ll_check_l_int32_default(_fun, L, 3, 1);
@@ -97,14 +99,14 @@ Create(lua_State *L)
 }
 
 /**
- * \brief Printable string for a Box*
+ * \brief Printable string for a Box*.
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
  */
 static int
 toString(lua_State *L)
 {
-    FUNC(LL_BOX ".toString");
+    LL_FUNC("toString");
     static char str[256];
     Box *box = ll_check_Box(_fun, L, 1);
     luaL_Buffer B;
@@ -130,7 +132,7 @@ toString(lua_State *L)
 }
 
 /**
- * \brief Test equality of a Box* (%box1) and another Box* (%box2)
+ * \brief Test equality of a Box* (%box1) and another Box* (%box2).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box1).
  * Arg #2 is expected to be another Box* (box2).
@@ -141,7 +143,7 @@ toString(lua_State *L)
 static int
 Equal(lua_State *L)
 {
-    FUNC(LL_BOX ".Equal");
+    LL_FUNC("Equal");
     Box *box1 = ll_check_Box(_fun, L, 1);
     Box *box2 = ll_check_Box(_fun, L, 2);
     l_int32 same = FALSE;
@@ -152,7 +154,7 @@ Equal(lua_State *L)
 }
 
 /**
- * \brief Adjust sides of a Box* (%boxs)
+ * \brief Adjust sides of a Box* (%boxs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box).
  * Arg #2 is expected to be a l_int32 (delleft).
@@ -166,7 +168,7 @@ Equal(lua_State *L)
 static int
 AdjustSides(lua_State *L)
 {
-    FUNC(LL_BOX ".AdjustSides");
+    LL_FUNC("AdjustSides");
     Box *boxs = ll_check_Box(_fun, L, 1);
     l_int32 delleft = ll_check_l_int32_default(_fun, L, 2, 0);
     l_int32 delright = ll_check_l_int32_default(_fun, L, 3, 0);
@@ -178,7 +180,7 @@ AdjustSides(lua_State *L)
 }
 
 /**
- * \brief Get the bounding region of a Box* (%box1) and another Box* (%box2)
+ * \brief Get the bounding region of a Box* (%box1) and another Box* (%box2).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box1).
  * Arg #2 is expected to be another Box* (box2).
@@ -189,7 +191,7 @@ AdjustSides(lua_State *L)
 static int
 BoundingRegion(lua_State *L)
 {
-    FUNC(LL_BOX ".BoundingRegion");
+    LL_FUNC("BoundingRegion");
     Box *box1 = ll_check_Box(_fun, L, 1);
     Box *box2 = ll_check_Box(_fun, L, 2);
     Box *box = boxBoundingRegion(box1, box2);
@@ -198,7 +200,7 @@ BoundingRegion(lua_State *L)
 }
 
 /**
- * \brief Change the Box* reference count
+ * \brief Change the Box* reference count.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * Arg #2 (i.e. self) is expected to be a l_int32 (delta).
@@ -209,14 +211,14 @@ BoundingRegion(lua_State *L)
 static int
 ChangeRefcount(lua_State *L)
 {
-    FUNC(LL_BOX ".ChangeRefcount");
+    LL_FUNC("ChangeRefcount");
     Box *box = ll_check_Box(_fun, L, 1);
     l_int32 delta = ll_check_l_int32(_fun, L, 2);
     return ll_push_bool(L, 0 == boxChangeRefcount(box, delta));
 }
 
 /**
- * \brief Clip a Box* (%boxs) rectangle to width and height (%wi,%hi)
+ * \brief Clip a Box* (%boxs) rectangle to width and height (%wi,%hi).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * Arg #2 is expected to be a l_int32 (wi).
@@ -228,7 +230,7 @@ ChangeRefcount(lua_State *L)
 static int
 ClipToRectangle(lua_State *L)
 {
-    FUNC(LL_BOX ".ClipToRectangle");
+    LL_FUNC("ClipToRectangle");
     Box *boxs = ll_check_Box(_fun, L, 1);
     l_int32 wi = ll_check_l_int32(_fun, L, 2);
     l_int32 hi = ll_check_l_int32(_fun, L, 3);
@@ -237,7 +239,7 @@ ClipToRectangle(lua_State *L)
 }
 
 /**
- * \brief Clip a Box* (%boxs) rectangle to width and height (w,h)
+ * \brief Clip a Box* (%boxs) rectangle to width and height (w,h).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * </pre>
@@ -247,7 +249,7 @@ ClipToRectangle(lua_State *L)
 static int
 ClipToRectangleParams(lua_State *L)
 {
-    FUNC(LL_BOX ".ClipToRectangleParams");
+    LL_FUNC("ClipToRectangleParams");
     Box *boxs = ll_check_Box(_fun, L, 1);
     l_int32 w = ll_check_l_int32(_fun, L, 2);
     l_int32 h = ll_check_l_int32(_fun, L, 3);
@@ -269,7 +271,7 @@ ClipToRectangleParams(lua_State *L)
 }
 
 /**
- * \brief Clone a Box*
+ * \brief Clone a Box*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * </pre>
@@ -279,14 +281,14 @@ ClipToRectangleParams(lua_State *L)
 static int
 Clone(lua_State *L)
 {
-    FUNC(LL_BOX ".Clone");
+    LL_FUNC("Clone");
     Box *boxs = ll_check_Box(_fun, L, 1);
     Box *box = boxClone(boxs);
     return ll_push_Box(_fun, L, box);
 }
 
 /**
- * \brief Compare the size of a Box* (%box1) and another Box* (%box2)
+ * \brief Compare the size of a Box* (%box1) and another Box* (%box2).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box1).
  * Arg #2 is expected to be another Box* (box2).
@@ -298,7 +300,7 @@ Clone(lua_State *L)
 static int
 CompareSize(lua_State *L)
 {
-    FUNC(LL_BOX ".CompareSize");
+    LL_FUNC("CompareSize");
     Box *box1 = ll_check_Box(_fun, L, 1);
     Box *box2 = ll_check_Box(_fun, L, 2);
     l_int32 type = ll_check_sort_by(_fun, L, 3, L_SORT_BY_WIDTH);
@@ -310,7 +312,7 @@ CompareSize(lua_State *L)
 }
 
 /**
- * \brief Check if a Box* (%box1) contains another Box* (%box2)
+ * \brief Check if a Box* (%box1) contains another Box* (%box2).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box1).
  * Arg #2 is expected to be another Box* (box2).
@@ -321,7 +323,7 @@ CompareSize(lua_State *L)
 static int
 Contains(lua_State *L)
 {
-    FUNC(LL_BOX ".Contains");
+    LL_FUNC("Contains");
     Box *box1 = ll_check_Box(_fun, L, 1);
     Box *box2 = ll_check_Box(_fun, L, 2);
     l_int32 result = 0;
@@ -332,7 +334,7 @@ Contains(lua_State *L)
 }
 
 /**
- * \brief Check if a Box* (%box) contains a point (%x,%y)
+ * \brief Check if a Box* (%box) contains a point (%x,%y).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box).
  * Arg #2 is expected to be a l_float32 (x).
@@ -344,7 +346,7 @@ Contains(lua_State *L)
 static int
 ContainsPt(lua_State *L)
 {
-    FUNC(LL_BOX ".ContainsPt");
+    LL_FUNC("ContainsPt");
     Box *box = ll_check_Box(_fun, L, 1);
     l_float32 x = ll_check_l_float32(_fun, L, 2);
     l_float32 y = ll_check_l_float32(_fun, L, 3);
@@ -356,7 +358,7 @@ ContainsPt(lua_State *L)
 }
 
 /**
- * \brief Convert corners (%ncorners) of a Box* (%box) to a Pta* (%pta)
+ * \brief Convert corners (%ncorners) of a Box* (%box) to a Pta* (%pta).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box).
  * Arg #2 is expected to be a l_int32 (ncorners).
@@ -367,7 +369,7 @@ ContainsPt(lua_State *L)
 static int
 ConvertToPta(lua_State *L)
 {
-    FUNC(LL_BOX ".ConvertToPta");
+    LL_FUNC("ConvertToPta");
     Box *box = ll_check_Box(_fun, L, 1);
     l_int32 ncorners = ll_check_l_int32(_fun, L, 2);
     Pta *pta = boxConvertToPta(box, ncorners);
@@ -375,7 +377,7 @@ ConvertToPta(lua_State *L)
 }
 
 /**
- * \brief Copy a Box*
+ * \brief Copy a Box*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * </pre>
@@ -385,14 +387,14 @@ ConvertToPta(lua_State *L)
 static int
 Copy(lua_State *L)
 {
-    FUNC(LL_BOX ".Copy");
+    LL_FUNC("Copy");
     Box *boxs = ll_check_Box(_fun, L, 1);
     Box *box = boxCopy(boxs);
     return ll_push_Box(_fun, L, box);
 }
 
 /**
- * \brief Create a new Box* if the parameters are valid
+ * \brief Create a new Box* if the parameters are valid.
  * <pre>
  * Arg #1 is expected to be a l_int32 (x).
  * Arg #2 is expected to be a l_int32 (y).
@@ -408,7 +410,7 @@ Copy(lua_State *L)
 static int
 CreateValid(lua_State *L)
 {
-    FUNC(LL_BOX ".CreateValid");
+    LL_FUNC("CreateValid");
     l_int32 x, y, w, h;
     Box *box;
 
@@ -421,7 +423,7 @@ CreateValid(lua_State *L)
 }
 
 /**
- * \brief Get the center of a Box* (%box)
+ * \brief Get the center of a Box* (%box).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box).
  * </pre>
@@ -431,7 +433,7 @@ CreateValid(lua_State *L)
 static int
 GetCenter(lua_State *L)
 {
-    FUNC(LL_BOX ".GetCenter");
+    LL_FUNC("GetCenter");
     Box *box = ll_check_Box(_fun, L, 1);
     l_float32 cx = 0.0f;
     l_float32 cy = 0.0f;
@@ -443,7 +445,7 @@ GetCenter(lua_State *L)
 }
 
 /**
- * \brief Get the Box* geometry
+ * \brief Get the Box* geometry.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * </pre>
@@ -453,7 +455,7 @@ GetCenter(lua_State *L)
 static int
 GetGeometry(lua_State *L)
 {
-    FUNC(LL_BOX ".GetGeometry");
+    LL_FUNC("GetGeometry");
     Box *box = ll_check_Box(_fun, L, 1);
     l_int32 x, y, w, h;
     if (boxGetGeometry(box, &x, &y, &w, &h))
@@ -466,7 +468,7 @@ GetGeometry(lua_State *L)
 }
 
 /**
- * \brief Get the Box* reference count
+ * \brief Get the Box* reference count.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * </pre>
@@ -476,14 +478,14 @@ GetGeometry(lua_State *L)
 static int
 GetRefcount(lua_State *L)
 {
-    FUNC(LL_BOX ".GetRefcount");
+    LL_FUNC("GetRefcount");
     Box *box = ll_check_Box(_fun, L, 1);
     lua_pushinteger(L, boxGetRefcount(box));
     return 1;
 }
 
 /**
- * \brief Get the BOX side locations (left, right, top, bottom)
+ * \brief Get the BOX side locations (left, right, top, bottom).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * </pre>
@@ -493,7 +495,7 @@ GetRefcount(lua_State *L)
 static int
 GetSideLocations(lua_State *L)
 {
-    FUNC(LL_BOX ".GetSideLocations");
+    LL_FUNC("GetSideLocations");
     Box *box = ll_check_Box(_fun, L, 1);
     l_int32 l, r, t, b;
     if (boxGetSideLocations(box, &l, &r, &t, &b))
@@ -506,7 +508,7 @@ GetSideLocations(lua_State *L)
 }
 
 /**
- * \brief Intersect a Box* (%box) by a line (%x, %y)
+ * \brief Intersect a Box* (%box) by a line (%x, %y).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box).
  * Arg #2 is expected to be a l_int32 (x).
@@ -519,7 +521,7 @@ GetSideLocations(lua_State *L)
 static int
 IntersectByLine(lua_State *L)
 {
-    FUNC(LL_BOX ".IntersectByLine");
+    LL_FUNC("IntersectByLine");
     Box *box = ll_check_Box(_fun, L, 1);
     l_int32 x = ll_check_l_int32(_fun, L, 2);
     l_int32 y = ll_check_l_int32(_fun, L, 3);
@@ -540,7 +542,7 @@ IntersectByLine(lua_State *L)
 }
 
 /**
- * \brief Check if a Box* (%box1) intersects another Box* (%box2)
+ * \brief Check if a Box* (%box1) intersects another Box* (%box2).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box1).
  * Arg #2 is expected to be another Box* (box2).
@@ -551,7 +553,7 @@ IntersectByLine(lua_State *L)
 static int
 Intersects(lua_State *L)
 {
-    FUNC(LL_BOX ".Intersects");
+    LL_FUNC("Intersects");
     Box *box1 = ll_check_Box(_fun, L, 1);
     Box *box2 = ll_check_Box(_fun, L, 2);
     l_int32 result = 0;
@@ -562,7 +564,7 @@ Intersects(lua_State *L)
 }
 
 /**
- * \brief Check if a Box* is valid
+ * \brief Check if a Box* is valid.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * </pre>
@@ -572,7 +574,7 @@ Intersects(lua_State *L)
 static int
 IsValid(lua_State *L)
 {
-    FUNC(LL_BOX ".IsValid");
+    LL_FUNC("IsValid");
     Box *box = ll_check_Box(_fun, L, 1);
     l_int32 valid = 0;
     if (boxIsValid(box, &valid))
@@ -582,7 +584,7 @@ IsValid(lua_State *L)
 }
 
 /**
- * \brief Get the overlap area of a Box* (%box1) and another Box* (%box2)
+ * \brief Get the overlap area of a Box* (%box1) and another Box* (%box2).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box1).
  * Arg #2 is expected to be another Box* (box2).
@@ -593,7 +595,7 @@ IsValid(lua_State *L)
 static int
 OverlapArea(lua_State *L)
 {
-    FUNC(LL_BOX ".OverlapArea");
+    LL_FUNC("OverlapArea");
     Box *box1 = ll_check_Box(_fun, L, 1);
     Box *box2 = ll_check_Box(_fun, L, 2);
     l_int32 area = 0.0f;
@@ -604,7 +606,7 @@ OverlapArea(lua_State *L)
 }
 
 /**
- * \brief Get the overlap fraction of a Box* (%box1) and another Box* (%box2)
+ * \brief Get the overlap fraction of a Box* (%box1) and another Box* (%box2).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box1).
  * Arg #2 is expected to be another Box* (box2).
@@ -615,7 +617,7 @@ OverlapArea(lua_State *L)
 static int
 OverlapFraction(lua_State *L)
 {
-    FUNC(LL_BOX ".OverlapFraction");
+    LL_FUNC("OverlapFraction");
     Box *box1 = ll_check_Box(_fun, L, 1);
     Box *box2 = ll_check_Box(_fun, L, 2);
     l_float32 fract = 0.0f;
@@ -626,7 +628,7 @@ OverlapFraction(lua_State *L)
 }
 
 /**
- * \brief Get the overlap region of a Box* (%box1) and another Box* (%box2)
+ * \brief Get the overlap region of a Box* (%box1) and another Box* (%box2).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box1).
  * Arg #2 is expected to be another Box* (box2).
@@ -637,7 +639,7 @@ OverlapFraction(lua_State *L)
 static int
 OverlapRegion(lua_State *L)
 {
-    FUNC(LL_BOX ".OverlapRegion");
+    LL_FUNC("OverlapRegion");
     Box *box1 = ll_check_Box(_fun, L, 1);
     Box *box2 = ll_check_Box(_fun, L, 2);
     Box *box = boxOverlapRegion(box1, box2);
@@ -646,7 +648,7 @@ OverlapRegion(lua_State *L)
 }
 
 /**
- * \brief Print info about a Box* (%box) to a Lua stream (%stream)
+ * \brief Print info about a Box* (%box) to a Lua stream (%stream).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box).
  * Arg #2 is expected to be a luaL_Stream io handle (stream).
@@ -657,14 +659,14 @@ OverlapRegion(lua_State *L)
 static int
 PrintStreamInfo(lua_State *L)
 {
-    FUNC(LL_BOX ".PrintStreamInfo");
+    LL_FUNC("PrintStreamInfo");
     Box *box = ll_check_Box(_fun, L, 1);
     luaL_Stream *stream = reinterpret_cast<luaL_Stream *>(luaL_checkudata(L, 2, LUA_FILEHANDLE));
     return ll_push_bool(L, 0 == boxPrintStreamInfo(stream->f, box));
 }
 
 /**
- * \brief Relocate one side of a Box* (%boxs)
+ * \brief Relocate one side of a Box* (%boxs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * </pre>
@@ -674,7 +676,7 @@ PrintStreamInfo(lua_State *L)
 static int
 RelocateOneSide(lua_State *L)
 {
-    FUNC(LL_BOX ".RelocateOneSide");
+    LL_FUNC("RelocateOneSide");
     Box *boxs = ll_check_Box(_fun, L, 1);
     l_int32 loc = ll_check_l_int32(_fun, L, 2);
     l_int32 sideflag = ll_check_from_side(_fun, L, 3, L_FROM_LEFT);
@@ -684,7 +686,7 @@ RelocateOneSide(lua_State *L)
 }
 
 /**
- * \brief Rotate a Box* (%boxs) orthogonally
+ * \brief Rotate a Box* (%boxs) orthogonally.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * Arg #2 is expected to be a l_int32 (w).
@@ -697,7 +699,7 @@ RelocateOneSide(lua_State *L)
 static int
 RotateOrth(lua_State *L)
 {
-    FUNC(LL_BOX ".RotateOrth");
+    LL_FUNC("RotateOrth");
     Box *boxs = ll_check_Box(_fun, L, 1);
     l_int32 w = ll_check_l_int32(_fun, L, 2);
     l_int32 h = ll_check_l_int32(_fun, L, 3);
@@ -707,7 +709,7 @@ RotateOrth(lua_State *L)
 }
 
 /**
- * \brief Get the separation distances of a Box* (%box1) and another Box* (%box2)
+ * \brief Get the separation distances of a Box* (%box1) and another Box* (%box2).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box1).
  * Arg #2 is expected to be another Box* (box2).
@@ -718,7 +720,7 @@ RotateOrth(lua_State *L)
 static int
 SeparationDistance(lua_State *L)
 {
-    FUNC(LL_BOX ".SeparationDistance");
+    LL_FUNC("SeparationDistance");
     Box *box1 = ll_check_Box(_fun, L, 1);
     Box *box2 = ll_check_Box(_fun, L, 2);
     l_int32 h_sep = 0;
@@ -731,7 +733,7 @@ SeparationDistance(lua_State *L)
 }
 
 /**
- * \brief Set the BOX geometry
+ * \brief Set the BOX geometry.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * Arg #2 is expected to be a lua_Integer (x).
@@ -745,7 +747,7 @@ SeparationDistance(lua_State *L)
 static int
 SetGeometry(lua_State *L)
 {
-    FUNC(LL_BOX ".SetGeometry");
+    LL_FUNC("SetGeometry");
     Box *box = ll_check_Box(_fun, L, 1);
     l_int32 x = ll_check_l_int32_default(_fun, L, 2, 0);
     l_int32 y = ll_check_l_int32_default(_fun, L, 3, 0);
@@ -755,7 +757,7 @@ SetGeometry(lua_State *L)
 }
 
 /**
- * \brief Set the BOX side locations (left, right, top, bottom)
+ * \brief Set the BOX side locations (left, right, top, bottom).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * Arg #2 is expected to be a lua_Integer (l).
@@ -769,7 +771,7 @@ SetGeometry(lua_State *L)
 static int
 SetSideLocations(lua_State *L)
 {
-    FUNC(LL_BOX ".SetSideLocations");
+    LL_FUNC("SetSideLocations");
     Box *box = ll_check_Box(_fun, L, 1);
     l_int32 l = ll_check_l_int32_default(_fun, L, 2, 0);
     l_int32 r = ll_check_l_int32_default(_fun, L, 3, 0);
@@ -779,7 +781,7 @@ SetSideLocations(lua_State *L)
 }
 
 /**
- * \brief Test similarity of a Box* (%box1) and another Box* (%box2)
+ * \brief Test similarity of a Box* (%box1) and another Box* (%box2).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box1).
  * Arg #2 is expected to be another Box* (box2).
@@ -794,7 +796,7 @@ SetSideLocations(lua_State *L)
 static int
 Similar(lua_State *L)
 {
-    FUNC(LL_BOX ".Similar");
+    LL_FUNC("Similar");
     Box *box1 = ll_check_Box(_fun, L, 1);
     Box *box2 = ll_check_Box(_fun, L, 2);
     l_int32 leftdiff = ll_check_l_int32(_fun, L, 3);
@@ -809,7 +811,7 @@ Similar(lua_State *L)
 }
 
 /**
- * \brief Transform a Box* (%boxs) by shifting and scaling
+ * \brief Transform a Box* (%boxs) by shifting and scaling.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * Arg #2 is expected to be a l_int32 (shiftx).
@@ -823,7 +825,7 @@ Similar(lua_State *L)
 static int
 Transform(lua_State *L)
 {
-    FUNC(LL_BOX ".Transform");
+    LL_FUNC("Transform");
     Box *boxs = ll_check_Box(_fun, L, 1);
     l_int32 shiftx = ll_check_l_int32(_fun, L, 2);
     l_int32 shifty = ll_check_l_int32(_fun, L, 3);
@@ -835,7 +837,7 @@ Transform(lua_State *L)
 }
 
 /**
- * \brief Ordered transform a Box* (%boxs) by shifting, scaling, and rotation.
+ * \brief Ordered transform a Box* (%boxs) by shifting, scaling, and rotation..
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * Arg #2 is expected to be a string describing the transform order (order).
@@ -853,7 +855,7 @@ Transform(lua_State *L)
 static int
 TransformOrdered(lua_State *L)
 {
-    FUNC(LL_BOX ".TransformOrdered");
+    LL_FUNC("TransformOrdered");
     Box *boxs = ll_check_Box(_fun, L, 1);
     l_float32 xc, yc;
     l_int32 ok = boxGetCenter(boxs, &xc, &yc);
@@ -870,7 +872,7 @@ TransformOrdered(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class LL_BOX
+ * \brief Check Lua stack at index %arg for udata of class LL_BOX.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -883,7 +885,7 @@ ll_check_Box(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Optionally expect a LL_BOX at index %arg on the Lua stack
+ * \brief Optionally expect a LL_BOX at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -898,7 +900,7 @@ ll_check_Box_opt(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Push BOX user data to the Lua stack and set its meta table
+ * \brief Push BOX user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param box pointer to the BOX
@@ -913,7 +915,7 @@ ll_push_Box(const char *_fun, lua_State *L, Box *box)
 }
 
 /**
- * \brief Create and push a new Box*
+ * \brief Create and push a new Box*.
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
  */
@@ -923,14 +925,13 @@ ll_new_Box(lua_State *L)
     return Create(L);
 }
 /**
- * \brief Register the Box* methods and functions in the LL_BOX meta table
+ * \brief Register the Box* methods and functions in the LL_BOX meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
 int
 ll_register_Box(lua_State *L)
 {
-    FUNC("ll_register_Box");
     static const luaL_Reg methods[] = {
         {"__gc",                    Destroy},   /* garbage collector */
         {"__new",                   Create},    /* new Box */

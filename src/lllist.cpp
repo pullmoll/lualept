@@ -38,8 +38,11 @@
  *====================================================================*/
 
 
+/** Define a function's name (_fun) with prefix LL_DLLIST */
+#define LL_FUNC(x) FUNC(LL_DLLIST "." x)
+
 /**
- * \brief Destroy a DoubleLinkedList*
+ * \brief Destroy a DoubleLinkedList*.
  * <pre>
  * Arg #1 is expected to be a DoubleLinkedList* (head)
  * </pre>
@@ -49,7 +52,7 @@
 static int
 Destroy(lua_State *L)
 {
-    FUNC(LL_DLLIST ".Destroy");
+    LL_FUNC("Destroy");
     DoubleLinkedList **plist = ll_check_udata<DoubleLinkedList>(_fun, L, 1, LL_DLLIST);
     DoubleLinkedList *list = *plist;
     DBG(LOG_DESTROY, "%s: '%s' plist=%p head=%p size=%d\n",
@@ -60,7 +63,7 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Get the count of a DoubleLinkedList* (%head)
+ * \brief Get the count of a DoubleLinkedList* (%head).
  * <pre>
  * Arg #1 is expected to be a DoubleLinkedList* (head)
  * </pre>
@@ -70,14 +73,14 @@ Destroy(lua_State *L)
 static int
 GetCount(lua_State *L)
 {
-    FUNC(LL_DLLIST ".GetCount");
+    LL_FUNC("GetCount");
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     lua_pushinteger(L, listGetCount(head));
     return 1;
 }
 
 /**
- * \brief Create a new DoubleLinkedList*
+ * \brief Create a new DoubleLinkedList*.
  * <pre>
  * Arg #1 is expected to be a string describing the key type (int,uint,float).
  * </pre>
@@ -87,20 +90,20 @@ GetCount(lua_State *L)
 static int
 Create(lua_State *L)
 {
-    FUNC(LL_DLLIST ".Create");
+    LL_FUNC("Create");
     DoubleLinkedList *head = ll_calloc<DoubleLinkedList>(_fun, L, 1);
     return ll_push_DoubleLinkedList(_fun, L, head);
 }
 
 /**
- * \brief Printable string for a DoubleLinkedList*
+ * \brief Printable string for a DoubleLinkedList*.
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
  */
 static int
 toString(lua_State *L)
 {
-    FUNC(LL_DLLIST ".toString");
+    LL_FUNC("toString");
     static char str[256];
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     DoubleLinkedList *elem;
@@ -125,7 +128,7 @@ toString(lua_State *L)
 }
 
 /**
- * \brief At data to the head of a DoubleLinkedList* (%head)
+ * \brief At data to the head of a DoubleLinkedList* (%head).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DoubleLinkedList* (head).
  * Arg #2 is expected to be a pointer (data).
@@ -136,14 +139,14 @@ toString(lua_State *L)
 static int
 AddToHead(lua_State *L)
 {
-    FUNC(LL_DLLIST ".AddToHead");
+    LL_FUNC("AddToHead");
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     void *data = reinterpret_cast<void *>(reinterpret_cast<intptr_t>(lua_topointer(L, 2)));
     return ll_push_bool(L, 0 == listAddToHead(&head, data));
 }
 
 /**
- * \brief At data to the tail of a DoubleLinkedList* (%head)
+ * \brief At data to the tail of a DoubleLinkedList* (%head).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DoubleLinkedList* (head).
  * Arg #2 is expected to be a pointer (data).
@@ -154,7 +157,7 @@ AddToHead(lua_State *L)
 static int
 AddToTail(lua_State *L)
 {
-    FUNC(LL_DLLIST ".AddToTail");
+    LL_FUNC("AddToTail");
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     DoubleLinkedList *tail = nullptr;
     void *data = reinterpret_cast<void *>(reinterpret_cast<intptr_t>(lua_topointer(L, 2)));
@@ -164,7 +167,7 @@ AddToTail(lua_State *L)
 }
 
 /**
- * \brief Find the element pointing to %data in an DoubleLinkedList* (%head)
+ * \brief Find the element pointing to %data in an DoubleLinkedList* (%head).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DoubleLinkedList* (head).
  * Arg #2 is expected to be light userdata (data).
@@ -175,7 +178,7 @@ AddToTail(lua_State *L)
 static int
 FindElement(lua_State *L)
 {
-    FUNC(LL_DLLIST ".FindElement");
+    LL_FUNC("FindElement");
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     void *data = reinterpret_cast<void *>(reinterpret_cast<intptr_t>(lua_topointer(L, 2)));
     DoubleLinkedList *elem = listFindElement(head, data);
@@ -184,7 +187,7 @@ FindElement(lua_State *L)
 }
 
 /**
- * \brief Find the tail of an DoubleLinkedList* (%head)
+ * \brief Find the tail of an DoubleLinkedList* (%head).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DoubleLinkedList* (head).
  * </pre>
@@ -194,7 +197,7 @@ FindElement(lua_State *L)
 static int
 FindTail(lua_State *L)
 {
-    FUNC(LL_DLLIST ".FindTail");
+    LL_FUNC("FindTail");
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     DoubleLinkedList *tail = listFindTail(head);
     lua_pushlightuserdata(L, tail);
@@ -202,7 +205,7 @@ FindTail(lua_State *L)
 }
 
 /**
- * \brief Insert data after a DoubleLinkedList* (%elem) into an DoubleLinkedList* (%head)
+ * \brief Insert data after a DoubleLinkedList* (%elem) into an DoubleLinkedList* (%head).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DoubleLinkedList* (head).
  * Arg #2 is expected to be a DoubleLinkedList* (elem).
@@ -214,7 +217,7 @@ FindTail(lua_State *L)
 static int
 InsertAfter(lua_State *L)
 {
-    FUNC(LL_DLLIST ".InsertAfter");
+    LL_FUNC("InsertAfter");
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     DoubleLinkedList *elem = ll_check_DoubleLinkedList(_fun, L, 2);
     void *data = reinterpret_cast<void *>(reinterpret_cast<intptr_t>(lua_topointer(L, 3)));
@@ -222,7 +225,7 @@ InsertAfter(lua_State *L)
 }
 
 /**
- * \brief Insert data before a DoubleLinkedList* (%elem) into an DoubleLinkedList* (%head)
+ * \brief Insert data before a DoubleLinkedList* (%elem) into an DoubleLinkedList* (%head).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DoubleLinkedList* (head).
  * Arg #2 is expected to be a DoubleLinkedList* (elem).
@@ -234,7 +237,7 @@ InsertAfter(lua_State *L)
 static int
 InsertBefore(lua_State *L)
 {
-    FUNC(LL_DLLIST ".InsertBefore");
+    LL_FUNC("InsertBefore");
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     DoubleLinkedList *elem = ll_check_DoubleLinkedList(_fun, L, 2);
     void *data = reinterpret_cast<void *>(reinterpret_cast<intptr_t>(lua_topointer(L, 3)));
@@ -242,7 +245,7 @@ InsertBefore(lua_State *L)
 }
 
 /**
- * \brief Join a DoubleLinkedList* (%list) to a DoubleLinkedList* (%head)
+ * \brief Join a DoubleLinkedList* (%list) to a DoubleLinkedList* (%head).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DoubleLinkedList* (head).
  * Arg #2 is expected to be a nother DoubleLinkedList* (list).
@@ -253,14 +256,14 @@ InsertBefore(lua_State *L)
 static int
 Join(lua_State *L)
 {
-    FUNC(LL_DLLIST ".Join");
+    LL_FUNC("Join");
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     DoubleLinkedList *list = ll_check_DoubleLinkedList(_fun, L, 2);
     return ll_push_bool(L, 0 == listJoin(&head, &list));
 }
 
 /**
- * \brief Remove an element DoubleLinkedList* (%elem) from a DoubleLinkedList* (%head)
+ * \brief Remove an element DoubleLinkedList* (%elem) from a DoubleLinkedList* (%head).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DoubleLinkedList* (head).
  * Arg #2 is expected to be a DoubleLinkedList* (elem).
@@ -271,7 +274,7 @@ Join(lua_State *L)
 static int
 RemoveElement(lua_State *L)
 {
-    FUNC(LL_DLLIST ".RemoveElement");
+    LL_FUNC("RemoveElement");
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     DoubleLinkedList *elem = ll_check_DoubleLinkedList(_fun, L, 2);
     void *data = listRemoveElement(&head, elem);
@@ -280,7 +283,7 @@ RemoveElement(lua_State *L)
 }
 
 /**
- * \brief Remove an element from the head of a DoubleLinkedList* (%head)
+ * \brief Remove an element from the head of a DoubleLinkedList* (%head).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DoubleLinkedList* (head).
  * </pre>
@@ -290,7 +293,7 @@ RemoveElement(lua_State *L)
 static int
 RemoveFromHead(lua_State *L)
 {
-    FUNC(LL_DLLIST ".RemoveFromHead");
+    LL_FUNC("RemoveFromHead");
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     void *data = listRemoveFromHead(&head);
     lua_pushlightuserdata(L, data);
@@ -298,7 +301,7 @@ RemoveFromHead(lua_State *L)
 }
 
 /**
- * \brief Remove an element from the tail of a DoubleLinkedList* (%head)
+ * \brief Remove an element from the tail of a DoubleLinkedList* (%head).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DoubleLinkedList* (head).
  * </pre>
@@ -308,7 +311,7 @@ RemoveFromHead(lua_State *L)
 static int
 RemoveFromTail(lua_State *L)
 {
-    FUNC(LL_DLLIST ".RemoveFromTail");
+    LL_FUNC("RemoveFromTail");
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     DoubleLinkedList *tail = nullptr;
     void *data = listRemoveFromTail(&head, &tail);
@@ -318,7 +321,7 @@ RemoveFromTail(lua_State *L)
 }
 
 /**
- * \brief Reverse a DoubleLinkedList* (%head)
+ * \brief Reverse a DoubleLinkedList* (%head).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DoubleLinkedList* (head).
  * </pre>
@@ -328,13 +331,13 @@ RemoveFromTail(lua_State *L)
 static int
 Reverse(lua_State *L)
 {
-    FUNC(LL_DLLIST ".Reverse");
+    LL_FUNC("Reverse");
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     return ll_push_bool(L, 0 == listReverse(&head));
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class LL_DLLIST
+ * \brief Check Lua stack at index %arg for udata of class LL_DLLIST.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -347,7 +350,7 @@ ll_check_DoubleLinkedList(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Optionally expect a LL_DLLIST at index %arg on the Lua stack
+ * \brief Optionally expect a LL_DLLIST at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -362,7 +365,7 @@ ll_check_DoubleLinkedList_opt(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Push DLLIST user data to the Lua stack and set its meta table
+ * \brief Push DLLIST user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param head pointer to the DLLIST
@@ -377,7 +380,7 @@ ll_push_DoubleLinkedList(const char *_fun, lua_State *L, DoubleLinkedList *head)
 }
 
 /**
- * \brief Create and push a new DoubleLinkedList*
+ * \brief Create and push a new DoubleLinkedList*.
  * \param L pointer to the lua_State
  * \return 1 DoubleLinkedList* on the Lua stack
  */
@@ -387,7 +390,7 @@ ll_new_DoubleLinkedList(lua_State *L)
     return Create(L);
 }
 /**
- * \brief Register the DLLIST methods and functions in the LL_DLLIST meta table
+ * \brief Register the DLLIST methods and functions in the LL_DLLIST meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */

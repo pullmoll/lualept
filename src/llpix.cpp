@@ -48,11 +48,11 @@ static l_int32 tab8[256];
  *
  *====================================================================*/
 
-
-
+/** Define a function's name (_fun) with prefix LL_PIX */
+#define LL_FUNC(x) FUNC(LL_PIX "." x)
 
 /**
- * \brief Destroy a Pix*
+ * \brief Destroy a Pix*.
  * <pre>
  * Arg #1 is expected to be Pix*.
  * </pre>
@@ -62,7 +62,7 @@ static l_int32 tab8[256];
 static int
 Destroy(lua_State *L)
 {
-    FUNC(LL_PIX ".Destroy");
+    LL_FUNC("Destroy");
     Pix **ppix = ll_check_udata<Pix>(_fun, L, 1, LL_PIX);
     Pix *pix = *ppix;
     DBG(LOG_DESTROY, "%s: '%s' ppix=%p pix=%p refcount=%d\n",
@@ -73,7 +73,7 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Create a new Pix*
+ * \brief Create a new Pix*.
  * <pre>
  * Arg #1 is expected to be Pix*.
  * or
@@ -91,7 +91,7 @@ Destroy(lua_State *L)
 static int
 Create(lua_State *L)
 {
-    FUNC(LL_PIX ".Create");
+    LL_FUNC("Create");
     Pix *pixs = ll_check_Pix_opt(_fun, L, 1);
     Pix *pix = nullptr;
     if (pixs) {
@@ -111,7 +111,7 @@ Create(lua_State *L)
 }
 
 /**
- * \brief Subtract the Pix* (%pix2) from Pix* (%pix1)
+ * \brief Subtract the Pix* (%pix2) from Pix* (%pix1).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
@@ -122,7 +122,7 @@ Create(lua_State *L)
 static int
 Subtract(lua_State *L)
 {
-    FUNC(LL_PIX ".Subtract");
+    LL_FUNC("Subtract");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     Pix *pix = pixSubtract(pixd, pixd, pixs);
@@ -131,7 +131,7 @@ Subtract(lua_State *L)
 }
 
 /**
- * \brief Invert the Pix* (%pixs)
+ * \brief Invert the Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is optional and, if given, expected to be a Pix* (pixs).
@@ -142,7 +142,7 @@ Subtract(lua_State *L)
 static int
 Invert(lua_State *L)
 {
-    FUNC(LL_PIX ".Invert");
+    LL_FUNC("Invert");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix_opt(_fun, L, 2);
     Pix *pix = pixInvert(pixs ? nullptr : pixd, pixs ? pixs : pixd);
@@ -151,7 +151,7 @@ Invert(lua_State *L)
 }
 
 /**
- * \brief And the Pix* (%pix1) and Pix* (%pix2)
+ * \brief And the Pix* (%pix1) and Pix* (%pix2).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
@@ -162,7 +162,7 @@ Invert(lua_State *L)
 static int
 And(lua_State *L)
 {
-    FUNC(LL_PIX ".And");
+    LL_FUNC("And");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     Pix *pix = pixAnd(pixd, pixd, pixs);
@@ -171,7 +171,7 @@ And(lua_State *L)
 }
 
 /**
- * \brief Or the Pix* (%pix1) and Pix* (%pix2)
+ * \brief Or the Pix* (%pix1) and Pix* (%pix2).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
@@ -182,7 +182,7 @@ And(lua_State *L)
 static int
 Or(lua_State *L)
 {
-    FUNC(LL_PIX ".Or");
+    LL_FUNC("Or");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     Pix *pix = pixOr(pixd, pixd, pixs);
@@ -191,7 +191,7 @@ Or(lua_State *L)
 }
 
 /**
- * \brief Xor the Pix* (%pix1) and Pix* (%pix2)
+ * \brief Xor the Pix* (%pix1) and Pix* (%pix2).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
@@ -202,7 +202,7 @@ Or(lua_State *L)
 static int
 Xor(lua_State *L)
 {
-    FUNC(LL_PIX ".Xor");
+    LL_FUNC("Xor");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     Pix *pix = pixXor(pixd, pixd, pixs);
@@ -211,14 +211,14 @@ Xor(lua_State *L)
 }
 
 /**
- * \brief toString
+ * \brief toString.
  * \param L pointer to the lua_State
  * @return 1 string on the Lua stack
  */
 static int
 toString(lua_State* L)
 {
-    FUNC(LL_PIX ".toString");
+    LL_FUNC("toString");
     static char str[256];
     Pix *pix = ll_check_Pix(_fun, L, 1);
     luaL_Buffer B;
@@ -279,7 +279,7 @@ toString(lua_State* L)
 }
 
 /**
- * \brief Build the absolute difference by column of Pix* (%pixs)
+ * \brief Build the absolute difference by column of Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is optional and, if given, expected to be a Box* (box).
@@ -290,7 +290,7 @@ toString(lua_State* L)
 static int
 AbsDiffByColumn(lua_State *L)
 {
-    FUNC(LL_PIX ".AbsDiffByColumn");
+    LL_FUNC("AbsDiffByColumn");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box_opt(_fun, L, 2);
     Numa* na = pixAbsDiffByColumn(pixs, box);
@@ -298,7 +298,7 @@ AbsDiffByColumn(lua_State *L)
 }
 
 /**
- * \brief Build the absolute difference by row of Pix* (%pixs)
+ * \brief Build the absolute difference by row of Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is optional and, if given, expected to be a Box* (box).
@@ -309,7 +309,7 @@ AbsDiffByColumn(lua_State *L)
 static int
 AbsDiffByRow(lua_State *L)
 {
-    FUNC(LL_PIX ".AbsDiffByRow");
+    LL_FUNC("AbsDiffByRow");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box_opt(_fun, L, 2);
     Numa* na = pixAbsDiffByRow(pixs, box);
@@ -317,7 +317,7 @@ AbsDiffByRow(lua_State *L)
 }
 
 /**
- * \brief Build the absolute difference inside a Box* (%box) of Pix* (%pixs)
+ * \brief Build the absolute difference inside a Box* (%box) of Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is optional and, if given, expected to be a Box* (box).
@@ -329,7 +329,7 @@ AbsDiffByRow(lua_State *L)
 static int
 AbsDiffInRect(lua_State *L)
 {
-    FUNC(LL_PIX ".AbsDiffInRect");
+    LL_FUNC("AbsDiffInRect");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box_opt(_fun, L, 2);
     l_int32 dir = ll_check_direction(_fun, L, 3, L_HORIZONTAL_LINE);
@@ -341,7 +341,7 @@ AbsDiffInRect(lua_State *L)
 }
 
 /**
- * \brief Build absolute difference on a line (%x1,%y1 to %x2,%y2) of Pix* (%pixs)
+ * \brief Build absolute difference on a line (%x1,%y1 to %x2,%y2) of Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is optional and, if given, expected to be a Box* (box).
@@ -352,7 +352,7 @@ AbsDiffInRect(lua_State *L)
 static int
 AbsDiffOnLine(lua_State *L)
 {
-    FUNC(LL_PIX ".AbsDiffOnLine");
+    LL_FUNC("AbsDiffOnLine");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 x1 = ll_check_l_int32(_fun, L, 2);
     l_int32 y1 = ll_check_l_int32(_fun, L, 3);
@@ -366,7 +366,7 @@ AbsDiffOnLine(lua_State *L)
 }
 
 /**
- * \brief Add black or white border pixels in a Pix* to a new Pix*
+ * \brief Add black or white border pixels in a Pix* to a new Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (left).
@@ -381,7 +381,7 @@ AbsDiffOnLine(lua_State *L)
 static int
 AddBlackOrWhiteBorder(lua_State *L)
 {
-    FUNC(LL_PIX ".AddBlackOrWhiteBorder");
+    LL_FUNC("AddBlackOrWhiteBorder");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 left = ll_check_l_int32(_fun, L, 2);
     l_int32 right = ll_check_l_int32(_fun, L, 3);
@@ -394,7 +394,7 @@ AddBlackOrWhiteBorder(lua_State *L)
 }
 
 /**
- * \brief Add border pixels in a Pix* (%pixs) to a new Pix* (%pixd)
+ * \brief Add border pixels in a Pix* (%pixs) to a new Pix* (%pixd).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (npix).
@@ -406,7 +406,7 @@ AddBlackOrWhiteBorder(lua_State *L)
 static int
 AddBorder(lua_State *L)
 {
-    FUNC(LL_PIX ".AddBorder");
+    LL_FUNC("AddBorder");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 npix = ll_check_l_int32(_fun, L, 2);
     l_uint32 val = ll_check_l_uint32(_fun, L, 3);
@@ -416,7 +416,7 @@ AddBorder(lua_State *L)
 }
 
 /**
- * \brief Add border pixels general (%val) in a Pix* (%pixs) to a new Pix* (%pixd)
+ * \brief Add border pixels general (%val) in a Pix* (%pixs) to a new Pix* (%pixd).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (left).
@@ -431,7 +431,7 @@ AddBorder(lua_State *L)
 static int
 AddBorderGeneral(lua_State *L)
 {
-    FUNC(LL_PIX ".AddBorderGeneral");
+    LL_FUNC("AddBorderGeneral");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 left = ll_check_l_int32(_fun, L, 2);
     l_int32 right = ll_check_l_int32(_fun, L, 3);
@@ -444,7 +444,7 @@ AddBorderGeneral(lua_State *L)
 }
 
 /**
- * \brief Add continued border pixels in a Pix* to a new Pix*
+ * \brief Add continued border pixels in a Pix* to a new Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (left).
@@ -458,7 +458,7 @@ AddBorderGeneral(lua_State *L)
 static int
 AddContinuedBorder(lua_State *L)
 {
-    FUNC(LL_PIX ".AddContinuedBorder");
+    LL_FUNC("AddContinuedBorder");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 left = ll_check_l_int32(_fun, L, 2);
     l_int32 right = ll_check_l_int32(_fun, L, 3);
@@ -470,7 +470,7 @@ AddContinuedBorder(lua_State *L)
 }
 
 /**
- * \brief Add mirrored border pixels in a Pix* (%pixs) to a new Pix* (%pixd)
+ * \brief Add mirrored border pixels in a Pix* (%pixs) to a new Pix* (%pixd).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (left).
@@ -484,7 +484,7 @@ AddContinuedBorder(lua_State *L)
 static int
 AddMirroredBorder(lua_State *L)
 {
-    FUNC(LL_PIX ".AddMirroredBorder");
+    LL_FUNC("AddMirroredBorder");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 left = ll_check_l_int32(_fun, L, 2);
     l_int32 right = ll_check_l_int32(_fun, L, 3);
@@ -496,7 +496,7 @@ AddMirroredBorder(lua_State *L)
 }
 
 /**
- * \brief Add mixed border pixels in a Pix* (%pixs) to a new Pix* (%pixd)
+ * \brief Add mixed border pixels in a Pix* (%pixs) to a new Pix* (%pixd).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (left).
@@ -510,7 +510,7 @@ AddMirroredBorder(lua_State *L)
 static int
 AddMixedBorder(lua_State *L)
 {
-    FUNC(LL_PIX ".AddMixedBorder");
+    LL_FUNC("AddMixedBorder");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 left = ll_check_l_int32(_fun, L, 2);
     l_int32 right = ll_check_l_int32(_fun, L, 3);
@@ -522,7 +522,7 @@ AddMixedBorder(lua_State *L)
 }
 
 /**
- * \brief Add repeated border pixels in a Pix* to a new Pix*
+ * \brief Add repeated border pixels in a Pix* to a new Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (left).
@@ -536,7 +536,7 @@ AddMixedBorder(lua_State *L)
 static int
 AddRepeatedBorder(lua_State *L)
 {
-    FUNC(LL_PIX ".AddRepeatedBorder");
+    LL_FUNC("AddRepeatedBorder");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 left = ll_check_l_int32(_fun, L, 2);
     l_int32 right = ll_check_l_int32(_fun, L, 3);
@@ -548,7 +548,7 @@ AddRepeatedBorder(lua_State *L)
 }
 
 /**
- * \brief Add to the text of a Pix*
+ * \brief Add to the text of a Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a string (text).
@@ -559,7 +559,7 @@ AddRepeatedBorder(lua_State *L)
 static int
 AddText(lua_State *L)
 {
-    FUNC(LL_PIX ".AddText");
+    LL_FUNC("AddText");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     const char* text = ll_check_string(_fun, L, 2);
     lua_pushboolean(L, pixAddText(pix, text));
@@ -567,7 +567,7 @@ AddText(lua_State *L)
 }
 
 /**
- * \brief Check alpha layer of a Pix* for opaqueness
+ * \brief Check alpha layer of a Pix* for opaqueness.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * </pre>
@@ -577,7 +577,7 @@ AddText(lua_State *L)
 static int
 AlphaIsOpaque(lua_State *L)
 {
-    FUNC(LL_PIX ".AlphaIsOpaque");
+    LL_FUNC("AlphaIsOpaque");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 opaque = 0;
     if (pixAlphaIsOpaque(pix, &opaque))
@@ -587,7 +587,7 @@ AlphaIsOpaque(lua_State *L)
 }
 
 /**
- * \brief Build the average by column of Pix* (%pixs)
+ * \brief Build the average by column of Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is optional and, if given, expected to be a Box* (box).
@@ -599,7 +599,7 @@ AlphaIsOpaque(lua_State *L)
 static int
 AverageByColumn(lua_State *L)
 {
-    FUNC(LL_PIX ".AverageByColumn");
+    LL_FUNC("AverageByColumn");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box_opt(_fun, L, 2);
     l_int32 type = ll_check_what_is_max(_fun, L, 3, L_WHITE_IS_MAX);
@@ -608,7 +608,7 @@ AverageByColumn(lua_State *L)
 }
 
 /**
- * \brief Build the average by row of Pix* (%pixs)
+ * \brief Build the average by row of Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is optional and, if given, expected to be a Box* (box).
@@ -620,7 +620,7 @@ AverageByColumn(lua_State *L)
 static int
 AverageByRow(lua_State *L)
 {
-    FUNC(LL_PIX ".AverageByRow");
+    LL_FUNC("AverageByRow");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box_opt(_fun, L, 2);
     l_int32 type = ll_check_what_is_max(_fun, L, 3, L_WHITE_IS_MAX);
@@ -629,7 +629,7 @@ AverageByRow(lua_State *L)
 }
 
 /**
- * \brief Build the average inside a Box* (%box) of Pix* (%pixs)
+ * \brief Build the average inside a Box* (%box) of Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is optional and, if given, expected to be a Box* (box).
@@ -640,7 +640,7 @@ AverageByRow(lua_State *L)
 static int
 AverageInRect(lua_State *L)
 {
-    FUNC(LL_PIX ".AverageInRect");
+    LL_FUNC("AverageInRect");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box_opt(_fun, L, 2);
     l_float32 ave = 0.0f;
@@ -651,7 +651,7 @@ AverageInRect(lua_State *L)
 }
 
 /**
- * \brief Blend all pixels inside a Box* (%box) in a Pix* (%pix) with value fraction (%val, %fract)
+ * \brief Blend all pixels inside a Box* (%box) in a Pix* (%pix) with value fraction (%val, %fract).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a Box* (box).
@@ -664,7 +664,7 @@ AverageInRect(lua_State *L)
 static int
 BlendInRect(lua_State *L)
 {
-    FUNC(LL_PIX ".BlendInRect");
+    LL_FUNC("BlendInRect");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
     l_uint32 val = ll_check_l_uint32(_fun, L, 3);
@@ -673,7 +673,7 @@ BlendInRect(lua_State *L)
 }
 
 /**
- * \brief Clear all pixels in a Pix*
+ * \brief Clear all pixels in a Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * </pre>
@@ -683,13 +683,13 @@ BlendInRect(lua_State *L)
 static int
 ClearAll(lua_State *L)
 {
-    FUNC(LL_PIX ".ClearAll");
+    LL_FUNC("ClearAll");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     return ll_push_bool(L, 0 == pixClearAll(pix));
 }
 
 /**
- * \brief Clear all pixels inside a Box* (%box) in a Pix* (%pix)
+ * \brief Clear all pixels inside a Box* (%box) in a Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a Box* (box).
@@ -700,14 +700,14 @@ ClearAll(lua_State *L)
 static int
 ClearInRect(lua_State *L)
 {
-    FUNC(LL_PIX ".ClearInRect");
+    LL_FUNC("ClearInRect");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
     return ll_push_bool(L, 0 == pixClearInRect(pix, box));
 }
 
 /**
- * \brief Clear a pixel value in Pix*
+ * \brief Clear a pixel value in Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a l_int32 (x).
@@ -719,7 +719,7 @@ ClearInRect(lua_State *L)
 static int
 ClearPixel(lua_State *L)
 {
-    FUNC(LL_PIX ".ClearPixel");
+    LL_FUNC("ClearPixel");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 x = ll_check_l_int32(_fun, L, 2);
     l_int32 y = ll_check_l_int32(_fun, L, 3);
@@ -727,7 +727,7 @@ ClearPixel(lua_State *L)
 }
 
 /**
- * \brief Clone a Pix*
+ * \brief Clone a Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
@@ -737,14 +737,14 @@ ClearPixel(lua_State *L)
 static int
 Clone(lua_State *L)
 {
-    FUNC(LL_PIX ".Clone");
+    LL_FUNC("Clone");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Pix *pixd = pixClone(pixs);
     return ll_push_Pix(_fun, L, pixd);
 }
 
 /**
- * \brief Colorize a gray 8bpp Pix* (%pixs) to a 32bpp or 8bpp colormapped Pix* (%pix)
+ * \brief Colorize a gray 8bpp Pix* (%pixs) to a 32bpp or 8bpp colormapped Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_uint32 (color).
@@ -756,7 +756,7 @@ Clone(lua_State *L)
 static int
 ColorizeGray(lua_State *L)
 {
-    FUNC(LL_PIX ".ColorizeGray");
+    LL_FUNC("ColorizeGray");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_uint32 color = ll_check_l_uint32(_fun, L, 2);
     l_int32 cmapflag = ll_check_boolean(_fun, L, 3);
@@ -765,7 +765,7 @@ ColorizeGray(lua_State *L)
 }
 
 /**
- * \brief Get the column stats for Pix* (%pixs) as six Numa*
+ * \brief Get the column stats for Pix* (%pixs) as six Numa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is optional and, if given, expected to be a Box* (box).
@@ -776,7 +776,7 @@ ColorizeGray(lua_State *L)
 static int
 ColumnStats(lua_State *L)
 {
-    FUNC(LL_PIX ".ColumnStats");
+    LL_FUNC("ColumnStats");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box_opt(_fun, L, 2);
     Numa *mean = nullptr;
@@ -796,7 +796,7 @@ ColumnStats(lua_State *L)
 }
 
 /**
- * \brief Combine the Pix* (%pixs) with Pix* (%pixd) using another Pix* (%pixm) as mask
+ * \brief Combine the Pix* (%pixs) with Pix* (%pixd) using another Pix* (%pixm) as mask.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
@@ -808,7 +808,7 @@ ColumnStats(lua_State *L)
 static int
 CombineMasked(lua_State *L)
 {
-    FUNC(LL_PIX ".CombineMasked");
+    LL_FUNC("CombineMasked");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     Pix *pixm = ll_check_Pix(_fun, L, 3);
@@ -816,7 +816,7 @@ CombineMasked(lua_State *L)
 }
 
 /**
- * \brief Set the mask for a Pix* (%pixd) from another Pix* (%pixm 1bpp) at offset %x and %y
+ * \brief Set the mask for a Pix* (%pixd) from another Pix* (%pixm 1bpp) at offset %x and %y.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
@@ -830,7 +830,7 @@ CombineMasked(lua_State *L)
 static int
 CombineMaskedGeneral(lua_State *L)
 {
-    FUNC(LL_PIX ".CombineMaskedGeneral");
+    LL_FUNC("CombineMaskedGeneral");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     Pix *pixm = ll_check_Pix(_fun, L, 3);
@@ -840,7 +840,7 @@ CombineMaskedGeneral(lua_State *L)
 }
 
 /**
- * \brief Convert a gray 16bpp Pix* (%pixs) to a gray 8bpp Pix* (%pix)
+ * \brief Convert a gray 16bpp Pix* (%pixs) to a gray 8bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string describing the byte selection type (type).
@@ -851,14 +851,14 @@ CombineMaskedGeneral(lua_State *L)
 static int
 Convert16To8(lua_State *L)
 {
-    FUNC(LL_PIX ".Convert16To8");
+    LL_FUNC("Convert16To8");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 type = ll_check_more_less_clip(_fun, L, 2, L_LS_BYTE);
     return ll_push_Pix(_fun, L, pixConvert16To8(pixs, type));
 }
 
 /**
- * \brief Convert a binary 1bpp Pix* (%pixs) to a 16 bpp Pix* (%pix)
+ * \brief Convert a binary 1bpp Pix* (%pixs) to a 16 bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_uint16 (val0).
@@ -870,7 +870,7 @@ Convert16To8(lua_State *L)
 static int
 Convert1To16(lua_State *L)
 {
-    FUNC(LL_PIX ".Convert1To16");
+    LL_FUNC("Convert1To16");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_uint16 val0 = ll_check_l_uint16(_fun, L, 2);
     l_uint16 val1 = ll_check_l_uint16(_fun, L, 3);
@@ -878,7 +878,7 @@ Convert1To16(lua_State *L)
 }
 
 /**
- * \brief Convert a binary 1bpp Pix* (%pixs) to a gray 2bpp Pix* (%pix)
+ * \brief Convert a binary 1bpp Pix* (%pixs) to a gray 2bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (val0).
@@ -890,7 +890,7 @@ Convert1To16(lua_State *L)
 static int
 Convert1To2(lua_State *L)
 {
-    FUNC(LL_PIX ".Convert1To2");
+    LL_FUNC("Convert1To2");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 val0 = ll_check_l_int32(_fun, L, 2);
     l_int32 val1 = ll_check_l_int32(_fun, L, 3);
@@ -898,7 +898,7 @@ Convert1To2(lua_State *L)
 }
 
 /**
- * \brief Convert a binary 1bpp Pix* (%pixs) to a colormapped 2bpp Pix* (%pix)
+ * \brief Convert a binary 1bpp Pix* (%pixs) to a colormapped 2bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -908,13 +908,13 @@ Convert1To2(lua_State *L)
 static int
 Convert1To2Cmap(lua_State *L)
 {
-    FUNC(LL_PIX ".Convert1To2Cmap");
+    LL_FUNC("Convert1To2Cmap");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     return ll_push_Pix(_fun, L, pixConvert1To2Cmap(pixs));
 }
 
 /**
- * \brief Convert a binary 1bpp Pix* (%pixs) to a 32bpp Pix* (%pix)
+ * \brief Convert a binary 1bpp Pix* (%pixs) to a 32bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_uint32 (val0).
@@ -926,7 +926,7 @@ Convert1To2Cmap(lua_State *L)
 static int
 Convert1To32(lua_State *L)
 {
-    FUNC(LL_PIX ".Convert1To32");
+    LL_FUNC("Convert1To32");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_uint32 val0 = ll_check_l_uint32(_fun, L, 2);
     l_uint32 val1 = ll_check_l_uint32(_fun, L, 3);
@@ -934,7 +934,7 @@ Convert1To32(lua_State *L)
 }
 
 /**
- * \brief Convert a binary 1bpp Pix* (%pixs) to a 4bpp Pix* (%pix)
+ * \brief Convert a binary 1bpp Pix* (%pixs) to a 4bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_uint32 (val0).
@@ -946,7 +946,7 @@ Convert1To32(lua_State *L)
 static int
 Convert1To4(lua_State *L)
 {
-    FUNC(LL_PIX ".Convert1To4");
+    LL_FUNC("Convert1To4");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 val0 = ll_check_l_int32(_fun, L, 2);
     l_int32 val1 = ll_check_l_int32(_fun, L, 3);
@@ -954,7 +954,7 @@ Convert1To4(lua_State *L)
 }
 
 /**
- * \brief Convert a binary 1bpp Pix* (%pixs) to a colormapped 4bpp Pix* (%pix)
+ * \brief Convert a binary 1bpp Pix* (%pixs) to a colormapped 4bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -964,13 +964,13 @@ Convert1To4(lua_State *L)
 static int
 Convert1To4Cmap(lua_State *L)
 {
-    FUNC(LL_PIX ".Convert1To4Cmap");
+    LL_FUNC("Convert1To4Cmap");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     return ll_push_Pix(_fun, L, pixConvert1To4Cmap(pixs));
 }
 
 /**
- * \brief Convert a binary 1bpp Pix* (%pixs) to a 8bpp Pix* (%pix)
+ * \brief Convert a binary 1bpp Pix* (%pixs) to a 8bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_uint8 (val0).
@@ -982,7 +982,7 @@ Convert1To4Cmap(lua_State *L)
 static int
 Convert1To8(lua_State *L)
 {
-    FUNC(LL_PIX ".Convert1To8");
+    LL_FUNC("Convert1To8");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_uint8 val0 = ll_check_l_uint8(_fun, L, 2);
     l_uint8 val1 = ll_check_l_uint8(_fun, L, 3);
@@ -990,7 +990,7 @@ Convert1To8(lua_State *L)
 }
 
 /**
- * \brief Convert a binary 1bpp Pix* (%pixs) to a colormapped 8bpp Pix* (%pix)
+ * \brief Convert a binary 1bpp Pix* (%pixs) to a colormapped 8bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -1000,13 +1000,13 @@ Convert1To8(lua_State *L)
 static int
 Convert1To8Cmap(lua_State *L)
 {
-    FUNC(LL_PIX ".Convert1To8Cmap");
+    LL_FUNC("Convert1To8Cmap");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     return ll_push_Pix(_fun, L, pixConvert1To8Cmap(pixs));
 }
 
 /**
- * \brief Convert a 24bpp Pix* (%pixs) to a 32bpp Pix* (%pix)
+ * \brief Convert a 24bpp Pix* (%pixs) to a 32bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -1016,13 +1016,13 @@ Convert1To8Cmap(lua_State *L)
 static int
 Convert24To32(lua_State *L)
 {
-    FUNC(LL_PIX ".Convert24To32");
+    LL_FUNC("Convert24To32");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     return ll_push_Pix(_fun, L, pixConvert24To32(pixs));
 }
 
 /**
- * \brief Convert a 2bpp Pix* (%pixs) to a 8bpp Pix* (%pix)
+ * \brief Convert a 2bpp Pix* (%pixs) to a 8bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_uint8 (val0).
@@ -1037,7 +1037,7 @@ Convert24To32(lua_State *L)
 static int
 Convert2To8(lua_State *L)
 {
-    FUNC(LL_PIX ".Convert2To8");
+    LL_FUNC("Convert2To8");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_uint8 val0 = ll_check_l_uint8(_fun, L, 2);
     l_uint8 val1 = ll_check_l_uint8(_fun, L, 3);
@@ -1048,7 +1048,7 @@ Convert2To8(lua_State *L)
 }
 
 /**
- * \brief Convert a 32bpp Pix* (%pixs) to a 16bpp Pix* (%pix)
+ * \brief Convert a 32bpp Pix* (%pixs) to a 16bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string describing the ms/ls 2 byte selection (type).
@@ -1059,14 +1059,14 @@ Convert2To8(lua_State *L)
 static int
 Convert32To16(lua_State *L)
 {
-    FUNC(LL_PIX ".Convert32To16");
+    LL_FUNC("Convert32To16");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 type = ll_check_more_less_clip(_fun, L, 2, L_LS_TWO_BYTES);
     return ll_push_Pix(_fun, L, pixConvert32To16(pixs, type));
 }
 
 /**
- * \brief Convert a 24bpp Pix* (%pixs) to a 32bpp Pix* (%pix)
+ * \brief Convert a 24bpp Pix* (%pixs) to a 32bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -1076,13 +1076,13 @@ Convert32To16(lua_State *L)
 static int
 Convert32To24(lua_State *L)
 {
-    FUNC(LL_PIX ".Convert32To24");
+    LL_FUNC("Convert32To24");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     return ll_push_Pix(_fun, L, pixConvert24To32(pixs));
 }
 
 /**
- * \brief Convert a 32bpp Pix* (%pixs) to a 16bpp Pix* (%pix)
+ * \brief Convert a 32bpp Pix* (%pixs) to a 16bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string describing the ms/ls 2 byte selection (type16).
@@ -1094,7 +1094,7 @@ Convert32To24(lua_State *L)
 static int
 Convert32To8(lua_State *L)
 {
-    FUNC(LL_PIX ".Convert32To8");
+    LL_FUNC("Convert32To8");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 type16 = ll_check_more_less_clip(_fun, L, 2, L_LS_TWO_BYTES);
     l_int32 type8 = ll_check_more_less_clip(_fun, L, 2, L_LS_BYTE);
@@ -1102,7 +1102,7 @@ Convert32To8(lua_State *L)
 }
 
 /**
- * \brief Convert a 2bpp Pix* (%pixs) to a 8bpp Pix* (%pix)
+ * \brief Convert a 2bpp Pix* (%pixs) to a 8bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_uint32 (val0).
@@ -1117,14 +1117,14 @@ Convert32To8(lua_State *L)
 static int
 Convert4To8(lua_State *L)
 {
-    FUNC(LL_PIX ".Convert4To8");
+    LL_FUNC("Convert4To8");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 cmapflag = ll_check_boolean(_fun, L, 2);
     return ll_push_Pix(_fun, L, pixConvert4To8(pixs, cmapflag));
 }
 
 /**
- * \brief Convert a 8bpp Pix* (%pixs) to a 16bpp Pix* (%pix)
+ * \brief Convert a 8bpp Pix* (%pixs) to a 16bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (leftshift).
@@ -1135,14 +1135,14 @@ Convert4To8(lua_State *L)
 static int
 Convert8To16(lua_State *L)
 {
-    FUNC(LL_PIX ".Convert4To8");
+    LL_FUNC("Convert4To8");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 leftshift = ll_check_l_int32_default(_fun, L, 2, 0);
     return ll_push_Pix(_fun, L, pixConvert8To16(pixs, leftshift));
 }
 
 /**
- * \brief Convert a 8bpp Pix* (%pixs) to a 2bpp Pix* (%pix)
+ * \brief Convert a 8bpp Pix* (%pixs) to a 2bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -1152,13 +1152,13 @@ Convert8To16(lua_State *L)
 static int
 Convert8To2(lua_State *L)
 {
-    FUNC(LL_PIX ".Convert8To2");
+    LL_FUNC("Convert8To2");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     return ll_push_Pix(_fun, L, pixConvert8To2(pixs));
 }
 
 /**
- * \brief Convert a 8bpp Pix* (%pixs) to a 32bpp Pix* (%pix)
+ * \brief Convert a 8bpp Pix* (%pixs) to a 32bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -1168,13 +1168,13 @@ Convert8To2(lua_State *L)
 static int
 Convert8To32(lua_State *L)
 {
-    FUNC(LL_PIX ".Convert8To32");
+    LL_FUNC("Convert8To32");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     return ll_push_Pix(_fun, L, pixConvert8To32(pixs));
 }
 
 /**
- * \brief Convert a 8bpp Pix* (%pixs) to a 4bpp Pix* (%pix)
+ * \brief Convert a 8bpp Pix* (%pixs) to a 4bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -1184,13 +1184,13 @@ Convert8To32(lua_State *L)
 static int
 Convert8To4(lua_State *L)
 {
-    FUNC(LL_PIX ".Convert8To4");
+    LL_FUNC("Convert8To4");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     return ll_push_Pix(_fun, L, pixConvert8To4(pixs));
 }
 
 /**
- * \brief Convert a colormapped Pix* (%pixs) to a binary 1bpp Pix* (%pix)
+ * \brief Convert a colormapped Pix* (%pixs) to a binary 1bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -1200,14 +1200,14 @@ Convert8To4(lua_State *L)
 static int
 ConvertCmapTo1(lua_State *L)
 {
-    FUNC(LL_PIX ".ConvertCmapTo1");
+    LL_FUNC("ConvertCmapTo1");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Pix *pix = pixConvertCmapTo1(pixs);
     return ll_push_Pix(_fun, L, pix);
 }
 
 /**
- * \brief Convert a gray 8bpp Pix* (%pixs) to a colormapped Pix* (%pix)
+ * \brief Convert a gray 8bpp Pix* (%pixs) to a colormapped Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -1217,14 +1217,14 @@ ConvertCmapTo1(lua_State *L)
 static int
 ConvertGrayToColormap(lua_State *L)
 {
-    FUNC(LL_PIX ".ConvertGrayToColormap");
+    LL_FUNC("ConvertGrayToColormap");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Pix *pix = pixConvertGrayToColormap(pixs);
     return ll_push_Pix(_fun, L, pix);
 }
 
 /**
- * \brief Convert a gray 8bpp Pix* (%pixs) to a colormapped Pix* (%pix)
+ * \brief Convert a gray 8bpp Pix* (%pixs) to a colormapped Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (mindepth).
@@ -1235,7 +1235,7 @@ ConvertGrayToColormap(lua_State *L)
 static int
 ConvertGrayToColormap8(lua_State *L)
 {
-    FUNC(LL_PIX ".ConvertGrayToColormap8");
+    LL_FUNC("ConvertGrayToColormap8");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 mindepth = ll_check_l_int32(_fun, L, 2);
     Pix *pix = pixConvertGrayToColormap8(pixs, mindepth);
@@ -1243,7 +1243,7 @@ ConvertGrayToColormap8(lua_State *L)
 }
 
 /**
- * \brief Convert a colormapped Pix* (%pixs) to a binary 1bpp Pix* (%pix)
+ * \brief Convert a colormapped Pix* (%pixs) to a binary 1bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (gamma).
@@ -1254,14 +1254,14 @@ ConvertGrayToColormap8(lua_State *L)
 static int
 ConvertGrayToFalseColor(lua_State *L)
 {
-    FUNC(LL_PIX ".ConvertGrayToFalseColor");
+    LL_FUNC("ConvertGrayToFalseColor");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 gamma = ll_check_l_float32_default(_fun, L, 2, 1.0f);
     return ll_push_Pix(_fun, L, pixConvertGrayToFalseColor(pixs, gamma));
 }
 
 /**
- * \brief Convert a 32bpp Pix* (%pixs) to a binary 1bpp Pix* (%pix)
+ * \brief Convert a 32bpp Pix* (%pixs) to a binary 1bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (rc).
@@ -1276,7 +1276,7 @@ ConvertGrayToFalseColor(lua_State *L)
 static int
 ConvertRGBToBinaryArb(lua_State *L)
 {
-    FUNC(LL_PIX ".ConvertRGBToBinaryArb");
+    LL_FUNC("ConvertRGBToBinaryArb");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 rc = ll_check_l_float32_default(_fun, L, 2, 0.3f);
     l_float32 gc = ll_check_l_float32_default(_fun, L, 3, 0.5f);
@@ -1288,7 +1288,7 @@ ConvertRGBToBinaryArb(lua_State *L)
 }
 
 /**
- * \brief Convert a 32bpp Pix* (%pixs) to a colormapped 8bpp Pix* (%pix)
+ * \brief Convert a 32bpp Pix* (%pixs) to a colormapped 8bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a boolean (ditherflag).
@@ -1299,7 +1299,7 @@ ConvertRGBToBinaryArb(lua_State *L)
 static int
 ConvertRGBToColormap(lua_State *L)
 {
-    FUNC(LL_PIX ".ConvertRGBToColormap");
+    LL_FUNC("ConvertRGBToColormap");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 ditherflag = ll_check_boolean(_fun, L, 2);
     Pix *pix = pixConvertRGBToColormap(pixs, ditherflag);
@@ -1307,7 +1307,7 @@ ConvertRGBToColormap(lua_State *L)
 }
 
 /**
- * \brief Convert a 32bpp Pix* (%pixs) to a gray 8bpp Pix* (%pix)
+ * \brief Convert a 32bpp Pix* (%pixs) to a gray 8bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (rwt).
@@ -1320,7 +1320,7 @@ ConvertRGBToColormap(lua_State *L)
 static int
 ConvertRGBToGray(lua_State *L)
 {
-    FUNC(LL_PIX ".ConvertRGBToGray");
+    LL_FUNC("ConvertRGBToGray");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 rwt = ll_check_l_float32_default(_fun, L, 2, 0.3f);
     l_float32 gwt = ll_check_l_float32_default(_fun, L, 2, 0.5f);
@@ -1330,7 +1330,7 @@ ConvertRGBToGray(lua_State *L)
 }
 
 /**
- * \brief Convert a 32bpp Pix* (%pixs) to a gray 8bpp Pix* (%pix)
+ * \brief Convert a 32bpp Pix* (%pixs) to a gray 8bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (rc).
@@ -1343,7 +1343,7 @@ ConvertRGBToGray(lua_State *L)
 static int
 ConvertRGBToGrayArb(lua_State *L)
 {
-    FUNC(LL_PIX ".ConvertRGBToGrayArb");
+    LL_FUNC("ConvertRGBToGrayArb");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 rc = ll_check_l_float32_default(_fun, L, 2, 0.3f);
     l_float32 gc = ll_check_l_float32_default(_fun, L, 2, 0.5f);
@@ -1353,7 +1353,7 @@ ConvertRGBToGrayArb(lua_State *L)
 }
 
 /**
- * \brief Convert a 32bpp Pix* (%pixs) to a gray 8bpp Pix* (%pix); fast version
+ * \brief Convert a 32bpp Pix* (%pixs) to a gray 8bpp Pix* (%pix); fast version.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -1363,14 +1363,14 @@ ConvertRGBToGrayArb(lua_State *L)
 static int
 ConvertRGBToGrayFast(lua_State *L)
 {
-    FUNC(LL_PIX ".ConvertRGBToGrayFast");
+    LL_FUNC("ConvertRGBToGrayFast");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Pix *pix = pixConvertRGBToGrayFast(pixs);
     return ll_push_Pix(_fun, L, pix);
 }
 
 /**
- * \brief Convert a 32bpp Pix* (%pixs) to a gray 8bpp Pix* (%pix); min/max/diff version
+ * \brief Convert a 32bpp Pix* (%pixs) to a gray 8bpp Pix* (%pix); min/max/diff version.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string defining the min/max type (type).
@@ -1381,7 +1381,7 @@ ConvertRGBToGrayFast(lua_State *L)
 static int
 ConvertRGBToGrayMinMax(lua_State *L)
 {
-    FUNC(LL_PIX ".ConvertRGBToGrayMinMax");
+    LL_FUNC("ConvertRGBToGrayMinMax");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 type = ll_check_choose_min_max(_fun, L, 2, L_CHOOSE_MIN);
     Pix *pix = pixConvertRGBToGrayMinMax(pixs, type);
@@ -1389,7 +1389,7 @@ ConvertRGBToGrayMinMax(lua_State *L)
 }
 
 /**
- * \brief Convert a 32bpp Pix* (%pixs) to a gray 8bpp Pix* (%pix)
+ * \brief Convert a 32bpp Pix* (%pixs) to a gray 8bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (refval).
@@ -1400,7 +1400,7 @@ ConvertRGBToGrayMinMax(lua_State *L)
 static int
 ConvertRGBToGraySatBoost(lua_State *L)
 {
-    FUNC(LL_PIX ".ConvertRGBToGraySatBoost");
+    LL_FUNC("ConvertRGBToGraySatBoost");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 refval = ll_check_l_int32(_fun, L, 2);
     Pix *pix = pixConvertRGBToGraySatBoost(pixs, refval);
@@ -1408,7 +1408,7 @@ ConvertRGBToGraySatBoost(lua_State *L)
 }
 
 /**
- * \brief Convert a 32bpp Pix* (%pixs) to a luminance 8bpp Pix* (%pix)
+ * \brief Convert a 32bpp Pix* (%pixs) to a luminance 8bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -1418,14 +1418,14 @@ ConvertRGBToGraySatBoost(lua_State *L)
 static int
 ConvertRGBToLuminance(lua_State *L)
 {
-    FUNC(LL_PIX ".ConvertRGBToLuminance");
+    LL_FUNC("ConvertRGBToLuminance");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Pix *pix = pixConvertRGBToLuminance(pixs);
     return ll_push_Pix(_fun, L, pix);
 }
 
 /**
- * \brief Convert a Pix* (%pixs) to a 1 bpp Pix* (%pix)
+ * \brief Convert a Pix* (%pixs) to a 1 bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (threshold).
@@ -1436,7 +1436,7 @@ ConvertRGBToLuminance(lua_State *L)
 static int
 ConvertTo1(lua_State *L)
 {
-    FUNC(LL_PIX ".ConvertTo1");
+    LL_FUNC("ConvertTo1");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 threshold = ll_check_l_int32_default(_fun, L, 4, 128);
     Pix *pix = pixConvertTo1(pixs, threshold);
@@ -1444,7 +1444,7 @@ ConvertTo1(lua_State *L)
 }
 
 /**
- * \brief Convert a Pix* (%pixs) to a 16bpp Pix* (%pix)
+ * \brief Convert a Pix* (%pixs) to a 16bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -1454,13 +1454,13 @@ ConvertTo1(lua_State *L)
 static int
 ConvertTo16(lua_State *L)
 {
-    FUNC(LL_PIX ".ConvertTo16");
+    LL_FUNC("ConvertTo16");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     return ll_push_Pix(_fun, L, pixConvertTo16(pixs));
 }
 
 /**
- * \brief Convert a Pix* (%pixs) to a binary 1bpp Pix* (%pix) by sampling
+ * \brief Convert a Pix* (%pixs) to a binary 1bpp Pix* (%pix) by sampling.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
@@ -1472,7 +1472,7 @@ ConvertTo16(lua_State *L)
 static int
 ConvertTo1BySampling(lua_State *L)
 {
-    FUNC(LL_PIX ".ConvertTo1BySampling");
+    LL_FUNC("ConvertTo1BySampling");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 factor = ll_check_l_int32(_fun, L, 2);
     l_int32 threshold = ll_check_l_int32(_fun, L, 3);
@@ -1480,7 +1480,7 @@ ConvertTo1BySampling(lua_State *L)
 }
 
 /**
- * \brief Convert a Pix* (%pixs) to a 2bpp Pix* (%pix)
+ * \brief Convert a Pix* (%pixs) to a 2bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -1490,13 +1490,13 @@ ConvertTo1BySampling(lua_State *L)
 static int
 ConvertTo2(lua_State *L)
 {
-    FUNC(LL_PIX ".ConvertTo2");
+    LL_FUNC("ConvertTo2");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     return ll_push_Pix(_fun, L, pixConvertTo2(pixs));
 }
 
 /**
- * \brief Convert a Pix* (%pixs) to a 32bpp Pix* (%pix)
+ * \brief Convert a Pix* (%pixs) to a 32bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -1506,13 +1506,13 @@ ConvertTo2(lua_State *L)
 static int
 ConvertTo32(lua_State *L)
 {
-    FUNC(LL_PIX ".ConvertTo32");
+    LL_FUNC("ConvertTo32");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     return ll_push_Pix(_fun, L, pixConvertTo32(pixs));
 }
 
 /**
- * \brief Convert a Pix* (%pixs) to a 32bpp Pix* (%pix) by sampling
+ * \brief Convert a Pix* (%pixs) to a 32bpp Pix* (%pix) by sampling.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
@@ -1523,14 +1523,14 @@ ConvertTo32(lua_State *L)
 static int
 ConvertTo32BySampling(lua_State *L)
 {
-    FUNC(LL_PIX ".ConvertTo32BySampling");
+    LL_FUNC("ConvertTo32BySampling");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 factor = ll_check_l_int32(_fun, L, 2);
     return ll_push_Pix(_fun, L, pixConvertTo32BySampling(pixs, factor));
 }
 
 /**
- * \brief Convert a Pix* (%pixs) to a 4bpp Pix* (%pix)
+ * \brief Convert a Pix* (%pixs) to a 4bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -1540,13 +1540,13 @@ ConvertTo32BySampling(lua_State *L)
 static int
 ConvertTo4(lua_State *L)
 {
-    FUNC(LL_PIX ".ConvertTo4");
+    LL_FUNC("ConvertTo4");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     return ll_push_Pix(_fun, L, pixConvertTo4(pixs));
 }
 
 /**
- * \brief Convert a Pix* (%pixs) to a 8bpp Pix* (%pix); colormapped or gray
+ * \brief Convert a Pix* (%pixs) to a 8bpp Pix* (%pix); colormapped or gray.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a boolean (cmapflag).
@@ -1557,14 +1557,14 @@ ConvertTo4(lua_State *L)
 static int
 ConvertTo8(lua_State *L)
 {
-    FUNC(LL_PIX ".ConvertTo8");
+    LL_FUNC("ConvertTo8");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 cmapflag = ll_check_boolean(_fun, L, 2);
     return ll_push_Pix(_fun, L, pixConvertTo8(pixs, cmapflag));
 }
 
 /**
- * \brief Convert a Pix* (%pixs) to a binary 1bpp Pix* (%pix) by sampling
+ * \brief Convert a Pix* (%pixs) to a binary 1bpp Pix* (%pix) by sampling.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
@@ -1576,7 +1576,7 @@ ConvertTo8(lua_State *L)
 static int
 ConvertTo8BySampling(lua_State *L)
 {
-    FUNC(LL_PIX ".ConvertTo8BySampling");
+    LL_FUNC("ConvertTo8BySampling");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 factor = ll_check_l_int32(_fun, L, 2);
     l_int32 cmapflag = ll_check_boolean(_fun, L, 3);
@@ -1584,7 +1584,7 @@ ConvertTo8BySampling(lua_State *L)
 }
 
 /**
- * \brief Convert a Pix* (%pixs) to a colormapped 8bpp Pix* (%pix)
+ * \brief Convert a Pix* (%pixs) to a colormapped 8bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a boolean (ditherflag).
@@ -1595,14 +1595,14 @@ ConvertTo8BySampling(lua_State *L)
 static int
 ConvertTo8Colormap(lua_State *L)
 {
-    FUNC(LL_PIX ".ConvertTo8Colormap");
+    LL_FUNC("ConvertTo8Colormap");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 ditherflag = ll_check_boolean(_fun, L, 2);
     return ll_push_Pix(_fun, L, pixConvertTo8Colormap(pixs, ditherflag));
 }
 
 /**
- * \brief Convert a Pix* (%pixs) to a 8bpp or 32bpp Pix* (%pix)
+ * \brief Convert a Pix* (%pixs) to a 8bpp or 32bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is exptected to be a string describing the copy/clone mode (copyflag).
@@ -1614,7 +1614,7 @@ ConvertTo8Colormap(lua_State *L)
 static int
 ConvertTo8Or32(lua_State *L)
 {
-    FUNC(LL_PIX ".ConvertTo8Or32");
+    LL_FUNC("ConvertTo8Or32");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 copyflag = ll_check_access_storage(_fun, L, 2, L_COPY);
     l_int32 warnflag = ll_check_boolean(_fun, L, 3);
@@ -1622,7 +1622,7 @@ ConvertTo8Or32(lua_State *L)
 }
 
 /**
- * \brief Copy a Pix*
+ * \brief Copy a Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
@@ -1632,14 +1632,14 @@ ConvertTo8Or32(lua_State *L)
 static int
 Copy(lua_State *L)
 {
-    FUNC(LL_PIX ".Copy");
+    LL_FUNC("Copy");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Pix *pixd = pixCopy(nullptr, pixs);
     return ll_push_Pix(_fun, L, pixd);
 }
 
 /**
- * \brief Copy border pixels from a Pix* (%pixs) to a new Pix* (%pix)
+ * \brief Copy border pixels from a Pix* (%pixs) to a new Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (left).
@@ -1653,7 +1653,7 @@ Copy(lua_State *L)
 static int
 CopyBorder(lua_State *L)
 {
-    FUNC(LL_PIX ".CopyBorder");
+    LL_FUNC("CopyBorder");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 left = ll_check_l_int32(_fun, L, 2);
     l_int32 right = ll_check_l_int32(_fun, L, 3);
@@ -1665,7 +1665,7 @@ CopyBorder(lua_State *L)
 }
 
 /**
- * \brief Copy the colormap of a Pix*
+ * \brief Copy the colormap of a Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
@@ -1676,14 +1676,14 @@ CopyBorder(lua_State *L)
 static int
 CopyColormap(lua_State *L)
 {
-    FUNC(LL_PIX ".CopyColormap");
+    LL_FUNC("CopyColormap");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     return ll_push_bool(L, 0 == pixCopyColormap(pixd, pixs));
 }
 
 /**
- * \brief Copy dimensions from a Pix* (pixs) to self (pixd)
+ * \brief Copy dimensions from a Pix* (pixs) to self (pixd).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
@@ -1694,14 +1694,14 @@ CopyColormap(lua_State *L)
 static int
 CopyDimensions(lua_State *L)
 {
-    FUNC(LL_PIX ".CopyDimensions");
+    LL_FUNC("CopyDimensions");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     return ll_push_bool(L, 0 == pixCopyDimensions(pixd, pixs));
 }
 
 /**
- * \brief Copy input format a Pix* (%pixs) to a Pix* (%pixd)
+ * \brief Copy input format a Pix* (%pixs) to a Pix* (%pixd).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
@@ -1712,14 +1712,14 @@ CopyDimensions(lua_State *L)
 static int
 CopyInputFormat(lua_State *L)
 {
-    FUNC(LL_PIX ".CopyInputFormat");
+    LL_FUNC("CopyInputFormat");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     return ll_push_bool(L, 0 == pixCopyInputFormat(pixd, pixs));
 }
 
 /**
- * \brief Copy one component in Pix* (%pixd) from Pix* (%pixs)
+ * \brief Copy one component in Pix* (%pixd) from Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
@@ -1731,7 +1731,7 @@ CopyInputFormat(lua_State *L)
 static int
 CopyRGBComponent(lua_State *L)
 {
-    FUNC(LL_PIX ".CopyRGBComponent");
+    LL_FUNC("CopyRGBComponent");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     l_int32 comp = ll_check_component(_fun, L, 3, L_ALPHA_CHANNEL);
@@ -1739,7 +1739,7 @@ CopyRGBComponent(lua_State *L)
 }
 
 /**
- * \brief Copy resolution from a Pix* (%pixs) to a Pix* (%pixd)
+ * \brief Copy resolution from a Pix* (%pixs) to a Pix* (%pixd).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
@@ -1750,14 +1750,14 @@ CopyRGBComponent(lua_State *L)
 static int
 CopyResolution(lua_State *L)
 {
-    FUNC(LL_PIX ".CopyResolution");
+    LL_FUNC("CopyResolution");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     return ll_push_bool(L, 0 == pixCopyResolution(pixd, pixs));
 }
 
 /**
- * \brief Copy samples per pixel (%spp) from a Pix* (%pixs) to Pix* (%pixd)
+ * \brief Copy samples per pixel (%spp) from a Pix* (%pixs) to Pix* (%pixd).
  *
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
@@ -1768,14 +1768,14 @@ CopyResolution(lua_State *L)
 static int
 CopySpp(lua_State *L)
 {
-    FUNC(LL_PIX ".CopySpp");
+    LL_FUNC("CopySpp");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     return ll_push_bool(L, 0 == pixCopySpp(pixd, pixs));
 }
 
 /**
- * \brief Copy text from a Pix* (%pixs) to Pix* (%pixd)
+ * \brief Copy text from a Pix* (%pixs) to Pix* (%pixd).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
@@ -1786,14 +1786,14 @@ CopySpp(lua_State *L)
 static int
 CopyText(lua_State *L)
 {
-    FUNC(LL_PIX ".CopyText");
+    LL_FUNC("CopyText");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     return ll_push_bool(L, 0 == pixCopyText(pixd, pixs));
 }
 
 /**
- * \brief Count pixels of arbitrary value (%val) in Box* (%box) of Pix* (%pixs)
+ * \brief Count pixels of arbitrary value (%val) in Box* (%box) of Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (val).
@@ -1806,7 +1806,7 @@ CopyText(lua_State *L)
 static int
 CountArbInRect(lua_State *L)
 {
-    FUNC(LL_PIX ".CountArbInRect");
+    LL_FUNC("CountArbInRect");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 val = ll_check_l_int32(_fun, L, 2);
     l_int32 factor = ll_check_l_int32(_fun, L, 3);
@@ -1819,7 +1819,7 @@ CountArbInRect(lua_State *L)
 }
 
 /**
- * \brief Count the number of foreground pixels in Pix* (%pixs)
+ * \brief Count the number of foreground pixels in Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -1829,7 +1829,7 @@ CountArbInRect(lua_State *L)
 static int
 CountPixels(lua_State *L)
 {
-    FUNC(LL_PIX ".CountPixels");
+    LL_FUNC("CountPixels");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 count = 0;
     if (pixCountPixels(pixs, &count, nullptr))
@@ -1839,7 +1839,7 @@ CountPixels(lua_State *L)
 }
 
 /**
- * \brief Count the number of pixels by column in Pix* (%pixs)
+ * \brief Count the number of pixels by column in Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -1849,14 +1849,14 @@ CountPixels(lua_State *L)
 static int
 CountPixelsByColumn(lua_State *L)
 {
-    FUNC(LL_PIX ".CountPixelsByColumn");
+    LL_FUNC("CountPixelsByColumn");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Numa *na = pixCountPixelsByColumn(pixs);
     return ll_push_Numa(_fun, L, na);
 }
 
 /**
- * \brief Count the number of pixels by row in Pix* (%pixs)
+ * \brief Count the number of pixels by row in Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -1866,14 +1866,14 @@ CountPixelsByColumn(lua_State *L)
 static int
 CountPixelsByRow(lua_State *L)
 {
-    FUNC(LL_PIX ".CountPixelsByRow");
+    LL_FUNC("CountPixelsByRow");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Numa *na = pixCountPixelsByRow(pixs, nullptr);
     return ll_push_Numa(_fun, L, na);
 }
 
 /**
- * \brief Count the number of foreground pixels in Pix* (%pixs) inside a Box* (%box)
+ * \brief Count the number of foreground pixels in Pix* (%pixs) inside a Box* (%box).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Box* (box).
@@ -1884,7 +1884,7 @@ CountPixelsByRow(lua_State *L)
 static int
 CountPixelsInRect(lua_State *L)
 {
-    FUNC(LL_PIX ".CountPixelsInRect");
+    LL_FUNC("CountPixelsInRect");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
     l_int32 count = 0;
@@ -1895,7 +1895,7 @@ CountPixelsInRect(lua_State *L)
 }
 
 /**
- * \brief Count the number of pixels in row (%row) of Pix* (%pixs)
+ * \brief Count the number of pixels in row (%row) of Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -1905,7 +1905,7 @@ CountPixelsInRect(lua_State *L)
 static int
 CountPixelsInRow(lua_State *L)
 {
-    FUNC(LL_PIX ".CountPixelsInRow");
+    LL_FUNC("CountPixelsInRow");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 row = ll_check_l_int32(_fun, L, 2);
     l_int32 count = 0;
@@ -1916,7 +1916,7 @@ CountPixelsInRow(lua_State *L)
 }
 
 /**
- * \brief Count the RGB colors in Pix* (%pixs)
+ * \brief Count the RGB colors in Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -1926,7 +1926,7 @@ CountPixelsInRow(lua_State *L)
 static int
 CountRGBColors(lua_State *L)
 {
-    FUNC(LL_PIX ".CountRGBColors");
+    LL_FUNC("CountRGBColors");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 count = pixCountRGBColors(pixs);
     lua_pushinteger(L, count);
@@ -1934,7 +1934,7 @@ CountRGBColors(lua_State *L)
 }
 
 /**
- * \brief Create a new Pix* but don't initialize it
+ * \brief Create a new Pix* but don't initialize it.
  * <pre>
  * Arg #1 is expected to be Pix*.
  * or
@@ -1950,7 +1950,7 @@ CountRGBColors(lua_State *L)
 static int
 CreateNoInit(lua_State *L)
 {
-    FUNC(LL_PIX ".CreateNoInit");
+    LL_FUNC("CreateNoInit");
     Pix *pixs = ll_check_Pix_opt(_fun, L, 1);
     Pix *pix = nullptr;
     if (pixs) {
@@ -1967,7 +1967,7 @@ CreateNoInit(lua_State *L)
 }
 
 /**
- * \brief Create a new Pix* (%pixd) from three layer Pix* (%pixr, %pixg, %pixb)
+ * \brief Create a new Pix* (%pixd) from three layer Pix* (%pixr, %pixg, %pixb).
  * <pre>
  * Arg #1 is expected to be a Pix* (pixr).
  * Arg #2 is expected to be a Pix* (pixg).
@@ -1979,7 +1979,7 @@ CreateNoInit(lua_State *L)
 static int
 CreateRGBImage(lua_State *L)
 {
-    FUNC(LL_PIX ".CreateRGBImage");
+    LL_FUNC("CreateRGBImage");
     Pix *pixr = ll_check_Pix(_fun, L, 1);
     Pix *pixg = ll_check_Pix(_fun, L, 2);
     Pix *pixb = ll_check_Pix(_fun, L, 3);
@@ -2054,7 +2054,7 @@ CreateRGBImage(lua_State *L)
 */
 
 /**
- * \brief Destroy the colormap of a Pix*
+ * \brief Destroy the colormap of a Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a PixColormap* (colormap).
@@ -2065,15 +2065,15 @@ CreateRGBImage(lua_State *L)
 static int
 DestroyColormap(lua_State *L)
 {
-    FUNC(LL_PIX ".DestroyColormap");
+    LL_FUNC("DestroyColormap");
     Pix *pix = ll_check_Pix(_fun, L, 1);
-    PixColormap* colormap = ll_take_PixColormap(L, 2);
+    PixColormap* colormap = ll_take_PixColormap(_fun, L, 2);
     (void)colormap;
     return ll_push_bool(L, 0 == pixDestroyColormap(pix));
 }
 
 /**
- * \brief Display a color array creating a Pix* (%pix)
+ * \brief Display a color array creating a Pix* (%pix).
  * <pre>
  * Arg #1 is expected to be a l_int32 (side).
  * Arg #2 is expected to be a l_int32 (ncols).
@@ -2086,7 +2086,7 @@ DestroyColormap(lua_State *L)
 static int
 DisplayColorArray(lua_State *L)
 {
-    FUNC(LL_PIX ".DisplayColorArray");
+    LL_FUNC("DisplayColorArray");
     l_int32 side = ll_check_l_int32(_fun, L, 1);
     l_int32 ncols = ll_check_l_int32(_fun, L, 2);
     l_int32 fontsize = ll_check_l_int32_default(_fun, L, 3, 0);
@@ -2098,7 +2098,7 @@ DisplayColorArray(lua_State *L)
 }
 
 /**
- * \brief Display the layers of a Pix* (pixd)
+ * \brief Display the layers of a Pix* (pixd).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (val).
@@ -2110,7 +2110,7 @@ DisplayColorArray(lua_State *L)
 static int
 DisplayLayersRGBA(lua_State *L)
 {
-    FUNC(LL_PIX ".DisplayLayersRGBA");
+    LL_FUNC("DisplayLayersRGBA");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_uint32 val = ll_check_l_uint32(_fun, L, 2);
     l_int32 maxw = ll_check_l_int32(_fun, L, 3);
@@ -2119,7 +2119,7 @@ DisplayLayersRGBA(lua_State *L)
 }
 
 /**
- * \brief Find the area to perimeter ratio in Pix* (%pixs)
+ * \brief Find the area to perimeter ratio in Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -2129,7 +2129,7 @@ DisplayLayersRGBA(lua_State *L)
 static int
 FindAreaPerimRatio(lua_State *L)
 {
-    FUNC(LL_PIX ".FindAreaPerimRatio");
+    LL_FUNC("FindAreaPerimRatio");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 fract = 0.0f;
     if (pixFindAreaPerimRatio(pixs, tab8, &fract))
@@ -2139,7 +2139,7 @@ FindAreaPerimRatio(lua_State *L)
 }
 
 /**
- * \brief Find the perimeter to area ratio in Pix* (%pixs)
+ * \brief Find the perimeter to area ratio in Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -2149,7 +2149,7 @@ FindAreaPerimRatio(lua_State *L)
 static int
 FindPerimToAreaRatio(lua_State *L)
 {
-    FUNC(LL_PIX ".FindPerimToAreaRatio");
+    LL_FUNC("FindPerimToAreaRatio");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 fract = 0.0f;
     if (pixFindPerimToAreaRatio(pixs, tab8, &fract))
@@ -2159,7 +2159,7 @@ FindPerimToAreaRatio(lua_State *L)
 }
 
 /**
- * \brief Look for one or two square tiles with conforming median
+ * \brief Look for one or two square tiles with conforming median.
  *        intensity and low variance outside but near the input %box.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
@@ -2175,7 +2175,7 @@ FindPerimToAreaRatio(lua_State *L)
 static int
 FindRepCloseTile(lua_State *L)
 {
-    FUNC(LL_PIX ".FindRepCloseTile");
+    LL_FUNC("FindRepCloseTile");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
     l_int32 searchdir = ll_check_direction(_fun, L, 3, L_HORIZ);
@@ -2189,7 +2189,7 @@ FindRepCloseTile(lua_State *L)
 }
 
 /**
- * \brief Flip a pixel value in Pix*
+ * \brief Flip a pixel value in Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a l_int32 (x).
@@ -2201,7 +2201,7 @@ FindRepCloseTile(lua_State *L)
 static int
 FlipPixel(lua_State *L)
 {
-    FUNC(LL_PIX ".FlipPixel");
+    LL_FUNC("FlipPixel");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 x = ll_check_l_int32(_fun, L, 2);
     l_int32 y = ll_check_l_int32(_fun, L, 3);
@@ -2209,7 +2209,7 @@ FlipPixel(lua_State *L)
 }
 
 /**
- * \brief Calculate the fraction of foreground in Pix* (%pixs)
+ * \brief Calculate the fraction of foreground in Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -2219,7 +2219,7 @@ FlipPixel(lua_State *L)
 static int
 ForegroundFraction(lua_State *L)
 {
-    FUNC(LL_PIX ".ForegroundFraction");
+    LL_FUNC("ForegroundFraction");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 fract = 0;
     if (pixForegroundFraction(pixs, &fract))
@@ -2229,7 +2229,7 @@ ForegroundFraction(lua_State *L)
 }
 
 /**
- * \brief Get the pixel average value for Pix* (%pixs) optionally masked with Pix* (%pixm)
+ * \brief Get the pixel average value for Pix* (%pixs) optionally masked with Pix* (%pixm).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string describing the type of stats (type).
@@ -2244,7 +2244,7 @@ ForegroundFraction(lua_State *L)
 static int
 GetAverageMasked(lua_State *L)
 {
-    FUNC(LL_PIX ".GetAverageMasked");
+    LL_FUNC("GetAverageMasked");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 type = ll_check_stats_type(_fun, L, 2, L_MEAN_ABSVAL);
     Pix *pixm = ll_check_Pix_opt(_fun, L, 3);
@@ -2259,7 +2259,7 @@ GetAverageMasked(lua_State *L)
 }
 
 /**
- * \brief Get the pixel average RGB values for Pix* (%pixs) optionally masked with Pix* (%pixm)
+ * \brief Get the pixel average RGB values for Pix* (%pixs) optionally masked with Pix* (%pixm).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string describing the type of stats (type).
@@ -2274,7 +2274,7 @@ GetAverageMasked(lua_State *L)
 static int
 GetAverageMaskedRGB(lua_State *L)
 {
-    FUNC(LL_PIX ".GetAverageMaskedRGB");
+    LL_FUNC("GetAverageMaskedRGB");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 type = ll_check_stats_type(_fun, L, 2, L_MEAN_ABSVAL);
     Pix *pixm = ll_check_Pix_opt(_fun, L, 3);
@@ -2291,7 +2291,7 @@ GetAverageMaskedRGB(lua_State *L)
 }
 
 /**
- * \brief Get the average value for Pix* (%pixs) as tiled Pix* (%pixv)
+ * \brief Get the average value for Pix* (%pixs) as tiled Pix* (%pixv).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string describing the type of stats (type).
@@ -2304,7 +2304,7 @@ GetAverageMaskedRGB(lua_State *L)
 static int
 GetAverageTiled(lua_State *L)
 {
-    FUNC(LL_PIX ".GetAverageTiled");
+    LL_FUNC("GetAverageTiled");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 type = ll_check_stats_type(_fun, L, 2, L_MEAN_ABSVAL);
     l_int32 sx = ll_check_l_int32_default(_fun, L, 3, 2);
@@ -2314,7 +2314,7 @@ GetAverageTiled(lua_State *L)
 }
 
 /**
- * \brief Get the average RGB values for Pix* (%pixs) as three Pix* (%pixr, %pixg, %pixb)
+ * \brief Get the average RGB values for Pix* (%pixs) as three Pix* (%pixr, %pixg, %pixb).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string describing the type of stats (type).
@@ -2327,7 +2327,7 @@ GetAverageTiled(lua_State *L)
 static int
 GetAverageTiledRGB(lua_State *L)
 {
-    FUNC(LL_PIX ".GetAverageTiledRGB");
+    LL_FUNC("GetAverageTiledRGB");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 type = ll_check_stats_type(_fun, L, 2, L_MEAN_ABSVAL);
     l_int32 sx = ll_check_l_int32_default(_fun, L, 3, 2);
@@ -2341,7 +2341,7 @@ GetAverageTiledRGB(lua_State *L)
 }
 
 /**
- * \brief Get a binned color for Pix* (%pixs)
+ * \brief Get a binned color for Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pix* (pixg).
@@ -2355,7 +2355,7 @@ GetAverageTiledRGB(lua_State *L)
 static int
 GetBinnedColor(lua_State *L)
 {
-    FUNC(LL_PIX ".GetBinnedColor");
+    LL_FUNC("GetBinnedColor");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Pix *pixg = ll_check_Pix(_fun, L, 2);
     l_int32 nbins = ll_check_l_int32_default(_fun, L, 3, 1);
@@ -2372,7 +2372,7 @@ GetBinnedColor(lua_State *L)
 }
 
 /**
- * \brief Get a binned component range for Pix* (%pixs)
+ * \brief Get a binned component range for Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (nbins).
@@ -2386,7 +2386,7 @@ GetBinnedColor(lua_State *L)
 static int
 GetBinnedComponentRange(lua_State *L)
 {
-    FUNC(LL_PIX ".GetBinnedComponentRange");
+    LL_FUNC("GetBinnedComponentRange");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 nbins = ll_check_l_int32_default(_fun, L, 2, 2);
     l_int32 factor = ll_check_l_int32_default(_fun, L, 3, 1);
@@ -2407,7 +2407,7 @@ GetBinnedComponentRange(lua_State *L)
 }
 
 /**
- * \brief Get black or white value in Pix*
+ * \brief Get black or white value in Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a string describing the operation (op).
@@ -2418,7 +2418,7 @@ GetBinnedComponentRange(lua_State *L)
 static int
 GetBlackOrWhiteVal(lua_State *L)
 {
-    FUNC(LL_PIX ".GetBlackOrWhiteVal");
+    LL_FUNC("GetBlackOrWhiteVal");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 op = ll_check_getval(_fun, L, 2, L_GET_BLACK_VAL);
     l_uint32 val = 0;
@@ -2429,7 +2429,7 @@ GetBlackOrWhiteVal(lua_State *L)
 }
 
 /**
- * \brief Get black value in Pix*
+ * \brief Get black value in Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * </pre>
@@ -2439,7 +2439,7 @@ GetBlackOrWhiteVal(lua_State *L)
 static int
 GetBlackVal(lua_State *L)
 {
-    FUNC(LL_PIX ".GetBlackVal");
+    LL_FUNC("GetBlackVal");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_uint32 val = 0;
     if (pixGetBlackOrWhiteVal(pix, L_GET_BLACK_VAL, &val))
@@ -2449,7 +2449,7 @@ GetBlackVal(lua_State *L)
 }
 
 /**
- * \brief Get the histogram of the color mapped Pix* (%pixs)
+ * \brief Get the histogram of the color mapped Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
@@ -2460,14 +2460,14 @@ GetBlackVal(lua_State *L)
 static int
 GetCmapHistogram(lua_State *L)
 {
-    FUNC(LL_PIX ".GetCmapHistogram");
+    LL_FUNC("GetCmapHistogram");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 factor = ll_check_l_int32(_fun, L, 2);
     return ll_push_Numa(_fun, L, pixGetCmapHistogram(pixs, factor));
 }
 
 /**
- * \brief Get the histogram of the color mapped Pix* (%pixs) inside Box* (%box)
+ * \brief Get the histogram of the color mapped Pix* (%pixs) inside Box* (%box).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Box* (box).
@@ -2479,7 +2479,7 @@ GetCmapHistogram(lua_State *L)
 static int
 GetCmapHistogramInRect(lua_State *L)
 {
-    FUNC(LL_PIX ".GetCmapHistogramInRect");
+    LL_FUNC("GetCmapHistogramInRect");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
     l_int32 factor = ll_check_l_int32(_fun, L, 3);
@@ -2487,7 +2487,7 @@ GetCmapHistogramInRect(lua_State *L)
 }
 
 /**
- * \brief Get the histogram of the color mapped Pix* (%pixs) masked with another Pix* (%pixm)
+ * \brief Get the histogram of the color mapped Pix* (%pixs) masked with another Pix* (%pixm).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pix* (pixm) (1bpp).
@@ -2501,7 +2501,7 @@ GetCmapHistogramInRect(lua_State *L)
 static int
 GetCmapHistogramMasked(lua_State *L)
 {
-    FUNC(LL_PIX ".GetCmapHistogramMasked");
+    LL_FUNC("GetCmapHistogramMasked");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Pix *pixm = ll_check_Pix(_fun, L, 2);
     l_int32 x = ll_check_l_int32(_fun, L, 3);
@@ -2511,7 +2511,7 @@ GetCmapHistogramMasked(lua_State *L)
 }
 
 /**
- * \brief Get a histogram AMAP* for the colors in Pix* (%pixs)
+ * \brief Get a histogram AMAP* for the colors in Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
@@ -2522,14 +2522,14 @@ GetCmapHistogramMasked(lua_State *L)
 static int
 GetColorAmapHistogram(lua_State *L)
 {
-    FUNC(LL_PIX ".GetColorAmapHistogram");
+    LL_FUNC("GetColorAmapHistogram");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 factor = ll_check_l_int32(_fun, L, 2);
     return ll_push_Amap(_fun, L, pixGetColorAmapHistogram(pixs, factor));
 }
 
 /**
- * \brief Get the RGB histograms of the Pix* (%pixs)
+ * \brief Get the RGB histograms of the Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
@@ -2540,7 +2540,7 @@ GetColorAmapHistogram(lua_State *L)
 static int
 GetColorHistogram(lua_State *L)
 {
-    FUNC(LL_PIX ".GetColorHistogram");
+    LL_FUNC("GetColorHistogram");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 factor = ll_check_l_int32(_fun, L, 2);
     Numa *nar = nullptr;
@@ -2552,7 +2552,7 @@ GetColorHistogram(lua_State *L)
 }
 
 /**
- * \brief Get the RGB histograms of the Pix* (%pixs) masked with another Pix* (%pixm)
+ * \brief Get the RGB histograms of the Pix* (%pixs) masked with another Pix* (%pixm).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pix* (pixm) (1bpp).
@@ -2566,7 +2566,7 @@ GetColorHistogram(lua_State *L)
 static int
 GetColorHistogramMasked(lua_State *L)
 {
-    FUNC(LL_PIX ".GetColorHistogramMasked");
+    LL_FUNC("GetColorHistogramMasked");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Pix *pixm = ll_check_Pix(_fun, L, 2);
     l_int32 x = ll_check_l_int32(_fun, L, 3);
@@ -2581,7 +2581,7 @@ GetColorHistogramMasked(lua_State *L)
 }
 
 /**
- * \brief Get the color near the mask boundary from Pix* (%pixs)
+ * \brief Get the color near the mask boundary from Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pix* (pixm).
@@ -2594,7 +2594,7 @@ GetColorHistogramMasked(lua_State *L)
 static int
 GetColorNearMaskBoundary(lua_State *L)
 {
-    FUNC(LL_PIX ".GetColorNearMaskBoundary");
+    LL_FUNC("GetColorNearMaskBoundary");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Pix *pixm = ll_check_Pix(_fun, L, 2);
     Box *box = ll_check_Box(_fun, L, 3);
@@ -2607,7 +2607,7 @@ GetColorNearMaskBoundary(lua_State *L)
 }
 
 /**
- * \brief Get the colormap of a Pix*
+ * \brief Get the colormap of a Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * </pre>
@@ -2617,14 +2617,14 @@ GetColorNearMaskBoundary(lua_State *L)
 static int
 GetColormap(lua_State *L)
 {
-    FUNC(LL_PIX ".GetColormap");
+    LL_FUNC("GetColormap");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     PixColormap* cmap = pixcmapCopy(pixGetColormap(pix));
     return ll_push_PixColormap(_fun, L, cmap);
 }
 
 /**
- * \brief Get column stats for Pix* (%pixs)
+ * \brief Get column stats for Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -2634,7 +2634,7 @@ GetColormap(lua_State *L)
 static int
 GetColumnStats(lua_State *L)
 {
-    FUNC(LL_PIX ".GetColumnStats");
+    LL_FUNC("GetColumnStats");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 type = ll_check_select_color(_fun, L, 2, L_SELECT_RED);
     l_int32 nbins = ll_check_l_int32(_fun, L, 3);
@@ -2656,7 +2656,7 @@ GetColumnStats(lua_State *L)
 }
 
 /**
- * \brief Get the data of a Pix* (%pix)
+ * \brief Get the data of a Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * </pre>
@@ -2666,7 +2666,7 @@ GetColumnStats(lua_State *L)
 static int
 GetData(lua_State *L)
 {
-    FUNC(LL_PIX ".GetData");
+    LL_FUNC("GetData");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_uint32 *data = pixGetData(pix);
     l_int32 wpl = pixGetWpl(pix);
@@ -2675,7 +2675,7 @@ GetData(lua_State *L)
 }
 
 /**
- * \brief Get the Pix* depth
+ * \brief Get the Pix* depth.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
@@ -2685,7 +2685,7 @@ GetData(lua_State *L)
 static int
 GetDepth(lua_State *L)
 {
-    FUNC(LL_PIX ".GetDepth");
+    LL_FUNC("GetDepth");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 depth = pixGetDepth(pix);
     lua_pushinteger(L, depth);
@@ -2693,7 +2693,7 @@ GetDepth(lua_State *L)
 }
 
 /**
- * \brief Get the Pix* dimensions
+ * \brief Get the Pix* dimensions.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
@@ -2703,7 +2703,7 @@ GetDepth(lua_State *L)
 static int
 GetDimensions(lua_State *L)
 {
-    FUNC(LL_PIX ".GetDimensions");
+    LL_FUNC("GetDimensions");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 width, height, depth;
     if (pixGetDimensions(pix, &width, &height, &depth))
@@ -2715,7 +2715,7 @@ GetDimensions(lua_State *L)
 }
 
 /**
- * \brief Get an extreme value for Pix* (%pixs)
+ * \brief Get an extreme value for Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
@@ -2727,7 +2727,7 @@ GetDimensions(lua_State *L)
 static int
 GetExtremeValue(lua_State *L)
 {
-    FUNC(LL_PIX ".GetExtremeValue");
+    LL_FUNC("GetExtremeValue");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 factor = ll_check_l_int32_default(_fun, L, 2, 1);
     l_int32 type = ll_check_select_min_max(_fun, L, 3, L_SELECT_MIN);
@@ -2745,7 +2745,7 @@ GetExtremeValue(lua_State *L)
 }
 
 /**
- * \brief Get the histogram of the grayscale Pix* (%pixs)
+ * \brief Get the histogram of the grayscale Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
@@ -2756,14 +2756,14 @@ GetExtremeValue(lua_State *L)
 static int
 GetGrayHistogram(lua_State *L)
 {
-    FUNC(LL_PIX ".GetGrayHistogram");
+    LL_FUNC("GetGrayHistogram");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 factor = ll_check_l_int32(_fun, L, 2);
     return ll_push_Numa(_fun, L, pixGetGrayHistogram(pixs, factor));
 }
 
 /**
- * \brief Get the histogram of the grayscale Pix* (%pixs) inside Box* (%box)
+ * \brief Get the histogram of the grayscale Pix* (%pixs) inside Box* (%box).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Box* (box).
@@ -2775,7 +2775,7 @@ GetGrayHistogram(lua_State *L)
 static int
 GetGrayHistogramInRect(lua_State *L)
 {
-    FUNC(LL_PIX ".GetGrayHistogramInRect");
+    LL_FUNC("GetGrayHistogramInRect");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
     l_int32 factor = ll_check_l_int32(_fun, L, 3);
@@ -2783,7 +2783,7 @@ GetGrayHistogramInRect(lua_State *L)
 }
 
 /**
- * \brief Get the histogram of the grayscale Pix* (%pixs) masked with another Pix* (%pixm)
+ * \brief Get the histogram of the grayscale Pix* (%pixs) masked with another Pix* (%pixm).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pix* (pixm) (1bpp).
@@ -2797,7 +2797,7 @@ GetGrayHistogramInRect(lua_State *L)
 static int
 GetGrayHistogramMasked(lua_State *L)
 {
-    FUNC(LL_PIX ".GetGrayHistogramMasked");
+    LL_FUNC("GetGrayHistogramMasked");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Pix *pixm = ll_check_Pix(_fun, L, 2);
     l_int32 x = ll_check_l_int32(_fun, L, 3);
@@ -2807,7 +2807,7 @@ GetGrayHistogramMasked(lua_State *L)
 }
 
 /**
- * \brief Get an array of histograms of the grayscale Pix* (%pixs) for %nx by %ny tiles
+ * \brief Get an array of histograms of the grayscale Pix* (%pixs) for %nx by %ny tiles.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
@@ -2820,7 +2820,7 @@ GetGrayHistogramMasked(lua_State *L)
 static int
 GetGrayHistogramTiled(lua_State *L)
 {
-    FUNC(LL_PIX ".GetGrayHistogramTiled");
+    LL_FUNC("GetGrayHistogramTiled");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 factor = ll_check_l_int32(_fun, L, 2);
     l_int32 nx = ll_check_l_int32(_fun, L, 3);
@@ -2829,7 +2829,7 @@ GetGrayHistogramTiled(lua_State *L)
 }
 
 /**
- * \brief Get the Pix* height
+ * \brief Get the Pix* height.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
@@ -2839,7 +2839,7 @@ GetGrayHistogramTiled(lua_State *L)
 static int
 GetHeight(lua_State *L)
 {
-    FUNC(LL_PIX ".GetHeight");
+    LL_FUNC("GetHeight");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 height = pixGetHeight(pix);
     lua_pushinteger(L, height);
@@ -2847,7 +2847,7 @@ GetHeight(lua_State *L)
 }
 
 /**
- * \brief Get the input format of a Pix*
+ * \brief Get the input format of a Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * </pre>
@@ -2857,14 +2857,14 @@ GetHeight(lua_State *L)
 static int
 GetInputFormat(lua_State *L)
 {
-    FUNC(LL_PIX ".GetInputFormat");
+    LL_FUNC("GetInputFormat");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     lua_pushstring(L, ll_string_input_format(pixGetInputFormat(pix)));
     return 1;
 }
 
 /**
- * \brief Get the maximum value for Pix* (%pixs) optionally in rect Box* (%box)
+ * \brief Get the maximum value for Pix* (%pixs) optionally in rect Box* (%box).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is optional and, if given, expected to be a Box*.
@@ -2875,7 +2875,7 @@ GetInputFormat(lua_State *L)
 static int
 GetMaxValueInRect(lua_State *L)
 {
-    FUNC(LL_PIX ".GetMaxValueInRect");
+    LL_FUNC("GetMaxValueInRect");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box_opt(_fun, L, 2);
     l_uint32 maxval = 0;
@@ -2890,7 +2890,7 @@ GetMaxValueInRect(lua_State *L)
 }
 
 /**
- * \brief Get the moment of order (%order) by column in Pix* (%pixs)
+ * \brief Get the moment of order (%order) by column in Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (order; 1 or 2).
@@ -2901,7 +2901,7 @@ GetMaxValueInRect(lua_State *L)
 static int
 GetMomentByColumn(lua_State *L)
 {
-    FUNC(LL_PIX ".GetMomentByColumn");
+    LL_FUNC("GetMomentByColumn");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 order = ll_check_l_int32(_fun, L, 2);
     Numa *na = pixGetMomentByColumn(pixs, order);
@@ -2909,7 +2909,7 @@ GetMomentByColumn(lua_State *L)
 }
 
 /**
- * \brief Get a pixel value from Pix*
+ * \brief Get a pixel value from Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a l_int32 (x).
@@ -2921,7 +2921,7 @@ GetMomentByColumn(lua_State *L)
 static int
 GetPixel(lua_State *L)
 {
-    FUNC(LL_PIX ".GetPixel");
+    LL_FUNC("GetPixel");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 x = ll_check_l_int32(_fun, L, 2);
     l_int32 y = ll_check_l_int32(_fun, L, 3);
@@ -2933,7 +2933,7 @@ GetPixel(lua_State *L)
 }
 
 /**
- * \brief Get the pixel average for Pix* (%pixs) optionally masked with Pix* (%pixm)
+ * \brief Get the pixel average for Pix* (%pixs) optionally masked with Pix* (%pixm).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is optional and, if given, expected to be a Pix* (pixm).
@@ -2947,7 +2947,7 @@ GetPixel(lua_State *L)
 static int
 GetPixelAverage(lua_State *L)
 {
-    FUNC(LL_PIX ".GetPixelAverage");
+    LL_FUNC("GetPixelAverage");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Pix *pixm = ll_check_Pix_opt(_fun, L, 2);
     l_int32 x = ll_check_l_int32_default(_fun, L, 3, 0);
@@ -2961,7 +2961,7 @@ GetPixelAverage(lua_State *L)
 }
 
 /**
- * \brief Get the pixel stats for Pix* (%pixs) optionally masked with Pix* (%pixm)
+ * \brief Get the pixel stats for Pix* (%pixs) optionally masked with Pix* (%pixm).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string describing the type of stats (type).
@@ -2973,7 +2973,7 @@ GetPixelAverage(lua_State *L)
 static int
 GetPixelStats(lua_State *L)
 {
-    FUNC(LL_PIX ".GetPixelStats");
+    LL_FUNC("GetPixelStats");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 type = ll_check_stats_type(_fun, L, 2, L_MEAN_ABSVAL);
     l_int32 factor = ll_check_l_int32_default(_fun, L, 3, 1);
@@ -2985,7 +2985,7 @@ GetPixelStats(lua_State *L)
 }
 
 /**
- * \brief Create a new Pix* (%pixd) from one component (%comp) of Pix* (%pixs)
+ * \brief Create a new Pix* (%pixd) from one component (%comp) of Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string with the component name (comp).
@@ -2996,7 +2996,7 @@ GetPixelStats(lua_State *L)
 static int
 GetRGBComponent(lua_State *L)
 {
-    FUNC(LL_PIX ".GetRGBComponent");
+    LL_FUNC("GetRGBComponent");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 comp = ll_check_component(_fun, L, 2, L_ALPHA_CHANNEL);
     Pix *pixd = pixGetRGBComponent(pixs, comp);
@@ -3004,7 +3004,7 @@ GetRGBComponent(lua_State *L)
 }
 
 /**
- * \brief Extract red, green and blue components from Pix* (pixs)
+ * \brief Extract red, green and blue components from Pix* (pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -3014,7 +3014,7 @@ GetRGBComponent(lua_State *L)
 static int
 GetRGBLine(lua_State *L)
 {
-    FUNC(LL_PIX ".GetRGBLine");
+    LL_FUNC("GetRGBLine");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 row = ll_check_l_int32(_fun, L, 2);
     size_t width = static_cast<size_t>(pixGetWidth(pixs));
@@ -3037,7 +3037,7 @@ GetRGBLine(lua_State *L)
 }
 
 /**
- * \brief Get a pixel's RGB values from Pix*
+ * \brief Get a pixel's RGB values from Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a l_int32 (x).
@@ -3049,7 +3049,7 @@ GetRGBLine(lua_State *L)
 static int
 GetRGBPixel(lua_State *L)
 {
-    FUNC(LL_PIX ".GetRGBPixel");
+    LL_FUNC("GetRGBPixel");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 x = ll_check_l_int32(_fun, L, 2);
     l_int32 y = ll_check_l_int32(_fun, L, 3);
@@ -3065,7 +3065,7 @@ GetRGBPixel(lua_State *L)
 }
 
 /**
- * \brief Get a random pixel's value from Pix*
+ * \brief Get a random pixel's value from Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * </pre>
@@ -3075,7 +3075,7 @@ GetRGBPixel(lua_State *L)
 static int
 GetRandomPixel(lua_State *L)
 {
-    FUNC(LL_PIX ".GetRandomPixel");
+    LL_FUNC("GetRandomPixel");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 x = 0;
     l_int32 y = 0;
@@ -3089,7 +3089,7 @@ GetRandomPixel(lua_State *L)
 }
 
 /**
- * \brief Get a rank color array for Pix* (%pixs)
+ * \brief Get a rank color array for Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (nbins).
@@ -3102,7 +3102,7 @@ GetRandomPixel(lua_State *L)
 static int
 GetRankColorArray(lua_State *L)
 {
-    FUNC(LL_PIX ".GetRankColorArray");
+    LL_FUNC("GetRankColorArray");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 nbins = ll_check_l_int32_default(_fun, L, 2, 1);
     l_int32 factor = ll_check_l_int32_default(_fun, L, 3, 1);
@@ -3118,7 +3118,7 @@ GetRankColorArray(lua_State *L)
 }
 
 /**
- * \brief Get rank value for Pix* (%pixs)
+ * \brief Get rank value for Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
@@ -3130,7 +3130,7 @@ GetRankColorArray(lua_State *L)
 static int
 GetRankValue(lua_State *L)
 {
-    FUNC(LL_PIX ".GetRankValue");
+    LL_FUNC("GetRankValue");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 factor = ll_check_l_int32(_fun, L, 2);
     l_float32 rank = ll_check_l_float32(_fun, L, 3);
@@ -3142,7 +3142,7 @@ GetRankValue(lua_State *L)
 }
 
 /**
- * \brief Get rank value for Pix* (%pixs) masked with another Pix* (%pixm)
+ * \brief Get rank value for Pix* (%pixs) masked with another Pix* (%pixm).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pix* (pixm).
@@ -3157,7 +3157,7 @@ GetRankValue(lua_State *L)
 static int
 GetRankValueMasked(lua_State *L)
 {
-    FUNC(LL_PIX ".GetRankValueMasked");
+    LL_FUNC("GetRankValueMasked");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Pix *pixm = ll_check_Pix(_fun, L, 2);
     l_int32 x = ll_check_l_int32(_fun, L, 3);
@@ -3174,7 +3174,7 @@ GetRankValueMasked(lua_State *L)
 }
 
 /**
- * \brief Get rank values for RGB for Pix* (%pixs) masked with another Pix* (%pixm)
+ * \brief Get rank values for RGB for Pix* (%pixs) masked with another Pix* (%pixm).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pix* (pixm).
@@ -3189,7 +3189,7 @@ GetRankValueMasked(lua_State *L)
 static int
 GetRankValueMaskedRGB(lua_State *L)
 {
-    FUNC(LL_PIX ".GetRankValueMaskedRGB");
+    LL_FUNC("GetRankValueMaskedRGB");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Pix *pixm = ll_check_Pix(_fun, L, 2);
     l_int32 x = ll_check_l_int32(_fun, L, 3);
@@ -3206,7 +3206,7 @@ GetRankValueMaskedRGB(lua_State *L)
 }
 
 /**
- * \brief Get the PIX resolution (x, y)
+ * \brief Get the PIX resolution (x, y).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
@@ -3216,7 +3216,7 @@ GetRankValueMaskedRGB(lua_State *L)
 static int
 GetResolution(lua_State *L)
 {
-    FUNC(LL_PIX ".GetResolution");
+    LL_FUNC("GetResolution");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 xres, yres;
     if (pixGetResolution(pix, &xres, &yres))
@@ -3227,7 +3227,7 @@ GetResolution(lua_State *L)
 }
 
 /**
- * \brief Get row stats for Pix* (%pixs)
+ * \brief Get row stats for Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -3237,7 +3237,7 @@ GetResolution(lua_State *L)
 static int
 GetRowStats(lua_State *L)
 {
-    FUNC(LL_PIX ".GetRowStats");
+    LL_FUNC("GetRowStats");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 type = ll_check_select_color(_fun, L, 2, L_SELECT_RED);
     l_int32 nbins = ll_check_l_int32(_fun, L, 3);
@@ -3259,7 +3259,7 @@ GetRowStats(lua_State *L)
 }
 
 /**
- * \brief Get the Pix* (%pix) samples per pixel (%spp)
+ * \brief Get the Pix* (%pix) samples per pixel (%spp).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
@@ -3269,7 +3269,7 @@ GetRowStats(lua_State *L)
 static int
 GetSpp(lua_State *L)
 {
-    FUNC(LL_PIX ".GetSpp");
+    LL_FUNC("GetSpp");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 spp = pixGetSpp(pix);
     lua_pushinteger(L, spp);
@@ -3277,7 +3277,7 @@ GetSpp(lua_State *L)
 }
 
 /**
- * \brief Get the text of a Pix*
+ * \brief Get the text of a Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * </pre>
@@ -3287,7 +3287,7 @@ GetSpp(lua_State *L)
 static int
 GetText(lua_State *L)
 {
-    FUNC(LL_PIX ".GetText");
+    LL_FUNC("GetText");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     const char* text = pixGetText(pix);
     lua_pushstring(L, text);
@@ -3295,7 +3295,7 @@ GetText(lua_State *L)
 }
 
 /**
- * \brief Get white value in Pix*
+ * \brief Get white value in Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * </pre>
@@ -3305,7 +3305,7 @@ GetText(lua_State *L)
 static int
 GetWhiteVal(lua_State *L)
 {
-    FUNC(LL_PIX ".GetWhiteVal");
+    LL_FUNC("GetWhiteVal");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_uint32 val = 0;
     if (pixGetBlackOrWhiteVal(pix, L_GET_WHITE_VAL, &val))
@@ -3315,7 +3315,7 @@ GetWhiteVal(lua_State *L)
 }
 
 /**
- * \brief Get the Pix* width
+ * \brief Get the Pix* width.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
@@ -3325,7 +3325,7 @@ GetWhiteVal(lua_State *L)
 static int
 GetWidth(lua_State *L)
 {
-    FUNC(LL_PIX ".GetWidth");
+    LL_FUNC("GetWidth");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 width = pixGetWidth(pix);
     lua_pushinteger(L, width);
@@ -3333,7 +3333,7 @@ GetWidth(lua_State *L)
 }
 
 /**
- * \brief Get the Pix* (%pix) words per line (%wpl)
+ * \brief Get the Pix* (%pix) words per line (%wpl).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
@@ -3343,7 +3343,7 @@ GetWidth(lua_State *L)
 static int
 GetWpl(lua_State *L)
 {
-    FUNC(LL_PIX ".GetWpl");
+    LL_FUNC("GetWpl");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 wpl = pixGetWpl(pix);
     lua_pushinteger(L, wpl);
@@ -3351,7 +3351,7 @@ GetWpl(lua_State *L)
 }
 
 /**
- * \brief Get the Pix* X resolution
+ * \brief Get the Pix* X resolution.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
@@ -3361,7 +3361,7 @@ GetWpl(lua_State *L)
 static int
 GetXRes(lua_State *L)
 {
-    FUNC(LL_PIX ".GetXRes");
+    LL_FUNC("GetXRes");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 xres = pixGetXRes(pix);
     lua_pushinteger(L, xres);
@@ -3369,7 +3369,7 @@ GetXRes(lua_State *L)
 }
 
 /**
- * \brief Get the Pix* Y resolution
+ * \brief Get the Pix* Y resolution.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
@@ -3379,7 +3379,7 @@ GetXRes(lua_State *L)
 static int
 GetYRes(lua_State *L)
 {
-    FUNC(LL_PIX ".GetYRes");
+    LL_FUNC("GetYRes");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 yres = pixGetYRes(pix);
     lua_pushinteger(L, yres);
@@ -3387,7 +3387,7 @@ GetYRes(lua_State *L)
 }
 
 /**
- * \brief Create a new alpha mask Pix* (%pixd) from Pix* (%pixs)
+ * \brief Create a new alpha mask Pix* (%pixd) from Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (dist).
@@ -3399,7 +3399,7 @@ GetYRes(lua_State *L)
 static int
 MakeAlphaFromMask(lua_State *L)
 {
-    FUNC(LL_PIX ".MakeAlphaFromMask");
+    LL_FUNC("MakeAlphaFromMask");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 dist = ll_check_l_int32(_fun, L, 2);
     int getbox = ll_check_boolean_default(_fun, L, 3, FALSE);
@@ -3412,7 +3412,7 @@ MakeAlphaFromMask(lua_State *L)
 }
 
 /**
- * \brief Create a new Pix* (%pixd) from a source Pix* (%pixs) using arithmetic factors (%rc, %gc, %bc)
+ * \brief Create a new Pix* (%pixd) from a source Pix* (%pixs) using arithmetic factors (%rc, %gc, %bc).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (rc).
@@ -3426,7 +3426,7 @@ MakeAlphaFromMask(lua_State *L)
 static int
 MakeArbMaskFromRGB(lua_State *L)
 {
-    FUNC(LL_PIX ".MakeArbMaskFromRGB");
+    LL_FUNC("MakeArbMaskFromRGB");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 rc = ll_check_l_float32(_fun, L, 2);
     l_float32 gc = ll_check_l_float32(_fun, L, 3);
@@ -3437,7 +3437,7 @@ MakeArbMaskFromRGB(lua_State *L)
 }
 
 /**
- * \brief Create a new Pix* (%pixd) from a source Pix* (%pixs) using a 2^depth entry lookup-table (%lut)
+ * \brief Create a new Pix* (%pixd) from a source Pix* (%pixs) using a 2^depth entry lookup-table (%lut).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string of max. 256 bytes (lut).
@@ -3448,7 +3448,7 @@ MakeArbMaskFromRGB(lua_State *L)
 static int
 MakeMaskFromLUT(lua_State *L)
 {
-    FUNC(LL_PIX ".MakeMaskFromLUT");
+    LL_FUNC("MakeMaskFromLUT");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     size_t len = 0;
     const char* lut = ll_check_lstring(_fun, L, 2, &len);
@@ -3463,7 +3463,7 @@ MakeMaskFromLUT(lua_State *L)
 }
 
 /**
- * \brief Create a new Pix* (%pixd) from a source Pix* (%pixs) using a mask value (%val)
+ * \brief Create a new Pix* (%pixd) from a source Pix* (%pixs) using a mask value (%val).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (val).
@@ -3474,7 +3474,7 @@ MakeMaskFromLUT(lua_State *L)
 static int
 MakeMaskFromVal(lua_State *L)
 {
-    FUNC(LL_PIX ".MakeMaskFromVal");
+    LL_FUNC("MakeMaskFromVal");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 val = ll_check_l_int32(_fun, L, 2);
     ll_push_Pix(_fun, L, pixMakeMaskFromVal(pixs, val));
@@ -3482,7 +3482,7 @@ MakeMaskFromVal(lua_State *L)
 }
 
 /**
- * \brief Create a mirrored tiling of the Pix* (%pixs)
+ * \brief Create a mirrored tiling of the Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (w).
@@ -3494,7 +3494,7 @@ MakeMaskFromVal(lua_State *L)
 static int
 MirroredTiling(lua_State *L)
 {
-    FUNC(LL_PIX ".MirroredTiling");
+    LL_FUNC("MirroredTiling");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 w = ll_check_l_int32(_fun, L, 2);
     l_int32 h = ll_check_l_int32(_fun, L, 3);
@@ -3502,7 +3502,7 @@ MirroredTiling(lua_State *L)
 }
 
 /**
- * \brief Paint %val through a mask Pix* (%pixm) onto a Pix* (%pixd) at offset %x and %y
+ * \brief Paint %val through a mask Pix* (%pixm) onto a Pix* (%pixd) at offset %x and %y.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* with 1 bit/pixel (pixm).
@@ -3520,7 +3520,7 @@ MirroredTiling(lua_State *L)
 static int
 PaintSelfThroughMask(lua_State *L)
 {
-    FUNC(LL_PIX ".PaintSelfThroughMask");
+    LL_FUNC("PaintSelfThroughMask");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixm = ll_check_Pix(_fun, L, 2);
     l_int32 x = ll_check_l_int32(_fun, L, 3);
@@ -3534,7 +3534,7 @@ PaintSelfThroughMask(lua_State *L)
 }
 
 /**
- * \brief Paint value (%val) through a mask Pix* (%pixm) onto a Pix* (%pixd) at offset (%x, %y)
+ * \brief Paint value (%val) through a mask Pix* (%pixm) onto a Pix* (%pixd) at offset (%x, %y).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* with (pixm) 1 bit/pixel.
@@ -3548,7 +3548,7 @@ PaintSelfThroughMask(lua_State *L)
 static int
 PaintThroughMask(lua_State *L)
 {
-    FUNC(LL_PIX ".PaintThroughMask");
+    LL_FUNC("PaintThroughMask");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixm = ll_check_Pix(_fun, L, 2);
     l_int32 x = ll_check_l_int32(_fun, L, 3);
@@ -3558,7 +3558,7 @@ PaintThroughMask(lua_State *L)
 }
 
 /**
- * \brief Print info about a Pix* (%pix) to a Lua stream (%stream)
+ * \brief Print info about a Pix* (%pix) to a Lua stream (%stream).
  *
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a luaL_Stream io handle (stream).
@@ -3569,7 +3569,7 @@ PaintThroughMask(lua_State *L)
 static int
 PrintStreamInfo(lua_State *L)
 {
-    FUNC(LL_PIX ".PrintStreamInfo");
+    LL_FUNC("PrintStreamInfo");
     static char str[64];
     Pix *pix= ll_check_Pix(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
@@ -3578,7 +3578,7 @@ PrintStreamInfo(lua_State *L)
 }
 
 /**
- * \brief Convert a colormapped Pix* (%pixs) to a binary 1bpp Pix* (%pix)
+ * \brief Convert a colormapped Pix* (%pixs) to a binary 1bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -3588,7 +3588,7 @@ PrintStreamInfo(lua_State *L)
 static int
 QuantizeIfFewColors(lua_State *L)
 {
-    FUNC(LL_PIX ".QuantizeIfFewColors");
+    LL_FUNC("QuantizeIfFewColors");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 maxcolors = ll_check_l_int32_default(_fun, L, 2, 256);
     l_int32 mingraycolors = ll_check_l_int32_default(_fun, L, 3, 0);
@@ -3600,7 +3600,7 @@ QuantizeIfFewColors(lua_State *L)
 }
 
 /**
- * \brief Get a binned color for Pix* (%pixs)
+ * \brief Get a binned color for Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string describing the select color type (type).
@@ -3614,7 +3614,7 @@ QuantizeIfFewColors(lua_State *L)
 static int
 RankBinByStrip(lua_State *L)
 {
-    FUNC(LL_PIX ".RankBinByStrip");
+    LL_FUNC("RankBinByStrip");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 type = ll_check_select_color(_fun, L, 2, L_SELECT_RED);
     l_int32 direction = ll_check_direction(_fun, L, 3, L_SCAN_HORIZONTAL);
@@ -3625,7 +3625,7 @@ RankBinByStrip(lua_State *L)
 }
 
 /**
- * \brief Read Pix* from an external file (%filename)
+ * \brief Read Pix* from an external file (%filename).
  * <pre>
  * Arg #1 is expected to be a string (filename).
  * </pre>
@@ -3635,14 +3635,14 @@ RankBinByStrip(lua_State *L)
 static int
 Read(lua_State *L)
 {
-    FUNC(LL_PIX ".Read");
+    LL_FUNC("Read");
     const char* filename = ll_check_string(_fun, L, 1);
     Pix *pix = pixRead(filename);
     return ll_push_Pix(_fun, L, pix);
 }
 
 /**
- * \brief Read a Pix* from a Lua string (%data)
+ * \brief Read a Pix* from a Lua string (%data).
  * <pre>
  * Arg #1 is expected to be a string (data).
  * </pre>
@@ -3652,7 +3652,7 @@ Read(lua_State *L)
 static int
 ReadMem(lua_State *L)
 {
-    FUNC(LL_PIX ".ReadMem");
+    LL_FUNC("ReadMem");
     size_t len;
     const char *data = ll_check_lstring(_fun, L, 1, &len);
     Pix *pix = pixReadMem(reinterpret_cast<const l_uint8 *>(data), len);
@@ -3660,7 +3660,7 @@ ReadMem(lua_State *L)
 }
 
 /**
- * \brief Read Pix* from a Lua io stream (%stream)
+ * \brief Read Pix* from a Lua io stream (%stream).
  * <pre>
  * Arg #1 is expected to be a luaL_Stream* (stream).
  * </pre>
@@ -3670,7 +3670,7 @@ ReadMem(lua_State *L)
 static int
 ReadStream(lua_State *L)
 {
-    FUNC(LL_PIX ".ReadStream");
+    LL_FUNC("ReadStream");
     luaL_Stream *stream = ll_check_stream(_fun, L, 1);
     l_int32 hint = ll_check_hint(_fun, L, 2, 0);
     Pix *pix = pixReadStream(stream->f, hint);
@@ -3678,7 +3678,7 @@ ReadStream(lua_State *L)
 }
 
 /**
- * \brief Remove border pixels (%npix) from a Pix* (%pixs) to a new Pix* (%pixd)
+ * \brief Remove border pixels (%npix) from a Pix* (%pixs) to a new Pix* (%pixd).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (npix).
@@ -3689,7 +3689,7 @@ ReadStream(lua_State *L)
 static int
 RemoveBorder(lua_State *L)
 {
-    FUNC(LL_PIX ".RemoveBorder");
+    LL_FUNC("RemoveBorder");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 npix = ll_check_l_int32(_fun, L, 2);
     Pix* pixd = pixRemoveBorder(pixs, npix);
@@ -3698,7 +3698,7 @@ RemoveBorder(lua_State *L)
 }
 
 /**
- * \brief Remove border pixels in a Pix* to a new Pix* (general case)
+ * \brief Remove border pixels in a Pix* to a new Pix* (general case).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (left).
@@ -3712,7 +3712,7 @@ RemoveBorder(lua_State *L)
 static int
 RemoveBorderGeneral(lua_State *L)
 {
-    FUNC(LL_PIX ".RemoveBorderGeneral");
+    LL_FUNC("RemoveBorderGeneral");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 left = ll_check_l_int32(_fun, L, 2);
     l_int32 right = ll_check_l_int32(_fun, L, 3);
@@ -3724,7 +3724,7 @@ RemoveBorderGeneral(lua_State *L)
 }
 
 /**
- * \brief Remove border pixels resizing a Pix* (%pixs) to a new Pix* (%pixd)
+ * \brief Remove border pixels resizing a Pix* (%pixs) to a new Pix* (%pixd).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (width).
@@ -3736,7 +3736,7 @@ RemoveBorderGeneral(lua_State *L)
 static int
 RemoveBorderToSize(lua_State *L)
 {
-    FUNC(LL_PIX ".RemoveBorderToSize");
+    LL_FUNC("RemoveBorderToSize");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 width = ll_check_l_int32(_fun, L, 2);
     l_int32 height = ll_check_l_int32(_fun, L, 3);
@@ -3746,7 +3746,7 @@ RemoveBorderToSize(lua_State *L)
 }
 
 /**
- * \brief Resize a Pix* image data
+ * \brief Resize a Pix* image data.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
@@ -3757,14 +3757,14 @@ RemoveBorderToSize(lua_State *L)
 static int
 ResizeImageData(lua_State *L)
 {
-    FUNC(LL_PIX ".ResizeImageData");
+    LL_FUNC("ResizeImageData");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     return ll_push_bool(L, 0 == pixResizeImageData(pixd, pixs));
 }
 
 /**
- * \brief Get the row stats for Pix* (%pixs) as six Numa*
+ * \brief Get the row stats for Pix* (%pixs) as six Numa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is optional and, if given, expected to be a Box* (box).
@@ -3775,7 +3775,7 @@ ResizeImageData(lua_State *L)
 static int
 RowStats(lua_State *L)
 {
-    FUNC(LL_PIX ".RowStats");
+    LL_FUNC("RowStats");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box_opt(_fun, L, 2);
     Numa *mean = nullptr;
@@ -3795,7 +3795,7 @@ RowStats(lua_State *L)
 }
 
 /**
- * \brief Scale resolution of a Pix* (%pix) by a factor (%xscale, %yscale)
+ * \brief Scale resolution of a Pix* (%pix) by a factor (%xscale, %yscale).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_float32 (xscale).
@@ -3807,7 +3807,7 @@ RowStats(lua_State *L)
 static int
 ScaleResolution(lua_State *L)
 {
-    FUNC(LL_PIX ".ScaleResolution");
+    LL_FUNC("ScaleResolution");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_float32 xscale = ll_check_l_float32(_fun, L, 2);
     l_float32 yscale = ll_check_l_float32(_fun, L, 3);
@@ -3815,7 +3815,7 @@ ScaleResolution(lua_State *L)
 }
 
 /**
- * \brief Set all pixels in a Pix*
+ * \brief Set all pixels in a Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * </pre>
@@ -3825,13 +3825,13 @@ ScaleResolution(lua_State *L)
 static int
 SetAll(lua_State *L)
 {
-    FUNC(LL_PIX ".SetAll");
+    LL_FUNC("SetAll");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     return ll_push_bool(L, 0 == pixSetAll(pix));
 }
 
 /**
- * \brief Set all pixels in a Pix* to an arbitrary value %val
+ * \brief Set all pixels in a Pix* to an arbitrary value %val.
  *
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a l_uint32 (val).
@@ -3842,14 +3842,14 @@ SetAll(lua_State *L)
 static int
 SetAllArbitrary(lua_State *L)
 {
-    FUNC(LL_PIX ".SetAllArbitrary");
+    LL_FUNC("SetAllArbitrary");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_uint32 val = ll_check_l_uint32(_fun, L, 2);
     return ll_push_bool(L, 0 == pixSetAllArbitrary(pix, val));
 }
 
 /**
- * \brief Set all pixels in a Pix* to a gray value (%grayval)
+ * \brief Set all pixels in a Pix* to a gray value (%grayval).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (grayval).
@@ -3860,14 +3860,14 @@ SetAllArbitrary(lua_State *L)
 static int
 SetAllGray(lua_State *L)
 {
-    FUNC(LL_PIX ".SetAllGray");
+    LL_FUNC("SetAllGray");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 grayval = ll_check_l_int32(_fun, L, 2);
     return ll_push_bool(L, 0 == pixSetAllGray(pix, grayval));
 }
 
 /**
- * \brief Set all pixels in a Pix* to black
+ * \brief Set all pixels in a Pix* to black.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * </pre>
@@ -3877,13 +3877,13 @@ SetAllGray(lua_State *L)
 static int
 SetBlack(lua_State *L)
 {
-    FUNC(LL_PIX ".SetBlack");
+    LL_FUNC("SetBlack");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     return ll_push_bool(L, 0 == pixSetBlackOrWhite(pix, L_SET_BLACK));
 }
 
 /**
- * \brief Set all pixels in a Pix* to black or white
+ * \brief Set all pixels in a Pix* to black or white.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a string describing an operation (op).
@@ -3894,14 +3894,14 @@ SetBlack(lua_State *L)
 static int
 SetBlackOrWhite(lua_State *L)
 {
-    FUNC(LL_PIX ".SetBlackOrWhite");
+    LL_FUNC("SetBlackOrWhite");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 op = ll_check_blackwhite(_fun, L, 2, L_SET_BLACK);
     return ll_push_bool(L, 0 == pixSetBlackOrWhite(pix, op));
 }
 
 /**
- * \brief Set border ring pixels in a Pix* (%pix) to value (%val)
+ * \brief Set border ring pixels in a Pix* (%pix) to value (%val).
  *
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (dist).
@@ -3913,7 +3913,7 @@ SetBlackOrWhite(lua_State *L)
 static int
 SetBorderRingVal(lua_State *L)
 {
-    FUNC(LL_PIX ".SetBorderRingVal");
+    LL_FUNC("SetBorderRingVal");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 dist = ll_check_l_int32(_fun, L, 2);
     l_uint32 val = ll_check_l_uint32(_fun, L, 3);
@@ -3921,7 +3921,7 @@ SetBorderRingVal(lua_State *L)
 }
 
 /**
- * \brief Set border pixels in a Pix* (%pix) to value (%val)
+ * \brief Set border pixels in a Pix* (%pix) to value (%val).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (left).
@@ -3936,7 +3936,7 @@ SetBorderRingVal(lua_State *L)
 static int
 SetBorderVal(lua_State *L)
 {
-    FUNC(LL_PIX ".SetBorderVal");
+    LL_FUNC("SetBorderVal");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 left = ll_check_l_int32(_fun, L, 2);
     l_int32 right = ll_check_l_int32(_fun, L, 3);
@@ -3947,7 +3947,7 @@ SetBorderVal(lua_State *L)
 }
 
 /**
- * \brief Set the colormap of a Pix*
+ * \brief Set the colormap of a Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a PixColormap* (colormap).
@@ -3961,14 +3961,14 @@ SetBorderVal(lua_State *L)
 static int
 SetColormap(lua_State *L)
 {
-    FUNC(LL_PIX ".SetColormap");
+    LL_FUNC("SetColormap");
     Pix *pix = ll_check_Pix(_fun, L, 1);
-    PixColormap* colormap = ll_take_PixColormap(L, 2);
+    PixColormap* colormap = ll_take_PixColormap(_fun, L, 2);
     return ll_push_bool(L, 0 == pixSetColormap(pix, colormap));
 }
 
 /**
- * \brief Set all pixel components (%comp) in a Pix* (%pix) to a value (%val)
+ * \brief Set all pixel components (%comp) in a Pix* (%pix) to a value (%val).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a string with the component name (comp).
@@ -3980,7 +3980,7 @@ SetColormap(lua_State *L)
 static int
 SetComponentArbitrary(lua_State *L)
 {
-    FUNC(LL_PIX ".SetComponentArbitrary");
+    LL_FUNC("SetComponentArbitrary");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 comp = ll_check_component(_fun, L, 2, 0);
     l_int32 val = ll_check_l_int32(_fun, L, 3);
@@ -3988,7 +3988,7 @@ SetComponentArbitrary(lua_State *L)
 }
 
 /**
- * \brief Set the data of a Pix* (%pix)
+ * \brief Set the data of a Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a Lua array table (h) of array tables (wpl).
@@ -3999,7 +3999,7 @@ SetComponentArbitrary(lua_State *L)
 static int
 SetData(lua_State *L)
 {
-    FUNC(LL_PIX ".SetData");
+    LL_FUNC("SetData");
     Pix* pix = ll_check_Pix(_fun, L, 1);
     l_int32 wpl = pixGetWpl(pix);
     l_int32 h = pixGetHeight(pix);
@@ -4013,7 +4013,7 @@ SetData(lua_State *L)
 }
 
 /**
- * \brief Set the Pix* depth
+ * \brief Set the Pix* depth.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
@@ -4023,14 +4023,14 @@ SetData(lua_State *L)
 static int
 SetDepth(lua_State *L)
 {
-    FUNC(LL_PIX ".SetDepth");
+    LL_FUNC("SetDepth");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 depth = ll_check_l_int32_default(_fun, L, 2, pixGetDepth(pix));
     return ll_push_bool(L, 0 == pixSetDepth(pix, depth));
 }
 
 /**
- * \brief Set the Pix* dimensions
+ * \brief Set the Pix* dimensions.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * Arg #2 is expected to be a lua_Integer (width).
@@ -4043,7 +4043,7 @@ SetDepth(lua_State *L)
 static int
 SetDimensions(lua_State *L)
 {
-    FUNC(LL_PIX ".SetDimensions");
+    LL_FUNC("SetDimensions");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 width = ll_check_l_int32_default(_fun, L, 2, 0);
     l_int32 height = ll_check_l_int32_default(_fun, L, 3, 0);
@@ -4052,7 +4052,7 @@ SetDimensions(lua_State *L)
 }
 
 /**
- * \brief Set the Pix* height
+ * \brief Set the Pix* height.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
@@ -4062,14 +4062,14 @@ SetDimensions(lua_State *L)
 static int
 SetHeight(lua_State *L)
 {
-    FUNC(LL_PIX ".SetHeight");
+    LL_FUNC("SetHeight");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 height = ll_check_l_int32_default(_fun, L, 2, pixGetHeight(pix));
     return ll_push_bool(L, 0 == pixSetHeight(pix, height));
 }
 
 /**
- * \brief Set all pixels inside a Box* (%box) in a Pix* (%pix)
+ * \brief Set all pixels inside a Box* (%box) in a Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a Box* (box).
@@ -4080,14 +4080,14 @@ SetHeight(lua_State *L)
 static int
 SetInRect(lua_State *L)
 {
-    FUNC(LL_PIX ".SetInRect");
+    LL_FUNC("SetInRect");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
     return ll_push_bool(L, 0 == pixSetInRect(pix, box));
 }
 
 /**
- * \brief Set all pixels inside a Box* (%box) in a Pix* (%pix) to a value (%val)
+ * \brief Set all pixels inside a Box* (%box) in a Pix* (%pix) to a value (%val).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a Box* (box).
@@ -4099,7 +4099,7 @@ SetInRect(lua_State *L)
 static int
 SetInRectArbitrary(lua_State *L)
 {
-    FUNC(LL_PIX ".SetInRectArbitrary");
+    LL_FUNC("SetInRectArbitrary");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
     l_uint32 val = ll_check_l_uint32(_fun, L, 3);
@@ -4107,7 +4107,7 @@ SetInRectArbitrary(lua_State *L)
 }
 
 /**
- * \brief Set the input format of a Pix*
+ * \brief Set the input format of a Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a string with the input format name (format).
@@ -4118,14 +4118,14 @@ SetInRectArbitrary(lua_State *L)
 static int
 SetInputFormat(lua_State *L)
 {
-    FUNC(LL_PIX ".SetInputFormat");
+    LL_FUNC("SetInputFormat");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 format = ll_check_input_format(_fun, L, 2, IFF_UNKNOWN);
     return ll_push_bool(L, 0 == pixSetInputFormat(pix, format));
 }
 
 /**
- * \brief Set the mask for a Pix* (%pixd) from another Pix* (%pixm)
+ * \brief Set the mask for a Pix* (%pixd) from another Pix* (%pixm).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixm) with 1 bit/pixel.
@@ -4137,7 +4137,7 @@ SetInputFormat(lua_State *L)
 static int
 SetMasked(lua_State *L)
 {
-    FUNC(LL_PIX ".SetMasked");
+    LL_FUNC("SetMasked");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixm = ll_check_Pix(_fun, L, 2);
     l_uint32 val = ll_check_l_uint32(_fun, L, 3);
@@ -4145,7 +4145,7 @@ SetMasked(lua_State *L)
 }
 
 /**
- * \brief Set the mask value (%val) for a Pix* (%pixd) at offset (%x,%y) from another Pix* (%pixm)
+ * \brief Set the mask value (%val) for a Pix* (%pixd) at offset (%x,%y) from another Pix* (%pixm).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixm) with 1 bit/pixel.
@@ -4159,7 +4159,7 @@ SetMasked(lua_State *L)
 static int
 SetMaskedGeneral(lua_State *L)
 {
-    FUNC(LL_PIX ".SetMaskedGeneral");
+    LL_FUNC("SetMaskedGeneral");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixm = ll_check_Pix(_fun, L, 2);
     l_uint32 val = ll_check_l_uint32(_fun, L, 3);
@@ -4169,7 +4169,7 @@ SetMaskedGeneral(lua_State *L)
 }
 
 /**
- * \brief Set mirrored border pixels in a Pix* (%pix)
+ * \brief Set mirrored border pixels in a Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (left).
@@ -4183,7 +4183,7 @@ SetMaskedGeneral(lua_State *L)
 static int
 SetMirroredBorder(lua_State *L)
 {
-    FUNC(LL_PIX ".SetMirroredBorder");
+    LL_FUNC("SetMirroredBorder");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 left = ll_check_l_int32(_fun, L, 2);
     l_int32 right = ll_check_l_int32(_fun, L, 3);
@@ -4193,7 +4193,7 @@ SetMirroredBorder(lua_State *L)
 }
 
 /**
- * \brief Set or clear border pixels in a Pix* (%pix)
+ * \brief Set or clear border pixels in a Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (left).
@@ -4208,7 +4208,7 @@ SetMirroredBorder(lua_State *L)
 static int
 SetOrClearBorder(lua_State *L)
 {
-    FUNC(LL_PIX ".SetOrClearBorder");
+    LL_FUNC("SetOrClearBorder");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 left = ll_check_l_int32(_fun, L, 2);
     l_int32 right = ll_check_l_int32(_fun, L, 3);
@@ -4219,7 +4219,7 @@ SetOrClearBorder(lua_State *L)
 }
 
 /**
- * \brief Set pad bits in a Pix* (%pix) to value (%val)
+ * \brief Set pad bits in a Pix* (%pix) to value (%val).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (val).
@@ -4230,14 +4230,14 @@ SetOrClearBorder(lua_State *L)
 static int
 SetPadBits(lua_State *L)
 {
-    FUNC(LL_PIX ".SetPadBits");
+    LL_FUNC("SetPadBits");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 val = ll_check_l_int32(_fun, L, 2);
     return ll_push_bool(L, 0 == pixSetPadBits(pix, val));
 }
 
 /**
- * \brief Set pad bits in a Pix* (%pix) band (%by, %bh) to value (%val)
+ * \brief Set pad bits in a Pix* (%pix) band (%by, %bh) to value (%val).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (by).
@@ -4250,7 +4250,7 @@ SetPadBits(lua_State *L)
 static int
 SetPadBitsBand(lua_State *L)
 {
-    FUNC(LL_PIX ".SetPadBitsBand");
+    LL_FUNC("SetPadBitsBand");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 by = ll_check_l_int32(_fun, L, 2);
     l_int32 bh = ll_check_l_int32(_fun, L, 3);
@@ -4259,7 +4259,7 @@ SetPadBitsBand(lua_State *L)
 }
 
 /**
- * \brief Set a pixel value in Pix*
+ * \brief Set a pixel value in Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a l_int32 (x).
@@ -4272,7 +4272,7 @@ SetPadBitsBand(lua_State *L)
 static int
 SetPixel(lua_State *L)
 {
-    FUNC(LL_PIX ".SetPixel");
+    LL_FUNC("SetPixel");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 x = ll_check_l_int32(_fun, L, 2);
     l_int32 y = ll_check_l_int32(_fun, L, 3);
@@ -4281,7 +4281,7 @@ SetPixel(lua_State *L)
 }
 
 /**
- * \brief Set a pixel column in Pix* (%pixd)
+ * \brief Set a pixel column in Pix* (%pixd).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a l_int32 (col).
@@ -4293,7 +4293,7 @@ SetPixel(lua_State *L)
 static int
 SetPixelColumn(lua_State *L)
 {
-    FUNC(LL_PIX ".SetPixelColumn");
+    LL_FUNC("SetPixelColumn");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     l_int32 col = ll_check_l_int32(_fun, L, 2);
     l_int32 rows = pixGetHeight(pixd);
@@ -4317,7 +4317,7 @@ SetPixelColumn(lua_State *L)
 }
 
 /**
- * \brief Set one component in Pix* (pixd 32bpp) from Pix* (pixs 8bpp)
+ * \brief Set one component in Pix* (pixd 32bpp) from Pix* (pixs 8bpp).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
@@ -4329,7 +4329,7 @@ SetPixelColumn(lua_State *L)
 static int
 SetRGBComponent(lua_State *L)
 {
-    FUNC(LL_PIX ".SetRGBComponent");
+    LL_FUNC("SetRGBComponent");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     l_int32 comp = ll_check_component(_fun, L, 3, L_ALPHA_CHANNEL);
@@ -4337,7 +4337,7 @@ SetRGBComponent(lua_State *L)
 }
 
 /**
- * \brief Set a pixel's RGB values in Pix*
+ * \brief Set a pixel's RGB values in Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a l_int32 (x).
@@ -4352,7 +4352,7 @@ SetRGBComponent(lua_State *L)
 static int
 SetRGBPixel(lua_State *L)
 {
-    FUNC(LL_PIX ".SetRGBPixel");
+    LL_FUNC("SetRGBPixel");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 x = ll_check_l_int32(_fun, L, 2);
     l_int32 y = ll_check_l_int32(_fun, L, 3);
@@ -4363,7 +4363,7 @@ SetRGBPixel(lua_State *L)
 }
 
 /**
- * \brief Set the PIX side resolution (x, y)
+ * \brief Set the PIX side resolution (x, y).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * Arg #2 is expected to be a lua_Integer (xres).
@@ -4375,7 +4375,7 @@ SetRGBPixel(lua_State *L)
 static int
 SetResolution(lua_State *L)
 {
-    FUNC(LL_PIX ".SetResolution");
+    LL_FUNC("SetResolution");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 xres = ll_check_l_int32_default(_fun, L, 2, 300);
     l_int32 yres = ll_check_l_int32_default(_fun, L, 3, xres);
@@ -4383,7 +4383,7 @@ SetResolution(lua_State *L)
 }
 
 /**
- * \brief Set the special value (%special) of a Pix* (%pix)
+ * \brief Set the special value (%special) of a Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (special).
@@ -4394,14 +4394,14 @@ SetResolution(lua_State *L)
 static int
 SetSpecial(lua_State *L)
 {
-    FUNC(LL_PIX ".SetSpecial");
+    LL_FUNC("SetSpecial");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 special = ll_check_l_int32(_fun, L, 2);
     return ll_push_bool(L, 0 == pixSetSpecial(pix, special));
 }
 
 /**
- * \brief Set the Pix* SPP (samples per pixel)
+ * \brief Set the Pix* SPP (samples per pixel).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
@@ -4411,14 +4411,14 @@ SetSpecial(lua_State *L)
 static int
 SetSpp(lua_State *L)
 {
-    FUNC(LL_PIX ".SetSpp");
+    LL_FUNC("SetSpp");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 spp = ll_check_l_int32_default(_fun, L, 2, pixGetSpp(pix));
     return ll_push_bool(L, 0 == pixSetSpp(pix, spp));
 }
 
 /**
- * \brief Set the text of a Pix*
+ * \brief Set the text of a Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a string (text).
@@ -4429,7 +4429,7 @@ SetSpp(lua_State *L)
 static int
 SetText(lua_State *L)
 {
-    FUNC(LL_PIX ".SetText");
+    LL_FUNC("SetText");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     const char* text = ll_check_string(_fun, L, 2);
     lua_pushboolean(L, pixSetText(pix, text));
@@ -4437,7 +4437,7 @@ SetText(lua_State *L)
 }
 
 /**
- * \brief Create a new Pix* (%pixd) from Pix* (%pixs) seting alpha == 0 pixels to a value (%val)
+ * \brief Create a new Pix* (%pixd) from Pix* (%pixs) seting alpha == 0 pixels to a value (%val).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_uint32 (val).
@@ -4448,7 +4448,7 @@ SetText(lua_State *L)
 static int
 SetUnderTransparency(lua_State *L)
 {
-    FUNC(LL_PIX ".SetUnderTransparency");
+    LL_FUNC("SetUnderTransparency");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_uint32 val = ll_check_l_uint32(_fun, L, 2);
     ll_push_Pix(_fun, L, pixSetUnderTransparency(pixs, val, 0));
@@ -4456,7 +4456,7 @@ SetUnderTransparency(lua_State *L)
 }
 
 /**
- * \brief Set all pixels in a Pix* to white
+ * \brief Set all pixels in a Pix* to white.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * </pre>
@@ -4466,13 +4466,13 @@ SetUnderTransparency(lua_State *L)
 static int
 SetWhite(lua_State *L)
 {
-    FUNC(LL_PIX ".SetWhite");
+    LL_FUNC("SetWhite");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     return ll_push_bool(L, 0 == pixSetBlackOrWhite(pix, L_SET_WHITE));
 }
 
 /**
- * \brief Set the Pix* width
+ * \brief Set the Pix* width.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
@@ -4482,14 +4482,14 @@ SetWhite(lua_State *L)
 static int
 SetWidth(lua_State *L)
 {
-    FUNC(LL_PIX ".SetWidth");
+    LL_FUNC("SetWidth");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 width = ll_check_l_int32_default(_fun, L, 2, pixGetWidth(pix));
     return ll_push_bool(L, 0 == pixSetWidth(pix, width));
 }
 
 /**
- * \brief Set the Pix* (%pix) words per line (%wpl)
+ * \brief Set the Pix* (%pix) words per line (%wpl).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
@@ -4499,14 +4499,14 @@ SetWidth(lua_State *L)
 static int
 SetWpl(lua_State *L)
 {
-    FUNC(LL_PIX ".SetWpl");
+    LL_FUNC("SetWpl");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 wpl = ll_check_l_int32_default(_fun, L, 2, pixGetWpl(pix));
     return ll_push_bool(L, 0 == pixSetWpl(pix, wpl));
 }
 
 /**
- * \brief Set the Pix* X resolution
+ * \brief Set the Pix* X resolution.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
@@ -4516,14 +4516,14 @@ SetWpl(lua_State *L)
 static int
 SetXRes(lua_State *L)
 {
-    FUNC(LL_PIX ".SetXRes");
+    LL_FUNC("SetXRes");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 xres = ll_check_l_int32_default(_fun, L, 2, pixGetXRes(pix));
     return ll_push_bool(L, 0 == pixSetXRes(pix, xres));
 }
 
 /**
- * \brief Set the Pix* Y resolution
+ * \brief Set the Pix* Y resolution.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
@@ -4533,14 +4533,14 @@ SetXRes(lua_State *L)
 static int
 SetYRes(lua_State *L)
 {
-    FUNC(LL_PIX ".SetYRes");
+    LL_FUNC("SetYRes");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 yres = ll_check_l_int32_default(_fun, L, 2, pixGetYRes(pix));
     return ll_push_bool(L, 0 == pixSetYRes(pix, yres));
 }
 
 /**
- * \brief Shift and transfer alpha channel from a Pix* (%pixs) to a Pix* (%pixd)
+ * \brief Shift and transfer alpha channel from a Pix* (%pixs) to a Pix* (%pixd).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
@@ -4553,7 +4553,7 @@ SetYRes(lua_State *L)
 static int
 ShiftAndTransferAlpha(lua_State *L)
 {
-    FUNC(LL_PIX ".ShiftAndTransferAlpha");
+    LL_FUNC("ShiftAndTransferAlpha");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     l_int32 shiftx = ll_check_l_int32(_fun, L, 3);
@@ -4563,7 +4563,7 @@ ShiftAndTransferAlpha(lua_State *L)
 }
 
 /**
- * \brief Check if a Pix* is valid
+ * \brief Check if a Pix* is valid.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
@@ -4573,14 +4573,14 @@ ShiftAndTransferAlpha(lua_State *L)
 static int
 SizesEqual(lua_State *L)
 {
-    FUNC(LL_PIX ".SizesEqual");
+    LL_FUNC("SizesEqual");
     Pix *pix1 = ll_check_Pix(_fun, L, 1);
     Pix *pix2 = ll_check_Pix(_fun, L, 2);
     return ll_push_bool(L, 0 == pixSizesEqual(pix1, pix2));
 }
 
 /**
- * \brief Split the distribution for bg/fg in Pix* (%pixs)
+ * \brief Split the distribution for bg/fg in Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (scorefract).
@@ -4592,7 +4592,7 @@ SizesEqual(lua_State *L)
 static int
 SplitDistributionFgBg(lua_State *L)
 {
-    FUNC(LL_PIX ".SplitDistributionFgBg");
+    LL_FUNC("SplitDistributionFgBg");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 scorefract = ll_check_l_float32_default(_fun, L, 2, 0.0f);
     l_int32 factor = ll_check_l_int32_default(_fun, L, 3, 1);
@@ -4608,7 +4608,7 @@ SplitDistributionFgBg(lua_State *L)
 }
 
 /**
- * \brief Swap an destroy a Pix* (pixd) with another Pix* (pixs)
+ * \brief Swap an destroy a Pix* (pixd) with another Pix* (pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
@@ -4619,7 +4619,7 @@ SplitDistributionFgBg(lua_State *L)
 static int
 SwapAndDestroy(lua_State *L)
 {
-    FUNC(LL_PIX ".SwapAndDestroy");
+    LL_FUNC("SwapAndDestroy");
     Pix **ppixd = ll_check_udata<Pix>(_fun, L, 1, LL_PIX);
     Pix **ppixs = ll_check_udata<Pix>(_fun, L, 2, LL_PIX);
     Pix *pixd = ll_check_Pix(_fun, L, 1);
@@ -4631,7 +4631,7 @@ SwapAndDestroy(lua_State *L)
 }
 
 /**
- * \brief Get the thresholds for bg/fg in Pix* (%pixs)
+ * \brief Get the thresholds for bg/fg in Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 factor.
@@ -4642,7 +4642,7 @@ SwapAndDestroy(lua_State *L)
 static int
 ThresholdForFgBg(lua_State *L)
 {
-    FUNC(LL_PIX ".ThresholdForFgBg");
+    LL_FUNC("ThresholdForFgBg");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 factor = ll_check_l_int32_default(_fun, L, 2, 1);
     l_int32 thresh = ll_check_l_int32_default(_fun, L, 3, 0);
@@ -4656,7 +4656,7 @@ ThresholdForFgBg(lua_State *L)
 }
 
 /**
- * \brief Check if the pixel sum of Pix* (%pixs) is above threshold (%thresh)
+ * \brief Check if the pixel sum of Pix* (%pixs) is above threshold (%thresh).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (thresh).
@@ -4667,7 +4667,7 @@ ThresholdForFgBg(lua_State *L)
 static int
 ThresholdPixelSum(lua_State *L)
 {
-    FUNC(LL_PIX ".ThresholdPixelSum");
+    LL_FUNC("ThresholdPixelSum");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 thresh = ll_check_l_int32(_fun, L, 2);
     l_int32 above = 0;
@@ -4678,7 +4678,7 @@ ThresholdPixelSum(lua_State *L)
 }
 
 /**
- * \brief Transfer all data from a Pix* (pixs) to self (pixd)
+ * \brief Transfer all data from a Pix* (pixs) to self (pixd).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
@@ -4691,7 +4691,7 @@ ThresholdPixelSum(lua_State *L)
 static int
 TransferAllData(lua_State *L)
 {
-    FUNC(LL_PIX ".TransferAllData");
+    LL_FUNC("TransferAllData");
     Pix **ppixs = ll_check_udata<Pix>(_fun, L, 2, LL_PIX);
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
@@ -4703,7 +4703,7 @@ TransferAllData(lua_State *L)
 }
 
 /**
- * \brief Convert a binary 1bpp Pix* (%pixs) to a depth bpp Pix* (%pix)
+ * \brief Convert a binary 1bpp Pix* (%pixs) to a depth bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (depth).
@@ -4715,7 +4715,7 @@ TransferAllData(lua_State *L)
 static int
 UnpackBinary(lua_State *L)
 {
-    FUNC(LL_PIX ".UnpackBinary");
+    LL_FUNC("UnpackBinary");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 depth = ll_check_l_int32_default(_fun, L, 2, 8);
     l_int32 invert = ll_check_boolean(_fun, L, 3);
@@ -4723,7 +4723,7 @@ UnpackBinary(lua_State *L)
 }
 
 /**
- * \brief Build the variance by column of Pix* (%pixs)
+ * \brief Build the variance by column of Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is optional and, if given, expected to be a Box* (box).
@@ -4734,7 +4734,7 @@ UnpackBinary(lua_State *L)
 static int
 VarianceByColumn(lua_State *L)
 {
-    FUNC(LL_PIX ".VarianceByColumn");
+    LL_FUNC("VarianceByColumn");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box_opt(_fun, L, 2);
     Numa* na = pixVarianceByColumn(pixs, box);
@@ -4742,7 +4742,7 @@ VarianceByColumn(lua_State *L)
 }
 
 /**
- * \brief Build the variance by row of Pix* (%pixs)
+ * \brief Build the variance by row of Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is optional and, if given, expected to be a Box* (box).
@@ -4753,7 +4753,7 @@ VarianceByColumn(lua_State *L)
 static int
 VarianceByRow(lua_State *L)
 {
-    FUNC(LL_PIX ".VarianceByRow");
+    LL_FUNC("VarianceByRow");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box_opt(_fun, L, 2);
     Numa* na = pixVarianceByRow(pixs, box);
@@ -4761,7 +4761,7 @@ VarianceByRow(lua_State *L)
 }
 
 /**
- * \brief Build the square root of the variance inside a Box* (%box) of Pix* (%pixs)
+ * \brief Build the square root of the variance inside a Box* (%box) of Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is optional and, if given, expected to be a Box* (box).
@@ -4772,7 +4772,7 @@ VarianceByRow(lua_State *L)
 static int
 VarianceInRect(lua_State *L)
 {
-    FUNC(LL_PIX ".VarianceInRect");
+    LL_FUNC("VarianceInRect");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box_opt(_fun, L, 2);
     l_float32 sqrvar = 0.0f;
@@ -4783,7 +4783,7 @@ VarianceInRect(lua_State *L)
 }
 
 /**
- * \brief Write the Pix* (%pix) to an external file (%filename)
+ * \brief Write the Pix* (%pix) to an external file (%filename).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a string (filename).
@@ -4795,7 +4795,7 @@ VarianceInRect(lua_State *L)
 static int
 Write(lua_State *L)
 {
-    FUNC(LL_PIX ".Write");
+    LL_FUNC("Write");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
     l_int32 format = ll_check_input_format(_fun, L, 3, IFF_DEFAULT);
@@ -4803,7 +4803,7 @@ Write(lua_State *L)
 }
 
 /**
- * \brief Write the Pix* (%pix) to memory and return it as a Lua string
+ * \brief Write the Pix* (%pix) to memory and return it as a Lua string.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa* user data.
  * Arg #2 is expected to be a string with the input format name (format).
@@ -4814,7 +4814,7 @@ Write(lua_State *L)
 static int
 WriteMem(lua_State *L)
 {
-    FUNC(LL_PIX ".WriteMem");
+    LL_FUNC("WriteMem");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 format = ll_check_input_format(_fun, L, 2, IFF_DEFAULT);
     l_uint8 *data = nullptr;
@@ -4827,7 +4827,7 @@ WriteMem(lua_State *L)
 }
 
 /**
- * \brief Write the Pix* (%pix) to a Lua io stream (%stream)
+ * \brief Write the Pix* (%pix) to a Lua io stream (%stream).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a luaL_Stream* (stream).
@@ -4839,7 +4839,7 @@ WriteMem(lua_State *L)
 static int
 WriteStream(lua_State *L)
 {
-    FUNC(LL_PIX ".WriteStream");
+    LL_FUNC("WriteStream");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 1);
     l_int32 format = ll_check_input_format(_fun, L, 3, IFF_DEFAULT);
@@ -4847,7 +4847,7 @@ WriteStream(lua_State *L)
 }
 
 /**
- * \brief Check if all pixels in Pix* (%pixs) are 0
+ * \brief Check if all pixels in Pix* (%pixs) are 0.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
@@ -4857,7 +4857,7 @@ WriteStream(lua_State *L)
 static int
 Zero(lua_State *L)
 {
-    FUNC(LL_PIX ".Zero");
+    LL_FUNC("Zero");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 empty = 0;
     if (pixZero(pixs, &empty))
@@ -4867,7 +4867,7 @@ Zero(lua_State *L)
 }
 
 /**
- * \brief Get the range values for Pix* (%pixs)
+ * \brief Get the range values for Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
@@ -4879,7 +4879,7 @@ Zero(lua_State *L)
 static int
 GetRangeValues(lua_State *L)
 {
-    FUNC(LL_PIX ".GetRangeValues");
+    LL_FUNC("GetRangeValues");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 factor = ll_check_l_int32_default(_fun, L, 2, 1);
     l_int32 color = ll_check_select_color(_fun, L, 3, L_SELECT_RED);
@@ -4892,7 +4892,7 @@ GetRangeValues(lua_State *L)
     return 2;
 }
 /**
- * \brief Check Lua stack at index %arg for udata of class LL_PIX
+ * \brief Check Lua stack at index %arg for udata of class LL_PIX.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -4904,7 +4904,7 @@ ll_check_Pix(const char *_fun, lua_State *L, int arg)
     return *ll_check_udata<Pix>(_fun, L, arg, LL_PIX);
 }
 /**
- * \brief Optionally expect a LL_PIX at index %arg on the Lua stack
+ * \brief Optionally expect a LL_PIX at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -4918,7 +4918,7 @@ ll_check_Pix_opt(const char *_fun, lua_State *L, int arg)
     return ll_check_Pix(_fun, L, arg);
 }
 /**
- * \brief Push PIX to the Lua stack and set its meta table
+ * \brief Push PIX to the Lua stack and set its meta table.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param pix pointer to the PIX
@@ -4932,7 +4932,7 @@ ll_push_Pix(const char *_fun, lua_State *L, Pix *pix)
     return ll_push_udata(_fun, L, LL_PIX, pix);
 }
 /**
- * \brief Create and push a new Pix*
+ * \brief Create and push a new Pix*.
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
  */
@@ -4942,7 +4942,7 @@ ll_new_Pix(lua_State *L)
     return Create(L);
 }
 /**
- * \brief Register the PIX methods and functions in the LL_PIX meta table
+ * \brief Register the PIX methods and functions in the LL_PIX meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */

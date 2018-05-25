@@ -37,9 +37,11 @@
  *
  *====================================================================*/
 
+/** Define a function's name (_fun) with prefix LL_PTAA */
+#define LL_FUNC(x) FUNC(LL_PTAA "." x)
 
 /**
- * \brief Destroy a Ptaa*
+ * \brief Destroy a Ptaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
  * </pre>
@@ -49,7 +51,7 @@
 static int
 Destroy(lua_State *L)
 {
-    FUNC(LL_PTAA ".Destroy");
+    LL_FUNC("Destroy");
     Ptaa **pptaa = ll_check_udata<Ptaa>(_fun, L, 1, LL_PTAA);
     Ptaa *ptaa = *pptaa;
     DBG(LOG_DESTROY, "%s: '%s' pptaa=%p ptaa=%p count=%d\n",
@@ -60,7 +62,7 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Create a new Ptaa*
+ * \brief Create a new Ptaa*.
  * <pre>
  * Arg #1 is expected to be a l_int32 (n).
  * </pre>
@@ -70,14 +72,14 @@ Destroy(lua_State *L)
 static int
 Create(lua_State *L)
 {
-    FUNC(LL_PTAA ".Create");
+    LL_FUNC("Create");
     l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
     Ptaa *ptaa = ptaaCreate(n);
     return ll_push_Ptaa(_fun, L, ptaa);
 }
 
 /**
- * \brief Get the number of arrays stored in the Ptaa*
+ * \brief Get the number of arrays stored in the Ptaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
  * </pre>
@@ -87,7 +89,7 @@ Create(lua_State *L)
 static int
 GetCount(lua_State *L)
 {
-    FUNC(LL_PTAA ".GetCount");
+    LL_FUNC("GetCount");
     Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
     l_int32 n = ptaaGetCount(ptaa);
     lua_pushinteger(L, n);
@@ -95,7 +97,7 @@ GetCount(lua_State *L)
 }
 
 /**
- * \brief Get the Pta* in the Ptaa* at index %idx
+ * \brief Get the Pta* in the Ptaa* at index %idx.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
  * Arg #2 is expected to be a Pta* user data.
@@ -107,7 +109,7 @@ GetCount(lua_State *L)
 static int
 AddPta(lua_State *L)
 {
-    FUNC(LL_PTAA ".AddPta");
+    LL_FUNC("AddPta");
     Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
     Pta *pta = ll_check_Pta(_fun, L, 2);
     l_int32 copyflag = ll_check_access_storage(_fun, L, 3, L_COPY);
@@ -115,7 +117,7 @@ AddPta(lua_State *L)
 }
 
 /**
- * \brief Get the Point stored in the Ptaa* at Pta* index %ipta and Point index %jpt
+ * \brief Get the Point stored in the Ptaa* at Pta* index %ipta and Point index %jpt.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
  * Arg #2 is expected to be a l_int32 (ipta).
@@ -127,7 +129,7 @@ AddPta(lua_State *L)
 static int
 GetPt(lua_State *L)
 {
-    FUNC(LL_PTAA ".GetPt");
+    LL_FUNC("GetPt");
     Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
     l_int32 ipta = ll_check_index(_fun, L, 2, ptaaGetCount(ptaa));
     l_int32 ipt = ll_check_index(_fun, L, 3, INT32_MAX);
@@ -141,7 +143,7 @@ GetPt(lua_State *L)
 }
 
 /**
- * \brief Get the Pta* in the Ptaa* at index %idx
+ * \brief Get the Pta* in the Ptaa* at index %idx.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
  * Arg #2 is expected to be a l_int32 (idx).
@@ -153,7 +155,7 @@ GetPt(lua_State *L)
 static int
 GetPta(lua_State *L)
 {
-    FUNC(LL_PTAA ".GetPta");
+    LL_FUNC("GetPta");
     Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, ptaaGetCount(ptaa));
     l_int32 accessflag = ll_check_access_storage(_fun, L, 3, L_COPY);
@@ -162,7 +164,7 @@ GetPta(lua_State *L)
 }
 
 /**
- * \brief Read a Ptaa* from an external file
+ * \brief Read a Ptaa* from an external file.
  * <pre>
  * Arg #1 is expected to be a string containing the filename.
  * </pre>
@@ -172,14 +174,14 @@ GetPta(lua_State *L)
 static int
 Read(lua_State *L)
 {
-    FUNC(LL_PTAA ".Read");
+    LL_FUNC("Read");
     const char *filename = ll_check_string(_fun, L, 1);
     Ptaa *ptaa = ptaaRead(filename);
     return ll_push_Ptaa(_fun, L, ptaa);
 }
 
 /**
- * \brief Read a Ptaa* from a Lua string (%data)
+ * \brief Read a Ptaa* from a Lua string (%data).
  * <pre>
  * Arg #1 is expected to be a string (data).
  * </pre>
@@ -189,7 +191,7 @@ Read(lua_State *L)
 static int
 ReadMem(lua_State *L)
 {
-    FUNC(LL_PTAA ".ReadMem");
+    LL_FUNC("ReadMem");
     size_t len;
     const char *data = ll_check_lstring(_fun, L, 1, &len);
     Ptaa *ptaa = ptaaReadMem(reinterpret_cast<const l_uint8 *>(data), len);
@@ -197,7 +199,7 @@ ReadMem(lua_State *L)
 }
 
 /**
- * \brief Read a Ptaa* from a Lua io stream (%stream)
+ * \brief Read a Ptaa* from a Lua io stream (%stream).
  * <pre>
  * Arg #1 is expected to be a luaL_Stream* (stream).
  * </pre>
@@ -207,14 +209,14 @@ ReadMem(lua_State *L)
 static int
 ReadStream(lua_State *L)
 {
-    FUNC(LL_PTAA ".ReadStream");
+    LL_FUNC("ReadStream");
     luaL_Stream *stream = ll_check_stream(_fun, L, 1);
     Ptaa *ptaa = ptaaReadStream(stream->f);
     return ll_push_Ptaa(_fun, L, ptaa);
 }
 
 /**
- * \brief Replace a Pta* in the Ptaa* at %idx
+ * \brief Replace a Pta* in the Ptaa* at %idx.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
  * Arg #2 is expected to be a l_int32 (idx).
@@ -226,7 +228,7 @@ ReadStream(lua_State *L)
 static int
 ReplacePta(lua_State *L)
 {
-    FUNC(LL_PTAA ".ReplacePta");
+    LL_FUNC("ReplacePta");
     Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, ptaaGetCount(ptaa));
     Pta *pta = ll_check_Pta(_fun, L, 3);
@@ -234,7 +236,7 @@ ReplacePta(lua_State *L)
 }
 
 /**
- * \brief Truncate the arrays stored in the Ptaa*
+ * \brief Truncate the arrays stored in the Ptaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
  * </pre>
@@ -244,13 +246,13 @@ ReplacePta(lua_State *L)
 static int
 Truncate(lua_State *L)
 {
-    FUNC(LL_PTAA ".Truncate");
+    LL_FUNC("Truncate");
     Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
     return ll_push_bool(L, 0 == ptaaTruncate(ptaa));
 }
 
 /**
- * \brief Write the Ptaa* (%ptaa) to an external file (%filename)
+ * \brief Write the Ptaa* (%ptaa) to an external file (%filename).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
  * Arg #2 is expected to be string containing the filename.
@@ -266,7 +268,7 @@ Truncate(lua_State *L)
 static int
 Write(lua_State *L)
 {
-    FUNC(LL_PTAA ".Write");
+    LL_FUNC("Write");
     Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
     l_int32 type = ll_check_boolean_default(_fun, L, 3, FALSE);
@@ -274,7 +276,7 @@ Write(lua_State *L)
 }
 
 /**
- * \brief Write the Ptaa* (%ptaa) to memory and return it as a Lua string
+ * \brief Write the Ptaa* (%ptaa) to memory and return it as a Lua string.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
  * Arg #2 is optional and, if given, expected to be a boolean (type)
@@ -289,7 +291,7 @@ Write(lua_State *L)
 static int
 WriteMem(lua_State *L)
 {
-    FUNC(LL_PTAA ".WriteMem");
+    LL_FUNC("WriteMem");
     Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
     l_int32 type = ll_check_boolean_default(_fun, L, 2, FALSE);
     l_uint8 *data = nullptr;
@@ -302,7 +304,7 @@ WriteMem(lua_State *L)
 }
 
 /**
- * \brief Write the Ptaa* to an external file
+ * \brief Write the Ptaa* to an external file.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
  * Arg #2 is expected to be a luaL_Stream* (stream).
@@ -318,7 +320,7 @@ WriteMem(lua_State *L)
 static int
 WriteStream(lua_State *L)
 {
-    FUNC(LL_PTAA ".WriteStream");
+    LL_FUNC("WriteStream");
     Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
     l_int32 type = ll_check_boolean_default(_fun, L, 3, FALSE);
@@ -326,7 +328,7 @@ WriteStream(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class LL_PTAA
+ * \brief Check Lua stack at index %arg for udata of class LL_PTAA.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -339,7 +341,7 @@ ll_check_Ptaa(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Optionally expect a LL_PTAA at index %arg on the Lua stack
+ * \brief Optionally expect a LL_PTAA at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -354,7 +356,7 @@ ll_check_Ptaa_opt(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Push PTAA user data to the Lua stack and set its meta table
+ * \brief Push PTAA user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param ptaa pointer to the PTAA
@@ -369,7 +371,7 @@ ll_push_Ptaa(const char *_fun, lua_State *L, Ptaa *ptaa)
 }
 
 /**
- * \brief Create and push a new Ptaa*
+ * \brief Create and push a new Ptaa*.
  * \param L pointer to the lua_State
  * \return 1 Ptaa* on the Lua stack
  */
@@ -379,7 +381,7 @@ ll_new_Ptaa(lua_State *L)
     return Create(L);
 }
 /**
- * \brief Register the PTAA methods and functions in the LL_PTAA meta table
+ * \brief Register the PTAA methods and functions in the LL_PTAA meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */

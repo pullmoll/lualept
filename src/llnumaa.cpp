@@ -38,8 +38,11 @@
  *====================================================================*/
 
 
+/** Define a function's name (_fun) with prefix LL_NUMAA */
+#define LL_FUNC(x) FUNC(LL_NUMAA "." x)
+
 /**
- * \brief Destroy a Numaa*
+ * \brief Destroy a Numaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numaa*.
  * </pre>
@@ -49,7 +52,7 @@
 static int
 Destroy(lua_State *L)
 {
-    FUNC(LL_NUMAA ".Destroy");
+    LL_FUNC("Destroy");
     Numaa **pnaa = ll_check_udata<Numaa>(_fun, L, 1, LL_NUMAA);
     Numaa *naa = *pnaa;
     DBG(LOG_DESTROY, "%s: '%s' pnaa=%p naa=%p count=%d\n",
@@ -60,7 +63,7 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Create a new Numaa*
+ * \brief Create a new Numaa*.
  * <pre>
  * Arg #1 is expected to be a l_int32 (n).
  * </pre>
@@ -70,14 +73,14 @@ Destroy(lua_State *L)
 static int
 Create(lua_State *L)
 {
-    FUNC(LL_NUMAA ".Create");
+    LL_FUNC("Create");
     l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
     Numaa *naa = numaaCreate(n);
     return ll_push_Numaa(_fun, L, naa);
 }
 
 /**
- * \brief Get the number of arrays stored in the Numaa* (%naa)
+ * \brief Get the number of arrays stored in the Numaa* (%naa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numaa* (naa).
  * </pre>
@@ -87,7 +90,7 @@ Create(lua_State *L)
 static int
 GetCount(lua_State *L)
 {
-    FUNC(LL_NUMAA ".GetCount");
+    LL_FUNC("GetCount");
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
     l_int32 n = numaaGetCount(naa);
     lua_pushinteger(L, n);
@@ -95,7 +98,7 @@ GetCount(lua_State *L)
 }
 
 /**
- * \brief Printable string for a Numaa*
+ * \brief Printable string for a Numaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numaa*.
  * </pre>
@@ -105,7 +108,7 @@ GetCount(lua_State *L)
 static int
 toString(lua_State *L)
 {
-    FUNC(LL_NUMAA ".toString");
+    LL_FUNC("toString");
     static char str[256];
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
     luaL_Buffer B;
@@ -137,7 +140,7 @@ toString(lua_State *L)
 }
 
 /**
- * \brief Add the Numa* (%na) to the Numaa* (%naa)
+ * \brief Add the Numa* (%na) to the Numaa* (%naa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numaa* (naa).
  * Arg #2 is expected to be a Numa* (na).
@@ -149,7 +152,7 @@ toString(lua_State *L)
 static int
 AddNuma(lua_State *L)
 {
-    FUNC(LL_NUMAA ".AddNuma");
+    LL_FUNC("AddNuma");
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
     Numa *na = ll_check_Numa(_fun, L, 2);
     l_int32 copyflag = ll_check_access_storage(_fun, L, 3, L_CLONE);
@@ -157,7 +160,7 @@ AddNuma(lua_State *L)
 }
 
 /**
- * \brief Flatten the Numaa* (%naa) to a Numa* (%na)
+ * \brief Flatten the Numaa* (%naa) to a Numa* (%na).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numaa*.
  * </pre>
@@ -167,14 +170,14 @@ AddNuma(lua_State *L)
 static int
 FlattenToNuma(lua_State *L)
 {
-    FUNC(LL_NUMAA ".FlattenToNuma");
+    LL_FUNC("FlattenToNuma");
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
     Numa *na = numaaFlattenToNuma(naa);
     return ll_push_Numa(_fun, L, na);
 }
 
 /**
- * \brief Get the Numa* (%na) from the Numaa* (%naa) at index (%idx)
+ * \brief Get the Numa* (%na) from the Numaa* (%naa) at index (%idx).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numaa* (naa).
  * Arg #2 is expected to be a l_int32 (idx).
@@ -186,7 +189,7 @@ FlattenToNuma(lua_State *L)
 static int
 GetNuma(lua_State *L)
 {
-    FUNC(LL_NUMAA ".GetNuma");
+    LL_FUNC("GetNuma");
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, numaaGetCount(naa));
     l_int32 accessflag = ll_check_access_storage(_fun, L, 3, L_CLONE);
@@ -195,7 +198,7 @@ GetNuma(lua_State *L)
 }
 
 /**
- * \brief Get the number of numbers stored in the Numaa* (%naa) at index (%idx)
+ * \brief Get the number of numbers stored in the Numaa* (%naa) at index (%idx).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numaa* (naa).
  * Arg #2 is expected to be a l_int32 (idx).
@@ -206,7 +209,7 @@ GetNuma(lua_State *L)
 static int
 GetNumaCount(lua_State *L)
 {
-    FUNC(LL_NUMAA ".GetNumaCount");
+    LL_FUNC("GetNumaCount");
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, numaaGetCount(naa));
     l_int32 n = numaaGetNumaCount(naa, idx);
@@ -215,7 +218,7 @@ GetNumaCount(lua_State *L)
 }
 
 /**
- * \brief Get the number of numbers stored in the entire Numaa* (%naa)
+ * \brief Get the number of numbers stored in the entire Numaa* (%naa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numaa* (naa).
  * </pre>
@@ -225,7 +228,7 @@ GetNumaCount(lua_State *L)
 static int
 GetNumberCount(lua_State *L)
 {
-    FUNC(LL_NUMAA ".GetNumberCount");
+    LL_FUNC("GetNumberCount");
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
     l_int32 n = numaaGetNumberCount(naa);
     lua_pushinteger(L, n);
@@ -233,7 +236,7 @@ GetNumberCount(lua_State *L)
 }
 
 /**
- * \brief Read a Numaa* (%naa) from an external file (%filename)
+ * \brief Read a Numaa* (%naa) from an external file (%filename).
  * <pre>
  * Arg #1 is expected to be a string (filename).
  * </pre>
@@ -243,14 +246,14 @@ GetNumberCount(lua_State *L)
 static int
 Read(lua_State *L)
 {
-    FUNC(LL_NUMAA ".Read");
+    LL_FUNC("Read");
     const char *filename = ll_check_string(_fun, L, 1);
     Numaa *naa = numaaRead(filename);
     return ll_push_Numaa(_fun, L, naa);
 }
 
 /**
- * \brief Read a Numaa* from a Lua string (%data)
+ * \brief Read a Numaa* from a Lua string (%data).
  * <pre>
  * Arg #1 is expected to be a string (data).
  * </pre>
@@ -260,7 +263,7 @@ Read(lua_State *L)
 static int
 ReadMem(lua_State *L)
 {
-    FUNC(LL_NUMAA ".ReadMem");
+    LL_FUNC("ReadMem");
     size_t len;
     const char *data = ll_check_lstring(_fun, L, 1, &len);
     Numaa *naa = numaaReadMem(reinterpret_cast<const l_uint8 *>(data), len);
@@ -268,7 +271,7 @@ ReadMem(lua_State *L)
 }
 
 /**
- * \brief Read a Numaa* (%naa) from a Lua io stream (%stream)
+ * \brief Read a Numaa* (%naa) from a Lua io stream (%stream).
  * <pre>
  * Arg #1 is expected to be a luaL_Stream* (stream).
  * </pre>
@@ -278,14 +281,14 @@ ReadMem(lua_State *L)
 static int
 ReadStream(lua_State *L)
 {
-    FUNC(LL_NUMAA ".ReadStream");
+    LL_FUNC("ReadStream");
     luaL_Stream *stream = ll_check_stream(_fun, L, 1);
     Numaa *naa = numaaReadStream(stream->f);
     return ll_push_Numaa(_fun, L, naa);
 }
 
 /**
- * \brief Replace a Numa* in the Numaa* at %idx
+ * \brief Replace a Numa* in the Numaa* at %idx.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numaa* (naa).
  * Arg #2 is expected to be a l_int32 (idx).
@@ -297,7 +300,7 @@ ReadStream(lua_State *L)
 static int
 ReplaceNuma(lua_State *L)
 {
-    FUNC(LL_NUMAA ".ReplaceNuma");
+    LL_FUNC("ReplaceNuma");
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, numaaGetCount(naa));
     Numa *na = ll_check_Numa(_fun, L, 3);
@@ -305,7 +308,7 @@ ReplaceNuma(lua_State *L)
 }
 
 /**
- * \brief Truncate the arrays stored in the Numaa*
+ * \brief Truncate the arrays stored in the Numaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numaa*.
  * </pre>
@@ -315,13 +318,13 @@ ReplaceNuma(lua_State *L)
 static int
 Truncate(lua_State *L)
 {
-    FUNC(LL_NUMAA ".Truncate");
+    LL_FUNC("Truncate");
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
     return ll_push_bool(L, 0 == numaaTruncate(naa));
 }
 
 /**
- * \brief Write the Numaa* to an external file
+ * \brief Write the Numaa* to an external file.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numaa*.
  * Arg #2 is expected to be string containing the filename.
@@ -332,14 +335,14 @@ Truncate(lua_State *L)
 static int
 Write(lua_State *L)
 {
-    FUNC(LL_NUMAA ".Write");
+    LL_FUNC("Write");
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
     return ll_push_bool(L, 0 == numaaWrite(filename, naa));
 }
 
 /**
- * \brief Write the Numaa* (%naa) to memory and return it as a Lua string
+ * \brief Write the Numaa* (%naa) to memory and return it as a Lua string.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numaa* user data.
  * </pre>
@@ -349,7 +352,7 @@ Write(lua_State *L)
 static int
 WriteMem(lua_State *L)
 {
-    FUNC(LL_NUMAA ".WriteMem");
+    LL_FUNC("WriteMem");
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
     l_uint8 *data = nullptr;
     size_t size = 0;
@@ -361,7 +364,7 @@ WriteMem(lua_State *L)
 }
 
 /**
- * \brief Write the Numaa* (%naa) to a Lua io stream (%stream)
+ * \brief Write the Numaa* (%naa) to a Lua io stream (%stream).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numaa*.
  * Arg #2 is expected to be string containing the filename.
@@ -372,14 +375,14 @@ WriteMem(lua_State *L)
 static int
 WriteStream(lua_State *L)
 {
-    FUNC(LL_NUMAA ".WriteStream");
+    LL_FUNC("WriteStream");
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
     return ll_push_bool(L, 0 == numaaWriteStream(stream->f, naa));
 }
 
 /**
- * \brief Create a full new Numaa*
+ * \brief Create a full new Numaa*.
  * <pre>
  * Arg #1 is expected to be a l_int32 (nptr).
  * Arg #1 is expected to be a l_int32 (n).
@@ -390,7 +393,7 @@ WriteStream(lua_State *L)
 static int
 CreateFull(lua_State *L)
 {
-    FUNC(LL_NUMAA ".CreateFull");
+    LL_FUNC("CreateFull");
     l_int32 nptr = ll_check_l_int32_default(_fun, L, 1, 1);
     l_int32 n = ll_check_l_int32_default(_fun, L, 2, 1);
     Numaa *naa = numaaCreateFull(nptr, n);
@@ -398,7 +401,7 @@ CreateFull(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class LL_NUMAA
+ * \brief Check Lua stack at index %arg for udata of class LL_NUMAA.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -411,7 +414,7 @@ ll_check_Numaa(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Optionally expect a LL_NUMAA at index %arg on the Lua stack
+ * \brief Optionally expect a LL_NUMAA at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -426,7 +429,7 @@ ll_check_Numaa_opt(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Push Numaa* user data to the Lua stack and set its meta table
+ * \brief Push Numaa* user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param naa pointer to the NUMAA
@@ -441,7 +444,7 @@ ll_push_Numaa(const char *_fun, lua_State *L, Numaa *naa)
 }
 
 /**
- * \brief Create and push a new Numaa*
+ * \brief Create and push a new Numaa*.
  * \param L pointer to the lua_State
  * \return 1 Numaa* on the Lua stack
  */
@@ -451,7 +454,7 @@ ll_new_Numaa(lua_State *L)
     return Create(L);
 }
 /**
- * \brief Register the NUMAA methods and functions in the LL_NUMAA meta table
+ * \brief Register the NUMAA methods and functions in the LL_NUMAA meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */

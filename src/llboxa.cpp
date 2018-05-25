@@ -37,10 +37,11 @@
  *
  *====================================================================*/
 
-
+/** Define a function's name (_fun) with prefix LL_BOXA */
+#define LL_FUNC(x) FUNC(LL_BOXA "." x)
 
 /**
- * \brief Destroy a Boxa*
+ * \brief Destroy a Boxa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa*.
  * </pre>
@@ -50,7 +51,7 @@
 static int
 Destroy(lua_State *L)
 {
-    FUNC(LL_BOXA ".Destroy");
+    LL_FUNC("Destroy");
     Boxa **pboxa = ll_check_udata<Boxa>(_fun, L, 1, LL_BOXA);
     Boxa *boxa = *pboxa;
     DBG(LOG_DESTROY, "%s: '%s' pboxa=%p boxa=%p count=%d\n",
@@ -61,7 +62,7 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Create a new Boxa*
+ * \brief Create a new Boxa*.
  * <pre>
  * Arg #1 is expected to be a l_int32 (n).
  * </pre>
@@ -71,14 +72,14 @@ Destroy(lua_State *L)
 static int
 Create(lua_State *L)
 {
-    FUNC(LL_BOXA ".Create");
+    LL_FUNC("Create");
     l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
     Boxa *boxa = boxaCreate(n);
     return ll_push_Boxa(_fun, L, boxa);
 }
 
 /**
- * \brief Get count for a Boxa*
+ * \brief Get count for a Boxa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa*.
  * </pre>
@@ -88,14 +89,14 @@ Create(lua_State *L)
 static int
 GetCount(lua_State *L)
 {
-    FUNC(LL_BOXA ".GetCount");
+    LL_FUNC("GetCount");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     lua_pushinteger(L, boxaGetCount(boxa));
     return 1;
 }
 
 /**
- * \brief Printable string for a Boxa*
+ * \brief Printable string for a Boxa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa*.
  * </pre>
@@ -105,7 +106,7 @@ GetCount(lua_State *L)
 static int
 toString(lua_State *L)
 {
-    FUNC(LL_BOXA ".toString");
+    LL_FUNC("toString");
     static char str[256];
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     luaL_Buffer B;
@@ -131,7 +132,7 @@ toString(lua_State *L)
 }
 
 /**
- * \brief Add a Box* to a Boxa*
+ * \brief Add a Box* to a Boxa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa*.
  * Arg #2 is expected to be a Box*.
@@ -142,7 +143,7 @@ toString(lua_State *L)
 static int
 AddBox(lua_State *L)
 {
-    FUNC(LL_BOXA ".AddBox");
+    LL_FUNC("AddBox");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
     l_int32 flag = ll_check_access_storage(_fun, L, 3, L_COPY);
@@ -150,7 +151,7 @@ AddBox(lua_State *L)
 }
 
 /**
- * \brief Adjust height of boxes changing (%sides) in a Boxa* (%boxas) to a (%target)
+ * \brief Adjust height of boxes changing (%sides) in a Boxa* (%boxas) to a (%target).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a string describing the side (sides).
@@ -163,7 +164,7 @@ AddBox(lua_State *L)
 static int
 AdjustHeightToTarget(lua_State *L)
 {
-    FUNC(LL_BOXA ".AdjustHeightToTarget");
+    LL_FUNC("AdjustHeightToTarget");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 sides = ll_check_adjust_sides(_fun, L, 2, 0);
     l_int32 target = ll_check_l_int32_default(_fun, L, 3, 0);
@@ -174,7 +175,7 @@ AdjustHeightToTarget(lua_State *L)
 }
 
 /**
- * \brief Adjust sides of boxes in a Boxa* (%boxas)
+ * \brief Adjust sides of boxes in a Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_int32 (delleft).
@@ -188,7 +189,7 @@ AdjustHeightToTarget(lua_State *L)
 static int
 AdjustSides(lua_State *L)
 {
-    FUNC(LL_BOXA ".AdjustSides");
+    LL_FUNC("AdjustSides");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 delleft = ll_check_l_int32_default(_fun, L, 2, 0);
     l_int32 delright = ll_check_l_int32_default(_fun, L, 3, 0);
@@ -200,7 +201,7 @@ AdjustSides(lua_State *L)
 }
 
 /**
- * \brief Adjust width of boxes changing (%sides) in a Boxa* (%boxas) to a (%target)
+ * \brief Adjust width of boxes changing (%sides) in a Boxa* (%boxas) to a (%target).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a string describing the side (sides).
@@ -213,7 +214,7 @@ AdjustSides(lua_State *L)
 static int
 AdjustWidthToTarget(lua_State *L)
 {
-    FUNC(LL_BOXA ".AdjustWidthToTarget");
+    LL_FUNC("AdjustWidthToTarget");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 sides = ll_check_adjust_sides(_fun, L, 2, 0);
     l_int32 target = ll_check_l_int32_default(_fun, L, 3, 0);
@@ -224,7 +225,7 @@ AdjustWidthToTarget(lua_State *L)
 }
 
 /**
- * \brief Affine transformation of the boxes in the Boxa* (%boxas)
+ * \brief Affine transformation of the boxes in the Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a table of 3x3 l_float32 (mat).
@@ -237,7 +238,7 @@ AdjustWidthToTarget(lua_State *L)
 static int
 AffineTransform(lua_State *L)
 {
-    FUNC(LL_BOXA ".AffineTransform");
+    LL_FUNC("AffineTransform");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 i, n;
     l_float32 *mat;
@@ -261,7 +262,7 @@ AffineTransform(lua_State *L)
 }
 
 /**
- * \brief Sort a (large number of) Boxa* (%boxas) by given type (%type) and order (%order)
+ * \brief Sort a (large number of) Boxa* (%boxas) by given type (%type) and order (%order).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a string defining the sort type (type).
@@ -273,7 +274,7 @@ AffineTransform(lua_State *L)
 static int
 BinSort(lua_State *L)
 {
-    FUNC(LL_BOXA ".BinSort");
+    LL_FUNC("BinSort");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 type = ll_check_sort_by(_fun, L, 2, L_SORT_BY_X);
     l_int32 order = ll_check_sort_order(_fun, L, 3, L_SORT_INCREASING);
@@ -283,7 +284,7 @@ BinSort(lua_State *L)
 }
 
 /**
- * \brief Clear the Boxa* (%boxa)
+ * \brief Clear the Boxa* (%boxa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * </pre>
@@ -293,13 +294,13 @@ BinSort(lua_State *L)
 static int
 Clear(lua_State *L)
 {
-    FUNC(LL_BOXA ".Clear");
+    LL_FUNC("Clear");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     return ll_push_bool(L, 0 == boxaClear(boxa));
 }
 
 /**
- * \brief Clip the boxes of Boxa* (%boxa) to a Box* (%box)
+ * \brief Clip the boxes of Boxa* (%boxa) to a Box* (%box).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a Box* (box).
@@ -310,14 +311,14 @@ Clear(lua_State *L)
 static int
 ClipToBox(lua_State *L)
 {
-    FUNC(LL_BOXA ".ClipToBox");
+    LL_FUNC("ClipToBox");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
     return ll_push_bool(L, 0 == boxaClipToBox(boxa, box));
 }
 
 /**
- * \brief Combine overlaps in boxes of Boxa* (%boxas)
+ * \brief Combine overlaps in boxes of Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is optional and, if given, expected to be a Pixa* (pixadb).
@@ -328,7 +329,7 @@ ClipToBox(lua_State *L)
 static int
 CombineOverlaps(lua_State *L)
 {
-    FUNC(LL_BOXA ".CombineOverlaps");
+    LL_FUNC("CombineOverlaps");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     Pixa *pixadb = ll_check_Pixa_opt(_fun, L, 2);
     Boxa *boxad = boxaCombineOverlaps(boxas, pixadb);
@@ -336,7 +337,7 @@ CombineOverlaps(lua_State *L)
 }
 
 /**
- * \brief Combine overlaps in pairs of boxes of two Boxa* (%boxa1, %boxa2)
+ * \brief Combine overlaps in pairs of boxes of two Boxa* (%boxa1, %boxa2).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa1).
  * Arg #2 is expected to be a another Boxa* (boxa2).
@@ -348,7 +349,7 @@ CombineOverlaps(lua_State *L)
 static int
 CombineOverlapsInPair(lua_State *L)
 {
-    FUNC(LL_BOXA ".CombineOverlapsInPair");
+    LL_FUNC("CombineOverlapsInPair");
     Boxa *boxa1 = ll_check_Boxa(_fun, L, 1);
     Boxa *boxa2 = ll_check_Boxa(_fun, L, 2);
     Pixa *pixadb = ll_check_Pixa_opt(_fun, L, 3);
@@ -360,7 +361,7 @@ CombineOverlapsInPair(lua_State *L)
 }
 
 /**
- * \brief Compare regions of Boxa* (%boxa1) with Boxa* (%boxa2)
+ * \brief Compare regions of Boxa* (%boxa1) with Boxa* (%boxa2).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa1).
  * Arg #2 is expected to be another Boxa* (boxa2).
@@ -373,7 +374,7 @@ CombineOverlapsInPair(lua_State *L)
 static int
 CompareRegions(lua_State *L)
 {
-    FUNC(LL_BOXA ".CompareRegions");
+    LL_FUNC("CompareRegions");
     Boxa *boxa1 = ll_check_Boxa(_fun, L, 1);
     Boxa *boxa2 = ll_check_Boxa(_fun, L, 2);
     l_int32 areathresh = ll_check_l_int32(_fun, L, 3);
@@ -390,7 +391,7 @@ CompareRegions(lua_State *L)
 }
 
 /**
- * \brief Constrain the size of boxes in a Boxa* (%boxas)
+ * \brief Constrain the size of boxes in a Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a l_int32 (width).
@@ -404,7 +405,7 @@ CompareRegions(lua_State *L)
 static int
 ConstrainSize(lua_State *L)
 {
-    FUNC(LL_BOXA ".ConstrainSize");
+    LL_FUNC("ConstrainSize");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 width = ll_check_l_int32_default(_fun, L, 2, 0);
     l_int32 widthflag = ll_check_adjust_sides(_fun, L, 3, L_ADJUST_LEFT_AND_RIGHT);
@@ -415,7 +416,7 @@ ConstrainSize(lua_State *L)
 }
 
 /**
- * \brief Return a Boxa* (%boxad) of boxes from Boxa* (%boxas) contained within Box* (%box)
+ * \brief Return a Boxa* (%boxad) of boxes from Boxa* (%boxas) contained within Box* (%box).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a Box* (box).
@@ -426,7 +427,7 @@ ConstrainSize(lua_State *L)
 static int
 ContainedInBox(lua_State *L)
 {
-    FUNC(LL_BOXA ".ContainedInBox");
+    LL_FUNC("ContainedInBox");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
     Boxa *boxad = boxaContainedInBox(boxas, box);
@@ -434,7 +435,7 @@ ContainedInBox(lua_State *L)
 }
 
 /**
- * \brief Return the count of boxes from Boxa* (%boxas) contained within Box* (%box)
+ * \brief Return the count of boxes from Boxa* (%boxas) contained within Box* (%box).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a Box* (box).
@@ -445,7 +446,7 @@ ContainedInBox(lua_State *L)
 static int
 ContainedInBoxCount(lua_State *L)
 {
-    FUNC(LL_BOXA ".ContainedInBoxCount");
+    LL_FUNC("ContainedInBoxCount");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
     l_int32 count = 0;
@@ -456,7 +457,7 @@ ContainedInBoxCount(lua_State *L)
 }
 
 /**
- * \brief Return true, if every box of Boxa* (%boxa2) is contained in a box of Boxa* (%boxa1)
+ * \brief Return true, if every box of Boxa* (%boxa2) is contained in a box of Boxa* (%boxa1).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa1).
  * Arg #2 is expected to be a Boxa* (boxa2).
@@ -467,7 +468,7 @@ ContainedInBoxCount(lua_State *L)
 static int
 ContainedInBoxa(lua_State *L)
 {
-    FUNC(LL_BOXA ".ContainedInBoxa");
+    LL_FUNC("ContainedInBoxa");
     Boxa *boxa1 = ll_check_Boxa(_fun, L, 1);
     Boxa *boxa2 = ll_check_Boxa(_fun, L, 2);
     l_int32 contained = 0;
@@ -478,7 +479,7 @@ ContainedInBoxa(lua_State *L)
 }
 
 /**
- * \brief Convert boxes from Boxa* (%boxa) to a Pta* (%pta)
+ * \brief Convert boxes from Boxa* (%boxa) to a Pta* (%pta).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_int32 (ncorners).
@@ -489,7 +490,7 @@ ContainedInBoxa(lua_State *L)
 static int
 ConvertToPta(lua_State *L)
 {
-    FUNC(LL_BOXA ".ConvertToPta");
+    LL_FUNC("ConvertToPta");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     l_int32 ncorners = ll_check_l_int32(_fun, L, 2);
     Pta *pta = boxaConvertToPta(boxa, ncorners);
@@ -497,7 +498,7 @@ ConvertToPta(lua_State *L)
 }
 
 /**
- * \brief Copy a Boxa*
+ * \brief Copy a Boxa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa*.
  * Arg #2 is an optional string defining the storage flags (copyflag).
@@ -508,7 +509,7 @@ ConvertToPta(lua_State *L)
 static int
 Copy(lua_State *L)
 {
-    FUNC(LL_BOXA ".Copy");
+    LL_FUNC("Copy");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 copyflag = ll_check_access_storage(_fun, L, 2, L_COPY);
     Boxa *boxa = boxaCopy(boxas, copyflag);
@@ -516,7 +517,7 @@ Copy(lua_State *L)
 }
 
 /**
- * \brief Encapsulate Boxa* (%boxa) aligned into a Boxaa* (%boxaa)
+ * \brief Encapsulate Boxa* (%boxa) aligned into a Boxaa* (%boxaa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_int32 (num).
@@ -528,7 +529,7 @@ Copy(lua_State *L)
 static int
 EncapsulateAligned(lua_State *L)
 {
-    FUNC(LL_BOXA ".EncapsulateAligned");
+    LL_FUNC("EncapsulateAligned");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     l_int32 num = ll_check_l_int32(_fun, L, 2);
     l_int32 copyflag = ll_check_access_storage(_fun, L, 3, L_COPY);
@@ -537,7 +538,7 @@ EncapsulateAligned(lua_State *L)
 }
 
 /**
- * \brief Extend a Boxa*
+ * \brief Extend a Boxa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa*.
  * </pre>
@@ -547,13 +548,13 @@ EncapsulateAligned(lua_State *L)
 static int
 ExtendArray(lua_State *L)
 {
-    FUNC(LL_BOXA ".ExtendArray");
+    LL_FUNC("ExtendArray");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     return ll_push_bool(L, 0 == boxaExtendArray(boxa));
 }
 
 /**
- * \brief Extend a Boxa* to a given size %n
+ * \brief Extend a Boxa* to a given size %n.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa*.
  * Arg #2 is expected to be a l_int32 (n).
@@ -564,14 +565,14 @@ ExtendArray(lua_State *L)
 static int
 ExtendArrayToSize(lua_State *L)
 {
-    FUNC(LL_BOXA ".ExtendArrayToSize");
+    LL_FUNC("ExtendArrayToSize");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     l_int32 n = ll_check_l_int32(_fun, L, 2);
     return ll_push_bool(L, 0 == boxaExtendArrayToSize(boxa, n));
 }
 
 /**
- * \brief Extract Boxa* (%boxa) as six Numa* (%nal, %nar, %nat, %nab, %naw, %nah)
+ * \brief Extract Boxa* (%boxa) as six Numa* (%nal, %nar, %nat, %nab, %naw, %nah).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a boolean (keepinvalid).
@@ -582,7 +583,7 @@ ExtendArrayToSize(lua_State *L)
 static int
 ExtractAsNuma(lua_State *L)
 {
-    FUNC(LL_BOXA ".ExtractAsNuma");
+    LL_FUNC("ExtractAsNuma");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     l_int32 keepinvalid = ll_check_boolean(_fun, L, 2);
     Numa *nal = nullptr;
@@ -599,7 +600,7 @@ ExtractAsNuma(lua_State *L)
 }
 
 /**
- * \brief Extract Boxa* (%boxa) as six Pta* (%ptal, %ptar, %ptat, %ptab, %ptaw, %ptah)
+ * \brief Extract Boxa* (%boxa) as six Pta* (%ptal, %ptar, %ptat, %ptab, %ptaw, %ptah).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is optional and, if given, expected to be a boolean (keepinvalid).
@@ -610,7 +611,7 @@ ExtractAsNuma(lua_State *L)
 static int
 ExtractAsPta(lua_State *L)
 {
-    FUNC(LL_BOXA ".ExtractAsPta");
+    LL_FUNC("ExtractAsPta");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     l_int32 keepinvalid = ll_check_boolean_default(_fun, L, 2, FALSE);
     Pta *ptal = nullptr;
@@ -627,7 +628,7 @@ ExtractAsPta(lua_State *L)
 }
 
 /**
- * \brief Extract a sorted pattern of boxes from a Boxa* (%boxas)
+ * \brief Extract a sorted pattern of boxes from a Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a Numa* (na).
@@ -638,7 +639,7 @@ ExtractAsPta(lua_State *L)
 static int
 ExtractSortedPattern(lua_State *L)
 {
-    FUNC(LL_BOXA ".ExtractSortedPattern");
+    LL_FUNC("ExtractSortedPattern");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     Numa *na = ll_check_Numa(_fun, L, 2);
     Numaa *naa = boxaExtractSortedPattern(boxas, na);
@@ -646,7 +647,7 @@ ExtractSortedPattern(lua_State *L)
 }
 
 /**
- * \brief Fill a sequence of boxes in a Boxa* (%boxas)
+ * \brief Fill a sequence of boxes in a Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a string describing the use flag (useflag).
@@ -658,7 +659,7 @@ ExtractSortedPattern(lua_State *L)
 static int
 FillSequence(lua_State *L)
 {
-    FUNC(LL_BOXA ".FillSequence");
+    LL_FUNC("FillSequence");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 useflag = ll_check_useflag(_fun, L, 2, L_USE_ALL_BOXES);
     l_int32 debug = ll_check_boolean_default(_fun, L, 3, FALSE);
@@ -667,7 +668,7 @@ FillSequence(lua_State *L)
 }
 
 /**
- * \brief Find invalid Box* in a Boxa* and return a Numa* of indices
+ * \brief Find invalid Box* in a Boxa* and return a Numa* of indices.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa*.
  * </pre>
@@ -677,14 +678,14 @@ FillSequence(lua_State *L)
 static int
 FindInvalidBoxes(lua_State *L)
 {
-    FUNC(LL_BOXA ".FindInvalidBoxes");
+    LL_FUNC("FindInvalidBoxes");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     Numa *na = boxaFindInvalidBoxes(boxa);
     return ll_push_Numa(_fun, L, na);
 }
 
 /**
- * \brief Get Boxa* (%boxad) of nearest boxes from Boxa* (%boxas)
+ * \brief Get Boxa* (%boxad) of nearest boxes from Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a l_int32 (x).
@@ -700,7 +701,7 @@ FindInvalidBoxes(lua_State *L)
 static int
 FindNearestBoxes(lua_State *L)
 {
-    FUNC(LL_BOXA ".FindNearestBoxes");
+    LL_FUNC("FindNearestBoxes");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 dist_select = ll_check_value_flags(_fun, L, 2, L_NON_NEGATIVE);
     l_int32 range = ll_check_l_int32(_fun, L, 3);
@@ -712,7 +713,7 @@ FindNearestBoxes(lua_State *L)
 }
 
 /**
- * \brief Get the area of boxes in a Boxa* (%boxas)
+ * \brief Get the area of boxes in a Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * </pre>
@@ -722,7 +723,7 @@ FindNearestBoxes(lua_State *L)
 static int
 GetArea(lua_State *L)
 {
-    FUNC(LL_BOXA ".GetArea");
+    LL_FUNC("GetArea");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 area = 0;
     if (boxaGetArea(boxas, &area))
@@ -732,7 +733,7 @@ GetArea(lua_State *L)
 }
 
 /**
- * \brief Get average size for Boxa* (%boxa) as two numbers (%w,%h)
+ * \brief Get average size for Boxa* (%boxa) as two numbers (%w,%h).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * </pre>
@@ -742,7 +743,7 @@ GetArea(lua_State *L)
 static int
 GetAverageSize(lua_State *L)
 {
-    FUNC(LL_BOXA ".GetAverageSize");
+    LL_FUNC("GetAverageSize");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_float32 w = 0.0f;
     l_float32 h = 0.0f;
@@ -754,7 +755,7 @@ GetAverageSize(lua_State *L)
 }
 
 /**
- * \brief Get Box* from a Boxa* (%boxa) at index (%idx)
+ * \brief Get Box* from a Boxa* (%boxa) at index (%idx).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa*.
  * Arg #2 is expected to be a l_int32 (idx).
@@ -766,7 +767,7 @@ GetAverageSize(lua_State *L)
 static int
 GetBox(lua_State *L)
 {
-    FUNC(LL_BOXA ".GetBox");
+    LL_FUNC("GetBox");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, boxaGetCount(boxa));
     l_int32 flag = ll_check_access_storage(_fun, L, 3, L_COPY);
@@ -775,7 +776,7 @@ GetBox(lua_State *L)
 }
 
 /**
- * \brief Get the geometry for a Box* from a Boxa* at index %idx
+ * \brief Get the geometry for a Box* from a Boxa* at index %idx.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa*.
  * Arg #2 is expected to be a l_int32 (idx).
@@ -786,7 +787,7 @@ GetBox(lua_State *L)
 static int
 GetBoxGeometry(lua_State *L)
 {
-    FUNC(LL_BOXA ".GetBoxGeometry");
+    LL_FUNC("GetBoxGeometry");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     l_int32 x, y, w, h;
     l_int32 idx = ll_check_index(_fun, L, 2, boxaGetCount(boxa));
@@ -800,7 +801,7 @@ GetBoxGeometry(lua_State *L)
 }
 
 /**
- * \brief Get the extent of boxes in a Boxa* (%boxas)
+ * \brief Get the extent of boxes in a Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a l_int32 (wc)
@@ -813,7 +814,7 @@ GetBoxGeometry(lua_State *L)
 static int
 GetCoverage(lua_State *L)
 {
-    FUNC(LL_BOXA ".GetCoverage");
+    LL_FUNC("GetCoverage");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 wc = ll_check_l_int32(_fun, L, 2);
     l_int32 hc = ll_check_l_int32(_fun, L, 3);
@@ -826,7 +827,7 @@ GetCoverage(lua_State *L)
 }
 
 /**
- * \brief Get the extent of boxes in a Boxa* (%boxas)
+ * \brief Get the extent of boxes in a Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * </pre>
@@ -836,7 +837,7 @@ GetCoverage(lua_State *L)
 static int
 GetExtent(lua_State *L)
 {
-    FUNC(LL_BOXA ".GetExtent");
+    LL_FUNC("GetExtent");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 w = 0;
     l_int32 h = 0;
@@ -849,7 +850,7 @@ GetExtent(lua_State *L)
 }
 
 /**
- * \brief Get median values for Boxa* (%boxa) as four integers (%x,%y,%w,%h)
+ * \brief Get median values for Boxa* (%boxa) as four integers (%x,%y,%w,%h).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * </pre>
@@ -859,7 +860,7 @@ GetExtent(lua_State *L)
 static int
 GetMedianVals(lua_State *L)
 {
-    FUNC(LL_BOXA ".GetMedianVals");
+    LL_FUNC("GetMedianVals");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 x = 0;
     l_int32 y = 0;
@@ -875,7 +876,7 @@ GetMedianVals(lua_State *L)
 }
 
 /**
- * \brief Get index and distance for Box* at (%i) from Boxa* (%boxa)
+ * \brief Get index and distance for Box* at (%i) from Boxa* (%boxa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_int32 (i).
@@ -889,7 +890,7 @@ GetMedianVals(lua_State *L)
 static int
 GetNearestByDirection(lua_State *L)
 {
-    FUNC(LL_BOXA ".GetNearestByDirection");
+    LL_FUNC("GetNearestByDirection");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     l_int32 i = ll_check_index(_fun, L, 2, boxaGetCount(boxa));
     l_int32 dir = ll_check_direction(_fun, L, 3, L_FROM_LEFT);
@@ -905,7 +906,7 @@ GetNearestByDirection(lua_State *L)
 }
 
 /**
- * \brief Get Box* (box) of Boxa* (%boxa) which is nearest to line (x,y)
+ * \brief Get Box* (box) of Boxa* (%boxa) which is nearest to line (x,y).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a l_int32 (x).
@@ -921,7 +922,7 @@ GetNearestByDirection(lua_State *L)
 static int
 GetNearestToLine(lua_State *L)
 {
-    FUNC(LL_BOXA ".GetNearestToLine");
+    LL_FUNC("GetNearestToLine");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     l_int32 x = ll_check_l_int32(_fun, L, 2);
     l_int32 y = ll_check_l_int32(_fun, L, 3);
@@ -930,7 +931,7 @@ GetNearestToLine(lua_State *L)
 }
 
 /**
- * \brief Get Box* (box) of Boxa* (%boxa) which is nearest to point (x,y)
+ * \brief Get Box* (box) of Boxa* (%boxa) which is nearest to point (x,y).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a l_int32 (x).
@@ -942,7 +943,7 @@ GetNearestToLine(lua_State *L)
 static int
 GetNearestToPt(lua_State *L)
 {
-    FUNC(LL_BOXA ".GetNearestToPt");
+    LL_FUNC("GetNearestToPt");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     l_int32 x = ll_check_l_int32(_fun, L, 2);
     l_int32 y = ll_check_l_int32(_fun, L, 3);
@@ -951,7 +952,7 @@ GetNearestToPt(lua_State *L)
 }
 
 /**
- * \brief Get rank values for Boxa* (%boxa) as four integers (%x,%y,%w,%h)
+ * \brief Get rank values for Boxa* (%boxa) as four integers (%x,%y,%w,%h).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_float32 (fract).
@@ -962,7 +963,7 @@ GetNearestToPt(lua_State *L)
 static int
 GetRankVals(lua_State *L)
 {
-    FUNC(LL_BOXA ".GetRankVals");
+    LL_FUNC("GetRankVals");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_float32 fract = ll_check_l_float32(_fun, L, 2);
     l_int32 x = 0;
@@ -979,7 +980,7 @@ GetRankVals(lua_State *L)
 }
 
 /**
- * \brief Get the size of boxes in a Boxa* (%boxas) as Numa* (%naw, %nah)
+ * \brief Get the size of boxes in a Boxa* (%boxas) as Numa* (%naw, %nah).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * </pre>
@@ -989,7 +990,7 @@ GetRankVals(lua_State *L)
 static int
 GetSizes(lua_State *L)
 {
-    FUNC(LL_BOXA ".GetSizes");
+    LL_FUNC("GetSizes");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     Numa *naw = nullptr;
     Numa *nah = nullptr;
@@ -999,7 +1000,7 @@ GetSizes(lua_State *L)
 }
 
 /**
- * \brief Get valid Box* from a Boxa* (%boxa) at index (%idx)
+ * \brief Get valid Box* from a Boxa* (%boxa) at index (%idx).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa*.
  * Arg #2 is expected to be a l_int32 (idx).
@@ -1011,7 +1012,7 @@ GetSizes(lua_State *L)
 static int
 GetValidBox(lua_State *L)
 {
-    FUNC(LL_BOXA ".GetValidBox");
+    LL_FUNC("GetValidBox");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, boxaGetCount(boxa));
     l_int32 flag = ll_check_access_storage(_fun, L, 3, L_COPY);
@@ -1020,7 +1021,7 @@ GetValidBox(lua_State *L)
 }
 
 /**
- * \brief Get valid count for a Boxa*
+ * \brief Get valid count for a Boxa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa*.
  * </pre>
@@ -1030,14 +1031,14 @@ GetValidBox(lua_State *L)
 static int
 GetValidCount(lua_State *L)
 {
-    FUNC(LL_BOXA ".GetValidCount");
+    LL_FUNC("GetValidCount");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     lua_pushinteger(L, boxaGetValidCount(boxa));
     return 1;
 }
 
 /**
- * \brief Get white blocks for boxes from a Boxa* (%boxas)
+ * \brief Get white blocks for boxes from a Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is optional and, if given, expected to be a Box* (box)
@@ -1140,7 +1141,7 @@ GetValidCount(lua_State *L)
 static int
 GetWhiteblocks(lua_State *L)
 {
-    FUNC(LL_BOXA ".GetWhiteblocks");
+    LL_FUNC("GetWhiteblocks");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
     l_int32 sortflag = ll_check_sort_by(_fun, L, 3, L_SORT_BY_WIDTH);
@@ -1154,7 +1155,7 @@ GetWhiteblocks(lua_State *L)
 }
 
 /**
- * \brief Handle overlaps in boxes of Boxa* (%boxas)
+ * \brief Handle overlaps in boxes of Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a string describing the operation (op).
@@ -1169,7 +1170,7 @@ GetWhiteblocks(lua_State *L)
 static int
 HandleOverlaps(lua_State *L)
 {
-    FUNC(LL_BOXA ".HandleOverlaps");
+    LL_FUNC("HandleOverlaps");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 op = ll_check_overlap(_fun, L, 2, L_COMBINE);
     l_int32 range = ll_check_l_int32(_fun, L, 3);
@@ -1181,7 +1182,7 @@ HandleOverlaps(lua_State *L)
 }
 
 /**
- * \brief Insert the Box* (%box) in a Boxa* (%boxa) at index %idx
+ * \brief Insert the Box* (%box) in a Boxa* (%boxa) at index %idx.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_int32 (idx).
@@ -1193,7 +1194,7 @@ HandleOverlaps(lua_State *L)
 static int
 InsertBox(lua_State *L)
 {
-    FUNC(LL_BOXA ".InsertBox");
+    LL_FUNC("InsertBox");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, boxaGetCount(boxa));
     Box *boxs = ll_check_Box(_fun, L, 3);
@@ -1203,7 +1204,7 @@ InsertBox(lua_State *L)
 }
 
 /**
- * \brief Return a Boxa* (%boxad) of boxes from Boxa* (%boxas) which intersect within Box* (%box)
+ * \brief Return a Boxa* (%boxad) of boxes from Boxa* (%boxas) which intersect within Box* (%box).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a Box* (box).
@@ -1214,7 +1215,7 @@ InsertBox(lua_State *L)
 static int
 IntersectsBox(lua_State *L)
 {
-    FUNC(LL_BOXA ".IntersectsBox");
+    LL_FUNC("IntersectsBox");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
     Boxa *boxad = boxaIntersectsBox(boxas, box);
@@ -1222,7 +1223,7 @@ IntersectsBox(lua_State *L)
 }
 
 /**
- * \brief Return the count of boxes from Boxa* (%boxa) which intersect with Box* (%box)
+ * \brief Return the count of boxes from Boxa* (%boxa) which intersect with Box* (%box).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a Box* (box).
@@ -1233,7 +1234,7 @@ IntersectsBox(lua_State *L)
 static int
 IntersectsBoxCount(lua_State *L)
 {
-    FUNC(LL_BOXA ".IntersectsBoxCount");
+    LL_FUNC("IntersectsBoxCount");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
     l_int32 count = 0;
@@ -1244,7 +1245,7 @@ IntersectsBoxCount(lua_State *L)
 }
 
 /**
- * \brief Get the IsFull state for a Boxa*
+ * \brief Get the IsFull state for a Boxa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa*.
  * </pre>
@@ -1254,14 +1255,14 @@ IntersectsBoxCount(lua_State *L)
 static int
 IsFull(lua_State *L)
 {
-    FUNC(LL_BOXA ".IsFull");
+    LL_FUNC("IsFull");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     int isfull = 0;
     return ll_push_bool(L, 0 == boxaIsFull(boxa, &isfull) && isfull);
 }
 
 /**
- * \brief Join Boxa* (%boxas) with Boxa* (%boxad)
+ * \brief Join Boxa* (%boxas) with Boxa* (%boxad).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxad).
  * Arg #2 is expected to be another Boxa* (boxas).
@@ -1274,7 +1275,7 @@ IsFull(lua_State *L)
 static int
 Join(lua_State *L)
 {
-    FUNC(LL_BOXA ".Join");
+    LL_FUNC("Join");
     Boxa *boxad = ll_check_Boxa(_fun, L, 1);
     Boxa *boxas = ll_check_Boxa(_fun, L, 2);
     l_int32 istart = ll_check_index(_fun, L, 3, 1);
@@ -1283,7 +1284,7 @@ Join(lua_State *L)
 }
 
 /**
- * \brief Linear fit for Boxa* (%boxas) giving Boxa* (%boxa)
+ * \brief Linear fit for Boxa* (%boxas) giving Boxa* (%boxa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_int32 (factor).
@@ -1295,7 +1296,7 @@ Join(lua_State *L)
 static int
 LinearFit(lua_State *L)
 {
-    FUNC(LL_BOXA ".LinearFit");
+    LL_FUNC("LinearFit");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 factor = ll_check_l_int32_default(_fun, L, 2, 3);
     l_int32 debug = ll_check_boolean_default(_fun, L, 3, FALSE);
@@ -1304,7 +1305,7 @@ LinearFit(lua_State *L)
 }
 
 /**
- * \brief Get the location range of boxes in a Boxa* (%boxas)
+ * \brief Get the location range of boxes in a Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * </pre>
@@ -1314,7 +1315,7 @@ LinearFit(lua_State *L)
 static int
 LocationRange(lua_State *L)
 {
-    FUNC(LL_BOXA ".LocationRange");
+    LL_FUNC("LocationRange");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 minx = 0;
     l_int32 miny = 0;
@@ -1330,7 +1331,7 @@ LocationRange(lua_State *L)
 }
 
 /**
- * \brief Make indicator for boxes from Boxa* (%boxa) by size
+ * \brief Make indicator for boxes from Boxa* (%boxa) by size.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_int32 (width).
@@ -1344,7 +1345,7 @@ LocationRange(lua_State *L)
 static int
 MakeSizeIndicator(lua_State *L)
 {
-    FUNC(LL_BOXA ".MakeSizeIndicator");
+    LL_FUNC("MakeSizeIndicator");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 width = ll_check_l_int32(_fun, L, 2);
     l_int32 height = ll_check_l_int32(_fun, L, 3);
@@ -1356,7 +1357,7 @@ MakeSizeIndicator(lua_State *L)
 }
 
 /**
- * \brief Make indicator for boxes from Boxa* (%boxa) by width/height ratio
+ * \brief Make indicator for boxes from Boxa* (%boxa) by width/height ratio.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_float32 (ratio).
@@ -1368,7 +1369,7 @@ MakeSizeIndicator(lua_State *L)
 static int
 MakeWHRatioIndicator(lua_State *L)
 {
-    FUNC(LL_BOXA ".MakeWHRatioIndicator");
+    LL_FUNC("MakeWHRatioIndicator");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_float32 ratio = ll_check_l_float32(_fun, L, 2);
     l_int32 relation = ll_check_relation(_fun, L, 3, L_SELECT_IF_LT);
@@ -1378,7 +1379,7 @@ MakeWHRatioIndicator(lua_State *L)
 }
 
 /**
- * \brief Merge even and odd Boxa* (%boxae, %boxao) into one Boxa* (%boxad)
+ * \brief Merge even and odd Boxa* (%boxae, %boxao) into one Boxa* (%boxad).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxae).
  * Arg #2 is expected to be a Boxa* (boxao).
@@ -1390,7 +1391,7 @@ MakeWHRatioIndicator(lua_State *L)
 static int
 MergeEvenOdd(lua_State *L)
 {
-    FUNC(LL_BOXA ".MergeEvenOdd ");
+    LL_FUNC("MergeEvenOdd ");
     Boxa *boxae = ll_check_Boxa(_fun, L, 1);
     Boxa *boxao = ll_check_Boxa(_fun, L, 2);
     l_int32 fillflag = ll_check_l_int32_default(_fun, L, 3, 0);
@@ -1399,7 +1400,7 @@ MergeEvenOdd(lua_State *L)
 }
 
 /**
- * \brief Modify a Boxa* (%boxas) with another Boxa* (%boxam) giving Boxa* (%boxa)
+ * \brief Modify a Boxa* (%boxas) with another Boxa* (%boxam) giving Boxa* (%boxa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be another Boxa* (boxam).
@@ -1413,7 +1414,7 @@ MergeEvenOdd(lua_State *L)
 static int
 ModifyWithBoxa(lua_State *L)
 {
-    FUNC(LL_BOXA ".ModifyWithBoxa");
+    LL_FUNC("ModifyWithBoxa");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     Boxa *boxam = ll_check_Boxa(_fun, L, 2);
     l_int32 subflag = ll_check_subflag(_fun, L, 3, L_USE_MINSIZE);
@@ -1424,7 +1425,7 @@ ModifyWithBoxa(lua_State *L)
 }
 
 /**
- * \brief Permute boxes in Boxa* (%boxas) by a pseudo random algorithm
+ * \brief Permute boxes in Boxa* (%boxas) by a pseudo random algorithm.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * </pre>
@@ -1434,14 +1435,14 @@ ModifyWithBoxa(lua_State *L)
 static int
 PermutePseudorandom(lua_State *L)
 {
-    FUNC(LL_BOXA ".PermutePseudorandom");
+    LL_FUNC("PermutePseudorandom");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     Boxa *boxa = boxaPermutePseudorandom(boxas);
     return ll_push_Boxa(_fun, L, boxa);
 }
 
 /**
- * \brief Permute boxes in Boxa* (%boxas) by a random algorithm
+ * \brief Permute boxes in Boxa* (%boxas) by a random algorithm.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * </pre>
@@ -1451,14 +1452,14 @@ PermutePseudorandom(lua_State *L)
 static int
 PermuteRandom(lua_State *L)
 {
-    FUNC(LL_BOXA ".PermuteRandom");
+    LL_FUNC("PermuteRandom");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     Boxa *boxad = boxaPermuteRandom(nullptr, boxas);
     return ll_push_Boxa(_fun, L, boxad);
 }
 
 /**
- * \brief Get the area of boxes in a Boxa* (%boxas)
+ * \brief Get the area of boxes in a Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a l_int32 (maxoverlap).
@@ -1469,7 +1470,7 @@ PermuteRandom(lua_State *L)
 static int
 PruneSortedOnOverlap(lua_State *L)
 {
-    FUNC(LL_BOXA ".PruneSortedOnOverlap");
+    LL_FUNC("PruneSortedOnOverlap");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 maxoverlap = ll_check_l_int32(_fun, L, 2);
     Boxa *boxa = boxaPruneSortedOnOverlap(boxas, maxoverlap);
@@ -1477,7 +1478,7 @@ PruneSortedOnOverlap(lua_State *L)
 }
 
 /**
- * \brief Read a Boxa* (%boxa) from a file (%filename)
+ * \brief Read a Boxa* (%boxa) from a file (%filename).
  * <pre>
  * Arg #1 is expected to be a string (filename).
  * </pre>
@@ -1487,14 +1488,14 @@ PruneSortedOnOverlap(lua_State *L)
 static int
 Read(lua_State *L)
 {
-    FUNC(LL_BOXA ".Read");
+    LL_FUNC("Read");
     const char *filename = ll_check_string(_fun, L, 1);
     Boxa *boxa = boxaRead(filename);
     return ll_push_Boxa(_fun, L, boxa);
 }
 
 /**
- * \brief Read a Boxa* (%boxa) from memory (%data)
+ * \brief Read a Boxa* (%boxa) from memory (%data).
  * <pre>
  * Arg #1 is expected to be a string (data).
  * </pre>
@@ -1504,7 +1505,7 @@ Read(lua_State *L)
 static int
 ReadMem(lua_State *L)
 {
-    FUNC(LL_BOXA ".ReadMem");
+    LL_FUNC("ReadMem");
     const char *data = ll_check_string(_fun, L, 1);
     lua_Integer size = luaL_len(L, 1);
     Boxa *boxa = boxaReadMem(reinterpret_cast<const l_uint8 *>(data), static_cast<size_t>(size));
@@ -1512,7 +1513,7 @@ ReadMem(lua_State *L)
 }
 
 /**
- * \brief Read a Boxa* (%boxa) from a stream (%stream)
+ * \brief Read a Boxa* (%boxa) from a stream (%stream).
  * <pre>
  * Arg #1 is expected to be a luaL_Stream* (stream).
  * </pre>
@@ -1522,14 +1523,14 @@ ReadMem(lua_State *L)
 static int
 ReadStream(lua_State *L)
 {
-    FUNC(LL_BOXA ".ReadStream");
+    LL_FUNC("ReadStream");
     luaL_Stream *stream = ll_check_stream(_fun, L, 1);
     Boxa *boxa = boxaReadStream(stream->f);
     return ll_push_Boxa(_fun, L, boxa);
 }
 
 /**
- * \brief Reconcile the height of even/odd boxes in a Boxa* (%boxas)
+ * \brief Reconcile the height of even/odd boxes in a Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a string describing the adjust sides (sides).
@@ -1544,7 +1545,7 @@ ReadStream(lua_State *L)
 static int
 ReconcileEvenOddHeight(lua_State *L)
 {
-    FUNC(LL_BOXA ".ReconcileEvenOddHeight");
+    LL_FUNC("ReconcileEvenOddHeight");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 sides = ll_check_adjust_sides(_fun, L, 2, L_ADJUST_TOP_AND_BOT);
     l_int32 delh = ll_check_l_int32(_fun, L, 3);
@@ -1556,7 +1557,7 @@ ReconcileEvenOddHeight(lua_State *L)
 }
 
 /**
- * \brief Reconcile the width of box pairs in a Boxa* (%boxas)
+ * \brief Reconcile the width of box pairs in a Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a l_int32 (delh).
@@ -1570,7 +1571,7 @@ ReconcileEvenOddHeight(lua_State *L)
 static int
 ReconcilePairWidth(lua_State *L)
 {
-    FUNC(LL_BOXA ".ReconcilePairWidth");
+    LL_FUNC("ReconcilePairWidth");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 delw = ll_check_l_int32(_fun, L, 2);
     l_int32 op = ll_check_adjust_sides(_fun, L, 3, L_ADJUST_CHOOSE_MIN);
@@ -1581,7 +1582,7 @@ ReconcilePairWidth(lua_State *L)
 }
 
 /**
- * \brief Reomve the Box* from a Boxa* (%boxa) at index (%idx)
+ * \brief Reomve the Box* from a Boxa* (%boxa) at index (%idx).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_int32 (idx).
@@ -1592,14 +1593,14 @@ ReconcilePairWidth(lua_State *L)
 static int
 RemoveBox(lua_State *L)
 {
-    FUNC(LL_BOXA ".RemoveBox");
+    LL_FUNC("RemoveBox");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, boxaGetCount(boxa));
     return ll_push_bool(L, 0 == boxaRemoveBox(boxa, idx));
 }
 
 /**
- * \brief Reomve the Box* (%box) from a Boxa* (%boxa) at index (%idx) and push it
+ * \brief Reomve the Box* (%box) from a Boxa* (%boxa) at index (%idx) and push it.
  * data
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
@@ -1611,7 +1612,7 @@ RemoveBox(lua_State *L)
 static int
 RemoveBoxAndSave(lua_State *L)
 {
-    FUNC(LL_BOXA ".RemoveBoxAndSave");
+    LL_FUNC("RemoveBoxAndSave");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, boxaGetCount(boxa));
     Box *box = nullptr;
@@ -1621,7 +1622,7 @@ RemoveBoxAndSave(lua_State *L)
 }
 
 /**
- * \brief Replace the Box* in a Boxa* at index %idx
+ * \brief Replace the Box* in a Boxa* at index %idx.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa*.
  * Arg #2 is expected to be a l_int32 (idx).
@@ -1633,7 +1634,7 @@ RemoveBoxAndSave(lua_State *L)
 static int
 ReplaceBox(lua_State *L)
 {
-    FUNC(LL_BOXA ".ReplaceBox");
+    LL_FUNC("ReplaceBox");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, boxaGetCount(boxa));
     Box *box = ll_check_Box(_fun, L, 3);
@@ -1642,7 +1643,7 @@ ReplaceBox(lua_State *L)
 }
 
 /**
- * \brief Rotate the boxes in the Boxa* (%boxas)
+ * \brief Rotate the boxes in the Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a l_float32 (xc).
@@ -1655,7 +1656,7 @@ ReplaceBox(lua_State *L)
 static int
 Rotate(lua_State *L)
 {
-    FUNC(LL_BOXA ".Rotate");
+    LL_FUNC("Rotate");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_float32 xc = ll_check_l_float32_default(_fun, L, 2, 1.0f);
     l_float32 yc = ll_check_l_float32_default(_fun, L, 3, 1.0f);
@@ -1665,7 +1666,7 @@ Rotate(lua_State *L)
 }
 
 /**
- * \brief Rotate a Boxa* (%boxas)
+ * \brief Rotate a Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * </pre>
@@ -1675,7 +1676,7 @@ Rotate(lua_State *L)
 static int
 RotateOrth(lua_State *L)
 {
-    FUNC(LL_BOXA ".RotateOrth");
+    LL_FUNC("RotateOrth");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 w = ll_check_l_int32(_fun, L, 2);
     l_int32 h = ll_check_l_int32(_fun, L, 3);
@@ -1686,7 +1687,7 @@ RotateOrth(lua_State *L)
 }
 
 /**
- * \brief Save the valid boxes in Boxa* (%boxas) and return the resulting Boxa* (%boxa)
+ * \brief Save the valid boxes in Boxa* (%boxas) and return the resulting Boxa* (%boxa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is an optional string defining the storage flags (copy, clone).
@@ -1697,7 +1698,7 @@ RotateOrth(lua_State *L)
 static int
 SaveValid(lua_State *L)
 {
-    FUNC(LL_BOXA ".SaveValid");
+    LL_FUNC("SaveValid");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 copyflag = ll_check_access_storage(_fun, L, 2, L_COPY);
     Boxa *boxa = boxaSaveValid(boxas, copyflag);
@@ -1705,7 +1706,7 @@ SaveValid(lua_State *L)
 }
 
 /**
- * \brief Scale the boxes in the Boxa* (%boxas)
+ * \brief Scale the boxes in the Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a l_float32 (scalex).
@@ -1717,7 +1718,7 @@ SaveValid(lua_State *L)
 static int
 Scale(lua_State *L)
 {
-    FUNC(LL_BOXA ".Scale");
+    LL_FUNC("Scale");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_float32 scalex = ll_check_l_float32_default(_fun, L, 2, 1.0f);
     l_float32 scaley = ll_check_l_float32_default(_fun, L, 3, 1.0f);
@@ -1726,7 +1727,7 @@ Scale(lua_State *L)
 }
 
 /**
- * \brief Select boxes from Boxa* (%boxa) by size
+ * \brief Select boxes from Boxa* (%boxa) by size.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_int32 (width).
@@ -1740,7 +1741,7 @@ Scale(lua_State *L)
 static int
 SelectBySize(lua_State *L)
 {
-    FUNC(LL_BOXA ".SelectBySize");
+    LL_FUNC("SelectBySize");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 width = ll_check_l_int32(_fun, L, 2);
     l_int32 height = ll_check_l_int32(_fun, L, 3);
@@ -1754,7 +1755,7 @@ SelectBySize(lua_State *L)
 }
 
 /**
- * \brief Select boxes from Boxa* (%boxa) by size
+ * \brief Select boxes from Boxa* (%boxa) by size.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_float32 (ratio).
@@ -1766,7 +1767,7 @@ SelectBySize(lua_State *L)
 static int
 SelectByWHRatio(lua_State *L)
 {
-    FUNC(LL_BOXA ".SelectByWHRatio");
+    LL_FUNC("SelectByWHRatio");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_float32 ratio = ll_check_l_float32(_fun, L, 2);
     l_int32 relation = ll_check_relation(_fun, L, 3, L_SELECT_IF_LT);
@@ -1778,7 +1779,7 @@ SelectByWHRatio(lua_State *L)
 }
 
 /**
- * \brief Select a large box in the upper, left area of Boxa* (%boxa)
+ * \brief Select a large box in the upper, left area of Boxa* (%boxa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_float32 (areaslop).
@@ -1790,7 +1791,7 @@ SelectByWHRatio(lua_State *L)
 static int
 SelectLargeULBox(lua_State *L)
 {
-    FUNC(LL_BOXA ".SelectLargeULBox");
+    LL_FUNC("SelectLargeULBox");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     l_float32 areaslop = ll_check_l_float32(_fun, L, 2);
     l_int32 yslop = ll_check_l_int32(_fun, L, 3);
@@ -1799,7 +1800,7 @@ SelectLargeULBox(lua_State *L)
 }
 
 /**
- * \brief Select a range (%istart, %iend) of boxes from Boxa* (%boxa)
+ * \brief Select a range (%istart, %iend) of boxes from Boxa* (%boxa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_int32 (first).
@@ -1812,7 +1813,7 @@ SelectLargeULBox(lua_State *L)
 static int
 SelectRange(lua_State *L)
 {
-    FUNC(LL_BOXA ".SelectRange");
+    LL_FUNC("SelectRange");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 first = ll_check_index(_fun, L, 2, boxaGetCount(boxas));
     l_int32 last = ll_check_index(_fun, L, 3, boxaGetCount(boxas));
@@ -1822,7 +1823,7 @@ SelectRange(lua_State *L)
 }
 
 /**
- * \brief Select boxes from Boxa* (%boxa) with indicator (%na)
+ * \brief Select boxes from Boxa* (%boxa) with indicator (%na).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a Numa* (na)
@@ -1833,7 +1834,7 @@ SelectRange(lua_State *L)
 static int
 SelectWithIndicator(lua_State *L)
 {
-    FUNC(LL_BOXA ".SelectWithIndicator");
+    LL_FUNC("SelectWithIndicator");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     Numa *na = ll_check_Numa(_fun, L, 2);
     l_int32 changed;
@@ -1844,7 +1845,7 @@ SelectWithIndicator(lua_State *L)
 }
 
 /**
- * \brief Set a side of boxes in a Boxa* (%boxas)
+ * \brief Set a side of boxes in a Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a string describing the side (side).
@@ -1857,7 +1858,7 @@ SelectWithIndicator(lua_State *L)
 static int
 SetSide(lua_State *L)
 {
-    FUNC(LL_BOXA ".SetSide");
+    LL_FUNC("SetSide");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 side = ll_check_set_side(_fun, L, 2, 0);
     l_int32 val = ll_check_l_int32_default(_fun, L, 3, 0);
@@ -1868,7 +1869,7 @@ SetSide(lua_State *L)
 }
 
 /**
- * \brief Test similarity of a Boxa* (%boxa1) and another Boxa* (%boxa2)
+ * \brief Test similarity of a Boxa* (%boxa1) and another Boxa* (%boxa2).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa1).
  * Arg #2 is expected to be another Boxa* (boxa2).
@@ -1883,7 +1884,7 @@ SetSide(lua_State *L)
 static int
 Similar(lua_State *L)
 {
-    FUNC(LL_BOXA ".Similar");
+    LL_FUNC("Similar");
     Boxa *boxa1 = ll_check_Boxa(_fun, L, 1);
     Boxa *boxa2 = ll_check_Boxa(_fun, L, 2);
     l_int32 leftdiff = ll_check_l_int32(_fun, L, 3);
@@ -1900,7 +1901,7 @@ Similar(lua_State *L)
 }
 
 /**
- * \brief Get the size range of boxes in a Boxa* (%boxas)
+ * \brief Get the size range of boxes in a Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * </pre>
@@ -1910,7 +1911,7 @@ Similar(lua_State *L)
 static int
 SizeRange(lua_State *L)
 {
-    FUNC(LL_BOXA ".SizeRange");
+    LL_FUNC("SizeRange");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 minw = 0;
     l_int32 minh = 0;
@@ -1926,7 +1927,7 @@ SizeRange(lua_State *L)
 }
 
 /**
- * \brief Determine the size variation of boxes in a Boxa* (%boxas)
+ * \brief Determine the size variation of boxes in a Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a string describing the select size (type).
@@ -1937,7 +1938,7 @@ SizeRange(lua_State *L)
 static int
 SizeVariation(lua_State *L)
 {
-    FUNC(LL_BOXA ".SizeVariation");
+    LL_FUNC("SizeVariation");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 type = ll_check_select_size(_fun, L, 2, L_SELECT_WIDTH);
     l_float32 del_evenodd = 0.0f;
@@ -1954,7 +1955,7 @@ SizeVariation(lua_State *L)
 }
 
 /**
- * \brief Smooth sequence by least square fit for Boxa* (%boxas)
+ * \brief Smooth sequence by least square fit for Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_int32 (factor).
@@ -1969,7 +1970,7 @@ SizeVariation(lua_State *L)
 static int
 SmoothSequenceLS(lua_State *L)
 {
-    FUNC(LL_BOXA ".SmoothSequenceLS");
+    LL_FUNC("SmoothSequenceLS");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 factor = ll_check_l_int32_default(_fun, L, 2, 3);
     l_int32 subflag = ll_check_subflag(_fun, L, 3, L_USE_MINSIZE);
@@ -1981,7 +1982,7 @@ SmoothSequenceLS(lua_State *L)
 }
 
 /**
- * \brief Smooth sequence by median for Boxa* (%boxas)
+ * \brief Smooth sequence by median for Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_int32 (halfwin).
@@ -1996,7 +1997,7 @@ SmoothSequenceLS(lua_State *L)
 static int
 SmoothSequenceMedian(lua_State *L)
 {
-    FUNC(LL_BOXA ".SmoothSequenceMedian");
+    LL_FUNC("SmoothSequenceMedian");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 halfwin = ll_check_l_int32_default(_fun, L, 2, 20);
     l_int32 subflag = ll_check_subflag(_fun, L, 3, L_USE_MINSIZE);
@@ -2008,7 +2009,7 @@ SmoothSequenceMedian(lua_State *L)
 }
 
 /**
- * \brief Sort a Boxa* (%boxas) by given type (%type) and order (%order)
+ * \brief Sort a Boxa* (%boxas) by given type (%type) and order (%order).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a string defining the sort type (type).
@@ -2020,7 +2021,7 @@ SmoothSequenceMedian(lua_State *L)
 static int
 Sort(lua_State *L)
 {
-    FUNC(LL_BOXA ".Sort");
+    LL_FUNC("Sort");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 type = ll_check_sort_by(_fun, L, 2, L_SORT_BY_X);
     l_int32 order = ll_check_sort_order(_fun, L, 3, L_SORT_INCREASING);
@@ -2030,7 +2031,7 @@ Sort(lua_State *L)
 }
 
 /**
- * \brief Sort a Boxa* (%boxas) in two dimensions into Boxaa* (boxaa)
+ * \brief Sort a Boxa* (%boxas) in two dimensions into Boxaa* (boxaa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a l_int32 (delta1).
@@ -2043,7 +2044,7 @@ Sort(lua_State *L)
 static int
 Sort2d(lua_State *L)
 {
-    FUNC(LL_BOXA ".Sort2d");
+    LL_FUNC("Sort2d");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 delta1 = ll_check_l_int32_default(_fun, L, 2, 0);
     l_int32 delta2 = ll_check_l_int32_default(_fun, L, 3, 0);
@@ -2054,7 +2055,7 @@ Sort2d(lua_State *L)
 }
 
 /**
- * \brief Sort a Boxa* (%boxas) by index (%naa) in two dimensions into Boxaa* (boxaa)
+ * \brief Sort a Boxa* (%boxas) by index (%naa) in two dimensions into Boxaa* (boxaa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a l_int32 (delta1).
@@ -2067,7 +2068,7 @@ Sort2d(lua_State *L)
 static int
 Sort2dByIndex(lua_State *L)
 {
-    FUNC(LL_BOXA ".Sort2dByIndex");
+    LL_FUNC("Sort2dByIndex");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     Numaa *naa = ll_check_Numaa(_fun, L, 2);
     Boxaa *boxaa = boxaSort2dByIndex(boxas, naa);
@@ -2075,7 +2076,7 @@ Sort2dByIndex(lua_State *L)
 }
 
 /**
- * \brief Sort a Boxa* (%boxas) by index
+ * \brief Sort a Boxa* (%boxas) by index.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a Numa* (naindex).
@@ -2086,7 +2087,7 @@ Sort2dByIndex(lua_State *L)
 static int
 SortByIndex(lua_State *L)
 {
-    FUNC(LL_BOXA ".SortByIndex");
+    LL_FUNC("SortByIndex");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     Numa *naindex = ll_check_Numa(_fun, L, 2);
     Boxa *boxa = boxaSortByIndex(boxas, naindex);
@@ -2094,7 +2095,7 @@ SortByIndex(lua_State *L)
 }
 
 /**
- * \brief Split Boxa* (%boxa) into even and odd (%boxae, %boxao)
+ * \brief Split Boxa* (%boxa) into even and odd (%boxae, %boxao).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is optional and, if gived, expected to be a l_int32 (fillflag).
@@ -2105,7 +2106,7 @@ SortByIndex(lua_State *L)
 static int
 SplitEvenOdd(lua_State *L)
 {
-    FUNC(LL_BOXA ".SplitEvenOdd ");
+    LL_FUNC("SplitEvenOdd ");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     l_int32 fillflag = ll_check_l_int32_default(_fun, L, 2, 0);
     Boxa *boxae = nullptr;
@@ -2116,7 +2117,7 @@ SplitEvenOdd(lua_State *L)
 }
 
 /**
- * \brief Swap boxes (%i, %j) in Boxa* (%boxa)
+ * \brief Swap boxes (%i, %j) in Boxa* (%boxa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_int32 (i).
@@ -2128,7 +2129,7 @@ SplitEvenOdd(lua_State *L)
 static int
 SwapBoxes(lua_State *L)
 {
-    FUNC(LL_BOXA ".SwapBoxes");
+    LL_FUNC("SwapBoxes");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     l_int32 i = ll_check_index(_fun, L, 2, boxaGetCount(boxa));
     l_int32 j = ll_check_index(_fun, L, 3, boxaGetCount(boxa));
@@ -2136,7 +2137,7 @@ SwapBoxes(lua_State *L)
 }
 
 /**
- * \brief Translate the boxes in the Boxa* (%boxas)
+ * \brief Translate the boxes in the Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a l_int32 (transx).
@@ -2148,7 +2149,7 @@ SwapBoxes(lua_State *L)
 static int
 Translate(lua_State *L)
 {
-    FUNC(LL_BOXA ".Translate");
+    LL_FUNC("Translate");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 transx = ll_check_l_int32_default(_fun, L, 2, 0);
     l_int32 transy = ll_check_l_int32_default(_fun, L, 3, 0);
@@ -2157,7 +2158,7 @@ Translate(lua_State *L)
 }
 
 /**
- * \brief Windowed median for Boxa* (%boxas) giving Boxa* (%boxa)
+ * \brief Windowed median for Boxa* (%boxas) giving Boxa* (%boxa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_int32 (halfwin).
@@ -2169,7 +2170,7 @@ Translate(lua_State *L)
 static int
 WindowedMedian(lua_State *L)
 {
-    FUNC(LL_BOXA ".WindowedMedian");
+    LL_FUNC("WindowedMedian");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 halfwin = ll_check_l_int32_default(_fun, L, 2, 3);
     l_int32 debug = ll_check_boolean_default(_fun, L, 3, FALSE);
@@ -2178,7 +2179,7 @@ WindowedMedian(lua_State *L)
 }
 
 /**
- * \brief Write a Boxa* (%boxa) to a file (%filename)
+ * \brief Write a Boxa* (%boxa) to a file (%filename).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box).
  * Arg #2 is expected to be a string (filename).
@@ -2189,14 +2190,14 @@ WindowedMedian(lua_State *L)
 static int
 Write(lua_State *L)
 {
-    FUNC(LL_BOXA ".Write");
+    LL_FUNC("Write");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
     return ll_push_bool(L, 0 == boxaWrite(filename, boxa));
 }
 
 /**
- * \brief Write a Boxa* (%boxa) to memory (%data)
+ * \brief Write a Boxa* (%boxa) to memory (%data).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box).
  * </pre>
@@ -2206,7 +2207,7 @@ Write(lua_State *L)
 static int
 WriteMem(lua_State *L)
 {
-    FUNC(LL_BOXA ".WriteMem");
+    LL_FUNC("WriteMem");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     l_uint8 *data = nullptr;
     size_t size = 0;
@@ -2218,7 +2219,7 @@ WriteMem(lua_State *L)
 }
 
 /**
- * \brief Write a Boxa* (%boxa) to a stream (%stream)
+ * \brief Write a Boxa* (%boxa) to a stream (%stream).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box).
  * Arg #2 is expected to be a luaL_Stream* (stream).
@@ -2229,14 +2230,14 @@ WriteMem(lua_State *L)
 static int
 WriteStream(lua_State *L)
 {
-    FUNC(LL_BOXA ".WriteStream");
+    LL_FUNC("WriteStream");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
     return ll_push_bool(L, 0 == boxaWriteStream(stream->f, boxa));
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class LL_BOXA
+ * \brief Check Lua stack at index %arg for udata of class LL_BOXA.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -2249,7 +2250,7 @@ ll_check_Boxa(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Optionally expect a LL_BOXA at index %arg on the Lua stack
+ * \brief Optionally expect a LL_BOXA at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -2264,7 +2265,7 @@ ll_check_Boxa_opt(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Push Boxa* user data to the Lua stack and set its meta table
+ * \brief Push Boxa* user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param boxa pointer to the BOXA
@@ -2278,7 +2279,7 @@ ll_push_Boxa(const char *_fun, lua_State *L, Boxa *boxa)
     return ll_push_udata(_fun, L, LL_BOXA, boxa);
 }
 /**
- * \brief Create and push a new Boxa*
+ * \brief Create and push a new Boxa*.
  * \param L pointer to the lua_State
  * \return 1 Boxa* on the Lua stack
  */
@@ -2288,7 +2289,7 @@ ll_new_Boxa(lua_State *L)
     return Create(L);
 }
 /**
- * \brief Register the BOX methods and functions in the LL_BOX meta table
+ * \brief Register the BOX methods and functions in the LL_BOX meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
