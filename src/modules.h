@@ -82,6 +82,8 @@
 #define	LL_PTAA		"Ptaa"          /*!< Lua class: array of Pta */
 #define	LL_NUMA		"Numa"          /*!< Lua class: array of floats (l_float32) */
 #define	LL_NUMAA	"Numaa"         /*!< Lua class: array of Numa */
+#define	LL_DEWARP       "Dewarp"        /*!< Lua class: Dewarp */
+#define	LL_DEWARPA      "Dewarpa"       /*!< Lua class: array of Dewarp */
 #define	LL_DNA		"Dna"           /*!< Lua class: array of doubles (l_float64, equiv. to lua_Number) */
 #define	LL_DNAA		"Dnaa"          /*!< Lua class: array of Dna */
 #define	LL_RBTNODE      "RbtreeNode"    /*!< Lua class: RbtreeNode (Amap and Aset nodes) */
@@ -410,6 +412,20 @@ extern Numaa      * ll_check_Numaa_opt(const char *_fun, lua_State *L, int arg);
 extern int          ll_push_Numaa(const char *_fun, lua_State *L, Numaa *naa);
 extern int          ll_new_Numaa(lua_State *L);
 extern int          ll_register_Numaa(lua_State *L);
+
+/* lldewarp.cpp */
+extern L_Dewarp   * ll_check_Dewarp(const char *_fun, lua_State *L, int arg);
+extern L_Dewarp   * ll_check_Dewarp_opt(const char *_fun, lua_State *L, int arg);
+extern int          ll_push_Dewarp(const char *_fun, lua_State *L, L_Dewarp *dew);
+extern int          ll_new_Dewarp(lua_State *L);
+extern int          ll_register_Dewarp(lua_State *L);
+
+/* lldewarpa.cpp */
+extern L_Dewarpa  * ll_check_Dewarpa(const char *_fun, lua_State *L, int arg);
+extern L_Dewarpa  * ll_check_Dewarpa_opt(const char *_fun, lua_State *L, int arg);
+extern int          ll_push_Dewarpa(const char *_fun, lua_State *L, L_Dewarpa *dew);
+extern int          ll_new_Dewarpa(lua_State *L);
+extern int          ll_register_Dewarpa(lua_State *L);
 
 /* lldna.cpp */
 extern L_Dna      * ll_check_Dna(const char *_fun, lua_State *L, int arg);

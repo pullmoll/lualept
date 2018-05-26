@@ -4,6 +4,34 @@
 	allheaders.h file.
 --]]
 
+local funcs = {}
+
+---
+-- Sort a table by its keys
+-- \param t table
+-- \param order optional function to sort table entries
+function spairs(t, order)
+	-- collect the keys
+	local keys = {}
+	for k in pairs(t) do keys[#keys+1] = k end
+	-- if order function is given, sort by it passing the
+	-- table and keys a,b; otherwise just sort the keys
+	if order then
+		table.sort(keys, function(a,b) return order(t, a, b) end)
+	else
+		table.sort(keys)
+	end
+	-- return the iterator function
+	local i = 0
+	return function()
+		i = i + 1
+		if keys[i] then
+			return keys[i], t[keys[i]]
+		end
+	end
+end
+
+---
 -- List the array table (t) contents to fd.
 -- \param fd io file descriptor
 -- \param t array table to list
@@ -19,28 +47,91 @@ end
 -- Strip known type prefixes from a Leptonica function name
 -- param str Leptonica function name
 function strip_type(str)
-	local s = str:match("^[%l_]+(.*)")
-	return s
+	local p, s = str:match("^([%l_]+)(.*)")
+	local prefixes = {
+		amap		= true,
+		array		= true,
+		barcode		= true,
+		bbuffer		= true,
+		bmf		= true,
+		box		= true,
+		boxa		= true,
+		boxaa		= true,
+		ccb		= true,
+		ccba		= true,
+		cmap		= true,
+		dewarp		= true,
+		dewarpa		= true,
+		dpix		= true,
+		fpix		= true,
+		fpixa		= true,
+		jb		= true,
+		l_amap		= true,
+		l_aset		= true,
+		l_bytea		= true,
+		l_dna		= true,
+		l_dnaa		= true,
+		l_rbtree	= true,
+		lheap		= true,
+		list		= true,
+		lqueue		= true,
+		lstack		= true,
+		numa		= true,
+		numaa		= true,
+		pix		= true,
+		pixa		= true,
+		pixaa		= true,
+		pixacc		= true,
+		pixacomp	= true,
+		pixcmap		= true,
+		pixcomp		= true,
+		pms		= true,
+		pta		= true,
+		ptaa		= true,
+		ptra		= true,
+		ptraa		= true,
+		quadtree	= true,
+		rch		= true,
+		rcha		= true,
+		recog		= true,
+		sa		= true,
+		sarray		= true,
+		sel		= true,
+		sela		= true,
+		string		= true,
+		sudoku		= true,
+		wshed		= true,
+		zlib		= true
+	}
+	if prefixes[p] then
+		return s
+	elseif p ~= nil then
+		local p1 = p:sub(1,1):upper()
+		local p2 = p:sub(2,-1)
+		return p1 .. p2 .. s
+	else
+		return s
+	end
 end
 
 ---
 -- Return the lualapt getter for parameter type
--- \param type type name of the variable
+-- \param vtype type name of the variable
 -- \param arg argument #
-function getter(type, arg)
+function getter(vtype, arg)
 	local g
-	local type_nostars = type:gsub("%*", "")
-	local type_noblank = type_nostars:gsub("%s", "")
-	return "ll_check_" .. type_noblank .. "(_fun, L, " .. arg .. ")"
+	local vtype_nostars = vtype:gsub("%*", "")
+	local vtype_noblank = vtype_nostars:gsub("%s", "")
+	return "ll_check_" .. vtype_noblank .. "(_fun, L, " .. arg .. ")"
 end
 ---
 -- Return the lualapt pusher for return type
--- \param type type name of the variable
+-- \param vtype type name of the variable
 -- \param var name of the local variable to push
-function pusher(type, var)
-	local type_nostart = type:gsub("%*", "")
-	local type_noblank = type_nostart:gsub("%s", "")
-	return "ll_push_" .. type_noblank .. "(_fun, L, " .. var ..")"
+function pusher(vtype, var)
+	local vtype_nostart = vtype:gsub("%*", "")
+	local vtype_noblank = vtype_nostart:gsub("%s", "")
+	return "ll_push_" .. vtype_noblank .. "(_fun, L, " .. var ..")"
 end
 
 ---
@@ -51,7 +142,7 @@ end
 function params(types, names, refs)
 	local str = ""
 	for i=1,#types do
-		local type = types[i]
+		local vtype = types[i]
 		local name = names[i]
 		if i > 1 then
 			str = str .. ', '
@@ -80,8 +171,11 @@ function parse(fd, str)
 				L_ASET      = "Aset",
 				L_ASET_NODE = "AsetNode",
 				L_BMF       = "Bmf",
+				BBUFFER     = "Bbuffer",
 				NUMA        = "Numa",
 				NUMAA       = "Numaa",
+				L_DEWARP    = "Dewarp",
+				L_DEWARPA   = "Dewarpa",
 				L_DNA       = "Dna",
 				L_DNAA      = "Dnaa",
 				PTA         = "Pta",
@@ -92,6 +186,7 @@ function parse(fd, str)
 				PIX         = "Pix",
 				PIXA        = "Pixa",
 				PIXAA       = "Pixaa",
+				PIXACOMP    = "PixaComp",
 				PIXCMAP     = "PixColormap",
 			}
 			return rename[s]
@@ -126,28 +221,30 @@ function parse(fd, str)
 
 	-- fill the arrays
 	for p in argl:gmatch("([^|]+)|?") do
-		local type, name, get
+		local vtype, name, get
 		if p == "..." then
-			type, name = "va_list", "ap"
+			vtype, name = "va_list", "ap"
 		else
-			type, name = p:match("([%w_]+%s*%**)%s*(.*)")
+			vtype, name = p:match("([%w_]+%s*%**)%s*(.*)")
 		end
-		if type:match("%*%*$") then
+		if vtype:match("%*%*$")
+			or vtype:match("ll_(i|ui)nt.*")
+			or vtype:match("size_t%s%*") then
 			-- this is (most probably) a pointer to a variable
-			type = type:sub(1,-2)		-- strip 2nd asterisk
+			vtype = vtype:sub(1,-2)		-- strip 2nd asterisk
 			name = name:gsub("p?(.*)","%1")	-- strip leading p
 			refs[name] = true
-			if type:match("^l_.*") then
+			if vtype:match("^l_.*") or vtype:match("size_t.*") then
 				get = "0"
 			else
 				get = "nullptr"
 			end
 		else
-			get = getter(type, argc)
+			get = getter(vtype, argc)
 		end
-		types[argc] = type
+		types[argc] = vtype
 		names[argc] = name
-		vars[argc] = "\t" .. type .. name .. " = " .. get .. ";"
+		vars[argc] = "\t" .. vtype .. name .. " = " .. get .. ";"
 		argc = argc + 1
 	end
 
@@ -158,16 +255,16 @@ function parse(fd, str)
 		' * <pre>'
 		}
 	for i = 1, argc-1 do
-		local type = types[i]
+		local vtype = types[i]
 		local name = names[i]
-		local type_noblank = type:gsub("%s","")
+		local vtype_noblank = vtype:gsub("%s","")
 		if not refs[name] then
 			-- this is a true parameter
 			line = ' * Arg #' .. i
 			if i == 1 then
 				line = line .. ' (i.e. self)'
 			end
-			line = line .. ' is expected to be a ' .. type_noblank
+			line = line .. ' is expected to be a ' .. vtype_noblank
 			line = line .. ' (' .. name .. ').'
 			func[#func+1] = line
 		end
@@ -187,13 +284,12 @@ function parse(fd, str)
 	for i = 1, #vars do
 		func[#func+1] = vars[i]
 	end
-	func[#func+1] = ''
 	func[#func+1] = '\t' .. rtype .. ' result = ' .. fname .. '(' .. params(types, names, refs) .. ');'
 	func[#func+1] = '\treturn ' .. pusher(rtype, "result") .. ';'
 	func[#func+1] = '}'
 	func[#func+1] = ''
 
-	list(fd, func)
+	funcs[fname] = func
 end
 
 ---
@@ -221,4 +317,9 @@ local allheaders = arg[1] or "/usr/include/leptonica/allheaders.h"
 local template = arg[2] or "template.cpp"
 local fs = io.open(allheaders)
 local fd = io.open(template, "wb")
-return extract(fs, fd)
+extract(fs, fd)
+
+for fname,func in spairs(funcs) do
+	print(fname)
+	list(fd, func)
+end

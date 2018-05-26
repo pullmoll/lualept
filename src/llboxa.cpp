@@ -1666,7 +1666,7 @@ Rotate(lua_State *L)
 }
 
 /**
- * \brief Rotate a Boxa* (%boxas).
+ * \brief Rotate a Boxa* (%boxas) orthogonally.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * </pre>
@@ -1755,7 +1755,7 @@ SelectBySize(lua_State *L)
 }
 
 /**
- * \brief Select boxes from Boxa* (%boxa) by size.
+ * \brief Select boxes from Boxa* (%boxa) by width/height ratio.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_float32 (ratio).
