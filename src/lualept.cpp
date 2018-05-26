@@ -780,6 +780,7 @@ ll_check_l_uint16_default(const char *_fun, lua_State *L, int arg, l_uint16 dflt
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the integer
+ * \param dflt default value
  * \return l_int32 for the boolean (1 = true, 0 = false); lua_error if out of bounds
  */
 l_int32
@@ -2815,23 +2816,6 @@ ll_register_LuaLept(lua_State *L)
         {"Version",                 Version},
         {"LuaVersion",              LuaVersion},
         {"LeptVersion",             LeptVersion},
-        {LL_NUMA,                   ll_new_Numa},
-        {LL_NUMAA,                  ll_new_Numaa},
-        {LL_DNA,                    ll_new_Dna},
-        {LL_DNAA,                   ll_new_Dnaa},
-        {LL_PTA,                    ll_new_Pta},
-        {LL_PTAA,                   ll_new_Ptaa},
-        {LL_AMAP,                   ll_new_Amap},
-        {LL_ASET,                   ll_new_Aset},
-        {LL_BMF,                    ll_new_Bmf},
-        {LL_DLLIST,                 ll_new_DoubleLinkedList},
-        {LL_BOX,                    ll_new_Box},
-        {LL_BOXA,                   ll_new_Boxa},
-        {LL_BOXAA,                  ll_new_Boxaa},
-        {LL_PIXCMAP,                ll_new_PixColormap},
-        {LL_PIX,                    ll_new_Pix},
-        {LL_PIXA,                   ll_new_Pixa},
-        {LL_PIXAA,                  ll_new_Pixaa},
         {"RGB",                     RGB},
         {"RGBA",                    RGBA},
         {"ToRGB",                   ToRGB},
@@ -2846,23 +2830,6 @@ ll_register_LuaLept(lua_State *L)
         LUA_SENTINEL
     };
 
-    ll_register_Amap(L);
-    ll_register_Aset(L);
-    ll_register_Bmf(L);
-    ll_register_DoubleLinkedList(L);
-    ll_register_Numa(L);
-    ll_register_Numaa(L);
-    ll_register_Dna(L);
-    ll_register_Dnaa(L);
-    ll_register_Pta(L);
-    ll_register_Ptaa(L);
-    ll_register_Box(L);
-    ll_register_Boxa(L);
-    ll_register_Boxaa(L);
-    ll_register_PixColormap(L);
-    ll_register_Pix(L);
-    ll_register_Pixa(L);
-    ll_register_Pixaa(L);
     return ll_register_class(L, LL_LEPT, methods, functions);
 }
 
@@ -2883,6 +2850,25 @@ ll_RunScript(const char *script)
     luaL_openlibs(L);
 
     /* Register our libraries */
+    ll_register_Amap(L);
+    ll_register_Aset(L);
+    ll_register_Bmf(L);
+    ll_register_DoubleLinkedList(L);
+    ll_register_Numa(L);
+    ll_register_Numaa(L);
+    ll_register_Dewarp(L);
+    ll_register_Dewarpa(L);
+    ll_register_Dna(L);
+    ll_register_Dnaa(L);
+    ll_register_Pta(L);
+    ll_register_Ptaa(L);
+    ll_register_Box(L);
+    ll_register_Boxa(L);
+    ll_register_Boxaa(L);
+    ll_register_PixColormap(L);
+    ll_register_Pix(L);
+    ll_register_Pixa(L);
+    ll_register_Pixaa(L);
     ll_register_LuaLept(L);
 
     res = luaL_loadfile(L, script);

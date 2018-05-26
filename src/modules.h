@@ -114,7 +114,9 @@ extern void **ll_udata(const char *_fun, lua_State* L, int arg, const char *tnam
 
 /**
  * \brief Cast the result of LEPT_MALLOC() to the given type.
- * \param T typename of the result pointer
+ * T is the typename of the result pointer
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
  * \param size size of the memory block
  * \result memory allocated and cast to T*
  */
@@ -131,7 +133,9 @@ ll_malloc(const char* _fun, lua_State *L, size_t size)
 
 /**
  * \brief Cast the result of LEPT_CALLOC() to the given type.
- * \param T typename of the result pointer
+ * T is the typename of the result pointer
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
  * \param nmemb number of members
  * \param size size of one member
  * \result memory allocated, zeroed and cast to T*
@@ -158,7 +162,9 @@ ll_calloc(const char* _fun, lua_State *L, l_int32 nmemb, l_int32 size)
 
 /**
  * \brief Cast the result of LEPT_CALLOC() to the given type.
- * \param T typename of the result pointer
+ * T is the typename of the result pointer
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
  * \param nmemb number of members
  * \result memory allocated, zeroed and cast to T*
  */
@@ -184,7 +190,7 @@ ll_calloc(const char* _fun, lua_State *L, l_int32 nmemb)
 
 /**
  * \brief Check Lua stack at index %arg for udata with %name.
- * \param T typename of the expected return value
+ * T is the typename of the expected return value
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg argument index

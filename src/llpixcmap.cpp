@@ -959,6 +959,7 @@ ll_check_PixColormap_opt(const char *_fun, lua_State *L, int arg)
  * The reason is that a PixColormap* does not have a reference
  * count and thus can be used exactly once in Pix:SetColormap().
  *
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the PixColormap* contained in the user data
