@@ -466,6 +466,8 @@ ll_register_Numaa(lua_State *L) {
         {"__len",           GetCount},    /* #numa */
         {"__tostring",      toString},
         {"AddNuma",         AddNuma},
+        {"Create",          Create},
+        {"CreateFull",      CreateFull},
         {"FlattenToNuma",   FlattenToNuma},
         {"GetCount",        GetCount},
         {"GetNuma",         GetNuma},
@@ -483,8 +485,6 @@ ll_register_Numaa(lua_State *L) {
     };
 
     static const luaL_Reg functions[] = {
-        {"Create",          Create},
-        {"CreateFull",      CreateFull},
         LUA_SENTINEL
     };
 

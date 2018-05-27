@@ -433,6 +433,7 @@ ll_register_Aset(lua_State *L)
     };
 
     static const luaL_Reg functions[] = {
+        {"__index",             Find},
         LUA_SENTINEL
     };
 

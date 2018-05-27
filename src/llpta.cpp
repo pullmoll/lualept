@@ -107,7 +107,7 @@ static int
 toString(lua_State *L)
 {
     LL_FUNC("toString");
-    static char str[256];
+    char str[256];
     Pta *pta = ll_check_Pta(_fun, L, 1);
     luaL_Buffer B;
     l_int32 i;

@@ -2219,6 +2219,26 @@ DestroyColormap(lua_State *L)
 }
 
 /**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_int32 (x).
+ * Arg #3 is expected to be a l_int32 (y).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 l_int32 on the Lua stack
+ */
+static int
+Display(lua_State *L)
+{
+    LL_FUNC("Display");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 x = ll_check_l_int32(_fun, L, 2);
+    l_int32 y = ll_check_l_int32(_fun, L, 3);
+    ll_push_bool(L, 0 == pixDisplay(pixs, x, y));
+}
+
+/**
  * \brief Display a color array creating a Pix* (%pix).
  * <pre>
  * Arg #1 is expected to be a l_int32 (side).
@@ -2244,6 +2264,50 @@ DisplayColorArray(lua_State *L)
 }
 
 /**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pix1).
+ * Arg #2 is expected to be a Pix* (pix2).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix * on the Lua stack
+ */
+static int
+DisplayDiffBinary(lua_State *L)
+{
+    LL_FUNC("DisplayDiffBinary");
+    Pix *pix1 = ll_check_Pix(_fun, L, 1);
+    Pix *pix2 = ll_check_Pix(_fun, L, 2);
+    Pix *pix = pixDisplayDiffBinary(pix1, pix2);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a Sel* (sel).
+ * Arg #3 is expected to be a l_int32 (scalefactor).
+ * Arg #4 is expected to be a l_uint32 (hitcolor).
+ * Arg #5 is expected to be a l_uint32 (misscolor).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix * on the Lua stack
+ */
+static int
+DisplayHitMissSel(lua_State *L)
+{
+    LL_FUNC("DisplayHitMissSel");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Sel *sel = ll_check_Sel(_fun, L, 2);
+    l_int32 scalefactor = ll_check_l_int32(_fun, L, 3);
+    l_uint32 hitcolor = ll_check_l_uint32(_fun, L, 4);
+    l_uint32 misscolor = ll_check_l_uint32(_fun, L, 5);
+    Pix *pix = pixDisplayHitMissSel(pixs, sel, scalefactor, hitcolor, misscolor);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
  * \brief Display the layers of a Pix* (pixd).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
@@ -2262,6 +2326,157 @@ DisplayLayersRGBA(lua_State *L)
     l_int32 maxw = ll_check_l_int32(_fun, L, 3);
     Pix *pixd = pixDisplayLayersRGBA(pixs, val, maxw);
     return ll_push_Pix(_fun, L, pixd);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a Pix* (pixp).
+ * Arg #3 is expected to be a Pix* (pixe).
+ * Arg #4 is expected to be a l_int32 (x0).
+ * Arg #5 is expected to be a l_int32 (y0).
+ * Arg #6 is expected to be a l_uint32 (color).
+ * Arg #7 is expected to be a l_float32 (scale).
+ * Arg #8 is expected to be a l_int32 (nlevels).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix * on the Lua stack
+ */
+static int
+DisplayMatchedPattern(lua_State *L)
+{
+    LL_FUNC("DisplayMatchedPattern");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Pix *pixp = ll_check_Pix(_fun, L, 2);
+    Pix *pixe = ll_check_Pix(_fun, L, 3);
+    l_int32 x0 = ll_check_l_int32(_fun, L, 4);
+    l_int32 y0 = ll_check_l_int32(_fun, L, 5);
+    l_uint32 color = ll_check_l_uint32(_fun, L, 6);
+    l_float32 scale = ll_check_l_float32(_fun, L, 7);
+    l_int32 nlevels = ll_check_l_int32(_fun, L, 8);
+    Pix *pix = pixDisplayMatchedPattern(pixs, pixp, pixe, x0, y0, color, scale, nlevels);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
+ * Arg #2 is expected to be a Pix* (pixs).
+ * Arg #3 is expected to be a Pta* (pta).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix * on the Lua stack
+ */
+static int
+DisplayPta(lua_State *L)
+{
+    LL_FUNC("DisplayPta");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
+    Pta *pta = ll_check_Pta(_fun, L, 3);
+    Pix *pix = pixDisplayPta(pixd, pixs, pta);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
+ * Arg #2 is expected to be a Pix* (pixs).
+ * Arg #3 is expected to be a Pta* (pta).
+ * Arg #4 is expected to be a Pix* (pixp).
+ * Arg #5 is expected to be a l_int32 (cx).
+ * Arg #6 is expected to be a l_int32 (cy).
+ * Arg #7 is expected to be a l_uint32 (color).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix * on the Lua stack
+ */
+static int
+DisplayPtaPattern(lua_State *L)
+{
+    LL_FUNC("DisplayPtaPattern");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
+    Pta *pta = ll_check_Pta(_fun, L, 3);
+    Pix *pixp = ll_check_Pix(_fun, L, 4);
+    l_int32 cx = ll_check_l_int32(_fun, L, 5);
+    l_int32 cy = ll_check_l_int32(_fun, L, 6);
+    l_uint32 color = ll_check_l_uint32(_fun, L, 7);
+    Pix *pix = pixDisplayPtaPattern(pixd, pixs, pta, pixp, cx, cy, color);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a Ptaa* (ptaa).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix * on the Lua stack
+ */
+static int
+DisplayPtaa(lua_State *L)
+{
+    LL_FUNC("DisplayPtaa");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Ptaa *ptaa = ll_check_Ptaa(_fun, L, 2);
+    Pix *pix = pixDisplayPtaa(pixs, ptaa);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
+ * Arg #2 is expected to be a Pix* (pixs).
+ * Arg #3 is expected to be a Ptaa* (ptaa).
+ * Arg #4 is expected to be a Pix* (pixp).
+ * Arg #5 is expected to be a l_int32 (cx).
+ * Arg #6 is expected to be a l_int32 (cy).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix * on the Lua stack
+ */
+static int
+DisplayPtaaPattern(lua_State *L)
+{
+    LL_FUNC("DisplayPtaaPattern");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
+    Ptaa *ptaa = ll_check_Ptaa(_fun, L, 3);
+    Pix *pixp = ll_check_Pix(_fun, L, 4);
+    l_int32 cx = ll_check_l_int32(_fun, L, 5);
+    l_int32 cy = ll_check_l_int32(_fun, L, 6);
+    Pix *pix = pixDisplayPtaaPattern(pixd, pixs, ptaa, pixp, cx, cy);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_int32 (x).
+ * Arg #3 is expected to be a l_int32 (y).
+ * Arg #4 is expected to be a string (title).
+ * Arg #5 is expected to be a l_int32 (dispflag).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 l_int32 on the Lua stack
+ */
+static int
+DisplayWithTitle(lua_State *L)
+{
+    LL_FUNC("DisplayWithTitle");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 x = ll_check_l_int32(_fun, L, 2);
+    l_int32 y = ll_check_l_int32(_fun, L, 3);
+    const char *title = ll_check_string(_fun, L, 4);
+    l_int32 dispflag = ll_check_boolean(_fun, L, 5);
+    return ll_push_bool(L, 0 == pixDisplayWithTitle(pixs, x, y, title, dispflag));
 }
 
 /**
@@ -5132,10 +5347,206 @@ BackgroundNormRGBArraysMorph(lua_State *L)
         Pix *pixr = nullptr;
         Pix *pixg = nullptr;
         Pix *pixb = nullptr;
-
         if (pixBackgroundNormRGBArraysMorph(pixs, pixim, reduction, size, bgval, &pixr, &pixg, &pixb))
             return ll_push_nil(L);
         return ll_push_Pix(_fun, L, pixr) + ll_push_Pix(_fun, L, pixg) + ll_push_Pix(_fun, L, pixb);
+}
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pix).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 l_int32 on the Lua stack
+ */
+static int
+SelectDefaultPdfEncoding(lua_State *L)
+{
+    LL_FUNC("SelectDefaultPdfEncoding");
+    Pix *pix = ll_check_Pix(_fun, L, 1);
+    l_int32 type = L_G4_ENCODE;
+    if (selectDefaultPdfEncoding(pix, &type))
+        return ll_push_nil(L);
+    lua_pushstring(L, ll_string_encoding(type));
+    return 1;
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
+ * Arg #2 is expected to be a Pix* (pixs).
+ * Arg #3 is expected to be a Sel* (sel).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix * on the Lua stack
+ */
+static int
+Dilate(lua_State *L)
+{
+    LL_FUNC("Dilate");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
+    Sel *sel = ll_check_Sel(_fun, L, 3);
+    Pix *pix = pixDilate(pixd, pixs, sel);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
+ * Arg #2 is expected to be a Pix* (pixs).
+ * Arg #3 is expected to be a l_int32 (hsize).
+ * Arg #4 is expected to be a l_int32 (vsize).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix * on the Lua stack
+ */
+static int
+DilateBrick(lua_State *L)
+{
+    LL_FUNC("DilateBrick");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
+    l_int32 hsize = ll_check_l_int32(_fun, L, 3);
+    l_int32 vsize = ll_check_l_int32(_fun, L, 4);
+    Pix *pix = pixDilateBrick(pixd, pixs, hsize, vsize);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
+ * Arg #2 is expected to be a Pix* (pixs).
+ * Arg #3 is expected to be a l_int32 (hsize).
+ * Arg #4 is expected to be a l_int32 (vsize).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix * on the Lua stack
+ */
+static int
+DilateBrickDwa(lua_State *L)
+{
+    LL_FUNC("DilateBrickDwa");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
+    l_int32 hsize = ll_check_l_int32(_fun, L, 3);
+    l_int32 vsize = ll_check_l_int32(_fun, L, 4);
+    Pix *pix = pixDilateBrickDwa(pixd, pixs, hsize, vsize);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
+ * Arg #2 is expected to be a Pix* (pixs).
+ * Arg #3 is expected to be a l_int32 (hsize).
+ * Arg #4 is expected to be a l_int32 (vsize).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix * on the Lua stack
+ */
+static int
+DilateCompBrick(lua_State *L)
+{
+    LL_FUNC("DilateCompBrick");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
+    l_int32 hsize = ll_check_l_int32(_fun, L, 3);
+    l_int32 vsize = ll_check_l_int32(_fun, L, 4);
+    Pix *pix = pixDilateCompBrick(pixd, pixs, hsize, vsize);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
+ * Arg #2 is expected to be a Pix* (pixs).
+ * Arg #3 is expected to be a l_int32 (hsize).
+ * Arg #4 is expected to be a l_int32 (vsize).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix * on the Lua stack
+ */
+static int
+DilateCompBrickDwa(lua_State *L)
+{
+    LL_FUNC("DilateCompBrickDwa");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
+    l_int32 hsize = ll_check_l_int32(_fun, L, 3);
+    l_int32 vsize = ll_check_l_int32(_fun, L, 4);
+    Pix *pix = pixDilateCompBrickDwa(pixd, pixs, hsize, vsize);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
+ * Arg #2 is expected to be a Pix* (pixs).
+ * Arg #3 is expected to be a l_int32 (hsize).
+ * Arg #4 is expected to be a l_int32 (vsize).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix * on the Lua stack
+ */
+static int
+DilateCompBrickExtendDwa(lua_State *L)
+{
+    LL_FUNC("DilateCompBrickExtendDwa");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
+    l_int32 hsize = ll_check_l_int32(_fun, L, 3);
+    l_int32 vsize = ll_check_l_int32(_fun, L, 4);
+    Pix *pix = pixDilateCompBrickExtendDwa(pixd, pixs, hsize, vsize);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_int32 (hsize).
+ * Arg #3 is expected to be a l_int32 (vsize).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix * on the Lua stack
+ */
+static int
+DilateGray(lua_State *L)
+{
+    LL_FUNC("DilateGray");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 hsize = ll_check_l_int32(_fun, L, 2);
+    l_int32 vsize = ll_check_l_int32(_fun, L, 3);
+    Pix *pix = pixDilateGray(pixs, hsize, vsize);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_int32 (hsize).
+ * Arg #3 is expected to be a l_int32 (vsize).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix * on the Lua stack
+ */
+static int
+DilateGray3(lua_State *L)
+{
+    LL_FUNC("DilateGray3");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 hsize = ll_check_l_int32(_fun, L, 2);
+    l_int32 vsize = ll_check_l_int32(_fun, L, 3);
+    Pix *pix = pixDilateGray3(pixs, hsize, vsize);
+    return ll_push_Pix(_fun, L, pix);
 }
 
 /**
@@ -5229,6 +5640,7 @@ ll_register_Pix(lua_State *L)
         {"BackgroundNormGrayArrayMorph",    BackgroundNormGrayArrayMorph},
         {"BackgroundNormMorph",             BackgroundNormMorph},
         {"BackgroundNormRGBArrays",         BackgroundNormRGBArrays},
+        {"BackgroundNormRGBArraysMorph",    BackgroundNormRGBArraysMorph},
         {"BackgroundNormSimple",            BackgroundNormSimple},
         {"BlendInRect",                     BlendInRect},
         {"CleanBackgroundToWhite",          CleanBackgroundToWhite},
@@ -5302,9 +5714,28 @@ ll_register_Pix(lua_State *L)
         {"Create",                          Create},
         {"CreateNoInit",                    CreateNoInit},
         {"CreateRGBImage",                  CreateRGBImage},
+        {"CreateTemplate",                  CreateTemplate},
+        {"CreateTemplateNoInit",            CreateTemplateNoInit},
         {"DestroyColormap",                 DestroyColormap},
+        {"Dilate",                          Dilate},
+        {"DilateBrick",                     DilateBrick},
+        {"DilateBrickDwa",                  DilateBrickDwa},
+        {"DilateCompBrick",                 DilateCompBrick},
+        {"DilateCompBrickDwa",              DilateCompBrickDwa},
+        {"DilateCompBrickExtendDwa",        DilateCompBrickExtendDwa},
+        {"DilateGray",                      DilateGray},
+        {"DilateGray3",                     DilateGray3},
+        {"Display",                         Display},
         {"DisplayColorArray",               DisplayColorArray},
+        {"DisplayDiffBinary",               DisplayDiffBinary},
+        {"DisplayHitMissSel",               DisplayHitMissSel},
         {"DisplayLayersRGBA",               DisplayLayersRGBA},
+        {"DisplayMatchedPattern",           DisplayMatchedPattern},
+        {"DisplayPta",                      DisplayPta},
+        {"DisplayPtaPattern",               DisplayPtaPattern},
+        {"DisplayPtaa",                     DisplayPtaa},
+        {"DisplayPtaaPattern",              DisplayPtaaPattern},
+        {"DisplayWithTitle",                DisplayWithTitle},
         {"FindAreaPerimRatio",              FindAreaPerimRatio},
         {"FindPageForeground",              FindPageForeground},
         {"FindPerimToAreaRatio",            FindPerimToAreaRatio},
@@ -5382,6 +5813,7 @@ ll_register_Pix(lua_State *L)
         {"ResizeImageData",                 ResizeImageData},
         {"RowStats",                        RowStats},
         {"ScaleResolution",                 ScaleResolution},
+        {"SelectDefaultPdfEncoding",        SelectDefaultPdfEncoding},
         {"SetAll",                          SetAll},
         {"SetAllArbitrary",                 SetAllArbitrary},
         {"SetAllGray",                      SetAllGray},

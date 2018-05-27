@@ -1237,6 +1237,54 @@ ll_string_more_less_clip(int flag)
 }
 
 /**
+ * \brief Table of PDF encoding format names and enumeration values.
+ */
+static const lept_enums_t tbl_encoding[] = {
+    TBL_ENTRY("default",        L_DEFAULT_ENCODE),
+    TBL_ENTRY("jpeg",           L_JPEG_ENCODE),
+    TBL_ENTRY("jpg",            L_JPEG_ENCODE),
+    TBL_ENTRY("g4",             L_G4_ENCODE),
+    TBL_ENTRY("flate",          L_FLATE_ENCODE),
+    TBL_ENTRY("jp2k",           L_JP2K_ENCODE)
+};
+
+/**
+ * \brief Check for an PDF encoding format name as string.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \param dflt default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_encoding(const char *_fun, lua_State *L, int arg, l_int32 dflt)
+{
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_encoding, ARRAYSIZE(tbl_encoding));
+}
+
+/**
+ * \brief Push a string listing the PDF encoding format keys.
+ * \param L pointer to lua_State
+ * \return 1 string on the Lua stack
+ */
+int
+ll_print_encoding(lua_State *L)
+{
+    return ll_push_tbl(L, tbl_encoding, ARRAYSIZE(tbl_encoding));
+}
+
+/**
+ * \brief Return the name for an input file format (IFF_*).
+ * \param format input file format value
+ * \return pointer to const string
+ */
+const char*
+ll_string_encoding(int format)
+{
+    return ll_string_tbl(format, tbl_encoding, ARRAYSIZE(tbl_encoding));
+}
+
+/**
  * \brief Table of input file format names and enumeration values.
  */
 static const lept_enums_t tbl_input_format[] = {
@@ -1898,6 +1946,43 @@ const char*
 ll_string_select_min_max(l_int32 which)
 {
     return ll_string_tbl(which, tbl_select_minmax, ARRAYSIZE(tbl_select_minmax));
+}
+
+/**
+ * \brief Table of select size names and enumeration values.
+ */
+static const lept_enums_t tbl_sel[] = {
+    TBL_ENTRY("dont-care",          SEL_DONT_CARE),
+    TBL_ENTRY("hit",                SEL_HIT),
+    TBL_ENTRY("h",                  SEL_HIT),
+    TBL_ENTRY("miss",               SEL_MISS),
+    TBL_ENTRY("m",                  SEL_MISS),
+    TBL_ENTRY("",                   SEL_DONT_CARE)
+};
+
+/**
+ * \brief Check for a select size name.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \param dflt default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_sel(const char *_fun, lua_State* L, int arg, l_int32 dflt)
+{
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_sel, ARRAYSIZE(tbl_sel));
+}
+
+/**
+ * \brief Return a string for the select size enumeration value.
+ * \param which select min or max enumeration value
+ * \return const string with the name
+ */
+const char*
+ll_string_sel(l_int32 which)
+{
+    return ll_string_tbl(which, tbl_sel, ARRAYSIZE(tbl_sel));
 }
 
 /**
@@ -2869,6 +2954,8 @@ ll_RunScript(const char *script)
     ll_register_Pix(L);
     ll_register_Pixa(L);
     ll_register_Pixaa(L);
+    ll_register_Sel(L);
+    ll_register_Sela(L);
     ll_register_LuaLept(L);
 
     res = luaL_loadfile(L, script);

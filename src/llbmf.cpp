@@ -257,6 +257,7 @@ ll_register_Bmf(lua_State *L)
     static const luaL_Reg methods[] = {
         {"__gc",                Destroy},   /* garbage collector */
         {"__new",               Create},
+        {"Create",              Create},
         {"Destroy",             Destroy},
         {"GetBaseline",         GetBaseline},
         {"GetLineStrings",      GetLineStrings},
@@ -267,7 +268,6 @@ ll_register_Bmf(lua_State *L)
     };
 
     static const luaL_Reg functions[] = {
-        {"Create",              Create},
         LUA_SENTINEL
     };
 

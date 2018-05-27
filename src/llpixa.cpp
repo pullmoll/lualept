@@ -522,6 +522,7 @@ ll_register_Pixa(lua_State *L)
         {"AddPix",              AddPix},
         {"Clear",               Clear},
         {"Copy",                Copy},
+        {"Create",              Create},
         {"Destroy",             Destroy},
         {"GetAlignedStats",     GetAlignedStats},
         {"GetBoxGeometry",      GetBoxGeometry},
@@ -544,7 +545,6 @@ ll_register_Pixa(lua_State *L)
     };
 
     static const luaL_Reg functions[] = {
-        {"Create",              Create},
         LUA_SENTINEL
     };
 

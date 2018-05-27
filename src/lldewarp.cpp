@@ -58,7 +58,7 @@ Destroy(lua_State *L)
     Dewarp **pdew = ll_check_udata<Dewarp>(_fun, L, 1, LL_DEWARP);
     Dewarp *dew = *pdew;
     DBG(LOG_DESTROY, "%s: '%s' pdew=%p dew=%p\n", _fun,
-        LL_DEWARP, pdewarp, dew);
+        LL_DEWARP, pdew, dew);
     dewarpDestroy(&dew);
     *pdew = nullptr;
     return 0;
@@ -149,7 +149,7 @@ BuildPageModel(lua_State *L)
 /**
  * \brief Create reference Dewarp* (%dew).
  * <pre>
- * Arg #1 (i.e. self) is expected to be a l_int32 (pageno).
+ * Arg #1 is expected to be a l_int32 (pageno).
  * Arg #2 is expected to be a l_int32 (refpage).
  * </pre>
  * \param L pointer to the lua_State
@@ -396,10 +396,10 @@ WriteMem(lua_State *L)
 }
 
 /**
- * \brief Write Dewarp* (%dew) to luaL_Stream* (%stream).
+ * \brief Write Dewarp* (%dew) to a luaL_Stream* (%stream).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dewarp* (dew).
- * Arg #2 is expected to be a FILE* (fp).
+ * Arg #2 is expected to be a luaL_Stream* (stream).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 for l_int32 on the Lua stack

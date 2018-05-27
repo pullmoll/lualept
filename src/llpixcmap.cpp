@@ -1020,6 +1020,9 @@ ll_register_PixColormap(lua_State *L)
         {"ConvertToHex",            ConvertToHex},
         {"Copy",                    Copy},
         {"CountGrayColors",         CountGrayColors},
+        {"Create",                  Create},
+        {"CreateLinear",            CreateLinear},
+        {"CreateRandom",            CreateRandom},
         {"DeserializeFromMemory",   DeserializeFromMemory},
         {"Destroy",                 Destroy},
         {"GetColor",                GetColor},
@@ -1051,9 +1054,6 @@ ll_register_PixColormap(lua_State *L)
     };
 
     static const luaL_Reg functions[] = {
-        {"Create",                  Create},
-        {"CreateRandom",            CreateRandom},
-        {"CreateLinear",            CreateLinear},
         LUA_SENTINEL
     };
 

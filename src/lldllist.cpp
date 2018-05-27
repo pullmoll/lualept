@@ -404,6 +404,7 @@ ll_register_DoubleLinkedList(lua_State *L)
         {"__tostring",          toString},
         {"AddToHead",           AddToHead},
         {"AddToTail",           AddToTail},
+        {"Create",              Create},
         {"Destroy",             Destroy},
         {"FindElement",         FindElement},
         {"FindTail",            FindTail},
@@ -419,7 +420,6 @@ ll_register_DoubleLinkedList(lua_State *L)
     };
 
     static const luaL_Reg functions[] = {
-        {"Create",              Create},
         LUA_SENTINEL
     };
 

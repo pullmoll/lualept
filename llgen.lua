@@ -119,19 +119,41 @@ end
 -- \param vtype type name of the variable
 -- \param arg argument #
 function getter(vtype, arg)
-	local g
-	local vtype_nostars = vtype:gsub("%*", "")
-	local vtype_noblank = vtype_nostars:gsub("%s", "")
-	return "ll_check_" .. vtype_noblank .. "(_fun, L, " .. arg .. ")"
+	if vtype == "const char *" then
+		return "ll_check_string(_fun, L, " .. arg .. ")"
+	elseif vtype == "luaL_Stream *" then
+		return "ll_check_stream(_fun, L, " .. arg .. ")"
+	else
+		local vtype_nostars = vtype:gsub("%*", "")
+		local vtype_noblank = vtype_nostars:gsub("%s", "")
+		return "ll_check_" .. vtype_noblank .. "(_fun, L, " .. arg .. ")"
+	end
 end
 ---
 -- Return the lualapt pusher for return type
 -- \param vtype type name of the variable
 -- \param var name of the local variable to push
 function pusher(vtype, var)
-	local vtype_nostart = vtype:gsub("%*", "")
-	local vtype_noblank = vtype_nostart:gsub("%s", "")
-	return "ll_push_" .. vtype_noblank .. "(_fun, L, " .. var ..")"
+	if vtype == "l_uint8 *" then
+		return "ll_push_lstring(_fun, L, reinterpret_cast<const char *>(" .. var .."), size)"
+	else
+		local vtype_nostart = vtype:gsub("%*", "")
+		local vtype_noblank = vtype_nostart:gsub("%s", "")
+		return "ll_push_" .. vtype_noblank .. "(_fun, L, " .. var ..")"
+	end
+end
+
+---
+-- Return the type name for a variable type
+-- \param vtype type name of the variable
+function typedescr(vtype)
+	if vtype == "const char *" then
+		return "string"
+	end
+	if vtype == "FILE *" then
+		return "luaL_Stream*"
+	end
+	return vtype:gsub("%s","")
 end
 
 ---
@@ -170,6 +192,7 @@ function parse(fd, str)
 				L_AMAP_NODE = "AmapNode",
 				L_ASET      = "Aset",
 				L_ASET_NODE = "AsetNode",
+				L_BBUFER    = "Bbuffer",
 				L_BMF       = "Bmf",
 				BBUFFER     = "Bbuffer",
 				NUMA        = "Numa",
@@ -188,6 +211,9 @@ function parse(fd, str)
 				PIXAA       = "Pixaa",
 				PIXACOMP    = "PixaComp",
 				PIXCMAP     = "PixColormap",
+				SARRAY      = "Sarray",
+				SEL	    = "Sel",
+				SELA        = "Sela",
 			}
 			return rename[s]
 		end)
@@ -201,11 +227,11 @@ function parse(fd, str)
 	local args = str:sub(argspos)
 	-- remove leading and trailing parenthesis
 	local args = args:match("%(%s*([^)]-)%s*%)")
-	-- turn parameters into a vertical back (|) separated string
+	-- turn parameters into a comma separated string without blanks between
 	local argl = args:gsub("%s*([^,]+),?%s*", function (s)
-			return s.."|"
+			return s..","
 		end)
-	-- strip last vertical bar (|)
+	-- strip last comma (,)
 	argl = argl:sub(1, -2)
 
 	-- print("rtype   : '" .. rtype .. "'")
@@ -220,31 +246,46 @@ function parse(fd, str)
 	local argc = 1		-- argument counter
 
 	-- fill the arrays
-	for p in argl:gmatch("([^|]+)|?") do
+	for p in argl:gmatch("([^,]+),?") do
 		local vtype, name, get
 		if p == "..." then
 			vtype, name = "va_list", "ap"
+		elseif p:match("^FILE *") then
+			-- replace "FILE * fp" with "luaL_Strea * stream"
+			vtype = "luaL_Stream *"
+			name = "stream"
 		else
-			vtype, name = p:match("([%w_]+%s*%**)%s*(.*)")
+			if p:match("^const ") then
+				vtype, name = p:match("^(const [%w_]+%s*%**)%s*(.*)")
+			else
+				vtype, name = p:match("([%w_]+%s*%**)%s*(.*)")
+			end
 		end
-		if vtype:match("%*%*$")
-			or vtype:match("ll_(i|ui)nt.*")
-			or vtype:match("size_t%s%*") then
+		if vtype:match("%*%*$")				-- vtype ends with "**"
+			or vtype:match("^l_u?int.*%*")		-- or starts with "l_int" or "l_uint"
+			or vtype:match("^l_float.*%*")		-- or starts with "l_float"
+			or vtype:match("^size_t%s*%*") then	-- or is a "size_t *"
 			-- this is (most probably) a pointer to a variable
-			vtype = vtype:sub(1,-2)		-- strip 2nd asterisk
-			name = name:gsub("p?(.*)","%1")	-- strip leading p
+			vtype = vtype:sub(1,-2)			-- strip 2nd asterisk
+			name = name:gsub("p?(.*)","%1")		-- strip leading "p" from the name
 			refs[name] = true
-			if vtype:match("^l_.*") or vtype:match("size_t.*") then
+			if vtype:match("^l_.*[^*]") or vtype:match("^size_t.*[^*]") then
 				get = "0"
 			else
 				get = "nullptr"
 			end
+		elseif vtype:match("%*$") and (			-- starts ends with "*"
+			vtype:match("^l_u?int") or		-- and starts with "l_int" or "l_uint"
+			vtype:match("^l_float") ) then		-- or starts with "l_float"
+			name = name:gsub("p?(.*)","%1")		-- strip leading "p" from the name
+			refs[name] = true
+			get = "nullptr"
 		else
 			get = getter(vtype, argc)
 		end
 		types[argc] = vtype
 		names[argc] = name
-		vars[argc] = "\t" .. vtype .. name .. " = " .. get .. ";"
+		vars[argc] = '    ' .. vtype .. name .. ' = ' .. get .. ';'
 		argc = argc + 1
 	end
 
@@ -257,14 +298,14 @@ function parse(fd, str)
 	for i = 1, argc-1 do
 		local vtype = types[i]
 		local name = names[i]
-		local vtype_noblank = vtype:gsub("%s","")
+		local param = typedescr(vtype)
 		if not refs[name] then
 			-- this is a true parameter
 			line = ' * Arg #' .. i
 			if i == 1 then
 				line = line .. ' (i.e. self)'
 			end
-			line = line .. ' is expected to be a ' .. vtype_noblank
+			line = line .. ' is expected to be a ' .. param
 			line = line .. ' (' .. name .. ').'
 			func[#func+1] = line
 		end
@@ -273,19 +314,19 @@ function parse(fd, str)
 
 	-- append the C function \param and \return comments
 	func[#func+1] = ' * \\param L pointer to the lua_State'
-	func[#func+1] = ' * \\return 1 for ' .. rtype .. ' on the Lua stack'
+	func[#func+1] = ' * \\return 1 ' .. rtype .. ' on the Lua stack'
 	func[#func+1] = ' */'
 
 	-- append the function body
 	func[#func+1] = 'static int'
 	func[#func+1] = strip_type(fname) .. '(lua_State *L)'
 	func[#func+1] = '{'
-	func[#func+1] = '\tLL_FUNC("' .. strip_type(fname) .. '");'
+	func[#func+1] = '    LL_FUNC("' .. strip_type(fname) .. '");'
 	for i = 1, #vars do
 		func[#func+1] = vars[i]
 	end
-	func[#func+1] = '\t' .. rtype .. ' result = ' .. fname .. '(' .. params(types, names, refs) .. ');'
-	func[#func+1] = '\treturn ' .. pusher(rtype, "result") .. ';'
+	func[#func+1] = '    ' .. rtype .. ' result = ' .. fname .. '(' .. params(types, names, refs) .. ');'
+	func[#func+1] = '    return ' .. pusher(rtype, "result") .. ';'
 	func[#func+1] = '}'
 	func[#func+1] = ''
 

@@ -8,13 +8,14 @@ liblualept_la_CFLAGS = $(LEPT_CFLAGS) $(LUA_CFLAGS)
 liblualept_la_LIBADD = $(LEPT_LIBS) $(LUA_LIBS)
 liblualept_la_SOURCES = lualept.cpp lualept.h modules.h \
  llaset.cpp llamap.cpp \
- llbmf.cpp lllist.cpp \
+ llbmf.cpp lldllist.cpp \
  lldewarp.cpp lldewarpa.cpp \
  llnuma.cpp llnumaa.cpp \
  lldna.cpp lldnaa.cpp \
  llpta.cpp llptaa.cpp \
  llbox.cpp llboxa.cpp llboxaa.cpp \
- llpixcmap.cpp llpix.cpp llpixa.cpp llpixaa.cpp
+ llpixcmap.cpp llpix.cpp llpixa.cpp llpixaa.cpp \
+ llsel.cpp llsela.cpp
 
 pkginclude_HEADERS = lualept.h
 

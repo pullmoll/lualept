@@ -33,7 +33,7 @@
 #if !defined(LUALEPT_EXPORTS_H)
 #define LUALEPT_EXPORTS_H
 
-#define LLUA_DEBUG      0               /*!< set to 1 to enable debugging */
+#define LLUA_DEBUG      1               /*!< set to 1 to enable debugging */
 #define LOG_REGISTER    1               /*!< set to 1 to log Lua class registration */
 #define LOG_DESTROY     1               /*!< set to 1 to log object destruction */
 #define LOG_PUSH_UDATA  1               /*!< set to 1 to log pushing user data */
@@ -98,6 +98,8 @@
 #define	LL_PIX		"Pix"           /*!< Lua class: Pix (pixels and meta data) */
 #define	LL_PIXA		"Pixa"          /*!< Lua class: array of Pix */
 #define	LL_PIXAA        "Pixaa"         /*!< Lua class: array of Pixa */
+#define	LL_SEL		"Sel"           /*!< Lua class: Sel () */
+#define	LL_SELA		"Sela"          /*!< Lua class: array of Pix */
 
 #define	LL_LEPT		"LuaLept"       /*!< Lua class: LuaLept top level */
 
@@ -282,6 +284,9 @@ extern const char * ll_string_access_storage(int flag);
 extern l_int32      ll_check_more_less_clip(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_more_less_clip(int flag);
 
+extern l_int32      ll_check_encoding(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_encoding(int flag);
+
 extern l_int32      ll_check_input_format(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_input_format(int format);
 
@@ -329,6 +334,9 @@ extern const char * ll_string_select_color(l_int32 color);
 
 extern l_int32      ll_check_select_min_max(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_select_min_max(l_int32 which);
+
+extern l_int32      ll_check_sel(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_sel(l_int32 which);
 
 extern l_int32      ll_check_select_size(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_select_size(l_int32 which);
@@ -510,6 +518,20 @@ extern Pixaa      * ll_check_Pixaa_opt(const char *_fun, lua_State *L, int arg);
 extern int          ll_push_Pixaa(const char *_fun, lua_State *L, Pixaa *pixaa);
 extern int          ll_new_Pixaa(lua_State *L);
 extern int          ll_register_Pixaa(lua_State *L);
+
+/* llsel.cpp */
+extern Sel        * ll_check_Sel(const char *_fun, lua_State *L, int arg);
+extern Sel        * ll_check_Sel_opt(const char *_fun, lua_State *L, int arg);
+extern int          ll_push_Sel(const char *_fun, lua_State *L, Sel *sel);
+extern int          ll_new_Sel(lua_State *L);
+extern int          ll_register_Sel(lua_State *L);
+
+/* llsela.cpp */
+extern Sela       * ll_check_Sela(const char *_fun, lua_State *L, int arg);
+extern Sela       * ll_check_Sela_opt(const char *_fun, lua_State *L, int arg);
+extern int          ll_push_Sela(const char *_fun, lua_State *L, Sela *sela);
+extern int          ll_new_Sela(lua_State *L);
+extern int          ll_register_Sela(lua_State *L);
 
 #ifdef __cplusplus
 }

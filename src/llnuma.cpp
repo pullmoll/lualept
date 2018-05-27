@@ -714,7 +714,6 @@ ll_register_Numa(lua_State *L)
     };
 
     static const luaL_Reg functions[] = {
-        {"Create",              Create},
         LUA_SENTINEL
     };
 

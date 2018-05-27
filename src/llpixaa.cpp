@@ -527,6 +527,8 @@ ll_register_Pixaa(lua_State *L)
         {"AddPix",              AddPix},
         {"AddPixa",		AddPixa},
         {"Clear",               Clear},
+        {"Create",              Create},
+        {"CreateFromPixa",      CreateFromPixa},
         {"Destroy",             Destroy},
         {"ExtendArray",		ExtendArray},
         {"GetBoxa",             GetBoxa},
@@ -546,8 +548,6 @@ ll_register_Pixaa(lua_State *L)
     };
 
     static const luaL_Reg functions[] = {
-        {"Create",              Create},
-        {"CreateFromPixa",      CreateFromPixa},
         LUA_SENTINEL
     };
 
