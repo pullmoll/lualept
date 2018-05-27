@@ -108,7 +108,7 @@ static int
 toString(lua_State *L)
 {
     LL_FUNC("toString");
-    static char str[256];
+    char str[256];
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
     luaL_Buffer B;
     luaL_buffinit(L, &B);
@@ -173,7 +173,7 @@ AddColor(lua_State *L)
     l_int32 rval = ll_check_l_int32(_fun, L, 2);
     l_int32 gval = ll_check_l_int32(_fun, L, 3);
     l_int32 bval = ll_check_l_int32(_fun, L, 4);
-    return ll_push_bool(L, 0 == pixcmapAddColor(cmap, rval, gval, bval));
+    return ll_push_bool(_fun, L, 0 == pixcmapAddColor(cmap, rval, gval, bval));
 }
 
 /**
@@ -249,7 +249,7 @@ AddRGBA(lua_State *L)
     l_int32 gval = ll_check_l_int32(_fun, L, 3);
     l_int32 bval = ll_check_l_int32(_fun, L, 4);
     l_int32 aval = ll_check_l_int32(_fun, L, 5);
-    return ll_push_bool(L, 0 == pixcmapAddRGBA(cmap, rval, gval, bval, aval));
+    return ll_push_bool(_fun, L, 0 == pixcmapAddRGBA(cmap, rval, gval, bval, aval));
 }
 
 /**
@@ -265,7 +265,7 @@ Clear(lua_State *L)
 {
     LL_FUNC("Clear");
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
-    return ll_push_bool(L, 0 == pixcmapClear(cmap));
+    return ll_push_bool(_fun, L, 0 == pixcmapClear(cmap));
 }
 
 /**
@@ -328,6 +328,46 @@ CountGrayColors(lua_State *L)
         return ll_push_nil(L);
     lua_pushinteger(L, ngray);
     return 1;
+}
+
+/**
+ * \brief Create a linear PixColormap* (%cmap).
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (depth).
+ * Arg #2 is expected to be a l_int32 (levels).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 PixColormap* on the Lua stack
+ */
+static int
+CreateLinear(lua_State *L)
+{
+    LL_FUNC("CreateLinear");
+    l_int32 depth = ll_check_l_int32(_fun, L, 1);
+    l_int32 levels = ll_check_l_int32(_fun, L, 1);
+    PixColormap *cmap = pixcmapCreateLinear(depth, levels);
+    return ll_push_PixColormap(_fun, L, cmap);
+}
+
+/**
+ * \brief Create a random PixColormap* (%cmap).
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (depth).
+ * Arg #2 is optional and, if given, expected to be a boolean (hasblack).
+ * Arg #3 is optional and, if given, expected to be a boolean (haswhite).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 PixColormap* on the Lua stack
+ */
+static int
+CreateRandom(lua_State *L)
+{
+    LL_FUNC("CreateRandom");
+    l_int32 depth = ll_check_l_int32(_fun, L, 1);
+    l_int32 hasblack = ll_check_boolean_default(_fun, L, 2, FALSE);
+    l_int32 haswhite = ll_check_boolean_default(_fun, L, 3, FALSE);
+    PixColormap *cmap = pixcmapCreateRandom(depth, hasblack, haswhite);
+    return ll_push_PixColormap(_fun, L, cmap);
 }
 
 /**
@@ -668,7 +708,7 @@ ResetColor(lua_State *L)
     l_int32 rval = ll_check_l_int32(_fun, L, 3);
     l_int32 gval = ll_check_l_int32(_fun, L, 4);
     l_int32 bval = ll_check_l_int32(_fun, L, 5);
-    return ll_push_bool(L, 0 == pixcmapResetColor(cmap, idx, rval, gval, bval));
+    return ll_push_bool(_fun, L, 0 == pixcmapResetColor(cmap, idx, rval, gval, bval));
 }
 
 /**
@@ -712,7 +752,7 @@ SetAlpha(lua_State *L)
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, 1 << pixcmapGetDepth(cmap));
     l_int32 aval = ll_check_l_int32(_fun, L, 2);
-    return ll_push_bool(L, 0 == pixcmapSetAlpha(cmap, idx, aval));
+    return ll_push_bool(_fun, L, 0 == pixcmapSetAlpha(cmap, idx, aval));
 }
 
 /**
@@ -732,7 +772,7 @@ SetBlackAndWhite(lua_State *L)
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
     l_int32 setblack = ll_check_boolean_default(_fun, L, 2, FALSE);
     l_int32 setwhite = ll_check_boolean_default(_fun, L, 3, FALSE);
-    return ll_push_bool(L, 0 == pixcmapSetBlackAndWhite(cmap, setblack, setwhite));
+    return ll_push_bool(_fun, L, 0 == pixcmapSetBlackAndWhite(cmap, setblack, setwhite));
 }
 
 /**
@@ -755,10 +795,10 @@ ToArrays(lua_State *L)
     l_int32 *amap = nullptr;
     if (pixcmapToArrays(cmap, &rmap, &gmap, &bmap, &amap))
         return ll_push_nil(L);
-    ll_push_iarray(L, rmap, ncolors);
-    ll_push_iarray(L, gmap, ncolors);
-    ll_push_iarray(L, bmap, ncolors);
-    ll_push_iarray(L, amap, ncolors);
+    ll_push_Iarray(_fun, L, rmap, ncolors);
+    ll_push_Iarray(_fun, L, gmap, ncolors);
+    ll_push_Iarray(_fun, L, bmap, ncolors);
+    ll_push_Iarray(_fun, L, amap, ncolors);
     LEPT_FREE(rmap);
     LEPT_FREE(gmap);
     LEPT_FREE(bmap);
@@ -788,7 +828,7 @@ ToRGBTable(lua_State *L)
     l_int32 i;
     if (pixcmapToRGBTable(cmap, &table, &ncolors))
         return ll_push_nil(L);
-    ll_push_uarray(L, table, ncolors);
+    ll_push_Uarray(_fun, L, table, ncolors);
     LEPT_FREE(table);
     return 4;
 }
@@ -884,46 +924,6 @@ WriteStream(lua_State *L)
 }
 
 /**
- * \brief Create a random PixColormap* (%cmap).
- * <pre>
- * Arg #1 is expected to be a l_int32 (depth).
- * Arg #2 is optional and, if given, expected to be a boolean (hasblack).
- * Arg #3 is optional and, if given, expected to be a boolean (haswhite).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 PixColormap* on the Lua stack
- */
-static int
-CreateRandom(lua_State *L)
-{
-    LL_FUNC("CreateRandom");
-    l_int32 depth = ll_check_l_int32(_fun, L, 1);
-    l_int32 hasblack = ll_check_boolean_default(_fun, L, 2, FALSE);
-    l_int32 haswhite = ll_check_boolean_default(_fun, L, 3, FALSE);
-    PixColormap *cmap = pixcmapCreateRandom(depth, hasblack, haswhite);
-    return ll_push_PixColormap(_fun, L, cmap);
-}
-
-/**
- * \brief Create a linear PixColormap* (%cmap).
- * <pre>
- * Arg #1 is expected to be a l_int32 (depth).
- * Arg #2 is expected to be a l_int32 (levels).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 PixColormap* on the Lua stack
- */
-static int
-CreateLinear(lua_State *L)
-{
-    LL_FUNC("CreateLinear");
-    l_int32 depth = ll_check_l_int32(_fun, L, 1);
-    l_int32 levels = ll_check_l_int32(_fun, L, 1);
-    PixColormap *cmap = pixcmapCreateLinear(depth, levels);
-    return ll_push_PixColormap(_fun, L, cmap);
-}
-
-/**
  * \brief Check Lua stack at index %arg for udata of class LL_PIXCMAP.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
@@ -987,7 +987,6 @@ ll_push_PixColormap(const char *_fun, lua_State *L, PixColormap *cmap)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, LL_PIXCMAP, cmap);
 }
-
 /**
  * \brief Create a new PixColormap*.
  * \param L pointer to the lua_State

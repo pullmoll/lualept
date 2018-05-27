@@ -37,16 +37,13 @@
  *
  *====================================================================*/
 
-typedef L_Dewarp    Dewarp;
-
 /** Define a function's name (_fun) with prefix LL_DEWARP */
 #define LL_FUNC(x) FUNC(LL_DEWARP "." x)
-
 
 /**
  * \brief Destroy a Dewarp*.
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Dewarp* (boxs).
+ * Arg #1 (i.e. self) is expected to be a Dewarp* (dew).
  * </pre>
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack
@@ -92,7 +89,7 @@ static int
 toString(lua_State *L)
 {
     LL_FUNC("toString");
-    static char str[256];
+    char str[256];
     Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
     luaL_Buffer B;
 
@@ -123,10 +120,10 @@ toString(lua_State *L)
 static int
 BuildLineModel(lua_State *L)
 {
-        LL_FUNC("BuildLineModel");
-        Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
-        l_int32 opensize = ll_check_l_int32(_fun, L, 2);
-        return ll_push_bool(L, 0 == dewarpBuildLineModel(dew, opensize, nullptr));
+    LL_FUNC("BuildLineModel");
+    Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
+    l_int32 opensize = ll_check_l_int32(_fun, L, 2);
+    return ll_push_bool(_fun, L, 0 == dewarpBuildLineModel(dew, opensize, nullptr));
 }
 
 /**
@@ -141,9 +138,9 @@ BuildLineModel(lua_State *L)
 static int
 BuildPageModel(lua_State *L)
 {
-        LL_FUNC("BuildPageModel");
-        Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
-        ll_push_bool(L, 0 == dewarpBuildPageModel(dew, nullptr));
+    LL_FUNC("BuildPageModel");
+    Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
+    return ll_push_bool(_fun, L, 0 == dewarpBuildPageModel(dew, nullptr));
 }
 
 /**
@@ -158,12 +155,13 @@ BuildPageModel(lua_State *L)
 static int
 CreateRef(lua_State *L)
 {
-        LL_FUNC("CreateRef");
-        l_int32 pageno = ll_check_l_int32(_fun, L, 1);
-        l_int32 refpage = ll_check_l_int32(_fun, L, 2);
-        Dewarp *dew = dewarpCreateRef(pageno, refpage);
-        return ll_push_Dewarp(_fun, L, dew);
+    LL_FUNC("CreateRef");
+    l_int32 pageno = ll_check_l_int32(_fun, L, 1);
+    l_int32 refpage = ll_check_l_int32(_fun, L, 2);
+    Dewarp *dew = dewarpCreateRef(pageno, refpage);
+    return ll_push_Dewarp(_fun, L, dew);
 }
+
 /**
  * \brief Find horizontal disparity for Dewarp* (%dew).
  * <pre>
@@ -176,10 +174,10 @@ CreateRef(lua_State *L)
 static int
 FindHorizDisparity(lua_State *L)
 {
-        LL_FUNC("FindHorizDisparity");
-        Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
-        Ptaa *ptaa = ll_check_Ptaa(_fun, L, 2);
-        return ll_push_bool(L, dewarpFindHorizDisparity(dew, ptaa));
+    LL_FUNC("FindHorizDisparity");
+    Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
+    Ptaa *ptaa = ll_check_Ptaa(_fun, L, 2);
+    return ll_push_bool(_fun, L, dewarpFindHorizDisparity(dew, ptaa));
 }
 
 /**
@@ -196,12 +194,12 @@ FindHorizDisparity(lua_State *L)
 static int
 FindHorizSlopeDisparity(lua_State *L)
 {
-        LL_FUNC("FindHorizSlopeDisparity");
-        Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
-        Pix *pixb = ll_check_Pix(_fun, L, 2);
-        l_float32 fractthresh = ll_check_l_float32(_fun, L, 3);
-        l_int32 parity = ll_check_l_int32(_fun, L, 4);
-        return ll_push_bool(L, 0 == dewarpFindHorizSlopeDisparity(dew, pixb, fractthresh, parity));
+    LL_FUNC("FindHorizSlopeDisparity");
+    Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
+    Pix *pixb = ll_check_Pix(_fun, L, 2);
+    l_float32 fractthresh = ll_check_l_float32(_fun, L, 3);
+    l_int32 parity = ll_check_l_int32(_fun, L, 4);
+    return ll_push_bool(_fun, L, 0 == dewarpFindHorizSlopeDisparity(dew, pixb, fractthresh, parity));
 }
 
 /**
@@ -217,11 +215,11 @@ FindHorizSlopeDisparity(lua_State *L)
 static int
 FindVertDisparity(lua_State *L)
 {
-        LL_FUNC("FindVertDisparity");
-        Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
-        Ptaa *ptaa = ll_check_Ptaa(_fun, L, 2);
-        l_int32 rotflag = ll_check_l_int32(_fun, L, 3);
-        return ll_push_bool(L, 0 == dewarpFindVertDisparity(dew, ptaa, rotflag));
+    LL_FUNC("FindVertDisparity");
+    Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
+    Ptaa *ptaa = ll_check_Ptaa(_fun, L, 2);
+    l_int32 rotflag = ll_check_l_int32(_fun, L, 3);
+    return ll_push_bool(_fun, L, 0 == dewarpFindVertDisparity(dew, ptaa, rotflag));
 }
 
 /**
@@ -236,12 +234,13 @@ FindVertDisparity(lua_State *L)
 static int
 GetTextlineCenters(lua_State *L)
 {
-        LL_FUNC("GetTextlineCenters");
-        Pix *pixs = ll_check_Pix(_fun, L, 1);
-        l_int32 debugflag = ll_check_l_int32(_fun, L, 2);
-        Ptaa *ptaa = dewarpGetTextlineCenters(pixs, debugflag);
-        return ll_push_Ptaa(_fun, L, ptaa);
+    LL_FUNC("GetTextlineCenters");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 debugflag = ll_check_l_int32(_fun, L, 2);
+    Ptaa *ptaa = dewarpGetTextlineCenters(pixs, debugflag);
+    return ll_push_Ptaa(_fun, L, ptaa);
 }
+
 /**
  * \brief Minimize Dewarp* (%dew).
  * <pre>
@@ -253,10 +252,11 @@ GetTextlineCenters(lua_State *L)
 static int
 Minimize(lua_State *L)
 {
-        LL_FUNC("Minimize");
-        Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
-        return ll_push_bool(L, 0 == dewarpMinimize(dew));
+    LL_FUNC("Minimize");
+    Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
+    return ll_push_bool(_fun, L, 0 == dewarpMinimize(dew));
 }
+
 /**
  * \brief Populate full res for Dewarp* (%dew).
  * <pre>
@@ -271,13 +271,14 @@ Minimize(lua_State *L)
 static int
 PopulateFullRes(lua_State *L)
 {
-        LL_FUNC("PopulateFullRes");
-        Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
-        Pix *pix = ll_check_Pix(_fun, L, 2);
-        l_int32 x = ll_check_l_int32(_fun, L, 3);
-        l_int32 y = ll_check_l_int32(_fun, L, 4);
-        return ll_push_bool(L, 0 == dewarpPopulateFullRes(dew, pix, x, y));
+    LL_FUNC("PopulateFullRes");
+    Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
+    Pix *pix = ll_check_Pix(_fun, L, 2);
+    l_int32 x = ll_check_l_int32(_fun, L, 3);
+    l_int32 y = ll_check_l_int32(_fun, L, 4);
+    return ll_push_bool(_fun, L, 0 == dewarpPopulateFullRes(dew, pix, x, y));
 }
+
 /**
  * \brief Read Dewarp* (%dew) from external file (%filename).
  * <pre>
@@ -289,10 +290,10 @@ PopulateFullRes(lua_State *L)
 static int
 Read(lua_State *L)
 {
-        LL_FUNC("Read");
-        const char *filename = ll_check_string(_fun, L, 1);
-        Dewarp * dew = dewarpRead(filename);
-        return ll_push_Dewarp(_fun, L, dew);
+    LL_FUNC("Read");
+    const char *filename = ll_check_string(_fun, L, 1);
+    Dewarp * dew = dewarpRead(filename);
+    return ll_push_Dewarp(_fun, L, dew);
 }
 
 /**
@@ -307,12 +308,12 @@ Read(lua_State *L)
 static int
 ReadMem(lua_State *L)
 {
-        LL_FUNC("ReadMem");
-        size_t size;
-        const char *str = ll_check_lstring(_fun, L, 1, &size);
-        l_uint8* data = reinterpret_cast<l_uint8 *>(reinterpret_cast<l_intptr_t>(str));
-        Dewarp *dew = dewarpReadMem(data, size);
-        return ll_push_Dewarp(_fun, L, dew);
+    LL_FUNC("ReadMem");
+    size_t size;
+    const char *str = ll_check_lstring(_fun, L, 1, &size);
+    l_uint8* data = reinterpret_cast<l_uint8 *>(reinterpret_cast<l_intptr_t>(str));
+    Dewarp *dew = dewarpReadMem(data, size);
+    return ll_push_Dewarp(_fun, L, dew);
 }
 
 /**
@@ -326,10 +327,10 @@ ReadMem(lua_State *L)
 static int
 ReadStream(lua_State *L)
 {
-        LL_FUNC("ReadStream");
-        luaL_Stream *stream = ll_check_stream(_fun, L, 1);
-        Dewarp *dew = dewarpReadStream(stream->f);
-        return ll_push_Dewarp(_fun, L, dew);
+    LL_FUNC("ReadStream");
+    luaL_Stream *stream = ll_check_stream(_fun, L, 1);
+    Dewarp *dew = dewarpReadStream(stream->f);
+    return ll_push_Dewarp(_fun, L, dew);
 }
 
 /**
@@ -346,13 +347,13 @@ ReadStream(lua_State *L)
 static int
 RemoveShortLines(lua_State *L)
 {
-        LL_FUNC("RemoveShortLines");
-        Pix *pixs = ll_check_Pix(_fun, L, 1);
-        Ptaa *ptaas = ll_check_Ptaa(_fun, L, 2);
-        l_float32 fract = ll_check_l_float32(_fun, L, 3);
-        l_int32 debugflag = ll_check_boolean(_fun, L, 4);
-        Ptaa * ptaa = dewarpRemoveShortLines(pixs, ptaas, fract, debugflag);
-        return ll_push_Ptaa(_fun, L, ptaa);
+    LL_FUNC("RemoveShortLines");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Ptaa *ptaas = ll_check_Ptaa(_fun, L, 2);
+    l_float32 fract = ll_check_l_float32(_fun, L, 3);
+    l_int32 debugflag = ll_check_boolean(_fun, L, 4);
+    Ptaa * ptaa = dewarpRemoveShortLines(pixs, ptaas, fract, debugflag);
+    return ll_push_Ptaa(_fun, L, ptaa);
 }
 
 /**
@@ -367,10 +368,10 @@ RemoveShortLines(lua_State *L)
 static int
 Write(lua_State *L)
 {
-        LL_FUNC("Write");
-        Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
-        const char *filename = ll_check_string(_fun, L, 2);
-        ll_push_bool(L, 0 == dewarpWrite(filename, dew));
+    LL_FUNC("Write");
+    Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
+    const char *filename = ll_check_string(_fun, L, 2);
+    ll_push_bool(_fun, L, 0 == dewarpWrite(filename, dew));
 }
 
 /**
@@ -384,15 +385,15 @@ Write(lua_State *L)
 static int
 WriteMem(lua_State *L)
 {
-        LL_FUNC("WriteMem");
-        Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
-        l_uint8 *data = nullptr;
-        size_t size = 0;
-        if (dewarpWriteMem(&data, &size, dew))
-            return ll_push_nil(L);
-        lua_pushlstring(L, reinterpret_cast<const char *>(data), size);
-        ll_free(data);
-        return 1;
+    LL_FUNC("WriteMem");
+    Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
+    l_uint8 *data = nullptr;
+    size_t size = 0;
+    if (dewarpWriteMem(&data, &size, dew))
+        return ll_push_nil(L);
+    lua_pushlstring(L, reinterpret_cast<const char *>(data), size);
+    ll_free(data);
+    return 1;
 }
 
 /**
@@ -407,10 +408,10 @@ WriteMem(lua_State *L)
 static int
 WriteStream(lua_State *L)
 {
-        LL_FUNC("WriteStream");
-        Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
-        luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-        return ll_push_bool(L, 0 == dewarpWriteStream(stream->f, dew));
+    LL_FUNC("WriteStream");
+    Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
+    luaL_Stream *stream = ll_check_stream(_fun, L, 2);
+    return ll_push_bool(_fun, L, 0 == dewarpWriteStream(stream->f, dew));
 }
 
 /**
@@ -440,7 +441,6 @@ ll_check_Dewarp_opt(const char *_fun, lua_State *L, int arg)
         return nullptr;
     return ll_check_Dewarp(_fun, L, arg);
 }
-
 /**
  * \brief Push BOX user data to the Lua stack and set its meta table.
  * \param _fun calling function's name

@@ -37,7 +37,6 @@
  *
  *====================================================================*/
 
-
 /** Define a function's name (_fun) with prefix LL_DLLIST */
 #define LL_FUNC(x) FUNC(LL_DLLIST "." x)
 
@@ -104,7 +103,7 @@ static int
 toString(lua_State *L)
 {
     LL_FUNC("toString");
-    static char str[256];
+    char str[256];
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     DoubleLinkedList *elem;
     luaL_Buffer B;
@@ -142,7 +141,7 @@ AddToHead(lua_State *L)
     LL_FUNC("AddToHead");
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     void *data = reinterpret_cast<void *>(reinterpret_cast<intptr_t>(lua_topointer(L, 2)));
-    return ll_push_bool(L, 0 == listAddToHead(&head, data));
+    return ll_push_bool(_fun, L, 0 == listAddToHead(&head, data));
 }
 
 /**
@@ -161,7 +160,7 @@ AddToTail(lua_State *L)
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     DoubleLinkedList *tail = nullptr;
     void *data = reinterpret_cast<void *>(reinterpret_cast<intptr_t>(lua_topointer(L, 2)));
-    lua_pushboolean(L, 0 == listAddToTail(&head, &tail, data));
+    ll_push_bool(_fun, L, 0 == listAddToTail(&head, &tail, data));
     lua_pushlightuserdata(L, tail);
     return 2;
 }
@@ -221,7 +220,7 @@ InsertAfter(lua_State *L)
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     DoubleLinkedList *elem = ll_check_DoubleLinkedList(_fun, L, 2);
     void *data = reinterpret_cast<void *>(reinterpret_cast<intptr_t>(lua_topointer(L, 3)));
-    return ll_push_bool(L, 0 == listInsertAfter(&head, elem, data));
+    return ll_push_bool(_fun, L, 0 == listInsertAfter(&head, elem, data));
 }
 
 /**
@@ -241,7 +240,7 @@ InsertBefore(lua_State *L)
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     DoubleLinkedList *elem = ll_check_DoubleLinkedList(_fun, L, 2);
     void *data = reinterpret_cast<void *>(reinterpret_cast<intptr_t>(lua_topointer(L, 3)));
-    return ll_push_bool(L, 0 == listInsertBefore(&head, elem, data));
+    return ll_push_bool(_fun, L, 0 == listInsertBefore(&head, elem, data));
 }
 
 /**
@@ -259,7 +258,7 @@ Join(lua_State *L)
     LL_FUNC("Join");
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     DoubleLinkedList *list = ll_check_DoubleLinkedList(_fun, L, 2);
-    return ll_push_bool(L, 0 == listJoin(&head, &list));
+    return ll_push_bool(_fun, L, 0 == listJoin(&head, &list));
 }
 
 /**
@@ -333,7 +332,7 @@ Reverse(lua_State *L)
 {
     LL_FUNC("Reverse");
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
-    return ll_push_bool(L, 0 == listReverse(&head));
+    return ll_push_bool(_fun, L, 0 == listReverse(&head));
 }
 
 /**
@@ -378,7 +377,6 @@ ll_push_DoubleLinkedList(const char *_fun, lua_State *L, DoubleLinkedList *head)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, LL_DLLIST, head);
 }
-
 /**
  * \brief Create and push a new DoubleLinkedList*.
  * \param L pointer to the lua_State

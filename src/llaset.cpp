@@ -37,11 +37,6 @@
  *
  *====================================================================*/
 
-/** Local type name for the ugly L_ASET */
-typedef L_ASET      Aset;
-/** Local type name for the ugly L_ASET_NODE */
-typedef L_ASET_NODE AsetNode;
-
 /** Define a function's name (_fun) with prefix LL_ASET */
 #define LL_FUNC(x) FUNC(LL_ASET "." x)
 
@@ -140,8 +135,7 @@ Insert(lua_State *L)
         else
             l_asetDelete(aset, key);
     }
-    lua_pushboolean(L, result);
-    return 1;
+    return ll_push_bool(_fun, L, result);
 }
 
 /**
@@ -153,7 +147,7 @@ static int
 toString(lua_State *L)
 {
     LL_FUNC("toString");
-    static char str[256];
+    char str[256];
     Aset *aset = ll_check_Aset(_fun, L, 1);
     AsetNode *node = nullptr;
     luaL_Buffer B;
@@ -234,8 +228,7 @@ Delete(lua_State *L)
     }
     if (result)
         l_asetDelete(aset, key);
-    lua_pushboolean(L, result);
-    return 1;
+    return ll_push_bool(_fun, L, result);
 }
 
 /**
@@ -270,10 +263,10 @@ Find(lua_State *L)
         result = TRUE;
         break;
     }
-    if (result)
-        value = l_asetFind(aset, key);
-    lua_pushboolean(L, result && nullptr != value);
-    return 1;
+    if (!result)
+        return ll_push_nil(L);
+    value = l_asetFind(aset, key);
+    return ll_push_bool(_fun, L, nullptr != value);
 }
 
 /**
@@ -377,7 +370,6 @@ ll_check_Aset_opt(const char *_fun, lua_State *L, int arg)
         return nullptr;
     return ll_check_Aset(_fun, L, arg);
 }
-
 /**
  * \brief Push ASET user data to the Lua stack and set its meta table.
  * \param _fun calling function's name

@@ -37,11 +37,54 @@
  *
  *====================================================================*/
 
-typedef L_Dewarp    Dewarp;
-typedef L_Dewarpa   Dewarpa;
-
 /** Define a function's name (_fun) with prefix LL_DEWARPA */
 #define LL_FUNC(x) FUNC(LL_DEWARPA "." x)
+
+/**
+ * \brief Destroy a Dewarpa* (%dewa).
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Dewarpa* (dewa).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 void on the Lua stack
+ */
+static int
+Destroy(lua_State *L)
+{
+    LL_FUNC("Destroy");
+    Dewarpa **pdewa = ll_check_udata<Dewarpa>(_fun, L, 1, LL_DEWARPA);
+    Dewarpa *dewa = *pdewa;
+    DBG(LOG_DESTROY, "%s: '%s' pdewa=%p dewa=%p\n", _fun,
+        LL_DEWARP, pdewa, dewa);
+    dewarpaDestroy(&dewa);
+    *pdewa = nullptr;
+    return 0;
+}
+
+/**
+ * \brief Create a new Dewarpa* (%dewa).
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a l_int32 (nptrs).
+ * Arg #2 is expected to be a l_int32 (sampling).
+ * Arg #3 is expected to be a l_int32 (redfactor).
+ * Arg #4 is expected to be a l_int32 (minlines).
+ * Arg #5 is expected to be a l_int32 (maxdist).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Dewarpa* on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    LL_FUNC("Create");
+    l_int32 nptrs = ll_check_l_int32(_fun, L, 1);
+    l_int32 sampling = ll_check_l_int32(_fun, L, 2);
+    l_int32 redfactor = ll_check_l_int32(_fun, L, 3);
+    l_int32 minlines = ll_check_l_int32(_fun, L, 4);
+    l_int32 maxdist = ll_check_l_int32(_fun, L, 5);
+    Dewarpa *dewa = dewarpaCreate(nptrs, sampling, redfactor, minlines, maxdist);
+    return ll_push_Dewarpa(_fun, L, dewa);
+}
 
 /**
  * \brief Printable string for a Dewarpa*.
@@ -52,7 +95,7 @@ static int
 toString(lua_State *L)
 {
     LL_FUNC("toString");
-    static char str[256];
+    char str[256];
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
     luaL_Buffer B;
 
@@ -135,79 +178,6 @@ ApplyDisparityBoxa(lua_State *L)
 }
 
 /**
- * \brief Create a new Dewarpa* (%dewa).
- * <pre>
- * Arg #1 (i.e. self) is expected to be a l_int32 (nptrs).
- * Arg #2 is expected to be a l_int32 (sampling).
- * Arg #3 is expected to be a l_int32 (redfactor).
- * Arg #4 is expected to be a l_int32 (minlines).
- * Arg #5 is expected to be a l_int32 (maxdist).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Dewarpa* on the Lua stack
- */
-static int
-Create(lua_State *L)
-{
-    LL_FUNC("Create");
-    l_int32 nptrs = ll_check_l_int32(_fun, L, 1);
-    l_int32 sampling = ll_check_l_int32(_fun, L, 2);
-    l_int32 redfactor = ll_check_l_int32(_fun, L, 3);
-    l_int32 minlines = ll_check_l_int32(_fun, L, 4);
-    l_int32 maxdist = ll_check_l_int32(_fun, L, 5);
-    Dewarpa *dewa = dewarpaCreate(nptrs, sampling, redfactor, minlines, maxdist);
-    return ll_push_Dewarpa(_fun, L, dewa);
-}
-
-#if defined(LL_PIXACOMP)
-/**
- * \brief Brief comment goes here.
- * <pre>
- * Arg #1 (i.e. self) is expected to be a PIXAC* (pixac).
- * Arg #2 is expected to be a l_int32 (useboth).
- * Arg #3 is expected to be a l_int32 (sampling).
- * Arg #4 is expected to be a l_int32 (minlines).
- * Arg #5 is expected to be a l_int32 (maxdist).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Dewarpa * on the Lua stack
- */
-static int
-CreateFromPixacomp(lua_State *L)
-{
-    LL_FUNC("CreateFromPixacomp");
-    PIXAC *pixac = ll_check_Pixacomp(_fun, L, 1);
-    l_int32 useboth = ll_check_l_int32(_fun, L, 2);
-    l_int32 sampling = ll_check_l_int32(_fun, L, 3);
-    l_int32 minlines = ll_check_l_int32(_fun, L, 4);
-    l_int32 maxdist = ll_check_l_int32(_fun, L, 5);
-    Dewarpa * result = dewarpaCreateFromPixacomp(pixac, useboth, sampling, minlines, maxdist);
-    return ll_push_Dewarpa(_fun, L, result);
-}
-#endif
-
-/**
- * \brief Destroy a Dewarpa* (%dewa).
- * <pre>
- * Arg #1 (i.e. self) is expected to be a Dewarpa* (dewa).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 void on the Lua stack
- */
-static int
-Destroy(lua_State *L)
-{
-    LL_FUNC("Destroy");
-    Dewarpa **pdewa = ll_check_udata<Dewarpa>(_fun, L, 1, LL_DEWARPA);
-    Dewarpa *dewa = *pdewa;
-    DBG(LOG_DESTROY, "%s: '%s' pdewa=%p dewa=%p\n", _fun,
-        LL_DEWARP, pdewa, dewa);
-    dewarpaDestroy(&dewa);
-    *pdewa = nullptr;
-    return 0;
-}
-
-/**
  * \brief Destroy a Dewarp* for page %pageno in the Dewarpa* (%dewa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dewarpa* (dewa).
@@ -222,7 +192,7 @@ DestroyDewarp(lua_State *L)
     LL_FUNC("DestroyDewarp");
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
     l_int32 pageno = ll_check_l_int32(_fun, L, 2);
-    ll_push_bool(L, 0 == dewarpaDestroyDewarp(dewa, pageno));
+    ll_push_bool(_fun, L, 0 == dewarpaDestroyDewarp(dewa, pageno));
 }
 
 /**
@@ -259,7 +229,7 @@ Info(lua_State *L)
     LL_FUNC("Info");
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    return ll_push_bool(L, 0 == dewarpaInfo(stream->f, dewa));
+    return ll_push_bool(_fun, L, 0 == dewarpaInfo(stream->f, dewa));
 }
 
 /**
@@ -277,7 +247,7 @@ InsertDewarp(lua_State *L)
     LL_FUNC("InsertDewarp");
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
     Dewarp *dew = ll_check_Dewarp(_fun, L, 2);
-    return ll_push_bool(L, 0 == dewarpaInsertDewarp(dewa, dew));
+    return ll_push_bool(_fun, L, 0 == dewarpaInsertDewarp(dewa, dew));
 }
 
 /**
@@ -297,7 +267,7 @@ InsertRefModels(lua_State *L)
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
     l_int32 notests = ll_check_boolean(_fun, L, 2);
     l_int32 debug = ll_check_boolean(_fun, L, 3);
-    return ll_push_bool(L, 0 == dewarpaInsertRefModels(dewa, notests, debug));
+    return ll_push_bool(_fun, L, 0 == dewarpaInsertRefModels(dewa, notests, debug));
 }
 
 /**
@@ -439,7 +409,7 @@ RestoreModels(lua_State *L)
 {
     LL_FUNC("RestoreModels");
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
-    ll_push_bool(L, 0 == dewarpaRestoreModels(dewa));
+    ll_push_bool(_fun, L, 0 == dewarpaRestoreModels(dewa));
 }
 
 /**
@@ -457,7 +427,7 @@ SetCheckColumns(lua_State *L)
     LL_FUNC("SetCheckColumns");
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
     l_int32 check_columns = ll_check_l_int32(_fun, L, 2);
-    ll_push_bool(L, 0 == dewarpaSetCheckColumns(dewa, check_columns));
+    ll_push_bool(_fun, L, 0 == dewarpaSetCheckColumns(dewa, check_columns));
 }
 
 /**
@@ -485,7 +455,7 @@ SetCurvatures(lua_State *L)
     l_int32 max_edgecurv = ll_check_l_int32(_fun, L, 5);
     l_int32 max_diff_edgecurv = ll_check_l_int32(_fun, L, 6);
     l_int32 max_edgeslope = ll_check_l_int32(_fun, L, 7);
-    ll_push_bool(L, 0 == dewarpaSetCurvatures(dewa,
+    ll_push_bool(_fun, L, 0 == dewarpaSetCurvatures(dewa,
                                               max_linecurv, min_diff_linecurv, max_diff_linecurv,
                                               max_edgecurv, max_diff_edgecurv, max_edgeslope));
 }
@@ -505,7 +475,7 @@ SetMaxDistance(lua_State *L)
     LL_FUNC("SetMaxDistance");
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
     l_int32 maxdist = ll_check_l_int32(_fun, L, 2);
-    ll_push_bool(L, 0 == dewarpaSetMaxDistance(dewa, maxdist));
+    ll_push_bool(_fun, L, 0 == dewarpaSetMaxDistance(dewa, maxdist));
 }
 
 /**
@@ -525,7 +495,7 @@ SetValidModels(lua_State *L)
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
     l_int32 notests = ll_check_boolean(_fun, L, 2);
     l_int32 debug = ll_check_boolean(_fun, L, 3);
-    ll_push_bool(L, 0 == dewarpaSetValidModels(dewa, notests, debug));
+    ll_push_bool(_fun, L, 0 == dewarpaSetValidModels(dewa, notests, debug));
 }
 
 /**
@@ -547,7 +517,7 @@ ShowArrays(lua_State *L)
     l_float32 scalefact = ll_check_l_float32(_fun, L, 2);
     l_int32 first = ll_check_l_int32(_fun, L, 3);
     l_int32 last = ll_check_l_int32(_fun, L, 4);
-    return ll_push_bool(L, 0 == dewarpaShowArrays(dewa, scalefact, first, last));
+    return ll_push_bool(_fun, L, 0 == dewarpaShowArrays(dewa, scalefact, first, last));
 }
 
 /**
@@ -563,7 +533,7 @@ StripRefModels(lua_State *L)
 {
     LL_FUNC("StripRefModels");
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
-    return ll_push_bool(L, 0 == dewarpaStripRefModels(dewa));
+    return ll_push_bool(_fun, L, 0 == dewarpaStripRefModels(dewa));
 }
 
 /**
@@ -581,7 +551,7 @@ UseBothArrays(lua_State *L)
     LL_FUNC("UseBothArrays");
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
     l_int32 useboth = ll_check_boolean(_fun, L, 2);
-    return ll_push_bool(L, 0 == dewarpaUseBothArrays(dewa, useboth));
+    return ll_push_bool(_fun, L, 0 == dewarpaUseBothArrays(dewa, useboth));
 }
 
 /**
@@ -599,7 +569,7 @@ Write(lua_State *L)
     LL_FUNC("Write");
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
-    return ll_push_bool(L, 0 == dewarpaWrite(filename, dewa));
+    return ll_push_bool(_fun, L, 0 == dewarpaWrite(filename, dewa));
 }
 
 /**
@@ -639,7 +609,32 @@ WriteStream(lua_State *L)
     LL_FUNC("WriteStream");
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    return ll_push_bool(L, 0 == dewarpaWriteStream(stream->f, dewa));
+    return ll_push_bool(_fun, L, 0 == dewarpaWriteStream(stream->f, dewa));
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a PixaComp* (pixac).
+ * Arg #2 is expected to be a l_int32 (useboth).
+ * Arg #3 is expected to be a l_int32 (sampling).
+ * Arg #4 is expected to be a l_int32 (minlines).
+ * Arg #5 is expected to be a l_int32 (maxdist).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Dewarpa * on the Lua stack
+ */
+static int
+CreateFromPixacomp(lua_State *L)
+{
+    LL_FUNC("CreateFromPixacomp");
+    PixaComp *pixac = ll_check_PixaComp(_fun, L, 1);
+    l_int32 useboth = ll_check_l_int32(_fun, L, 2);
+    l_int32 sampling = ll_check_l_int32(_fun, L, 3);
+    l_int32 minlines = ll_check_l_int32(_fun, L, 4);
+    l_int32 maxdist = ll_check_l_int32(_fun, L, 5);
+    Dewarpa * result = dewarpaCreateFromPixacomp(pixac, useboth, sampling, minlines, maxdist);
+    return ll_push_Dewarpa(_fun, L, result);
 }
 
 /**
@@ -669,7 +664,6 @@ ll_check_Dewarpa_opt(const char *_fun, lua_State *L, int arg)
         return nullptr;
     return ll_check_Dewarpa(_fun, L, arg);
 }
-
 /**
  * \brief Push BOX user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
@@ -709,6 +703,7 @@ ll_register_Dewarpa(lua_State *L)
         {"ApplyDisparity",          ApplyDisparity},
         {"ApplyDisparityBoxa",      ApplyDisparityBoxa},
         {"Create",                  Create},
+        {"CreateFromPixacomp",      CreateFromPixacomp},
         {"Destroy",                 Destroy},
         {"DestroyDewarp",           DestroyDewarp},
         {"GetDewarp",               GetDewarp},

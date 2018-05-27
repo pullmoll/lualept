@@ -121,8 +121,8 @@ GetLineStrings(lua_State *L)
     l_int32 firstident = ll_check_l_int32_default(_fun, L, 4, 0);
     l_int32 h = 0;
     Sarray *sa = bmfGetLineStrings(bmf, str, maxw, firstident, &h);
-    lua_pushinteger(L, h);
-    ll_push_sarray(L, sa);
+    ll_push_l_int32(_fun, L, h);
+    ll_push_Sarray(_fun, L, sa);
     sarrayDestroy(&sa);
     return 2;
 }
@@ -217,7 +217,6 @@ ll_check_Bmf_opt(const char *_fun, lua_State *L, int arg)
         return nullptr;
     return ll_check_Bmf(_fun, L, arg);
 }
-
 /**
  * \brief Push BMF user data to the Lua stack and set its meta table.
  * \param _fun calling function's name

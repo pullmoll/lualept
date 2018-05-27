@@ -37,8 +37,6 @@
  *
  *====================================================================*/
 
-typedef L_Dnaa      Dnaa;       /*!< Local type name for the ugly L_Dnaa */
-
 /** Define a function's name (_fun) with prefix LL_DNAA */
 #define LL_FUNC(x) FUNC(LL_DNAA "." x)
 
@@ -99,6 +97,26 @@ GetCount(lua_State *L)
 }
 
 /**
+ * \brief Replace a L_Dna* int the Dnaa*.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Dnaa* user data.
+ * Arg #2 is expected to be a l_int32 (idx).
+ * Arg #3 is expected to be a L_Dna* user data.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+ReplaceDna(lua_State *L)
+{
+    LL_FUNC("ReplaceDna");
+    Dnaa *daa = ll_check_Dnaa(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, l_dnaaGetCount(daa));
+    L_Dna *da = ll_check_Dna(_fun, L, 3);
+    return ll_push_bool(_fun, L, 0 == l_dnaaReplaceDna(daa, idx, da));
+}
+
+/**
  * \brief Printable string for a Dnaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dnaa* user data.
@@ -110,7 +128,7 @@ static int
 toString(lua_State *L)
 {
     LL_FUNC("toString");
-    static char str[256];
+    char str[256];
     Dnaa *daa = ll_check_Dnaa(_fun, L, 1);
     luaL_Buffer B;
     l_int32 i, j;
@@ -159,7 +177,7 @@ AddDna(lua_State *L)
     Dnaa *daa = ll_check_Dnaa(_fun, L, 1);
     L_Dna *da = ll_check_Dna(_fun, L, 2);
     l_int32 copyflag = ll_check_access_storage(_fun, L, 3, L_COPY);
-    return ll_push_bool(L, 0 == l_dnaaAddDna(daa, da, copyflag));
+    return ll_push_bool(_fun, L, 0 == l_dnaaAddDna(daa, da, copyflag));
 }
 
 /**
@@ -182,6 +200,25 @@ AddNumber(lua_State *L)
     lua_Number val = lua_tonumberx(L, 3, &isnumber);
     lua_pushboolean(L, isnumber && 0 == l_dnaaAddNumber(daa, idx, val));
     return 1;
+}
+
+/**
+ * \brief Create a full new Dnaa*.
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (nptr).
+ * Arg #2 is expected to be a l_int32 (n).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 DNAA* on the Lua stack
+ */
+static int
+CreateFull(lua_State *L)
+{
+    LL_FUNC("CreateFull");
+    l_int32 nptr = ll_check_l_int32_default(_fun, L, 1, 1);
+    l_int32 n = ll_check_l_int32_default(_fun, L, 2, 1);
+    Dnaa *daa = l_dnaaCreateFull(nptr, n);
+    return ll_push_Dnaa(_fun, L, daa);
 }
 
 /**
@@ -317,26 +354,6 @@ ReadStream(lua_State *L)
 }
 
 /**
- * \brief Replace a L_Dna* int the Dnaa*.
- * <pre>
- * Arg #1 (i.e. self) is expected to be a Dnaa* user data.
- * Arg #2 is expected to be a l_int32 (idx).
- * Arg #3 is expected to be a L_Dna* user data.
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 boolean on the Lua stack
- */
-static int
-ReplaceDna(lua_State *L)
-{
-    LL_FUNC("ReplaceDna");
-    Dnaa *daa = ll_check_Dnaa(_fun, L, 1);
-    l_int32 idx = ll_check_index(_fun, L, 2, l_dnaaGetCount(daa));
-    L_Dna *da = ll_check_Dna(_fun, L, 3);
-    return ll_push_bool(L, 0 == l_dnaaReplaceDna(daa, idx, da));
-}
-
-/**
  * \brief Truncate the arrays stored in the Dnaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dnaa* user data.
@@ -349,7 +366,7 @@ Truncate(lua_State *L)
 {
     LL_FUNC("Truncate");
     Dnaa *daa = ll_check_Dnaa(_fun, L, 1);
-    return ll_push_bool(L, 0 == l_dnaaTruncate(daa));
+    return ll_push_bool(_fun, L, 0 == l_dnaaTruncate(daa));
 }
 
 /**
@@ -367,7 +384,7 @@ Write(lua_State *L)
     LL_FUNC("Write");
     Dnaa *daa = ll_check_Dnaa(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
-    return ll_push_bool(L, 0 == l_dnaaWrite(filename, daa));
+    return ll_push_bool(_fun, L, 0 == l_dnaaWrite(filename, daa));
 }
 
 /**
@@ -385,26 +402,7 @@ WriteStream(lua_State *L)
     LL_FUNC("WriteStream");
     Dnaa *daa = ll_check_Dnaa(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    return ll_push_bool(L, 0 == l_dnaaWriteStream(stream->f, daa));
-}
-
-/**
- * \brief Create a full new Dnaa*.
- * <pre>
- * Arg #1 is expected to be a l_int32 (nptr).
- * Arg #2 is expected to be a l_int32 (n).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 DNAA* on the Lua stack
- */
-static int
-CreateFull(lua_State *L)
-{
-    LL_FUNC("CreateFull");
-    l_int32 nptr = ll_check_l_int32_default(_fun, L, 1, 1);
-    l_int32 n = ll_check_l_int32_default(_fun, L, 2, 1);
-    Dnaa *daa = l_dnaaCreateFull(nptr, n);
-    return ll_push_Dnaa(_fun, L, daa);
+    return ll_push_bool(_fun, L, 0 == l_dnaaWriteStream(stream->f, daa));
 }
 
 /**
@@ -449,7 +447,6 @@ ll_push_Dnaa(const char *_fun, lua_State *L, Dnaa *daa)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, LL_DNAA, daa);
 }
-
 /**
  * \brief Create and push a new DNAA*.
  * \param L pointer to the lua_State

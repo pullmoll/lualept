@@ -13,17 +13,21 @@ AC_CANONICAL_HOST
 
 # Checks for programs.
 AC_PROG_CXX
+AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_INSTALL
-AC_PROG_LIBTOOL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
+AC_PROG_LIBTOOL
+AC_SUBST(LIBTOOL_DEPS)
 
 # Checks for libraries.
 LT_LIB_M
 
+# Checks for pkg-config libraries.
 PKG_CHECK_MODULES([LEPT], [lept >= 1.76.0])
-PKG_CHECK_MODULES([LUA], [lua5.3 >= 5.3.0])
+PKG_CHECK_MODULES([LUA],  [lua5.3 >= 5.3.0])
+PKG_CHECK_MODULES([SDL2], [sdl2])
 
 case "$host_os" in
   mingw32*)

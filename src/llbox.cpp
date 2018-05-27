@@ -107,7 +107,7 @@ static int
 toString(lua_State *L)
 {
     LL_FUNC("toString");
-    static char str[256];
+    char str[256];
     Box *box = ll_check_Box(_fun, L, 1);
     luaL_Buffer B;
     l_int32 x, y, w, h;
@@ -149,8 +149,7 @@ Equal(lua_State *L)
     l_int32 same = FALSE;
     if (boxEqual(box1, box2, &same))
         return ll_push_nil(L);
-    lua_pushboolean(L, same);
-    return 1;
+    return ll_push_bool(_fun, L, same);
 }
 
 /**
@@ -214,7 +213,7 @@ ChangeRefcount(lua_State *L)
     LL_FUNC("ChangeRefcount");
     Box *box = ll_check_Box(_fun, L, 1);
     l_int32 delta = ll_check_l_int32(_fun, L, 2);
-    return ll_push_bool(L, 0 == boxChangeRefcount(box, delta));
+    return ll_push_bool(_fun, L, 0 == boxChangeRefcount(box, delta));
 }
 
 /**
@@ -329,8 +328,7 @@ Contains(lua_State *L)
     l_int32 result = 0;
     if (boxContains(box1, box2, &result))
         return ll_push_nil(L);
-    lua_pushboolean(L, result);
-    return 1;
+    return ll_push_bool(_fun, L, result);
 }
 
 /**
@@ -353,8 +351,7 @@ ContainsPt(lua_State *L)
     l_int32 contains = FALSE;
     if (boxContainsPt(box, x, y, &contains))
         return ll_push_nil(L);
-    lua_pushboolean(L, contains);
-    return 1;
+    return ll_push_bool(_fun, L, contains);
 }
 
 /**
@@ -559,8 +556,7 @@ Intersects(lua_State *L)
     l_int32 result = 0;
     if (boxIntersects(box1, box2, &result))
         return ll_push_nil(L);
-    lua_pushboolean(L, result);
-    return 1;
+    return ll_push_bool(_fun, L, result);
 }
 
 /**
@@ -579,8 +575,7 @@ IsValid(lua_State *L)
     l_int32 valid = 0;
     if (boxIsValid(box, &valid))
         return ll_push_nil(L);
-    lua_pushboolean(L, valid);
-    return 1;
+    return ll_push_bool(_fun, L, valid);
 }
 
 /**
@@ -662,7 +657,7 @@ PrintStreamInfo(lua_State *L)
     LL_FUNC("PrintStreamInfo");
     Box *box = ll_check_Box(_fun, L, 1);
     luaL_Stream *stream = reinterpret_cast<luaL_Stream *>(luaL_checkudata(L, 2, LUA_FILEHANDLE));
-    return ll_push_bool(L, 0 == boxPrintStreamInfo(stream->f, box));
+    return ll_push_bool(_fun, L, 0 == boxPrintStreamInfo(stream->f, box));
 }
 
 /**
@@ -753,7 +748,7 @@ SetGeometry(lua_State *L)
     l_int32 y = ll_check_l_int32_default(_fun, L, 3, 0);
     l_int32 w = ll_check_l_int32_default(_fun, L, 4, 1);
     l_int32 h = ll_check_l_int32_default(_fun, L, 5, 1);
-    return ll_push_bool(L, 0 == boxSetGeometry(box, x, y, w, h));
+    return ll_push_bool(_fun, L, 0 == boxSetGeometry(box, x, y, w, h));
 }
 
 /**
@@ -777,7 +772,7 @@ SetSideLocations(lua_State *L)
     l_int32 r = ll_check_l_int32_default(_fun, L, 3, 0);
     l_int32 t = ll_check_l_int32_default(_fun, L, 4, 0);
     l_int32 b = ll_check_l_int32_default(_fun, L, 5, 0);
-    return ll_push_bool(L, 0 == boxSetSideLocations(box, l, r, t, b));
+    return ll_push_bool(_fun, L, 0 == boxSetSideLocations(box, l, r, t, b));
 }
 
 /**
@@ -806,8 +801,7 @@ Similar(lua_State *L)
     l_int32 similar = FALSE;
     if (boxSimilar(box1, box2, leftdiff, rightdiff, topdiff, botdiff, &similar))
         return ll_push_nil(L);
-    lua_pushboolean(L, similar);
-    return 1;
+    return ll_push_bool(_fun, L, similar);
 }
 
 /**
@@ -913,7 +907,6 @@ ll_push_Box(const char *_fun, lua_State *L, Box *box)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, LL_BOX, box);
 }
-
 /**
  * \brief Create and push a new Box*.
  * \param L pointer to the lua_State

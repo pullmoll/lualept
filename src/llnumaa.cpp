@@ -37,7 +37,6 @@
  *
  *====================================================================*/
 
-
 /** Define a function's name (_fun) with prefix LL_NUMAA */
 #define LL_FUNC(x) FUNC(LL_NUMAA "." x)
 
@@ -109,7 +108,7 @@ static int
 toString(lua_State *L)
 {
     LL_FUNC("toString");
-    static char str[256];
+    char str[256];
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
     luaL_Buffer B;
     l_int32 i, j;
@@ -156,7 +155,26 @@ AddNuma(lua_State *L)
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
     Numa *na = ll_check_Numa(_fun, L, 2);
     l_int32 copyflag = ll_check_access_storage(_fun, L, 3, L_CLONE);
-    return ll_push_bool(L, 0 == numaaAddNuma(naa, na, copyflag));
+    return ll_push_bool(_fun, L, 0 == numaaAddNuma(naa, na, copyflag));
+}
+
+/**
+ * \brief Create a full new Numaa*.
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (nptr).
+ * Arg #1 is expected to be a l_int32 (n).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Numaa* on the Lua stack
+ */
+static int
+CreateFull(lua_State *L)
+{
+    LL_FUNC("CreateFull");
+    l_int32 nptr = ll_check_l_int32_default(_fun, L, 1, 1);
+    l_int32 n = ll_check_l_int32_default(_fun, L, 2, 1);
+    Numaa *naa = numaaCreateFull(nptr, n);
+    return ll_push_Numaa(_fun, L, naa);
 }
 
 /**
@@ -304,7 +322,7 @@ ReplaceNuma(lua_State *L)
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, numaaGetCount(naa));
     Numa *na = ll_check_Numa(_fun, L, 3);
-    return ll_push_bool(L, 0 == numaaReplaceNuma(naa, idx, na));
+    return ll_push_bool(_fun, L, 0 == numaaReplaceNuma(naa, idx, na));
 }
 
 /**
@@ -320,7 +338,7 @@ Truncate(lua_State *L)
 {
     LL_FUNC("Truncate");
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
-    return ll_push_bool(L, 0 == numaaTruncate(naa));
+    return ll_push_bool(_fun, L, 0 == numaaTruncate(naa));
 }
 
 /**
@@ -338,7 +356,7 @@ Write(lua_State *L)
     LL_FUNC("Write");
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
-    return ll_push_bool(L, 0 == numaaWrite(filename, naa));
+    return ll_push_bool(_fun, L, 0 == numaaWrite(filename, naa));
 }
 
 /**
@@ -378,26 +396,7 @@ WriteStream(lua_State *L)
     LL_FUNC("WriteStream");
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    return ll_push_bool(L, 0 == numaaWriteStream(stream->f, naa));
-}
-
-/**
- * \brief Create a full new Numaa*.
- * <pre>
- * Arg #1 is expected to be a l_int32 (nptr).
- * Arg #1 is expected to be a l_int32 (n).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Numaa* on the Lua stack
- */
-static int
-CreateFull(lua_State *L)
-{
-    LL_FUNC("CreateFull");
-    l_int32 nptr = ll_check_l_int32_default(_fun, L, 1, 1);
-    l_int32 n = ll_check_l_int32_default(_fun, L, 2, 1);
-    Numaa *naa = numaaCreateFull(nptr, n);
-    return ll_push_Numaa(_fun, L, naa);
+    return ll_push_bool(_fun, L, 0 == numaaWriteStream(stream->f, naa));
 }
 
 /**
@@ -442,7 +441,6 @@ ll_push_Numaa(const char *_fun, lua_State *L, Numaa *naa)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, LL_NUMAA, naa);
 }
-
 /**
  * \brief Create and push a new Numaa*.
  * \param L pointer to the lua_State

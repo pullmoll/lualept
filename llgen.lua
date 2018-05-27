@@ -31,6 +31,12 @@ function spairs(t, order)
 	end
 end
 
+function tsize(t)
+	local n = 0
+	for k in pairs(t) do n = n + 1 end
+	return n
+end
+
 ---
 -- List the array table (t) contents to fd.
 -- \param fd io file descriptor
@@ -192,25 +198,35 @@ function parse(fd, str)
 				L_AMAP_NODE = "AmapNode",
 				L_ASET      = "Aset",
 				L_ASET_NODE = "AsetNode",
-				L_BBUFER    = "Bbuffer",
 				L_BMF       = "Bmf",
 				BBUFFER     = "Bbuffer",
-				NUMA        = "Numa",
-				NUMAA       = "Numaa",
+				BOX         = "Box",
+				BOXA        = "Boxa",
+				BOXAA       = "Boxaa",
+				CCBORD      = "CCBord",
+				CCBORDA     = "CCBorda",
+				DPIX	    = "DPix",
+				FPIX	    = "FPix",
+				FPIXA       = "FPixa",
+				L_BBUFER    = "Bbuffer",
+				L_COMP_DATA = "CompData",
 				L_DEWARP    = "Dewarp",
 				L_DEWARPA   = "Dewarpa",
 				L_DNA       = "Dna",
 				L_DNAA      = "Dnaa",
-				PTA         = "Pta",
-				PTAA        = "Ptaa",
-				BOX         = "Box",
-				BOXA        = "Boxa",
-				BOXAA       = "Boxaa",
+				L_KERNEL    = "Kernel",
+				L_PDF_DATA  = "PdfData",
+				L_STACK     = "Stack",
+				NUMA        = "Numa",
+				NUMAA       = "Numaa",
 				PIX         = "Pix",
 				PIXA        = "Pixa",
 				PIXAA       = "Pixaa",
+				PIXCOMP     = "PixComp",
 				PIXACOMP    = "PixaComp",
 				PIXCMAP     = "PixColormap",
+				PTA         = "Pta",
+				PTAA        = "Ptaa",
 				SARRAY      = "Sarray",
 				SEL	    = "Sel",
 				SELA        = "Sela",
@@ -314,7 +330,11 @@ function parse(fd, str)
 
 	-- append the C function \param and \return comments
 	func[#func+1] = ' * \\param L pointer to the lua_State'
-	func[#func+1] = ' * \\return 1 ' .. rtype .. ' on the Lua stack'
+	if tsize(refs) > 0 then
+		func[#func+1] = ' * \\return ' .. tsize(refs) .. ' on the Lua stack'
+	else
+		func[#func+1] = ' * \\return 1 ' .. rtype .. ' on the Lua stack'
+	end
 	func[#func+1] = ' */'
 
 	-- append the function body
@@ -325,8 +345,29 @@ function parse(fd, str)
 	for i = 1, #vars do
 		func[#func+1] = vars[i]
 	end
-	func[#func+1] = '    ' .. rtype .. ' result = ' .. fname .. '(' .. params(types, names, refs) .. ');'
-	func[#func+1] = '    return ' .. pusher(rtype, "result") .. ';'
+
+	if tsize(refs) > 0 then
+		-- there were references to variables
+		-- assume the Leptonica function returns 0 on success
+		func[#func+1] = '    if (' .. fname .. '(' .. params(types, names, refs) .. '))'
+		func[#func+1] = '        return ll_push_nil(L);'
+		for i = 1, #vars do
+			local name = names[i]
+			if refs[name] ~= nil then
+				local vtype = types[i]
+				func[#func+1] = '    ' .. pusher(vtype, name) .. ';'
+			end
+		end
+		func[#func+1] = '    return ' .. tsize(refs) .. ';'
+	else
+		-- there were no references to variables
+		-- assume the Leptonica function the result
+		if not rtype:match("%*$") then
+			rtype = rtype .. ' '
+		end
+		func[#func+1] = '    ' .. rtype .. 'result = ' .. fname .. '(' .. params(types, names, refs) .. ');'
+		func[#func+1] = '    return ' .. pusher(rtype, "result") .. ';'
+	end
 	func[#func+1] = '}'
 	func[#func+1] = ''
 

@@ -151,7 +151,7 @@ AddPt(lua_State *L)
     Pta *pta = ll_check_Pta(_fun, L, 1);
     l_float32 x = ll_check_l_float32(_fun, L, 2);
     l_float32 y = ll_check_l_float32(_fun, L, 3);
-    return ll_push_bool(L, 0 == ptaAddPt(pta, x, y));
+    return ll_push_bool(_fun, L, 0 == ptaAddPt(pta, x, y));
 }
 
 /**
@@ -239,7 +239,7 @@ Empty(lua_State *L)
 {
     LL_FUNC("Empty");
     Pta *pta = ll_check_Pta(_fun, L, 1);
-    return ll_push_bool(L, 0 == ptaEmpty(pta));
+    return ll_push_bool(_fun, L, 0 == ptaEmpty(pta));
 }
 
 /**
@@ -329,7 +329,7 @@ InsertPt(lua_State *L)
     l_int32 idx = ll_check_index(_fun, L, 2, ptaGetCount(pta));
     l_int32 x = ll_check_l_int32(_fun, L, 3);
     l_int32 y = ll_check_l_int32(_fun, L, 4);
-    return ll_push_bool(L, 0 == ptaInsertPt(pta, idx, x, y));
+    return ll_push_bool(_fun, L, 0 == ptaInsertPt(pta, idx, x, y));
 }
 
 /**
@@ -399,7 +399,7 @@ RemovePt(lua_State *L)
     LL_FUNC("RemovePt");
     Pta *pta = ll_check_Pta(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, ptaGetCount(pta));
-    return ll_push_bool(L, 0 == ptaRemovePt(pta, idx));
+    return ll_push_bool(_fun, L, 0 == ptaRemovePt(pta, idx));
 }
 
 /**
@@ -421,7 +421,7 @@ SetPt(lua_State *L)
     l_int32 idx = ll_check_index(_fun, L, 2, ptaGetCount(pta));
     l_float32 x = ll_check_l_float32(_fun, L, 3);
     l_float32 y = ll_check_l_float32(_fun, L, 4);
-    return ll_push_bool(L, 0 == ptaSetPt(pta, idx, x, y));
+    return ll_push_bool(_fun, L, 0 == ptaSetPt(pta, idx, x, y));
 }
 
 /**
@@ -445,7 +445,7 @@ Write(lua_State *L)
     Pta *pta = ll_check_Pta(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
     l_int32 type = ll_check_boolean_default(_fun, L, 3, FALSE);
-    return ll_push_bool(L, 0 == ptaWrite(filename, pta, type));
+    return ll_push_bool(_fun, L, 0 == ptaWrite(filename, pta, type));
 }
 
 /**
@@ -497,7 +497,7 @@ WriteStream(lua_State *L)
     Pta *pta = ll_check_Pta(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
     l_int32 type = ll_check_boolean_default(_fun, L, 3, FALSE);
-    return ll_push_bool(L, 0 == ptaWriteStream(stream->f, pta, type));
+    return ll_push_bool(_fun, L, 0 == ptaWriteStream(stream->f, pta, type));
 }
 
 /**
@@ -542,7 +542,6 @@ ll_push_Pta(const char *_fun, lua_State *L, Pta *pta)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, LL_PTA, pta);
 }
-
 /**
  * \brief Create and push a new Pta*.
  * \param L pointer to the lua_State
@@ -571,6 +570,7 @@ ll_register_Pta(lua_State *L)
         {"ConvertToBox",    ConvertToBox},
         {"Copy",            Copy},
         {"CopyRange",       CopyRange},
+        {"Create",          Create},
         {"Destroy",         Destroy},
         {"Empty",           Empty},
         {"GetArrays",       GetArrays},
@@ -589,7 +589,6 @@ ll_register_Pta(lua_State *L)
     };
 
     static const luaL_Reg functions[] = {
-        {"Create",          Create},
         LUA_SENTINEL
     };
 

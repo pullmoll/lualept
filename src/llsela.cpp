@@ -79,20 +79,20 @@ Create(lua_State *L)
 }
 
 /**
- * \brief Create a new Sela* (%sela) from an external file (%filename)
+ * \brief Get then number Sel* in the Sela* (%sela).
  * <pre>
- * Arg #1 (i.e. self) is expected to be a string (filename).
+ * Arg #1 (i.e. self) is expected to be a Sela* (sela).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 Sela * on the Lua stack
+ * \return 1 l_int32 on the Lua stack
  */
 static int
-CreateFromFile(lua_State *L)
+GetCount(lua_State *L)
 {
-    LL_FUNC("CreateFromFile");
-    const char *filename = ll_check_string(_fun, L, 1);
-    Sela *sela = selaCreateFromFile(filename);
-    return ll_push_Sela(_fun, L, sela);
+    LL_FUNC("GetCount");
+    Sela *sela = ll_check_Sela(_fun, L, 1);
+    lua_pushinteger(L, selaGetCount(sela));
+    return 1;
 }
 
 /**
@@ -107,7 +107,7 @@ static int
 toString(lua_State *L)
 {
     LL_FUNC("toString");
-    static char str[256];
+    char str[256];
     Sela *sela = ll_check_Sela(_fun, L, 1);
     luaL_Buffer B;
 
@@ -272,28 +272,6 @@ AddHitMiss(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sela* (sela).
- * Arg #2 is expected to be a Sel* (sel).
- * Arg #3 is expected to be a string (selname).
- * Arg #4 is expected to be a l_int32 (copyflag).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
- */
-static int
-AddSel(lua_State *L)
-{
-    LL_FUNC("AddSel");
-    Sela *sela = ll_check_Sela(_fun, L, 1);
-    Sel *sel = ll_check_Sel(_fun, L, 2);
-    const char *selname = ll_check_string(_fun, L, 3);
-    l_int32 copyflag = ll_check_access_storage(_fun, L, 4, L_COPY);
-    return ll_push_bool(L, 0 == selaAddSel(sela, sel, selname, copyflag));
-}
-
-/**
- * \brief Brief comment goes here.
- * <pre>
- * Arg #1 (i.e. self) is expected to be a Sela* (sela).
  * Arg #2 is expected to be a l_float32 (hlsize).
  * Arg #3 is expected to be a l_float32 (mdist).
  * Arg #4 is expected to be a l_int32 (norient).
@@ -312,6 +290,45 @@ AddTJunctions(lua_State *L)
     l_int32 norient = ll_check_l_int32(_fun, L, 4);
     l_int32 debugflag = ll_check_l_int32(_fun, L, 5);
     Sela *sela = selaAddTJunctions(selas, hlsize, mdist, norient, debugflag);
+    return ll_push_Sela(_fun, L, sela);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Sela* (sela).
+ * Arg #2 is expected to be a Sel* (sel).
+ * Arg #3 is expected to be a string (selname).
+ * Arg #4 is expected to be a l_int32 (copyflag).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 l_int32 on the Lua stack
+ */
+static int
+AddSel(lua_State *L)
+{
+    LL_FUNC("AddSel");
+    Sela *sela = ll_check_Sela(_fun, L, 1);
+    Sel *sel = ll_check_Sel(_fun, L, 2);
+    const char *selname = ll_check_string(_fun, L, 3);
+    l_int32 copyflag = ll_check_access_storage(_fun, L, 4, L_COPY);
+    return ll_push_bool(_fun, L, 0 == selaAddSel(sela, sel, selname, copyflag));
+}
+
+/**
+ * \brief Create a new Sela* (%sela) from an external file (%filename)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a string (filename).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Sela * on the Lua stack
+ */
+static int
+CreateFromFile(lua_State *L)
+{
+    LL_FUNC("CreateFromFile");
+    const char *filename = ll_check_string(_fun, L, 1);
+    Sela *sela = selaCreateFromFile(filename);
     return ll_push_Sela(_fun, L, sela);
 }
 
@@ -365,63 +382,39 @@ FindSelByName(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Get Sel* with index (%idx) from Sela* (%sela).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sela* (sela).
- * Arg #2 is expected to be a l_int32 (hsize).
- * Arg #3 is expected to be a l_int32 (vsize).
+ * Arg #2 is expected to be a l_int32 (i).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 string on the Lua stack
+ * \return 1 Sel * on the Lua stack
  */
 static int
-GetBrickName(lua_State *L)
+GetSel(lua_State *L)
 {
-    LL_FUNC("GetBrickName");
+    LL_FUNC("GetSel");
     Sela *sela = ll_check_Sela(_fun, L, 1);
-    l_int32 hsize = ll_check_l_int32(_fun, L, 2);
-    l_int32 vsize = ll_check_l_int32(_fun, L, 3);
-    char *name = selaGetBrickName(sela, hsize, vsize);
-    lua_pushstring(L, name);
-    return 1;
+    l_int32 idx = ll_check_index(_fun, L, 2, selaGetCount(sela));
+    return ll_push_Sel(_fun, L, selaGetSel(sela, idx));
 }
 
 /**
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sela* (sela).
- * Arg #2 is expected to be a l_int32 (size).
- * Arg #3 is expected to be a l_int32 (direction).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 string on the Lua stack
+ * \return 1 Sarray * on the Lua stack
  */
 static int
-GetCombName(lua_State *L)
+GetSelnames(lua_State *L)
 {
-    LL_FUNC("GetCombName");
+    LL_FUNC("GetSelnames");
     Sela *sela = ll_check_Sela(_fun, L, 1);
-    l_int32 size = ll_check_l_int32(_fun, L, 2);
-    l_int32 direction = ll_check_l_int32(_fun, L, 3);
-    char *name = selaGetCombName(sela, size, direction);
-    lua_pushstring(L, name);
-    return 1;
-}
-
-/**
- * \brief Get then number Sel* in the Sela* (%sela).
- * <pre>
- * Arg #1 (i.e. self) is expected to be a Sela* (sela).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
- */
-static int
-GetCount(lua_State *L)
-{
-    LL_FUNC("GetCount");
-    Sela *sela = ll_check_Sela(_fun, L, 1);
-    lua_pushinteger(L, selaGetCount(sela));
+    Sarray *sa = selaGetSelnames(sela);
+    ll_push_Sarray(_fun, L, sa);
+    sarrayDestroy(&sa);
     return 1;
 }
 
@@ -474,7 +467,7 @@ Write(lua_State *L)
     LL_FUNC("Write");
     Sela *sela = ll_check_Sela(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
-    return ll_push_bool(L, 0 == selaWrite(filename, sela));
+    return ll_push_bool(_fun, L, 0 == selaWrite(filename, sela));
 }
 
 /**
@@ -492,43 +485,50 @@ WriteStream(lua_State *L)
     LL_FUNC("WriteStream");
     Sela *sela = ll_check_Sela(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    return ll_push_bool(L, 0 == selaWriteStream(stream->f, sela));
-}
-
-/**
- * \brief Get Sel* with index (%idx) from Sela* (%sela).
- * <pre>
- * Arg #1 (i.e. self) is expected to be a Sela* (sela).
- * Arg #2 is expected to be a l_int32 (i).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Sel * on the Lua stack
- */
-static int
-GetSel(lua_State *L)
-{
-    LL_FUNC("GetSel");
-    Sela *sela = ll_check_Sela(_fun, L, 1);
-    l_int32 idx = ll_check_index(_fun, L, 2, selaGetCount(sela));
-    return ll_push_Sel(_fun, L, selaGetSel(sela, idx));
+    return ll_push_bool(_fun, L, 0 == selaWriteStream(stream->f, sela));
 }
 
 /**
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sela* (sela).
+ * Arg #2 is expected to be a l_int32 (hsize).
+ * Arg #3 is expected to be a l_int32 (vsize).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 Sarray * on the Lua stack
+ * \return 1 string on the Lua stack
  */
 static int
-GetSelnames(lua_State *L)
+GetBrickName(lua_State *L)
 {
-    LL_FUNC("GetSelnames");
+    LL_FUNC("GetBrickName");
     Sela *sela = ll_check_Sela(_fun, L, 1);
-    Sarray *sa = selaGetSelnames(sela);
-    ll_push_sarray(L, sa);
-    sarrayDestroy(&sa);
+    l_int32 hsize = ll_check_l_int32(_fun, L, 2);
+    l_int32 vsize = ll_check_l_int32(_fun, L, 3);
+    char *name = selaGetBrickName(sela, hsize, vsize);
+    lua_pushstring(L, name);
+    return 1;
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Sela* (sela).
+ * Arg #2 is expected to be a l_int32 (size).
+ * Arg #3 is expected to be a l_int32 (direction).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 string on the Lua stack
+ */
+static int
+GetCombName(lua_State *L)
+{
+    LL_FUNC("GetCombName");
+    Sela *sela = ll_check_Sela(_fun, L, 1);
+    l_int32 size = ll_check_l_int32(_fun, L, 2);
+    l_int32 direction = ll_check_l_int32(_fun, L, 3);
+    char *name = selaGetCombName(sela, size, direction);
+    lua_pushstring(L, name);
     return 1;
 }
 
@@ -593,7 +593,6 @@ ll_push_Sela(const char *_fun, lua_State *L, Sela *sela)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, LL_SELA, sela);
 }
-
 /**
  * \brief Create and push a new Sela*.
  * \param L pointer to the lua_State

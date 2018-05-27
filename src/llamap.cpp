@@ -37,9 +37,6 @@
  *
  *====================================================================*/
 
-typedef L_AMAP      Amap;       /*!< Local type name for the ugly L_AMAP */
-typedef L_AMAP_NODE AmapNode;   /*!< Local type name for the ugly L_AMAP_NODE */
-
 /** Define a function's name (_fun) with prefix LL_AMAP */
 #define LL_FUNC(x) FUNC(LL_AMAP "." x)
 
@@ -149,8 +146,7 @@ Insert(lua_State *L)
         result = TRUE;
         break;
     }
-    lua_pushboolean(L, result);
-    return 1;
+    return ll_push_bool(_fun, L, result);
 }
 
 /**
@@ -165,7 +161,7 @@ static int
 toString(lua_State *L)
 {
     LL_FUNC("toString");
-    static char str[256];
+    char str[256];
     Amap *amap = ll_check_Amap(_fun, L, 1);
     AmapNode *node = nullptr;
     luaL_Buffer B;
@@ -251,8 +247,7 @@ Delete(lua_State *L)
         result = TRUE;
         break;
     }
-    lua_pushboolean(L, result);
-    return 1;
+    return ll_push_bool(_fun, L, result);
 }
 
 /**
@@ -278,27 +273,26 @@ Find(lua_State *L)
         key.itype = ll_check_l_int64(_fun, L, 2);
         value = l_amapFind(amap, key);
         if (value) {
-            lua_pushinteger(L, static_cast<lua_Integer>(value->itype));
-            result = 1;
+            result = ll_push_l_int64(_fun, L, value->itype);
         }
         break;
     case L_UINT_TYPE:
         key.utype = ll_check_l_uint64(_fun, L, 2);
         value = l_amapFind(amap, key);
         if (value) {
-            lua_pushinteger(L, static_cast<lua_Integer>(value->utype));
-            result = 1;
+            result = ll_push_l_uint64(_fun, L, value->utype);
         }
         break;
     case L_FLOAT_TYPE:
         key.ftype = ll_check_l_float64(_fun, L, 2);
         value = l_amapFind(amap, key);
         if (value) {
-            lua_pushnumber(L, static_cast<lua_Number>(value->ftype));
-            result = 1;
+            result = ll_push_l_float64(_fun, L, value->ftype);
         }
         break;
     }
+    if (!result)
+        return ll_push_nil(L);
     return result;
 }
 
@@ -403,7 +397,6 @@ ll_check_Amap_opt(const char *_fun, lua_State *L, int arg)
         return nullptr;
     return ll_check_Amap(_fun, L, arg);
 }
-
 /**
  * \brief Push Amap user data to the Lua stack and set its meta table.
  * \param _fun calling function's name

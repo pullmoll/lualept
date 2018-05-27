@@ -37,7 +37,6 @@
  *
  *====================================================================*/
 
-
 /** Define a function's name (_fun) with prefix LL_NUMA */
 #define LL_FUNC(x) FUNC(LL_NUMA "." x)
 
@@ -114,7 +113,7 @@ ReplaceNumber(lua_State *L)
     Numa *na = ll_check_Numa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, numaGetCount(na));
     l_float32 val = ll_check_l_float32(_fun, L, 3);
-    return ll_push_bool(L, 0 == numaReplaceNumber(na, idx, val));
+    return ll_push_bool(_fun, L, 0 == numaReplaceNumber(na, idx, val));
 }
 
 /**
@@ -126,7 +125,7 @@ static int
 toString(lua_State *L)
 {
     LL_FUNC("toString");
-    static char str[256];
+    char str[256];
     Numa *da = ll_check_Numa(_fun, L, 1);
     luaL_Buffer B;
     l_int32 i;
@@ -164,7 +163,7 @@ AddNumber(lua_State *L)
     LL_FUNC("AddNumber");
     Numa *na = ll_check_Numa(_fun, L, 1);
     l_float32 val = ll_check_l_float32(_fun, L, 2);
-    return ll_push_bool(L, 0 == numaAddNumber(na, val));
+    return ll_push_bool(_fun, L, 0 == numaAddNumber(na, val));
 }
 
 /**
@@ -206,7 +205,7 @@ ConvertToSarray(lua_State *L)
     l_int32 size2 = L_FLOAT_VALUE == type ? ll_check_l_int32_default(_fun, L, 4, 0) : 0;
     l_int32 addzeroes = ll_check_boolean_default(_fun, L, 5, FALSE);
     Sarray *sa = numaConvertToSarray(na, size1, size2, addzeroes, type);
-    ll_push_sarray(L, sa);
+    ll_push_Sarray(_fun, L, sa);
     sarrayDestroy(&sa);
     return 1;
 }
@@ -243,7 +242,7 @@ CopyParameters(lua_State *L)
     LL_FUNC("CopyParameters");
     Numa *nad = ll_check_Numa(_fun, L, 1);
     Numa *nas = ll_check_Numa(_fun, L, 2);
-    return ll_push_bool(L, 0 == numaCopyParameters(nad, nas));
+    return ll_push_bool(_fun, L, 0 == numaCopyParameters(nad, nas));
 }
 
 /**
@@ -259,7 +258,7 @@ Empty(lua_State *L)
 {
     LL_FUNC("Empty");
     Numa *na = ll_check_Numa(_fun, L, 1);
-    return ll_push_bool(L, 0 == numaEmpty(na));
+    return ll_push_bool(_fun, L, 0 == numaEmpty(na));
 }
 
 /**
@@ -275,7 +274,7 @@ FromArray(lua_State *L)
 {
     LL_FUNC("FromArray");
     l_int32 i, n;
-    l_float32 *tbl = ll_unpack_farray(_fun, L, 1, &n);
+    l_float32 *tbl = ll_unpack_Farray(_fun, L, 1, &n);
     Numa* na = numaCreate(n);
     if (!na)
         return ll_push_nil(L);
@@ -300,7 +299,7 @@ GetFArray(lua_State *L)
     Numa *na = ll_check_Numa(_fun, L, 1);
     l_float32 *fa = numaGetFArray(na, L_COPY);
     l_int32 n = numaGetCount(na);
-    int res = ll_push_farray(L, fa, n);
+    int res = ll_push_Farray(_fun, L, fa, n);
     LEPT_FREE(fa);
     return res;
 }
@@ -342,7 +341,7 @@ GetIArray(lua_State *L)
     Numa *na = ll_check_Numa(_fun, L, 1);
     l_int32 *ia = numaGetIArray(na);
     l_int32 n = numaGetCount(na);
-    int res = ll_push_iarray(L, ia, n);
+    int res = ll_push_Iarray(_fun, L, ia, n);
     LEPT_FREE(ia);
     return res;
 }
@@ -408,7 +407,7 @@ InsertNumber(lua_State *L)
     Numa *na = ll_check_Numa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, numaGetCount(na));
     l_float32 val = ll_check_l_float32(_fun, L, 3);
-    return ll_push_bool(L, 0 == numaInsertNumber(na, idx, val));
+    return ll_push_bool(_fun, L, 0 == numaInsertNumber(na, idx, val));
 }
 
 /**
@@ -478,7 +477,7 @@ RemoveNumber(lua_State *L)
     LL_FUNC("RemoveNumber");
     Numa *na = ll_check_Numa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, numaGetCount(na));
-    return ll_push_bool(L, 0 == numaRemoveNumber(na, idx));
+    return ll_push_bool(_fun, L, 0 == numaRemoveNumber(na, idx));
 }
 
 /**
@@ -496,7 +495,7 @@ SetCount(lua_State *L)
     LL_FUNC("SetCount");
     Numa* na = ll_check_Numa(_fun, L, 1);
     l_int32 n = ll_check_l_int32(_fun, L, 2);
-    return ll_push_bool(L, 0 == numaSetCount(na, n));
+    return ll_push_bool(_fun, L, 0 == numaSetCount(na, n));
 }
 
 /**
@@ -516,7 +515,7 @@ SetParameters(lua_State *L)
     Numa *na = ll_check_Numa(_fun, L, 1);
     l_float32 startx = ll_check_l_float32(_fun, L, 2);
     l_float32 deltax = ll_check_l_float32(_fun, L, 3);
-    return ll_push_bool(L, 0 == numaSetParameters(na, startx, deltax));
+    return ll_push_bool(_fun, L, 0 == numaSetParameters(na, startx, deltax));
 }
 
 /**
@@ -536,7 +535,7 @@ SetValue(lua_State *L)
     Numa *na = ll_check_Numa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, numaGetCount(na));
     l_float32 val = ll_check_l_float32(_fun, L, 3);
-    return ll_push_bool(L, 0 == numaSetValue(na, idx, val));
+    return ll_push_bool(_fun, L, 0 == numaSetValue(na, idx, val));
 }
 
 /**
@@ -556,7 +555,7 @@ ShiftValue(lua_State *L)
     Numa *na = ll_check_Numa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, numaGetCount(na));
     l_float32 diff = ll_check_l_float32(_fun, L, 3);
-    return ll_push_bool(L, 0 == numaShiftValue(na, idx, diff));
+    return ll_push_bool(_fun, L, 0 == numaShiftValue(na, idx, diff));
 }
 
 /**
@@ -574,7 +573,7 @@ Write(lua_State *L)
     LL_FUNC("Write");
     Numa *na = ll_check_Numa(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
-    return ll_push_bool(L, 0 == numaWrite(filename, na));
+    return ll_push_bool(_fun, L, 0 == numaWrite(filename, na));
 }
 
 /**
@@ -614,7 +613,7 @@ WriteStream(lua_State *L)
     LL_FUNC("WriteStream");
     Numa *na = ll_check_Numa(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    return ll_push_bool(L, 0 == numaWriteStream(stream->f, na));
+    return ll_push_bool(_fun, L, 0 == numaWriteStream(stream->f, na));
 }
 
 /**
@@ -659,7 +658,6 @@ ll_push_Numa(const char *_fun, lua_State *L, Numa *na)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, LL_NUMA, na);
 }
-
 /**
  * \brief Create and push NUMA user data to the Lua stack.
  * \param L pointer to the lua_State
