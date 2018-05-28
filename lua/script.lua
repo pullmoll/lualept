@@ -318,6 +318,8 @@ function pix_test()
 		for x = 4, width-4 do pix:SetPixel(x, y, black) end
 	end
 
+	pix:Display(0,0)
+
 	pix:SetSpecial(10+9)	-- maximum compression
 	local ok = pix:Write(filename, "png")
 	print(pad("pix:Write('" .. filename .."')"), ok)
@@ -339,7 +341,6 @@ function pix_test()
 	local pix2 = Pix(filename)
 	print(pad("pix2 = Pix('" .. filename .. "')"), pix2);
 
-
 	-- get the pixel data of pix2 as two dimensional array of integers
 	local data = pix2:GetData();
 	print(pad("pix2:GetData()"), data)
@@ -353,6 +354,7 @@ function pix_test()
 
 	local ok = pix2:SetData(data)
 	print(pad("pix2:SetData(data)"), ok)
+	pix2:Display(0,0)
 
 	local w, h, d = pix2:GetDimensions()
 	print(pad("width"), w)
@@ -379,6 +381,7 @@ function pix_test()
 	local pix3 = pix3:AddBorder(20, LuaLept.RGB(255,255,255))
 	print(pad("pix3"), pix3)
 	local ok = pix3:Write("/tmp/carray.tiff", "lzw")
+	pix3:Display(0,0)
 end
 
 function pix2_test()
@@ -388,6 +391,8 @@ function pix2_test()
 	header("Pix2")
 	local pix = Pix('lualept.jpg')
 	print (pad("pix"), pix)
+
+	pix:DisplayWithTitle(0,0, 'lualept.jpg', true)
 
 	local ok = pix:Write(filename, 'png')
 	print (pad("pix:Write('" .. filename .. "', 'png')"), ok)
@@ -404,6 +409,8 @@ function pix2_test()
 	print (pad("pixm"), pixm)
 	print (pad("dimensions"), pixm:GetDimensions())
 
+	pixm:Display(0,0)
+
 	print (pad("pixels"), pixm:CountPixels())
 	local box = Box(10,w-20,h-100,100)
 	print (pad("rect"), box)
@@ -415,6 +422,8 @@ function pix2_test()
 	pix:PaintThroughMask(pixm, 0, 0, LuaLept.RGB(255,48,48))
 	local ok = pix:Write(filename3,'png')
 	print (pad("pix:Write('" .. filename3 .. "','png')"), ok)
+
+	pix:Display(0,0)
 end
 
 function fpix_test()
@@ -462,7 +471,7 @@ function dpix_test()
 	local dpix3 = DPix(dpix2)
 	print(pad("dpix3 = DPix(dpix2)"), dpix3)
 
-	local pix = dpix2:ConvertToPix(4, false, true)
+	local pix = dpix2:ConvertToPix(0, "clip-to-zero", true)
 	pix:Write(filename2)
 	print(pad("pix:Write('" .. filename2 .."')"), ok)
 end
@@ -505,8 +514,8 @@ amap_test()
 -- box_test()
 -- numa_test()
 -- dna_test()
--- pix_test()
--- pix2_test()
+pix_test()
+pix2_test()
 fpix_test()
 dpix_test()
 

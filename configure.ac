@@ -27,7 +27,13 @@ LT_LIB_M
 # Checks for pkg-config libraries.
 PKG_CHECK_MODULES([LEPT], [lept >= 1.76.0])
 PKG_CHECK_MODULES([LUA],  [lua5.3 >= 5.3.0])
-PKG_CHECK_MODULES([SDL2], [sdl2])
+
+# Optionally link -lSDL2 to support internal Pix display
+AC_ARG_WITH([sdl2], AS_HELP_STRING([--with-sdl2=no], [Disable building the SDL2 Pix viewer.]))
+if test "x$with_sdl2" != "xno"; then
+	PKG_CHECK_MODULES([SDL2], [sdl2 >= 2.0.0],
+		[AC_DEFINE([HAVE_SDL2], [1], [Define to 1 if you have the <SDL2/SDL.h> header file.])])
+fi
 
 case "$host_os" in
   mingw32*)
