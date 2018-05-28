@@ -41,6 +41,53 @@
 #define LL_FUNC(x) FUNC(LL_COMPDATA "." x)
 
 /**
+ * \brief Destroy a CompData*.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CompData* (cid).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 0 for nothing on the Lua stack
+ */
+static int
+Destroy(lua_State *L)
+{
+    LL_FUNC("Destroy");
+    CompData **pcid = ll_check_udata<CompData>(_fun, L, 1, LL_COMPDATA);
+    CompData *cid = *pcid;
+    DBG(LOG_DESTROY, "%s: '%s' pcid=%p cid=%p\n",
+        _fun, LL_COMPDATA, pcid, cid);
+    l_CIDataDestroy(&cid);
+    *pcid = nullptr;
+    return 0;
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 is expected to be a string (fname).
+ * Arg #2 is expected to be a l_int32 (type).
+ * Arg #3 is expected to be a l_int32 (quality).
+ * Arg #4 is expected to be a l_int32 (ascii85).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    LL_FUNC("Create");
+    const char *fname = ll_check_string(_fun, L, 1);
+    l_int32 type = ll_check_l_int32(_fun, L, 2);
+    l_int32 quality = ll_check_l_int32(_fun, L, 3);
+    l_int32 ascii85 = ll_check_l_int32(_fun, L, 4);
+    CompData *cid = nullptr;
+    if (l_generateCIData(fname, type, quality, ascii85, &cid))
+        return ll_push_nil(L);
+    ll_push_CompData(_fun, L, cid);
+    return 1;
+}
+
+/**
  * \brief Printable string for a Sel* (%sel).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sel* (sel).
@@ -53,7 +100,7 @@ toString(lua_State *L)
 {
     LL_FUNC("toString");
     char str[256];
-    CompressedData *cdata = ll_check_CompData(_fun, L, 1);
+    CompData *cdata = ll_check_CompData(_fun, L, 1);
     luaL_Buffer B;
 
     luaL_buffinit(L, &B);
@@ -100,39 +147,272 @@ toString(lua_State *L)
 }
 
 /**
- * \brief Destroy a CompData*.
- *
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CompData* (cid).
+ * Arg #2 is expected to be a string (title).
+ * </pre>
  * \param L pointer to the lua_State
- * \return 0 for nothing on the Lua stack
+ * \return 1 lstring on the Lua stack
  */
 static int
-Destroy(lua_State *L)
+ConvertToPdfData(lua_State *L)
 {
-    LL_FUNC("Destroy");
-    CompressedData **pcdata = ll_check_udata<CompressedData>(_fun, L, 1, LL_COMPDATA);
-    CompressedData *cdata = *pcdata;
-    DBG(LOG_DESTROY, "%s: '%s' pcdata=%p cdata=%p\n",
-        _fun, LL_COMPDATA, pcdata, cdata);
-    ll_free(cdata);
-    *pcdata = nullptr;
-    return 0;
+    LL_FUNC("ConvertToPdfData");
+    CompData *cid = ll_check_CompData(_fun, L, 1);
+    const char *title = ll_check_string(_fun, L, 2);
+    l_uint8 *data = nullptr;
+    size_t nbytes = 0;
+    if (cidConvertToPdfData(cid, title, &data, &nbytes))
+        return ll_push_nil(L);
+    ll_push_lstring(_fun, L, reinterpret_cast<const char *>(data), nbytes);
+    ll_free(data);
+    return 1;
 }
 
 /**
- * \brief Create a new CompData*.
- *
- * Arg #1 is expected to be a string (dir).
- * Arg #2 is expected to be a l_int32 (fontsize).
- *
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 is expected to be a string (fname).
+ * Arg #2 is expected to be a Pix* (pix).
+ * Arg #3 is expected to be a l_int32 (quality).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+CreateForPdf(lua_State *L)
+{
+    LL_FUNC("CreateForPdf");
+    const char *fname = ll_check_string(_fun, L, 1);
+    Pix *pix = ll_check_Pix(_fun, L, 2);
+    l_int32 quality = ll_check_l_int32(_fun, L, 3);
+    CompData *cid = nullptr;
+    if (l_generateCIDataForPdf(fname, pix, quality, &cid))
+        return ll_push_nil(L);
+    return ll_push_CompData(_fun, L, cid);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 is expected to be a string (fname).
+ * Arg #2 is expected to be a l_int32 (ascii85flag).
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 CompData* on the Lua stack
  */
 static int
-Create(lua_State *L)
+FlateData(lua_State *L)
 {
-    LL_FUNC("Create");
-    CompressedData *cdata = ll_calloc<CompressedData>(_fun, L, 1);
-    return ll_push_CompData(_fun, L, cdata);
+    LL_FUNC("FlateData");
+    const char *fname = ll_check_string(_fun, L, 1);
+    l_int32 ascii85flag = ll_check_l_int32(_fun, L, 2);
+    CompData *cid = l_generateFlateData(fname, ascii85flag);
+    return ll_push_CompData(_fun, L, cid);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a string (fname).
+ * Arg #2 is expected to be a Pix* (pixs).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 CompData* on the Lua stack
+ */
+static int
+FlateDataPdf(lua_State *L)
+{
+    LL_FUNC("FlateDataPdf");
+    const char *fname = ll_check_string(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
+    CompData *cid = l_generateFlateDataPdf(fname, pixs);
+    return ll_push_CompData(_fun, L, cid);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a string (fname).
+ * Arg #2 is expected to be a l_int32 (ascii85flag).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 CompData* on the Lua stack
+ */
+static int
+G4Data(lua_State *L)
+{
+    LL_FUNC("G4Data");
+    const char *fname = ll_check_string(_fun, L, 1);
+    l_int32 ascii85flag = ll_check_l_int32(_fun, L, 2);
+    CompData *cid = l_generateG4Data(fname, ascii85flag);
+    return ll_push_CompData(_fun, L, cid);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 is expected to be a string (filename).
+ * Arg #2 is expected to be a l_int32 (type).
+ * Arg #3 is expected to be a l_int32 (quality).
+ * Arg #4 is expected to be a l_int32 (ascii85).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+Generate(lua_State *L)
+{
+    LL_FUNC("Generate");
+    const char *filename = ll_check_string(_fun, L, 1);
+    l_int32 type = ll_check_l_int32(_fun, L, 2);
+    l_int32 quality = ll_check_l_int32(_fun, L, 3);
+    l_int32 ascii85 = ll_check_l_int32(_fun, L, 4);
+    CompData *cid = nullptr;
+    if (l_generateCIData(filename, type, quality, ascii85, &cid))
+        return ll_push_nil(L);
+    return ll_push_CompData(_fun, L, cid);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CompData* (cid).
+ * Arg #2 is expected to be a string (filein).
+ * Arg #3 is expected to be a l_float32 (xpt).
+ * Arg #4 is expected to be a l_float32 (ypt).
+ * Arg #5 is expected to be a l_float32 (wpt).
+ * Arg #6 is expected to be a l_float32 (hpt).
+ * Arg #7 is expected to be a l_int32 (pageno).
+ * Arg #8 is expected to be a l_int32 (endpage).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+GenerateFlatePS(lua_State *L)
+{
+    LL_FUNC("GenerateFlatePS");
+    CompData *cid = ll_check_CompData(_fun, L, 1);
+    const char *filein = ll_check_string(_fun, L, 2);
+    l_float32 xpt = ll_check_l_float32(_fun, L, 3);
+    l_float32 ypt = ll_check_l_float32(_fun, L, 4);
+    l_float32 wpt = ll_check_l_float32(_fun, L, 5);
+    l_float32 hpt = ll_check_l_float32(_fun, L, 6);
+    l_int32 pageno = ll_check_l_int32(_fun, L, 7);
+    l_int32 endpage = ll_check_l_int32(_fun, L, 8);
+    char *str = generateFlatePS(filein, cid, xpt, ypt, wpt, hpt, pageno, endpage);
+    ll_push_string(_fun, L, str);
+    ll_free(str);
+    return 1;
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CompData* (cid).
+ * Arg #2 is expected to be a string (filein).
+ * Arg #3 is expected to be a l_float32 (xpt).
+ * Arg #4 is expected to be a l_float32 (ypt).
+ * Arg #5 is expected to be a l_float32 (wpt).
+ * Arg #6 is expected to be a l_float32 (hpt).
+ * Arg #7 is expected to be a l_int32 (maskflag).
+ * Arg #8 is expected to be a l_int32 (pageno).
+ * Arg #9 is expected to be a l_int32 (endpage).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+GenerateG4PS(lua_State *L)
+{
+    LL_FUNC("GenerateG4PS");
+    CompData *cid = ll_check_CompData(_fun, L, 1);
+    const char *filein = ll_check_string(_fun, L, 2);
+    l_float32 xpt = ll_check_l_float32(_fun, L, 3);
+    l_float32 ypt = ll_check_l_float32(_fun, L, 4);
+    l_float32 wpt = ll_check_l_float32(_fun, L, 5);
+    l_float32 hpt = ll_check_l_float32(_fun, L, 6);
+    l_int32 maskflag = ll_check_l_int32(_fun, L, 7);
+    l_int32 pageno = ll_check_l_int32(_fun, L, 8);
+    l_int32 endpage = ll_check_l_int32(_fun, L, 9);
+    char *str = generateG4PS(filein, cid, xpt, ypt, wpt, hpt, maskflag, pageno, endpage);
+    ll_push_string(_fun, L, str);
+    ll_free(str);
+    return 1;
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CompData* (cid).
+ * Arg #2 is expected to be a string (filein).
+ * Arg #3 is expected to be a l_float32 (xpt).
+ * Arg #4 is expected to be a l_float32 (ypt).
+ * Arg #5 is expected to be a l_float32 (wpt).
+ * Arg #6 is expected to be a l_float32 (hpt).
+ * Arg #7 is expected to be a l_int32 (pageno).
+ * Arg #8 is expected to be a l_int32 (endpage).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+GenerateJpegPS(lua_State *L)
+{
+    LL_FUNC("GenerateJpegPS");
+    CompData *cid = ll_check_CompData(_fun, L, 1);
+    const char *filein = ll_check_string(_fun, L, 2);
+    l_float32 xpt = ll_check_l_float32(_fun, L, 3);
+    l_float32 ypt = ll_check_l_float32(_fun, L, 4);
+    l_float32 wpt = ll_check_l_float32(_fun, L, 5);
+    l_float32 hpt = ll_check_l_float32(_fun, L, 6);
+    l_int32 pageno = ll_check_l_int32(_fun, L, 7);
+    l_int32 endpage = ll_check_l_int32(_fun, L, 8);
+    char *str = generateJpegPS(filein, cid, xpt, ypt, wpt, hpt, pageno, endpage);
+    ll_push_string(_fun, L, str);
+    ll_free(str);
+    return 1;
+}
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a string (fname).
+ * Arg #2 is expected to be a l_int32 (ascii85flag).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+JpegData(lua_State *L)
+{
+    LL_FUNC("JpegData");
+    const char *fname = ll_check_string(_fun, L, 1);
+    l_int32 ascii85flag = ll_check_l_int32(_fun, L, 2);
+    CompData *cid = l_generateJpegData(fname, ascii85flag);
+    return ll_push_CompData(_fun, L, cid);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a lstring (str).
+ * Arg #2 is expected to be a boolean (ascii85flag).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 CompData* on the Lua stack
+ */
+static int
+JpegDataMem(lua_State *L)
+{
+    LL_FUNC("JpegDataMem");
+    size_t nbytes = 0;
+    const char *str = ll_check_lstring(_fun, L, 1, &nbytes);
+    l_int32 ascii85flag = ll_check_boolean(_fun, L, 2);
+    l_uint8* data = reinterpret_cast<l_uint8 *>(reinterpret_cast<l_intptr_t>(str));
+    CompData *cid = l_generateJpegDataMem(data, nbytes, ascii85flag);
+    return ll_push_CompData(_fun, L, cid);
 }
 
 /**
@@ -142,12 +422,11 @@ Create(lua_State *L)
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the CompData* contained in the user data
  */
-CompressedData *
+CompData *
 ll_check_CompData(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<CompressedData>(_fun, L, arg, LL_COMPDATA);
+    return *ll_check_udata<CompData>(_fun, L, arg, LL_COMPDATA);
 }
-
 /**
  * \brief Optionally expect a LL_DLLIST at index %arg on the Lua stack.
  * \param _fun calling function's name
@@ -155,7 +434,7 @@ ll_check_CompData(const char *_fun, lua_State *L, int arg)
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the CompData* contained in the user data
  */
-CompressedData *
+CompData *
 ll_check_CompData_opt(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
@@ -170,14 +449,14 @@ ll_check_CompData_opt(const char *_fun, lua_State *L, int arg)
  * \return 1 CompData* on the Lua stack
  */
 int
-ll_push_CompData(const char *_fun, lua_State *L, CompressedData *cdata)
+ll_push_CompData(const char *_fun, lua_State *L, CompData *cdata)
 {
     if (!cdata)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, LL_COMPDATA, cdata);
 }
 /**
- * \brief Create and push a new CompData*.
+ * \brief Generate and push a new CompData*.
  *
  * Arg #1 is expected to be a string (dir).
  * Arg #2 is expected to be a l_int32 (fontsize).
@@ -188,7 +467,7 @@ ll_push_CompData(const char *_fun, lua_State *L, CompressedData *cdata)
 int
 ll_new_CompData(lua_State *L)
 {
-    return Create(L);
+    return Generate(L);
 }
 /**
  * \brief Register the BMF methods and functions in the LL_COMPDATA meta table.
@@ -202,8 +481,19 @@ ll_register_CompData(lua_State *L)
         {"__gc",                Destroy},   /* garbage collector */
         {"__new",               Create},
         {"__tostring",          toString},
+        {"ConvertToPdfData",    ConvertToPdfData},
         {"Create",              Create},
+        {"CreateForPdf",        CreateForPdf},
         {"Destroy",             Destroy},
+        {"FlateData",           FlateData},
+        {"FlateDataPdf",        FlateDataPdf},
+        {"G4Data",              G4Data},
+        {"Generate",            Generate},
+        {"GenerateFlatePS",     GenerateFlatePS},
+        {"GenerateG4PS",        GenerateG4PS},
+        {"GenerateJpegPS",      GenerateJpegPS},
+        {"JpegData",            JpegData},
+        {"JpegDataMem",         JpegDataMem},
         LUA_SENTINEL
     };
 
@@ -211,7 +501,7 @@ ll_register_CompData(lua_State *L)
         LUA_SENTINEL
     };
 
-    lua_pushcfunction(L, Create);
+    lua_pushcfunction(L, Generate);
     lua_setglobal(L, LL_COMPDATA);
     return ll_register_class(L, LL_COMPDATA, methods, functions);
 }

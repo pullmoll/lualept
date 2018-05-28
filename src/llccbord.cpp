@@ -61,7 +61,24 @@ toString(lua_State* L)
                 LL_CCBORD ": %p\n",
                 reinterpret_cast<void *>(ccb));
         luaL_addstring(&B, str);
-
+        snprintf(str, sizeof(str), "    pix           : " LL_PIX "* %p\n", reinterpret_cast<void *>(ccb->pix));
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    boxa          : " LL_BOXA "* %p\n", reinterpret_cast<void *>(ccb->boxa));
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    start         : " LL_PTA "* %p\n", reinterpret_cast<void *>(ccb->start));
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    refcount      : %d\n", ccb->refcount);
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    local         : " LL_PTAA "* %p\n", reinterpret_cast<void *>(ccb->local));
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    global        : " LL_PTAA "* %p\n", reinterpret_cast<void *>(ccb->global));
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    step          : " LL_NUMAA "* %p\n", reinterpret_cast<void *>(ccb->step));
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    splocal       : " LL_PTA "* %p\n", reinterpret_cast<void *>(ccb->splocal));
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    spglobal      : " LL_PTA "* %p\n", reinterpret_cast<void *>(ccb->spglobal));
+        luaL_addstring(&B, str);
     }
     luaL_pushresult(&B);
     return 1;

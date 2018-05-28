@@ -9503,7 +9503,7 @@ GenerateCIData(lua_State *L)
     l_int32 type = ll_check_l_int32(_fun, L, 2);
     l_int32 quality = ll_check_l_int32(_fun, L, 3);
     l_int32 ascii85 = ll_check_l_int32(_fun, L, 4);
-    CompressedData *cid = nullptr;
+    CompData *cid = nullptr;
     if (pixGenerateCIData(pixs, type, quality, ascii85, &cid))
         return ll_push_nil(L);
     ll_push_CompData(_fun, L, cid);
