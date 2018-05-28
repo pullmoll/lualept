@@ -113,7 +113,7 @@ AddBox(lua_State *L)
     Pixaa *pixaa = ll_check_Pixaa(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
     l_int32 copyflag = ll_check_access_storage(_fun, L, 3, L_COPY);
-    return ll_push_bool(_fun, L, 0 == pixaaAddBox(pixaa, box, copyflag));
+    return ll_push_boolean(_fun, L, 0 == pixaaAddBox(pixaa, box, copyflag));
 }
 
 /**
@@ -137,7 +137,7 @@ AddPix(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 3);
     Box *box = ll_check_Box(_fun, L, 4);
     l_int32 copyflag = ll_check_access_storage(_fun, L, 5, L_COPY);
-    return ll_push_bool(_fun, L, 0 == pixaaAddPix(pixaa, idx, pix, box, copyflag));
+    return ll_push_boolean(_fun, L, 0 == pixaaAddPix(pixaa, idx, pix, box, copyflag));
 }
 
 /**
@@ -157,7 +157,7 @@ AddPixa(lua_State *L)
     Pixaa *pixaa = ll_check_Pixaa(_fun, L, 1);
     Pixa *pixa = ll_check_Pixa(_fun, L, 2);
     l_int32 flag = ll_check_access_storage(_fun, L, 3, L_COPY);
-    return ll_push_bool(_fun, L, 0 == pixaaAddPixa(pixaa, pixa, flag));
+    return ll_push_boolean(_fun, L, 0 == pixaaAddPixa(pixaa, pixa, flag));
 }
 
 /**
@@ -173,7 +173,7 @@ Clear(lua_State *L)
 {
     LL_FUNC("Clear");
     Pixaa *paa = ll_check_Pixaa(_fun, L, 1);
-    return ll_push_bool(_fun, L, 0 == pixaaClear(paa));
+    return ll_push_boolean(_fun, L, 0 == pixaaClear(paa));
 }
 
 /**
@@ -212,7 +212,7 @@ ExtendArray(lua_State *L)
 {
     LL_FUNC("ExtendArray");
     Pixaa *pixaa = ll_check_Pixaa(_fun, L, 1);
-    return ll_push_bool(_fun, L, 0 == pixaaExtendArray(pixaa));
+    return ll_push_boolean(_fun, L, 0 == pixaaExtendArray(pixaa));
 }
 
 /**
@@ -274,7 +274,7 @@ Join(lua_State *L)
     Pixaa *pixaas = ll_check_Pixaa(_fun, L, 2);
     l_int32 istart = ll_check_l_int32_default(_fun, L, 3, 1) - 1;
     l_int32 iend = ll_check_l_int32_default(_fun, L, 3, pixaaGetCount(pixaas, nullptr)) - 1;
-    return ll_push_bool(_fun, L, 0 == pixaaJoin(pixaad, pixaas, istart, iend));
+    return ll_push_boolean(_fun, L, 0 == pixaaJoin(pixaad, pixaas, istart, iend));
 }
 
 /**
@@ -381,7 +381,7 @@ ReplacePixa(lua_State *L)
     Pixaa *paa = ll_check_Pixaa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, pixaaGetCount(paa, nullptr));
     Pixa *pa = ll_check_Pixa(_fun, L, 3);
-    return ll_push_bool(_fun, L, 0 == pixaaReplacePixa(paa, idx, pa));
+    return ll_push_boolean(_fun, L, 0 == pixaaReplacePixa(paa, idx, pa));
 }
 
 /**
@@ -397,7 +397,7 @@ Truncate(lua_State *L)
 {
     LL_FUNC("Truncate");
     Pixaa *pixaa = ll_check_Pixaa(_fun, L, 1);
-    return ll_push_bool(_fun, L, 0 == pixaaTruncate(pixaa));
+    return ll_push_boolean(_fun, L, 0 == pixaaTruncate(pixaa));
 }
 
 /**
@@ -415,7 +415,7 @@ Write(lua_State *L)
     LL_FUNC("Write");
     Pixaa *pixaa = ll_check_Pixaa(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == pixaaWrite(filename, pixaa));
+    return ll_push_boolean(_fun, L, 0 == pixaaWrite(filename, pixaa));
 }
 
 /**
@@ -455,7 +455,7 @@ WriteStream(lua_State *L)
     LL_FUNC("WriteStream");
     Pixaa *pixaa = ll_check_Pixaa(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == pixaaWriteStream(stream->f, pixaa));
+    return ll_push_boolean(_fun, L, 0 == pixaaWriteStream(stream->f, pixaa));
 }
 
 /**

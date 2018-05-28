@@ -123,7 +123,7 @@ BuildLineModel(lua_State *L)
     LL_FUNC("BuildLineModel");
     Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
     l_int32 opensize = ll_check_l_int32(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == dewarpBuildLineModel(dew, opensize, nullptr));
+    return ll_push_boolean(_fun, L, 0 == dewarpBuildLineModel(dew, opensize, nullptr));
 }
 
 /**
@@ -140,7 +140,7 @@ BuildPageModel(lua_State *L)
 {
     LL_FUNC("BuildPageModel");
     Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
-    return ll_push_bool(_fun, L, 0 == dewarpBuildPageModel(dew, nullptr));
+    return ll_push_boolean(_fun, L, 0 == dewarpBuildPageModel(dew, nullptr));
 }
 
 /**
@@ -177,7 +177,7 @@ FindHorizDisparity(lua_State *L)
     LL_FUNC("FindHorizDisparity");
     Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
     Ptaa *ptaa = ll_check_Ptaa(_fun, L, 2);
-    return ll_push_bool(_fun, L, dewarpFindHorizDisparity(dew, ptaa));
+    return ll_push_boolean(_fun, L, dewarpFindHorizDisparity(dew, ptaa));
 }
 
 /**
@@ -199,7 +199,7 @@ FindHorizSlopeDisparity(lua_State *L)
     Pix *pixb = ll_check_Pix(_fun, L, 2);
     l_float32 fractthresh = ll_check_l_float32(_fun, L, 3);
     l_int32 parity = ll_check_l_int32(_fun, L, 4);
-    return ll_push_bool(_fun, L, 0 == dewarpFindHorizSlopeDisparity(dew, pixb, fractthresh, parity));
+    return ll_push_boolean(_fun, L, 0 == dewarpFindHorizSlopeDisparity(dew, pixb, fractthresh, parity));
 }
 
 /**
@@ -219,7 +219,7 @@ FindVertDisparity(lua_State *L)
     Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
     Ptaa *ptaa = ll_check_Ptaa(_fun, L, 2);
     l_int32 rotflag = ll_check_l_int32(_fun, L, 3);
-    return ll_push_bool(_fun, L, 0 == dewarpFindVertDisparity(dew, ptaa, rotflag));
+    return ll_push_boolean(_fun, L, 0 == dewarpFindVertDisparity(dew, ptaa, rotflag));
 }
 
 /**
@@ -254,7 +254,7 @@ Minimize(lua_State *L)
 {
     LL_FUNC("Minimize");
     Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
-    return ll_push_bool(_fun, L, 0 == dewarpMinimize(dew));
+    return ll_push_boolean(_fun, L, 0 == dewarpMinimize(dew));
 }
 
 /**
@@ -276,7 +276,7 @@ PopulateFullRes(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 2);
     l_int32 x = ll_check_l_int32(_fun, L, 3);
     l_int32 y = ll_check_l_int32(_fun, L, 4);
-    return ll_push_bool(_fun, L, 0 == dewarpPopulateFullRes(dew, pix, x, y));
+    return ll_push_boolean(_fun, L, 0 == dewarpPopulateFullRes(dew, pix, x, y));
 }
 
 /**
@@ -371,7 +371,7 @@ Write(lua_State *L)
     LL_FUNC("Write");
     Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
-    ll_push_bool(_fun, L, 0 == dewarpWrite(filename, dew));
+    ll_push_boolean(_fun, L, 0 == dewarpWrite(filename, dew));
 }
 
 /**
@@ -411,7 +411,7 @@ WriteStream(lua_State *L)
     LL_FUNC("WriteStream");
     Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == dewarpWriteStream(stream->f, dew));
+    return ll_push_boolean(_fun, L, 0 == dewarpWriteStream(stream->f, dew));
 }
 
 /**

@@ -116,7 +116,7 @@ ReplaceNumber(lua_State *L)
     lua_Number val = lua_tonumberx(L, 3, &isnumber);
     if (!isnumber)
         return ll_push_nil(L);
-    return ll_push_bool(_fun, L, 0 == l_dnaReplaceNumber(da, idx, val));
+    return ll_push_boolean(_fun, L, 0 == l_dnaReplaceNumber(da, idx, val));
 }
 
 /**
@@ -173,7 +173,7 @@ AddNumber(lua_State *L)
     lua_Number val = lua_tonumberx(L, 2, &isnumber);
     if (!isnumber)
         return ll_push_nil(L);
-    return ll_push_bool(_fun, L, 0 == l_dnaAddNumber(da, val));
+    return ll_push_boolean(_fun, L, 0 == l_dnaAddNumber(da, val));
 }
 
 /**
@@ -225,7 +225,7 @@ CopyParameters(lua_State *L)
     LL_FUNC("CopyParameters");
     Dna *dad = ll_check_Dna(_fun, L, 1);
     Dna *das = ll_check_Dna(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == l_dnaCopyParameters(dad, das));
+    return ll_push_boolean(_fun, L, 0 == l_dnaCopyParameters(dad, das));
 }
 
 /**
@@ -241,7 +241,7 @@ Empty(lua_State *L)
 {
     LL_FUNC("Empty");
     Dna *da = ll_check_Dna(_fun, L, 1);
-    return ll_push_bool(_fun, L, 0 == l_dnaEmpty(da));
+    return ll_push_boolean(_fun, L, 0 == l_dnaEmpty(da));
 }
 
 /**
@@ -393,7 +393,7 @@ InsertNumber(lua_State *L)
     lua_Number val = lua_tonumberx(L, 3, &isnumber);
     if (!isnumber)
         return ll_push_nil(L);
-    return ll_push_bool(_fun, L, 0 == l_dnaInsertNumber(da, idx, val) ? TRUE : FALSE);
+    return ll_push_boolean(_fun, L, 0 == l_dnaInsertNumber(da, idx, val) ? TRUE : FALSE);
     return 1;
 }
 
@@ -446,7 +446,7 @@ RemoveNumber(lua_State *L)
     LL_FUNC("RemoveNumber");
     Dna *da = ll_check_Dna(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
-    return ll_push_bool(_fun, L, 0 == l_dnaRemoveNumber(da, idx));
+    return ll_push_boolean(_fun, L, 0 == l_dnaRemoveNumber(da, idx));
 }
 
 /**
@@ -464,7 +464,7 @@ SetCount(lua_State *L)
     LL_FUNC("SetCount");
     Dna *da = ll_check_Dna(_fun, L, 1);
     l_int32 n = ll_check_l_int32(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == l_dnaSetCount(da, n));
+    return ll_push_boolean(_fun, L, 0 == l_dnaSetCount(da, n));
 }
 
 /**
@@ -484,7 +484,7 @@ SetParameters(lua_State *L)
     Dna *da = ll_check_Dna(_fun, L, 1);
     lua_Number startx = ll_check_l_float64(_fun, L, 2);
     lua_Number deltax = ll_check_l_float64(_fun, L, 3);
-    return ll_push_bool(_fun, L, 0 == l_dnaSetParameters(da, startx, deltax));
+    return ll_push_boolean(_fun, L, 0 == l_dnaSetParameters(da, startx, deltax));
 }
 
 /**
@@ -504,7 +504,7 @@ SetValue(lua_State *L)
     Dna *da = ll_check_Dna(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
     l_float64 val = ll_check_l_float64(_fun, L, 3);
-    return ll_push_bool(_fun, L, 0 == l_dnaSetValue(da, idx, val));
+    return ll_push_boolean(_fun, L, 0 == l_dnaSetValue(da, idx, val));
 }
 
 /**
@@ -524,7 +524,7 @@ ShiftValue(lua_State *L)
     Dna *da = ll_check_Dna(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
     l_float64 diff = ll_check_l_float64(_fun, L, 3);
-    return ll_push_bool(_fun, L, 0 == l_dnaShiftValue(da, idx, diff));
+    return ll_push_boolean(_fun, L, 0 == l_dnaShiftValue(da, idx, diff));
 }
 
 /**
@@ -542,7 +542,7 @@ Write(lua_State *L)
     LL_FUNC("Write");
     Dna *da = ll_check_Dna(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == l_dnaWrite(filename, da));
+    return ll_push_boolean(_fun, L, 0 == l_dnaWrite(filename, da));
 }
 
 /**
@@ -560,7 +560,7 @@ WriteStream(lua_State *L)
     LL_FUNC("WriteStream");
     Dna *da = ll_check_Dna(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == l_dnaWriteStream(stream->f, da));
+    return ll_push_boolean(_fun, L, 0 == l_dnaWriteStream(stream->f, da));
 }
 
 /**

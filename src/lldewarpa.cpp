@@ -192,7 +192,7 @@ DestroyDewarp(lua_State *L)
     LL_FUNC("DestroyDewarp");
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
     l_int32 pageno = ll_check_l_int32(_fun, L, 2);
-    ll_push_bool(_fun, L, 0 == dewarpaDestroyDewarp(dewa, pageno));
+    ll_push_boolean(_fun, L, 0 == dewarpaDestroyDewarp(dewa, pageno));
 }
 
 /**
@@ -229,7 +229,7 @@ Info(lua_State *L)
     LL_FUNC("Info");
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == dewarpaInfo(stream->f, dewa));
+    return ll_push_boolean(_fun, L, 0 == dewarpaInfo(stream->f, dewa));
 }
 
 /**
@@ -247,7 +247,7 @@ InsertDewarp(lua_State *L)
     LL_FUNC("InsertDewarp");
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
     Dewarp *dew = ll_check_Dewarp(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == dewarpaInsertDewarp(dewa, dew));
+    return ll_push_boolean(_fun, L, 0 == dewarpaInsertDewarp(dewa, dew));
 }
 
 /**
@@ -267,7 +267,7 @@ InsertRefModels(lua_State *L)
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
     l_int32 notests = ll_check_boolean(_fun, L, 2);
     l_int32 debug = ll_check_boolean(_fun, L, 3);
-    return ll_push_bool(_fun, L, 0 == dewarpaInsertRefModels(dewa, notests, debug));
+    return ll_push_boolean(_fun, L, 0 == dewarpaInsertRefModels(dewa, notests, debug));
 }
 
 /**
@@ -409,7 +409,7 @@ RestoreModels(lua_State *L)
 {
     LL_FUNC("RestoreModels");
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
-    ll_push_bool(_fun, L, 0 == dewarpaRestoreModels(dewa));
+    ll_push_boolean(_fun, L, 0 == dewarpaRestoreModels(dewa));
 }
 
 /**
@@ -427,7 +427,7 @@ SetCheckColumns(lua_State *L)
     LL_FUNC("SetCheckColumns");
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
     l_int32 check_columns = ll_check_l_int32(_fun, L, 2);
-    ll_push_bool(_fun, L, 0 == dewarpaSetCheckColumns(dewa, check_columns));
+    ll_push_boolean(_fun, L, 0 == dewarpaSetCheckColumns(dewa, check_columns));
 }
 
 /**
@@ -455,7 +455,7 @@ SetCurvatures(lua_State *L)
     l_int32 max_edgecurv = ll_check_l_int32(_fun, L, 5);
     l_int32 max_diff_edgecurv = ll_check_l_int32(_fun, L, 6);
     l_int32 max_edgeslope = ll_check_l_int32(_fun, L, 7);
-    ll_push_bool(_fun, L, 0 == dewarpaSetCurvatures(dewa,
+    ll_push_boolean(_fun, L, 0 == dewarpaSetCurvatures(dewa,
                                               max_linecurv, min_diff_linecurv, max_diff_linecurv,
                                               max_edgecurv, max_diff_edgecurv, max_edgeslope));
 }
@@ -475,7 +475,7 @@ SetMaxDistance(lua_State *L)
     LL_FUNC("SetMaxDistance");
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
     l_int32 maxdist = ll_check_l_int32(_fun, L, 2);
-    ll_push_bool(_fun, L, 0 == dewarpaSetMaxDistance(dewa, maxdist));
+    ll_push_boolean(_fun, L, 0 == dewarpaSetMaxDistance(dewa, maxdist));
 }
 
 /**
@@ -495,7 +495,7 @@ SetValidModels(lua_State *L)
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
     l_int32 notests = ll_check_boolean(_fun, L, 2);
     l_int32 debug = ll_check_boolean(_fun, L, 3);
-    ll_push_bool(_fun, L, 0 == dewarpaSetValidModels(dewa, notests, debug));
+    ll_push_boolean(_fun, L, 0 == dewarpaSetValidModels(dewa, notests, debug));
 }
 
 /**
@@ -517,7 +517,7 @@ ShowArrays(lua_State *L)
     l_float32 scalefact = ll_check_l_float32(_fun, L, 2);
     l_int32 first = ll_check_l_int32(_fun, L, 3);
     l_int32 last = ll_check_l_int32(_fun, L, 4);
-    return ll_push_bool(_fun, L, 0 == dewarpaShowArrays(dewa, scalefact, first, last));
+    return ll_push_boolean(_fun, L, 0 == dewarpaShowArrays(dewa, scalefact, first, last));
 }
 
 /**
@@ -533,7 +533,7 @@ StripRefModels(lua_State *L)
 {
     LL_FUNC("StripRefModels");
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
-    return ll_push_bool(_fun, L, 0 == dewarpaStripRefModels(dewa));
+    return ll_push_boolean(_fun, L, 0 == dewarpaStripRefModels(dewa));
 }
 
 /**
@@ -551,7 +551,7 @@ UseBothArrays(lua_State *L)
     LL_FUNC("UseBothArrays");
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
     l_int32 useboth = ll_check_boolean(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == dewarpaUseBothArrays(dewa, useboth));
+    return ll_push_boolean(_fun, L, 0 == dewarpaUseBothArrays(dewa, useboth));
 }
 
 /**
@@ -569,7 +569,7 @@ Write(lua_State *L)
     LL_FUNC("Write");
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == dewarpaWrite(filename, dewa));
+    return ll_push_boolean(_fun, L, 0 == dewarpaWrite(filename, dewa));
 }
 
 /**
@@ -609,7 +609,7 @@ WriteStream(lua_State *L)
     LL_FUNC("WriteStream");
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == dewarpaWriteStream(stream->f, dewa));
+    return ll_push_boolean(_fun, L, 0 == dewarpaWriteStream(stream->f, dewa));
 }
 
 /**

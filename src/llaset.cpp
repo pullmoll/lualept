@@ -135,7 +135,7 @@ Insert(lua_State *L)
         else
             l_asetDelete(aset, key);
     }
-    return ll_push_bool(_fun, L, result);
+    return ll_push_boolean(_fun, L, result);
 }
 
 /**
@@ -228,7 +228,7 @@ Delete(lua_State *L)
     }
     if (result)
         l_asetDelete(aset, key);
-    return ll_push_bool(_fun, L, result);
+    return ll_push_boolean(_fun, L, result);
 }
 
 /**
@@ -266,7 +266,7 @@ Find(lua_State *L)
     if (!result)
         return ll_push_nil(L);
     value = l_asetFind(aset, key);
-    return ll_push_bool(_fun, L, nullptr != value);
+    return ll_push_boolean(_fun, L, nullptr != value);
 }
 
 /**

@@ -40,7 +40,7 @@
 #endif
 #define LOG_REGISTER        1           /*!< set to 1 to log Lua class registration */
 #define LOG_DESTROY         1           /*!< set to 1 to log object destruction */
-#define LOG_PUSH_BOOLEAN    1           /*!< set to 1 to log pushing booleans */
+#define LOG_PUSH_BOOLEAN    0           /*!< set to 1 to log pushing booleans */
 #define LOG_PUSH_INTEGER    1           /*!< set to 1 to log pushing integers */
 #define LOG_PUSH_NUMBER     1           /*!< set to 1 to log pushing numbers */
 #define LOG_PUSH_STRING     1           /*!< set to 1 to log pushing strings */
@@ -83,6 +83,9 @@
 #if defined(HAVE_UNISTD_H)
 #include <unistd.h>
 #endif
+#if defined(HAVE_SDL2)
+#include <SDL.h>
+#endif
 
 #define	LL_AMAP		"Amap"          /*!< Lua class: Amap (key / value pairs) */
 #define	LL_ASET		"Aset"          /*!< Lua class: Aset (key set) */
@@ -115,6 +118,7 @@
 #define	LL_PTA		"Pta"           /*!< Lua class: Pta (array of points, i.e. pair of l_float32) */
 #define	LL_PTAA		"Ptaa"          /*!< Lua class: Ptaa (array of Pta) */
 #define	LL_RBTNODE      "RbtreeNode"    /*!< Lua class: RbtreeNode (Amap and Aset nodes) */
+#define	LL_SARRAY	"Sarray"        /*!< Lua class: Sel */
 #define	LL_SEL		"Sel"           /*!< Lua class: Sel */
 #define	LL_SELA		"Sela"          /*!< Lua class: array of Sel */
 #define	LL_STACK        "Stack"         /*!< Lua class: Stack */
@@ -134,6 +138,7 @@ typedef struct lua_State lua_State;
 extern void die(const char *_fun, lua_State* L, const char *format, ...);
 extern void **ll_udata(const char *_fun, lua_State* L, int arg, const char *tname);
 
+extern int DisplaySDL2(Pix* pix, int x0, int y0, const char* title);
 /**
  * \brief Cast the result of LEPT_MALLOC() to the given type.
  * T is the typename of the result pointer
@@ -257,7 +262,7 @@ extern int          ll_register_class(lua_State *L, const char *name, const luaL
 
 extern int          ll_push_udata(const char *_fun, lua_State *L, const char* name, void *udata);
 extern int          ll_push_nil(lua_State *L);
-extern int          ll_push_bool(const char* _fun, lua_State *L, bool b);
+extern int          ll_push_boolean(const char* _fun, lua_State *L, bool b);
 extern int          ll_push_l_uint8(const char *_fun, lua_State *L, l_uint8 val);
 extern int          ll_push_l_uint16(const char *_fun, lua_State *, l_uint16 val);
 extern int          ll_push_l_int32(const char *_fun, lua_State *L, l_int32 val);
@@ -314,13 +319,13 @@ extern l_float64    ll_check_l_float64_default(const char *_fun, lua_State *L, i
 extern l_int32      ll_check_tbl(const char *_fun, lua_State *L, int arg, l_int32 dflt, const lept_enums_t *tbl, size_t len);
 
 extern l_int32      ll_check_access_storage(const char *_fun, lua_State *L, int arg, l_int32 dflt);
-extern const char * ll_string_access_storage(int flag);
+extern const char * ll_string_access_storage(l_int32 flag);
 
 extern l_int32      ll_check_more_less_clip(const char *_fun, lua_State *L, int arg, l_int32 dflt);
-extern const char * ll_string_more_less_clip(int flag);
+extern const char * ll_string_more_less_clip(l_int32 flag);
 
 extern l_int32      ll_check_encoding(const char *_fun, lua_State *L, int arg, l_int32 dflt);
-extern const char * ll_string_encoding(int flag);
+extern const char * ll_string_encoding(l_int32 flag);
 
 extern l_int32      ll_check_input_format(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_input_format(int format);
@@ -414,6 +419,9 @@ extern const char * ll_string_subflag(l_int32 rotation);
 
 extern l_int32      ll_check_useflag(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_useflag(l_int32 rotation);
+
+extern l_int32      ll_check_negvals(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_negvals(l_int32 rotation);
 
 extern l_int32      ll_check_value_flags(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_value_flags(l_int32 rotation);

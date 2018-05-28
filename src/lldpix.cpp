@@ -150,7 +150,7 @@ AddMultConstant(lua_State *L)
     DPix *dpix = ll_check_DPix(_fun, L, 1);
     l_float64 addc = ll_check_l_float64(_fun, L, 2);
     l_float64 multc = ll_check_l_float64(_fun, L, 3);
-    return ll_push_bool(_fun, L, 0 == dpixAddMultConstant(dpix, addc, multc));
+    return ll_push_boolean(_fun, L, 0 == dpixAddMultConstant(dpix, addc, multc));
 }
 
 /**
@@ -168,7 +168,7 @@ ChangeRefcount(lua_State *L)
     LL_FUNC("ChangeRefcount");
     DPix *dpix = ll_check_DPix(_fun, L, 1);
     l_int32 delta = ll_check_l_int32(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == dpixChangeRefcount(dpix, delta));
+    return ll_push_boolean(_fun, L, 0 == dpixChangeRefcount(dpix, delta));
 }
 
 /**
@@ -221,8 +221,8 @@ ConvertToPix(lua_State *L)
 {
     LL_FUNC("ConvertToPix");
     DPix *dpixs = ll_check_DPix(_fun, L, 1);
-    l_int32 outdepth = ll_check_l_int32(_fun, L, 2);
-    l_int32 negvals = ll_check_boolean_default(_fun, L, 3, FALSE);
+    l_int32 outdepth = ll_check_l_int32_default(_fun, L, 2, 0);
+    l_int32 negvals = ll_check_negvals(_fun, L, 3, L_CLIP_TO_ZERO);
     l_int32 errorflag = ll_check_boolean_default(_fun, L, 4, FALSE);
     Pix *pix = dpixConvertToPix(dpixs, outdepth, negvals, errorflag);
     return ll_push_Pix(_fun, L, pix);
@@ -262,7 +262,7 @@ CopyResolution(lua_State *L)
     LL_FUNC("CopyResolution");
     DPix *dpixd = ll_check_DPix(_fun, L, 1);
     DPix *dpixs = ll_check_DPix(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == dpixCopyResolution(dpixd, dpixs));
+    return ll_push_boolean(_fun, L, 0 == dpixCopyResolution(dpixd, dpixs));
 }
 
 /**
@@ -600,8 +600,7 @@ SetAllArbitrary(lua_State *L)
     LL_FUNC("SetAllArbitrary");
     DPix *dpix = ll_check_DPix(_fun, L, 1);
     l_float64 inval = ll_check_l_float64(_fun, L, 2);
-    l_int32 result = dpixSetAllArbitrary(dpix, inval);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == dpixSetAllArbitrary(dpix, inval));
 }
 
 /**
@@ -649,7 +648,7 @@ SetDimensions(lua_State *L)
     DPix *dpix = ll_check_DPix(_fun, L, 1);
     l_int32 w = ll_check_l_int32(_fun, L, 2);
     l_int32 h = ll_check_l_int32(_fun, L, 3);
-    return ll_push_bool(_fun, L, 0 == dpixSetDimensions(dpix, w, h));
+    return ll_push_boolean(_fun, L, 0 == dpixSetDimensions(dpix, w, h));
 }
 
 /**
@@ -671,7 +670,7 @@ SetPixel(lua_State *L)
     l_int32 x = ll_check_l_int32(_fun, L, 2);
     l_int32 y = ll_check_l_int32(_fun, L, 3);
     l_float64 val = ll_check_l_float64(_fun, L, 4);
-    return ll_push_bool(_fun, L, 0 == dpixSetPixel(dpix, x, y, val));
+    return ll_push_boolean(_fun, L, 0 == dpixSetPixel(dpix, x, y, val));
 }
 
 /**
@@ -691,7 +690,7 @@ SetResolution(lua_State *L)
     DPix *dpix = ll_check_DPix(_fun, L, 1);
     l_int32 xres = ll_check_l_int32(_fun, L, 2);
     l_int32 yres = ll_check_l_int32(_fun, L, 3);
-    return ll_push_bool(_fun, L, 0 == dpixSetResolution(dpix, xres, yres));
+    return ll_push_boolean(_fun, L, 0 == dpixSetResolution(dpix, xres, yres));
 }
 
 /**
@@ -709,7 +708,7 @@ SetWpl(lua_State *L)
     LL_FUNC("SetWpl");
     DPix *dpix = ll_check_DPix(_fun, L, 1);
     l_int32 wpl = ll_check_l_int32(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == dpixSetWpl(dpix, wpl));
+    return ll_push_boolean(_fun, L, 0 == dpixSetWpl(dpix, wpl));
 }
 
 /**

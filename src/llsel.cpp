@@ -549,7 +549,7 @@ SetElement(lua_State *L)
     l_int32 row = ll_check_l_int32(_fun, L, 2);
     l_int32 col = ll_check_l_int32(_fun, L, 3);
     l_int32 type = ll_check_l_int32(_fun, L, 4);
-    return ll_push_bool(_fun, L, 0 == selSetElement(sel, row, col, type));
+    return ll_push_boolean(_fun, L, 0 == selSetElement(sel, row, col, type));
 }
 
 /**
@@ -567,7 +567,7 @@ SetName(lua_State *L)
     LL_FUNC("SetName");
     Sel *sel = ll_check_Sel(_fun, L, 1);
     const char *name = ll_check_string(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == selSetName(sel, name));
+    return ll_push_boolean(_fun, L, 0 == selSetName(sel, name));
 }
 
 /**
@@ -587,7 +587,7 @@ SetOrigin(lua_State *L)
     Sel *sel = ll_check_Sel(_fun, L, 1);
     l_int32 cy = ll_check_l_int32(_fun, L, 2);
     l_int32 cx = ll_check_l_int32(_fun, L, 3);
-    return ll_push_bool(_fun, L, 0 == selSetOrigin(sel, cy, cx));
+    return ll_push_boolean(_fun, L, 0 == selSetOrigin(sel, cy, cx));
 }
 
 /**
@@ -605,7 +605,7 @@ Write(lua_State *L)
     LL_FUNC("Write");
     Sel *sel = ll_check_Sel(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == selWrite(filename, sel));
+    return ll_push_boolean(_fun, L, 0 == selWrite(filename, sel));
 }
 
 /**
@@ -623,7 +623,7 @@ WriteStream(lua_State *L)
     LL_FUNC("WriteStream");
     Sel *sel = ll_check_Sel(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == selWriteStream(stream->f, sel));
+    return ll_push_boolean(_fun, L, 0 == selWriteStream(stream->f, sel));
 }
 
 /**

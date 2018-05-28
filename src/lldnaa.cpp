@@ -113,7 +113,7 @@ ReplaceDna(lua_State *L)
     Dnaa *daa = ll_check_Dnaa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, l_dnaaGetCount(daa));
     L_Dna *da = ll_check_Dna(_fun, L, 3);
-    return ll_push_bool(_fun, L, 0 == l_dnaaReplaceDna(daa, idx, da));
+    return ll_push_boolean(_fun, L, 0 == l_dnaaReplaceDna(daa, idx, da));
 }
 
 /**
@@ -177,7 +177,7 @@ AddDna(lua_State *L)
     Dnaa *daa = ll_check_Dnaa(_fun, L, 1);
     L_Dna *da = ll_check_Dna(_fun, L, 2);
     l_int32 copyflag = ll_check_access_storage(_fun, L, 3, L_COPY);
-    return ll_push_bool(_fun, L, 0 == l_dnaaAddDna(daa, da, copyflag));
+    return ll_push_boolean(_fun, L, 0 == l_dnaaAddDna(daa, da, copyflag));
 }
 
 /**
@@ -366,7 +366,7 @@ Truncate(lua_State *L)
 {
     LL_FUNC("Truncate");
     Dnaa *daa = ll_check_Dnaa(_fun, L, 1);
-    return ll_push_bool(_fun, L, 0 == l_dnaaTruncate(daa));
+    return ll_push_boolean(_fun, L, 0 == l_dnaaTruncate(daa));
 }
 
 /**
@@ -384,7 +384,7 @@ Write(lua_State *L)
     LL_FUNC("Write");
     Dnaa *daa = ll_check_Dnaa(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == l_dnaaWrite(filename, daa));
+    return ll_push_boolean(_fun, L, 0 == l_dnaaWrite(filename, daa));
 }
 
 /**
@@ -402,7 +402,7 @@ WriteStream(lua_State *L)
     LL_FUNC("WriteStream");
     Dnaa *daa = ll_check_Dnaa(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == l_dnaaWriteStream(stream->f, daa));
+    return ll_push_boolean(_fun, L, 0 == l_dnaaWriteStream(stream->f, daa));
 }
 
 /**

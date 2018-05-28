@@ -146,7 +146,7 @@ Insert(lua_State *L)
         result = TRUE;
         break;
     }
-    return ll_push_bool(_fun, L, result);
+    return ll_push_boolean(_fun, L, result);
 }
 
 /**
@@ -247,7 +247,7 @@ Delete(lua_State *L)
         result = TRUE;
         break;
     }
-    return ll_push_bool(_fun, L, result);
+    return ll_push_boolean(_fun, L, result);
 }
 
 /**

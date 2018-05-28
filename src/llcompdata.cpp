@@ -88,7 +88,7 @@ Create(lua_State *L)
 }
 
 /**
- * \brief Printable string for a Sel* (%sel).
+ * \brief Printable string for a CompData* (%cid).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sel* (sel).
  * </pre>
@@ -100,46 +100,46 @@ toString(lua_State *L)
 {
     LL_FUNC("toString");
     char str[256];
-    CompData *cdata = ll_check_CompData(_fun, L, 1);
+    CompData *cid = ll_check_CompData(_fun, L, 1);
     luaL_Buffer B;
 
     luaL_buffinit(L, &B);
-    if (!cdata) {
+    if (!cid) {
         luaL_addstring(&B, "nil");
     } else {
-        snprintf(str, sizeof(str), LL_COMPDATA ": %p\n", reinterpret_cast<void *>(cdata));
+        snprintf(str, sizeof(str), LL_COMPDATA ": %p\n", reinterpret_cast<void *>(cid));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    type          : %s\n", ll_string_encoding(cdata->type));
+        snprintf(str, sizeof(str), "    type          : %s\n", ll_string_encoding(cid->type));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    datacomp      : %p\n", reinterpret_cast<void *>(cdata->datacomp));
+        snprintf(str, sizeof(str), "    datacomp      : %p\n", reinterpret_cast<void *>(cid->datacomp));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    nbytescomp    : %" PRIu64 "\n", static_cast<l_uintptr_t>(cdata->nbytescomp));
+        snprintf(str, sizeof(str), "    nbytescomp    : %" PRIu64 "\n", static_cast<l_uintptr_t>(cid->nbytescomp));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    data85        : %p\n", reinterpret_cast<void *>(cdata->data85));
+        snprintf(str, sizeof(str), "    data85        : %p\n", reinterpret_cast<void *>(cid->data85));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    nbytes85      : %" PRIu64 "\n", static_cast<l_uintptr_t>(cdata->nbytes85));
+        snprintf(str, sizeof(str), "    nbytes85      : %" PRIu64 "\n", static_cast<l_uintptr_t>(cid->nbytes85));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    cmapdata85    : %p\n", reinterpret_cast<void *>(cdata->cmapdata85));
+        snprintf(str, sizeof(str), "    cmapdata85    : %p\n", reinterpret_cast<void *>(cid->cmapdata85));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    cmapdatahex   : %p\n", reinterpret_cast<void *>(cdata->cmapdatahex));
+        snprintf(str, sizeof(str), "    cmapdatahex   : %p\n", reinterpret_cast<void *>(cid->cmapdatahex));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    ncolors       : %d\n", cdata->ncolors);
+        snprintf(str, sizeof(str), "    ncolors       : %d\n", cid->ncolors);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    w             : %d\n", cdata->w);
+        snprintf(str, sizeof(str), "    w             : %d\n", cid->w);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    h             : %d\n", cdata->h);
+        snprintf(str, sizeof(str), "    h             : %d\n", cid->h);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    bps           : %d\n", cdata->bps);
+        snprintf(str, sizeof(str), "    bps           : %d\n", cid->bps);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    spp           : %d\n", cdata->spp);
+        snprintf(str, sizeof(str), "    spp           : %d\n", cid->spp);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    minisblack    : %d\n", cdata->minisblack);
+        snprintf(str, sizeof(str), "    minisblack    : %d\n", cid->minisblack);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    predictor     : %d\n", cdata->predictor);
+        snprintf(str, sizeof(str), "    predictor     : %d\n", cid->predictor);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    nbytes        : %" PRIu64 "\n", static_cast<l_uintptr_t>(cdata->nbytes));
+        snprintf(str, sizeof(str), "    nbytes        : %" PRIu64 "\n", static_cast<l_uintptr_t>(cid->nbytes));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    res           : %d\n", cdata->res);
+        snprintf(str, sizeof(str), "    res           : %d\n", cid->res);
         luaL_addstring(&B, str);
     }
     luaL_pushresult(&B);

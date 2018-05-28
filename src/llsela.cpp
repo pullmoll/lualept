@@ -312,7 +312,7 @@ AddSel(lua_State *L)
     Sel *sel = ll_check_Sel(_fun, L, 2);
     const char *selname = ll_check_string(_fun, L, 3);
     l_int32 copyflag = ll_check_access_storage(_fun, L, 4, L_COPY);
-    return ll_push_bool(_fun, L, 0 == selaAddSel(sela, sel, selname, copyflag));
+    return ll_push_boolean(_fun, L, 0 == selaAddSel(sela, sel, selname, copyflag));
 }
 
 /**
@@ -467,7 +467,7 @@ Write(lua_State *L)
     LL_FUNC("Write");
     Sela *sela = ll_check_Sela(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == selaWrite(filename, sela));
+    return ll_push_boolean(_fun, L, 0 == selaWrite(filename, sela));
 }
 
 /**
@@ -485,7 +485,7 @@ WriteStream(lua_State *L)
     LL_FUNC("WriteStream");
     Sela *sela = ll_check_Sela(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == selaWriteStream(stream->f, sela));
+    return ll_push_boolean(_fun, L, 0 == selaWriteStream(stream->f, sela));
 }
 
 /**

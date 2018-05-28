@@ -111,7 +111,7 @@ AddFPix(lua_State *L)
     FPixa *fpixa = ll_check_FPixa(_fun, L, 1);
     FPix *fpix = ll_check_FPix(_fun, L, 2);
     l_int32 copyflag = ll_check_access_storage(_fun, L, 3, L_COPY);
-    return ll_push_bool(_fun, L, 0 == fpixaAddFPix(fpixa, fpix, copyflag));
+    return ll_push_boolean(_fun, L, 0 == fpixaAddFPix(fpixa, fpix, copyflag));
 }
 
 /**
@@ -129,7 +129,7 @@ ChangeRefcount(lua_State *L)
     LL_FUNC("ChangeRefcount");
     FPixa *fpixa = ll_check_FPixa(_fun, L, 1);
     l_int32 delta = ll_check_l_int32(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == fpixaChangeRefcount(fpixa, delta));
+    return ll_push_boolean(_fun, L, 0 == fpixaChangeRefcount(fpixa, delta));
 }
 
 /**
@@ -358,7 +358,7 @@ SetPixel(lua_State *L)
     l_int32 x = ll_check_l_int32(_fun, L, 3);
     l_int32 y = ll_check_l_int32(_fun, L, 4);
     l_float32 val = ll_check_l_float32(_fun, L, 5);
-    return ll_push_bool(_fun, L, 0 == fpixaSetPixel(fpixa, index, x, y, val));
+    return ll_push_boolean(_fun, L, 0 == fpixaSetPixel(fpixa, index, x, y, val));
 }
 
 /**

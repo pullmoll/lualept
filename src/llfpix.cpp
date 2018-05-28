@@ -224,7 +224,7 @@ AddMultConstant(lua_State *L)
     FPix *fpix = ll_check_FPix(_fun, L, 1);
     l_float32 addc = ll_check_l_float32(_fun, L, 2);
     l_float32 multc = ll_check_l_float32(_fun, L, 3);
-    return ll_push_bool(_fun, L, 0 == fpixAddMultConstant(fpix, addc, multc));
+    return ll_push_boolean(_fun, L, 0 == fpixAddMultConstant(fpix, addc, multc));
 }
 
 /**
@@ -333,7 +333,7 @@ ChangeRefcount(lua_State *L)
     LL_FUNC("ChangeRefcount");
     FPix *fpix = ll_check_FPix(_fun, L, 1);
     l_int32 delta = ll_check_l_int32(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == fpixChangeRefcount(fpix, delta));
+    return ll_push_boolean(_fun, L, 0 == fpixChangeRefcount(fpix, delta));
 }
 
 /**
@@ -375,8 +375,8 @@ ConvertToDPix(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPix* (fpixs).
  * Arg #2 is expected to be a l_int32 (outdepth).
- * Arg #3 is expected to be a l_int32 (negvals).
- * Arg #4 is expected to be a l_int32 (errorflag).
+ * Arg #3 is expected to be a string describing what to do with negative values (negvals).
+ * Arg #4 is expected to be a boolean (errorflag).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 on the Lua stack
@@ -387,7 +387,7 @@ ConvertToPix(lua_State *L)
     LL_FUNC("ConvertToPix");
     FPix *fpixs = ll_check_FPix(_fun, L, 1);
     l_int32 outdepth = ll_check_l_int32(_fun, L, 2);
-    l_int32 negvals = ll_check_boolean_default(_fun, L, 3, FALSE);
+    l_int32 negvals = ll_check_negvals(_fun, L, 3, L_CLIP_TO_ZERO);
     l_int32 errorflag = ll_check_boolean_default(_fun, L, 4, FALSE);
     Pix *pix = fpixConvertToPix(fpixs, outdepth, negvals, errorflag);
     return ll_push_Pix(_fun, L, pix);
@@ -471,7 +471,7 @@ CopyResolution(lua_State *L)
     LL_FUNC("CopyResolution");
     FPix *fpixd = ll_check_FPix(_fun, L, 1);
     FPix *fpixs = ll_check_FPix(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == fpixCopyResolution(fpixd, fpixs));
+    return ll_push_boolean(_fun, L, 0 == fpixCopyResolution(fpixd, fpixs));
 }
 
 /**
@@ -777,7 +777,7 @@ PrintStream(lua_State *L)
     FPix *fpix = ll_check_FPix(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
     l_int32 factor = ll_check_l_int32(_fun, L, 3);
-    return ll_push_bool(_fun, L, 0 == fpixPrintStream(stream->f, fpix, factor));
+    return ll_push_boolean(_fun, L, 0 == fpixPrintStream(stream->f, fpix, factor));
 }
 
 /**
@@ -854,7 +854,7 @@ Rasterop(lua_State *L)
     FPix *fpixs = ll_check_FPix(_fun, L, 6);
     l_int32 sx = ll_check_l_int32(_fun, L, 7);
     l_int32 sy = ll_check_l_int32(_fun, L, 8);
-    return ll_push_bool(_fun, L, 0 == fpixRasterop(fpixd, dx, dy, dw, dh, fpixs, sx, sy));
+    return ll_push_boolean(_fun, L, 0 == fpixRasterop(fpixd, dx, dy, dw, dh, fpixs, sx, sy));
 }
 
 /**
@@ -971,7 +971,7 @@ ResizeImageData(lua_State *L)
     LL_FUNC("ResizeImageData");
     FPix *fpixd = ll_check_FPix(_fun, L, 1);
     FPix *fpixs = ll_check_FPix(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == fpixResizeImageData(fpixd, fpixs));
+    return ll_push_boolean(_fun, L, 0 == fpixResizeImageData(fpixd, fpixs));
 }
 
 /**
@@ -1065,7 +1065,7 @@ SetAllArbitrary(lua_State *L)
     LL_FUNC("SetAllArbitrary");
     FPix *fpix = ll_check_FPix(_fun, L, 1);
     l_float32 inval = ll_check_l_float32(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == fpixSetAllArbitrary(fpix, inval));
+    return ll_push_boolean(_fun, L, 0 == fpixSetAllArbitrary(fpix, inval));
 }
 
 /**
@@ -1089,7 +1089,7 @@ SetData(lua_State *L)
     data = ll_calloc<l_float32>(_fun, L, h * wpl);
     if (!ll_unpack_Farray_2d(_fun, L, 2, data, wpl, h))
         return ll_push_nil(L);
-    ll_push_bool(_fun, L, 0 == fpixSetData(fpix, data));
+    ll_push_boolean(_fun, L, 0 == fpixSetData(fpix, data));
     ll_free(data);
     return 1;
 }
@@ -1111,7 +1111,7 @@ SetDimensions(lua_State *L)
     FPix *fpix = ll_check_FPix(_fun, L, 1);
     l_int32 w = ll_check_l_int32(_fun, L, 2);
     l_int32 h = ll_check_l_int32(_fun, L, 3);
-    return ll_push_bool(_fun, L, 0 == fpixSetDimensions(fpix, w, h));
+    return ll_push_boolean(_fun, L, 0 == fpixSetDimensions(fpix, w, h));
 }
 
 /**
@@ -1133,7 +1133,7 @@ SetPixel(lua_State *L)
     l_int32 x = ll_check_l_int32(_fun, L, 2);
     l_int32 y = ll_check_l_int32(_fun, L, 3);
     l_float32 val = ll_check_l_float32(_fun, L, 4);
-    return ll_push_bool(_fun, L, 0 == fpixSetPixel(fpix, x, y, val));
+    return ll_push_boolean(_fun, L, 0 == fpixSetPixel(fpix, x, y, val));
 }
 
 /**
@@ -1153,7 +1153,7 @@ SetResolution(lua_State *L)
     FPix *fpix = ll_check_FPix(_fun, L, 1);
     l_int32 xres = ll_check_l_int32(_fun, L, 2);
     l_int32 yres = ll_check_l_int32(_fun, L, 3);
-    return ll_push_bool(_fun, L, 0 == fpixSetResolution(fpix, xres, yres));
+    return ll_push_boolean(_fun, L, 0 == fpixSetResolution(fpix, xres, yres));
 }
 
 /**
@@ -1171,7 +1171,7 @@ SetWpl(lua_State *L)
     LL_FUNC("SetWpl");
     FPix *fpix = ll_check_FPix(_fun, L, 1);
     l_int32 wpl = ll_check_l_int32(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == fpixSetWpl(fpix, wpl));
+    return ll_push_boolean(_fun, L, 0 == fpixSetWpl(fpix, wpl));
 }
 
 /**
@@ -1208,7 +1208,7 @@ Write(lua_State *L)
     LL_FUNC("Write");
     FPix *fpix = ll_check_FPix(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == fpixWrite(filename, fpix));
+    return ll_push_boolean(_fun, L, 0 == fpixWrite(filename, fpix));
 }
 
 /**

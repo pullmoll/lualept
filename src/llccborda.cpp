@@ -111,7 +111,7 @@ AddCcb(lua_State *L)
     LL_FUNC("AddCcb");
     CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
     CCBord *ccb = ll_check_CCBord(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == ccbaAddCcb(ccba, ccb));
+    return ll_push_boolean(_fun, L, 0 == ccbaAddCcb(ccba, ccb));
 }
 
 /**
@@ -195,7 +195,7 @@ GenerateGlobalLocs(lua_State *L)
 {
     LL_FUNC("GenerateGlobalLocs");
     CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
-    return ll_push_bool(_fun, L, 0 == ccbaGenerateGlobalLocs(ccba));
+    return ll_push_boolean(_fun, L, 0 == ccbaGenerateGlobalLocs(ccba));
 }
 
 /**
@@ -213,7 +213,7 @@ GenerateSPGlobalLocs(lua_State *L)
     LL_FUNC("GenerateSPGlobalLocs");
     CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
     l_int32 ptsflag = ll_check_l_int32(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == ccbaGenerateSPGlobalLocs(ccba, ptsflag));
+    return ll_push_boolean(_fun, L, 0 == ccbaGenerateSPGlobalLocs(ccba, ptsflag));
 }
 
 /**
@@ -284,7 +284,7 @@ StepChainsToPixCoords(lua_State *L)
     LL_FUNC("StepChainsToPixCoords");
     CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
     l_int32 coordtype = ll_check_l_int32(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == ccbaStepChainsToPixCoords(ccba, coordtype));
+    return ll_push_boolean(_fun, L, 0 == ccbaStepChainsToPixCoords(ccba, coordtype));
 }
 
 /**
@@ -302,7 +302,7 @@ Write(lua_State *L)
     LL_FUNC("Write");
     CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == ccbaWrite(filename, ccba));
+    return ll_push_boolean(_fun, L, 0 == ccbaWrite(filename, ccba));
 }
 
 /**
@@ -320,7 +320,7 @@ WriteSVG(lua_State *L)
     LL_FUNC("WriteSVG");
     CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == ccbaWriteSVG(filename, ccba));
+    return ll_push_boolean(_fun, L, 0 == ccbaWriteSVG(filename, ccba));
 }
 
 /**
@@ -374,7 +374,7 @@ GenerateSinglePath(lua_State *L)
 {
     LL_FUNC("GenerateSinglePath");
     CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
-    return ll_push_bool(_fun, L, 0 == ccbaGenerateSinglePath(ccba));
+    return ll_push_boolean(_fun, L, 0 == ccbaGenerateSinglePath(ccba));
 }
 
 /**
@@ -390,7 +390,7 @@ GenerateStepChains(lua_State *L)
 {
     LL_FUNC("GenerateStepChains");
     CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
-    return ll_push_bool(_fun, L, 0 == ccbaGenerateStepChains(ccba));
+    return ll_push_boolean(_fun, L, 0 == ccbaGenerateStepChains(ccba));
 }
 /**
  * \brief Check Lua stack at index (%arg) for udata of class LL_CCBORDA.

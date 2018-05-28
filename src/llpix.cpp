@@ -51,7 +51,6 @@ static l_int32 tab8[256];
 /** Define a function's name (_fun) with prefix LL_PIX */
 #define LL_FUNC(x) FUNC(LL_PIX "." x)
 
-
 /**
  * \brief Destroy a Pix*.
  * <pre>
@@ -613,7 +612,7 @@ AddConstantGray(lua_State *L)
     LL_FUNC("AddConstantGray");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 val = ll_check_l_int32(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == pixAddConstantGray(pixs, val));
+    return ll_push_boolean(_fun, L, 0 == pixAddConstantGray(pixs, val));
 }
 
 /**
@@ -2294,7 +2293,7 @@ BlendInRect(lua_State *L)
     Box *box = ll_check_Box(_fun, L, 2);
     l_uint32 val = ll_check_l_uint32(_fun, L, 3);
     l_float32 fract = ll_check_l_float32(_fun, L, 4);
-    return ll_push_bool(_fun, L, 0 == pixBlendInRect(pix, box, val, fract));
+    return ll_push_boolean(_fun, L, 0 == pixBlendInRect(pix, box, val, fract));
 }
 
 /**
@@ -2718,7 +2717,7 @@ ClearAll(lua_State *L)
 {
     LL_FUNC("ClearAll");
     Pix *pix = ll_check_Pix(_fun, L, 1);
-    return ll_push_bool(_fun, L, 0 == pixClearAll(pix));
+    return ll_push_boolean(_fun, L, 0 == pixClearAll(pix));
 }
 
 /**
@@ -2736,7 +2735,7 @@ ClearInRect(lua_State *L)
     LL_FUNC("ClearInRect");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == pixClearInRect(pix, box));
+    return ll_push_boolean(_fun, L, 0 == pixClearInRect(pix, box));
 }
 
 /**
@@ -2756,7 +2755,7 @@ ClearPixel(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 x = ll_check_l_int32(_fun, L, 2);
     l_int32 y = ll_check_l_int32(_fun, L, 3);
-    return ll_push_bool(_fun, L, 0 == pixClearPixel(pix, x, y));
+    return ll_push_boolean(_fun, L, 0 == pixClearPixel(pix, x, y));
 }
 
 /**
@@ -3698,7 +3697,7 @@ CombineMasked(lua_State *L)
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     Pix *pixm = ll_check_Pix(_fun, L, 3);
-    return ll_push_bool(_fun, L, 0 == pixCombineMasked(pixd, pixs, pixm));
+    return ll_push_boolean(_fun, L, 0 == pixCombineMasked(pixd, pixs, pixm));
 }
 
 /**
@@ -3722,7 +3721,7 @@ CombineMaskedGeneral(lua_State *L)
     Pix *pixm = ll_check_Pix(_fun, L, 3);
     l_int32 x = ll_check_l_int32(_fun, L, 4);
     l_int32 y = ll_check_l_int32(_fun, L, 5);
-    return ll_push_bool(_fun, L, 0 == pixCombineMaskedGeneral(pixd, pixs, pixm, x, y));
+    return ll_push_boolean(_fun, L, 0 == pixCombineMaskedGeneral(pixd, pixs, pixm, x, y));
 }
 
 /**
@@ -5338,7 +5337,7 @@ ConvertToFPix(lua_State *L)
  * Arg #6 is expected to be a l_int32 (y).
  * Arg #7 is expected to be a l_int32 (res).
  * Arg #8 is expected to be a string (title).
- * Arg #10 is expected to be a l_int32 (position).
+ * Arg #9 is expected to be a l_int32 (position).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -5348,15 +5347,15 @@ ConvertToPdf(lua_State *L)
 {
     LL_FUNC("ConvertToPdf");
     Pix *pix = ll_check_Pix(_fun, L, 1);
-    l_int32 type = ll_check_l_int32(_fun, L, 2);
+    l_int32 type = ll_check_compression(_fun, L, 2, IFF_DEFAULT);
     l_int32 quality = ll_check_l_int32(_fun, L, 3);
     const char *fileout = ll_check_string(_fun, L, 4);
     l_int32 x = ll_check_l_int32(_fun, L, 5);
     l_int32 y = ll_check_l_int32(_fun, L, 6);
     l_int32 res = ll_check_l_int32(_fun, L, 7);
     const char *title = ll_check_string(_fun, L, 8);
-    L_PDF_DATA *lpd = nullptr;
-    l_int32 position = ll_check_l_int32(_fun, L, 10);
+    l_int32 position = ll_check_l_int32(_fun, L, 9);
+    PdfData *lpd = nullptr;
     if (pixConvertToPdf(pix, type, quality, fileout, x, y, res, title, &lpd, position))
         return ll_push_nil(L);
     ll_push_PdfData(_fun, L, lpd);
@@ -5376,7 +5375,7 @@ ConvertToPdf(lua_State *L)
  * Arg #10 is expected to be a l_int32 (position).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 2 lstring (%data, %nbytes) and PdfData* (%lpd) on the Lua stack
  */
 static int
 ConvertToPdfData(lua_State *L)
@@ -5385,19 +5384,20 @@ ConvertToPdfData(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 type = ll_check_l_int32(_fun, L, 2);
     l_int32 quality = ll_check_l_int32(_fun, L, 3);
-    l_uint8 *data = 0;
-    size_t nbytes = 0;
     l_int32 x = ll_check_l_int32(_fun, L, 6);
     l_int32 y = ll_check_l_int32(_fun, L, 7);
     l_int32 res = ll_check_l_int32(_fun, L, 8);
     const char *title = ll_check_string(_fun, L, 9);
     l_int32 position = ll_check_l_int32(_fun, L, 10);
+    l_uint8 *data = nullptr;
+    size_t nbytes = 0;
     PdfData *lpd = nullptr;
     if (pixConvertToPdfData(pix, type, quality, &data, &nbytes, x, y, res, title, &lpd, position))
         return ll_push_nil(L);
     ll_push_lstring(_fun, L, reinterpret_cast<const char *>(data), nbytes);
+    ll_free(data);
     ll_push_PdfData(_fun, L, lpd);
-    return 3;
+    return 2;
 }
 
 /**
@@ -5682,7 +5682,7 @@ CopyColormap(lua_State *L)
     LL_FUNC("CopyColormap");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == pixCopyColormap(pixd, pixs));
+    return ll_push_boolean(_fun, L, 0 == pixCopyColormap(pixd, pixs));
 }
 
 /**
@@ -5700,7 +5700,7 @@ CopyDimensions(lua_State *L)
     LL_FUNC("CopyDimensions");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == pixCopyDimensions(pixd, pixs));
+    return ll_push_boolean(_fun, L, 0 == pixCopyDimensions(pixd, pixs));
 }
 
 /**
@@ -5718,7 +5718,7 @@ CopyInputFormat(lua_State *L)
     LL_FUNC("CopyInputFormat");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == pixCopyInputFormat(pixd, pixs));
+    return ll_push_boolean(_fun, L, 0 == pixCopyInputFormat(pixd, pixs));
 }
 
 /**
@@ -5738,7 +5738,7 @@ CopyRGBComponent(lua_State *L)
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     l_int32 comp = ll_check_component(_fun, L, 3, L_ALPHA_CHANNEL);
-    return ll_push_bool(_fun, L, 0 == pixCopyRGBComponent(pixd, pixs, comp));
+    return ll_push_boolean(_fun, L, 0 == pixCopyRGBComponent(pixd, pixs, comp));
 }
 
 /**
@@ -5756,7 +5756,7 @@ CopyResolution(lua_State *L)
     LL_FUNC("CopyResolution");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == pixCopyResolution(pixd, pixs));
+    return ll_push_boolean(_fun, L, 0 == pixCopyResolution(pixd, pixs));
 }
 
 /**
@@ -5774,7 +5774,7 @@ CopySpp(lua_State *L)
     LL_FUNC("CopySpp");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == pixCopySpp(pixd, pixs));
+    return ll_push_boolean(_fun, L, 0 == pixCopySpp(pixd, pixs));
 }
 
 /**
@@ -5792,7 +5792,7 @@ CopyText(lua_State *L)
     LL_FUNC("CopyText");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == pixCopyText(pixd, pixs));
+    return ll_push_boolean(_fun, L, 0 == pixCopyText(pixd, pixs));
 }
 
 /**
@@ -6665,7 +6665,7 @@ DestroyColormap(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     PixColormap* colormap = ll_take_PixColormap(_fun, L, 2);
     (void)colormap;
-    return ll_push_bool(_fun, L, 0 == pixDestroyColormap(pix));
+    return ll_push_boolean(_fun, L, 0 == pixDestroyColormap(pix));
 }
 
 /**
@@ -6860,10 +6860,16 @@ static int
 Display(lua_State *L)
 {
     LL_FUNC("Display");
+    char title[256];
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 x = ll_check_l_int32(_fun, L, 2);
     l_int32 y = ll_check_l_int32(_fun, L, 3);
-    ll_push_bool(_fun, L, 0 == pixDisplay(pixs, x, y));
+    snprintf(title, sizeof(title), LL_PIX "*: %p", reinterpret_cast<void *>(pixs));
+#if defined(HAVE_SDL2)
+    return ll_push_boolean(_fun, L, DisplaySDL2(pixs, x, y, title));
+#else
+    return ll_push_boolean(_fun, L, 0 == pixDisplay(pixs, x, y));
+#endif
 }
 
 /**
@@ -7104,7 +7110,12 @@ DisplayWithTitle(lua_State *L)
     l_int32 y = ll_check_l_int32(_fun, L, 3);
     const char *title = ll_check_string(_fun, L, 4);
     l_int32 dispflag = ll_check_boolean(_fun, L, 5);
-    return ll_push_bool(_fun, L, 0 == pixDisplayWithTitle(pixs, x, y, title, dispflag));
+#if defined(HAVE_SDL2)
+    UNUSED(dispflag);
+    return ll_push_boolean(_fun, L, DisplaySDL2(pixs, x, y, title));
+#else
+    return ll_push_boolean(_fun, L, 0 == pixDisplayWithTitle(pixs, x, y, title, dispflag));
+#endif
 }
 
 /**
@@ -9221,7 +9232,7 @@ FlipPixel(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 x = ll_check_l_int32(_fun, L, 2);
     l_int32 y = ll_check_l_int32(_fun, L, 3);
-    return ll_push_bool(_fun, L, 0 == pixFlipPixel(pix, x, y));
+    return ll_push_boolean(_fun, L, 0 == pixFlipPixel(pix, x, y));
 }
 
 /**
@@ -14272,7 +14283,7 @@ PaintSelfThroughMask(lua_State *L)
     l_int32 tilesize = ll_check_l_int32(_fun, L, 7);
     l_int32 ntiles = ll_check_l_int32(_fun, L, 8);
     l_int32 distblend = ll_check_l_int32_default(_fun, L, 9, 0);
-    return ll_push_bool(_fun, L, 0 == pixPaintSelfThroughMask(pixd, pixm, x, y, searchdir, mindist, tilesize, ntiles, distblend));
+    return ll_push_boolean(_fun, L, 0 == pixPaintSelfThroughMask(pixd, pixm, x, y, searchdir, mindist, tilesize, ntiles, distblend));
 }
 
 /**
@@ -14296,7 +14307,7 @@ PaintThroughMask(lua_State *L)
     l_int32 x = ll_check_l_int32(_fun, L, 3);
     l_int32 y = ll_check_l_int32(_fun, L, 4);
     l_uint32 val = ll_check_l_uint32(_fun, L, 5);
-    return ll_push_bool(_fun, L, 0 == pixPaintThroughMask(pixd, pixm, x, y, val));
+    return ll_push_boolean(_fun, L, 0 == pixPaintThroughMask(pixd, pixm, x, y, val));
 }
 
 /**
@@ -14362,7 +14373,7 @@ PrintStreamInfo(lua_State *L)
     Pix *pix= ll_check_Pix(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
     snprintf(str, sizeof(str), "%p\n", reinterpret_cast<void *>(pix));
-    return ll_push_bool(_fun, L, 0 == pixPrintStreamInfo(stream->f, pix, str));
+    return ll_push_boolean(_fun, L, 0 == pixPrintStreamInfo(stream->f, pix, str));
 }
 
 /**
@@ -16929,7 +16940,7 @@ ResizeImageData(lua_State *L)
     LL_FUNC("ResizeImageData");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == pixResizeImageData(pixd, pixs));
+    return ll_push_boolean(_fun, L, 0 == pixResizeImageData(pixd, pixs));
 }
 
 /**
@@ -18305,7 +18316,7 @@ ScaleResolution(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_float32 xscale = ll_check_l_float32(_fun, L, 2);
     l_float32 yscale = ll_check_l_float32(_fun, L, 3);
-    return ll_push_bool(_fun, L, 0 == pixScaleResolution(pix, xscale, yscale));
+    return ll_push_boolean(_fun, L, 0 == pixScaleResolution(pix, xscale, yscale));
 }
 
 /**
@@ -19310,7 +19321,7 @@ SetAll(lua_State *L)
 {
     LL_FUNC("SetAll");
     Pix *pix = ll_check_Pix(_fun, L, 1);
-    return ll_push_bool(_fun, L, 0 == pixSetAll(pix));
+    return ll_push_boolean(_fun, L, 0 == pixSetAll(pix));
 }
 
 /**
@@ -19328,7 +19339,7 @@ SetAllArbitrary(lua_State *L)
     LL_FUNC("SetAllArbitrary");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_uint32 val = ll_check_l_uint32(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == pixSetAllArbitrary(pix, val));
+    return ll_push_boolean(_fun, L, 0 == pixSetAllArbitrary(pix, val));
 }
 
 /**
@@ -19346,7 +19357,7 @@ SetAllGray(lua_State *L)
     LL_FUNC("SetAllGray");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 grayval = ll_check_l_int32(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == pixSetAllGray(pix, grayval));
+    return ll_push_boolean(_fun, L, 0 == pixSetAllGray(pix, grayval));
 }
 
 /**
@@ -19379,7 +19390,7 @@ SetBlack(lua_State *L)
 {
     LL_FUNC("SetBlack");
     Pix *pix = ll_check_Pix(_fun, L, 1);
-    return ll_push_bool(_fun, L, 0 == pixSetBlackOrWhite(pix, L_SET_BLACK));
+    return ll_push_boolean(_fun, L, 0 == pixSetBlackOrWhite(pix, L_SET_BLACK));
 }
 
 /**
@@ -19397,7 +19408,7 @@ SetBlackOrWhite(lua_State *L)
     LL_FUNC("SetBlackOrWhite");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 op = ll_check_blackwhite(_fun, L, 2, L_SET_BLACK);
-    return ll_push_bool(_fun, L, 0 == pixSetBlackOrWhite(pix, op));
+    return ll_push_boolean(_fun, L, 0 == pixSetBlackOrWhite(pix, op));
 }
 
 /**
@@ -19438,7 +19449,7 @@ SetBorderRingVal(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 dist = ll_check_l_int32(_fun, L, 2);
     l_uint32 val = ll_check_l_uint32(_fun, L, 3);
-    return ll_push_bool(_fun, L, 0 == pixSetBorderRingVal(pix, dist, val));
+    return ll_push_boolean(_fun, L, 0 == pixSetBorderRingVal(pix, dist, val));
 }
 
 /**
@@ -19464,7 +19475,7 @@ SetBorderVal(lua_State *L)
     l_int32 top = ll_check_l_int32(_fun, L, 4);
     l_int32 bottom = ll_check_l_int32(_fun, L, 5);
     l_uint32 val = ll_check_l_uint32(_fun, L, 6);
-    return ll_push_bool(_fun, L, 0 == pixSetBorderVal(pix, left, right, top, bottom, val));
+    return ll_push_boolean(_fun, L, 0 == pixSetBorderVal(pix, left, right, top, bottom, val));
 }
 
 /**
@@ -19504,7 +19515,7 @@ SetColormap(lua_State *L)
     LL_FUNC("SetColormap");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     PixColormap* colormap = ll_take_PixColormap(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == pixSetColormap(pix, colormap));
+    return ll_push_boolean(_fun, L, 0 == pixSetColormap(pix, colormap));
 }
 
 /**
@@ -19524,7 +19535,7 @@ SetComponentArbitrary(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 comp = ll_check_component(_fun, L, 2, 0);
     l_int32 val = ll_check_l_int32(_fun, L, 3);
-    return ll_push_bool(_fun, L, 0 == pixSetComponentArbitrary(pix, comp, val));
+    return ll_push_boolean(_fun, L, 0 == pixSetComponentArbitrary(pix, comp, val));
 }
 
 /**
@@ -19549,7 +19560,7 @@ SetData(lua_State *L)
     memcpy(data, pixGetData(pix), size);
     data = ll_unpack_Uarray_2d(_fun, L, 2, data, wpl, h);
     /* Do not free(data); it is owned by the Pix* now */
-    return ll_push_bool(_fun, L, 0 == pixSetData(pix, data));
+    return ll_push_boolean(_fun, L, 0 == pixSetData(pix, data));
 }
 
 /**
@@ -19566,7 +19577,7 @@ SetDepth(lua_State *L)
     LL_FUNC("SetDepth");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 depth = ll_check_l_int32_default(_fun, L, 2, pixGetDepth(pix));
-    return ll_push_bool(_fun, L, 0 == pixSetDepth(pix, depth));
+    return ll_push_boolean(_fun, L, 0 == pixSetDepth(pix, depth));
 }
 
 /**
@@ -19588,7 +19599,7 @@ SetDimensions(lua_State *L)
     l_int32 width = ll_check_l_int32_default(_fun, L, 2, 0);
     l_int32 height = ll_check_l_int32_default(_fun, L, 3, 0);
     l_int32 depth = ll_check_l_int32_default(_fun, L, 4, 1);
-    return ll_push_bool(_fun, L, 0 == pixSetDimensions(pix, width, height, depth));
+    return ll_push_boolean(_fun, L, 0 == pixSetDimensions(pix, width, height, depth));
 }
 
 /**
@@ -19605,7 +19616,7 @@ SetHeight(lua_State *L)
     LL_FUNC("SetHeight");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 height = ll_check_l_int32_default(_fun, L, 2, pixGetHeight(pix));
-    return ll_push_bool(_fun, L, 0 == pixSetHeight(pix, height));
+    return ll_push_boolean(_fun, L, 0 == pixSetHeight(pix, height));
 }
 
 /**
@@ -19623,7 +19634,7 @@ SetInRect(lua_State *L)
     LL_FUNC("SetInRect");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == pixSetInRect(pix, box));
+    return ll_push_boolean(_fun, L, 0 == pixSetInRect(pix, box));
 }
 
 /**
@@ -19643,7 +19654,7 @@ SetInRectArbitrary(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
     l_uint32 val = ll_check_l_uint32(_fun, L, 3);
-    return ll_push_bool(_fun, L, 0 == pixSetInRectArbitrary(pix, box, val));
+    return ll_push_boolean(_fun, L, 0 == pixSetInRectArbitrary(pix, box, val));
 }
 
 /**
@@ -19661,7 +19672,7 @@ SetInputFormat(lua_State *L)
     LL_FUNC("SetInputFormat");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 format = ll_check_input_format(_fun, L, 2, IFF_UNKNOWN);
-    return ll_push_bool(_fun, L, 0 == pixSetInputFormat(pix, format));
+    return ll_push_boolean(_fun, L, 0 == pixSetInputFormat(pix, format));
 }
 
 /**
@@ -19702,7 +19713,7 @@ SetMasked(lua_State *L)
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixm = ll_check_Pix(_fun, L, 2);
     l_uint32 val = ll_check_l_uint32(_fun, L, 3);
-    return ll_push_bool(_fun, L, 0 == pixSetMasked(pixd, pixm, val));
+    return ll_push_boolean(_fun, L, 0 == pixSetMasked(pixd, pixm, val));
 }
 
 /**
@@ -19755,7 +19766,7 @@ SetMaskedGeneral(lua_State *L)
     l_uint32 val = ll_check_l_uint32(_fun, L, 3);
     l_int32 x = ll_check_l_int32(_fun, L, 4);
     l_int32 y = ll_check_l_int32(_fun, L, 5);
-    return ll_push_bool(_fun, L, 0 == pixSetMaskedGeneral(pixd, pixm, val, x, y));
+    return ll_push_boolean(_fun, L, 0 == pixSetMaskedGeneral(pixd, pixm, val, x, y));
 }
 
 /**
@@ -19779,7 +19790,7 @@ SetMirroredBorder(lua_State *L)
     l_int32 right = ll_check_l_int32(_fun, L, 3);
     l_int32 top = ll_check_l_int32(_fun, L, 4);
     l_int32 bottom = ll_check_l_int32(_fun, L, 5);
-    return ll_push_bool(_fun, L, 0 == pixSetMirroredBorder(pix, left, right, top, bottom));
+    return ll_push_boolean(_fun, L, 0 == pixSetMirroredBorder(pix, left, right, top, bottom));
 }
 
 /**
@@ -19805,7 +19816,7 @@ SetOrClearBorder(lua_State *L)
     l_int32 top = ll_check_l_int32(_fun, L, 4);
     l_int32 bottom = ll_check_l_int32(_fun, L, 5);
     l_int32 op = ll_check_rasterop(_fun, L, 6, PIX_CLR);
-    return ll_push_bool(_fun, L, 0 == pixSetOrClearBorder(pix, left, right, top, bottom, op));
+    return ll_push_boolean(_fun, L, 0 == pixSetOrClearBorder(pix, left, right, top, bottom, op));
 }
 
 /**
@@ -19823,7 +19834,7 @@ SetPadBits(lua_State *L)
     LL_FUNC("SetPadBits");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 val = ll_check_l_int32(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == pixSetPadBits(pix, val));
+    return ll_push_boolean(_fun, L, 0 == pixSetPadBits(pix, val));
 }
 
 /**
@@ -19845,7 +19856,7 @@ SetPadBitsBand(lua_State *L)
     l_int32 by = ll_check_l_int32(_fun, L, 2);
     l_int32 bh = ll_check_l_int32(_fun, L, 3);
     l_int32 val = ll_check_l_int32(_fun, L, 4);
-    return ll_push_bool(_fun, L, 0 == pixSetPadBitsBand(pix, by, bh, val));
+    return ll_push_boolean(_fun, L, 0 == pixSetPadBitsBand(pix, by, bh, val));
 }
 
 /**
@@ -19867,7 +19878,7 @@ SetPixel(lua_State *L)
     l_int32 x = ll_check_l_int32(_fun, L, 2);
     l_int32 y = ll_check_l_int32(_fun, L, 3);
     l_uint32 val = ll_check_l_uint32(_fun, L, 4) - 1;
-    return ll_push_bool(_fun, L, 0 == pixSetPixel(pix, x, y, val));
+    return ll_push_boolean(_fun, L, 0 == pixSetPixel(pix, x, y, val));
 }
 
 /**
@@ -19903,7 +19914,7 @@ SetPixelColumn(lua_State *L)
     LEPT_FREE(tblvect);
     result = pixSetPixelColumn(pixd, col, colvect);
     LEPT_FREE(colvect);
-    return ll_push_bool(_fun, L, 0 == result);
+    return ll_push_boolean(_fun, L, 0 == result);
 }
 
 /**
@@ -19923,7 +19934,7 @@ SetRGBComponent(lua_State *L)
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     l_int32 comp = ll_check_component(_fun, L, 3, L_ALPHA_CHANNEL);
-    return ll_push_bool(_fun, L, 0 == pixSetRGBComponent(pixd, pixs, comp));
+    return ll_push_boolean(_fun, L, 0 == pixSetRGBComponent(pixd, pixs, comp));
 }
 
 /**
@@ -19949,7 +19960,7 @@ SetRGBPixel(lua_State *L)
     l_int32 rval = ll_check_l_int32(_fun, L, 4);
     l_int32 gval = ll_check_l_int32(_fun, L, 5);
     l_int32 bval = ll_check_l_int32(_fun, L, 6);
-    return ll_push_bool(_fun, L, 0 == pixSetRGBPixel(pix, x, y, rval, gval, bval));
+    return ll_push_boolean(_fun, L, 0 == pixSetRGBPixel(pix, x, y, rval, gval, bval));
 }
 
 /**
@@ -19969,7 +19980,7 @@ SetResolution(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 xres = ll_check_l_int32_default(_fun, L, 2, 300);
     l_int32 yres = ll_check_l_int32_default(_fun, L, 3, xres);
-    return ll_push_bool(_fun, L, 0 == pixSetResolution(pix, xres, yres));
+    return ll_push_boolean(_fun, L, 0 == pixSetResolution(pix, xres, yres));
 }
 
 /**
@@ -20045,7 +20056,7 @@ SetSpecial(lua_State *L)
     LL_FUNC("SetSpecial");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 special = ll_check_l_int32(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == pixSetSpecial(pix, special));
+    return ll_push_boolean(_fun, L, 0 == pixSetSpecial(pix, special));
 }
 
 /**
@@ -20062,7 +20073,7 @@ SetSpp(lua_State *L)
     LL_FUNC("SetSpp");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 spp = ll_check_l_int32_default(_fun, L, 2, pixGetSpp(pix));
-    return ll_push_bool(_fun, L, 0 == pixSetSpp(pix, spp));
+    return ll_push_boolean(_fun, L, 0 == pixSetSpp(pix, spp));
 }
 
 /**
@@ -20205,7 +20216,7 @@ SetWhite(lua_State *L)
 {
     LL_FUNC("SetWhite");
     Pix *pix = ll_check_Pix(_fun, L, 1);
-    return ll_push_bool(_fun, L, 0 == pixSetBlackOrWhite(pix, L_SET_WHITE));
+    return ll_push_boolean(_fun, L, 0 == pixSetBlackOrWhite(pix, L_SET_WHITE));
 }
 
 /**
@@ -20222,7 +20233,7 @@ SetWidth(lua_State *L)
     LL_FUNC("SetWidth");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 width = ll_check_l_int32_default(_fun, L, 2, pixGetWidth(pix));
-    return ll_push_bool(_fun, L, 0 == pixSetWidth(pix, width));
+    return ll_push_boolean(_fun, L, 0 == pixSetWidth(pix, width));
 }
 
 /**
@@ -20239,7 +20250,7 @@ SetWpl(lua_State *L)
     LL_FUNC("SetWpl");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 wpl = ll_check_l_int32_default(_fun, L, 2, pixGetWpl(pix));
-    return ll_push_bool(_fun, L, 0 == pixSetWpl(pix, wpl));
+    return ll_push_boolean(_fun, L, 0 == pixSetWpl(pix, wpl));
 }
 
 /**
@@ -20256,7 +20267,7 @@ SetXRes(lua_State *L)
     LL_FUNC("SetXRes");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 xres = ll_check_l_int32_default(_fun, L, 2, pixGetXRes(pix));
-    return ll_push_bool(_fun, L, 0 == pixSetXRes(pix, xres));
+    return ll_push_boolean(_fun, L, 0 == pixSetXRes(pix, xres));
 }
 
 /**
@@ -20273,7 +20284,7 @@ SetYRes(lua_State *L)
     LL_FUNC("SetYRes");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 yres = ll_check_l_int32_default(_fun, L, 2, pixGetYRes(pix));
-    return ll_push_bool(_fun, L, 0 == pixSetYRes(pix, yres));
+    return ll_push_boolean(_fun, L, 0 == pixSetYRes(pix, yres));
 }
 
 /**
@@ -20427,7 +20438,7 @@ SizesEqual(lua_State *L)
     LL_FUNC("SizesEqual");
     Pix *pix1 = ll_check_Pix(_fun, L, 1);
     Pix *pix2 = ll_check_Pix(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == pixSizesEqual(pix1, pix2));
+    return ll_push_boolean(_fun, L, 0 == pixSizesEqual(pix1, pix2));
 }
 
 /**
@@ -22242,7 +22253,7 @@ Write(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
     l_int32 format = ll_check_input_format(_fun, L, 3, IFF_DEFAULT);
-    return ll_push_bool(_fun, L, 0 == pixWrite(filename, pix, format));
+    return ll_push_boolean(_fun, L, 0 == pixWrite(filename, pix, format));
 }
 
 /**
@@ -22821,7 +22832,7 @@ WriteStream(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 1);
     l_int32 format = ll_check_input_format(_fun, L, 3, IFF_DEFAULT);
-    return ll_push_bool(_fun, L, 0 == pixWriteStream(stream->f, pix, format));
+    return ll_push_boolean(_fun, L, 0 == pixWriteStream(stream->f, pix, format));
 }
 
 /**

@@ -141,7 +141,7 @@ AddToHead(lua_State *L)
     LL_FUNC("AddToHead");
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     void *data = reinterpret_cast<void *>(reinterpret_cast<intptr_t>(lua_topointer(L, 2)));
-    return ll_push_bool(_fun, L, 0 == listAddToHead(&head, data));
+    return ll_push_boolean(_fun, L, 0 == listAddToHead(&head, data));
 }
 
 /**
@@ -160,7 +160,7 @@ AddToTail(lua_State *L)
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     DoubleLinkedList *tail = nullptr;
     void *data = reinterpret_cast<void *>(reinterpret_cast<intptr_t>(lua_topointer(L, 2)));
-    ll_push_bool(_fun, L, 0 == listAddToTail(&head, &tail, data));
+    ll_push_boolean(_fun, L, 0 == listAddToTail(&head, &tail, data));
     lua_pushlightuserdata(L, tail);
     return 2;
 }
@@ -220,7 +220,7 @@ InsertAfter(lua_State *L)
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     DoubleLinkedList *elem = ll_check_DoubleLinkedList(_fun, L, 2);
     void *data = reinterpret_cast<void *>(reinterpret_cast<intptr_t>(lua_topointer(L, 3)));
-    return ll_push_bool(_fun, L, 0 == listInsertAfter(&head, elem, data));
+    return ll_push_boolean(_fun, L, 0 == listInsertAfter(&head, elem, data));
 }
 
 /**
@@ -240,7 +240,7 @@ InsertBefore(lua_State *L)
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     DoubleLinkedList *elem = ll_check_DoubleLinkedList(_fun, L, 2);
     void *data = reinterpret_cast<void *>(reinterpret_cast<intptr_t>(lua_topointer(L, 3)));
-    return ll_push_bool(_fun, L, 0 == listInsertBefore(&head, elem, data));
+    return ll_push_boolean(_fun, L, 0 == listInsertBefore(&head, elem, data));
 }
 
 /**
@@ -258,7 +258,7 @@ Join(lua_State *L)
     LL_FUNC("Join");
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     DoubleLinkedList *list = ll_check_DoubleLinkedList(_fun, L, 2);
-    return ll_push_bool(_fun, L, 0 == listJoin(&head, &list));
+    return ll_push_boolean(_fun, L, 0 == listJoin(&head, &list));
 }
 
 /**
@@ -332,7 +332,7 @@ Reverse(lua_State *L)
 {
     LL_FUNC("Reverse");
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
-    return ll_push_bool(_fun, L, 0 == listReverse(&head));
+    return ll_push_boolean(_fun, L, 0 == listReverse(&head));
 }
 
 /**

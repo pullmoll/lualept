@@ -215,7 +215,7 @@ ll_push_nil(lua_State *L)
  * \return 1 boolean on the Lua stack
  */
 int
-ll_push_bool(const char* _fun, lua_State *L, bool b)
+ll_push_boolean(const char* _fun, lua_State *L, bool b)
 {
     UNUSED(_fun);
     DBG(LOG_PUSH_BOOLEAN, "%s: push %s\n", _fun, b ? "TRUE" : "FALSE");
@@ -1438,6 +1438,9 @@ ll_check_tbl(const char *_fun, lua_State *L, int arg, l_int32 dflt, const lept_e
 
 /**
  * \brief Table of access/storage flag names and enumeration values.
+ * <pre>
+ * Access and storage flags.
+ * </pre>
  */
 static const lept_enums_t tbl_access_storage[] = {
     TBL_ENTRY("nocopy",         L_NOCOPY),      /* do not copy the object; do not delete the ptr */
@@ -1467,13 +1470,16 @@ ll_check_access_storage(const char *_fun, lua_State *L, int arg, l_int32 dflt)
  * \return pointer to const string
  */
 const char*
-ll_string_access_storage(int flag)
+ll_string_access_storage(l_int32 flag)
 {
     return ll_string_tbl(flag, tbl_access_storage, ARRAYSIZE(tbl_access_storage));
 }
 
 /**
  * \brief Table of access/storage flag names and enumeration values.
+ * <pre>
+ * 16-bit conversion flags.
+ * </pre>
  */
 static const lept_enums_t tbl_more_less_clip[] = {
     TBL_ENTRY("ls-byte",        L_LS_BYTE),
@@ -1521,20 +1527,28 @@ ll_check_more_less_clip(const char *_fun, lua_State *L, int arg, l_int32 dflt)
  * \return pointer to const string
  */
 const char*
-ll_string_more_less_clip(int flag)
+ll_string_more_less_clip(l_int32 flag)
 {
     return ll_string_tbl(flag, tbl_more_less_clip, ARRAYSIZE(tbl_more_less_clip));
 }
 
 /**
  * \brief Table of PDF encoding format names and enumeration values.
+ * <pre>
+ * Pdf formatted encoding types.
+ * </pre>
  */
 static const lept_enums_t tbl_encoding[] = {
+    TBL_ENTRY("default-encode", L_DEFAULT_ENCODE),
     TBL_ENTRY("default",        L_DEFAULT_ENCODE),
+    TBL_ENTRY("jpeg-encode",    L_JPEG_ENCODE),
     TBL_ENTRY("jpeg",           L_JPEG_ENCODE),
     TBL_ENTRY("jpg",            L_JPEG_ENCODE),
+    TBL_ENTRY("g4-encode",      L_G4_ENCODE),
     TBL_ENTRY("g4",             L_G4_ENCODE),
+    TBL_ENTRY("flate-encode",   L_FLATE_ENCODE),
     TBL_ENTRY("flate",          L_FLATE_ENCODE),
+    TBL_ENTRY("jp2k-encode",    L_JP2K_ENCODE),
     TBL_ENTRY("jp2k",           L_JP2K_ENCODE)
 };
 
@@ -1565,17 +1579,30 @@ ll_print_encoding(lua_State *L)
 
 /**
  * \brief Return the name for an input file format (IFF_*).
- * \param format input file format value
+ * \param encoding encoding enumeration value
  * \return pointer to const string
  */
 const char*
-ll_string_encoding(int format)
+ll_string_encoding(l_int32 encoding)
 {
-    return ll_string_tbl(format, tbl_encoding, ARRAYSIZE(tbl_encoding));
+    return ll_string_tbl(encoding, tbl_encoding, ARRAYSIZE(tbl_encoding));
 }
 
 /**
  * \brief Table of input file format names and enumeration values.
+ * <pre>
+ *  The IFF_DEFAULT flag is used to write the file out in the
+ *  same (input) file format that the pix was read from.  If the pix
+ *  was not read from file, the input format field will be
+ *  IFF_UNKNOWN and the output file format will be chosen to
+ *  be compressed and lossless; namely, IFF_TIFF_G4 for d = 1
+ *  and IFF_PNG for everything else.
+ *
+ *  In the future, new format types that have defined extensions
+ *  will be added before IFF_DEFAULT, and will be kept in sync with
+ *  the file format extensions in writefile.c.  The positions of
+ *  file formats before IFF_DEFAULT will remain invariant.
+ * </pre>
  */
 static const lept_enums_t tbl_input_format[] = {
     TBL_ENTRY("unknown",         IFF_UNKNOWN),
@@ -1650,6 +1677,9 @@ ll_string_input_format(int format)
 
 /**
  * \brief Table of key type names for AMAP and ASET.
+ * <pre>
+ * The three valid key types for red-black trees, maps and sets.
+ * </pre>
  */
 static const lept_enums_t tbl_keytype[] = {
     TBL_ENTRY("int",        L_INT_TYPE),
@@ -1684,13 +1714,19 @@ ll_string_keytype(l_int32 type)
 
 /**
  * \brief Table of choice names and enumeration values.
+ * <pre>
+ * Set selection flags.
+ * </pre>
  */
 static const lept_enums_t tbl_consecutive_skip_by[] = {
-    TBL_ENTRY("consecutive",     L_CHOOSE_CONSECUTIVE),
-    TBL_ENTRY("cons",            L_CHOOSE_CONSECUTIVE),
-    TBL_ENTRY("skip-by",         L_CHOOSE_SKIP_BY),
-    TBL_ENTRY("skip_by",         L_CHOOSE_SKIP_BY),
-    TBL_ENTRY("skip",            L_CHOOSE_SKIP_BY),
+    TBL_ENTRY("choose-consecutive", L_CHOOSE_CONSECUTIVE),
+    TBL_ENTRY("consecutive",        L_CHOOSE_CONSECUTIVE),
+    TBL_ENTRY("cons",               L_CHOOSE_CONSECUTIVE),
+    TBL_ENTRY("c",                  L_CHOOSE_CONSECUTIVE),
+    TBL_ENTRY("choose-skip-by",     L_CHOOSE_SKIP_BY),
+    TBL_ENTRY("skip-by",            L_CHOOSE_SKIP_BY),
+    TBL_ENTRY("skip",               L_CHOOSE_SKIP_BY),
+    TBL_ENTRY("s",                  L_CHOOSE_SKIP_BY)
 };
 
 /**
@@ -1720,6 +1756,20 @@ ll_string_consecutive_skip_by(l_int32 choice)
 
 /**
  * \brief Table of color component names and enumeration values.
+ * <pre>
+ *  Notes:
+ *      (1) These are the byte indices for colors in 32 bpp images.
+ *          They are used through the GET/SET_DATA_BYTE accessors.
+ *          The 4th byte, typically known as the "alpha channel" and used
+ *          for blending, is used to a small extent in leptonica.
+ *      (2) Do not change these values!  If you redefine them, functions
+ *          that have the shifts hardcoded for efficiency and conciseness
+ *          (instead of using the constants below) will break.  These
+ *          functions are labelled with "***"  next to their names at
+ *          the top of the files in which they are defined.
+ *      (3) The shifts to extract the red, green, blue and alpha components
+ *          from a 32 bit pixel are defined here.
+ * </pre>
  */
 static const lept_enums_t tbl_component[] = {
     TBL_ENTRY("red",             COLOR_RED),
@@ -1761,6 +1811,9 @@ ll_string_component(l_int32 component)
 
 /**
  * \brief Table of color compression names and enumeration values.
+ * <pre>
+ * Compression to use for PDF.
+ * </pre>
  */
 static const lept_enums_t tbl_compression[] = {
     TBL_ENTRY("default",        IFF_DEFAULT),
@@ -1805,6 +1858,9 @@ ll_string_compression(l_int32 compression)
 
 /**
  * \brief Table of choice min/max names and enumeration values.
+ * <pre>
+ * Min/max selection flags.
+ * </pre>
  */
 static const lept_enums_t tbl_choose_min_max[] = {
     TBL_ENTRY("choose-min",         L_CHOOSE_MIN),
@@ -1822,7 +1878,7 @@ static const lept_enums_t tbl_choose_min_max[] = {
 };
 
 /**
- * \brief Check for an min/max name as string.
+ * \brief Check for a min/max name as string.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
@@ -1848,6 +1904,9 @@ ll_string_choose_min_max(l_int32 choice)
 
 /**
  * \brief Table of white/black is max names and enumeration values.
+ * <pre>
+ * Flags for 8 bit and 16 bit pixel sums.
+ * </pre>
  */
 static const lept_enums_t tbl_what_is_max[] = {
     TBL_ENTRY("white-is-max",    L_WHITE_IS_MAX),
@@ -1885,12 +1944,19 @@ ll_string_what_is_max(l_int32 what)
 
 /**
  * \brief Table of get white/black val names and enumeration values.
+ * <pre>
+ * Flags for getting white or black value.
+ * </pre>
  */
 static const lept_enums_t tbl_getval[] = {
-    TBL_ENTRY("white",           L_GET_WHITE_VAL),
-    TBL_ENTRY("w",               L_GET_WHITE_VAL),
-    TBL_ENTRY("black",           L_GET_BLACK_VAL),
-    TBL_ENTRY("b",               L_GET_BLACK_VAL)
+    TBL_ENTRY("get-white-val",  L_GET_WHITE_VAL),
+    TBL_ENTRY("white-val",      L_GET_WHITE_VAL),
+    TBL_ENTRY("white",          L_GET_WHITE_VAL),
+    TBL_ENTRY("w",              L_GET_WHITE_VAL),
+    TBL_ENTRY("get-black-val",  L_GET_BLACK_VAL),
+    TBL_ENTRY("black-val",      L_GET_BLACK_VAL),
+    TBL_ENTRY("black",          L_GET_BLACK_VAL),
+    TBL_ENTRY("b",              L_GET_BLACK_VAL)
 };
 
 /**
@@ -1920,6 +1986,9 @@ ll_string_getval(l_int32 val)
 
 /**
  * \brief Table of direction names and enumeration values.
+ * <pre>
+ * Line orientation flags.
+ * </pre>
  */
 static const lept_enums_t tbl_direction[] = {
     TBL_ENTRY("horizontal-line", L_HORIZONTAL_LINE),
@@ -1959,12 +2028,17 @@ ll_string_direction(l_int32 dir)
 
 /**
  * \brief Table of set white/black names and enumeration values.
+ * <pre>
+ * Flags for setting to white or black.
+ * </pre>
  */
 static const lept_enums_t tbl_blackwhite[] = {
-    TBL_ENTRY("white",           L_SET_WHITE),
-    TBL_ENTRY("w",               L_SET_WHITE),
-    TBL_ENTRY("black",           L_SET_BLACK),
-    TBL_ENTRY("b",               L_SET_BLACK)
+    TBL_ENTRY("set-white",      L_SET_WHITE),
+    TBL_ENTRY("white",          L_SET_WHITE),
+    TBL_ENTRY("w",              L_SET_WHITE),
+    TBL_ENTRY("set-black",      L_SET_BLACK),
+    TBL_ENTRY("black",          L_SET_BLACK),
+    TBL_ENTRY("b",              L_SET_BLACK)
 };
 
 /**
@@ -1994,28 +2068,91 @@ ll_string_blackwhite(l_int32 which)
 
 /**
  * \brief Table of rasterop names and enumeration values.
+ * <pre>
+ * The following operation bit flags have been modified from
+ * Sun's pixrect.h.
+ *
+ * The 'op' in 'rasterop' is represented by an integer
+ * composed with Boolean functions using the set of five integers
+ * given below.  The integers, and the op codes resulting from
+ * boolean expressions on them, need only be in the range from 0 to 15.
+ * The function is applied on a per-pixel basis.
+ *
+ * Examples: the op code representing ORing the src and dest
+ * is computed using the bit OR, as PIX_SRC | PIX_DST;  the op
+ * code representing XORing src and dest is found from
+ * PIX_SRC ^ PIX_DST;  the op code representing ANDing src and dest
+ * is found from PIX_SRC & PIX_DST.  Note that
+ * PIX_NOT(PIX_CLR) = PIX_SET, and v.v., as they must be.
+ *
+ * We use the following set of definitions:
+ *
+ *      #define   PIX_SRC      0xc
+ *      #define   PIX_DST      0xa
+ *      #define   PIX_NOT(op)  (op) ^ 0xf
+ *      #define   PIX_CLR      0x0
+ *      #define   PIX_SET      0xf
+ *
+ * These definitions differ from Sun's, in that Sun left-shifted
+ * each value by 1 pixel, and used the least significant bit as a
+ * flag for the "pseudo-operation" of clipping.  We don't need
+ * this bit, because it is both efficient and safe ALWAYS to clip
+ * the rectangles to the src and dest images, which is what we do.
+ * See the notes in rop.h on the general choice of these bit flags.
+ *
+ * [If for some reason you need compatibility with Sun's xview package,
+ * you can adopt the original Sun definitions to avoid redefinition conflicts:
+ *
+ *      #define   PIX_SRC      (0xc << 1)
+ *      #define   PIX_DST      (0xa << 1)
+ *      #define   PIX_NOT(op)  ((op) ^ 0x1e)
+ *      #define   PIX_CLR      (0x0 << 1)
+ *      #define   PIX_SET      (0xf << 1)
+ * ]
+ *
+ * We have, for reference, the following 16 unique op flags:
+ *
+ *      PIX_CLR                           0000             0x0
+ *      PIX_SET                           1111             0xf
+ *      PIX_SRC                           1100             0xc
+ *      PIX_DST                           1010             0xa
+ *      PIX_NOT(PIX_SRC)                  0011             0x3
+ *      PIX_NOT(PIX_DST)                  0101             0x5
+ *      PIX_SRC | PIX_DST                 1110             0xe
+ *      PIX_SRC & PIX_DST                 1000             0x8
+ *      PIX_SRC ^ PIX_DST                 0110             0x6
+ *      PIX_NOT(PIX_SRC) | PIX_DST        1011             0xb
+ *      PIX_NOT(PIX_SRC) & PIX_DST        0010             0x2
+ *      PIX_SRC | PIX_NOT(PIX_DST)        1101             0xd
+ *      PIX_SRC & PIX_NOT(PIX_DST)        0100             0x4
+ *      PIX_NOT(PIX_SRC | PIX_DST)        0001             0x1
+ *      PIX_NOT(PIX_SRC & PIX_DST)        0111             0x7
+ *      PIX_NOT(PIX_SRC ^ PIX_DST)        1001             0x9
+ *
+ * </pre>
  */
 static const lept_enums_t tbl_rasterop[] = {
-    TBL_ENTRY("clr",             PIX_CLR),
-    TBL_ENTRY("set",             PIX_SET),
-    TBL_ENTRY("src",             PIX_SRC),
-    TBL_ENTRY("dst",             PIX_DST),
-    TBL_ENTRY("!src",            PIX_NOT(PIX_SRC)),
-    TBL_ENTRY("!dst",            PIX_NOT(PIX_DST)),
-    TBL_ENTRY("src|dst",         PIX_SRC | PIX_DST),
-    TBL_ENTRY("paint",           PIX_SRC | PIX_DST),
-    TBL_ENTRY("src&dst",         PIX_SRC & PIX_DST),
-    TBL_ENTRY("mask",            PIX_SRC & PIX_DST),
-    TBL_ENTRY("src^dst",         PIX_SRC ^ PIX_DST),
-    TBL_ENTRY("xor",             PIX_SRC ^ PIX_DST),
-    TBL_ENTRY("!src|dst",        PIX_NOT(PIX_SRC) | PIX_DST),
-    TBL_ENTRY("!src&dst",        PIX_NOT(PIX_SRC) & PIX_DST),
-    TBL_ENTRY("subtract",        PIX_NOT(PIX_SRC) & PIX_DST),
-    TBL_ENTRY("src|!dst",        PIX_SRC | PIX_NOT(PIX_DST)),
-    TBL_ENTRY("src&!dst",        PIX_SRC & PIX_NOT(PIX_DST)),
-    TBL_ENTRY("!(src|dst)",      PIX_NOT(PIX_SRC | PIX_DST)),
-    TBL_ENTRY("!(src&dst)",      PIX_NOT(PIX_SRC & PIX_DST)),
-    TBL_ENTRY("!(src^dst)",      PIX_NOT(PIX_SRC ^ PIX_DST))
+    TBL_ENTRY("clr",            PIX_CLR),
+    TBL_ENTRY("set",            PIX_SET),
+    TBL_ENTRY("src",            PIX_SRC),
+    TBL_ENTRY("dst",            PIX_DST),
+    TBL_ENTRY("!src",           PIX_NOT(PIX_SRC)),
+    TBL_ENTRY("!dst",           PIX_NOT(PIX_DST)),
+    TBL_ENTRY("src|dst",        PIX_SRC | PIX_DST),
+    TBL_ENTRY("paint",          PIX_SRC | PIX_DST),
+    TBL_ENTRY("src&dst",        PIX_SRC & PIX_DST),
+    TBL_ENTRY("mask",           PIX_SRC & PIX_DST),
+    TBL_ENTRY("src^dst",        PIX_SRC ^ PIX_DST),
+    TBL_ENTRY("xor",            PIX_SRC ^ PIX_DST),
+    TBL_ENTRY("!src|dst",       PIX_NOT(PIX_SRC) | PIX_DST),
+    TBL_ENTRY("!src&dst",       PIX_NOT(PIX_SRC) & PIX_DST),
+    TBL_ENTRY("subtract",       PIX_NOT(PIX_SRC) & PIX_DST),
+    TBL_ENTRY("sub",            PIX_NOT(PIX_SRC) & PIX_DST),
+    TBL_ENTRY("src|!dst",       PIX_SRC | PIX_NOT(PIX_DST)),
+    TBL_ENTRY("src&!dst",       PIX_SRC & PIX_NOT(PIX_DST)),
+    TBL_ENTRY("!(src|dst)",     PIX_NOT(PIX_SRC | PIX_DST)),
+    TBL_ENTRY("!(src&dst)",     PIX_NOT(PIX_SRC & PIX_DST)),
+    TBL_ENTRY("!(src^dst)",     PIX_NOT(PIX_SRC ^ PIX_DST))
 };
 
 /**
@@ -2045,6 +2182,9 @@ ll_string_rasterop(l_int32 op)
 
 /**
  * \brief Table of JPEG reader hint names and enumeration values.
+ * <pre>
+ * Hinting bit flags in jpeg reader.
+ * </pre>
  */
 static const lept_enums_t tbl_hint[] = {
     TBL_ENTRY("none",               0),
@@ -2085,6 +2225,10 @@ ll_string_hint(l_int32 dir)
 
 /**
  * \brief Table of search direction names and enumeration values.
+ * <pre>
+ * Direction flags for grayscale morphology, granulometry,         *
+ * composable Sels, convolution, etc.
+ * </pre>
  */
 static const lept_enums_t tbl_searchdir[] = {
     TBL_ENTRY("horizontal",          L_HORIZ),
@@ -2125,11 +2269,16 @@ ll_string_searchir(l_int32 dir)
 
 /**
  * \brief Table of stats type names and enumeration values.
+ * <pre>
+ * Flags for data type converted from Numa.
+ * </pre>
  */
 static const lept_enums_t tbl_number_value[] = {
+    TBL_ENTRY("integer-value",      L_INTEGER_VALUE),
     TBL_ENTRY("integer",            L_INTEGER_VALUE),
     TBL_ENTRY("int",                L_INTEGER_VALUE),
     TBL_ENTRY("i",                  L_INTEGER_VALUE),
+    TBL_ENTRY("float-value",        L_FLOAT_VALUE),
     TBL_ENTRY("float",              L_FLOAT_VALUE),
     TBL_ENTRY("f",                  L_FLOAT_VALUE)
 };
@@ -2160,7 +2309,10 @@ ll_string_number_value(l_int32 type)
 }
 
 /**
- * \brief Table of stats type names and enumeration values.
+ * \brief Table of statistical measures names and enumeration values.
+ * <pre>
+ * Statistical measures.
+ * </pre>
  */
 static const lept_enums_t tbl_stats_type[] = {
     TBL_ENTRY("mean-absval",         L_MEAN_ABSVAL),
@@ -2204,7 +2356,10 @@ ll_string_stats_type(l_int32 type)
 }
 
 /**
- * \brief Table of select color names and enumeration values.
+ * \brief Table of color component selection names and enumeration values.
+ * <pre>
+ * Color component selection flags.
+ * </pre>
  */
 static const lept_enums_t tbl_select_color[] = {
     TBL_ENTRY("red",                 L_SELECT_RED),
@@ -2225,7 +2380,7 @@ static const lept_enums_t tbl_select_color[] = {
 };
 
 /**
- * \brief Check for a select color name.
+ * \brief Check for a color component selection.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
@@ -2239,7 +2394,7 @@ ll_check_select_color(const char *_fun, lua_State* L, int arg, l_int32 dflt)
 }
 
 /**
- * \brief Return a string for the select color enumeration value.
+ * \brief Return a string for the color component selection enumeration value.
  * \param color selected color enumeration value
  * \return const string with the name
  */
@@ -2251,6 +2406,9 @@ ll_string_select_color(l_int32 color)
 
 /**
  * \brief Table of select min/max names and enumeration values.
+ * <pre>
+ * Color component selection flags. Only "min" and "max" subset.
+ * </pre>
  */
 static const lept_enums_t tbl_select_minmax[] = {
     TBL_ENTRY("min",                 L_SELECT_MIN),
@@ -2283,7 +2441,10 @@ ll_string_select_min_max(l_int32 which)
 }
 
 /**
- * \brief Table of select size names and enumeration values.
+ * \brief Table of structuring element type names and enumeration values.
+ * <pre>
+ * Structuring element types.
+ * </pre>
  */
 static const lept_enums_t tbl_sel[] = {
     TBL_ENTRY("dont-care",          SEL_DONT_CARE),
@@ -2295,7 +2456,7 @@ static const lept_enums_t tbl_sel[] = {
 };
 
 /**
- * \brief Check for a select size name.
+ * \brief Check for a structuring element type name.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
@@ -2309,7 +2470,7 @@ ll_check_sel(const char *_fun, lua_State* L, int arg, l_int32 dflt)
 }
 
 /**
- * \brief Return a string for the select size enumeration value.
+ * \brief Return a string for the structuring element type enumeration value.
  * \param which select min or max enumeration value
  * \return const string with the name
  */
@@ -2320,7 +2481,10 @@ ll_string_sel(l_int32 which)
 }
 
 /**
- * \brief Table of select size names and enumeration values.
+ * \brief Table of location filter names and enumeration values.
+ * <pre>
+ * Location filter flags.
+ * </pre>
  */
 static const lept_enums_t tbl_select_size[] = {
     TBL_ENTRY("width",              L_SELECT_WIDTH),
@@ -2340,7 +2504,7 @@ static const lept_enums_t tbl_select_size[] = {
 };
 
 /**
- * \brief Check for a select size name.
+ * \brief Check for a location filter name.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
@@ -2354,7 +2518,7 @@ ll_check_select_size(const char *_fun, lua_State* L, int arg, l_int32 dflt)
 }
 
 /**
- * \brief Return a string for the select size enumeration value.
+ * \brief Return a string for the location filter enumeration value.
  * \param which select min or max enumeration value
  * \return const string with the name
  */
@@ -2366,34 +2530,48 @@ ll_string_select_size(l_int32 which)
 
 /**
  * \brief Table of sort by names and enumeration values.
+ * <pre>
+ * Sort type flags.
+ * </pre>
  */
 static const lept_enums_t tbl_sort_by[] = {
-    TBL_ENTRY("x",              L_SORT_BY_X),
-    TBL_ENTRY("y",              L_SORT_BY_Y),
-    TBL_ENTRY("right",          L_SORT_BY_RIGHT),
-    TBL_ENTRY("r",              L_SORT_BY_RIGHT),
-    TBL_ENTRY("bottom",         L_SORT_BY_BOT),
-    TBL_ENTRY("bot",            L_SORT_BY_BOT),
-    TBL_ENTRY("b",              L_SORT_BY_BOT),
-    TBL_ENTRY("width",          L_SORT_BY_WIDTH),
-    TBL_ENTRY("w",              L_SORT_BY_WIDTH),
-    TBL_ENTRY("height",         L_SORT_BY_HEIGHT),
-    TBL_ENTRY("h",              L_SORT_BY_HEIGHT),
-    TBL_ENTRY("min-dimension",  L_SORT_BY_MIN_DIMENSION),
-    TBL_ENTRY("min",            L_SORT_BY_MIN_DIMENSION),
-    TBL_ENTRY("max-dimension",  L_SORT_BY_MAX_DIMENSION),
-    TBL_ENTRY("max",            L_SORT_BY_MAX_DIMENSION),
-    TBL_ENTRY("perimeter",      L_SORT_BY_PERIMETER),
-    TBL_ENTRY("perim",          L_SORT_BY_PERIMETER),
-    TBL_ENTRY("p",              L_SORT_BY_PERIMETER),
-    TBL_ENTRY("area",           L_SORT_BY_AREA),
-    TBL_ENTRY("a",              L_SORT_BY_AREA),
-    TBL_ENTRY("aspect-ratio",   L_SORT_BY_ASPECT_RATIO),
-    TBL_ENTRY("aspect",         L_SORT_BY_ASPECT_RATIO),
+    TBL_ENTRY("sort-by-x",              L_SORT_BY_X),
+    TBL_ENTRY("x",                      L_SORT_BY_X),
+    TBL_ENTRY("sort-by-y",              L_SORT_BY_Y),
+    TBL_ENTRY("y",                      L_SORT_BY_Y),
+    TBL_ENTRY("sort-by-right",          L_SORT_BY_RIGHT),
+    TBL_ENTRY("right",                  L_SORT_BY_RIGHT),
+    TBL_ENTRY("r",                      L_SORT_BY_RIGHT),
+    TBL_ENTRY("sort-by-bot",            L_SORT_BY_BOT),
+    TBL_ENTRY("bottom",                 L_SORT_BY_BOT),
+    TBL_ENTRY("bot",                    L_SORT_BY_BOT),
+    TBL_ENTRY("b",                      L_SORT_BY_BOT),
+    TBL_ENTRY("sort-by-width",          L_SORT_BY_WIDTH),
+    TBL_ENTRY("width",                  L_SORT_BY_WIDTH),
+    TBL_ENTRY("w",                      L_SORT_BY_WIDTH),
+    TBL_ENTRY("sort-by-height",         L_SORT_BY_HEIGHT),
+    TBL_ENTRY("height",                 L_SORT_BY_HEIGHT),
+    TBL_ENTRY("h",                      L_SORT_BY_HEIGHT),
+    TBL_ENTRY("sort-by-min-dimension",  L_SORT_BY_MIN_DIMENSION),
+    TBL_ENTRY("min-dimension",          L_SORT_BY_MIN_DIMENSION),
+    TBL_ENTRY("min",                    L_SORT_BY_MIN_DIMENSION),
+    TBL_ENTRY("sort-by-max-dimension",  L_SORT_BY_MAX_DIMENSION),
+    TBL_ENTRY("max-dimension",          L_SORT_BY_MAX_DIMENSION),
+    TBL_ENTRY("max",                    L_SORT_BY_MAX_DIMENSION),
+    TBL_ENTRY("sort-by-perimeter",      L_SORT_BY_PERIMETER),
+    TBL_ENTRY("perimeter",              L_SORT_BY_PERIMETER),
+    TBL_ENTRY("perim",                  L_SORT_BY_PERIMETER),
+    TBL_ENTRY("p",                      L_SORT_BY_PERIMETER),
+    TBL_ENTRY("sort-by-area",           L_SORT_BY_AREA),
+    TBL_ENTRY("area",                   L_SORT_BY_AREA),
+    TBL_ENTRY("a",                      L_SORT_BY_AREA),
+    TBL_ENTRY("sort-by-aspect-ratio",   L_SORT_BY_ASPECT_RATIO),
+    TBL_ENTRY("aspect-ratio",           L_SORT_BY_ASPECT_RATIO),
+    TBL_ENTRY("aspect",                 L_SORT_BY_ASPECT_RATIO),
 };
 
 /**
- * \brief Check for a sort by name.
+ * \brief Check for a sort type name.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
@@ -2407,7 +2585,7 @@ ll_check_sort_by(const char *_fun, lua_State* L, int arg, l_int32 dflt)
 }
 
 /**
- * \brief Return a string for sort by enumeration value.
+ * \brief Return a string for sort type enumeration value.
  * \param sort_by selected sort by enumeration value
  * \return const string with the name
  */
@@ -2419,19 +2597,26 @@ ll_string_sort_by(l_int32 sort_by)
 
 /**
  * \brief Table of set side names and enumeration values.
+ * <pre>
+ * Box size adjustment and location flags. Only the "set-" subset.
+ * </pre>
  */
 static const lept_enums_t tbl_set_side[] = {
-    TBL_ENTRY("left",           L_SET_LEFT),
-    TBL_ENTRY("lft",            L_SET_LEFT),
-    TBL_ENTRY("l",              L_SET_LEFT),
-    TBL_ENTRY("right",          L_SET_RIGHT),
-    TBL_ENTRY("rgt",            L_SET_RIGHT),
-    TBL_ENTRY("r",              L_SET_RIGHT),
-    TBL_ENTRY("top",            L_SET_TOP),
-    TBL_ENTRY("t",              L_SET_TOP),
-    TBL_ENTRY("bottom",         L_SET_BOT),
-    TBL_ENTRY("bot",            L_SET_BOT),
-    TBL_ENTRY("b",              L_SET_BOT)
+    TBL_ENTRY("set-left",           L_SET_LEFT),
+    TBL_ENTRY("left",               L_SET_LEFT),
+    TBL_ENTRY("lft",                L_SET_LEFT),
+    TBL_ENTRY("l",                  L_SET_LEFT),
+    TBL_ENTRY("set-right",          L_SET_RIGHT),
+    TBL_ENTRY("right",              L_SET_RIGHT),
+    TBL_ENTRY("rgt",                L_SET_RIGHT),
+    TBL_ENTRY("r",                  L_SET_RIGHT),
+    TBL_ENTRY("set-top",            L_SET_TOP),
+    TBL_ENTRY("top",                L_SET_TOP),
+    TBL_ENTRY("t",                  L_SET_TOP),
+    TBL_ENTRY("set-bot",            L_SET_BOT),
+    TBL_ENTRY("bottom",             L_SET_BOT),
+    TBL_ENTRY("bot",                L_SET_BOT),
+    TBL_ENTRY("b",                  L_SET_BOT)
 };
 
 /**
@@ -2460,24 +2645,31 @@ ll_string_set_side(l_int32 which)
 }
 
 /**
- * \brief Table of from side names and enumeration values.
+ * \brief Table of scan direction names and enumeration values.
+ * <pre>
+ * Scan direction flags. Only the "from-" subset.
+ * </pre>
  */
 static const lept_enums_t tbl_from_side[] = {
+    TBL_ENTRY("from-left",      L_FROM_LEFT),
     TBL_ENTRY("left",           L_FROM_LEFT),
     TBL_ENTRY("lft",            L_FROM_LEFT),
     TBL_ENTRY("l",              L_FROM_LEFT),
+    TBL_ENTRY("from-right",     L_FROM_RIGHT),
     TBL_ENTRY("right",          L_FROM_RIGHT),
     TBL_ENTRY("rgt",            L_FROM_RIGHT),
     TBL_ENTRY("r",              L_FROM_RIGHT),
+    TBL_ENTRY("from-top",       L_FROM_TOP),
     TBL_ENTRY("top",            L_FROM_TOP),
     TBL_ENTRY("t",              L_FROM_TOP),
+    TBL_ENTRY("from-bot",       L_FROM_BOT),
     TBL_ENTRY("bottom",         L_FROM_BOT),
     TBL_ENTRY("bot",            L_FROM_BOT),
     TBL_ENTRY("b",              L_FROM_BOT)
 };
 
 /**
- * \brief Check for a from side name.
+ * \brief Check for a scan direction name.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
@@ -2491,7 +2683,7 @@ ll_check_from_side(const char *_fun, lua_State* L, int arg, l_int32 dflt)
 }
 
 /**
- * \brief Return a string for the from side enumeration value.
+ * \brief Return a string for the scan direction enumeration value.
  * \param which from side enumeration value
  * \return const string with the name
  */
@@ -2503,45 +2695,67 @@ ll_string_from_side(l_int32 which)
 
 /**
  * \brief Table of adjust side names and enumeration values.
+ * <pre>
+ * Box size adjustment and location flags.
+ * </pre>
  */
 static const lept_enums_t tbl_adjust_sides[] = {
     TBL_ENTRY("adjust-skip",            L_ADJUST_SKIP),
+    TBL_ENTRY("adj-skip",               L_ADJUST_SKIP),
     TBL_ENTRY("skip",                   L_ADJUST_SKIP),
     TBL_ENTRY("adjust-left",            L_ADJUST_LEFT),
+    TBL_ENTRY("adj-left",               L_ADJUST_LEFT),
     TBL_ENTRY("left",                   L_ADJUST_LEFT),
     TBL_ENTRY("lft",                    L_ADJUST_LEFT),
     TBL_ENTRY("l",                      L_ADJUST_LEFT),
     TBL_ENTRY("adjust-right",           L_ADJUST_RIGHT),
+    TBL_ENTRY("adj-right",              L_ADJUST_RIGHT),
     TBL_ENTRY("right",                  L_ADJUST_RIGHT),
     TBL_ENTRY("rgt",                    L_ADJUST_RIGHT),
     TBL_ENTRY("r",                      L_ADJUST_RIGHT),
     TBL_ENTRY("adjust-left-and-right",  L_ADJUST_LEFT_AND_RIGHT),
+    TBL_ENTRY("adj-left-and-right",     L_ADJUST_LEFT_AND_RIGHT),
     TBL_ENTRY("left-and-right",         L_ADJUST_LEFT_AND_RIGHT),
     TBL_ENTRY("l-r",                    L_ADJUST_LEFT_AND_RIGHT),
     TBL_ENTRY("adjust-top",             L_ADJUST_TOP),
+    TBL_ENTRY("adj-top",                L_ADJUST_TOP),
     TBL_ENTRY("top",                    L_ADJUST_TOP),
     TBL_ENTRY("t",                      L_ADJUST_TOP),
+    TBL_ENTRY("adjust-bot",             L_ADJUST_BOT),
+    TBL_ENTRY("adj-bot",                L_ADJUST_BOT),
     TBL_ENTRY("adjust-bottom",          L_ADJUST_BOT),
     TBL_ENTRY("bottom",                 L_ADJUST_BOT),
     TBL_ENTRY("bot",                    L_ADJUST_BOT),
     TBL_ENTRY("b",                      L_ADJUST_BOT),
-    TBL_ENTRY("adjust-top-and-bottom",  L_ADJUST_TOP_AND_BOT),
-    TBL_ENTRY("top-and-bottom",         L_ADJUST_TOP_AND_BOT),
     TBL_ENTRY("adjust-top-and-bot",     L_ADJUST_TOP_AND_BOT),
+    TBL_ENTRY("adj-top-and-bot",        L_ADJUST_TOP_AND_BOT),
     TBL_ENTRY("top-and-bot",            L_ADJUST_TOP_AND_BOT),
+    TBL_ENTRY("adjust-top-and-bottom",  L_ADJUST_TOP_AND_BOT),
+    TBL_ENTRY("adj-top-and-bottom",     L_ADJUST_TOP_AND_BOT),
+    TBL_ENTRY("top-and-bottom",         L_ADJUST_TOP_AND_BOT),
     TBL_ENTRY("t-b",                    L_ADJUST_TOP_AND_BOT),
     TBL_ENTRY("adjust-choose-min",      L_ADJUST_CHOOSE_MIN),
+    TBL_ENTRY("adj-choose-min",         L_ADJUST_CHOOSE_MIN),
     TBL_ENTRY("choose-min",             L_ADJUST_CHOOSE_MIN),
     TBL_ENTRY("adjust-choose-max",      L_ADJUST_CHOOSE_MAX),
+    TBL_ENTRY("adj-choose-max",         L_ADJUST_CHOOSE_MAX),
     TBL_ENTRY("choose-max",             L_ADJUST_CHOOSE_MAX),
     TBL_ENTRY("set-left",               L_SET_LEFT),
+    TBL_ENTRY("set-l",                  L_SET_LEFT),
     TBL_ENTRY("set-right",              L_SET_RIGHT),
+    TBL_ENTRY("set-r",                  L_SET_RIGHT),
     TBL_ENTRY("set-top",                L_SET_TOP),
+    TBL_ENTRY("set-t",                  L_SET_TOP),
     TBL_ENTRY("set-bot",                L_SET_BOT),
+    TBL_ENTRY("set-b",                  L_SET_BOT),
     TBL_ENTRY("get-left",               L_GET_LEFT),
+    TBL_ENTRY("get-l",                  L_GET_LEFT),
     TBL_ENTRY("get-right",              L_GET_RIGHT),
+    TBL_ENTRY("get-r",                  L_GET_RIGHT),
     TBL_ENTRY("get-top",                L_GET_TOP),
-    TBL_ENTRY("get-bot",                L_GET_BOT)
+    TBL_ENTRY("get-t",                  L_GET_TOP),
+    TBL_ENTRY("get-bot",                L_GET_BOT),
+    TBL_ENTRY("get-b",                  L_GET_BOT)
 };
 
 /**
@@ -2571,6 +2785,9 @@ ll_string_adjust_sides(l_int32 which)
 
 /**
  * \brief Table of sort mode by names and enumeration values.
+ * <pre>
+ * Sort mode flags.
+ * </pre>
  */
 static const lept_enums_t tbl_sort_mode[] = {
     TBL_ENTRY("shell-sort",             L_SHELL_SORT),
@@ -2608,6 +2825,9 @@ ll_string_sort_mode(l_int32 sort_mode)
 
 /**
  * \brief Table of sort order by names and enumeration values.
+ * <pre>
+ * Sort order flags.
+ * </pre>
  */
 static const lept_enums_t tbl_sort_order[] = {
     TBL_ENTRY("increasing",             L_SORT_INCREASING),
@@ -2634,13 +2854,13 @@ ll_check_sort_order(const char *_fun, lua_State* L, int arg, l_int32 dflt)
 
 /**
  * \brief Return a string for the sort order.
- * \param sort_order transform sort_order enumeration value
+ * \param order transform sort_order enumeration value
  * \return const string with the name
  */
 const char*
-ll_string_sort_order(l_int32 sort_order)
+ll_string_sort_order(l_int32 order)
 {
-    return ll_string_tbl(sort_order, tbl_sort_order, ARRAYSIZE(tbl_sort_order));
+    return ll_string_tbl(order, tbl_sort_order, ARRAYSIZE(tbl_sort_order));
 }
 
 /**
@@ -2688,6 +2908,9 @@ ll_string_trans_order(l_int32 order)
 
 /**
  * \brief Table of transform relation by names and enumeration values.
+ * <pre>
+ * Size filter flags.
+ * </pre>
  */
 static const lept_enums_t tbl_relation[] = {
     TBL_ENTRY("less-than",              L_SELECT_IF_LT),
@@ -2731,6 +2954,9 @@ ll_string_relation(l_int32 relation)
 
 /**
  * \brief Table of transform rotation by names and enumeration values.
+ * <pre>
+ * Translates degrees to clockwise count.
+ * </pre>
  */
 static const lept_enums_t tbl_rotation[] = {
     TBL_ENTRY("0",      0),
@@ -2768,6 +2994,9 @@ ll_string_rotation(l_int32 rotation)
 
 /**
  * \brief Table of handle overlap by names and enumeration values.
+ * <pre>
+ * Handling overlapping bounding boxes in Boxa.
+ * </pre>
  */
 static const lept_enums_t tbl_overlap[] = {
     TBL_ENTRY("combine",        L_COMBINE),
@@ -2805,6 +3034,9 @@ ll_string_overlap(l_int32 overlap)
 
 /**
  * \brief Table of handle subflag by names and enumeration values.
+ * <pre>
+ * Flags for modifying box boundaries using a second box.
+ * </pre>
  */
 static const lept_enums_t tbl_subflag[] = {
     TBL_ENTRY("use-minsize",        L_USE_MINSIZE),
@@ -2858,6 +3090,9 @@ ll_string_subflag(l_int32 subflag)
 
 /**
  * \brief Table of handle use flag by names and enumeration values.
+ * <pre>
+ * Flags for replacing invalid boxes.
+ * </pre>
  */
 static const lept_enums_t tbl_useflag[] = {
     TBL_ENTRY("use-all-boxes",          L_USE_ALL_BOXES),
@@ -2899,6 +3134,50 @@ ll_string_useflag(l_int32 useflag)
 
 /**
  * \brief Table of dist select by names and enumeration values.
+ * <pre>
+ * Handling negative values in conversion to unsigned int.
+ * </pre>
+ */
+static const lept_enums_t tbl_negvals[] = {
+    TBL_ENTRY("clip-to-zero",   L_CLIP_TO_ZERO),
+    TBL_ENTRY("zero",           L_CLIP_TO_ZERO),
+    TBL_ENTRY("z",              L_CLIP_TO_ZERO),
+    TBL_ENTRY("take-absval",    L_TAKE_ABSVAL),
+    TBL_ENTRY("absval",         L_TAKE_ABSVAL),
+    TBL_ENTRY("abs",            L_TAKE_ABSVAL),
+    TBL_ENTRY("a",              L_TAKE_ABSVAL)
+};
+
+/**
+ * \brief Check for a negvals name.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \param dflt default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_negvals(const char *_fun, lua_State* L, int arg, l_int32 dflt)
+{
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_negvals, ARRAYSIZE(tbl_negvals));
+}
+
+/**
+ * \brief Return a string for the negvals enumeration value.
+ * \param negvals enumeration value
+ * \return const string with the name
+ */
+const char*
+ll_string_negvals(l_int32 negvals)
+{
+    return ll_string_tbl(negvals, tbl_negvals, ARRAYSIZE(tbl_negvals));
+}
+
+/**
+ * \brief Table of dist select by names and enumeration values.
+ * <pre>
+ * Value flags.
+ * </pre>
  */
 static const lept_enums_t tbl_value_flags[] = {
     TBL_ENTRY("negative",       L_NEGATIVE),
