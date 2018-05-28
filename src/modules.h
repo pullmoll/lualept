@@ -276,6 +276,7 @@ extern int          ll_push_Uarray_2d(const char* _fun, lua_State *L, const l_ui
 extern int          ll_push_Farray(const char* _fun, lua_State *L, const l_float32* fa, l_int32 n);
 extern int          ll_push_Farray_2d(const char* _fun, lua_State *L, const l_float32* fa, l_int32 wpl, l_int32 h);
 extern int          ll_push_Darray(const char* _fun, lua_State *L, const l_float64* da, l_int32 n);
+extern int          ll_push_Darray_2d(const char* _fun, lua_State *L, const l_float64* da, l_int32 wpl, l_int32 h);
 extern int          ll_push_Sarray(const char* _fun, lua_State *L, Sarray *sa);
 
 extern l_int32    * ll_unpack_Iarray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
@@ -284,6 +285,7 @@ extern l_uint32   * ll_unpack_Uarray_2d(const char *_fun, lua_State *L, int arg,
 extern l_float32  * ll_unpack_Farray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
 extern l_float32  * ll_unpack_Farray_2d(const char *_fun, lua_State *L, int arg, l_float32 *data, l_int32 wpl, l_int32 h);
 extern l_float64  * ll_unpack_Darray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
+extern l_float64  * ll_unpack_Darray_2d(const char *_fun, lua_State *L, int arg, l_float64 *data, l_int32 wpl, l_int32 h);
 extern Sarray     * ll_unpack_Sarray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
 
 extern l_int32      ll_check_index(const char *_fun, lua_State *L, int arg, l_int32 imax);

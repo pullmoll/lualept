@@ -91,7 +91,7 @@ Create(lua_State *L)
 }
 
 /**
- * \brief toString.
+ * \brief Printable string for a FPix*.
  * \param L pointer to the lua_State
  * @return 1 string on the Lua stack
  */
@@ -114,7 +114,7 @@ toString(lua_State* L)
             snprintf(str, sizeof(str), "invalid");
         } else {
             wpl = fpixGetWpl(pix);
-            size = static_cast<long>(sizeof(l_uint32)) * wpl * h;
+            size = static_cast<long>(sizeof(l_float32)) * wpl * h;
             data = fpixGetData(pix);
             refcnt = fpixGetRefcount(pix);
             fpixGetResolution(pix, &xres, &yres);
@@ -122,7 +122,7 @@ toString(lua_State* L)
                      LL_FPIX ": %p\n"
                      "    width = %d, height = %d, wpl = %d\n"
                      "    data = %p, size = %#" PRIx64 "\n"
-                     "    xres = %d, yres = %d, refcount = %d\n",
+                     "    xres = %d, yres = %d, refcount = %d",
                      reinterpret_cast<void *>(pix),
                      w, h, wpl, data, size, xres, yres, refcnt);
         }

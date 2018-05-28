@@ -212,7 +212,7 @@ Xor(lua_State *L)
 }
 
 /**
- * \brief toString.
+ * \brief Printable string for a Pix*.
  * \param L pointer to the lua_State
  * @return 1 string on the Lua stack
  */

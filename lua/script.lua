@@ -420,6 +420,7 @@ end
 function fpix_test()
 	local filename = "/tmp/fpix-test.fpix"
 	local filename2 = "/tmp/fpix-test.png"
+	header("FPix")
 	local fpix = FPix(160,100)
 	fpix:SetResolution(150,150)
 	print(pad("fpix = FPix(160,100)"), fpix)
@@ -437,6 +438,31 @@ function fpix_test()
 	print(pad("fpix3 = FPix(fpix2)"), fpix3)
 
 	local pix = fpix2:ThresholdToPix(0.80)
+	pix:Write(filename2)
+	print(pad("pix:Write('" .. filename2 .."')"), ok)
+end
+
+function dpix_test()
+	local filename = "/tmp/dpix-test.dpix"
+	local filename2 = "/tmp/dpix-test.png"
+	header("DPix")
+	local dpix = DPix(160,100)
+	dpix:SetResolution(150,150)
+	print(pad("dpix = DPix(160,100)"), dpix)
+	dpix:SetAllArbitrary(0.95)
+	for x=0,159 do
+		local y = 100*x//160
+		dpix:SetPixel(x, y, 0.55)
+	end
+	local ok = dpix:Write(filename)
+	print(pad("dpix:Write('" .. filename .."')"), ok)
+
+	local dpix2 = DPix(filename)
+	print(pad("dpix2 = DPix('" .. filename .. "')"), dpix2)
+	local dpix3 = DPix(dpix2)
+	print(pad("dpix3 = DPix(dpix2)"), dpix3)
+
+	local pix = dpix2:ConvertToPix(4, false, true)
 	pix:Write(filename2)
 	print(pad("pix:Write('" .. filename2 .."')"), ok)
 end
@@ -482,6 +508,7 @@ amap_test()
 -- pix_test()
 -- pix2_test()
 fpix_test()
+dpix_test()
 
 header()
 print("That's all, folks!")
