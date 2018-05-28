@@ -36,7 +36,7 @@
 #include "lualept.h"
 
 #if !defined(LLUA_DEBUG)
-#define LLUA_DEBUG          1           /*!< set to 1 to enable debugging */
+#define LLUA_DEBUG          0           /*!< set to 1 to enable debugging */
 #endif
 #define LOG_REGISTER        1           /*!< set to 1 to log Lua class registration */
 #define LOG_DESTROY         1           /*!< set to 1 to log object destruction */

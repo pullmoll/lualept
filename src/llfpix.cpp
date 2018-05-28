@@ -72,10 +72,64 @@ static int
 Create(lua_State *L)
 {
     LL_FUNC("Create");
-    l_int32 width = ll_check_l_int32_default(_fun, L, 1, 1);
-    l_int32 height = ll_check_l_int32_default(_fun, L, 2, 1);
-    FPix *fpix = fpixCreate(width, height);
+    FPix *fpix = nullptr;
+    if (lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
+            l_int32 width = ll_check_l_int32_default(_fun, L, 1, 1);
+            l_int32 height = ll_check_l_int32_default(_fun, L, 2, 1);
+            fpix = fpixCreate(width, height);
+    } else if (lua_isstring(L, 1)) {
+        const char* filename = ll_check_string(_fun, L, 1);
+        fpix = fpixRead(filename);
+    } else if (ll_check_FPix_opt(_fun, L, 1)) {
+        FPix *fpixs = ll_check_FPix(_fun, L, 1);
+        fpix = fpixCreateTemplate(fpixs);
+    } else if (luaL_checkudata(L, 1, LUA_FILEHANDLE)) {
+        luaL_Stream *stream = ll_check_stream(_fun, L, 1);
+        fpix = fpixReadStream(stream->f);
+    }
     return ll_push_FPix(_fun, L, fpix);
+}
+
+/**
+ * \brief toString.
+ * \param L pointer to the lua_State
+ * @return 1 string on the Lua stack
+ */
+static int
+toString(lua_State* L)
+{
+    LL_FUNC("toString");
+    char str[256];
+    FPix *pix = ll_check_FPix(_fun, L, 1);
+    luaL_Buffer B;
+    void *data;
+    l_int32 w, h, wpl, refcnt, xres, yres;
+    long size;
+
+    luaL_buffinit(L, &B);
+    if (!pix) {
+        luaL_addstring(&B, "nil");
+    } else {
+        if (fpixGetDimensions(pix, &w, &h)) {
+            snprintf(str, sizeof(str), "invalid");
+        } else {
+            wpl = fpixGetWpl(pix);
+            size = static_cast<long>(sizeof(l_uint32)) * wpl * h;
+            data = fpixGetData(pix);
+            refcnt = fpixGetRefcount(pix);
+            fpixGetResolution(pix, &xres, &yres);
+            snprintf(str, sizeof(str),
+                     LL_FPIX ": %p\n"
+                     "    width = %d, height = %d, wpl = %d\n"
+                     "    data = %p, size = %#" PRIx64 "\n"
+                     "    xres = %d, yres = %d, refcount = %d\n",
+                     reinterpret_cast<void *>(pix),
+                     w, h, wpl, data, size, xres, yres, refcnt);
+        }
+        luaL_addstring(&B, str);
+    }
+    luaL_pushresult(&B);
+    return 1;
 }
 
 /**
@@ -1260,6 +1314,7 @@ ll_register_FPix(lua_State *L)
     static const luaL_Reg methods[] = {
         {"__gc",                    Destroy},   /* garbage collector */
         {"__new",                   Create},
+        {"__tostring",              toString},
         {"AddBorder",               AddBorder},
         {"AddContinuedBorder",      AddContinuedBorder},
         {"AddMirroredBorder",       AddMirroredBorder},

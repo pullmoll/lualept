@@ -417,6 +417,30 @@ function pix2_test()
 	print (pad("pix:Write('" .. filename3 .. "','png')"), ok)
 end
 
+function fpix_test()
+	local filename = "/tmp/fpix-test.fpix"
+	local filename2 = "/tmp/fpix-test.png"
+	local fpix = FPix(160,100)
+	fpix:SetResolution(150,150)
+	print(pad("fpix = FPix(160,100)"), fpix)
+	fpix:SetAllArbitrary(0.95)
+	for x=0,159 do
+		local y = 100*x//160
+		fpix:SetPixel(x, y, 0.55)
+	end
+	local ok = fpix:Write(filename)
+	print(pad("fpix:Write('" .. filename .."')"), ok)
+
+	local fpix2 = FPix(filename)
+	print(pad("fpix2 = FPix('" .. filename .. "')"), fpix2)
+	local fpix3 = FPix(fpix2)
+	print(pad("fpix3 = FPix(fpix2)"), fpix3)
+
+	local pix = fpix2:ThresholdToPix(0.80)
+	pix:Write(filename2)
+	print(pad("pix:Write('" .. filename2 .."')"), ok)
+end
+
 function hex_dump(buf)
 	for i = 1, math.ceil(#buf/16) * 16 do
 		if (i-1) % 16 == 0 then
@@ -457,6 +481,7 @@ amap_test()
 -- dna_test()
 -- pix_test()
 -- pix2_test()
+fpix_test()
 
 header()
 print("That's all, folks!")
