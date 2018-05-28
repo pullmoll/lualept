@@ -107,7 +107,7 @@ ll_check_PixaComp_opt(const char *_fun, lua_State *L, int arg)
  * \brief Push PixaComp* to the Lua stack and set its meta table.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
- * \param cd pointer to the L_PixaComp
+ * \param pixacomp pointer to the PixaComp
  * \return 1 PixaComp* on the Lua stack
  */
 int
@@ -119,10 +119,6 @@ ll_push_PixaComp(const char *_fun, lua_State *L, PixaComp *pixacomp)
 }
 /**
  * \brief Create and push a new PixaComp*.
- *
- * Arg #1 is expected to be a string (dir).
- * Arg #2 is expected to be a l_int32 (fontsize).
- *
  * \param L pointer to the lua_State
  * \return 1 PixaComp* on the Lua stack
  */

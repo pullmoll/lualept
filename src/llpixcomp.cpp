@@ -109,7 +109,7 @@ ll_check_PixComp_opt(const char *_fun, lua_State *L, int arg)
  * \brief Push PixComp* to the Lua stack and set its meta table.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
- * \param cd pointer to the L_PixComp
+ * \param pixcomp pointer to the PixComp
  * \return 1 PixComp* on the Lua stack
  */
 int

@@ -210,6 +210,7 @@ ll_push_nil(lua_State *L)
 
 /**
  * \brief Push boolean (%b) to the Lua stack and return 1.
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param b boolean value TRUE or FALSE
  * \return 1 boolean on the Lua stack
@@ -225,6 +226,7 @@ ll_push_boolean(const char* _fun, lua_State *L, bool b)
 
 /**
  * \brief Push l_uint8 (%val) to the Lua stack and return 1.
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param val l_uint8 value
  * \return 1 boolean on the Lua stack
@@ -240,6 +242,7 @@ ll_push_l_uint8(const char* _fun, lua_State *L, l_uint8 val)
 
 /**
  * \brief Push l_uint16 (%val) to the Lua stack and return 1.
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param val l_uint16 value
  * \return 1 boolean on the Lua stack
@@ -255,6 +258,7 @@ ll_push_l_uint16(const char* _fun, lua_State *L, l_uint16 val)
 
 /**
  * \brief Push l_int32 (%val) to the Lua stack and return 1.
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param val l_int32 value
  * \return 1 boolean on the Lua stack
@@ -270,6 +274,7 @@ ll_push_l_int32(const char* _fun, lua_State *L, l_int32 val)
 
 /**
  * \brief Push l_uint32 (%val) to the Lua stack and return 1.
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param val l_uint32 value
  * \return 1 boolean on the Lua stack
@@ -285,6 +290,7 @@ ll_push_l_uint32(const char* _fun, lua_State *L, l_uint32 val)
 
 /**
  * \brief Push l_int64 (%val) to the Lua stack and return 1.
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param val l_int64 value
  * \return 1 boolean on the Lua stack
@@ -300,6 +306,7 @@ ll_push_l_int64(const char* _fun, lua_State *L, l_int64 val)
 
 /**
  * \brief Push l_uint64 (%val) to the Lua stack and return 1.
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param val l_uint64 value
  * \return 1 boolean on the Lua stack
@@ -315,8 +322,9 @@ ll_push_l_uint64(const char* _fun, lua_State *L, l_uint64 val)
 
 /**
  * \brief Push size_t (%val) to the Lua stack and return 1.
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
- * \param val size_t value
+ * \param size size_t value
  * \return 1 boolean on the Lua stack
  */
 int
@@ -330,6 +338,7 @@ ll_push_size_t(const char* _fun, lua_State *L, size_t size)
 
 /**
  * \brief Push l_float32 (%val) to the Lua stack and return 1.
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param val l_float32 value
  * \return 1 boolean on the Lua stack
@@ -345,6 +354,7 @@ ll_push_l_float32(const char* _fun, lua_State *L, l_float32 val)
 
 /**
  * \brief Push l_float64 (%val) to the Lua stack and return 1.
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param val l_float64 value
  * \return 1 boolean on the Lua stack
@@ -360,8 +370,9 @@ ll_push_l_float64(const char* _fun, lua_State *L, l_float64 val)
 
 /**
  * \brief Push string (%str) to the Lua stack and return 1.
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
- * \param val lstring value
+ * \param str string value
  * \return 1 boolean on the Lua stack
  */
 int
@@ -375,8 +386,10 @@ ll_push_string(const char* _fun, lua_State *L, const char* str)
 
 /**
  * \brief Push lstring (%str) to the Lua stack and return 1.
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
- * \param val lstring value
+ * \param str lstring value
+ * \param len lstring length
  * \return 1 boolean on the Lua stack
  */
 int
@@ -390,6 +403,7 @@ ll_push_lstring(const char* _fun, lua_State *L, const char* str, size_t len)
 
 /**
  * \brief Push a l_int32 array (%ia) to the Lua stack and return 1.
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param ia pointer to the l_int32 array
  * \param n number of values in the array
@@ -413,6 +427,7 @@ ll_push_Iarray(const char* _fun, lua_State *L, const l_int32 *ia, l_int32 n)
 
 /**
  * \brief Push a l_uint32 array (%ua) to the Lua stack and return 1.
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param ua pointer to the l_uint32 array
  * \param n number of values in the array
@@ -436,6 +451,7 @@ ll_push_Uarray(const char* _fun, lua_State *L, const l_uint32 *ua, l_int32 n)
 
 /**
  * \brief Push a l_uint32 2D array (%data) to the Lua stack and return 1.
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param data pointer to the l_uint32 array
  * \param wpl number of words in the row
@@ -457,6 +473,7 @@ ll_push_Uarray_2d(const char* _fun, lua_State *L, const l_uint32 *data, l_int32 
 
 /**
  * \brief Push a l_float32 array (%fa) to the Lua stack and return 1.
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param fa pointer to the l_float32 array
  * \param n number of values in the array
@@ -480,6 +497,7 @@ ll_push_Farray(const char* _fun, lua_State *L, const l_float32 *fa, l_int32 n)
 
 /**
  * \brief Push a l_float32 2D array (%data) to the Lua stack and return 1.
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param data pointer to the l_float32 array
  * \param wpl number of words in the row
@@ -501,6 +519,7 @@ ll_push_Farray_2d(const char* _fun, lua_State *L, const l_float32 *data, l_int32
 
 /**
  * \brief Push a l_float64 array (%da) to the Lua stack and return 1.
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param da pointer to the l_float32 array
  * \param n number of values in the array
@@ -524,6 +543,7 @@ ll_push_Darray(const char* _fun, lua_State *L, const l_float64 *da, l_int32 n)
 
 /**
  * \brief Push a l_float64 2D array (%data) to the Lua stack and return 1.
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param data pointer to the l_float32 array
  * \param wpl number of words in the row
@@ -545,6 +565,7 @@ ll_push_Darray_2d(const char* _fun, lua_State *L, const l_float64 *data, l_int32
 
 /**
  * \brief Push a string array Sarray* (%sa) to the Lua stack and return 1.
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param sa pointer to the Sarray
  * \return 1 table on the stack

@@ -582,7 +582,7 @@ extern int              ll_register_PixComp(lua_State *L);
 /* llpixacomp.cpp */
 extern PixaComp       * ll_check_PixaComp(const char *_fun, lua_State *L, int arg);
 extern PixaComp       * ll_check_PixaComp_opt(const char *_fun, lua_State *L, int arg);
-extern int              ll_push_PixaComp(const char *_fun, lua_State *L, PixaComp *pac);
+extern int              ll_push_PixaComp(const char *_fun, lua_State *L, PixaComp *pixacomp);
 extern int              ll_new_PixaComp(lua_State *L);
 extern int              ll_register_PixaComp(lua_State *L);
 
