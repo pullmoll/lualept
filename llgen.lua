@@ -52,7 +52,7 @@ end
 ---
 -- Strip known type prefixes from a Leptonica function name
 -- param str Leptonica function name
-function strip_type(str)
+function strip_ftype(str)
 	local p, s = str:match("^([%l_]+)(.*)")
 	local prefixes = {
 		amap		= true,
@@ -91,6 +91,7 @@ function strip_type(str)
 		pixacomp	= true,
 		pixcmap		= true,
 		pixcomp		= true,
+		pixTiling	= true,
 		pms		= true,
 		pta		= true,
 		ptaa		= true,
@@ -194,42 +195,42 @@ function parse(fd, str)
 	-- replace allheaders.h names with lualept names
 	local str = str:gsub("([%w_]+)", function (s)
 			local rename = {
-				L_AMAP      = "Amap",
-				L_AMAP_NODE = "AmapNode",
-				L_ASET      = "Aset",
-				L_ASET_NODE = "AsetNode",
-				L_BMF       = "Bmf",
-				BBUFFER     = "Bbuffer",
-				BOX         = "Box",
-				BOXA        = "Boxa",
-				BOXAA       = "Boxaa",
-				CCBORD      = "CCBord",
-				CCBORDA     = "CCBorda",
-				DPIX	    = "DPix",
-				FPIX	    = "FPix",
-				FPIXA       = "FPixa",
-				L_BBUFER    = "Bbuffer",
-				L_COMP_DATA = "CompData",
-				L_DEWARP    = "Dewarp",
-				L_DEWARPA   = "Dewarpa",
-				L_DNA       = "Dna",
-				L_DNAA      = "Dnaa",
-				L_KERNEL    = "Kernel",
-				L_PDF_DATA  = "PdfData",
-				L_STACK     = "Stack",
-				NUMA        = "Numa",
-				NUMAA       = "Numaa",
-				PIX         = "Pix",
-				PIXA        = "Pixa",
-				PIXAA       = "Pixaa",
-				PIXCOMP     = "PixComp",
-				PIXACOMP    = "PixaComp",
-				PIXCMAP     = "PixColormap",
-				PTA         = "Pta",
-				PTAA        = "Ptaa",
-				SARRAY      = "Sarray",
-				SEL	    = "Sel",
-				SELA        = "Sela",
+				L_AMAP		= "Amap",
+				L_AMAP_NODE	= "AmapNode",
+				L_ASET		= "Aset",
+				L_ASET_NODE	= "AsetNode",
+				L_BMF		= "Bmf",
+				BBUFFER		= "Bbuffer",
+				BOX		= "Box",
+				BOXA		= "Boxa",
+				BOXAA		= "Boxaa",
+				CCBORD		= "CCBord",
+				CCBORDA		= "CCBorda",
+				DPIX		= "DPix",
+				FPIX		= "FPix",
+				FPIXA		= "FPixa",
+				L_BBUFFER	= "Bbuffer",
+				L_COMP_DATA	= "CompData",
+				L_DEWARP	= "Dewarp",
+				L_DEWARPA	= "Dewarpa",
+				L_DNA		= "Dna",
+				L_DNAA		= "Dnaa",
+				L_KERNEL	= "Kernel",
+				L_PDF_DATA	= "PdfData",
+				L_STACK		= "Stack",
+				NUMA		= "Numa",
+				NUMAA		= "Numaa",
+				PIX		= "Pix",
+				PIXA		= "Pixa",
+				PIXAA		= "Pixaa",
+				PIXCOMP		= "PixComp",
+				PIXACOMP	= "PixaComp",
+				PIXCMAP		= "PixColormap",
+				PTA		= "Pta",
+				PTAA		= "Ptaa",
+				SARRAY		= "Sarray",
+				SEL		= "Sel",
+				SELA		= "Sela",
 			}
 			return rename[s]
 		end)
@@ -260,6 +261,8 @@ function parse(fd, str)
 	local names = {}	-- table array of variable names
 	local refs = {}		-- array of names that are non-parameters
 	local argc = 1		-- argument counter
+	local argi = 1		-- argument index
+	local retn = 0
 
 	-- fill the arrays
 	for p in argl:gmatch("([^,]+),?") do
@@ -297,7 +300,8 @@ function parse(fd, str)
 			refs[name] = true
 			get = "nullptr"
 		else
-			get = getter(vtype, argc)
+			get = getter(vtype, argi)
+			argi = argi + 1
 		end
 		types[argc] = vtype
 		names[argc] = name
@@ -311,57 +315,75 @@ function parse(fd, str)
 		' * \\brief Brief comment goes here.',
 		' * <pre>'
 		}
+
+	local argi = 1
 	for i = 1, argc-1 do
 		local vtype = types[i]
 		local name = names[i]
 		local param = typedescr(vtype)
-		if not refs[name] then
+		if refs[name] then
+			retn = retn + 1
+		else
 			-- this is a true parameter
-			line = ' * Arg #' .. i
-			if i == 1 then
+			line = ' * Arg #' .. argi
+			if argi == 1 then
 				line = line .. ' (i.e. self)'
 			end
 			line = line .. ' is expected to be a ' .. param
 			line = line .. ' (' .. name .. ').'
 			func[#func+1] = line
+			argi = argi + 1
 		end
 	end
 	func[#func+1] = ' * </pre>'
+	if rtype ~= "l_int32" then
+		retn = retn + 1
+	end
 
 	-- append the C function \param and \return comments
 	func[#func+1] = ' * \\param L pointer to the lua_State'
-	if tsize(refs) > 0 then
-		func[#func+1] = ' * \\return ' .. tsize(refs) .. ' on the Lua stack'
-	else
-		func[#func+1] = ' * \\return 1 ' .. rtype .. ' on the Lua stack'
-	end
+	func[#func+1] = ' * \\return ' .. retn .. ' on the Lua stack'
 	func[#func+1] = ' */'
 
 	-- append the function body
 	func[#func+1] = 'static int'
-	func[#func+1] = strip_type(fname) .. '(lua_State *L)'
+	func[#func+1] = strip_ftype(fname) .. '(lua_State *L)'
 	func[#func+1] = '{'
-	func[#func+1] = '    LL_FUNC("' .. strip_type(fname) .. '");'
+	func[#func+1] = '    LL_FUNC("' .. strip_ftype(fname) .. '");'
 	for i = 1, #vars do
 		func[#func+1] = vars[i]
 	end
 
 	if tsize(refs) > 0 then
 		-- there were references to variables
-		-- assume the Leptonica function returns 0 on success
-		func[#func+1] = '    if (' .. fname .. '(' .. params(types, names, refs) .. '))'
-		func[#func+1] = '        return ll_push_nil(L);'
-		for i = 1, #vars do
-			local name = names[i]
-			if refs[name] ~= nil then
-				local vtype = types[i]
-				func[#func+1] = '    ' .. pusher(vtype, name) .. ';'
+		if rtype == "l_int32" then
+			-- assume the Leptonica function returns 0 on success
+			func[#func+1] = '    if (' .. fname .. '(' .. params(types, names, refs) .. '))'
+			func[#func+1] = '        return ll_push_nil(L);'
+			for i = 1, #vars do
+				local name = names[i]
+				if refs[name] ~= nil then
+					local vtype = types[i]
+					func[#func+1] = '    ' .. pusher(vtype, name) .. ';'
+				end
+			end
+		else
+			-- the function returns some other type
+			func[#func+1] = '    ' .. rtype .. ' result = ' ..
+				fname .. '(' .. params(types, names, refs) .. ');'
+			func[#func+1] = '    ' .. pusher(rtype, "result") .. ';'
+			for i = 1, #vars do
+				local name = names[i]
+				if refs[name] ~= nil then
+					local vtype = types[i]
+					func[#func+1] = '    ' .. pusher(vtype, name) .. ';'
+				end
 			end
 		end
-		func[#func+1] = '    return ' .. tsize(refs) .. ';'
+		func[#func+1] = '    return ' .. retn .. ';'
 	else
 		-- there were no references to variables
-		-- assume the Leptonica function the result
+		-- assume the Leptonica function returns the result
 		if not rtype:match("%*$") then
 			rtype = rtype .. ' '
 		end

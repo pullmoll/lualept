@@ -40,6 +40,8 @@
 /** Define a function's name (_fun) with prefix LL_CCBORDA */
 #define LL_FUNC(x) FUNC(LL_CCBORDA "." x)
 
+
+
 /**
  * \brief Destroy a CCBorda*.
  *
@@ -79,6 +81,318 @@ Create(lua_State *L)
 }
 
 /**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 integer on the Lua stack
+ */
+static int
+GetCount(lua_State *L)
+{
+    LL_FUNC("GetCount");
+    CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
+    return ll_push_l_int32(_fun, L, ccbaGetCount(ccba));
+}
+
+/**
+ * \brief Add the CCBord* (%ccb) to the CCBorda* (%ccba).
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
+ * Arg #2 is expected to be a CCBord* (ccb).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+AddCcb(lua_State *L)
+{
+    LL_FUNC("AddCcb");
+    CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
+    CCBord *ccb = ll_check_CCBord(_fun, L, 2);
+    return ll_push_bool(_fun, L, 0 == ccbaAddCcb(ccba, ccb));
+}
+
+/**
+ * \brief Display the CCBora* (%ccba) in a Pix* (%pix).
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+DisplayBorder(lua_State *L)
+{
+    LL_FUNC("DisplayBorder");
+    CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
+    Pix *pix = ccbaDisplayBorder(ccba);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+DisplayImage1(lua_State *L)
+{
+    LL_FUNC("DisplayImage1");
+    CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
+    Pix *pix = ccbaDisplayImage1(ccba);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+DisplayImage2(lua_State *L)
+{
+    LL_FUNC("DisplayImage2");
+    CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
+    Pix *pix = ccbaDisplayImage2(ccba);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+DisplaySPBorder(lua_State *L)
+{
+    LL_FUNC("DisplaySPBorder");
+    CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
+    Pix *pix = ccbaDisplaySPBorder(ccba);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+GenerateGlobalLocs(lua_State *L)
+{
+    LL_FUNC("GenerateGlobalLocs");
+    CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
+    return ll_push_bool(_fun, L, 0 == ccbaGenerateGlobalLocs(ccba));
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
+ * Arg #2 is expected to be a l_int32 (ptsflag).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+GenerateSPGlobalLocs(lua_State *L)
+{
+    LL_FUNC("GenerateSPGlobalLocs");
+    CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
+    l_int32 ptsflag = ll_check_l_int32(_fun, L, 2);
+    return ll_push_bool(_fun, L, 0 == ccbaGenerateSPGlobalLocs(ccba, ptsflag));
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
+ * Arg #2 is expected to be a l_int32 (index).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 CCBord* on the Lua stack
+ */
+static int
+GetCcb(lua_State *L)
+{
+    LL_FUNC("GetCcb");
+    CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
+    l_int32 index = ll_check_index(_fun, L, 2, ccbaGetCount(ccba));
+    CCBord *ccb = ccbaGetCcb(ccba, index);
+    return ll_push_CCBord(_fun, L, ccb);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a string (filename).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 CCBorda* on the Lua stack
+ */
+static int
+Read(lua_State *L)
+{
+    LL_FUNC("Read");
+    const char *filename = ll_check_string(_fun, L, 1);
+    CCBorda *result = ccbaRead(filename);
+    return ll_push_CCBorda(_fun, L, result);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a luaL_Stream* (stream).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 CCBorda* on the Lua stack
+ */
+static int
+ReadStream(lua_State *L)
+{
+    LL_FUNC("ReadStream");
+    luaL_Stream *stream = ll_check_stream(_fun, L, 1);
+    CCBorda *result = ccbaReadStream(stream->f);
+    return ll_push_CCBorda(_fun, L, result);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
+ * Arg #2 is expected to be a l_int32 (coordtype).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+StepChainsToPixCoords(lua_State *L)
+{
+    LL_FUNC("StepChainsToPixCoords");
+    CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
+    l_int32 coordtype = ll_check_l_int32(_fun, L, 2);
+    return ll_push_bool(_fun, L, 0 == ccbaStepChainsToPixCoords(ccba, coordtype));
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
+ * Arg #2 is expected to be a string (filename).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+Write(lua_State *L)
+{
+    LL_FUNC("Write");
+    CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
+    const char *filename = ll_check_string(_fun, L, 2);
+    return ll_push_bool(_fun, L, 0 == ccbaWrite(filename, ccba));
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
+ * Arg #2 is expected to be a string (filename).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+WriteSVG(lua_State *L)
+{
+    LL_FUNC("WriteSVG");
+    CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
+    const char *filename = ll_check_string(_fun, L, 2);
+    return ll_push_bool(_fun, L, 0 == ccbaWriteSVG(filename, ccba));
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
+ * Arg #2 is expected to be a string (filename).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 string on the Lua stack
+ */
+static int
+WriteSVGString(lua_State *L)
+{
+    LL_FUNC("WriteSVGString");
+    CCBorda *ccba = ll_check_CCBorda(_fun, L, 2);
+    const char *filename = ll_check_string(_fun, L, 1);
+    char *result = ccbaWriteSVGString(filename, ccba);
+    return ll_push_string(_fun, L, result);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
+ * Arg #2 is expected to be a luaL_Stream* (stream).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 0 on the Lua stack
+ */
+static int
+WriteStream(lua_State *L)
+{
+    LL_FUNC("WriteStream");
+    CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
+    luaL_Stream *stream = ll_check_stream(_fun, L, 2);
+    l_int32 result = ccbaWriteStream(stream->f, ccba);
+    return ll_push_l_int32(_fun, L, result);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+GenerateSinglePath(lua_State *L)
+{
+    LL_FUNC("GenerateSinglePath");
+    CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
+    return ll_push_bool(_fun, L, 0 == ccbaGenerateSinglePath(ccba));
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+GenerateStepChains(lua_State *L)
+{
+    LL_FUNC("GenerateStepChains");
+    CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
+    return ll_push_bool(_fun, L, 0 == ccbaGenerateStepChains(ccba));
+}
+/**
  * \brief Check Lua stack at index (%arg) for udata of class LL_CCBORDA.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
@@ -90,7 +404,6 @@ ll_check_CCBorda(const char *_fun, lua_State *L, int arg)
 {
     return *ll_check_udata<CCBorda>(_fun, L, arg, LL_CCBORDA);
 }
-
 /**
  * \brief Optionally expect a CCBorda* at index (%arg) on the Lua stack.
  * \param _fun calling function's name
@@ -138,10 +451,27 @@ int
 ll_register_CCBorda(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},   /* garbage collector */
-        {"__new",               Create},
-        {"Create",              Create},
-        {"Destroy",             Destroy},
+        {"__gc",                    Destroy},   /* garbage collector */
+        {"__new",                   Create},
+        {"__len",                   GetCount},
+        {"AddCcb",                  AddCcb},
+        {"Create",                  Create},
+        {"Destroy",                 Destroy},
+        {"DisplayBorder",           DisplayBorder},
+        {"DisplayImage1",           DisplayImage1},
+        {"DisplayImage2",           DisplayImage2},
+        {"DisplaySPBorder",         DisplaySPBorder},
+        {"GenerateGlobalLocs",      GenerateGlobalLocs},
+        {"GenerateSPGlobalLocs",    GenerateSPGlobalLocs},
+        {"GetCcb",                  GetCcb},
+        {"GetCount",                GetCount},
+        {"Read",                    Read},
+        {"ReadStream",              ReadStream},
+        {"StepChainsToPixCoords",   StepChainsToPixCoords},
+        {"Write",                   Write},
+        {"WriteSVG",                WriteSVG},
+        {"WriteSVGString",          WriteSVGString},
+        {"WriteStream",             WriteStream},
         LUA_SENTINEL
     };
 
