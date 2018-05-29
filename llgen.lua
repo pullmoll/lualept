@@ -4,7 +4,14 @@
 	allheaders.h file.
 --]]
 
-local funcs = {}
+-- set to true to debug parsing
+debug = false
+
+-- array of functions
+funcs = {}
+
+-- array of Leptonica src/*.c pre-formatted comments
+heads = {}
 
 ---
 -- Sort a table by its keys
@@ -49,6 +56,89 @@ function list(fd, t)
 	if t ~= nil then
 		for _,l in ipairs(t) do
 			fd:write(l .. '\n')
+		end
+	end
+end
+
+---
+-- Extract pre-formatted comment sections from the file fs.
+-- Modifies the global heads table
+-- \param fs source file stream
+
+function pre_comments(fs)
+	local head = {}			-- currently collected heading
+	local fname = nil		-- current function/heading name (start with head before 1st function)
+	local pre = false		-- true while inside HTML pre tag
+	local note = false		-- true when the 'Note:' or 'Notes:' line was read
+	local state = 0
+
+	while true do
+		line = fs:read()
+		if line == nil then
+			-- end of file
+			break
+		end
+
+		if line == '/**' or line == '/*!' then
+			-- start of Doxygen comment
+			-- introduces a new function
+			if fname ~= nil then
+				heads[fname] = head
+			end
+			fname = nil
+			-- go to state 1 (parsing doxygen comment)
+			state = 1
+		end
+
+		if state == 3 then
+			-- 2nd line after a comment
+			-- contains the name of the function and its parameters
+			-- go to state 4 (skip until end of function)
+			state = 4
+		end
+
+		if state == 2 then
+			-- 1st line after a comment
+			-- return type
+			-- go to state 3 (2nd line after a comment)
+			state = 3
+		end
+
+		if line == ' */' then
+			-- end of Doxygen comment
+			-- go to state 2 (1st line after a comment)
+			state = 2
+		end
+
+		if state == 1 then
+			-- inside doxygen comment
+			if line:match('%s*(%\\brief)%s*') then
+				fname = line:match('%\\brief%s*([^(]+)')
+			end
+			if pre and line:match('Note[s]?:') then
+				note = true
+			end
+			if line:match('<pre>') then
+				pre = true
+			end
+			if line:match('</pre>') then
+				pre = false
+				note = false
+			end
+			if pre and note then
+				head[#head+1] = line
+			end
+		end
+
+		if state == 4 and line == '}' then
+			-- end of a function
+			if debug and name ~= nil then
+				print("name='" .. name .. "'")
+				list(io.stdout, head)
+			end
+			head = {}
+			state = 0
+			name = nil
 		end
 	end
 end
@@ -336,17 +426,19 @@ function parse(fd, str)
 	-- strip last comma (,)
 	argl = argl:sub(1, -2)
 
-	-- print("rtype   : '" .. rtype .. "'")
-	-- print("fname   : '" .. fname .. "'")
-	-- print("argspos : '" .. argspos .. "'")
-	-- print("argl    : '" .. argl .. "'")
+	if debug then
+		print("rtype   : '" .. rtype .. "'")
+		print("fname   : '" .. fname .. "'")
+		print("argspos : '" .. argspos .. "'")
+		print("argl    : '" .. argl .. "'")
+	end
 
 	local vars = {}		-- table array of variables
 	local types = {}	-- table array of variable types
 	local names = {}	-- table array of variable names
 	local refs = {}		-- array of names that are non-parameters
 	local argc = 1		-- argument counter
-	local argi = 1		-- argument index
+	local argi = 1		-- local variable index
 	local retn = 0
 
 	-- fill the arrays
@@ -421,6 +513,17 @@ function parse(fd, str)
 			argi = argi + 1
 		end
 	end
+
+	if heads[fname] ~= nil then
+		local t = heads[fname]
+		-- empty line
+		func[#func+1] = ' *'
+		-- emit the "Note:" section of the Leptonica function
+		for _,l in ipairs(t) do
+			func[#func+1] = l
+		end
+	end
+
 	func[#func+1] = ' * </pre>'
 	if rtype ~= "l_int32" and rtype ~= "l_ok" then
 		retn = retn + 1
@@ -524,13 +627,30 @@ end
 -- \param arg table array of command line parameters
 script = arg[0] or ""
 
-local allheaders = arg[1] or "../leptonica/src/allheaders.h"
-local template = arg[2] or "template.cpp"
+local allheaders = "../leptonica/src/allheaders.h"
+local template = "template.cpp"
+
+-- parameters > 0 are ../leptonica/src/*.c file names
+if #arg > 0 then
+	for i = 1,#arg do
+		local fs = io.open(arg[i])
+		if debug then
+			print("===> parsing " .. arg[i])
+		end
+		pre_comments(fs)
+		fs:close()
+	end
+end
+
 local fs = io.open(allheaders)
 local fd = io.open(template, "wb")
 extract(fs, fd)
+fs:close()
 
 for fname,func in spairs(funcs) do
-	print(fname)
+	if debug then
+		print(fname)
+	end
 	list(fd, func)
 end
+fd:close()
