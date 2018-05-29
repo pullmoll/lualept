@@ -344,7 +344,7 @@ static int
 GetNext(lua_State *L)
 {
     LL_FUNC("GetNext");
-    /* HACK: deconstify */
+    /* XXX: deconstify */
     AmapNode *node = reinterpret_cast<AmapNode *>(reinterpret_cast<l_intptr_t>(lua_topointer(L, 2)));
     AmapNode *next = l_amapGetNext(node);
     lua_pushlightuserdata(L, next);
@@ -363,7 +363,7 @@ static int
 GetPrev(lua_State *L)
 {
     LL_FUNC("GetPrev");
-    /* HACK: deconstify */
+    /* XXX: deconstify */
     AmapNode *node = reinterpret_cast<AmapNode *>(reinterpret_cast<l_intptr_t>(lua_topointer(L, 2)));
     AmapNode *prev = l_amapGetPrev(node);
     lua_pushlightuserdata(L, prev);

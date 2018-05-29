@@ -374,6 +374,7 @@ ReadMem(lua_State *L)
     LL_FUNC("ReadMem");
     size_t size = 0;
     const char *str = ll_check_lstring(_fun, L, 1, &size);
+    /* XXX: deconstify */
     l_uint8 *data = reinterpret_cast<l_uint8 *>(reinterpret_cast<l_intptr_t>(str));
     Dewarpa *dewa = dewarpaReadMem(data, size);
     return ll_push_Dewarpa(_fun, L, dewa);

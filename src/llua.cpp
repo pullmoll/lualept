@@ -35,18 +35,18 @@
 
 int main(int argc, char **argv)
 {
-        const char* progname = nullptr;
-        const char* script = nullptr;
-        progname = strrchr(argv[0], '/');
-        if (!progname)
-                progname = strrchr(argv[0], '\\');
-        if (!progname)
-                progname = argv[0];
+    const char* progname = nullptr;
+    const char* script = nullptr;
+    progname = strrchr(argv[0], '/');
+    if (!progname)
+        progname = strrchr(argv[0], '\\');
+    if (!progname)
+        progname = argv[0];
 
-        if (argc < 2) {
-                return ERROR_INT("Usage: llua <script.lua>\n", progname, 1);
-        }
-        script = argv[1];
+    if (argc < 2) {
+        return ERROR_INT("Usage: llua <script.lua>\n", progname, 1);
+    }
+    script = argv[1];
 
-        return ll_RunScript(script);
+    return ll_RunScript(script);
 }

@@ -115,7 +115,7 @@ toString(lua_State *L)
  * Arg #3 is expected to be a const (char *debugfile).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 for l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 BuildLineModel(lua_State *L)
@@ -133,7 +133,7 @@ BuildLineModel(lua_State *L)
  * Arg #2 is expected to be a const (char *debugfile).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 for l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 BuildPageModel(lua_State *L)
@@ -223,10 +223,10 @@ FindVertDisparity(lua_State *L)
 }
 
 /**
- * \brief Get text line centers for Dewarp* (%dew).
+ * \brief Get text line centers for Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is expected to be a l_int32 (debugflag).
+ * Arg #2 is expected to be a boolean (debugflag).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Ptaa* on the Lua stack
@@ -236,7 +236,7 @@ GetTextlineCenters(lua_State *L)
 {
     LL_FUNC("GetTextlineCenters");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 debugflag = ll_check_l_int32(_fun, L, 2);
+    l_int32 debugflag = ll_check_boolean_default(_fun, L, 2, FALSE);
     Ptaa *ptaa = dewarpGetTextlineCenters(pixs, debugflag);
     return ll_push_Ptaa(_fun, L, ptaa);
 }
@@ -258,7 +258,7 @@ Minimize(lua_State *L)
 }
 
 /**
- * \brief Populate full res for Dewarp* (%dew).
+ * \brief Populate full res for Dewarp* (%dew) using Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dewarp* (dew).
  * Arg #2 is expected to be a Pix* (pix).
@@ -274,8 +274,8 @@ PopulateFullRes(lua_State *L)
     LL_FUNC("PopulateFullRes");
     Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
     Pix *pix = ll_check_Pix(_fun, L, 2);
-    l_int32 x = ll_check_l_int32(_fun, L, 3);
-    l_int32 y = ll_check_l_int32(_fun, L, 4);
+    l_int32 x = ll_check_l_int32_default(_fun, L, 3, 0);
+    l_int32 y = ll_check_l_int32_default(_fun, L, 4, 0);
     return ll_push_boolean(_fun, L, 0 == dewarpPopulateFullRes(dew, pix, x, y));
 }
 
@@ -292,7 +292,7 @@ Read(lua_State *L)
 {
     LL_FUNC("Read");
     const char *filename = ll_check_string(_fun, L, 1);
-    Dewarp * dew = dewarpRead(filename);
+    Dewarp *dew = dewarpRead(filename);
     return ll_push_Dewarp(_fun, L, dew);
 }
 
@@ -311,7 +311,8 @@ ReadMem(lua_State *L)
     LL_FUNC("ReadMem");
     size_t size;
     const char *str = ll_check_lstring(_fun, L, 1, &size);
-    l_uint8* data = reinterpret_cast<l_uint8 *>(reinterpret_cast<l_intptr_t>(str));
+    /* XXX: deconstify */
+    l_uint8 *data = reinterpret_cast<l_uint8 *>(reinterpret_cast<l_intptr_t>(str));
     Dewarp *dew = dewarpReadMem(data, size);
     return ll_push_Dewarp(_fun, L, dew);
 }
@@ -351,8 +352,8 @@ RemoveShortLines(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Ptaa *ptaas = ll_check_Ptaa(_fun, L, 2);
     l_float32 fract = ll_check_l_float32(_fun, L, 3);
-    l_int32 debugflag = ll_check_boolean(_fun, L, 4);
-    Ptaa * ptaa = dewarpRemoveShortLines(pixs, ptaas, fract, debugflag);
+    l_int32 debugflag = ll_check_boolean_default(_fun, L, 4, FALSE);
+    Ptaa *ptaa = dewarpRemoveShortLines(pixs, ptaas, fract, debugflag);
     return ll_push_Ptaa(_fun, L, ptaa);
 }
 
@@ -363,7 +364,7 @@ RemoveShortLines(lua_State *L)
  * Arg #2 is expected to be a string (filename).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 for l_int32 on the Lua stack
+ * \return 1 l_int32 on the Lua stack
  */
 static int
 Write(lua_State *L)
@@ -380,7 +381,7 @@ Write(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dewarp* (dew).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 for l_int32 on the Lua stack
+ * \return 1 l_int32 on the Lua stack
  */
 static int
 WriteMem(lua_State *L)
@@ -403,7 +404,7 @@ WriteMem(lua_State *L)
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 for l_int32 on the Lua stack
+ * \return 1 l_int32 on the Lua stack
  */
 static int
 WriteStream(lua_State *L)

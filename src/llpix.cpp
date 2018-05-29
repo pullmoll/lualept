@@ -9191,6 +9191,7 @@ FlipFHMTGen(lua_State *L)
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     const char *name = ll_check_string(_fun, L, 3);
+    /* XXX: deconstify */
     char *selname = reinterpret_cast<char *>(reinterpret_cast<l_intptr_t>(name));
     Pix *pix = pixFlipFHMTGen(pixd, pixs, selname);
     return ll_push_Pix(_fun, L, pix);
@@ -23297,6 +23298,7 @@ FMorphopGen_1(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     l_int32 operation = ll_check_l_int32(_fun, L, 3);
     const char *name = ll_check_string(_fun, L, 4);
+    /* XXX: deconstify */
     char *selname = reinterpret_cast<char *>(reinterpret_cast<l_intptr_t>(name));
     Pix *pix = pixFMorphopGen_1(pixd, pixs, operation, selname);
     return ll_push_Pix(_fun, L, pix);
@@ -23366,6 +23368,7 @@ MorphDwa_1(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     l_int32 operation = ll_check_l_int32(_fun, L, 3);
     const char *name = ll_check_string(_fun, L, 4);
+    /* XXX: deconstify */
     char *selname = reinterpret_cast<char *>(reinterpret_cast<l_intptr_t>(name));
     Pix *pix = pixMorphDwa_1(pixd, pixs, operation, selname);
     return ll_push_Pix(_fun, L, pix);
@@ -23390,6 +23393,7 @@ MorphDwa_2(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     l_int32 operation = ll_check_l_int32(_fun, L, 3);
     const char *name = ll_check_string(_fun, L, 4);
+    /* XXX: deconstify */
     char *selname = reinterpret_cast<char *>(reinterpret_cast<l_intptr_t>(name));
     Pix *pix = pixMorphDwa_2(pixd, pixs, operation, selname);
     return ll_push_Pix(_fun, L, pix);
