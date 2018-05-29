@@ -31,6 +31,10 @@ function spairs(t, order)
 	end
 end
 
+---
+-- Return the size of a (non-array) table
+-- \param t table
+-- \return number of items in table
 function tsize(t)
 	local n = 0
 	for k in pairs(t) do n = n + 1 end
@@ -145,14 +149,90 @@ end
 -- Return the lualapt pusher for return type
 -- \param vtype type name of the variable
 -- \param var name of the local variable to push
-function pusher(vtype, var)
-	if vtype == "l_uint8 *" then
-		return "ll_push_lstring(_fun, L, reinterpret_cast<const char *>(" .. var .."), size)"
-	else
-		local vtype_nostart = vtype:gsub("%*", "")
-		local vtype_noblank = vtype_nostart:gsub("%s", "")
-		return "ll_push_" .. vtype_noblank .. "(_fun, L, " .. var ..")"
+-- \param isref true, if the variable is a reference
+function pusher(vtype, var, isref)
+	if vtype:match("l_ok") then
+		return "ll_push_boolean(_fun, L, 0 == " .. var .. ")"
 	end
+	if isref then
+		if vtype:match("l_uint8 %*") then
+			-- l_uint8 *data;
+			return "ll_push_lstring(_fun, L, reinterpret_cast<const char *>(" .. var .."), size)"
+		elseif vtype:match("char %*") then
+			-- char *string;
+			return "ll_push_string(_fun, L, " .. var ..")"
+		elseif vtype:match("l_int32 %*") then
+			-- l_int32 *array;
+			return "ll_push_Iarray(_fun, L, " .. var .. ", size)"
+		elseif vtype:match("l_uint32 %*") then
+			-- l_uint32 *array;
+			return "ll_push_Uarray(_fun, L, " .. var .. ", size)"
+		elseif vtype:match("l_float32 %*") then
+			-- l_float32 *array;
+			return "ll_push_Farray(_fun, L, " .. var .. ", size)"
+		elseif vtype:match("l_float64 %*") then
+			-- l_float64 *array;
+			return "ll_push_Darray(_fun, L, " .. var .. ", size)"
+		elseif vtype:match("Sarray %*") then
+			-- Sarray *sa;
+			return "ll_push_Sarray(_fun, L, " .. var .. ")"
+		end
+	end
+	local vtype_nostart = vtype:gsub("%*", "")
+	local vtype_noblank = vtype_nostart:gsub("%s", "")
+	return "ll_push_" .. vtype_noblank .. "(_fun, L, " .. var ..")"
+end
+
+---
+-- Return a variable name for the result type of a Leptonica function
+-- \param rtype result type (or pointer to the rtype)
+-- \param names table of variable names
+-- \return a name or "result" as default
+function result_name(rtype, names)
+	local str = rtype:gsub("([%w_]+)%s*%**", function (s)
+			local varname = {
+				Amap		= "amap",
+				AmapNode	= "node",
+				Aset		= "aset",
+				AsetNode	= "node",
+				Bmf		= "bmf",
+				Bbuffer		= "bbuf",
+				Box		= "box",
+				Boxa		= "boxa",
+				Boxaa		= "boxaa",
+				CCBord		= "ccb",
+				CCBorda		= "ccba",
+				DPix		= "dpix",
+				FPix		= "fpix",
+				FPixa		= "fpixa",
+				CompData	= "cid",
+				Dewarp		= "dew",
+				Dewarpa		= "dewa",
+				Dna		= "da",
+				Dnaa		= "daa",
+				Kernel		= "kel",
+				PdfData		= "pdfd",
+				Stack		= "lstack",
+				Numa		= "na",
+				Numaa		= "naa",
+				Pix		= "pix",
+				Pixa		= "pixa",
+				Pixaa		= "pixaa",
+				PixComp		= "pixc",
+				PixaComp	= "pixac",
+				PixColormap	= "cmap",
+				Pta		= "pta",
+				Ptaa		= "ptaa",
+				Sarray		= "sa",
+				Sel		= "sel",
+				Sela		= "sela",
+			}
+			return varname[s] or "result"
+		end)
+	if names[str] ~= nil then
+		str = "r" .. str
+	end
+	return str
 end
 
 ---
@@ -332,6 +412,7 @@ function parse(fd, str)
 			-- this is a true parameter
 			line = ' * Arg #' .. argi
 			if argi == 1 then
+				-- this is wrong for constructors...
 				line = line .. ' (i.e. self)'
 			end
 			line = line .. ' is expected to be a ' .. param
@@ -341,12 +422,13 @@ function parse(fd, str)
 		end
 	end
 	func[#func+1] = ' * </pre>'
-	if rtype ~= "l_int32" then
+	if rtype ~= "l_int32" and rtype ~= "l_ok" then
 		retn = retn + 1
 	end
 
 	-- append the C function \param and \return comments
 	func[#func+1] = ' * \\param L pointer to the lua_State'
+	-- TODO: list types and names of return values
 	func[#func+1] = ' * \\return ' .. retn .. ' on the Lua stack'
 	func[#func+1] = ' */'
 
@@ -360,40 +442,54 @@ function parse(fd, str)
 	end
 
 	if tsize(refs) > 0 then
+		local rname = result_name(rtype, names)
 		-- there were references to variables
-		if rtype == "l_int32" then
-			-- assume the Leptonica function returns 0 on success
+		if rtype == "l_ok" then
+			-- The Leptonica function returns 0 on success
 			func[#func+1] = '    if (' .. fname .. '(' .. params(types, names, refs) .. '))'
 			func[#func+1] = '        return ll_push_nil(L);'
 			for i = 1, #vars do
 				local name = names[i]
 				if refs[name] ~= nil then
 					local vtype = types[i]
-					func[#func+1] = '    ' .. pusher(vtype, name) .. ';'
+					func[#func+1] = '    ' .. pusher(vtype, name, false) .. ';'
 				end
 			end
-		else
-			-- the function returns some other type
-			func[#func+1] = '    ' .. rtype .. ' result = ' ..
-				fname .. '(' .. params(types, names, refs) .. ');'
-			func[#func+1] = '    ' .. pusher(rtype, "result") .. ';'
+		elseif rytpe == "void" then
+			-- the function returns nothing
+			func[#func+1] = '    ' .. fname .. '(' .. params(types, names, refs) .. ');'
 			for i = 1, #vars do
 				local name = names[i]
 				if refs[name] ~= nil then
 					local vtype = types[i]
-					func[#func+1] = '    ' .. pusher(vtype, name) .. ';'
+					func[#func+1] = '    ' .. pusher(vtype, name, false) .. ';'
+				end
+			end
+		else
+			-- the function returns some other type
+			func[#func+1] = '    ' .. rtype .. ' ' ..rname .. ' = ' ..
+				fname .. '(' .. params(types, names, refs) .. ');'
+			func[#func+1] = '    ' .. pusher(rtype, rname, true) .. ';'
+			for i = 1, #vars do
+				local name = names[i]
+				if refs[name] ~= nil then
+					local vtype = types[i]
+					func[#func+1] = '    ' .. pusher(vtype, name, false) .. ';'
 				end
 			end
 		end
 		func[#func+1] = '    return ' .. retn .. ';'
 	else
+		local rname = result_name(rtype, names)
+		-- there were references to variables
 		-- there were no references to variables
 		-- assume the Leptonica function returns the result
 		if not rtype:match("%*$") then
 			rtype = rtype .. ' '
 		end
-		func[#func+1] = '    ' .. rtype .. 'result = ' .. fname .. '(' .. params(types, names, refs) .. ');'
-		func[#func+1] = '    return ' .. pusher(rtype, "result") .. ';'
+		func[#func+1] = '    ' .. rtype .. rname .. ' = ' ..
+			fname .. '(' .. params(types, names, refs) .. ');'
+		func[#func+1] = '    return ' .. pusher(rtype, rname, true) .. ';'
 	end
 	func[#func+1] = '}'
 	func[#func+1] = ''
@@ -406,6 +502,12 @@ end
 -- \param fd destination file stream (templates.cpp)
 -- \return true on success
 function extract(fs, fd)
+	fd:write('#include "../leptonica/src/allheaders.h"\n')
+	fd:write('#include "src/modules.h"\n')
+	fd:write('#include </usr/include/lua5.3/lualib.h>\n')
+	fd:write('#include </usr/include/lua5.3/lauxlib.h>\n')
+	fd:write('#define LL_FUNC(x) const char *_fun = x; (void)_fun\n')
+	fd:write('\n')
 	while true do
 		local line = fs:read()
 		if line == nil then
@@ -422,7 +524,7 @@ end
 -- \param arg table array of command line parameters
 script = arg[0] or ""
 
-local allheaders = arg[1] or "/usr/include/leptonica/allheaders.h"
+local allheaders = arg[1] or "../leptonica/src/allheaders.h"
 local template = arg[2] or "template.cpp"
 local fs = io.open(allheaders)
 local fd = io.open(template, "wb")
