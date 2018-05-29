@@ -369,6 +369,9 @@ extern const char * ll_string_searchir(l_int32 dir);
 extern l_int32      ll_check_number_value(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_number_value(l_int32 dir);
 
+extern l_int32      ll_check_position(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern const char * ll_string_position(l_int32 dir);
+
 extern l_int32      ll_check_stats_type(const char *_fun, lua_State *L, int arg, l_int32 dflt);
 extern const char * ll_string_stats_type(l_int32 dir);
 

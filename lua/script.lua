@@ -1,3 +1,5 @@
+tmpdir = "/tmp/lualept"
+
 function header(str)
 	local len = str ~= nil and #str or 0
 	local nstar = (78 - len) // 2
@@ -155,7 +157,7 @@ function box_test()
 end
 
 function numa_test()
-	local filename = "/tmp/test.numa"
+	local filename = tmpdir .. "/test.numa"
 	header("Numa/Numaa")
 
 	local PI = 3.14159265358979323846
@@ -265,7 +267,7 @@ function dna_test()
 	print("da:GetDArray():", t)
 	tbl(t)
 
-	local filename = "/tmp/test.daa"
+	local filename = tmpdir .. "/test.daa"
 	local ok = daa:Write(filename)
 	print(pad("daa:Write('"..filename.."')"), ok)
 
@@ -280,7 +282,7 @@ function dna_test()
 end
 
 function pix_test()
-	local filename = "/tmp/test.png"
+	local filename = tmpdir .. "/test.png"
 	header("Pix")
 	local width, height, depth = 320, 240, 2
 	local pix = Pix(width,height,depth)
@@ -318,8 +320,6 @@ function pix_test()
 		for x = 4, width-4 do pix:SetPixel(x, y, black) end
 	end
 
-	pix:Display(0,0)
-
 	pix:SetSpecial(10+9)	-- maximum compression
 	local ok = pix:Write(filename, "png")
 	print(pad("pix:Write('" .. filename .."')"), ok)
@@ -354,7 +354,6 @@ function pix_test()
 
 	local ok = pix2:SetData(data)
 	print(pad("pix2:SetData(data)"), ok)
-	pix2:Display(0,0)
 
 	local w, h, d = pix2:GetDimensions()
 	print(pad("width"), w)
@@ -379,20 +378,21 @@ function pix_test()
 		0x81ff2a00, 0x19f9fa00, 0x8a818b00, 0x586a9400}
 	local pix3 = Pix().DisplayColorArray(240, 4, 6, carray)
 	local pix3 = pix3:AddBorder(20, LuaLept.RGB(255,255,255))
+
 	print(pad("pix3"), pix3)
-	local ok = pix3:Write("/tmp/carray.tiff", "lzw")
-	pix3:Display(0,0)
+	local ok = pix3:Write(tmpdir .. "/carray.tiff", "lzw")
+
+	local data, pdf = pix3:ConvertToPdf("jpg", 75, tmpdir .. "/carray.pdf", 0, 0, 300, "A PixColormap array")
+	print(pad("pix3:ConvertToPdf(...)"), pdf)
 end
 
 function pix2_test()
-	local filename = "/tmp/lualept.png"
-	local filename2 = "/tmp/lualept-mask.tif"
-	local filename3 = "/tmp/lualept-masked.png"
+	local filename = tmpdir .. "/lualept.png"
+	local filename2 = tmpdir .. "/lualept-mask.tif"
+	local filename3 = tmpdir .. "/lualept-masked.png"
 	header("Pix2")
 	local pix = Pix('lualept.jpg')
 	print (pad("pix"), pix)
-
-	pix:DisplayWithTitle(0,0, 'lualept.jpg', true)
 
 	local ok = pix:Write(filename, 'png')
 	print (pad("pix:Write('" .. filename .. "', 'png')"), ok)
@@ -409,8 +409,6 @@ function pix2_test()
 	print (pad("pixm"), pixm)
 	print (pad("dimensions"), pixm:GetDimensions())
 
-	pixm:Display(0,0)
-
 	print (pad("pixels"), pixm:CountPixels())
 	local box = Box(10,w-20,h-100,100)
 	print (pad("rect"), box)
@@ -422,13 +420,11 @@ function pix2_test()
 	pix:PaintThroughMask(pixm, 0, 0, LuaLept.RGB(255,48,48))
 	local ok = pix:Write(filename3,'png')
 	print (pad("pix:Write('" .. filename3 .. "','png')"), ok)
-
-	pix:Display(0,0)
 end
 
 function fpix_test()
-	local filename = "/tmp/fpix-test.fpix"
-	local filename2 = "/tmp/fpix-test.png"
+	local filename = tmpdir .. "/fpix-test.fpix"
+	local filename2 = tmpdir .. "/fpix-test.png"
 	header("FPix")
 	local fpix = FPix(160,100)
 	fpix:SetResolution(150,150)
@@ -452,8 +448,8 @@ function fpix_test()
 end
 
 function dpix_test()
-	local filename = "/tmp/dpix-test.dpix"
-	local filename2 = "/tmp/dpix-test.png"
+	local filename = tmpdir .. "/dpix-test.dpix"
+	local filename2 = tmpdir .. "/dpix-test.png"
 	header("DPix")
 	local dpix = DPix(160,100)
 	dpix:SetResolution(150,150)
@@ -515,9 +511,9 @@ amap_test()
 -- numa_test()
 -- dna_test()
 pix_test()
-pix2_test()
-fpix_test()
-dpix_test()
+-- pix2_test()
+-- fpix_test()
+-- dpix_test()
 
 header()
 print("That's all, folks!")

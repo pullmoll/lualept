@@ -2330,6 +2330,52 @@ ll_string_number_value(l_int32 type)
 }
 
 /**
+ * \brief Table of position names and enumeration values.
+ * <pre>
+ * Pdf multi image flags.
+ * </pre>
+ */
+static const lept_enums_t tbl_position[] = {
+    TBL_ENTRY("single-image",       0),
+    TBL_ENTRY("single",             0),
+    TBL_ENTRY("s",                  0),
+    TBL_ENTRY("first-image",        L_FIRST_IMAGE),
+    TBL_ENTRY("first",              L_FIRST_IMAGE),
+    TBL_ENTRY("f",                  L_FIRST_IMAGE),
+    TBL_ENTRY("next-image",         L_NEXT_IMAGE),
+    TBL_ENTRY("next",               L_NEXT_IMAGE),
+    TBL_ENTRY("n",                  L_NEXT_IMAGE),
+    TBL_ENTRY("last-image",         L_LAST_IMAGE),
+    TBL_ENTRY("last",               L_LAST_IMAGE),
+    TBL_ENTRY("l",                  L_LAST_IMAGE)
+};
+
+/**
+ * \brief Check for a position name.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \param dflt default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_position(const char *_fun, lua_State* L, int arg, l_int32 dflt)
+{
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_position, ARRAYSIZE(tbl_position));
+}
+
+/**
+ * \brief Return a string for the position enumeration value.
+ * \param type enumeration value of the position
+ * \return const string with the name
+ */
+const char*
+ll_string_position(l_int32 type)
+{
+    return ll_string_tbl(type, tbl_position, ARRAYSIZE(tbl_position));
+}
+
+/**
  * \brief Table of statistical measures names and enumeration values.
  * <pre>
  * Statistical measures.

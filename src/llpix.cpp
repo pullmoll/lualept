@@ -5327,7 +5327,7 @@ ConvertToFPix(lua_State *L)
  * Arg #6 is expected to be a l_int32 (y).
  * Arg #7 is expected to be a l_int32 (res).
  * Arg #8 is expected to be a string (title).
- * Arg #9 is expected to be a l_int32 (position).
+ * Arg #9 is expected to be a string describing the position (position).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -5344,9 +5344,9 @@ ConvertToPdf(lua_State *L)
     l_int32 y = ll_check_l_int32(_fun, L, 6);
     l_int32 res = ll_check_l_int32(_fun, L, 7);
     const char *title = ll_check_string(_fun, L, 8);
-    l_int32 position = ll_check_l_int32(_fun, L, 9);
+    l_int32 position = ll_check_position(_fun, L, 9, 0);
     PdfData *lpd = nullptr;
-    if (pixConvertToPdf(pix, type, quality, fileout, x, y, res, title, &lpd, position))
+    if (pixConvertToPdf(pix, type, quality, fileout, x, y, res, title, position ? &lpd : nullptr, position))
         return ll_push_nil(L);
     ll_push_PdfData(_fun, L, lpd);
     return 1;
@@ -5358,11 +5358,11 @@ ConvertToPdf(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (type).
  * Arg #3 is expected to be a l_int32 (quality).
- * Arg #6 is expected to be a l_int32 (x).
- * Arg #7 is expected to be a l_int32 (y).
- * Arg #8 is expected to be a l_int32 (res).
- * Arg #9 is expected to be a string (title).
- * Arg #10 is expected to be a l_int32 (position).
+ * Arg #4 is expected to be a l_int32 (x).
+ * Arg #5 is expected to be a l_int32 (y).
+ * Arg #6 is expected to be a l_int32 (res).
+ * Arg #7 is expected to be a string (title).
+ * Arg #8 is expected to be a string describing the position (position).
  * </pre>
  * \param L pointer to the lua_State
  * \return 2 lstring (%data, %nbytes) and PdfData* (%lpd) on the Lua stack
@@ -5374,15 +5374,15 @@ ConvertToPdfData(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 type = ll_check_l_int32(_fun, L, 2);
     l_int32 quality = ll_check_l_int32(_fun, L, 3);
-    l_int32 x = ll_check_l_int32(_fun, L, 6);
-    l_int32 y = ll_check_l_int32(_fun, L, 7);
-    l_int32 res = ll_check_l_int32(_fun, L, 8);
-    const char *title = ll_check_string(_fun, L, 9);
-    l_int32 position = ll_check_l_int32(_fun, L, 10);
+    l_int32 x = ll_check_l_int32(_fun, L, 4);
+    l_int32 y = ll_check_l_int32(_fun, L, 5);
+    l_int32 res = ll_check_l_int32(_fun, L, 6);
+    const char *title = ll_check_string(_fun, L, 7);
+    l_int32 position = ll_check_position(_fun, L, 8, 0);
     l_uint8 *data = nullptr;
     size_t nbytes = 0;
     PdfData *lpd = nullptr;
-    if (pixConvertToPdfData(pix, type, quality, &data, &nbytes, x, y, res, title, &lpd, position))
+    if (pixConvertToPdfData(pix, type, quality, &data, &nbytes, x, y, res, title, position ? &lpd : nullptr, position))
         return ll_push_nil(L);
     ll_push_lstring(_fun, L, reinterpret_cast<const char *>(data), nbytes);
     ll_free(data);

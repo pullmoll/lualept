@@ -168,7 +168,7 @@ ConvertToPdf(lua_State *L)
     l_int32 res = ll_check_l_int32(_fun, L, 7);
     const char *title = ll_check_string(_fun, L, 8);
     PdfData *lpd = nullptr;
-    l_int32 position = ll_check_l_int32(_fun, L, 9);
+    l_int32 position = ll_check_position(_fun, L, 9, L_FIRST_IMAGE);
     if (convertToPdf(filein, type, quality, fileout, x, y, res, title, &lpd, position))
         return ll_push_nil(L);
     ll_push_PdfData(_fun, L, lpd);
