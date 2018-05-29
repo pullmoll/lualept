@@ -81,6 +81,57 @@ Create(lua_State *L)
 }
 
 /**
+ * \brief Printable string for a Pix*.
+ * \param L pointer to the lua_State
+ * @return 1 string on the Lua stack
+ */
+static int
+toString(lua_State* L)
+{
+    LL_FUNC("toString");
+    char str[256];
+    Kernel *kel = ll_check_Kernel(_fun, L, 1);
+    l_int32 sy, sx, cy, cx, y, x;
+    l_float32 sum;
+    l_float32 val;
+    int len;
+    luaL_Buffer B;
+
+    luaL_buffinit(L, &B);
+    if (!kel) {
+        luaL_addstring(&B, "nil");
+    } else {
+        if (kernelGetParameters(kel, &sy, &sx, &cy, &cx)) {
+            snprintf(str, sizeof(str), "invalid");
+        } else {
+            kernelGetSum(kel, &sum);
+            snprintf(str, sizeof(str),
+                     LL_KERNEL ": %p\n"
+                     "    sy = %d, sx = %d, cy = %d, cx = %d, sum = %g\n",
+                     reinterpret_cast<void *>(kel),
+                     sy, sx, cy, cx, static_cast<double>(sum));
+        }
+        luaL_addstring(&B, str);
+        for (y = 0; y < sy; y++) {
+            if (y > 0)
+                luaL_addstring(&B, "\n");
+            luaL_addstring(&B, "    ");
+            for (x = 0; x < sx; x++) {
+                if (x > 0) {
+                    snprintf(str, sizeof(str), " %*s", 10 - len, "");
+                    luaL_addstring(&B, str);
+                }
+                kernelGetElement(kel, y, x, &val);
+                len = snprintf(str, sizeof(str), "%.6g", static_cast<double>(val));
+                luaL_addstring(&B, str);
+            }
+        }
+    }
+    luaL_pushresult(&B);
+    return 1;
+}
+
+/**
  * \brief Copy a Kernel* (%kels).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Kernel* (kels).
@@ -352,7 +403,7 @@ ReadStream(lua_State *L)
  * Arg #4 is expected to be a l_float32 (val).
  * </pre>
  * \param L pointer to the lua_State
- * \return 0 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 SetElement(lua_State *L)
@@ -362,8 +413,7 @@ SetElement(lua_State *L)
     l_int32 row = ll_check_l_int32(_fun, L, 2);
     l_int32 col = ll_check_l_int32(_fun, L, 3);
     l_float32 val = ll_check_l_float32(_fun, L, 4);
-    l_int32 result = kernelSetElement(kel, row, col, val);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == kernelSetElement(kel, row, col, val));
 }
 
 /**
@@ -487,6 +537,7 @@ ll_register_Kernel(lua_State *L)
     static const luaL_Reg methods[] = {
         {"__gc",                Destroy},   /* garbage collector */
         {"__new",               Create},
+        {"__tostring",          toString},
         {"Copy",                Copy},
         {"Create",              Create},
         {"CreateFromFile",      CreateFromFile},

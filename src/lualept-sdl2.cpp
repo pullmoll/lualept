@@ -47,10 +47,21 @@ SetPixel(SDL_Surface *image, float scale, int x, int y, uint32_t color)
     SDL_FillRect(image, &rect, color);
 }
 
+static l_uint32
+MakeColor(SDL_Surface *image, l_int32 red, l_int32 green, l_int32 blue, l_int32 alpha)
+{
+    const l_uint32 color = SDL_MapRGBA(image->format,
+                                       static_cast<l_uint8>(red),
+                                       static_cast<l_uint8>(green),
+                                       static_cast<l_uint8>(blue),
+                                       static_cast<l_uint8>(alpha));
+    return color;
+}
+
 static void
 PaintImagePix(SDL_Surface *image, Pix *pix, float scale)
 {
-    const l_uint32 *srcdata = pixGetData(pix);
+    l_uint32 *srcdata = pixGetData(pix);
     PixColormap *cmap = pixGetColormap(pix);
     const int height = pixGetHeight(pix);
     const int depth = pixGetDepth(pix);
@@ -61,21 +72,22 @@ PaintImagePix(SDL_Surface *image, Pix *pix, float scale)
     switch (depth) {
     case 1:
         for (int y = 0; y < height; y++) {
-            const l_uint32* src = srcdata + y * wpl;
+            l_uint32* src = srcdata + y * wpl;
             for (int x = 0; x < 32*wpl; x += 32) {
-                l_uint32 pixels = *src++;
                 if (cmap) {
                     for (int b = 0; b < 32; b++) {
-                        l_uint32 color;
-                        pixcmapGetColor32(cmap, (pixels >> 31) & 1, &color);
+                        l_int32 red, green, blue;
+                        l_uint32 pixel, color;
+                        pixcmapGetColor32(cmap, GET_DATA_BIT(src, x + b), &pixel);
+                        extractRGBValues(pixel, &red, &green, &blue);
+                        color = MakeColor(image, red, green, blue, 255);
                         SetPixel(image, scale, x+b, y, color);
-                        pixels <<= 1;
                     }
                 } else {
                     for (int b = 0; b < 32; b++) {
-                        l_uint32 color = (0xffffff00 * ((pixels >> 31) & 1)) | (0xfful << L_ALPHA_SHIFT);
+                        l_int32 gray = 255 * GET_DATA_BIT(src, x + b);
+                        l_uint32 color = MakeColor(image, gray, gray, gray, 255);
                         SetPixel(image, scale, x+b, y, color);
-                        pixels <<= 1;
                     }
                 }
             }
@@ -84,21 +96,22 @@ PaintImagePix(SDL_Surface *image, Pix *pix, float scale)
 
     case 2:
         for (int y = 0; y < height; y++) {
-            const l_uint32* src = srcdata + y * wpl;
+            l_uint32* src = srcdata + y * wpl;
             for (int x = 0; x < 16*wpl; x += 16) {
-                l_uint32 pixels = *src++;
                 if (cmap) {
                     for (int b = 0; b < 16; b++) {
-                        l_uint32 color = 0;
-                        pixcmapGetColor32(cmap, (pixels >> 30) & 3, &color);
+                        l_int32 red, green, blue;
+                        l_uint32 pixel, color;
+                        pixcmapGetColor32(cmap, GET_DATA_DIBIT(src, x + b), &pixel);
+                        extractRGBValues(pixel, &red, &green, &blue);
+                        color = MakeColor(image, red, green, blue, 255);
                         SetPixel(image, scale, x+b, y, color);
-                        pixels <<= 2;
                     }
                 } else {
                     for (int b = 0; b < 16; b++) {
-                        l_uint32 color = 255 * ((pixels >> 30) & 3) / 3;
+                        l_int32 gray = 255 * GET_DATA_DIBIT(src, x + b) / 3;
+                        l_uint32 color = MakeColor(image, gray, gray, gray, 255);
                         SetPixel(image, scale, x+b, y, color);
-                        pixels <<= 2;
                     }
                 }
             }
@@ -107,21 +120,22 @@ PaintImagePix(SDL_Surface *image, Pix *pix, float scale)
 
     case 4:
         for (int y = 0; y < height; y++) {
-            const l_uint32* src = srcdata + y * wpl;
+            l_uint32* src = srcdata + y * wpl;
             for (int x = 0; x < 8*wpl; x += 8) {
-                l_uint32 pixels = *src++;
                 if (cmap) {
                     for (int b = 0; b < 8; b++) {
-                        l_uint32 color = 0;
-                        pixcmapGetColor32(cmap, (pixels >> 28) & 15, &color);
+                        l_int32 red, green, blue;
+                        l_uint32 pixel, color;
+                        pixcmapGetColor32(cmap, GET_DATA_QBIT(src, x + b), &pixel);
+                        extractRGBValues(pixel, &red, &green, &blue);
+                        color = MakeColor(image, red, green, blue, 255);
                         SetPixel(image, scale, x+b, y, color);
-                        pixels <<= 4;
                     }
                 } else {
                     for (int b = 0; b < 8; b++) {
-                        l_uint32 color = 255 * ((pixels >> 28) & 15) / 15;
+                        l_int32 gray = 255 * GET_DATA_QBIT(src, x + b) / 15;
+                        const l_uint32 color = MakeColor(image, gray, gray, gray, 255);
                         SetPixel(image, scale, x+b, y, color);
-                        pixels <<= 4;
                     }
                 }
             }
@@ -130,22 +144,36 @@ PaintImagePix(SDL_Surface *image, Pix *pix, float scale)
 
     case 8:
         for (int y = 0; y < height; y++) {
-            const l_uint32* src = srcdata + y * wpl;
+            l_uint32* src = srcdata + y * wpl;
             for (int x = 0; x < 4*wpl; x += 4) {
-                l_uint32 pixels = *src++;
                 if (cmap) {
                     for (int b = 0; b < 4; b++) {
-                        l_uint32 color = 0;
-                        pixcmapGetColor32(cmap, (pixels >> 24) & 255, &color);
+                        l_int32 red, green, blue;
+                        l_uint32 pixel, color;
+                        pixcmapGetColor32(cmap, GET_DATA_BYTE(src, x+b), &pixel);
+                        extractRGBValues(pixel, &red, &green, &blue);
+                        color = MakeColor(image, red, green, blue, 255);
                         SetPixel(image, scale, x+b, y, color);
-                        pixels <<= 8;
                     }
                 } else {
                     for (int b = 0; b < 4; b++) {
-                        l_uint32 color = (pixels >> 24) & 255;
+                        l_int32 gray = GET_DATA_BYTE(src, x+b);
+                        l_uint32 color = MakeColor(image, gray, gray, gray, 255);
                         SetPixel(image, scale, x+b, y, color);
-                        pixels <<= 8;
                     }
+                }
+            }
+        }
+        break;
+
+    case 16:
+        for (int y = 0; y < height; y++) {
+            l_uint32* src = srcdata + y * wpl;
+            for (int x = 0; x < 2*wpl; x += 2) {
+                for (int b = 0; b < 2; b++) {
+                    l_int32 gray = GET_DATA_TWO_BYTES(src, x+b) / 256;
+                    const l_uint32 color = MakeColor(image, gray, gray, gray, 255);
+                    SetPixel(image, scale, x+b, y, color);
                 }
             }
         }
@@ -153,10 +181,12 @@ PaintImagePix(SDL_Surface *image, Pix *pix, float scale)
 
     case 24:
         for (int y = 0; y < height; y++) {
-            const l_uint32* src = srcdata + y * wpl;
+            l_uint32* src = srcdata + y * wpl;
             for (int x = 0; x < wpl; x++) {
-                const l_uint32 pixels = *src++;
-                const l_uint32 color = pixels | (0xfful << L_ALPHA_CHANNEL);
+                l_int32 red, green, blue;
+                l_uint32 pixel = GET_DATA_FOUR_BYTES(src, x), color;
+                extractRGBValues(pixel, &red, &green, &blue);
+                color = MakeColor(image, red, green, blue, 255);
                 SetPixel(image, scale, x, y, color);
             }
         }
@@ -164,17 +194,21 @@ PaintImagePix(SDL_Surface *image, Pix *pix, float scale)
 
     case 32:
         for (int y = 0; y < height; y++) {
-            const l_uint32* src = srcdata + y * wpl;
+            l_uint32* src = srcdata + y * wpl;
             if (3 == spp) {
                 for (int x = 0; x < wpl; x++) {
-                    const l_uint32 pixels = *src++;
-                    const l_uint32 color = pixels | (0xfful << L_ALPHA_CHANNEL);
+                    l_int32 red, green, blue;
+                    l_uint32 pixel = GET_DATA_FOUR_BYTES(src, x), color;
+                    extractRGBValues(pixel, &red, &green, &blue);
+                    color = MakeColor(image, red, green, blue, 255);
                     SetPixel(image, scale, x, y, color);
                 }
             } else {
                 for (int x = 0; x < wpl; x++) {
-                    const l_uint32 pixels = *src++;
-                    const l_uint32 color = pixels;
+                    l_int32 red, green, blue, alpha;
+                    l_uint32 pixel = GET_DATA_FOUR_BYTES(src, x), color;
+                    extractRGBAValues(pixel, &red, &green, &blue, &alpha);
+                    color = MakeColor(image, red, green, blue, alpha);
                     SetPixel(image, scale, x, y, color);
                 }
             }
