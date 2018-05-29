@@ -62,7 +62,7 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Create a new CompData* from a file (%fname).
  * <pre>
  * Arg #1 is expected to be a string (fname).
  * Arg #2 is expected to be a l_int32 (type).
@@ -147,7 +147,7 @@ toString(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Convert CompData* (%cid) to PDF data in a lstring (%data, %nbytes).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CompData* (cid).
  * Arg #2 is expected to be a string (title).
@@ -171,7 +171,7 @@ ConvertToPdfData(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Create CompData* (%cid) for PDF from a file (%fname).
  * <pre>
  * Arg #1 is expected to be a string (fname).
  * Arg #2 is expected to be a Pix* (pix).
@@ -194,7 +194,7 @@ CreateForPdf(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Flate compress data from a file (%fname) to a CompData* (%cid).
  * <pre>
  * Arg #1 is expected to be a string (fname).
  * Arg #2 is expected to be a l_int32 (ascii85flag).
@@ -213,7 +213,7 @@ FlateData(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Flate compress data from a file (%fname) for a PDF to a CompData* (%cid).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a string (fname).
  * Arg #2 is expected to be a Pix* (pixs).
@@ -232,7 +232,7 @@ FlateDataPdf(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief G4 compress data from a file (%fname) to a CompData* (%cid).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a string (fname).
  * Arg #2 is expected to be a l_int32 (ascii85flag).
@@ -251,7 +251,7 @@ G4Data(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Generate CompData* (%cid) from a file (%fname).
  * <pre>
  * Arg #1 is expected to be a string (filename).
  * Arg #2 is expected to be a l_int32 (type).
@@ -259,24 +259,49 @@ G4Data(lua_State *L)
  * Arg #4 is expected to be a l_int32 (ascii85).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 on the Lua stack
+ * \return 1 CompData* on the Lua stack
  */
 static int
 Generate(lua_State *L)
 {
     LL_FUNC("Generate");
-    const char *filename = ll_check_string(_fun, L, 1);
+    const char *fname = ll_check_string(_fun, L, 1);
     l_int32 type = ll_check_l_int32(_fun, L, 2);
     l_int32 quality = ll_check_l_int32(_fun, L, 3);
     l_int32 ascii85 = ll_check_l_int32(_fun, L, 4);
     CompData *cid = nullptr;
-    if (l_generateCIData(filename, type, quality, ascii85, &cid))
+    if (l_generateCIData(fname, type, quality, ascii85, &cid))
         return ll_push_nil(L);
     return ll_push_CompData(_fun, L, cid);
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Generate CompData* (%cid) from a Pix* (%pixs).
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_int32 (type).
+ * Arg #3 is expected to be a l_int32 (quality).
+ * Arg #4 is expected to be a l_int32 (ascii85).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 CompData* on the Lua stack
+ */
+static int
+GenerateCIData(lua_State *L)
+{
+    LL_FUNC("GenerateCIData");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 type = ll_check_l_int32(_fun, L, 2);
+    l_int32 quality = ll_check_l_int32(_fun, L, 3);
+    l_int32 ascii85 = ll_check_l_int32(_fun, L, 4);
+    CompData *cid = nullptr;
+    if (pixGenerateCIData(pixs, type, quality, ascii85, &cid))
+        return ll_push_nil(L);
+    return ll_push_CompData(_fun, L, cid);
+}
+
+/**
+ * \brief Generate CompData* (%cid) from a file (%filein) using flate compression.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CompData* (cid).
  * Arg #2 is expected to be a string (filein).
@@ -288,7 +313,7 @@ Generate(lua_State *L)
  * Arg #8 is expected to be a l_int32 (endpage).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 on the Lua stack
+ * \return 1 lstring on the Lua stack
  */
 static int
 GenerateFlatePS(lua_State *L)
@@ -309,7 +334,7 @@ GenerateFlatePS(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Generate CompData* (%cid) from a file (%filein) using G4 compression.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CompData* (cid).
  * Arg #2 is expected to be a string (filein).
@@ -322,7 +347,7 @@ GenerateFlatePS(lua_State *L)
  * Arg #9 is expected to be a l_int32 (endpage).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 on the Lua stack
+ * \return 1 lstring on the Lua stack
  */
 static int
 GenerateG4PS(lua_State *L)
@@ -344,7 +369,7 @@ GenerateG4PS(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Generate CompData* (%cid) from a file (%filein) using JPEG compression.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CompData* (cid).
  * Arg #2 is expected to be a string (filein).
@@ -356,7 +381,7 @@ GenerateG4PS(lua_State *L)
  * Arg #8 is expected to be a l_int32 (endpage).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 on the Lua stack
+ * \return 1 lstring on the Lua stack
  */
 static int
 GenerateJpegPS(lua_State *L)
@@ -376,13 +401,13 @@ GenerateJpegPS(lua_State *L)
     return 1;
 }
 /**
- * \brief Brief comment goes here.
+ * \brief JPEG compress data from a file (%fname) to a CompData* (%cid).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a string (fname).
  * Arg #2 is expected to be a l_int32 (ascii85flag).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 on the Lua stack
+ * \return 1 CompData* on the Lua stack
  */
 static int
 JpegData(lua_State *L)
@@ -395,7 +420,7 @@ JpegData(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief JPEG compress data from a lstring (%str, %nbytes) to a CompData* (%cid).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a lstring (str).
  * Arg #2 is expected to be a boolean (ascii85flag).
@@ -489,6 +514,7 @@ ll_register_CompData(lua_State *L)
         {"FlateDataPdf",        FlateDataPdf},
         {"G4Data",              G4Data},
         {"Generate",            Generate},
+        {"GenerateCIData",      GenerateCIData},
         {"GenerateFlatePS",     GenerateFlatePS},
         {"GenerateG4PS",        GenerateG4PS},
         {"GenerateJpegPS",      GenerateJpegPS},
