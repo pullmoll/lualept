@@ -73,6 +73,7 @@ function strip_ftype(str)
 		fpix		= true,
 		fpixa		= true,
 		jb		= true,
+		kernel		= true,
 		l_amap		= true,
 		l_aset		= true,
 		l_bytea		= true,

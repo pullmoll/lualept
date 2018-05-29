@@ -41,12 +41,12 @@
 #define LL_FUNC(x) FUNC(LL_KERNEL "." x)
 
 /**
- * \brief Brief comment goes here.
+ * \brief Destroy a Kernel* (%kel).
  * <pre>
  * Arg #1 is expected to be a l_int32 (freeflag).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 void on the Lua stack
+ * \return 0 nothing on the Lua stack
  */
 static int
 Destroy(lua_State *L)
@@ -62,13 +62,13 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Create a Kernel* (%kel).
  * <pre>
  * Arg #1 is expected to be a l_int32 (height).
  * Arg #2 is expected to be a l_int32 (width).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 Kernel * on the Lua stack
+ * \return 1 Kernel* on the Lua stack
  */
 static int
 Create(lua_State *L)
@@ -81,7 +81,7 @@ Create(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Copy a Kernel* (%kels).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Kernel* (kels).
  * </pre>
@@ -98,12 +98,12 @@ Copy(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Create a Kernel* (%kel) from an external file (%filename).
  * <pre>
  * Arg #1 is expected to be a string (filename).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 on the Lua stack
+ * \return 1 Kernel* on the Lua stack
  */
 static int
 CreateFromFile(lua_State *L)
@@ -115,14 +115,14 @@ CreateFromFile(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Create a Kernel* (%kel) from a Pix* (%pix).
  * <pre>
  * Arg #1 is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (cy).
  * Arg #3 is expected to be a l_int32 (cx).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 on the Lua stack
+ * \return 1 Kernel* on the Lua stack
  */
 static int
 CreateFromPix(lua_State *L)
@@ -136,7 +136,7 @@ CreateFromPix(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Create a Kernel* (%kel) from a string (%kdata).
  * <pre>
  * Arg #1 is expected to be a l_int32 (h).
  * Arg #2 is expected to be a l_int32 (w).
@@ -145,7 +145,7 @@ CreateFromPix(lua_State *L)
  * Arg #5 is expected to be a string (kdata).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 on the Lua stack
+ * \return 1 Kernel* on the Lua stack
  */
 static int
 CreateFromString(lua_State *L)
@@ -156,19 +156,19 @@ CreateFromString(lua_State *L)
     l_int32 cy = ll_check_l_int32(_fun, L, 3);
     l_int32 cx = ll_check_l_int32(_fun, L, 4);
     const char *kdata = ll_check_string(_fun, L, 5);
-    Kernel *result = kernelCreateFromString(h, w, cy, cx, kdata);
-    return ll_push_Kernel(_fun, L, result);
+    Kernel *kel = kernelCreateFromString(h, w, cy, cx, kdata);
+    return ll_push_Kernel(_fun, L, kel);
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Display a Kernel* (%kel) in a Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Kernel* (kel).
  * Arg #2 is expected to be a l_int32 (size).
  * Arg #3 is expected to be a l_int32 (gthick).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 on the Lua stack
+ * \return 1 Pix* on the Lua stack
  */
 static int
 DisplayInPix(lua_State *L)
@@ -182,14 +182,14 @@ DisplayInPix(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Get element in row (%row), column (%col) from a Kernel* (%kel).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Kernel* (kel).
  * Arg #2 is expected to be a l_int32 (row).
  * Arg #3 is expected to be a l_int32 (col).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 on the Lua stack
+ * \return 1 number on the Lua stack
  */
 static int
 GetElement(lua_State *L)
@@ -206,12 +206,12 @@ GetElement(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Get the minimum and maximum values from a Kernel* (%kel).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Kernel* (kel).
  * </pre>
  * \param L pointer to the lua_State
- * \return 2 on the Lua stack
+ * \return 2 numbers on the Lua stack
  */
 static int
 GetMinMax(lua_State *L)
@@ -228,12 +228,12 @@ GetMinMax(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Get the parameters for a Kernel* (%kel).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Kernel* (kel).
  * </pre>
  * \param L pointer to the lua_State
- * \return 4 on the Lua stack
+ * \return 4 integers on the Lua stack
  */
 static int
 GetParameters(lua_State *L)
@@ -254,12 +254,12 @@ GetParameters(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Get the sum of a Kernel* (%kel).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Kernel* (kel).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 on the Lua stack
+ * \return 1 number on the Lua stack
  */
 static int
 GetSum(lua_State *L)
@@ -274,12 +274,12 @@ GetSum(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Invert a Kernel* (%kels).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Kernel* (kels).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 on the Lua stack
+ * \return 1 Kernel* on the Lua stack
  */
 static int
 Invert(lua_State *L)
@@ -291,7 +291,7 @@ Invert(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Normalize a Kernel* (%kel).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Kernel* (kels).
  * Arg #2 is expected to be a l_float32 (normsum).
@@ -310,7 +310,7 @@ Normalize(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Read a Kernel* (%kel) from an external file (%fname).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a string (fname).
  * </pre>
@@ -327,7 +327,7 @@ Read(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Read a Kernel* (%kel) from a luaL_Stream* (%stream).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a luaL_Stream* (stream).
  * </pre>
@@ -344,7 +344,7 @@ ReadStream(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Set element in row (%row), column (%col) in a Kernel* (%kel).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Kernel* (kel).
  * Arg #2 is expected to be a l_int32 (row).
@@ -367,9 +367,9 @@ SetElement(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Set the origin (%cy, %cx) of a Kernel* (%kel).
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Kernel* (kels).
+ * Arg #1 (i.e. self) is expected to be a Kernel* (kel).
  * Arg #2 is expected to be a l_int32 (cy).
  * Arg #3 is expected to be a l_int32 (cx).
  * </pre>
@@ -380,14 +380,14 @@ static int
 SetOrigin(lua_State *L)
 {
     LL_FUNC("SetOrigin");
-    Kernel *kels = ll_check_Kernel(_fun, L, 1);
+    Kernel *kel = ll_check_Kernel(_fun, L, 1);
     l_int32 cy = ll_check_l_int32(_fun, L, 2);
     l_int32 cx = ll_check_l_int32(_fun, L, 3);
-    return ll_push_boolean(_fun, L, 0 == kernelSetOrigin(kels, cy, cx));
+    return ll_push_boolean(_fun, L, 0 == kernelSetOrigin(kel, cy, cx));
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Write a Kernel* (%kel) to an external file (%fname).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Kernel* (kel).
  * Arg #2 is expected to be a string (fname).
@@ -405,7 +405,7 @@ Write(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Write a Kernel* (%kel) to a luaL_Stream* (%stream).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Kernel* (kel).
  * Arg #2 is expected to be a luaL_Stream* (stream).
