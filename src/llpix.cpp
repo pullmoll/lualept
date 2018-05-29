@@ -392,7 +392,7 @@ AbsDifference(lua_State *L)
  * Arg #3 is expected to be a l_int32 (op).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 Accumulate(lua_State *L)
@@ -401,8 +401,7 @@ Accumulate(lua_State *L)
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     l_int32 op = ll_check_l_int32(_fun, L, 3);  /* FIXME: operations */
-    l_int32 result = pixAccumulate(pixd, pixs, op);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixAccumulate(pixd, pixs, op));
 }
 
 /**
@@ -687,15 +686,14 @@ AddGray(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 AddGrayColormap8(lua_State *L)
 {
     LL_FUNC("AddGrayColormap8");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 result = pixAddGrayColormap8(pixs);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixAddGrayColormap8(pixs));
 }
 
 /**
@@ -892,7 +890,7 @@ AddTextlines(lua_State *L)
  * Arg #3 is expected to be a Numa* (na).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 AddWithIndicator(lua_State *L)
@@ -901,8 +899,7 @@ AddWithIndicator(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Pixa *pixa = ll_check_Pixa(_fun, L, 2);
     Numa *na = ll_check_Numa(_fun, L, 3);
-    l_int32 result = pixAddWithIndicator(pixs, pixa, na);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixAddWithIndicator(pixs, pixa, na));
 }
 
 /**
@@ -1428,7 +1425,7 @@ AverageOnLine(lua_State *L)
  * Arg #10 is expected to be a l_int32 (smoothy).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 for Pix * on the Lua stack
+ * \return 1 Pix * on the Lua stack
  */
 static int
 BackgroundNorm(lua_State *L)
@@ -1490,7 +1487,7 @@ BackgroundNormFlex(lua_State *L)
  * Arg #9 is expected to be a l_int32 (smoothy).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 for l_int32 on the Lua stack
+ * \return 1 Pix* on the Lua stack
  */
 static int
 BackgroundNormGrayArray(lua_State *L)
@@ -1506,10 +1503,9 @@ BackgroundNormGrayArray(lua_State *L)
     l_int32 smoothx = ll_check_l_int32 (_fun, L, 8);
     l_int32 smoothy = ll_check_l_int32 (_fun, L, 9);
     Pix *pixd = nullptr;
-
-    l_int32 result = pixBackgroundNormGrayArray(pixs, pixim, sx, sy, thresh, mincount, bgval, smoothx, smoothy, &pixd);
-    lua_pushinteger(L, result);
-    return 1;
+    if (pixBackgroundNormGrayArray(pixs, pixim, sx, sy, thresh, mincount, bgval, smoothx, smoothy, &pixd))
+        return ll_push_nil(L);
+    return ll_push_Pix(_fun, L, pixd);
 }
 /**
  * \brief Comment here
@@ -1521,7 +1517,7 @@ BackgroundNormGrayArray(lua_State *L)
  * Arg #5 is expected to be a l_int32 (bgval).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 for l_int32 on the Lua stack
+ * \return 1 l_int32 on the Lua stack
  */
 static int
 BackgroundNormGrayArrayMorph(lua_State *L)
@@ -1548,7 +1544,7 @@ BackgroundNormGrayArrayMorph(lua_State *L)
  * Arg #5 is expected to be a l_int32 (bgval).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 for Pix * on the Lua stack
+ * \return 1 Pix * on the Lua stack
  */
 static int
 BackgroundNormMorph(lua_State *L)
@@ -1562,6 +1558,7 @@ BackgroundNormMorph(lua_State *L)
     Pix *pix = pixBackgroundNormMorph(pixs, pixim, reduction, size, bgval);
     return ll_push_Pix(_fun, L, pix);
 }
+
 /**
  * \brief Comment here
  * <pre>
@@ -1639,7 +1636,7 @@ BackgroundNormRGBArraysMorph(lua_State *L)
  * Arg #3 is expected to be a Pix* (pixg).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 for Pix * on the Lua stack
+ * \return 1 Pix * on the Lua stack
  */
 static int
 BackgroundNormSimple(lua_State *L)
@@ -2077,7 +2074,7 @@ BlendBoxaRandom(lua_State *L)
  * Arg #5 is expected to be a l_int32 (sindex).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 BlendCmap(lua_State *L)
@@ -2088,8 +2085,7 @@ BlendCmap(lua_State *L)
     l_int32 x = ll_check_l_int32(_fun, L, 3);
     l_int32 y = ll_check_l_int32(_fun, L, 4);
     l_int32 sindex = ll_check_l_int32(_fun, L, 5);
-    l_int32 result = pixBlendCmap(pixs, pixb, x, y, sindex);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixBlendCmap(pixs, pixb, x, y, sindex));
 }
 
 /**
@@ -2627,7 +2623,7 @@ Centroid8(lua_State *L)
  * Arg #2 is expected to be a l_int32 (delta).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 ChangeRefcount(lua_State *L)
@@ -2635,8 +2631,7 @@ ChangeRefcount(lua_State *L)
     LL_FUNC("ChangeRefcount");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 delta = ll_check_l_int32(_fun, L, 2);
-    l_int32 result = pixChangeRefcount(pix, delta);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixChangeRefcount(pix, delta));
 }
 
 /**
@@ -2645,15 +2640,15 @@ ChangeRefcount(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 l_int32 (%iff) on the Lua stack
  */
 static int
 ChooseOutputFormat(lua_State *L)
 {
     LL_FUNC("ChooseOutputFormat");
     Pix *pix = ll_check_Pix(_fun, L, 1);
-    l_int32 result = pixChooseOutputFormat(pix);
-    return ll_push_l_int32(_fun, L, result);
+    l_int32 iff = pixChooseOutputFormat(pix);
+    return ll_push_l_int32(_fun, L, iff);
 }
 
 /**
@@ -2667,7 +2662,7 @@ ChooseOutputFormat(lua_State *L)
  * Arg #6 is expected to be a l_int32 (whiteval).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 for Pix * on the Lua stack
+ * \return 1 Pix * on the Lua stack
  */
 static int
 CleanBackgroundToWhite(lua_State *L)
@@ -3259,7 +3254,7 @@ ColorFraction(lua_State *L)
  * Arg #7 is expected to be a l_int32 (bval).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 ColorGray(lua_State *L)
@@ -3272,8 +3267,7 @@ ColorGray(lua_State *L)
     l_int32 rval = ll_check_l_int32(_fun, L, 5);
     l_int32 gval = ll_check_l_int32(_fun, L, 6);
     l_int32 bval = ll_check_l_int32(_fun, L, 7);
-    l_int32 result = pixColorGray(pixs, box, type, thresh, rval, gval, bval);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixColorGray(pixs, box, type, thresh, rval, gval, bval));
 }
 
 /**
@@ -3287,7 +3281,7 @@ ColorGray(lua_State *L)
  * Arg #6 is expected to be a l_int32 (bval).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 ColorGrayCmap(lua_State *L)
@@ -3299,8 +3293,7 @@ ColorGrayCmap(lua_State *L)
     l_int32 rval = ll_check_l_int32(_fun, L, 4);
     l_int32 gval = ll_check_l_int32(_fun, L, 5);
     l_int32 bval = ll_check_l_int32(_fun, L, 6);
-    l_int32 result = pixColorGrayCmap(pixs, box, type, rval, gval, bval);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixColorGrayCmap(pixs, box, type, rval, gval, bval));
 }
 
 /**
@@ -3343,7 +3336,7 @@ ColorGrayMasked(lua_State *L)
  * Arg #6 is expected to be a l_int32 (bval).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 ColorGrayMaskedCmap(lua_State *L)
@@ -3355,8 +3348,7 @@ ColorGrayMaskedCmap(lua_State *L)
     l_int32 rval = ll_check_l_int32(_fun, L, 4);
     l_int32 gval = ll_check_l_int32(_fun, L, 5);
     l_int32 bval = ll_check_l_int32(_fun, L, 6);
-    l_int32 result = pixColorGrayMaskedCmap(pixs, pixm, type, rval, gval, bval);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixColorGrayMaskedCmap(pixs, pixm, type, rval, gval, bval));
 }
 
 /**
@@ -3399,7 +3391,7 @@ ColorGrayRegions(lua_State *L)
  * Arg #6 is expected to be a l_int32 (bval).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 ColorGrayRegionsCmap(lua_State *L)
@@ -3411,8 +3403,7 @@ ColorGrayRegionsCmap(lua_State *L)
     l_int32 rval = ll_check_l_int32(_fun, L, 4);
     l_int32 gval = ll_check_l_int32(_fun, L, 5);
     l_int32 bval = ll_check_l_int32(_fun, L, 6);
-    l_int32 result = pixColorGrayRegionsCmap(pixs, boxa, type, rval, gval, bval);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixColorGrayRegionsCmap(pixs, boxa, type, rval, gval, bval));
 }
 
 /**
@@ -3566,7 +3557,7 @@ ColorSegmentCluster(lua_State *L)
  * Arg #3 is expected to be a l_int32 (finalcolors).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 ColorSegmentRemoveColors(lua_State *L)
@@ -3575,8 +3566,7 @@ ColorSegmentRemoveColors(lua_State *L)
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     l_int32 finalcolors = ll_check_l_int32(_fun, L, 3);
-    l_int32 result = pixColorSegmentRemoveColors(pixd, pixs, finalcolors);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixColorSegmentRemoveColors(pixd, pixs, finalcolors));
 }
 
 /**
@@ -3588,7 +3578,7 @@ ColorSegmentRemoveColors(lua_State *L)
  * Arg #4 is expected to be a l_float32 (bfract).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 Pix * on the Lua stack
+ * \return 1 Pix* on the Lua stack
  */
 static int
 ColorShiftRGB(lua_State *L)
@@ -3628,7 +3618,7 @@ ColorizeGray(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (thresh).
- * Arg #5 is expected to be a l_int32 (debug).
+ * Arg #3 is expected to be a boolean (debug).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -3639,9 +3629,9 @@ ColorsForQuantization(lua_State *L)
     LL_FUNC("ColorsForQuantization");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 thresh = ll_check_l_int32(_fun, L, 2);
+    l_int32 debug = ll_check_boolean_default(_fun, L, 3, FALSE);
     l_int32 ncolors = 0;
     l_int32 iscolor = 0;
-    l_int32 debug = ll_check_l_int32(_fun, L, 5);
     if (pixColorsForQuantization(pixs, thresh, &ncolors, &iscolor, debug))
         return ll_push_nil(L);
     ll_push_l_int32(_fun, L, ncolors);
@@ -4117,9 +4107,9 @@ ConnCompBB(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Ptaa* (ptaa).
- * Arg #4 is expected to be a l_float32 (x).
- * Arg #5 is expected to be a l_float32 (y).
- * Arg #6 is expected to be a l_int32 (debug).
+ * Arg #3 is expected to be a l_float32 (x).
+ * Arg #4 is expected to be a l_float32 (y).
+ * Arg #5 is expected to be a boolean (debug).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -4130,10 +4120,10 @@ ConnCompIncrAdd(lua_State *L)
     LL_FUNC("ConnCompIncrAdd");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Ptaa *ptaa = ll_check_Ptaa(_fun, L, 2);
+    l_float32 x = ll_check_l_float32(_fun, L, 3);
+    l_float32 y = ll_check_l_float32(_fun, L, 4);
+    l_int32 debug = ll_check_boolean_default(_fun, L, 5, FALSE);
     l_int32 ncc = 0;
-    l_float32 x = ll_check_l_float32(_fun, L, 4);
-    l_float32 y = ll_check_l_float32(_fun, L, 5);
-    l_int32 debug = ll_check_l_int32(_fun, L, 6);
     if (pixConnCompIncrAdd(pixs, ptaa, &ncc, x, y, debug))
         return ll_push_nil(L);
     ll_push_l_int32(_fun, L, ncc);
@@ -5449,7 +5439,7 @@ ConvertToPdfDataSegmented(lua_State *L)
  * Arg #9 is expected to be a string (fileout).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 ConvertToPdfSegmented(lua_State *L)
@@ -5464,8 +5454,7 @@ ConvertToPdfSegmented(lua_State *L)
     l_float32 scalefactor = ll_check_l_float32(_fun, L, 7);
     const char *title = ll_check_string(_fun, L, 8);
     const char *fileout = ll_check_string(_fun, L, 9);
-    l_int32 result = pixConvertToPdfSegmented(pixs, res, type, thresh, boxa, quality, scalefactor, title, fileout);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixConvertToPdfSegmented(pixs, res, type, thresh, boxa, quality, scalefactor, title, fileout));
 }
 
 /**
@@ -5981,8 +5970,7 @@ CountArbInRect(lua_State *L)
     l_int32 count;
     if (pixCountArbInRect(pixs, box, val, factor, &count))
         return ll_push_nil(L);
-    lua_pushinteger(L, count);
-    return 1;
+    return ll_push_l_int32(_fun, L, count);
 }
 
 /**
@@ -6041,8 +6029,7 @@ CountConnComp(lua_State *L)
     l_int32 count = 0;
     if (pixCountConnComp(pixs, connectivity, &count))
         return ll_push_nil(L);
-    ll_push_l_int32(_fun, L, count);
-    return 1;
+    return ll_push_l_int32(_fun, L, count);
 }
 
 /**
@@ -6061,8 +6048,7 @@ CountPixels(lua_State *L)
     l_int32 count = 0;
     if (pixCountPixels(pixs, &count, nullptr))
         return ll_push_nil(L);
-    lua_pushinteger(L, count);
-    return 1;
+    return ll_push_l_int32(_fun, L, count);
 }
 
 /**
@@ -6117,8 +6103,7 @@ CountPixelsInRect(lua_State *L)
     l_int32 count = 0;
     if (pixCountPixelsInRect(pixs, box, &count, nullptr))
         return ll_push_nil(L);
-    lua_pushinteger(L, count);
-    return 1;
+    return ll_push_l_int32(_fun, L, count);
 }
 
 /**
@@ -6138,8 +6123,7 @@ CountPixelsInRow(lua_State *L)
     l_int32 count = 0;
     if (pixCountPixelsInRow(pixs, row, &count, nullptr))
         return ll_push_nil(L);
-    lua_pushinteger(L, count);
-    return 1;
+    return ll_push_l_int32(_fun, L, count);
 }
 
 /**
@@ -6156,8 +6140,7 @@ CountRGBColors(lua_State *L)
     LL_FUNC("CountRGBColors");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 count = pixCountRGBColors(pixs);
-    lua_pushinteger(L, count);
-    return 1;
+    return ll_push_l_int32(_fun, L, count);
 }
 
 /**
@@ -6428,7 +6411,7 @@ DarkenGray(lua_State *L)
  * Arg #3 is expected to be a l_int32 (nx).
  * Arg #4 is expected to be a l_int32 (ny).
  * Arg #5 is expected to be a l_float32 (thresh).
- * Arg #7 is expected to be a Pixa* (pixadebug).
+ * Arg #6 is expected to be a Pixa* (pixadebug).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -6442,8 +6425,8 @@ DecideIfPhotoImage(lua_State *L)
     l_int32 nx = ll_check_l_int32(_fun, L, 3);
     l_int32 ny = ll_check_l_int32(_fun, L, 4);
     l_float32 thresh = ll_check_l_float32(_fun, L, 5);
+    Pixa *pixadebug = ll_check_Pixa_opt(_fun, L, 6);
     Numaa *naa = nullptr;
-    Pixa *pixadebug = ll_check_Pixa(_fun, L, 7);
     if (pixDecideIfPhotoImage(pix, factor, nx, ny, thresh, &naa, pixadebug))
         return ll_push_nil(L);
     ll_push_Numaa(_fun, L, naa);
@@ -7125,7 +7108,7 @@ DisplayWithTitle(lua_State *L)
  * Arg #2 is expected to be a l_int32 (reduction).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 DisplayWrite(lua_State *L)
@@ -7133,8 +7116,7 @@ DisplayWrite(lua_State *L)
     LL_FUNC("DisplayWrite");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 reduction = ll_check_l_int32(_fun, L, 2);
-    l_int32 result = pixDisplayWrite(pixs, reduction);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixDisplayWrite(pixs, reduction));
 }
 
 /**
@@ -7315,15 +7297,14 @@ EmbedForRotation(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 EndianByteSwap(lua_State *L)
 {
     LL_FUNC("EndianByteSwap");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 result = pixEndianByteSwap(pixs);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixEndianByteSwap(pixs));
 }
 
 /**
@@ -7349,15 +7330,14 @@ EndianByteSwapNew(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 EndianTwoByteSwap(lua_State *L)
 {
     LL_FUNC("EndianTwoByteSwap");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 result = pixEndianTwoByteSwap(pixs);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixEndianTwoByteSwap(pixs));
 }
 
 /**
@@ -8205,7 +8185,7 @@ FillHolesToBoundingRect(lua_State *L)
  * Arg #4 is expected to be a l_int32 (filltype).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 FillMapHoles(lua_State *L)
@@ -8215,8 +8195,7 @@ FillMapHoles(lua_State *L)
     l_int32 nx = ll_check_l_int32(_fun, L, 2);
     l_int32 ny = ll_check_l_int32(_fun, L, 3);
     l_int32 filltype = ll_check_l_int32(_fun, L, 4);
-    l_int32 result = pixFillMapHoles(pix, nx, ny, filltype);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixFillMapHoles(pix, nx, ny, filltype));
 }
 
 /**
@@ -9303,15 +9282,14 @@ FractionFgInMask(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 FreeData(lua_State *L)
 {
     LL_FUNC("FreeData");
     Pix *pix = ll_check_Pix(_fun, L, 1);
-    l_int32 result = pixFreeData(pix);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixFreeData(pix));
 }
 
 /**
@@ -9395,17 +9373,17 @@ GammaTRCWithAlpha(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is expected to be a l_int32 (debug).
+ * Arg #2 is expected to be a boolean (debug).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 Pix * on the Lua stack
+ * \return 1 Pix* (%pixtext) and l_int32 (%htfound) on the Lua stack
  */
 static int
 GenHalftoneMask(lua_State *L)
 {
     LL_FUNC("GenHalftoneMask");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 debug = ll_check_l_int32(_fun, L, 2);
+    l_int32 debug = ll_check_boolean_default(_fun, L, 2, FALSE);
     Pix *pixtext = nullptr;
     l_int32 htfound = 0;
     if (pixGenHalftoneMask(pixs, &pixtext, &htfound, debug))
@@ -10118,8 +10096,8 @@ GetBinnedComponentRange(lua_State *L)
 
     if (pixGetBinnedComponentRange(pixs, nbins, factor, color, &minval, &maxval, &carray, fontsize))
         return ll_push_nil(L);
-    lua_pushinteger(L, minval);
-    lua_pushinteger(L, maxval);
+    ll_push_l_int32(_fun, L, minval);
+    ll_push_l_int32(_fun, L, maxval);
     res = ll_push_Uarray(_fun, L, carray, nbins);
     LEPT_FREE(carray);
     return 2 + res;
@@ -10143,8 +10121,7 @@ GetBlackOrWhiteVal(lua_State *L)
     l_uint32 val = 0;
     if (pixGetBlackOrWhiteVal(pix, op, &val))
         return ll_push_nil(L);
-    lua_pushinteger(L, val);
-    return 1;
+    return ll_push_l_int32(_fun, L, val);
 }
 
 /**
@@ -10163,8 +10140,7 @@ GetBlackVal(lua_State *L)
     l_uint32 val = 0;
     if (pixGetBlackOrWhiteVal(pix, L_GET_BLACK_VAL, &val))
         return ll_push_nil(L);
-    lua_pushinteger(L, val);
-    return 1;
+    return ll_push_l_int32(_fun, L, val);
 }
 
 /**
@@ -10340,8 +10316,7 @@ GetColorNearMaskBoundary(lua_State *L)
     l_int32 dist = ll_check_l_int32(_fun, L, 4);
     if (pixGetColorNearMaskBoundary(pixs, pixm, box, dist, &val, 0))
         return ll_push_nil(L);
-    lua_pushinteger(L, val);
-    return 1;
+    return ll_push_l_int32(_fun, L, val);
 }
 
 /**
@@ -10426,8 +10401,7 @@ GetDepth(lua_State *L)
     LL_FUNC("GetDepth");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 depth = pixGetDepth(pix);
-    lua_pushinteger(L, depth);
-    return 1;
+    return ll_push_l_int32(_fun, L, depth);
 }
 
 /**
@@ -10497,10 +10471,7 @@ GetDimensions(lua_State *L)
     l_int32 width, height, depth;
     if (pixGetDimensions(pix, &width, &height, &depth))
         return ll_push_nil(L);
-    lua_pushinteger(L, width);
-    lua_pushinteger(L, height);
-    lua_pushinteger(L, depth);
-    return 3;
+    return ll_push_l_int32(_fun, L, width) + ll_push_l_int32(_fun, L, height) + ll_push_l_int32(_fun, L, depth);
 }
 
 /**
@@ -10547,11 +10518,10 @@ GetExtremeValue(lua_State *L)
     l_int32 grayval = 0;
     if (pixGetExtremeValue(pixs, factor, type, &rval, &gval, &bval, &grayval))
         return ll_push_nil(L);
-    lua_pushinteger(L, rval);
-    lua_pushinteger(L, gval);
-    lua_pushinteger(L, bval);
-    lua_pushinteger(L, grayval);
-    return 4;
+    return ll_push_l_int32(_fun, L, rval) +
+        ll_push_l_int32(_fun, L, gval) +
+        ll_push_l_int32(_fun, L, bval) +
+        ll_push_l_int32(_fun, L, grayval);
 }
 
 /**
@@ -10652,8 +10622,7 @@ GetHeight(lua_State *L)
     LL_FUNC("GetHeight");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 height = pixGetHeight(pix);
-    lua_pushinteger(L, height);
-    return 1;
+    ll_push_l_int32(_fun, L, height);
 }
 
 /**
@@ -10666,7 +10635,7 @@ GetHeight(lua_State *L)
  * Arg #5 is expected to be a l_int32 (ys).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 GetHoleBorder(lua_State *L)
@@ -10677,8 +10646,7 @@ GetHoleBorder(lua_State *L)
     Box *box = ll_check_Box(_fun, L, 3);
     l_int32 xs = ll_check_l_int32(_fun, L, 4);
     l_int32 ys = ll_check_l_int32(_fun, L, 5);
-    l_int32 result = pixGetHoleBorder(ccb, pixs, box, xs, ys);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixGetHoleBorder(ccb, pixs, box, xs, ys));
 }
 
 /**
@@ -10803,7 +10771,7 @@ GetLinePtrs(lua_State *L)
  * Arg #5 is expected to be a l_float32 (sweeprange).
  * Arg #6 is expected to be a l_float32 (sweepdelta).
  * Arg #7 is expected to be a l_float32 (minbsdelta).
- * Arg #10 is expected to be a l_int32 (debug).
+ * Arg #8 is expected to be a boolean (debug).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa * on the Lua stack
@@ -10819,9 +10787,9 @@ GetLocalSkewAngles(lua_State *L)
     l_float32 sweeprange = ll_check_l_float32(_fun, L, 5);
     l_float32 sweepdelta = ll_check_l_float32(_fun, L, 6);
     l_float32 minbsdelta = ll_check_l_float32(_fun, L, 7);
+    l_int32 debug = ll_check_boolean_default(_fun, L, 8, FALSE);
     l_float32 a = 0;
     l_float32 b = 0;
-    l_int32 debug = ll_check_l_int32(_fun, L, 10);
     if (pixGetLocalSkewAngles(pixs, nslices, redsweep, redsearch, sweeprange, sweepdelta, minbsdelta, &a, &b, debug))
         return ll_push_nil(L);
     ll_push_l_float32(_fun, L, a);
@@ -10858,9 +10826,8 @@ GetLocalSkewTransform(lua_State *L)
     Pta *ptad = nullptr;
     if (pixGetLocalSkewTransform(pixs, nslices, redsweep, redsearch, sweeprange, sweepdelta, minbsdelta, &ptas, &ptad))
         return ll_push_nil(L);
-    ll_push_Pta(_fun, L, ptas);
-    ll_push_Pta(_fun, L, ptad);
-    return 2;
+    return ll_push_Pta(_fun, L, ptas) +
+            ll_push_Pta(_fun, L, ptad);
 }
 
 /**
@@ -10883,10 +10850,9 @@ GetMaxValueInRect(lua_State *L)
     l_int32 ymax = 0;
     if (pixGetMaxValueInRect(pixs, box, &maxval, &xmax, &ymax))
         return ll_push_nil(L);
-    lua_pushinteger(L, maxval);
-    lua_pushinteger(L, xmax);
-    lua_pushinteger(L, ymax);
-    return 3;
+    return ll_push_l_uint32(_fun, L, maxval) +
+            ll_push_l_int32(_fun, L, xmax) +
+            ll_push_l_int32(_fun, L, ymax);
 }
 
 /**
@@ -10972,8 +10938,8 @@ GetOuterBorderPta(lua_State *L)
     LL_FUNC("GetOuterBorderPta");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
-    Pta *result = pixGetOuterBorderPta(pixs, box);
-    return ll_push_Pta(_fun, L, result);
+    Pta *pta = pixGetOuterBorderPta(pixs, box);
+    return ll_push_Pta(_fun, L, pta);
 }
 
 /**
@@ -10989,8 +10955,8 @@ GetOuterBordersPtaa(lua_State *L)
 {
     LL_FUNC("GetOuterBordersPtaa");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    Ptaa *result = pixGetOuterBordersPtaa(pixs);
-    return ll_push_Ptaa(_fun, L, result);
+    Ptaa *ptaa = pixGetOuterBordersPtaa(pixs);
+    return ll_push_Ptaa(_fun, L, ptaa);
 }
 
 /**
@@ -11001,7 +10967,7 @@ GetOuterBordersPtaa(lua_State *L)
  * Arg #3 is expected to be a l_int32 (factor).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 l_float32 on the Lua stack
  */
 static int
 GetPSNR(lua_State *L)
@@ -11013,8 +10979,7 @@ GetPSNR(lua_State *L)
     l_float32 psnr = 0;
     if (pixGetPSNR(pix1, pix2, factor, &psnr))
         return ll_push_nil(L);
-    ll_push_l_float32(_fun, L, psnr);
-    return 1;
+    return ll_push_l_float32(_fun, L, psnr);
 }
 
 /**
@@ -11069,8 +11034,7 @@ GetPixel(lua_State *L)
     l_uint32 val = 0;
     if (pixGetPixel(pix, x, y, &val))
         return ll_push_nil(L);
-    lua_pushinteger(L, val);
-    return 1;
+    return ll_push_l_int32(_fun, L, val);
 }
 
 /**
@@ -11097,8 +11061,7 @@ GetPixelAverage(lua_State *L)
     l_uint32 value = 0;
     if (pixGetPixelAverage(pixs, pixm, x,y, factor, &value))
         return ll_push_nil(L);
-    lua_pushinteger(L, value);
-    return 1;
+    return ll_push_l_uint32(_fun, L, value);
 }
 
 /**
@@ -11121,8 +11084,7 @@ GetPixelStats(lua_State *L)
     l_uint32 value = 0;
     if (pixGetPixelStats(pixs, factor, type, &value))
         return ll_push_nil(L);
-    lua_pushinteger(L, value);
-    return 1;
+    return ll_push_l_uint32(_fun, L, value);
 }
 
 /**
@@ -11238,10 +11200,9 @@ GetRGBPixel(lua_State *L)
     l_int32 bval = 0;
     if (pixGetRGBPixel(pix, x, y, &rval, &gval, &bval))
         return ll_push_nil(L);
-    lua_pushinteger(L, rval);
-    lua_pushinteger(L, gval);
-    lua_pushinteger(L, bval);
-    return 3;
+    return ll_push_l_int32(_fun, L, rval) +
+        ll_push_l_int32(_fun, L, gval) +
+        ll_push_l_int32(_fun, L, bval);
 }
 
 /**
@@ -11262,10 +11223,9 @@ GetRandomPixel(lua_State *L)
     l_uint32 val = 0;
     if (pixGetRandomPixel(pix, &val, &x, &y))
         return ll_push_nil(L);
-    lua_pushinteger(L, val);
-    lua_pushinteger(L, x);
-    lua_pushinteger(L, y);
-    return 3;
+    return ll_push_l_uint32(_fun, L, val) +
+        ll_push_l_int32(_fun, L, x) +
+        ll_push_l_int32(_fun, L, y);
 }
 
 /**
@@ -11289,9 +11249,8 @@ GetRangeValues(lua_State *L)
     l_int32 maxval = 0;
     if (pixGetRangeValues(pixs, factor, color, &minval, &maxval))
         return ll_push_nil(L);
-    lua_pushinteger(L, minval);
-    lua_pushinteger(L, maxval);
-    return 2;
+    return ll_push_l_int32(_fun, L, minval) +
+            ll_push_l_int32(_fun, L, maxval);
 }
 
 /**
@@ -11343,8 +11302,7 @@ GetRankValue(lua_State *L)
     l_uint32 value = 0;
     if (pixGetRankValue(pixs, factor, rank, &value))
         return ll_push_nil(L);
-    lua_pushinteger(L, value);
-    return 1;
+    return ll_push_l_uint32(_fun, L, value);
 }
 
 /**
@@ -11444,8 +11402,8 @@ GetRefcount(lua_State *L)
 {
     LL_FUNC("GetRefcount");
     Pix *pix = ll_check_Pix(_fun, L, 1);
-    l_int32 result = pixGetRefcount(pix);
-    return ll_push_l_int32(_fun, L, result);
+    l_int32 refcount = pixGetRefcount(pix);
+    return ll_push_l_int32(_fun, L, refcount);
 }
 
 /**
@@ -11490,9 +11448,8 @@ GetResolution(lua_State *L)
     l_int32 xres, yres;
     if (pixGetResolution(pix, &xres, &yres))
         return ll_push_nil(L);
-    lua_pushinteger(L, xres);
-    lua_pushinteger(L, yres);
-    return 2;
+    return ll_push_l_int32(_fun, L, xres) +
+            ll_push_l_int32(_fun, L, yres);
 }
 
 /**
@@ -11512,12 +11469,6 @@ GetRowStats(lua_State *L)
     l_int32 nbins = ll_check_l_int32(_fun, L, 3);
     l_int32 thresh = ll_check_l_int32_default(_fun, L, 4, 0);
     l_float32 *colvect = ll_calloc<l_float32>(_fun, L, nbins);
-    if (!colvect) {
-        lua_pushfstring(L, "%s: could not allocate colvect (%d)",
-                        _fun, static_cast<size_t>(nbins) * sizeof(*colvect));
-        lua_error(L);
-        return 0;
-    }
     if (pixGetRowStats(pixs, type, nbins, thresh, colvect)) {
         LEPT_FREE(colvect);
         return ll_push_nil(L);
@@ -11546,8 +11497,8 @@ GetRunCentersOnLine(lua_State *L)
     l_int32 x = ll_check_l_int32(_fun, L, 2);
     l_int32 y = ll_check_l_int32(_fun, L, 3);
     l_int32 minlength = ll_check_l_int32(_fun, L, 4);
-    Numa *result = pixGetRunCentersOnLine(pixs, x, y, minlength);
-    return ll_push_Numa(_fun, L, result);
+    Numa *na = pixGetRunCentersOnLine(pixs, x, y, minlength);
+    return ll_push_Numa(_fun, L, na);
 }
 
 /**
@@ -11571,8 +11522,8 @@ GetRunsOnLine(lua_State *L)
     l_int32 y1 = ll_check_l_int32(_fun, L, 3);
     l_int32 x2 = ll_check_l_int32(_fun, L, 4);
     l_int32 y2 = ll_check_l_int32(_fun, L, 5);
-    Numa *result = pixGetRunsOnLine(pixs, x1, y1, x2, y2);
-    return ll_push_Numa(_fun, L, result);
+    Numa *na = pixGetRunsOnLine(pixs, x1, y1, x2, y2);
+    return ll_push_Numa(_fun, L, na);
 }
 
 /**
@@ -11598,7 +11549,9 @@ GetSortedNeighborValues(lua_State *L)
     l_int32 nvals = 0;
     if (pixGetSortedNeighborValues(pixs, x, y, conn, &neigh, &nvals))
         return ll_push_nil(L);
-    return ll_push_Iarray(_fun, L, neigh, nvals);
+    ll_push_Iarray(_fun, L, neigh, nvals);
+    ll_free(neigh);
+    return 1;
 }
 
 /**
@@ -11615,8 +11568,7 @@ GetSpp(lua_State *L)
     LL_FUNC("GetSpp");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 spp = pixGetSpp(pix);
-    lua_pushinteger(L, spp);
-    return 1;
+    return ll_push_l_int32(_fun, L, spp);
 }
 
 /**
@@ -11653,8 +11605,7 @@ GetWhiteVal(lua_State *L)
     l_uint32 val = 0;
     if (pixGetBlackOrWhiteVal(pix, L_GET_WHITE_VAL, &val))
         return ll_push_nil(L);
-    lua_pushinteger(L, val);
-    return 1;
+    return ll_push_l_uint32(_fun, L, val);
 }
 
 /**
@@ -11671,8 +11622,7 @@ GetWidth(lua_State *L)
     LL_FUNC("GetWidth");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 width = pixGetWidth(pix);
-    lua_pushinteger(L, width);
-    return 1;
+    return ll_push_l_int32(_fun, L, width);
 }
 
 /**
@@ -11751,8 +11701,7 @@ GetWpl(lua_State *L)
     LL_FUNC("GetWpl");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 wpl = pixGetWpl(pix);
-    lua_pushinteger(L, wpl);
-    return 1;
+    return ll_push_l_int32(_fun, L, wpl);
 }
 
 /**
@@ -11769,8 +11718,7 @@ GetXRes(lua_State *L)
     LL_FUNC("GetXRes");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 xres = pixGetXRes(pix);
-    lua_pushinteger(L, xres);
-    return 1;
+    return ll_push_l_int32(_fun, L, xres);
 }
 
 /**
@@ -11787,8 +11735,7 @@ GetYRes(lua_State *L)
     LL_FUNC("GetYRes");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 yres = pixGetYRes(pix);
-    lua_pushinteger(L, yres);
-    return 1;
+    return ll_push_l_int32(_fun, L, yres);
 }
 
 /**
@@ -12038,7 +11985,7 @@ HShearCorner(lua_State *L)
  * Arg #4 is expected to be a l_int32 (incolor).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 HShearIP(lua_State *L)
@@ -12048,8 +11995,7 @@ HShearIP(lua_State *L)
     l_int32 yloc = ll_check_l_int32(_fun, L, 2);
     l_float32 radang = ll_check_l_float32(_fun, L, 3);
     l_int32 incolor = ll_check_l_int32(_fun, L, 4);
-    l_int32 result = pixHShearIP(pixs, yloc, radang, incolor);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixHShearIP(pixs, yloc, radang, incolor));
 }
 
 /**
@@ -12061,7 +12007,7 @@ HShearIP(lua_State *L)
  * Arg #4 is expected to be a l_int32 (incolor).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 Pix * on the Lua stack
+ * \return 1 Pix* on the Lua stack
  */
 static int
 HShearLI(lua_State *L)
@@ -12143,7 +12089,7 @@ HasHighlightRed(lua_State *L)
  * Arg #8 is expected to be a l_int32 (maxdiffh).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 Haustest(lua_State *L)
@@ -12157,8 +12103,7 @@ Haustest(lua_State *L)
     l_float32 dely = ll_check_l_float32(_fun, L, 6);
     l_int32 maxdiffw = ll_check_l_int32(_fun, L, 7);
     l_int32 maxdiffh = ll_check_l_int32(_fun, L, 8);
-    l_int32 result = pixHaustest(pix1, pix2, pix3, pix4, delx, dely, maxdiffw, maxdiffh);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixHaustest(pix1, pix2, pix3, pix4, delx, dely, maxdiffw, maxdiffh));
 }
 
 /**
@@ -12183,7 +12128,7 @@ HolesByFilling(lua_State *L)
 /**
  * \brief Brief comment goes here.
  * <pre>
- * Arg #1 (i.e. self) is expected to be a l_int32 (w).
+ * Arg #1 is expected to be a l_int32 (w).
  * Arg #2 is expected to be a l_int32 (h).
  * Arg #3 is expected to be a l_uint32 (offset).
  * </pre>
@@ -12231,7 +12176,7 @@ IntersectionOfMorphOps(lua_State *L)
  * Arg #5 is expected to be a l_int32 (debugflag).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 Boxa* (%boxa) on the Lua stack
  */
 static int
 ItalicWords(lua_State *L)
@@ -12258,7 +12203,7 @@ ItalicWords(lua_State *L)
  * Arg #5 is expected to be a l_float32 (maxfade).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 LinearEdgeFade(lua_State *L)
@@ -12269,8 +12214,7 @@ LinearEdgeFade(lua_State *L)
     l_int32 fadeto = ll_check_l_int32(_fun, L, 3);
     l_float32 distfract = ll_check_l_float32(_fun, L, 4);
     l_float32 maxfade = ll_check_l_float32(_fun, L, 5);
-    l_int32 result = pixLinearEdgeFade(pixs, dir, fadeto, distfract, maxfade);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixLinearEdgeFade(pixs, dir, fadeto, distfract, maxfade));
 }
 
 /**
@@ -13143,8 +13087,8 @@ MinOrMax(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #3 is expected to be a l_int32 (mincount).
- * Arg #4 is expected to be a l_int32 (debug).
+ * Arg #2 is expected to be a l_int32 (mincount).
+ * Arg #3 is expected to be a boolean (debug).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -13154,9 +13098,9 @@ MirrorDetect(lua_State *L)
 {
     LL_FUNC("MirrorDetect");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 mincount = ll_check_l_int32(_fun, L, 2);
+    l_int32 debug = ll_check_boolean_default(_fun, L, 3, FALSE);
     l_float32 conf = 0;
-    l_int32 mincount = ll_check_l_int32(_fun, L, 3);
-    l_int32 debug = ll_check_l_int32(_fun, L, 4);
     if (pixMirrorDetect(pixs, &conf, mincount, debug))
         return ll_push_nil(L);
     ll_push_l_float32(_fun, L, conf);
@@ -13167,8 +13111,8 @@ MirrorDetect(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #3 is expected to be a l_int32 (mincount).
- * Arg #4 is expected to be a l_int32 (debug).
+ * Arg #2 is expected to be a l_int32 (mincount).
+ * Arg #3 is expected to be a boolean (debug).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -13178,9 +13122,9 @@ MirrorDetectDwa(lua_State *L)
 {
     LL_FUNC("MirrorDetectDwa");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 mincount = ll_check_l_int32(_fun, L, 2);
+    l_int32 debug = ll_check_boolean_default(_fun, L, 3, FALSE);
     l_float32 conf = 0;
-    l_int32 mincount = ll_check_l_int32(_fun, L, 3);
-    l_int32 debug = ll_check_l_int32(_fun, L, 4);
     if (pixMirrorDetectDwa(pixs, &conf, mincount, debug))
         return ll_push_nil(L);
     ll_push_l_float32(_fun, L, conf);
@@ -13204,7 +13148,8 @@ MirroredTiling(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 w = ll_check_l_int32(_fun, L, 2);
     l_int32 h = ll_check_l_int32(_fun, L, 3);
-    return ll_push_Pix(_fun, L, pixMirroredTiling(pixs, w, h));
+    Pix *pix = pixMirroredTiling(pixs, w, h);
+    return ll_push_Pix(_fun, L, pix);
 }
 
 /**
@@ -14050,10 +13995,10 @@ OpenGray3(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (minupconf).
  * Arg #3 is expected to be a l_float32 (minratio).
- * Arg #7 is expected to be a l_int32 (debug).
+ * Arg #4 is expected to be a l_int32 (debug).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 Pix * on the Lua stack
+ * \return 3 l_float32 (%upconf, %leftconf) and l_int32 (%rotation) on the Lua stack
  */
 static int
 OrientCorrect(lua_State *L)
@@ -14062,10 +14007,10 @@ OrientCorrect(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 minupconf = ll_check_l_float32(_fun, L, 2);
     l_float32 minratio = ll_check_l_float32(_fun, L, 3);
+    l_int32 debug = ll_check_boolean_default(_fun, L, 4, FALSE);
     l_float32 upconf = 0;
     l_float32 leftconf = 0;
     l_int32 rotation = 0;
-    l_int32 debug = ll_check_l_int32(_fun, L, 7);
     if (pixOrientCorrect(pixs, minupconf, minratio, &upconf, &leftconf, &rotation, debug))
         return ll_push_nil(L);
     ll_push_l_float32(_fun, L, upconf);
@@ -14078,8 +14023,8 @@ OrientCorrect(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #4 is expected to be a l_int32 (mincount).
- * Arg #5 is expected to be a l_int32 (debug).
+ * Arg #2 is expected to be a l_int32 (mincount).
+ * Arg #3 is expected to be a boolean (debug).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -14089,10 +14034,10 @@ OrientDetect(lua_State *L)
 {
     LL_FUNC("OrientDetect");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 mincount = ll_check_l_int32(_fun, L, 2);
+    l_int32 debug = ll_check_boolean_default(_fun, L, 3, FALSE);
     l_float32 upconf = 0;
     l_float32 leftconf = 0;
-    l_int32 mincount = ll_check_l_int32(_fun, L, 4);
-    l_int32 debug = ll_check_l_int32(_fun, L, 5);
     if (pixOrientDetect(pixs, &upconf, &leftconf, mincount, debug))
         return ll_push_nil(L);
     ll_push_l_float32(_fun, L, upconf);
@@ -14104,8 +14049,8 @@ OrientDetect(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #4 is expected to be a l_int32 (mincount).
- * Arg #5 is expected to be a l_int32 (debug).
+ * Arg #2 is expected to be a l_int32 (mincount).
+ * Arg #3 is expected to be a boolean (debug).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -14115,10 +14060,10 @@ OrientDetectDwa(lua_State *L)
 {
     LL_FUNC("OrientDetectDwa");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 mincount = ll_check_l_int32(_fun, L, 2);
+    l_int32 debug = ll_check_boolean_default(_fun, L, 3, FALSE);
     l_float32 upconf = 0;
     l_float32 leftconf = 0;
-    l_int32 mincount = ll_check_l_int32(_fun, L, 4);
-    l_int32 debug = ll_check_l_int32(_fun, L, 5);
     if (pixOrientDetectDwa(pixs, &upconf, &leftconf, mincount, debug))
         return ll_push_nil(L);
     ll_push_l_float32(_fun, L, upconf);
@@ -15313,7 +15258,7 @@ ReadIndexed(lua_State *L)
  * Arg #2 is expected to be a l_uint32 (reduction).
  * Arg #3 is expected to be a Box* (box).
  * Arg #4 is expected to be a l_int32 (hint).
- * Arg #5 is expected to be a l_int32 (debug).
+ * Arg #5 is expected to be a boolean (debug).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15326,7 +15271,7 @@ ReadJp2k(lua_State *L)
     l_uint32 reduction = ll_check_l_uint32(_fun, L, 2);
     Box *box = ll_check_Box(_fun, L, 3);
     l_int32 hint = ll_check_l_int32(_fun, L, 4);
-    l_int32 debug = ll_check_l_int32(_fun, L, 5);
+    l_int32 debug = ll_check_boolean_default(_fun, L, 5, FALSE);
     Pix *pix = pixReadJp2k(filename, reduction, box, hint, debug);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -15442,7 +15387,7 @@ ReadMemGif(lua_State *L)
  * Arg #2 is expected to be a l_uint32 (reduction).
  * Arg #3 is expected to be a Box* (box).
  * Arg #4 is expected to be a l_int32 (hint).
- * Arg #5 is expected to be a l_int32 (debug).
+ * Arg #5 is expected to be a boolean (debug).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15457,7 +15402,7 @@ ReadMemJp2k(lua_State *L)
     l_uint32 reduction = ll_check_l_uint32(_fun, L, 2);
     Box *box = ll_check_Box(_fun, L, 3);
     l_int32 hint = ll_check_l_int32(_fun, L, 4);
-    l_int32 debug = ll_check_l_int32(_fun, L, 5);
+    l_int32 debug = ll_check_boolean_default(_fun, L, 5, FALSE);
     Pix *pix = pixReadMemJp2k(data, size, reduction, box, hint, debug);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -15647,7 +15592,7 @@ ReadStreamGif(lua_State *L)
  * Arg #2 is expected to be a l_uint32 (reduction).
  * Arg #3 is expected to be a Box* (box).
  * Arg #4 is expected to be a l_int32 (hint).
- * Arg #5 is expected to be a l_int32 (debug).
+ * Arg #5 is expected to be a boolean (debug).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15660,7 +15605,7 @@ ReadStreamJp2k(lua_State *L)
     l_uint32 reduction = ll_check_l_uint32(_fun, L, 2);
     Box *box = ll_check_Box(_fun, L, 3);
     l_int32 hint = ll_check_l_int32(_fun, L, 4);
-    l_int32 debug = ll_check_l_int32(_fun, L, 5);
+    l_int32 debug = ll_check_boolean_default(_fun, L, 5, FALSE);
     Pix *pix = pixReadStreamJp2k(stream->f, reduction, box, hint, debug);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -20609,10 +20554,9 @@ SplitDistributionFgBg(lua_State *L)
     l_int32 bgval;
     if (pixSplitDistributionFgBg(pixs, scorefract, factor, &thresh, &fgval, &bgval, nullptr))
         return ll_push_nil(L);
-    lua_pushinteger(L, thresh);
-    lua_pushinteger(L, fgval);
-    lua_pushinteger(L, bgval);
-    return 3;
+    return ll_push_l_int32(_fun, L, thresh) +
+            ll_push_l_int32(_fun, L, fgval) +
+            ll_push_l_int32(_fun, L, bgval);
 }
 
 /**
@@ -20640,8 +20584,8 @@ SplitIntoBoxa(lua_State *L)
     l_int32 maxbg = ll_check_l_int32(_fun, L, 5);
     l_int32 maxcomps = ll_check_l_int32(_fun, L, 6);
     l_int32 remainder = ll_check_l_int32(_fun, L, 7);
-    Boxa *result = pixSplitIntoBoxa(pixs, minsum, skipdist, delta, maxbg, maxcomps, remainder);
-    return ll_push_Boxa(_fun, L, result);
+    Boxa *boxa = pixSplitIntoBoxa(pixs, minsum, skipdist, delta, maxbg, maxcomps, remainder);
+    return ll_push_Boxa(_fun, L, boxa);
 }
 
 /**
@@ -20666,10 +20610,9 @@ SplitIntoCharacters(lua_State *L)
     Pix *pixdebug = nullptr;
     if (pixSplitIntoCharacters(pixs, minw, minh, &boxa, &pixa, &pixdebug))
         return ll_push_nil(L);
-    ll_push_Boxa(_fun, L, boxa);
-    ll_push_Pixa(_fun, L, pixa);
-    ll_push_Pix(_fun, L, pixdebug);
-    return 3;
+    return ll_push_Boxa(_fun, L, boxa) +
+            ll_push_Pixa(_fun, L, pixa) +
+            ll_push_Pix(_fun, L, pixdebug);
 }
 
 /**
@@ -21058,9 +21001,8 @@ ThresholdForFgBg(lua_State *L)
     l_int32 bgval;
     if (pixThresholdForFgBg(pixs, factor, thresh, &fgval, &bgval))
         return ll_push_nil(L);
-    lua_pushinteger(L, fgval);
-    lua_pushinteger(L, bgval);
-    return 2;
+    return ll_push_l_int32(_fun, L, fgval) +
+            ll_push_l_int32(_fun, L, bgval);
 }
 
 /**
@@ -21678,8 +21620,8 @@ UnsharpMaskingGrayFast(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #3 is expected to be a l_int32 (mincount).
- * Arg #4 is expected to be a l_int32 (debug).
+ * Arg #2 is expected to be a l_int32 (mincount).
+ * Arg #3 is expected to be a boolean (debug).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -21689,9 +21631,9 @@ UpDownDetect(lua_State *L)
 {
     LL_FUNC("UpDownDetect");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 mincount = ll_check_l_int32(_fun, L, 2);
+    l_int32 debug = ll_check_boolean_default(_fun, L, 3, FALSE);
     l_float32 conf = 0;
-    l_int32 mincount = ll_check_l_int32(_fun, L, 3);
-    l_int32 debug = ll_check_l_int32(_fun, L, 4);
     if (pixUpDownDetect(pixs, &conf, mincount, debug))
         return ll_push_nil(L);
     ll_push_l_float32(_fun, L, conf);
@@ -21703,7 +21645,7 @@ UpDownDetect(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (mincount).
- * Arg #4 is expected to be a l_int32 (debug).
+ * Arg #4 is expected to be a boolean (debug).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -21713,9 +21655,9 @@ UpDownDetectDwa(lua_State *L)
 {
     LL_FUNC("UpDownDetectDwa");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 mincount = ll_check_l_int32(_fun, L, 2);
+    l_int32 debug = ll_check_boolean_default(_fun, L, 3, FALSE);
     l_float32 conf = 0;
-    l_int32 mincount = ll_check_l_int32(_fun, L, 3);
-    l_int32 debug = ll_check_l_int32(_fun, L, 4);
     if (pixUpDownDetectDwa(pixs, &conf, mincount, debug))
         return ll_push_nil(L);
     ll_push_l_float32(_fun, L, conf);
@@ -21726,9 +21668,9 @@ UpDownDetectDwa(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #3 is expected to be a l_int32 (mincount).
- * Arg #4 is expected to be a l_int32 (npixels).
- * Arg #5 is expected to be a l_int32 (debug).
+ * Arg #2 is expected to be a l_int32 (mincount).
+ * Arg #3 is expected to be a l_int32 (npixels).
+ * Arg #4 is expected to be a boolean (debug).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -21738,10 +21680,10 @@ UpDownDetectGeneral(lua_State *L)
 {
     LL_FUNC("UpDownDetectGeneral");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 mincount = ll_check_l_int32(_fun, L, 2);
+    l_int32 npixels = ll_check_l_int32(_fun, L, 3);
+    l_int32 debug = ll_check_boolean_default(_fun, L, 4, FALSE);
     l_float32 conf = 0;
-    l_int32 mincount = ll_check_l_int32(_fun, L, 3);
-    l_int32 npixels = ll_check_l_int32(_fun, L, 4);
-    l_int32 debug = ll_check_l_int32(_fun, L, 5);
     if (pixUpDownDetectGeneral(pixs, &conf, mincount, npixels, debug))
         return ll_push_nil(L);
     ll_push_l_float32(_fun, L, conf);
@@ -21752,22 +21694,22 @@ UpDownDetectGeneral(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #3 is expected to be a l_int32 (mincount).
- * Arg #4 is expected to be a l_int32 (npixels).
- * Arg #5 is expected to be a l_int32 (debug).
+ * Arg #2 is expected to be a l_int32 (mincount).
+ * Arg #3 is expected to be a l_int32 (npixels).
+ * Arg #4 is expected to be a boolean (debug).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 l_float32 (%conf) on the Lua stack
  */
 static int
 UpDownDetectGeneralDwa(lua_State *L)
 {
     LL_FUNC("UpDownDetectGeneralDwa");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 mincount = ll_check_l_int32(_fun, L, 2);
+    l_int32 npixels = ll_check_l_int32(_fun, L, 3);
+    l_int32 debug = ll_check_boolean_default(_fun, L, 4, FALSE);
     l_float32 conf = 0;
-    l_int32 mincount = ll_check_l_int32(_fun, L, 3);
-    l_int32 npixels = ll_check_l_int32(_fun, L, 4);
-    l_int32 debug = ll_check_l_int32(_fun, L, 5);
     if (pixUpDownDetectGeneralDwa(pixs, &conf, mincount, npixels, debug))
         return ll_push_nil(L);
     ll_push_l_float32(_fun, L, conf);
@@ -22264,7 +22206,7 @@ Write(lua_State *L)
  * Arg #2 is expected to be a Pix* (pix).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WriteAutoFormat(lua_State *L)
@@ -22272,8 +22214,7 @@ WriteAutoFormat(lua_State *L)
     LL_FUNC("WriteAutoFormat");
     const char *filename = ll_check_string(_fun, L, 1);
     Pix *pix = ll_check_Pix(_fun, L, 2);
-    l_int32 result = pixWriteAutoFormat(filename, pix);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixWriteAutoFormat(filename, pix));
 }
 
 /**
@@ -22284,7 +22225,7 @@ WriteAutoFormat(lua_State *L)
  * Arg #3 is expected to be a l_int32 (format).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WriteDebug(lua_State *L)
@@ -22293,8 +22234,7 @@ WriteDebug(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     const char *fname = ll_check_string(_fun, L, 2);
     l_int32 format = ll_check_input_format(_fun, L, 3, IFF_DEFAULT);
-    l_int32 result = pixWriteDebug(fname, pix, format);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixWriteDebug(fname, pix, format));
 }
 
 /**
@@ -22306,7 +22246,7 @@ WriteDebug(lua_State *L)
  * Arg #4 is expected to be a l_int32 (progressive).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WriteImpliedFormat(lua_State *L)
@@ -22316,8 +22256,7 @@ WriteImpliedFormat(lua_State *L)
     const char *filename = ll_check_string(_fun, L, 2);
     l_int32 quality = ll_check_l_int32(_fun, L, 3);
     l_int32 progressive = ll_check_l_int32(_fun, L, 4);
-    l_int32 result = pixWriteImpliedFormat(filename, pix, quality, progressive);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixWriteImpliedFormat(filename, pix, quality, progressive));
 }
 
 /**
@@ -22328,10 +22267,10 @@ WriteImpliedFormat(lua_State *L)
  * Arg #3 is expected to be a l_int32 (quality).
  * Arg #4 is expected to be a l_int32 (nlevels).
  * Arg #5 is expected to be a l_int32 (hint).
- * Arg #6 is expected to be a l_int32 (debug).
+ * Arg #6 is expected to be a boolean (debug).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WriteJp2k(lua_State *L)
@@ -22342,9 +22281,8 @@ WriteJp2k(lua_State *L)
     l_int32 quality = ll_check_l_int32(_fun, L, 3);
     l_int32 nlevels = ll_check_l_int32(_fun, L, 4);
     l_int32 hint = ll_check_l_int32(_fun, L, 5);
-    l_int32 debug = ll_check_l_int32(_fun, L, 6);
-    l_int32 result = pixWriteJp2k(filename, pix, quality, nlevels, hint, debug);
-    return ll_push_l_int32(_fun, L, result);
+    l_int32 debug = ll_check_boolean_default(_fun, L, 6, FALSE);
+    return ll_push_boolean(_fun, L, 0 == pixWriteJp2k(filename, pix, quality, nlevels, hint, debug));
 }
 
 /**
@@ -22356,7 +22294,7 @@ WriteJp2k(lua_State *L)
  * Arg #4 is expected to be a l_int32 (progressive).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean the Lua stack
  */
 static int
 WriteJpeg(lua_State *L)
@@ -22366,8 +22304,7 @@ WriteJpeg(lua_State *L)
     const char *filename = ll_check_string(_fun, L, 2);
     l_int32 quality = ll_check_l_int32(_fun, L, 3);
     l_int32 progressive = ll_check_l_int32(_fun, L, 4);
-    l_int32 result = pixWriteJpeg(filename, pix, quality, progressive);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixWriteJpeg(filename, pix, quality, progressive));
 }
 
 /**
@@ -22377,7 +22314,7 @@ WriteJpeg(lua_State *L)
  * Arg #2 is expected to be a string with the input format name (format).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 boolean on the Lua stack
+ * \return 1 lstring (%data, %size) on the Lua stack
  */
 static int
 WriteMem(lua_State *L)
@@ -22400,7 +22337,7 @@ WriteMem(lua_State *L)
  * Arg #1 is expected to be a Pix* (pixs).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 lstring (%fdata, %fsize) on the Lua stack
  */
 static int
 WriteMemBmp(lua_State *L)
@@ -22422,7 +22359,7 @@ WriteMemBmp(lua_State *L)
  * Arg #1 is expected to be a Pix* (pix).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 lstring (%data, %size) on the Lua stack
  */
 static int
 WriteMemGif(lua_State *L)
@@ -22448,7 +22385,7 @@ WriteMemGif(lua_State *L)
  * Arg #5 is expected to be a l_int32 (debug).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 lstring (%data, %size) on the Lua stack
  */
 static int
 WriteMemJp2k(lua_State *L)
@@ -22458,7 +22395,7 @@ WriteMemJp2k(lua_State *L)
     l_int32 quality = ll_check_l_int32(_fun, L, 2);
     l_int32 nlevels = ll_check_l_int32(_fun, L, 3);
     l_int32 hint = ll_check_l_int32(_fun, L, 4);
-    l_int32 debug = ll_check_l_int32(_fun, L, 5);
+    l_int32 debug = ll_check_boolean_default(_fun, L, 5, FALSE);
     l_uint8 *data = nullptr;
     size_t size = 0;
     if (pixWriteMemJp2k(&data, &size, pix, quality, nlevels, hint, debug))
@@ -22476,7 +22413,7 @@ WriteMemJp2k(lua_State *L)
  * Arg #5 is expected to be a l_int32 (progressive).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 lstring (%data, %size) on the Lua stack
  */
 static int
 WriteMemJpeg(lua_State *L)
@@ -22503,14 +22440,14 @@ WriteMemJpeg(lua_State *L)
  * Arg #4 is expected to be a l_float32 (scale).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 lstring (%data, %size) on the Lua stack
  */
 static int
 WriteMemPS(lua_State *L)
 {
     LL_FUNC("WriteMemPS");
     Pix *pix = ll_check_Pix(_fun, L, 1);
-    Box *box = ll_check_Box(_fun, L, 2);
+    Box *box = ll_check_Box_opt(_fun, L, 2);
     l_int32 res = ll_check_l_int32(_fun, L, 3);
     l_float32 scale = ll_check_l_float32(_fun, L, 4);
     l_uint8 *data = nullptr;
@@ -22528,7 +22465,7 @@ WriteMemPS(lua_State *L)
  * Arg #1 is expected to be a Pix* (pix).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 lstring (%data, %size) on the Lua stack
  */
 static int
 WriteMemPam(lua_State *L)
@@ -22552,7 +22489,7 @@ WriteMemPam(lua_State *L)
  * Arg #3 is expected to be a string (title).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 lstring (%data, %nbytes) on the Lua stack
  */
 static int
 WriteMemPdf(lua_State *L)
@@ -22577,7 +22514,7 @@ WriteMemPdf(lua_State *L)
  * Arg #2 is expected to be a l_float32 (gamma).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 lstring (%filedata, %filesize) on the Lua stack
  */
 static int
 WriteMemPng(lua_State *L)
@@ -22600,7 +22537,7 @@ WriteMemPng(lua_State *L)
  * Arg #1 is expected to be a Pix* (pix).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 lstring (%data, %size) on the Lua stack
  */
 static int
 WriteMemPnm(lua_State *L)
@@ -22622,7 +22559,7 @@ WriteMemPnm(lua_State *L)
  * Arg #1 is expected to be a Pix* (pix).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 lstring (%data, %size) on the Lua stack
  */
 static int
 WriteMemSpix(lua_State *L)
@@ -22645,7 +22582,7 @@ WriteMemSpix(lua_State *L)
  * Arg #2 is expected to be a l_int32 (comptype).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 lstring (%data, %size) on the Lua stack
  */
 static int
 WriteMemTiff(lua_State *L)
@@ -22673,19 +22610,17 @@ WriteMemTiff(lua_State *L)
  * Arg #6 is expected to be a Numa* (nasizes).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 lstring (%data, %size) on the Lua stack
  */
 static int
 WriteMemTiffCustom(lua_State *L)
 {
     LL_FUNC("WriteMemTiffCustom");
-    l_int32 n_savals = 0;
-    l_int32 n_satypes = 0;
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 comptype = ll_check_l_int32(_fun, L, 2);
     Numa *natags = ll_check_Numa(_fun, L, 3);
-    Sarray *savals = ll_unpack_Sarray(_fun, L, 4, &n_savals);
-    Sarray *satypes = ll_unpack_Sarray(_fun, L, 5, &n_satypes);
+    Sarray *savals = ll_unpack_Sarray(_fun, L, 4, nullptr);
+    Sarray *satypes = ll_unpack_Sarray(_fun, L, 5, nullptr);
     Numa *nasizes = ll_check_Numa(_fun, L, 6);
     l_uint8 *data = nullptr;
     size_t size = 0;
@@ -22699,20 +22634,20 @@ WriteMemTiffCustom(lua_State *L)
 /**
  * \brief Brief comment goes here.
  * <pre>
- * Arg #3 is expected to be a Pix* (pixs).
- * Arg #4 is expected to be a l_int32 (quality).
- * Arg #5 is expected to be a l_int32 (lossless).
+ * Arg #1 is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_int32 (quality).
+ * Arg #3 is expected to be a l_int32 (lossless).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 lstring (%encdata, %encsize) on the Lua stack
  */
 static int
 WriteMemWebP(lua_State *L)
 {
     LL_FUNC("WriteMemWebP");
-    Pix *pixs = ll_check_Pix(_fun, L, 3);
-    l_int32 quality = ll_check_l_int32(_fun, L, 4);
-    l_int32 lossless = ll_check_l_int32(_fun, L, 5);
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 quality = ll_check_l_int32(_fun, L, 2);
+    l_int32 lossless = ll_check_l_int32(_fun, L, 3);
     l_uint8 *encdata = nullptr;
     size_t encsize = 0;
     if (pixWriteMemWebP(&encdata, &encsize, pixs, quality, lossless))
@@ -22732,7 +22667,7 @@ WriteMemWebP(lua_State *L)
  * Arg #5 is expected to be a string (fileout).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WriteMixedToPS(lua_State *L)
@@ -22743,8 +22678,7 @@ WriteMixedToPS(lua_State *L)
     l_float32 scale = ll_check_l_float32(_fun, L, 3);
     l_int32 pageno = ll_check_l_int32(_fun, L, 4);
     const char *fileout = ll_check_string(_fun, L, 5);
-    l_int32 result = pixWriteMixedToPS(pixb, pixc, scale, pageno, fileout);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixWriteMixedToPS(pixb, pixc, scale, pageno, fileout));
 }
 
 /**
@@ -22754,7 +22688,7 @@ WriteMixedToPS(lua_State *L)
  * Arg #2 is expected to be a string (fileout).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WritePSEmbed(lua_State *L)
@@ -22762,8 +22696,7 @@ WritePSEmbed(lua_State *L)
     LL_FUNC("WritePSEmbed");
     const char *filein = ll_check_string(_fun, L, 1);
     const char *fileout = ll_check_string(_fun, L, 2);
-    l_int32 result = pixWritePSEmbed(filein, fileout);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixWritePSEmbed(filein, fileout));
 }
 
 /**
@@ -22774,7 +22707,7 @@ WritePSEmbed(lua_State *L)
  * Arg #3 is expected to be a l_float32 (gamma).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WritePng(lua_State *L)
@@ -22783,8 +22716,7 @@ WritePng(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
     l_float32 gamma = ll_check_l_float32(_fun, L, 3);
-    l_int32 result = pixWritePng(filename, pix, gamma);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixWritePng(filename, pix, gamma));
 }
 
 /**
@@ -22799,7 +22731,7 @@ WritePng(lua_State *L)
  * Arg #7 is expected to be a string (fileout).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WriteSegmentedPageToPS(lua_State *L)
@@ -22812,8 +22744,7 @@ WriteSegmentedPageToPS(lua_State *L)
     l_int32 threshold = ll_check_l_int32(_fun, L, 5);
     l_int32 pageno = ll_check_l_int32(_fun, L, 6);
     const char *fileout = ll_check_string(_fun, L, 7);
-    l_int32 result = pixWriteSegmentedPageToPS(pixs, pixm, textscale, imagescale, threshold, pageno, fileout);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixWriteSegmentedPageToPS(pixs, pixm, textscale, imagescale, threshold, pageno, fileout));
 }
 
 /**
@@ -22843,7 +22774,7 @@ WriteStream(lua_State *L)
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WriteStreamAsciiPnm(lua_State *L)
@@ -22851,8 +22782,7 @@ WriteStreamAsciiPnm(lua_State *L)
     LL_FUNC("WriteStreamAsciiPnm");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    l_int32 result = pixWriteStreamAsciiPnm(stream->f, pix);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixWriteStreamAsciiPnm(stream->f, pix));
 }
 
 /**
@@ -22862,7 +22792,7 @@ WriteStreamAsciiPnm(lua_State *L)
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WriteStreamBmp(lua_State *L)
@@ -22870,8 +22800,7 @@ WriteStreamBmp(lua_State *L)
     LL_FUNC("WriteStreamBmp");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    l_int32 result = pixWriteStreamBmp(stream->f, pix);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixWriteStreamBmp(stream->f, pix));
 }
 
 /**
@@ -22881,7 +22810,7 @@ WriteStreamBmp(lua_State *L)
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WriteStreamGif(lua_State *L)
@@ -22889,8 +22818,7 @@ WriteStreamGif(lua_State *L)
     LL_FUNC("WriteStreamGif");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    l_int32 result = pixWriteStreamGif(stream->f, pix);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixWriteStreamGif(stream->f, pix));
 }
 
 /**
@@ -22901,10 +22829,10 @@ WriteStreamGif(lua_State *L)
  * Arg #3 is expected to be a l_int32 (quality).
  * Arg #4 is expected to be a l_int32 (nlevels).
  * Arg #5 is expected to be a l_int32 (hint).
- * Arg #6 is expected to be a l_int32 (debug).
+ * Arg #6 is expected to be a boolean (debug).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WriteStreamJp2k(lua_State *L)
@@ -22915,9 +22843,8 @@ WriteStreamJp2k(lua_State *L)
     l_int32 quality = ll_check_l_int32(_fun, L, 3);
     l_int32 nlevels = ll_check_l_int32(_fun, L, 4);
     l_int32 hint = ll_check_l_int32(_fun, L, 5);
-    l_int32 debug = ll_check_l_int32(_fun, L, 6);
-    l_int32 result = pixWriteStreamJp2k(stream->f, pix, quality, nlevels, hint, debug);
-    return ll_push_l_int32(_fun, L, result);
+    l_int32 debug = ll_check_boolean_default(_fun, L, 6, FALSE);
+    return ll_push_boolean(_fun, L, 0 == pixWriteStreamJp2k(stream->f, pix, quality, nlevels, hint, debug));
 }
 
 /**
@@ -22929,7 +22856,7 @@ WriteStreamJp2k(lua_State *L)
  * Arg #4 is expected to be a l_int32 (progressive).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WriteStreamJpeg(lua_State *L)
@@ -22939,8 +22866,7 @@ WriteStreamJpeg(lua_State *L)
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
     l_int32 quality = ll_check_l_int32(_fun, L, 3);
     l_int32 progressive = ll_check_l_int32(_fun, L, 4);
-    l_int32 result = pixWriteStreamJpeg(stream->f, pixs, quality, progressive);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixWriteStreamJpeg(stream->f, pixs, quality, progressive));
 }
 
 /**
@@ -22953,7 +22879,7 @@ WriteStreamJpeg(lua_State *L)
  * Arg #5 is expected to be a l_float32 (scale).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WriteStreamPS(lua_State *L)
@@ -22964,8 +22890,7 @@ WriteStreamPS(lua_State *L)
     Box *box = ll_check_Box(_fun, L, 3);
     l_int32 res = ll_check_l_int32(_fun, L, 4);
     l_float32 scale = ll_check_l_float32(_fun, L, 5);
-    l_int32 result = pixWriteStreamPS(stream->f, pix, box, res, scale);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixWriteStreamPS(stream->f, pix, box, res, scale));
 }
 
 /**
@@ -22975,7 +22900,7 @@ WriteStreamPS(lua_State *L)
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WriteStreamPam(lua_State *L)
@@ -22983,8 +22908,7 @@ WriteStreamPam(lua_State *L)
     LL_FUNC("WriteStreamPam");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    l_int32 result = pixWriteStreamPam(stream->f, pix);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixWriteStreamPam(stream->f, pix));
 }
 
 /**
@@ -22996,7 +22920,7 @@ WriteStreamPam(lua_State *L)
  * Arg #4 is expected to be a string (title).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WriteStreamPdf(lua_State *L)
@@ -23006,8 +22930,7 @@ WriteStreamPdf(lua_State *L)
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
     l_int32 res = ll_check_l_int32(_fun, L, 3);
     const char *title = ll_check_string(_fun, L, 4);
-    l_int32 result = pixWriteStreamPdf(stream->f, pix, res, title);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixWriteStreamPdf(stream->f, pix, res, title));
 }
 
 /**
@@ -23018,7 +22941,7 @@ WriteStreamPdf(lua_State *L)
  * Arg #3 is expected to be a l_float32 (gamma).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WriteStreamPng(lua_State *L)
@@ -23027,8 +22950,7 @@ WriteStreamPng(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
     l_float32 gamma = ll_check_l_float32(_fun, L, 3);
-    l_int32 result = pixWriteStreamPng(stream->f, pix, gamma);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixWriteStreamPng(stream->f, pix, gamma));
 }
 
 /**
@@ -23038,7 +22960,7 @@ WriteStreamPng(lua_State *L)
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WriteStreamPnm(lua_State *L)
@@ -23046,8 +22968,7 @@ WriteStreamPnm(lua_State *L)
     LL_FUNC("WriteStreamPnm");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    l_int32 result = pixWriteStreamPnm(stream->f, pix);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixWriteStreamPnm(stream->f, pix));
 }
 
 /**
@@ -23057,7 +22978,7 @@ WriteStreamPnm(lua_State *L)
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WriteStreamSpix(lua_State *L)
@@ -23065,8 +22986,7 @@ WriteStreamSpix(lua_State *L)
     LL_FUNC("WriteStreamSpix");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    l_int32 result = pixWriteStreamSpix(stream->f, pix);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixWriteStreamSpix(stream->f, pix));
 }
 
 /**
@@ -23077,7 +22997,7 @@ WriteStreamSpix(lua_State *L)
  * Arg #3 is expected to be a l_int32 (comptype).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WriteStreamTiff(lua_State *L)
@@ -23086,8 +23006,7 @@ WriteStreamTiff(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
     l_int32 comptype = ll_check_l_int32(_fun, L, 3);
-    l_int32 result = pixWriteStreamTiff(stream->f, pix, comptype);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixWriteStreamTiff(stream->f, pix, comptype));
 }
 
 /**
@@ -23099,7 +23018,7 @@ WriteStreamTiff(lua_State *L)
  * Arg #4 is expected to be a string (modestr).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WriteStreamTiffWA(lua_State *L)
@@ -23109,8 +23028,7 @@ WriteStreamTiffWA(lua_State *L)
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
     l_int32 comptype = ll_check_l_int32(_fun, L, 3);
     const char *modestr = ll_check_string(_fun, L, 4);
-    l_int32 result = pixWriteStreamTiffWA(stream->f, pix, comptype, modestr);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixWriteStreamTiffWA(stream->f, pix, comptype, modestr));
 }
 
 /**
@@ -23122,7 +23040,7 @@ WriteStreamTiffWA(lua_State *L)
  * Arg #4 is expected to be a l_int32 (lossless).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WriteStreamWebP(lua_State *L)
@@ -23132,8 +23050,7 @@ WriteStreamWebP(lua_State *L)
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
     l_int32 quality = ll_check_l_int32(_fun, L, 3);
     l_int32 lossless = ll_check_l_int32(_fun, L, 4);
-    l_int32 result = pixWriteStreamWebP(stream->f, pixs, quality, lossless);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixWriteStreamWebP(stream->f, pixs, quality, lossless));
 }
 
 /**
@@ -23145,7 +23062,7 @@ WriteStreamWebP(lua_State *L)
  * Arg #4 is expected to be a l_float32 (scale).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 char * on the Lua stack
+ * \return 1 string (%str) on the Lua stack
  */
 static int
 WriteStringPS(lua_State *L)
@@ -23155,8 +23072,10 @@ WriteStringPS(lua_State *L)
     Box *box = ll_check_Box(_fun, L, 2);
     l_int32 res = ll_check_l_int32(_fun, L, 3);
     l_float32 scale = ll_check_l_float32(_fun, L, 4);
-    char *result = pixWriteStringPS(pixs, box, res, scale);
-    return ll_push_string(_fun, L, result);
+    char *str = pixWriteStringPS(pixs, box, res, scale);
+    ll_push_string(_fun, L, str);
+    ll_free(str);
+    return 1;
 }
 
 /**
@@ -23168,7 +23087,7 @@ WriteStringPS(lua_State *L)
  * Arg #4 is expected to be a string (modestr).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WriteTiff(lua_State *L)
@@ -23178,8 +23097,7 @@ WriteTiff(lua_State *L)
     const char *filename = ll_check_string(_fun, L, 2);
     l_int32 comptype = ll_check_l_int32(_fun, L, 3);
     const char *modestr = ll_check_string(_fun, L, 4);
-    l_int32 result = pixWriteTiff(filename, pix, comptype, modestr);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixWriteTiff(filename, pix, comptype, modestr));
 }
 
 /**
@@ -23195,24 +23113,21 @@ WriteTiff(lua_State *L)
  * Arg #8 is expected to be a Numa* (nasizes).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WriteTiffCustom(lua_State *L)
 {
     LL_FUNC("WriteTiffCustom");
-    l_int32 n_savals = 0;
-    l_int32 n_satypes = 0;
     Pix *pix = ll_check_Pix(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
     l_int32 comptype = ll_check_l_int32(_fun, L, 3);
     const char *modestr = ll_check_string(_fun, L, 4);
     Numa *natags = ll_check_Numa(_fun, L, 5);
-    Sarray *savals = ll_unpack_Sarray(_fun, L, 6, &n_savals);
-    Sarray *satypes = ll_unpack_Sarray(_fun, L, 7, &n_satypes);
+    Sarray *savals = ll_unpack_Sarray(_fun, L, 6, nullptr);
+    Sarray *satypes = ll_unpack_Sarray(_fun, L, 7, nullptr);
     Numa *nasizes = ll_check_Numa(_fun, L, 8);
-    l_int32 result = pixWriteTiffCustom(filename, pix, comptype, modestr, natags, savals, satypes, nasizes);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixWriteTiffCustom(filename, pix, comptype, modestr, natags, savals, satypes, nasizes));
 }
 
 /**
@@ -23224,7 +23139,7 @@ WriteTiffCustom(lua_State *L)
  * Arg #4 is expected to be a l_int32 (lossless).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WriteWebP(lua_State *L)
@@ -23234,8 +23149,7 @@ WriteWebP(lua_State *L)
     const char *filename = ll_check_string(_fun, L, 2);
     l_int32 quality = ll_check_l_int32(_fun, L, 3);
     l_int32 lossless = ll_check_l_int32(_fun, L, 4);
-    l_int32 result = pixWriteWebP(filename, pixs, quality, lossless);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == pixWriteWebP(filename, pixs, quality, lossless));
 }
 
 /**
@@ -23254,8 +23168,7 @@ Zero(lua_State *L)
     l_int32 empty = 0;
     if (pixZero(pixs, &empty))
         return ll_push_nil(L);
-    lua_pushboolean(L, empty);
-    return 1;
+    return ll_push_boolean(_fun, L, empty);
 }
 
 /**
