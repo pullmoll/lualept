@@ -91,7 +91,7 @@ GetCount(lua_State *L)
 {
     LL_FUNC("GetCount");
     Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
-    lua_pushinteger(L, boxaaGetCount(boxaa));
+    ll_push_l_int32(_fun, L, boxaaGetCount(boxaa));
     return 1;
 }
 
@@ -292,7 +292,7 @@ GetBoxCount(lua_State *L)
 {
     LL_FUNC("GetBoxCount");
     Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
-    lua_pushinteger(L, boxaaGetBoxCount(boxaa));
+    ll_push_l_int32(_fun, L, boxaaGetBoxCount(boxaa));
     return 1;
 }
 

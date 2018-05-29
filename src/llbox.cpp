@@ -260,17 +260,17 @@ ClipToRectangleParams(lua_State *L)
     l_int32 bh = 0;
     if (boxClipToRectangleParams(boxs, w, h, &xstart, &ystart, &xend, &yend, &bw, &bh))
         return ll_push_nil(L);
-    lua_pushinteger(L, xstart);
-    lua_pushinteger(L, ystart);
-    lua_pushinteger(L, xend);
-    lua_pushinteger(L, yend);
-    lua_pushinteger(L, bw);
-    lua_pushinteger(L, bh);
+    ll_push_l_int32(_fun, L, xstart);
+    ll_push_l_int32(_fun, L, ystart);
+    ll_push_l_int32(_fun, L, xend);
+    ll_push_l_int32(_fun, L, yend);
+    ll_push_l_int32(_fun, L, bw);
+    ll_push_l_int32(_fun, L, bh);
     return 6;
 }
 
 /**
- * \brief Clone a Box*.
+ * \brief Clone a Box* (%boxs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * </pre>
@@ -306,7 +306,7 @@ CompareSize(lua_State *L)
     l_int32 rel = 0;
     if (boxCompareSize(box1, box2, type, &rel))
         return ll_push_nil(L);
-    lua_pushinteger(L, rel);
+    ll_push_l_int32(_fun, L, rel);
     return 1;
 }
 
@@ -374,7 +374,7 @@ ConvertToPta(lua_State *L)
 }
 
 /**
- * \brief Copy a Box*.
+ * \brief Copy a Box* (%boxs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * </pre>
@@ -391,7 +391,7 @@ Copy(lua_State *L)
 }
 
 /**
- * \brief Create a new Box* if the parameters are valid.
+ * \brief Create a new Box* (%box) if the parameters are valid.
  * <pre>
  * Arg #1 is expected to be a l_int32 (x).
  * Arg #2 is expected to be a l_int32 (y).
@@ -399,7 +399,7 @@ Copy(lua_State *L)
  * Arg #4 is expected to be a l_int32 (h).
  *
  * Notes:
- *     (1) This returns NULL if either w = 0 or h = 0.
+ *     (1) This returns nil if either w = 0 or h = 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -425,7 +425,7 @@ CreateValid(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Box* (box).
  * </pre>
  * \param L pointer to the lua_State
- * \return 2 numbers on the Lua stack (cx, cy)
+ * \return 2 numbers on the Lua stack (%cx, %cy)
  */
 static int
 GetCenter(lua_State *L)
@@ -436,8 +436,8 @@ GetCenter(lua_State *L)
     l_float32 cy = 0.0f;
     if (boxGetCenter(box, &cx, &cy))
         return ll_push_nil(L);
-    lua_pushnumber(L, static_cast<lua_Number>(cx));
-    lua_pushnumber(L, static_cast<lua_Number>(cy));
+    ll_push_l_float32(_fun, L, cx);
+    ll_push_l_float32(_fun, L, cy);
     return 2;
 }
 
@@ -457,10 +457,10 @@ GetGeometry(lua_State *L)
     l_int32 x, y, w, h;
     if (boxGetGeometry(box, &x, &y, &w, &h))
         return ll_push_nil(L);
-    lua_pushinteger(L, x);
-    lua_pushinteger(L, y);
-    lua_pushinteger(L, w);
-    lua_pushinteger(L, h);
+    ll_push_l_int32(_fun, L, x);
+    ll_push_l_int32(_fun, L, y);
+    ll_push_l_int32(_fun, L, w);
+    ll_push_l_int32(_fun, L, h);
     return 4;
 }
 
@@ -477,7 +477,7 @@ GetRefcount(lua_State *L)
 {
     LL_FUNC("GetRefcount");
     Box *box = ll_check_Box(_fun, L, 1);
-    lua_pushinteger(L, boxGetRefcount(box));
+    ll_push_l_int32(_fun, L, boxGetRefcount(box));
     return 1;
 }
 
@@ -497,10 +497,10 @@ GetSideLocations(lua_State *L)
     l_int32 l, r, t, b;
     if (boxGetSideLocations(box, &l, &r, &t, &b))
         return ll_push_nil(L);
-    lua_pushinteger(L, l);
-    lua_pushinteger(L, r);
-    lua_pushinteger(L, t);
-    lua_pushinteger(L, b);
+    ll_push_l_int32(_fun, L, l);
+    ll_push_l_int32(_fun, L, r);
+    ll_push_l_int32(_fun, L, t);
+    ll_push_l_int32(_fun, L, b);
     return 4;
 }
 
@@ -530,11 +530,11 @@ IntersectByLine(lua_State *L)
     l_int32 n = 0;
     if (boxIntersectByLine(box, x, y, slope, &x1, &y1, &x2, &y2, &n))
         return ll_push_nil(L);
-    lua_pushinteger(L, x1);
-    lua_pushinteger(L, y1);
-    lua_pushinteger(L, x2);
-    lua_pushinteger(L, y2);
-    lua_pushinteger(L, n);
+    ll_push_l_int32(_fun, L, x1);
+    ll_push_l_int32(_fun, L, y1);
+    ll_push_l_int32(_fun, L, x2);
+    ll_push_l_int32(_fun, L, y2);
+    ll_push_l_int32(_fun, L, n);
     return 5;
 }
 
@@ -596,7 +596,7 @@ OverlapArea(lua_State *L)
     l_int32 area = 0.0f;
     if (boxOverlapArea(box1, box2, &area))
         return ll_push_nil(L);
-    lua_pushinteger(L, area);
+    ll_push_l_int32(_fun, L, area);
     return 1;
 }
 
@@ -618,8 +618,7 @@ OverlapFraction(lua_State *L)
     l_float32 fract = 0.0f;
     if (boxOverlapFraction(box1, box2, &fract))
         return ll_push_nil(L);
-    lua_pushnumber(L, static_cast<lua_Number>(fract));
-    return 1;
+    return ll_push_l_float32(_fun, L, fract);
 }
 
 /**
@@ -722,8 +721,8 @@ SeparationDistance(lua_State *L)
     l_int32 v_sep = 0;
     if (boxSeparationDistance(box1, box2, &h_sep, &v_sep))
         return ll_push_nil(L);
-    lua_pushinteger(L, h_sep);
-    lua_pushinteger(L, v_sep);
+    ll_push_l_int32(_fun, L, h_sep);
+    ll_push_l_int32(_fun, L, v_sep);
     return 2;
 }
 

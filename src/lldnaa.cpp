@@ -91,8 +91,7 @@ GetCount(lua_State *L)
 {
     LL_FUNC("GetCount");
     Dnaa *daa = ll_check_Dnaa(_fun, L, 1);
-    l_int32 n = l_dnaaGetCount(daa);
-    lua_pushinteger(L, n);
+    ll_push_l_int32(_fun, L, l_dnaaGetCount(daa));
     return 1;
 }
 
@@ -273,8 +272,7 @@ GetDnaCount(lua_State *L)
     LL_FUNC("GetDnaCount");
     Dnaa *daa = ll_check_Dnaa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, l_dnaaGetCount(daa));
-    l_int32 n = l_dnaaGetDnaCount(daa, idx);
-    lua_pushinteger(L, n);
+    ll_push_l_int32(_fun, L, l_dnaaGetDnaCount(daa, idx));
     return 1;
 }
 
@@ -291,7 +289,7 @@ GetNumberCount(lua_State *L)
 {
     LL_FUNC("GetNumberCount");
     Dnaa *daa = ll_check_Dnaa(_fun, L, 1);
-    lua_pushinteger(L, l_dnaaGetNumberCount(daa));
+    ll_push_l_int32(_fun, L, l_dnaaGetNumberCount(daa));
     return 1;
 }
 
@@ -312,10 +310,10 @@ GetValue(lua_State *L)
     Dnaa *daa = ll_check_Dnaa(_fun, L, 1);
     l_int32 i = ll_check_index(_fun, L, 2, l_dnaaGetCount(daa));
     l_int32 j = ll_check_index(_fun, L, 3, INT32_MAX);
-    lua_Number val;
+    l_float64 val;
     if (l_dnaaGetValue(daa, i, j, &val))
         return ll_push_nil(L);
-    lua_pushnumber(L, val);
+    ll_push_l_float64(_fun, L, val);
     return 1;
 }
 

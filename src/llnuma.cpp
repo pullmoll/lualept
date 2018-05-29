@@ -91,8 +91,7 @@ GetCount(lua_State *L)
 {
     LL_FUNC("GetCount");
     Numa* na = ll_check_Numa(_fun, L, 1);
-    l_int32 n = numaGetCount(na);
-    lua_pushinteger(L, n);
+    ll_push_l_int32(_fun, L, numaGetCount(na));
     return 1;
 }
 
@@ -322,7 +321,7 @@ GetFValue(lua_State *L)
     l_float32 val;
     if (numaGetFValue(na, idx, &val))
         return ll_push_nil(L);
-    lua_pushnumber(L, (lua_Number)val);
+    ll_push_l_float32(_fun, L, val);
     return 1;
 }
 
@@ -364,7 +363,7 @@ GetIValue(lua_State *L)
     l_int32 val;
     if (numaGetIValue(na, idx, &val))
         return ll_push_nil(L);
-    lua_pushinteger(L, val);
+    ll_push_l_int32(_fun, L, val);
     return 1;
 }
 
@@ -385,8 +384,8 @@ GetParameters(lua_State *L)
     l_float32 deltax = 0;
     if (numaGetParameters(na, &startx, &deltax))
         return ll_push_nil(L);
-    lua_pushnumber(L, static_cast<lua_Number>(startx));
-    lua_pushnumber(L, static_cast<lua_Number>(deltax));
+    ll_push_l_float32(_fun, L, startx);
+    ll_push_l_float32(_fun, L, deltax);
     return 2;
 }
 

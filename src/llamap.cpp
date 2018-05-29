@@ -74,7 +74,7 @@ Size(lua_State *L)
 {
     LL_FUNC("Size");
     Amap *amap = ll_check_Amap(_fun, L, 1);
-    lua_pushinteger(L, l_amapSize(amap));
+    ll_push_l_int32(_fun, L, l_amapSize(amap));
     return 1;
 }
 
@@ -434,10 +434,10 @@ ll_register_Amap(lua_State *L)
 {
     static const luaL_Reg methods[] = {
         {"__gc",                Destroy},   /* garbage collector */
-        {"__len",               Size},
-        {"__new",               Create},
-        {"__newindex",          Insert},
-        {"__tostring",          toString},
+        {"__len",               Size},      /* #amap */
+        {"__new",               Create},    /* Amap(n) */
+        {"__newindex",          Insert},    /* amap[n] = value */
+        {"__tostring",          toString},  /* print(amap) */
         {"Create",              Create},
         {"Delete",              Delete},
         {"Destroy",             Destroy},

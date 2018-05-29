@@ -91,7 +91,7 @@ GetCount(lua_State *L)
 {
     LL_FUNC("GetCount");
     Sela *sela = ll_check_Sela(_fun, L, 1);
-    lua_pushinteger(L, selaGetCount(sela));
+    ll_push_l_int32(_fun, L, selaGetCount(sela));
     return 1;
 }
 
@@ -364,7 +364,7 @@ DisplayInPix(lua_State *L)
  * Arg #2 is expected to be a string (name).
  * </pre>
  * \param L pointer to the lua_State
- * \return 2 integer (%index) and Sel* (%sel) on the Lua stack
+ * \return 2 integer (%idx) and Sel* (%sel) on the Lua stack
  */
 static int
 FindSelByName(lua_State *L)
@@ -372,11 +372,11 @@ FindSelByName(lua_State *L)
     LL_FUNC("FindSelByName");
     Sela *sela = ll_check_Sela(_fun, L, 1);
     const char *name = ll_check_string(_fun, L, 2);
-    l_int32 index = 0;
+    l_int32 idx = 0;
     Sel *sel = nullptr;
-    if (selaFindSelByName(sela, name, &index, &sel))
+    if (selaFindSelByName(sela, name, &idx, &sel))
         return ll_push_nil(L);
-    lua_pushinteger(L, index + 1);
+    ll_push_l_int32(_fun, L, idx + 1);
     ll_push_Sel(_fun, L, sel);
     return 2;
 }

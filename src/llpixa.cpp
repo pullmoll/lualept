@@ -91,7 +91,7 @@ GetCount(lua_State *L)
 {
     LL_FUNC("GetCount");
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
-    lua_pushinteger(L, pixaGetCount(pixa));
+    ll_push_l_int32(_fun, L, pixaGetCount(pixa));
     return 1;
 }
 
@@ -187,10 +187,10 @@ GetBoxGeometry(lua_State *L)
     l_int32 x, y, w, h;
     if (pixaGetBoxGeometry(pixa, idx, &x, &y, &w, &h))
         return ll_push_nil(L);
-    lua_pushinteger(L, x);
-    lua_pushinteger(L, y);
-    lua_pushinteger(L, w);
-    lua_pushinteger(L, h);
+    ll_push_l_int32(_fun, L, x);
+    ll_push_l_int32(_fun, L, y);
+    ll_push_l_int32(_fun, L, w);
+    ll_push_l_int32(_fun, L, h);
     return 4;
 }
 

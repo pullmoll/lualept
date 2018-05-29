@@ -91,8 +91,7 @@ GetCount(lua_State *L)
 {
     LL_FUNC("GetCount");
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
-    l_int32 n = numaaGetCount(naa);
-    lua_pushinteger(L, n);
+    ll_push_l_int32(_fun, L, numaaGetCount(naa));
     return 1;
 }
 
@@ -230,8 +229,7 @@ GetNumaCount(lua_State *L)
     LL_FUNC("GetNumaCount");
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, numaaGetCount(naa));
-    l_int32 n = numaaGetNumaCount(naa, idx);
-    lua_pushinteger(L, n);
+    ll_push_l_int32(_fun, L, numaaGetNumaCount(naa, idx));
     return 1;
 }
 
@@ -248,8 +246,7 @@ GetNumberCount(lua_State *L)
 {
     LL_FUNC("GetNumberCount");
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
-    l_int32 n = numaaGetNumberCount(naa);
-    lua_pushinteger(L, n);
+    ll_push_l_int32(_fun, L, numaaGetNumberCount(naa));
     return 1;
 }
 

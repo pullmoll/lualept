@@ -91,7 +91,7 @@ GetCount(lua_State *L)
 {
     LL_FUNC("GetCount");
     Pta *pta = ll_check_Pta(_fun, L, 1);
-    lua_pushinteger(L, ptaGetCount(pta));
+    ll_push_l_int32(_fun, L, ptaGetCount(pta));
     return 1;
 }
 
@@ -281,8 +281,8 @@ GetIPt(lua_State *L)
     l_int32 y;
     if (ptaGetIPt(pta, idx, &x, &y))
         return ll_push_nil(L);
-    lua_pushinteger(L, static_cast<lua_Integer>(x));
-    lua_pushinteger(L, static_cast<lua_Integer>(y));
+    ll_push_l_int32(_fun, L, x);
+    ll_push_l_int32(_fun, L, y);
     return 2;
 }
 
@@ -305,8 +305,8 @@ GetPt(lua_State *L)
     l_float32 y = 0;
     if (ptaGetPt(pta, idx, &x, &y))
         return ll_push_nil(L);
-    lua_pushnumber(L, static_cast<lua_Number>(x));
-    lua_pushnumber(L, static_cast<lua_Number>(y));
+    ll_push_l_float32(_fun, L, x);
+    ll_push_l_float32(_fun, L, y);
     return 2;
 }
 

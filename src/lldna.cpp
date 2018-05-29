@@ -91,8 +91,7 @@ GetCount(lua_State *L)
 {
     LL_FUNC("GetCount");
     Dna *da = ll_check_Dna(_fun, L, 1);
-    l_int32 n = l_dnaGetCount(da);
-    lua_pushinteger(L, n);
+    ll_push_l_int32(_fun, L, l_dnaGetCount(da));
     return 1;
 }
 
@@ -301,11 +300,11 @@ GetDValue(lua_State *L)
 {
     LL_FUNC("GetDValue");
     Dna *da = ll_check_Dna(_fun, L, 1);
-    l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
-    lua_Number val;
-    if (l_dnaGetDValue(da, idx, &val))
+    l_int32 index = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
+    l_float64 val = 0;
+    if (l_dnaGetDValue(da, index, &val))
         return ll_push_nil(L);
-    lua_pushnumber(L, val);
+    ll_push_l_float64(_fun, L, val);
     return 1;
 }
 
@@ -323,8 +322,8 @@ GetIArray(lua_State *L)
     LL_FUNC("GetIArray");
     Dna *dna = ll_check_Dna(_fun, L, 1);
     l_int32 *ia = l_dnaGetIArray(dna);
-    l_int32 n = l_dnaGetCount(dna);
-    int res = ll_push_Iarray(_fun, L, ia, n);
+    l_int32 size = l_dnaGetCount(dna);
+    int res = ll_push_Iarray(_fun, L, ia, size);
     LEPT_FREE(ia);
     return res;
 }
@@ -347,7 +346,7 @@ GetIValue(lua_State *L)
     l_int32 val;
     if (l_dnaGetIValue(da, idx, &val))
         return ll_push_nil(L);
-    lua_pushinteger(L, val);
+    ll_push_l_int32(_fun, L, val);
     return 1;
 }
 
@@ -364,12 +363,12 @@ GetParameters(lua_State *L)
 {
     LL_FUNC("GetParameters");
     Dna *da = ll_check_Dna(_fun, L, 1);
-    lua_Number startx = 0;
-    lua_Number deltax = 0;
+    l_float64 startx = 0;
+    l_float64 deltax = 0;
     if (l_dnaGetParameters(da, &startx, &deltax))
         return ll_push_nil(L);
-    lua_pushnumber(L, startx);
-    lua_pushnumber(L, deltax);
+    ll_push_l_float64(_fun, L, startx);
+    ll_push_l_float64(_fun, L, deltax);
     return 2;
 }
 

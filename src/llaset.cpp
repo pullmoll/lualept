@@ -73,7 +73,7 @@ Size(lua_State *L)
 {
     LL_FUNC("Size");
     Aset *aset = ll_check_Aset(_fun, L, 1);
-    lua_pushinteger(L, l_asetSize(aset));
+    ll_push_l_int32(_fun, L, l_asetSize(aset));
     return 1;
 }
 

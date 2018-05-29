@@ -299,10 +299,10 @@ FindMaxTranslations(lua_State *L)
     l_int32 yn = 0;
     if (selFindMaxTranslations(sel, &xp, &yp, &xn, &yn))
         return ll_push_nil(L);
-    lua_pushinteger(L, xp);
-    lua_pushinteger(L, yp);
-    lua_pushinteger(L, xn);
-    lua_pushinteger(L, yn);
+    ll_push_l_int32(_fun, L, xp);
+    ll_push_l_int32(_fun, L, yp);
+    ll_push_l_int32(_fun, L, xn);
+    ll_push_l_int32(_fun, L, yn);
     return 4;
 }
 
@@ -368,10 +368,10 @@ GetParameters(lua_State *L)
     l_int32 cx = 0;
     if (selGetParameters(sel, &sy, &sx, &cy, &cx))
         return ll_push_nil(L);
-    lua_pushinteger(L, sy);
-    lua_pushinteger(L, sx);
-    lua_pushinteger(L, cy);
-    lua_pushinteger(L, cx);
+    ll_push_l_int32(_fun, L, sy);
+    ll_push_l_int32(_fun, L, sx);
+    ll_push_l_int32(_fun, L, cy);
+    ll_push_l_int32(_fun, L, cx);
     return 4;
 }
 
@@ -525,8 +525,8 @@ SelectComposableSizes(lua_State *L)
     l_int32 factor2 = 0;
     if (selectComposableSizes(size, &factor1, &factor2))
         return ll_push_nil(L);
-    lua_pushinteger(L, factor1);
-    lua_pushinteger(L, factor2);
+    ll_push_l_int32(_fun, L, factor1);
+    ll_push_l_int32(_fun, L, factor2);
     return 2;
 }
 

@@ -336,7 +336,7 @@ AbsDiffInRect(lua_State *L)
     l_float32 absdiff = 0.0f;
     if (pixAbsDiffInRect(pixs, box, dir, &absdiff))
         return ll_push_nil(L);
-    lua_pushnumber(L, static_cast<lua_Number>(absdiff));
+    ll_push_l_float32(_fun, L, absdiff);
     return 1;
 }
 
@@ -361,7 +361,7 @@ AbsDiffOnLine(lua_State *L)
     l_float32 absdiff = 0.0f;
     if (pixAbsDiffOnLine(pixs, x1, y1, x2, y2, &absdiff))
         return ll_push_nil(L);
-    lua_pushnumber(L, static_cast<lua_Number>(absdiff));
+    ll_push_l_float32(_fun, L, absdiff);
     return 1;
 }
 
@@ -1351,7 +1351,7 @@ AverageInRect(lua_State *L)
     l_float32 ave = 0.0f;
     if (pixAverageInRect(pixs, box, &ave))
         return ll_push_nil(L);
-    lua_pushnumber(L, static_cast<lua_Number>(ave));
+    ll_push_l_float32(_fun, L, ave);
     return 1;
 }
 
@@ -8327,7 +8327,7 @@ FindAreaPerimRatio(lua_State *L)
     l_float32 fract = 0.0f;
     if (pixFindAreaPerimRatio(pixs, tab8, &fract))
         return ll_push_nil(L);
-    lua_pushnumber(L, (lua_Number)fract);
+    ll_push_l_float32(_fun, L, fract);
     return 1;
 }
 
@@ -8748,7 +8748,7 @@ FindPerimToAreaRatio(lua_State *L)
     l_float32 fract = 0.0f;
     if (pixFindPerimToAreaRatio(pixs, tab8, &fract))
         return ll_push_nil(L);
-    lua_pushnumber(L, (lua_Number)fract);
+    ll_push_l_float32(_fun, L, fract);
     return 1;
 }
 
@@ -9250,7 +9250,7 @@ ForegroundFraction(lua_State *L)
     l_float32 fract = 0;
     if (pixForegroundFraction(pixs, &fract))
         return ll_push_nil(L);
-    lua_pushnumber(L, static_cast<lua_Number>(fract));
+    ll_push_l_float32(_fun, L, fract);
     return 1;
 }
 
@@ -9829,7 +9829,7 @@ GetAverageMasked(lua_State *L)
     l_float32 value = 0.0;
     if (pixGetAverageMasked(pixs, pixm, x, y, factor, type, &value))
         return ll_push_nil(L);
-    lua_pushnumber(L, (lua_Number)value);
+    ll_push_l_float32(_fun, L, value);
     return 3;
 }
 
@@ -9859,9 +9859,9 @@ GetAverageMaskedRGB(lua_State *L)
     l_float32 rval = 0.0, gval = 0.0, bval = 0.0;
     if (pixGetAverageMaskedRGB(pixs, pixm, x, y, factor, type, &rval, &gval, &bval))
         return ll_push_nil(L);
-    lua_pushnumber(L, static_cast<lua_Number>(rval));
-    lua_pushnumber(L, static_cast<lua_Number>(gval));
-    lua_pushnumber(L, static_cast<lua_Number>(bval));
+    ll_push_l_float32(_fun, L, rval);
+    ll_push_l_float32(_fun, L, gval);
+    ll_push_l_float32(_fun, L, bval);
     return 3;
 }
 
@@ -11332,9 +11332,9 @@ GetRankValueMasked(lua_State *L)
     Numa *na = nullptr;
     if (pixGetRankValueMasked(pixs, pixm, x, y, factor, rank, &value, &na))
         return ll_push_nil(L);
-    lua_pushnumber(L, static_cast<lua_Number>(value));
+    ll_push_l_float32(_fun, L, value);
     ll_push_Numa(_fun, L, na);
-    return 1;
+    return 2;
 }
 
 /**
@@ -11363,9 +11363,9 @@ GetRankValueMaskedRGB(lua_State *L)
     l_float32 rval = 0.0f, gval = 0.0f, bval = 0.0f;
     if (pixGetRankValueMaskedRGB(pixs, pixm, x, y, factor, rank, &rval, &gval, &bval))
         return ll_push_nil(L);
-    lua_pushnumber(L, static_cast<lua_Number>(rval));
-    lua_pushnumber(L, static_cast<lua_Number>(gval));
-    lua_pushnumber(L, static_cast<lua_Number>(bval));
+    ll_push_l_float32(_fun, L, rval);
+    ll_push_l_float32(_fun, L, gval);
+    ll_push_l_float32(_fun, L, bval);
     return 3;
 }
 
@@ -21928,7 +21928,7 @@ VarianceInRect(lua_State *L)
     l_float32 sqrvar = 0.0f;
     if (pixVarianceInRect(pixs, box, &sqrvar))
         return ll_push_nil(L);
-    lua_pushnumber(L, static_cast<lua_Number>(sqrvar));
+    ll_push_l_float32(_fun, L, sqrvar);
     return 1;
 }
 

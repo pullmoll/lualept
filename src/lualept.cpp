@@ -3396,7 +3396,7 @@ RGB(lua_State *L)
     l_uint32 pixel;
     if (composeRGBPixel(rval, gval, bval, &pixel))
         return ll_push_nil(L);
-    lua_pushinteger(L, pixel);
+    ll_push_l_uint32(_fun, L, pixel);
     return 1;
 }
 
@@ -3422,7 +3422,7 @@ RGBA(lua_State *L)
     l_uint32 pixel;
     if (composeRGBAPixel(rval, gval, bval, aval, &pixel))
         return ll_push_nil(L);
-    lua_pushinteger(L, pixel);
+    ll_push_l_uint32(_fun, L, pixel);
     return 1;
 }
 
@@ -3443,9 +3443,9 @@ ToRGB(lua_State *L)
     l_int32 gval = 0;
     l_int32 bval = 0;
     extractRGBValues(pixel, &rval, &gval, &bval);
-    lua_pushinteger(L, rval);
-    lua_pushinteger(L, gval);
-    lua_pushinteger(L, bval);
+    ll_push_l_int32(_fun, L, rval);
+    ll_push_l_int32(_fun, L, gval);
+    ll_push_l_int32(_fun, L, bval);
     return 3;
 }
 
@@ -3467,10 +3467,10 @@ ToRGBA(lua_State *L)
     l_int32 bval = 0;
     l_int32 aval = 0;
     extractRGBAValues(pixel, &rval, &gval, &bval, &aval);
-    lua_pushinteger(L, rval);
-    lua_pushinteger(L, gval);
-    lua_pushinteger(L, bval);
-    lua_pushinteger(L, aval);
+    ll_push_l_int32(_fun, L, rval);
+    ll_push_l_int32(_fun, L, gval);
+    ll_push_l_int32(_fun, L, bval);
+    ll_push_l_int32(_fun, L, aval);
     return 4;
 }
 
@@ -3489,7 +3489,7 @@ MinMaxComponent(lua_State *L)
     FUNC(LL_LEPT ".MinMaxComponent");
     l_uint32 pixel = ll_check_l_uint32(_fun, L, 1);
     l_int32 type = ll_check_choose_min_max(_fun, L, 2, 0);
-    lua_pushinteger(L, extractMinMaxComponent(pixel, type));
+    ll_push_l_int32(_fun, L, extractMinMaxComponent(pixel, type));
     return 1;
 }
 
@@ -3507,7 +3507,7 @@ MinComponent(lua_State *L)
 {
     FUNC(LL_LEPT ".MinComponent");
     l_uint32 pixel = ll_check_l_uint32(_fun, L, 1);
-    lua_pushinteger(L, extractMinMaxComponent(pixel, L_CHOOSE_MIN));
+    ll_push_l_int32(_fun, L, extractMinMaxComponent(pixel, L_CHOOSE_MIN));
     return 1;
 }
 
@@ -3525,7 +3525,7 @@ MaxComponent(lua_State *L)
 {
     FUNC(LL_LEPT ".MaxComponent");
     l_uint32 pixel = ll_check_l_uint32(_fun, L, 1);
-    lua_pushinteger(L, extractMinMaxComponent(pixel, L_CHOOSE_MAX));
+    ll_push_l_int32(_fun, L, extractMinMaxComponent(pixel, L_CHOOSE_MAX));
     return 1;
 }
 /**

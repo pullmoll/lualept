@@ -92,8 +92,9 @@ GetCount(lua_State *L)
     LL_FUNC("GetCount");
     Pixaa *pixaa = ll_check_Pixaa(_fun, L, 1);
     Numa *na = nullptr;
-    lua_pushinteger(L, pixaaGetCount(pixaa, &na));
-    return 1 + ll_push_Numa(_fun, L, na);
+    ll_push_l_int32(_fun, L, pixaaGetCount(pixaa, &na));
+    ll_push_Numa(_fun, L, na);
+    return 2;
 }
 
 /**

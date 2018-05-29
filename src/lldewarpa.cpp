@@ -284,7 +284,7 @@ ListPages(lua_State *L)
     LL_FUNC("ListPages");
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
     l_int32 res = dewarpaListPages(dewa);
-    lua_pushinteger(L, res);
+    ll_push_l_int32(_fun, L, res);
     return 1;
 }
 
@@ -309,12 +309,12 @@ ModelStats(lua_State *L)
     l_int32 nref = 0;
     if (dewarpaModelStats(dewa, &nnone, &nvsuccess, &nvvalid, &nhsuccess, &nhvalid, &nref))
         return ll_push_nil(L);
-    lua_pushinteger(L, nnone);
-    lua_pushinteger(L, nvsuccess);
-    lua_pushinteger(L, nvvalid);
-    lua_pushinteger(L, nhsuccess);
-    lua_pushinteger(L, nhvalid);
-    lua_pushinteger(L, nref);
+    ll_push_l_int32(_fun, L, nnone);
+    ll_push_l_int32(_fun, L, nvsuccess);
+    ll_push_l_int32(_fun, L, nvvalid);
+    ll_push_l_int32(_fun, L, nhsuccess);
+    ll_push_l_int32(_fun, L, nhvalid);
+    ll_push_l_int32(_fun, L, nref);
     return 6;
 }
 
@@ -337,8 +337,8 @@ ModelStatus(lua_State *L)
     l_int32 hsuccess = 0;
     if (dewarpaModelStatus(dewa, pageno, &vsuccess, &hsuccess))
         return ll_push_nil(L);
-    lua_pushinteger(L, vsuccess);
-    lua_pushinteger(L, hsuccess);
+    ll_push_l_int32(_fun, L, vsuccess);
+    ll_push_l_int32(_fun, L, hsuccess);
     return 2;
 }
 

@@ -96,7 +96,7 @@ GetBaseline(lua_State *L)
     l_int32 baseline = 0;
     if (bmfGetBaseline(bmf, chr, &baseline))
         return ll_push_nil(L);
-    lua_pushinteger(L, baseline);
+    ll_push_l_int32(_fun, L, baseline);
     return 1;
 }
 
@@ -164,7 +164,7 @@ GetStringWidth(lua_State *L)
     l_int32 w;
     if (bmfGetStringWidth(bmf, str, &w))
         return ll_push_nil(L);
-    lua_pushinteger(L, w);
+    ll_push_l_int32(_fun, L, w);
     return 1;
 }
 
@@ -186,7 +186,7 @@ GetWidth(lua_State *L)
     l_int32 w = 0;
     if (bmfGetWidth(bmf, chr, &w))
         return ll_push_nil(L);
-    lua_pushinteger(L, w);
+    ll_push_l_int32(_fun, L, w);
     return 1;
 }
 

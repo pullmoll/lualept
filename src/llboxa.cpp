@@ -91,7 +91,7 @@ GetCount(lua_State *L)
 {
     LL_FUNC("GetCount");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
-    lua_pushinteger(L, boxaGetCount(boxa));
+    ll_push_l_int32(_fun, L, boxaGetCount(boxa));
     return 1;
 }
 
@@ -384,9 +384,9 @@ CompareRegions(lua_State *L)
     l_float32 diffxor = 0.0f;
     if (boxaCompareRegions(boxa1, boxa2, areathresh, &nsame, &diffarea, &diffxor, &pixdb))
         return ll_push_nil(L);
-    lua_pushinteger(L, nsame);
-    lua_pushnumber(L, static_cast<lua_Number>(diffarea));
-    lua_pushnumber(L, static_cast<lua_Number>(diffxor));
+    ll_push_l_int32(_fun, L, nsame);
+    ll_push_l_float32(_fun, L, diffarea);
+    ll_push_l_float32(_fun, L, diffxor);
     return 3;
 }
 
@@ -452,7 +452,7 @@ ContainedInBoxCount(lua_State *L)
     l_int32 count = 0;
     if (boxaContainedInBoxCount(boxas, box, &count))
         return ll_push_nil(L);
-    lua_pushinteger(L, count);
+    ll_push_l_int32(_fun, L, count);
     return 1;
 }
 
@@ -727,7 +727,7 @@ GetArea(lua_State *L)
     l_int32 area = 0;
     if (boxaGetArea(boxas, &area))
         return ll_push_nil(L);
-    lua_pushinteger(L, area);
+    ll_push_l_int32(_fun, L, area);
     return 1;
 }
 
@@ -748,8 +748,8 @@ GetAverageSize(lua_State *L)
     l_float32 h = 0.0f;
     if (boxaGetAverageSize(boxas, &w, &h))
         return ll_push_nil(L);
-    lua_pushnumber(L, static_cast<lua_Number>(w));
-    lua_pushnumber(L, static_cast<lua_Number>(h));
+    ll_push_l_float32(_fun, L, w);
+    ll_push_l_float32(_fun, L, h);
     return 2;
 }
 
@@ -792,10 +792,10 @@ GetBoxGeometry(lua_State *L)
     l_int32 idx = ll_check_index(_fun, L, 2, boxaGetCount(boxa));
     if (boxaGetBoxGeometry(boxa, idx, &x, &y, &w, &h))
         return ll_push_nil(L);
-    lua_pushinteger(L, x);
-    lua_pushinteger(L, y);
-    lua_pushinteger(L, w);
-    lua_pushinteger(L, h);
+    ll_push_l_int32(_fun, L, x);
+    ll_push_l_int32(_fun, L, y);
+    ll_push_l_int32(_fun, L, w);
+    ll_push_l_int32(_fun, L, h);
     return 4;
 }
 
@@ -821,7 +821,7 @@ GetCoverage(lua_State *L)
     l_float32 fract = 0.0f;
     if (boxaGetCoverage(boxas, wc, hc, exactflag, &fract))
         return ll_push_nil(L);
-    lua_pushnumber(L, static_cast<lua_Number>(fract));
+    ll_push_l_float32(_fun, L, fract);
     return 1;
 }
 
@@ -843,9 +843,10 @@ GetExtent(lua_State *L)
     Box *box = nullptr;
     if (boxaGetExtent(boxas, &w, &h, &box))
         return ll_push_nil(L);
-    lua_pushinteger(L, w);
-    lua_pushinteger(L, h);
-    return 2 + ll_push_Box(_fun, L, box);;
+    ll_push_l_int32(_fun, L, w);
+    ll_push_l_int32(_fun, L, h);
+    ll_push_Box(_fun, L, box);
+    return 3;
 }
 
 /**
@@ -867,10 +868,10 @@ GetMedianVals(lua_State *L)
     l_int32 h = 0;
     if (boxaGetMedianVals(boxas, &x, &y, &w, &h))
         return ll_push_nil(L);
-    lua_pushinteger(L, x);
-    lua_pushinteger(L, y);
-    lua_pushinteger(L, w);
-    lua_pushinteger(L, h);
+    ll_push_l_int32(_fun, L, x);
+    ll_push_l_int32(_fun, L, y);
+    ll_push_l_int32(_fun, L, w);
+    ll_push_l_int32(_fun, L, h);
     return 4;
 }
 
@@ -899,8 +900,8 @@ GetNearestByDirection(lua_State *L)
     l_int32 dist = 0;
     if (boxaGetNearestByDirection(boxa, i, dir, dist_select, range, &index, &dist))
         return ll_push_nil(L);
-    lua_pushinteger(L, index);
-    lua_pushinteger(L, dist);
+    ll_push_l_int32(_fun, L, index);
+    ll_push_l_int32(_fun, L, dist);
     return 2;
 }
 
@@ -971,10 +972,10 @@ GetRankVals(lua_State *L)
     l_int32 h = 0;
     if (boxaGetRankVals(boxas, fract, &x, &y, &w, &h))
         return ll_push_nil(L);
-    lua_pushinteger(L, x);
-    lua_pushinteger(L, y);
-    lua_pushinteger(L, w);
-    lua_pushinteger(L, h);
+    ll_push_l_int32(_fun, L, x);
+    ll_push_l_int32(_fun, L, y);
+    ll_push_l_int32(_fun, L, w);
+    ll_push_l_int32(_fun, L, h);
     return 4;
 }
 
@@ -1032,7 +1033,7 @@ GetValidCount(lua_State *L)
 {
     LL_FUNC("GetValidCount");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
-    lua_pushinteger(L, boxaGetValidCount(boxa));
+    ll_push_l_int32(_fun, L, boxaGetValidCount(boxa));
     return 1;
 }
 
@@ -1238,7 +1239,7 @@ IntersectsBoxCount(lua_State *L)
     l_int32 count = 0;
     if (boxaIntersectsBoxCount(boxa, box, &count))
         return ll_push_nil(L);
-    lua_pushinteger(L, count);
+    ll_push_l_int32(_fun, L, count);
     return 1;
 }
 
@@ -1321,10 +1322,10 @@ LocationRange(lua_State *L)
     l_int32 maxy = 0;
     if (boxaLocationRange(boxas, &minx, &miny, &maxx, &maxy))
         return ll_push_nil(L);
-    lua_pushinteger(L, minx);
-    lua_pushinteger(L, miny);
-    lua_pushinteger(L, maxx);
-    lua_pushinteger(L, maxy);
+    ll_push_l_int32(_fun, L, minx);
+    ll_push_l_int32(_fun, L, miny);
+    ll_push_l_int32(_fun, L, maxx);
+    ll_push_l_int32(_fun, L, maxy);
     return 4;
 }
 
@@ -1747,7 +1748,7 @@ SelectBySize(lua_State *L)
     l_int32 changed;
     Boxa *boxa = boxaSelectBySize(boxas, width, height, type, relation, &changed);
     ll_push_Boxa(_fun, L, boxa);
-    lua_pushinteger(L, changed);
+    ll_push_l_int32(_fun, L, changed);
     return 2;
 }
 
@@ -1771,7 +1772,7 @@ SelectByWHRatio(lua_State *L)
     l_int32 changed;
     Boxa *boxa = boxaSelectByWHRatio(boxas, ratio, relation, &changed);
     ll_push_Boxa(_fun, L, boxa);
-    lua_pushinteger(L, changed);
+    ll_push_l_int32(_fun, L, changed);
     return 2;
 }
 
@@ -1837,7 +1838,7 @@ SelectWithIndicator(lua_State *L)
     l_int32 changed;
     Boxa *boxa = boxaSelectWithIndicator(boxas, na, &changed);
     ll_push_Boxa(_fun, L, boxa);
-    lua_pushinteger(L, changed);
+    ll_push_l_int32(_fun, L, changed);
     return 2;
 }
 
@@ -1916,10 +1917,10 @@ SizeRange(lua_State *L)
     l_int32 maxh = 0;
     if (boxaSizeRange(boxas, &minw, &minh, &maxw, &maxh))
         return ll_push_nil(L);
-    lua_pushinteger(L, minw);
-    lua_pushinteger(L, minh);
-    lua_pushinteger(L, maxw);
-    lua_pushinteger(L, maxh);
+    ll_push_l_int32(_fun, L, minw);
+    ll_push_l_int32(_fun, L, minh);
+    ll_push_l_int32(_fun, L, maxw);
+    ll_push_l_int32(_fun, L, maxh);
     return 4;
 }
 
@@ -1944,10 +1945,10 @@ SizeVariation(lua_State *L)
     l_float32 rms_all = 0.0f;
     if (boxaSizeVariation(boxas, type, &del_evenodd, &rms_even, &rms_odd, &rms_all))
         return ll_push_nil(L);
-    lua_pushnumber(L, static_cast<lua_Number>(del_evenodd));
-    lua_pushnumber(L, static_cast<lua_Number>(rms_even));
-    lua_pushnumber(L, static_cast<lua_Number>(rms_odd));
-    lua_pushnumber(L, static_cast<lua_Number>(rms_all));
+    ll_push_l_float32(_fun, L, del_evenodd);
+    ll_push_l_float32(_fun, L, rms_even);
+    ll_push_l_float32(_fun, L, rms_odd);
+    ll_push_l_float32(_fun, L, rms_all);
     return 4;
 }
 

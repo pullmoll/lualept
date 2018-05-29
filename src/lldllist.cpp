@@ -74,7 +74,7 @@ GetCount(lua_State *L)
 {
     LL_FUNC("GetCount");
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
-    lua_pushinteger(L, listGetCount(head));
+    ll_push_l_int32(_fun, L, listGetCount(head));
     return 1;
 }
 

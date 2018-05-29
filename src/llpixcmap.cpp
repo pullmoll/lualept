@@ -92,7 +92,7 @@ GetCount(lua_State *L)
     LL_FUNC("GetCount");
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
     l_int32 count = pixcmapGetCount(cmap);
-    lua_pushinteger(L, count);
+    ll_push_l_int32(_fun, L, count);
     return 1;
 }
 
@@ -150,7 +150,7 @@ AddBlackOrWhite(lua_State *L)
     l_int32 idx = 0;
     if (pixcmapAddBlackOrWhite(cmap, color, &idx))
         return ll_push_nil(L);
-    lua_pushinteger(L, idx + 1);  /* Lua index is 1-based */
+    ll_push_l_int32(_fun, L, idx + 1);  /* Lua index is 1-based */
     return 1;
 }
 
@@ -198,7 +198,7 @@ AddNearestColor(lua_State *L)
     l_int32 idx = 0;
     if (pixcmapAddNearestColor(cmap, rval, gval, bval, &idx))
         return ll_push_nil(L);
-    lua_pushinteger(L, idx + 1);  /* Lua index is 1-based */
+    ll_push_l_int32(_fun, L, idx + 1);  /* Lua index is 1-based */
     return 1;
 }
 
@@ -224,7 +224,7 @@ AddNewColor(lua_State *L)
     l_int32 idx = 0;
     if (pixcmapAddNewColor(cmap, rval, gval, bval, &idx))
         return ll_push_nil(L);
-    lua_pushinteger(L, idx + 1);  /* Lua index is 1-based */
+    ll_push_l_int32(_fun, L, idx + 1);  /* Lua index is 1-based */
     return 1;
 }
 
@@ -326,7 +326,7 @@ CountGrayColors(lua_State *L)
     l_int32 ngray = 0;
     if (pixcmapCountGrayColors(cmap, &ngray))
         return ll_push_nil(L);
-    lua_pushinteger(L, ngray);
+    ll_push_l_int32(_fun, L, ngray);
     return 1;
 }
 
@@ -415,9 +415,9 @@ GetColor(lua_State *L)
     l_int32 bval = 0;
     if (pixcmapGetColor(cmap, idx, &rval, &gval, &bval))
         return ll_push_nil(L);
-    lua_pushinteger(L, rval);
-    lua_pushinteger(L, gval);
-    lua_pushinteger(L, bval);
+    ll_push_l_int32(_fun, L, rval);
+    ll_push_l_int32(_fun, L, gval);
+    ll_push_l_int32(_fun, L, bval);
     return 3;
 }
 
@@ -439,7 +439,7 @@ GetColor32(lua_State *L)
     l_uint32 val32 = 0;
     if (pixcmapGetColor32(cmap, idx, &val32))
         return ll_push_nil(L);
-    lua_pushinteger(L, val32);
+    ll_push_l_uint32(_fun, L, val32);
     return 1;
 }
 
@@ -457,7 +457,7 @@ GetDepth(lua_State *L)
     LL_FUNC("GetDepth");
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
     l_int32 depth = pixcmapGetDepth(cmap);
-    lua_pushinteger(L, depth);
+    ll_push_l_int32(_fun, L, depth);
     return 1;
 }
 
@@ -475,7 +475,7 @@ GetFreeCount(lua_State *L)
     LL_FUNC("GetFreeCount");
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
     l_int32 freecount = pixcmapGetFreeCount(cmap);
-    lua_pushinteger(L, freecount);
+    ll_push_l_int32(_fun, L, freecount);
     return 1;
 }
 
@@ -501,7 +501,7 @@ GetIndex(lua_State *L)
     l_int32 idx = 0;
     if (pixcmapGetIndex(cmap, rval, gval, bval, &idx))
         return ll_push_nil(L);
-    lua_pushinteger(L, idx + 1);  /* Lua index is 1-based */
+    ll_push_l_int32(_fun, L, idx + 1);  /* Lua index is 1-based */
     return 1;
 }
 
@@ -521,7 +521,7 @@ GetMinDepth(lua_State *L)
     l_int32 mindepth = 0;
     if (pixcmapGetMinDepth(cmap, &mindepth))
         return ll_push_nil(L);
-    lua_pushinteger(L, mindepth);
+    ll_push_l_int32(_fun, L, mindepth);
     return 1;
 }
 
@@ -546,10 +546,10 @@ GetRGBA(lua_State *L)
     l_int32 aval = 0;
     if (pixcmapGetRGBA(cmap, idx, &rval, &gval, &bval, &aval))
         return ll_push_nil(L);
-    lua_pushinteger(L, rval);
-    lua_pushinteger(L, gval);
-    lua_pushinteger(L, bval);
-    lua_pushinteger(L, aval);
+    ll_push_l_int32(_fun, L, rval);
+    ll_push_l_int32(_fun, L, gval);
+    ll_push_l_int32(_fun, L, bval);
+    ll_push_l_int32(_fun, L, aval);
     return 4;
 }
 
@@ -571,7 +571,7 @@ GetRGBA32(lua_State *L)
     l_uint32 val32 = 0;
     if (pixcmapGetRGBA32(cmap, idx, &val32))
         return ll_push_nil(L);
-    lua_pushinteger(L, val32);
+    ll_push_l_uint32(_fun, L, val32);
     return 1;
 }
 
@@ -855,7 +855,7 @@ UsableColor(lua_State *L)
     l_int32 idx = 0;
     if (pixcmapUsableColor(cmap, rval, gval, bval, &idx))
         return ll_push_nil(L);
-    lua_pushinteger(L, idx + 1);  /* Lua index is 1-based */
+    ll_push_l_int32(_fun, L, idx + 1);  /* Lua index is 1-based */
     return 1;
 }
 
