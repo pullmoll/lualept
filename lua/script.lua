@@ -450,14 +450,22 @@ end
 function dpix_test()
 	local filename = tmpdir .. "/dpix-test.dpix"
 	local filename2 = tmpdir .. "/dpix-test.png"
+	local filename3 = tmpdir .. "/dpix-test.pdf"
 	header("DPix")
 	local dpix = DPix(160,100)
 	dpix:SetResolution(150,150)
 	print(pad("dpix = DPix(160,100)"), dpix)
-	dpix:SetAllArbitrary(0.95)
+	dpix:SetAllArbitrary(160.95)
+	-- draw a diagonal line with random pixel values between 0 and 255.
+	math.randomseed(12345)
 	for x=0,159 do
 		local y = 100*x//160
-		dpix:SetPixel(x, y, 0.55)
+		local val = math.random() * 255
+		dpix:SetPixel(x-1, y, val)
+		val = math.random() * 255
+		dpix:SetPixel(x, y, val)
+		val = math.random() * 255
+		dpix:SetPixel(x+1, y, val)
 	end
 	local ok = dpix:Write(filename)
 	print(pad("dpix:Write('" .. filename .."')"), ok)
@@ -467,9 +475,14 @@ function dpix_test()
 	local dpix3 = DPix(dpix2)
 	print(pad("dpix3 = DPix(dpix2)"), dpix3)
 
+	local data = dpix2:GetData()
+	print(pad("data = dpix2:GetData()"), data)
+
 	local pix = dpix2:ConvertToPix(0, "clip-to-zero", true)
 	pix:Write(filename2)
 	print(pad("pix:Write('" .. filename2 .."')"), ok)
+	local data, pdf = pix:ConvertToPdf("png", 75, filename3, 0, 0, 150, "A DPix converted to Pix, then to PDF")
+	print(pad("pix:ConvertToPdf(...)"), data)
 end
 
 function hex_dump(buf)
@@ -503,17 +516,17 @@ print(pad("LuaLept:Version()"), LuaLept:Version())
 print(pad("LuaLept:LuaVersion()"), LuaLept:LuaVersion())
 print(pad("LuaLept:LeptVersion()"), LuaLept:LeptVersion())
 
--- bmf_test()
--- aset_test()
+bmf_test()
+aset_test()
 amap_test()
--- pta_test()
--- box_test()
--- numa_test()
--- dna_test()
+pta_test()
+box_test()
+numa_test()
+dna_test()
 pix_test()
--- pix2_test()
--- fpix_test()
--- dpix_test()
+pix2_test()
+fpix_test()
+dpix_test()
 
 header()
 print("That's all, folks!")
