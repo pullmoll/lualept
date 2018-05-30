@@ -228,6 +228,23 @@ function getter(vtype, arg)
 		return "ll_check_string(_fun, L, " .. arg .. ")"
 	elseif vtype == "luaL_Stream *" then
 		return "ll_check_stream(_fun, L, " .. arg .. ")"
+	elseif vtype:match("l_uint8 %*") then
+		return "ll_check_lstring(_fun, L, " .. arg .. ", &size)"
+	elseif vtype:match("l_int32 %*") then
+		-- l_int32 *array;
+		return "ll_unpack_Iarray(_fun, L, " .. arg .. ", &size)"
+	elseif vtype:match("l_uint32 %*") then
+		-- l_uint32 *array;
+		return "ll_unpack_Uarray(_fun, L, " .. arg .. ", &size)"
+	elseif vtype:match("l_float32 %*") then
+		-- l_float32 *array;
+		return "ll_unpack_Farray(_fun, L, " .. arg .. ", &size)"
+	elseif vtype:match("l_float64 %*") then
+		-- l_float64 *array;
+		return "ll_unpack_Darray(_fun, L, " .. arg .. ", &size)"
+	elseif vtype:match("Sarray %*") then
+		-- Sarray *sa;
+		return "ll_unpack_Sarray(_fun, L, " .. arg .. ")"
 	else
 		local vtype_nostars = vtype:gsub("%*", "")
 		local vtype_noblank = vtype_nostars:gsub("%s", "")
@@ -488,7 +505,7 @@ function parse(fd, str)
 	-- create the function's Doxygen comment
 	local func = {
 		'/**',
-		' * \\brief Brief comment goes here.',
+		' * \\brief ' .. strip_ftype(fname) .. '() brief comment goes here.',
 		' * <pre>'
 		}
 
@@ -550,34 +567,20 @@ function parse(fd, str)
 			-- The Leptonica function returns 0 on success
 			func[#func+1] = '    if (' .. fname .. '(' .. params(types, names, refs) .. '))'
 			func[#func+1] = '        return ll_push_nil(L);'
-			for i = 1, #vars do
-				local name = names[i]
-				if refs[name] ~= nil then
-					local vtype = types[i]
-					func[#func+1] = '    ' .. pusher(vtype, name, false) .. ';'
-				end
-			end
-		elseif rytpe == "void" then
+		elseif rypte == nil or rytpe == "void " then
 			-- the function returns nothing
 			func[#func+1] = '    ' .. fname .. '(' .. params(types, names, refs) .. ');'
-			for i = 1, #vars do
-				local name = names[i]
-				if refs[name] ~= nil then
-					local vtype = types[i]
-					func[#func+1] = '    ' .. pusher(vtype, name, false) .. ';'
-				end
-			end
 		else
 			-- the function returns some other type
 			func[#func+1] = '    ' .. rtype .. ' ' ..rname .. ' = ' ..
 				fname .. '(' .. params(types, names, refs) .. ');'
 			func[#func+1] = '    ' .. pusher(rtype, rname, true) .. ';'
-			for i = 1, #vars do
-				local name = names[i]
-				if refs[name] ~= nil then
-					local vtype = types[i]
-					func[#func+1] = '    ' .. pusher(vtype, name, false) .. ';'
-				end
+		end
+		for i = 1, #vars do
+			local name = names[i]
+			if refs[name] ~= nil then
+				local vtype = types[i]
+				func[#func+1] = '    ' .. pusher(vtype, name, false) .. ';'
 			end
 		end
 		func[#func+1] = '    return ' .. retn .. ';'
