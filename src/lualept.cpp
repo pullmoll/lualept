@@ -630,11 +630,11 @@ ll_unpack_Iarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the table
- * \param plen pointer to a l_int32 receiving the size of the array
+ * \param pn pointer to a l_int32 receiving the size of the array
  * \return allocated array l_uint32* with *pn entries
  */
 l_uint32 *
-ll_unpack_Uarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
+ll_unpack_Uarray(const char *_fun, lua_State *L, int arg, l_int32 *pn)
 {
     l_int32 len = static_cast<l_int32>(luaL_len(L, arg));
     l_uint32 *ua = reinterpret_cast<l_uint32 *>(LEPT_CALLOC(len, sizeof(*ua)));
@@ -657,8 +657,8 @@ ll_unpack_Uarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
         /* remove value; keep 'key' for next iteration */
         lua_pop(L, 1);
     }
-    if (plen)
-        *plen = len;
+    if (pn)
+        *pn = len;
     return ua;
 }
 

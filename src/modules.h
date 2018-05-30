@@ -285,7 +285,7 @@ extern int          ll_push_Darray_2d(const char* _fun, lua_State *L, const l_fl
 extern int          ll_push_Sarray(const char* _fun, lua_State *L, Sarray *sa);
 
 extern l_int32    * ll_unpack_Iarray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
-extern l_uint32   * ll_unpack_Uarray(const char *_fun, lua_State *L, int arg, l_int32 *plen);
+extern l_uint32   * ll_unpack_Uarray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
 extern l_uint32   * ll_unpack_Uarray_2d(const char *_fun, lua_State *L, int arg, l_uint32 *data, l_int32 wpl, l_int32 h);
 extern l_float32  * ll_unpack_Farray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
 extern l_float32  * ll_unpack_Farray_2d(const char *_fun, lua_State *L, int arg, l_float32 *data, l_int32 wpl, l_int32 h);
