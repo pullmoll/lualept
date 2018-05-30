@@ -82,10 +82,6 @@ function pre_comments(fs)
 		if line == '/**' or line == '/*!' then
 			-- start of Doxygen comment
 			-- introduces a new function
-			if fname ~= nil then
-				heads[fname] = head
-			end
-			fname = nil
 			-- go to state 1 (parsing doxygen comment)
 			state = 1
 		end
@@ -132,9 +128,12 @@ function pre_comments(fs)
 
 		if state == 4 and line == '}' then
 			-- end of a function
-			if debug and name ~= nil then
-				print("name='" .. name .. "'")
-				list(io.stdout, head)
+			if fname ~= nil then
+				if debug then
+					print("fname='" .. fname .. "'")
+					list(io.stdout, head)
+				end
+				heads[fname] = head
 			end
 			head = {}
 			state = 0
@@ -225,7 +224,7 @@ end
 -- \param vtype type name of the variable
 -- \param arg argument #
 function getter(vtype, arg)
-	if vtype == "const char *" then
+	if vtype == "const char *" or vtype == "char *" then
 		return "ll_check_string(_fun, L, " .. arg .. ")"
 	elseif vtype == "luaL_Stream *" then
 		return "ll_check_stream(_fun, L, " .. arg .. ")"
@@ -329,13 +328,13 @@ end
 -- Return the type name for a variable type
 -- \param vtype type name of the variable
 function typedescr(vtype)
-	if vtype == "const char *" then
+	if vtype == "const char *" or vtype == "char *" then
 		return "string"
-	end
-	if vtype == "FILE *" then
+	elseif vtype == "FILE *" then
 		return "luaL_Stream*"
+	else
+		return vtype:gsub("%s","")
 	end
-	return vtype:gsub("%s","")
 end
 
 ---
