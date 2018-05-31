@@ -25,5 +25,14 @@ at me and tell me where I'm missing the point.
 Still, the project already runs some script (`lua/script.lua`) which I use for testing
 the language bindings as I write the wrapper functions.
 
+
+### Now for some good news (2018-05-30):
+My customer [ImageWare Components GmbH](https://www.imageware.de/en/) approved
+to pay me for the development of lualept, as they will probably use it in their product
+[BCS2](https://www.imageware.de/en/solutions/scan-software/bcs-2-overview/), which is the
+application I'm contributing my time, skills and knowledge to for *money* :-)
+
+In fact I'll be adding the Lua scripting to the BCS2 C++ interface to Leptonica.
+
 <a href="mailto:Jürgen Buchmüller <pullmoll@t-online.de>">Jürgen Buchmüller</a>
 
