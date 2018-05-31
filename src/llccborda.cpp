@@ -392,6 +392,7 @@ GenerateStepChains(lua_State *L)
     CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
     return ll_push_boolean(_fun, L, 0 == ccbaGenerateStepChains(ccba));
 }
+
 /**
  * \brief Check Lua stack at index (%arg) for udata of class LL_CCBORDA.
  * \param _fun calling function's name
@@ -404,6 +405,7 @@ ll_check_CCBorda(const char *_fun, lua_State *L, int arg)
 {
     return *ll_check_udata<CCBorda>(_fun, L, arg, LL_CCBORDA);
 }
+
 /**
  * \brief Optionally expect a CCBorda* at index (%arg) on the Lua stack.
  * \param _fun calling function's name
@@ -418,6 +420,7 @@ ll_check_CCBorda_opt(const char *_fun, lua_State *L, int arg)
         return nullptr;
     return ll_check_CCBorda(_fun, L, arg);
 }
+
 /**
  * \brief Push CCBorda* to the Lua stack and set its meta table.
  * \param _fun calling function's name
@@ -432,6 +435,7 @@ ll_push_CCBorda(const char *_fun, lua_State *L, CCBorda *cd)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, LL_CCBORDA, cd);
 }
+
 /**
  * \brief Create and push a new CCBorda*.
  * \param L pointer to the lua_State
@@ -440,8 +444,29 @@ ll_push_CCBorda(const char *_fun, lua_State *L, CCBorda *cd)
 int
 ll_new_CCBorda(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_CCBorda");
+    CCBorda *ccba = nullptr;
+    if (lua_isuserdata(L, 1)) {
+        Pix* pixs = ll_check_Pix_opt(_fun, L, 1);
+        if (pixs) {
+            l_int32 n = ll_check_l_int32_default(_fun, L, 2, 1);
+            ccba = ccbaCreate(pixs, n);
+        } else {
+            luaL_Stream *stream = ll_check_stream(_fun, L, 1);
+            ccba = ccbaReadStream(stream->f);
+        }
+    }
+    if (!ccba && lua_isstring(L, 1)) {
+        const char* filename = ll_check_string(_fun, L, 1);
+        ccba = ccbaRead(filename);
+    }
+    if (!ccba) {
+        /* FIXME: create data for no pix? */
+        ccba = ccbaCreate(nullptr, 1);
+    }
+    return ll_push_CCBorda(_fun, L, ccba);
 }
+
 /**
  * \brief Register the CCBorda methods and functions in the LL_CCBORDA meta table.
  * \param L pointer to the lua_State
@@ -451,8 +476,8 @@ int
 ll_register_CCBorda(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                    Destroy},   /* garbage collector */
-        {"__new",                   Create},
+        {"__gc",                    Destroy},           /* garbage collector */
+        {"__new",                   ll_new_CCBorda},    /* CCBorda(pix,n) */
         {"__len",                   GetCount},
         {"AddCcb",                  AddCcb},
         {"Create",                  Create},
@@ -463,6 +488,8 @@ ll_register_CCBorda(lua_State *L)
         {"DisplaySPBorder",         DisplaySPBorder},
         {"GenerateGlobalLocs",      GenerateGlobalLocs},
         {"GenerateSPGlobalLocs",    GenerateSPGlobalLocs},
+        {"GenerateSinglePath",      GenerateSinglePath},
+        {"GenerateStepChains",      GenerateStepChains},
         {"GetCcb",                  GetCcb},
         {"GetCount",                GetCount},
         {"Read",                    Read},
@@ -479,7 +506,7 @@ ll_register_CCBorda(lua_State *L)
         LUA_SENTINEL
     };
 
-    lua_pushcfunction(L, Create);
+    lua_pushcfunction(L, ll_new_CCBorda);
     lua_setglobal(L, LL_CCBORDA);
     return ll_register_class(L, LL_CCBORDA, methods, functions);
 }

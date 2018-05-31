@@ -73,21 +73,9 @@ static int
 Create(lua_State *L)
 {
     LL_FUNC("Create");
-    DPix *dpix = nullptr;
-    if (lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
-            l_int32 width = ll_check_l_int32_default(_fun, L, 1, 1);
-            l_int32 height = ll_check_l_int32_default(_fun, L, 2, 1);
-            dpix = dpixCreate(width, height);
-    } else if (lua_isstring(L, 1)) {
-        const char* filename = ll_check_string(_fun, L, 1);
-        dpix = dpixRead(filename);
-    } else if (ll_check_DPix_opt(_fun, L, 1)) {
-        DPix *dpixs = ll_check_DPix(_fun, L, 1);
-        dpix = dpixCreateTemplate(dpixs);
-    } else if (luaL_checkudata(L, 1, LUA_FILEHANDLE)) {
-        luaL_Stream *stream = ll_check_stream(_fun, L, 1);
-        dpix = dpixReadStream(stream->f);
-    }
+    l_int32 width = ll_check_l_int32_default(_fun, L, 1, 1);
+    l_int32 height = ll_check_l_int32_default(_fun, L, 2, 1);
+    DPix *dpix = dpixCreate(width, height);
     return ll_push_DPix(_fun, L, dpix);
 }
 
@@ -726,8 +714,7 @@ Write(lua_State *L)
     LL_FUNC("Write");
     DPix *dpix = ll_check_DPix(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
-    l_int32 result = dpixWrite(filename, dpix);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == dpixWrite(filename, dpix));
 }
 
 /**
@@ -767,8 +754,7 @@ WriteStream(lua_State *L)
     LL_FUNC("WriteStream");
     DPix *dpix = ll_check_DPix(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    l_int32 result = dpixWriteStream(stream->f, dpix);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, 0 == dpixWriteStream(stream->f, dpix));
 }
 
 /**
@@ -783,6 +769,7 @@ ll_check_DPix(const char *_fun, lua_State *L, int arg)
 {
     return *ll_check_udata<DPix>(_fun, L, arg, LL_DPIX);
 }
+
 /**
  * \brief Optionally expect a DPix* at index (%arg) on the Lua stack.
  * \param _fun calling function's name
@@ -797,6 +784,7 @@ ll_check_DPix_opt(const char *_fun, lua_State *L, int arg)
         return nullptr;
     return ll_check_DPix(_fun, L, arg);
 }
+
 /**
  * \brief Push DPix* to the Lua stack and set its meta table.
  * \param _fun calling function's name
@@ -811,6 +799,7 @@ ll_push_DPix(const char *_fun, lua_State *L, DPix *cd)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, LL_DPIX, cd);
 }
+
 /**
  * \brief Create and push a new DPix*.
  *
@@ -823,8 +812,59 @@ ll_push_DPix(const char *_fun, lua_State *L, DPix *cd)
 int
 ll_new_DPix(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_DPix");
+    DPix *dpix = nullptr;
+
+    if (lua_isuserdata(L, 1)) {
+        DPix *dpixs = ll_check_DPix_opt(_fun, L, 1);
+        if (dpixs) {
+            DBG(LOG_NEW_CLASS, "%s: create from %s* %p\n", _fun,
+                LL_DPIX, reinterpret_cast<void *>(dpixs));
+            dpix = dpixCreateTemplate(dpixs);
+        } else {
+            luaL_Stream *stream = ll_check_stream(_fun, L, 1);
+            DBG(LOG_NEW_CLASS, "%s: create from %s* %p\n", _fun,
+                LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
+            dpix = dpixReadStream(stream->f);
+        }
+    }
+
+    if (!dpix && lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
+        l_int32 width = ll_check_l_int32_default(_fun, L, 1, 1);
+        l_int32 height = ll_check_l_int32_default(_fun, L, 2, 1);
+        DBG(LOG_NEW_CLASS, "%s: create from integers %s=%d, %s=%d\n", _fun,
+            "width", width, "height", height);
+        dpix = dpixCreate(width, height);
+    }
+
+    if (!dpix && lua_isstring(L, 1)) {
+        const char* filename = ll_check_string(_fun, L, 1);
+        DBG(LOG_NEW_CLASS, "%s: created from %s '%s'\n", _fun,
+            "filename", filename);
+        dpix = dpixRead(filename);
+    }
+
+    if (!dpix && lua_isstring(L, 1)) {
+        size_t size = 0;
+        const char *str = ll_check_lstring(_fun, L, 1, &size);
+        const l_uint8 *data = reinterpret_cast<const l_uint8 *>(str);
+        DBG(LOG_NEW_CLASS, "%s: create from %s* %p, %s %llu\n", _fun,
+            "string", reinterpret_cast<const void *>(data),
+            "size", static_cast<l_uint64>(size));
+        dpix = dpixReadMem(data, size);
+    }
+
+    if (!dpix) {
+        DBG(LOG_NEW_CLASS, "%s: createfrom integers %s=%d, %s=%d\n", _fun,
+            "width", 1, "height", 1);
+        dpix = dpixCreate(1,1);
+    }
+    DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
+        LL_DPIX, reinterpret_cast<void *>(dpix));
+
+    return ll_push_DPix(_fun, L, dpix);
 }
+
 /**
  * \brief Register the DPix methods and functions in the LL_DPIX meta table.
  * \param L pointer to the lua_State
@@ -834,8 +874,8 @@ int
 ll_register_DPix(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                    Destroy},   /* garbage collector */
-        {"__new",                   Create},
+        {"__gc",                    Destroy},               /* garbage collector */
+        {"__new",                   ll_new_DPix},           /* DPix() */
         {"__tostring",              toString},
         {"AddMultConstant",         AddMultConstant},
         {"ChangeRefcount",          ChangeRefcount},
@@ -880,7 +920,7 @@ ll_register_DPix(lua_State *L)
         LUA_SENTINEL
     };
 
-    lua_pushcfunction(L, Create);
+    lua_pushcfunction(L, ll_new_DPix);
     lua_setglobal(L, LL_DPIX);
     return ll_register_class(L, LL_DPIX, methods, functions);
 }

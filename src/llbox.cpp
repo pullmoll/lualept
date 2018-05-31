@@ -809,8 +809,8 @@ Similar(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * Arg #2 is expected to be a l_int32 (shiftx).
  * Arg #3 is expected to be a l_int32 (shifty).
- * Arg #4 is optional and, if given, expected to be a l_float32 (scalex).
- * Arg #5 is optional and, if given, expected to be a l_float32 (scaley).
+ * Arg #4 is an optional l_float32 (scalex).
+ * Arg #5 is an optional l_float32 (scaley).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -834,13 +834,13 @@ Transform(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * Arg #2 is expected to be a string describing the transform order (order).
- * Arg #3 is optional and, if given, expected to be a l_int32 (shiftx).
- * Arg #4 is optional and, if given, expected to be a l_int32 (shifty).
- * Arg #5 is optional and, if given, expected to be a l_float32 (scalex).
- * Arg #6 is optional and, if given, expected to be a l_float32 (scaley).
- * Arg #7 is optional and, if given, expected to be a l_int32 (xcen).
- * Arg #8 is optional and, if given, expected to be a l_int32 (ycen).
- * Arg #9 is optional and, if given, expected to be a l_float32 (angle).
+ * Arg #3 is an optional l_int32 (shiftx).
+ * Arg #4 is an optional l_int32 (shifty).
+ * Arg #5 is an optional l_float32 (scalex).
+ * Arg #6 is an optional l_float32 (scaley).
+ * Arg #7 is an optional l_int32 (xcen).
+ * Arg #8 is an optional l_int32 (ycen).
+ * Arg #9 is an optional l_float32 (angle).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -914,8 +914,26 @@ ll_push_Box(const char *_fun, lua_State *L, Box *box)
 int
 ll_new_Box(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_Box");
+    Box *box = nullptr;
+    if (lua_isuserdata(L, 1)) {
+        Box *boxs = ll_check_Box_opt(_fun, L, 1);
+        if (boxs) {
+            box = boxCopy(boxs);
+        }
+    }
+    if (!box && lua_isinteger(L, 1)) {
+        l_int32 x = ll_check_l_int32_default(_fun, L, 1, 0);
+        l_int32 y = ll_check_l_int32_default(_fun, L, 2, 0);
+        l_int32 w = ll_check_l_int32_default(_fun, L, 3, 1);
+        l_int32 h = ll_check_l_int32_default(_fun, L, 4, 1);
+    }
+    if (!box) {
+        box = boxCreate(0,0,0,0);
+    }
+    return ll_push_Box(_fun, L, box);
 }
+
 /**
  * \brief Register the Box* methods and functions in the LL_BOX meta table.
  * \param L pointer to the lua_State
@@ -925,8 +943,8 @@ int
 ll_register_Box(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                    Destroy},   /* garbage collector */
-        {"__new",                   Create},    /* new Box */
+        {"__gc",                    Destroy},           /* garbage collector */
+        {"__new",                   ll_new_Box},        /* Box(x,y,w,h) with optional parameters */
         {"__tostring",              toString},
         {"__eq",                    Equal},
         {"AdjustSides",             AdjustSides},
@@ -970,7 +988,7 @@ ll_register_Box(lua_State *L)
         LUA_SENTINEL
     };
 
-    lua_pushcfunction(L, Create);
+    lua_pushcfunction(L, ll_new_Box);
     lua_setglobal(L, LL_BOX);
     return ll_register_class(L, LL_BOX, methods, functions);
 }

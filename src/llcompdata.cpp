@@ -77,9 +77,9 @@ Create(lua_State *L)
 {
     LL_FUNC("Create");
     const char *fname = ll_check_string(_fun, L, 1);
-    l_int32 type = ll_check_l_int32(_fun, L, 2);
-    l_int32 quality = ll_check_l_int32(_fun, L, 3);
-    l_int32 ascii85 = ll_check_l_int32(_fun, L, 4);
+    l_int32 type = ll_check_compression(_fun, L, 2, IFF_DEFAULT);
+    l_int32 quality = ll_check_l_int32_default(_fun, L, 3, 75);
+    l_int32 ascii85 = ll_check_boolean_default(_fun, L, 4, FALSE);
     CompData *cid = nullptr;
     if (l_generateCIData(fname, type, quality, ascii85, &cid))
         return ll_push_nil(L);
@@ -481,6 +481,7 @@ ll_push_CompData(const char *_fun, lua_State *L, CompData *cdata)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, LL_COMPDATA, cdata);
 }
+
 /**
  * \brief Generate and push a new CompData*.
  *
@@ -493,8 +494,18 @@ ll_push_CompData(const char *_fun, lua_State *L, CompData *cdata)
 int
 ll_new_CompData(lua_State *L)
 {
-    return Generate(L);
+    FUNC("ll_new_CompData");
+    const char *fname = ll_check_string(_fun, L, 1);
+    l_int32 type = ll_check_compression(_fun, L, 2, IFF_DEFAULT);
+    l_int32 quality = ll_check_l_int32_default(_fun, L, 3, 75);
+    l_int32 ascii85 = ll_check_boolean_default(_fun, L, 4, FALSE);
+    CompData *cid = nullptr;
+    if (l_generateCIData(fname, type, quality, ascii85, &cid))
+        return ll_push_nil(L);
+    ll_push_CompData(_fun, L, cid);
+    return 1;
 }
+
 /**
  * \brief Register the BMF methods and functions in the LL_COMPDATA meta table.
  * \param L pointer to the lua_State
@@ -504,8 +515,8 @@ int
 ll_register_CompData(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},   /* garbage collector */
-        {"__new",               Create},
+        {"__gc",                Destroy},           /* garbage collector */
+        {"__new",               ll_new_CompData},   /* CompData("filename", type, quality, ascii895) */
         {"__tostring",          toString},
         {"ConvertToPdfData",    ConvertToPdfData},
         {"Create",              Create},
@@ -528,7 +539,7 @@ ll_register_CompData(lua_State *L)
         LUA_SENTINEL
     };
 
-    lua_pushcfunction(L, Generate);
+    lua_pushcfunction(L, ll_new_CompData);
     lua_setglobal(L, LL_COMPDATA);
     return ll_register_class(L, LL_COMPDATA, methods, functions);
 }

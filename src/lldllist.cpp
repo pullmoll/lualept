@@ -385,8 +385,13 @@ ll_push_DoubleLinkedList(const char *_fun, lua_State *L, DoubleLinkedList *head)
 int
 ll_new_DoubleLinkedList(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_DoubleLinkedList");
+    DoubleLinkedList *head = ll_check_ludata<DoubleLinkedList>(_fun, L, 1);
+    if (!head)
+        head =  ll_calloc<DoubleLinkedList>(_fun, L, 1);
+    return ll_push_DoubleLinkedList(_fun, L, head);
 }
+
 /**
  * \brief Register the DLLIST methods and functions in the LL_DLLIST meta table.
  * \param L pointer to the lua_State
@@ -396,9 +401,9 @@ int
 ll_register_DoubleLinkedList(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},       /* garbage collector */
-        {"__len",               GetCount},      /* #list */
-        {"__new",               Create},        /* new DoubleLinkedList */
+        {"__gc",                Destroy},                   /* garbage collector */
+        {"__len",               GetCount},                  /* #list */
+        {"__new",               ll_new_DoubleLinkedList},   /* DoubleLinkedList(data) */
         {"__tostring",          toString},
         {"AddToHead",           AddToHead},
         {"AddToTail",           AddToTail},
@@ -421,7 +426,7 @@ ll_register_DoubleLinkedList(lua_State *L)
         LUA_SENTINEL
     };
 
-    lua_pushcfunction(L, Create);
+    lua_pushcfunction(L, ll_new_DoubleLinkedList);
     lua_setglobal(L, LL_DLLIST);
     return ll_register_class(L, LL_DLLIST, methods, functions);
 }

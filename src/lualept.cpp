@@ -89,10 +89,11 @@ ll_strcasecmp(const char* dst, const char* src)
 #endif
 
 #if defined(LLUA_DEBUG) && (LLUA_DEBUG>0)
+static int enabled = LOG_NEW_CLASS;
 void dbg(int enable, const char* format, ...)
 {
     va_list ap;
-    if (!enable)
+    if (0 == (enable & enabled))
         return;
     va_start(ap, format);
     vfprintf(stderr, format, ap);
@@ -118,6 +119,22 @@ void die(const char* _fun, lua_State *L, const char *format, ...)
 }
 
 /**
+ * \brief Check Lua stack at index %arg for light user data.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg argument index
+ * \return pointer to the udata
+ */
+void* ll_ludata(const char *_fun, lua_State *L, int arg)
+{
+    const void *cptr = lua_islightuserdata(L, arg) ? lua_topointer(L, arg) : nullptr;
+    /* XXX: deconstify */
+    void *ptr = reinterpret_cast<void *>(reinterpret_cast<l_intptr_t>(cptr));
+    UNUSED(_fun);
+    return ptr;
+}
+
+/**
  * \brief Check Lua stack at index %arg for udata with %name.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
@@ -129,12 +146,12 @@ void **
 ll_udata(const char *_fun, lua_State *L, int arg, const char* tname)
 {
     char msg[128];
-    void **ppptr = reinterpret_cast<void **>(luaL_checkudata(L, arg, tname));
-    if (nullptr == ppptr) {
+    void **pptr = reinterpret_cast<void **>(luaL_checkudata(L, arg, tname));
+    if (nullptr == pptr) {
         snprintf(msg, sizeof(msg), "%s: expected '%s'", _fun, tname);
     }
-    luaL_argcheck(L, ppptr != nullptr, arg, msg);
-    return ppptr;
+    luaL_argcheck(L, pptr != nullptr, arg, msg);
+    return pptr;
 }
 
 /**

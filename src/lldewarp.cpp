@@ -100,7 +100,75 @@ toString(lua_State *L)
         snprintf(str, sizeof(str),
                  LL_DEWARP ": %p\n",
                  reinterpret_cast<void *>(dew));
+        luaL_addstring(&B, str);
         /* TODO: more info */
+        snprintf(str, sizeof(str), "    dewa (parent) : " LL_DEWARPA "* %p\n", reinterpret_cast<void *>(dew->dewa));
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    pixs          : " LL_PIX "* %p\n", reinterpret_cast<void *>(dew->pixs));
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    sampvdispar   : " LL_FPIX "* %p\n", reinterpret_cast<void *>(dew->sampvdispar));
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    samphdispar   : " LL_FPIX "* %p\n", reinterpret_cast<void *>(dew->samphdispar));
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    sampydispar   : " LL_FPIX "* %p\n", reinterpret_cast<void *>(dew->sampydispar));
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    fullvdispar   : " LL_FPIX "* %p\n", reinterpret_cast<void *>(dew->fullvdispar));
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    fullhdispar   : " LL_FPIX "* %p\n", reinterpret_cast<void *>(dew->fullhdispar));
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    fullydispar   : " LL_FPIX "* %p\n", reinterpret_cast<void *>(dew->fullydispar));
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    namidys       : " LL_NUMA "* %p\n", reinterpret_cast<void *>(dew->namidys));
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    nacurves      : " LL_NUMA "* %p\n", reinterpret_cast<void *>(dew->nacurves));
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    w             :  %d\n", dew->w);
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    h             :  %d\n", dew->h);
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    pageno        :  %d\n", dew->pageno);
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    sampling      :  %d\n", dew->sampling);
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    redfactor     :  %d\n", dew->redfactor);
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    minlines      :  %d\n", dew->minlines);
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    nlines        :  %d\n", dew->nlines);
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    mincurv       :  %d\n", dew->mincurv);
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    maxcurv       :  %d\n", dew->maxcurv);
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    leftslope     :  %d\n", dew->leftslope);
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    rightslope    :  %d\n", dew->rightslope);
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    leftcurv      :  %d\n", dew->leftcurv);
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    rightcurv     :  %d\n", dew->rightcurv);
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    nx            :  %d\n", dew->nx);
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    ny            :  %d\n", dew->ny);
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    hasref        :  %d\n", dew->hasref);
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    refpage       :  %d\n", dew->refpage);
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    vsuccess      :  %d\n", dew->vsuccess);
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    hsuccess      :  %d\n", dew->hsuccess);
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    ysuccess      :  %d\n", dew->ysuccess);
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    vvalid        :  %d\n", dew->vvalid);
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    hvalid        :  %d\n", dew->hvalid);
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    skip_horiz    :  %d\n", dew->skip_horiz);
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    debug         :  %d\n", dew->debug);
         luaL_addstring(&B, str);
     }
     luaL_pushresult(&B);
@@ -372,7 +440,7 @@ Write(lua_State *L)
     LL_FUNC("Write");
     Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
-    ll_push_boolean(_fun, L, 0 == dewarpWrite(filename, dew));
+    return ll_push_boolean(_fun, L, 0 == dewarpWrite(filename, dew));
 }
 
 /**
@@ -442,6 +510,7 @@ ll_check_Dewarp_opt(const char *_fun, lua_State *L, int arg)
         return nullptr;
     return ll_check_Dewarp(_fun, L, arg);
 }
+
 /**
  * \brief Push BOX user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
@@ -456,6 +525,7 @@ ll_push_Dewarp(const char *_fun, lua_State *L, Dewarp *dew)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, LL_DEWARP, dew);
 }
+
 /**
  * \brief Create and push a new Dewarp*.
  * \param L pointer to the lua_State
@@ -464,8 +534,45 @@ ll_push_Dewarp(const char *_fun, lua_State *L, Dewarp *dew)
 int
 ll_new_Dewarp(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_Dewarp");
+    Dewarp *dew = nullptr;
+
+    if (lua_isuserdata(L, 1)) {
+        Pix *pixs = ll_check_Pix_opt(_fun, L, 1);
+        if (pixs) {
+            l_int32 pageno = ll_check_l_int32_default(_fun, L, 2, 1);
+            dew = dewarpCreate(pixs, pageno);
+        } else {
+            luaL_Stream *stream = ll_check_stream(_fun, L, 1);
+            dew = dewarpReadStream(stream->f);
+        }
+    }
+
+    if (!dew && lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
+        l_int32 pageno = ll_check_l_int32(_fun, L, 1);
+        l_int32 refpage = ll_check_l_int32(_fun, L, 2);
+        dew = dewarpCreateRef(pageno, refpage);
+    }
+
+    if (!dew && lua_isstring(L, 1)) {
+        const char *filename = ll_check_string(_fun, L, 1);
+        dew = dewarpRead(filename);
+    }
+
+    if (!dew && lua_isstring(L, 1)) {
+        size_t size = 0;
+        const char *str = ll_check_lstring(_fun, L, 1, &size);
+        const l_uint8 *data = reinterpret_cast<const l_uint8 *>(str);
+        dew = dewarpReadMem(data, size);
+    }
+
+    if (!dew) {
+        /* FIXME: creat from null Pix* ? */
+        dew = dewarpCreate(nullptr, 1);
+    }
+    return ll_push_Dewarp(_fun, L, dew);
 }
+
 /**
  * \brief Register the Dewarp* methods and functions in the LL_DEWARP meta table.
  * \param L pointer to the lua_State
@@ -475,8 +582,8 @@ int
 ll_register_Dewarp(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                    Destroy},   /* garbage collector */
-        {"__new",                   Create},    /* new Dewarp */
+        {"__gc",                    Destroy},               /* garbage collector */
+        {"__new",                   ll_new_Dewarp},         /* Dewarp(pix, pageno) or Dewarp(pageno, refpage) */
         {"__tostring",              toString},
         {"BuildLineModel",          BuildLineModel},
         {"BuildPageModel",          BuildPageModel},
@@ -503,7 +610,7 @@ ll_register_Dewarp(lua_State *L)
         LUA_SENTINEL
     };
 
-    lua_pushcfunction(L, Create);
+    lua_pushcfunction(L, ll_new_Dewarp);
     lua_setglobal(L, LL_DEWARP);
     return ll_register_class(L, LL_DEWARP, methods, functions);
 }

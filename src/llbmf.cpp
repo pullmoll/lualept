@@ -106,7 +106,7 @@ GetBaseline(lua_State *L)
  * Arg #1 is expected to be a Bmf* (bmf).
  * Arg #2 is expected to be a string (str).
  * Arg #3 is expected to be a l_int32 (maxw).
- * Arg #4 is optional and, if given, expected to be a l_int32 (firstident).
+ * Arg #4 is an optional l_int32 (firstident).
  *
  * \param L pointer to the lua_State
  * \return 1 integer (h) plus a table of strings on the Lua stack
@@ -243,7 +243,11 @@ ll_push_Bmf(const char *_fun, lua_State *L, L_Bmf *bmf)
 int
 ll_new_Bmf(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_Bmf");
+    const char* dir = lua_isstring(L, 1) ? ll_check_string(_fun, L, 1) : ".";
+    l_int32 fontsize = ll_check_l_int32_default(_fun, L, 2, 6);
+    L_Bmf *bmf = bmfCreate(dir, fontsize);
+    return ll_push_Bmf(_fun, L, bmf);
 }
 /**
  * \brief Register the BMF methods and functions in the LL_BMF meta table.
@@ -254,8 +258,8 @@ int
 ll_register_Bmf(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},   /* garbage collector */
-        {"__new",               Create},
+        {"__gc",                Destroy},       /* garbage collector */
+        {"__new",               ll_new_Bmf},    /* Bmf("dir", fontsize) */
         {"Create",              Create},
         {"Destroy",             Destroy},
         {"GetBaseline",         GetBaseline},
@@ -270,7 +274,7 @@ ll_register_Bmf(lua_State *L)
         LUA_SENTINEL
     };
 
-    lua_pushcfunction(L, Create);
+    lua_pushcfunction(L, ll_new_Bmf);
     lua_setglobal(L, LL_BMF);
     return ll_register_class(L, LL_BMF, methods, functions);
 }

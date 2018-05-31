@@ -182,8 +182,8 @@ Clear(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a Pixa* user data.
  * Arg #2 is expected to be a l_int32 (n).
- * Arg #3 is optional and, if given, expected to be a string (type).
- * Arg #4 is optional and, if given, expected to be a string (copyflag).
+ * Arg #3 is an optional string (type).
+ * Arg #4 is an optional string (copyflag).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pixaa* on the Lua stack

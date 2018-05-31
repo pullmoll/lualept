@@ -255,7 +255,7 @@ Truncate(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
  * Arg #2 is expected to be string containing the filename.
- * Arg #3 is optional and, if given, expected to be a boolean (type)
+ * Arg #3 is an optional boolean (type)
  *
  * Note:
  *      type = true means the data is written as integers.
@@ -278,7 +278,7 @@ Write(lua_State *L)
  * \brief Write the Ptaa* (%ptaa) to memory and return it as a Lua string.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
- * Arg #2 is optional and, if given, expected to be a boolean (type)
+ * Arg #2 is an optional boolean (type)
  *
  * Note:
  *      type = true means the data is written as integers.
@@ -307,7 +307,7 @@ WriteMem(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
  * Arg #2 is expected to be a luaL_Stream* (stream).
- * Arg #3 is optional and, if given, expected to be a boolean (type)
+ * Arg #3 is an optional boolean (type)
  *
  * Note:
  *      type = true means the data is written as integers.

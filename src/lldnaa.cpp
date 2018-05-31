@@ -454,9 +454,36 @@ int
 ll_new_Dnaa(lua_State *L)
 {
     FUNC("ll_new_Dnaa");
-    Dnaa *daa = l_dnaaCreate(1);
+    Dnaa *daa = nullptr;
+
+    if (lua_isuserdata(L, 1)) {
+        luaL_Stream* stream = ll_check_stream(_fun, L, 1);
+        daa = l_dnaaReadStream(stream->f);
+    }
+
+    if (!daa && lua_isinteger(L, 1)) {
+        if (lua_isinteger(L, 2)) {
+            l_int32 nptr = ll_check_l_int32_default(_fun, L, 1, 1);
+            l_int32 n = ll_check_l_int32_default(_fun, L, 2, 1);
+            daa = l_dnaaCreateFull(nptr, n);
+        } else {
+            l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+            daa = l_dnaaCreate(n);
+        }
+    }
+
+    if (!daa && lua_isstring(L, 1)) {
+        const char *filename = ll_check_string(_fun, L, 1);
+        daa = l_dnaaRead(filename);
+    }
+
+    if (!daa) {
+        daa = l_dnaaCreate(1);
+    }
+
     return ll_push_Dnaa(_fun, L, daa);
 }
+
 /**
  * \brief Register the L_DNAA methods and functions in the LL_DNAA meta table.
  * \param L pointer to the lua_State
@@ -465,11 +492,11 @@ ll_new_Dnaa(lua_State *L)
 int
 ll_register_Dnaa(lua_State *L) {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},       /* garbage collector */
-        {"__new",               Create},        /* dnaa = Dnaa(n) */
-        {"__len",               GetCount},      /* #dnaa */
-        {"__newindex",          ReplaceDna},    /* dnaa[idx] = dna */
-        {"__tostring",          toString},      /* print(dnaa) */
+        {"__gc",                Destroy},           /* garbage collector */
+        {"__new",               ll_new_Dnaa},       /* Dnaa() */
+        {"__len",               GetCount},          /* #dnaa */
+        {"__newindex",          ReplaceDna},        /* dnaa[idx] = dna */
+        {"__tostring",          toString},          /* print(dnaa) */
         {"AddDna",              AddDna},
         {"AddNumber",           AddNumber},
         {"Create",              Create},

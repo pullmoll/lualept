@@ -99,7 +99,7 @@ Create(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Aset* (aset).
  * Arg #2 is expected to be a key (int, uint or float).
- * Arg #3 is optional and, if given, expected to be a boolean (value).
+ * Arg #3 is an optional boolean (value).
  *
  * Note: if Arg #3 is false, the node is deleted instead of inserted.
  * </pre>
@@ -395,7 +395,10 @@ ll_push_Aset(const char *_fun, lua_State *L, Aset *aset)
 int
 ll_new_Aset(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_Aset");
+    l_int32 keytype = ll_check_keytype(_fun, L, 1, L_INT_TYPE);
+    Aset *aset = l_asetCreate(keytype);
+    return ll_push_Aset(_fun, L, aset);
 }
 /**
  * \brief Register the ASET methods and functions in the LL_ASET meta table.
@@ -406,9 +409,9 @@ int
 ll_register_Aset(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},   /* garbage collector */
+        {"__gc",                Destroy},       /* garbage collector */
         {"__len",               Size},
-        {"__new",               Create},
+        {"__new",               ll_new_Aset},   /* Aset(n) */
         {"__newindex",          Insert},
         {"__tostring",          toString},
         {"Create",              Create},
@@ -429,7 +432,7 @@ ll_register_Aset(lua_State *L)
         LUA_SENTINEL
     };
 
-    lua_pushcfunction(L, Create);
+    lua_pushcfunction(L, ll_new_Aset);
     lua_setglobal(L, LL_ASET);
     return ll_register_class(L, LL_ASET, methods, functions);
 }

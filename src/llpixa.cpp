@@ -200,7 +200,7 @@ GetBoxGeometry(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pixa*.
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a Pix* (%pixs).
- * Arg #4 is optional and, if given, expected to be a Box* (%boxs).
+ * Arg #4 is an optional Box* (%boxs).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -377,7 +377,7 @@ RemovePixAndSave(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a Pix* (pixs).
- * Arg #4 is optional and, if given, expected to be a Box* (boxs).
+ * Arg #4 is an optional Box* (boxs).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack

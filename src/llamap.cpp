@@ -422,8 +422,12 @@ ll_push_Amap(const char *_fun, lua_State *L, Amap *amap)
 int
 ll_new_Amap(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_Amap");
+    l_int32 keytype = ll_check_keytype(_fun, L, 1, L_INT_TYPE);
+    Amap *amap = l_amapCreate(keytype);
+    return ll_push_Amap(_fun, L, amap);
 }
+
 /**
  * \brief Register the Amap methods and functions in the LL_AMAP meta table.
  * \param L pointer to the lua_State
@@ -433,11 +437,11 @@ int
 ll_register_Amap(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},   /* garbage collector */
-        {"__len",               Size},      /* #amap */
-        {"__new",               Create},    /* Amap(n) */
-        {"__newindex",          Insert},    /* amap[n] = value */
-        {"__tostring",          toString},  /* print(amap) */
+        {"__gc",                Destroy},       /* garbage collector */
+        {"__len",               Size},          /* #amap */
+        {"__new",               ll_new_Amap},
+        {"__newindex",          Insert},        /* amap[n] = value */
+        {"__tostring",          toString},      /* print(amap) */
         {"Create",              Create},
         {"Delete",              Delete},
         {"Destroy",             Destroy},
@@ -455,7 +459,7 @@ ll_register_Amap(lua_State *L)
         LUA_SENTINEL
     };
 
-    lua_pushcfunction(L, Create);
+    lua_pushcfunction(L, ll_new_Amap);
     lua_setglobal(L, LL_AMAP);
     return ll_register_class(L, LL_AMAP, methods, functions);
 }

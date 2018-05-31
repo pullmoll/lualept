@@ -413,8 +413,20 @@ ll_push_FPixa(const char *_fun, lua_State *L, FPixa *cd)
 int
 ll_new_FPixa(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_FPixa");
+    if (lua_isuserdata(L, 1)) {
+        FPixa *fpixas = ll_check_FPixa(_fun, L, 1);
+        FPixa *fpixa = fpixaCopy(fpixas, L_COPY);
+        return ll_push_FPixa(_fun, L, fpixa);
+    }
+    if (lua_isinteger(L, 1)) {
+        l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+        FPixa *fpixa = fpixaCreate(n);
+        return ll_push_FPixa(_fun, L, fpixa);
+    }
+    return ll_push_nil(L);
 }
+
 /**
  * \brief Register the FPixa methods and functions in the LL_FPIXA meta table.
  * \param L pointer to the lua_State
@@ -424,8 +436,8 @@ int
 ll_register_FPixa(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},   /* garbage collector */
-        {"__new",               Create},
+        {"__gc",                Destroy},           /* garbage collector */
+        {"__new",               ll_new_FPixa},      /* FPixa() */
         {"__len",               GetCount},
         {"AddFPix",             AddFPix},
         {"ChangeRefcount",      ChangeRefcount},
@@ -450,7 +462,7 @@ ll_register_FPixa(lua_State *L)
         LUA_SENTINEL
     };
 
-    lua_pushcfunction(L, Create);
+    lua_pushcfunction(L, ll_new_Pixa);
     lua_setglobal(L, LL_FPIXA);
     return ll_register_class(L, LL_FPIXA, methods, functions);
 }

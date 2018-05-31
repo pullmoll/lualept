@@ -1,4 +1,5 @@
 tmpdir = "/tmp/lualept"
+images = "images"
 
 function header(str)
 	local len = str ~= nil and #str or 0
@@ -390,8 +391,9 @@ function pix2_test()
 	local filename = tmpdir .. "/lualept.png"
 	local filename2 = tmpdir .. "/lualept-mask.tif"
 	local filename3 = tmpdir .. "/lualept-masked.png"
+	local image1 = images .. '/lualept.jpg'
 	header("Pix2")
-	local pix = Pix('lualept.jpg')
+	local pix = Pix(image1)
 	print (pad("pix"), pix)
 
 	local ok = pix:Write(filename, 'png')
@@ -427,8 +429,9 @@ function fpix_test()
 	local filename2 = tmpdir .. "/fpix-test.png"
 	header("FPix")
 	local fpix = FPix(160,100)
-	fpix:SetResolution(150,150)
 	print(pad("fpix = FPix(160,100)"), fpix)
+	fpix:SetResolution(150,150)
+	print(pad("fpix:SetResolution(150,150)"), fpix)
 	fpix:SetAllArbitrary(0.95)
 	for x=0,159 do
 		local y = 100*x//160
@@ -478,7 +481,9 @@ function dpix_test()
 	local data = dpix2:GetData()
 	print(pad("data = dpix2:GetData()"), data)
 
-	local pix = dpix2:ConvertToPix(0, "clip-to-zero", true)
+	local negvals = "clip-to-zero"
+	local pix = dpix2:ConvertToPix(16, negvals, true)
+	print(pad("pix = dpix2:ConvertToPix(16,'" .. negvals .. "', true)"), ok)
 	pix:Write(filename2)
 	print(pad("pix:Write('" .. filename2 .."')"), ok)
 	local data, pdf = pix:ConvertToPdf("png", 75, filename3, 0, 0, 150, "A DPix converted to Pix, then to PDF")

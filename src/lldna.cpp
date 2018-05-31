@@ -604,6 +604,7 @@ ll_push_Dna(const char *_fun, lua_State *L, Dna *da)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, LL_DNA, da);
 }
+
 /**
  * \brief Create and push a new DNA*.
  * \param L pointer to the lua_State
@@ -612,8 +613,35 @@ ll_push_Dna(const char *_fun, lua_State *L, Dna *da)
 int
 ll_new_Dna(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_Dna");
+    Dna *da = nullptr;
+
+    if (lua_isuserdata(L, 1)) {
+        Dna *das = ll_check_Dna_opt(_fun, L, 1);
+        if (das) {
+            da = l_dnaCopy(das);
+        } else {
+            luaL_Stream* stream = ll_check_stream(_fun, L, 1);
+            da = l_dnaReadStream(stream->f);
+        }
+    }
+
+    if (lua_isinteger(L, 1)) {
+        l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+        da = l_dnaCreate(n);
+    }
+
+    if (!da && lua_isstring(L, 1)) {
+        const char *filename = ll_check_string(_fun, L, 1);
+        da = l_dnaRead(filename);
+    }
+
+    if (!da) {
+        da = l_dnaCreate(1);
+    }
+    return ll_push_Dna(_fun, L, da);
 }
+
 /**
  * \brief Register the L_DNA methods and functions in the LL_L_DNA meta table.
  * \param L pointer to the lua_State
@@ -623,10 +651,10 @@ int
 ll_register_Dna(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                    Destroy},       /* Lua garbage collector */
-        {"__new",                   Create},        /* TODO: smart create via Create, FromArray, Read ? */
-        {"__len",                   GetCount},      /* #dna */
-        {"__newitem",               ReplaceNumber}, /* dna[index] = number */
+        {"__gc",                    Destroy},           /* garbage collector */
+        {"__new",                   ll_new_Dna},        /* Dna() */
+        {"__len",                   GetCount},          /* #dna */
+        {"__newitem",               ReplaceNumber},     /* dna[index] = number */
         {"__tostring",              toString},
         {"AddNumber",               AddNumber},
         {"Clone",                   Clone},

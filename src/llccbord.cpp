@@ -169,8 +169,22 @@ ll_push_CCBord(const char *_fun, lua_State *L, CCBord *cd)
 int
 ll_new_CCBord(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_CCBord");
+    CCBord *ccb = nullptr;
+    if (lua_isuserdata(L, 1)) {
+        Pix* pixs = ll_check_Pix_opt(_fun, L, 1);
+        if (pixs) {
+            l_int32 n = ll_check_l_int32_default(_fun, L, 2, 1);
+            ccb = ccbCreate(pixs);
+        }
+    }
+    if (!ccb) {
+        /* FIXME: create data for no pix? */
+        ccb = ccbCreate(nullptr);
+    }
+    return ll_push_CCBord(_fun, L, ccb);
 }
+
 /**
  * \brief Register the CCBord methods and functions in the LL_CCBORD meta table.
  * \param L pointer to the lua_State
@@ -180,8 +194,8 @@ int
 ll_register_CCBord(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},   /* garbage collector */
-        {"__new",               Create},
+        {"__gc",                Destroy},       /* garbage collector */
+        {"__new",               ll_new_CCBord}, /* CCBord(pix) */
         {"__tostring",          toString},
         {"Create",              Create},
         {"Destroy",             Destroy},
@@ -192,7 +206,7 @@ ll_register_CCBord(lua_State *L)
         LUA_SENTINEL
     };
 
-    lua_pushcfunction(L, Create);
+    lua_pushcfunction(L, ll_new_CCBord);
     lua_setglobal(L, LL_CCBORD);
     return ll_register_class(L, LL_CCBORD, methods, functions);
 }

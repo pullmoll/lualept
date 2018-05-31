@@ -36,16 +36,17 @@
 #include "lualept.h"
 
 #if !defined(LLUA_DEBUG)
-#define LLUA_DEBUG          0           /*!< set to 1 to enable debugging */
+#define LLUA_DEBUG          1           /*!< set to 1 to enable debugging */
 #endif
-#define LOG_REGISTER        1           /*!< set to 1 to log Lua class registration */
-#define LOG_DESTROY         1           /*!< set to 1 to log object destruction */
-#define LOG_PUSH_BOOLEAN    0           /*!< set to 1 to log pushing booleans */
-#define LOG_PUSH_INTEGER    1           /*!< set to 1 to log pushing integers */
-#define LOG_PUSH_NUMBER     1           /*!< set to 1 to log pushing numbers */
-#define LOG_PUSH_STRING     1           /*!< set to 1 to log pushing strings */
-#define LOG_PUSH_UDATA      1           /*!< set to 1 to log pushing user data */
-#define LOG_PUSH_TABLE      1           /*!< set to 1 to log pushing tables */
+#define LOG_REGISTER        (1<<0)      /*!< set to 1 to log Lua class registration */
+#define LOG_DESTROY         (1<<1)      /*!< set to 1 to log object destruction */
+#define LOG_PUSH_BOOLEAN    (1<<2)      /*!< set to 1 to log pushing booleans */
+#define LOG_PUSH_INTEGER    (1<<3)      /*!< set to 1 to log pushing integers */
+#define LOG_PUSH_NUMBER     (1<<4)      /*!< set to 1 to log pushing numbers */
+#define LOG_PUSH_STRING     (1<<5)      /*!< set to 1 to log pushing strings */
+#define LOG_PUSH_UDATA      (1<<6)      /*!< set to 1 to log pushing user data */
+#define LOG_PUSH_TABLE      (1<<7)      /*!< set to 1 to log pushing tables */
+#define LOG_NEW_CLASS       (1<<8)      /*!< set to 1 to log ll_new_<ClassName> */
 
 #if defined(HAVE_CTYPE_H)
 #include <ctype.h>
@@ -136,6 +137,7 @@ extern void dbg(int enable, const char* format, ...);
 
 typedef struct lua_State lua_State;
 extern void die(const char *_fun, lua_State* L, const char *format, ...);
+extern void *ll_ludata(const char *_fun, lua_State* L, int arg);
 extern void **ll_udata(const char *_fun, lua_State* L, int arg, const char *tname);
 
 extern int DisplaySDL2(Pix* pix, int x0, int y0, const char* title);
@@ -228,6 +230,12 @@ template<typename T> T **
 ll_check_udata(const char *_fun, lua_State *L, int arg, const char* tname)
 {
     return reinterpret_cast<T **>(ll_udata(_fun, L, arg, tname));
+}
+
+template<typename T> T *
+ll_check_ludata(const char *_fun, lua_State *L, int arg)
+{
+    return reinterpret_cast<T *>(ll_ludata(_fun, L, arg));
 }
 
 #ifdef __cplusplus

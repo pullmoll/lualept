@@ -219,7 +219,7 @@ ExtendArrayToSize(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxaa* user data (boxaa).
  * Arg #2 is expected to be a l_int32 (num).
  * Arg #3 is expected to be a string describing the copy flag (copyflag).
- * Arg #3 is optional and, if given, expected to be a Box* (fillerbox).
+ * Arg #3 is an optional Box* (fillerbox).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -343,8 +343,8 @@ InsertBoxa(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxaad).
  * Arg #2 is expected to be another Box* (boxaas).
- * Arg #3 is optional and, if given, expected to be a l_int32 (istart).
- * Arg #4 is optional and, if given, expected to be a l_int32 (iend).
+ * Arg #3 is an optional l_int32 (istart).
+ * Arg #4 is an optional l_int32 (iend).
  * </pre>
  * \param L pointer to the lua_State
  * \return 2 boolean and Numa* on the Lua stack
@@ -559,7 +559,27 @@ int
 ll_new_Boxaa(lua_State *L)
 {
     FUNC("ll_new_Boxaa");
-    Boxaa *boxaa = boxaaCreate(1);
+    Boxaa *boxaa = nullptr;
+    if (lua_isuserdata(L, 1)) {
+        Boxaa *boxaas = ll_check_Boxaa_opt(_fun, L, 1);
+        if (boxaas) {
+            boxaa = boxaaCopy(boxaas, L_COPY);
+        } else {
+            luaL_Stream *stream = ll_check_stream(_fun, L, 2);
+            boxaa = boxaaReadStream(stream->f);
+        }
+    }
+    if (!boxaa && lua_isinteger(L, 1)) {
+        l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+        boxaa = boxaaCreate(n);
+    }
+    if (!boxaa && lua_isstring(L, 1)) {
+        const char* filename = ll_check_string(_fun, L, 1);
+        boxaa = boxaaRead(filename);
+    }
+    if (!boxaa) {
+        boxaa = boxaaCreate(1);
+    }
     return ll_push_Boxaa(_fun, L, boxaa);
 }
 /**
@@ -572,7 +592,7 @@ ll_register_Boxaa(lua_State *L)
 {
     static const luaL_Reg methods[] = {
         {"__gc",                    Destroy},               /* garbage collect */
-        {"__new",                   Create},                /* new Boxaa */
+        {"__new",                   ll_new_Boxaa},          /* Boxaa(n) */
         {"__len",                   GetCount},              /* #boxa */
         {"__tostring",              toString},
         {"AddBoxa",                 AddBoxa},
@@ -604,7 +624,7 @@ ll_register_Boxaa(lua_State *L)
         LUA_SENTINEL
     };
 
-    lua_pushcfunction(L, Create);
+    lua_pushcfunction(L, ll_new_Boxaa);
     lua_setglobal(L, LL_BOXAA);
     return ll_register_class(L, LL_BOXAA, methods, functions);
 }

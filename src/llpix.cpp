@@ -134,7 +134,7 @@ Subtract(lua_State *L)
  * \brief Invert the Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
- * Arg #2 is optional and, if given, expected to be a Pix* (pixs).
+ * Arg #2 is an optional Pix* (pixs).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -282,7 +282,7 @@ toString(lua_State* L)
  * \brief Build the absolute difference by column of Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is optional and, if given, expected to be a Box* (box).
+ * Arg #2 is an optional Box* (box).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -301,7 +301,7 @@ AbsDiffByColumn(lua_State *L)
  * \brief Build the absolute difference by row of Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is optional and, if given, expected to be a Box* (box).
+ * Arg #2 is an optional Box* (box).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -320,8 +320,8 @@ AbsDiffByRow(lua_State *L)
  * \brief Build the absolute difference inside a Box* (%box) of Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is optional and, if given, expected to be a Box* (box).
- * Arg #2 is optional and, if given, expected to be a string (dir: horizontal-line or vertical-line).
+ * Arg #2 is an optional Box* (box).
+ * Arg #2 is an optional string (dir: horizontal-line or vertical-line).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -344,7 +344,7 @@ AbsDiffInRect(lua_State *L)
  * \brief Build absolute difference on a line (%x1,%y1 to %x2,%y2) of Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is optional and, if given, expected to be a Box* (box).
+ * Arg #2 is an optional Box* (box).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -1295,8 +1295,8 @@ AssignToNearestColor(lua_State *L)
  * \brief Build the average by column of Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is optional and, if given, expected to be a Box* (box).
- * Arg #3 is optional and, if given, expected to be a string (type: white-is-max or black-is-max).
+ * Arg #2 is an optional Box* (box).
+ * Arg #3 is an optional string (type: white-is-max or black-is-max).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -1316,8 +1316,8 @@ AverageByColumn(lua_State *L)
  * \brief Build the average by row of Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is optional and, if given, expected to be a Box* (box).
- * Arg #3 is optional and, if given, expected to be a string (type).
+ * Arg #2 is an optional Box* (box).
+ * Arg #3 is an optional string (type).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -1337,7 +1337,7 @@ AverageByRow(lua_State *L)
  * \brief Build the average inside a Box* (%box) of Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is optional and, if given, expected to be a Box* (box).
+ * Arg #2 is an optional Box* (box).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -3643,7 +3643,7 @@ ColorsForQuantization(lua_State *L)
  * \brief Get the column stats for Pix* (%pixs) as six Numa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is optional and, if given, expected to be a Box* (box).
+ * Arg #2 is an optional Box* (box).
  * </pre>
  * \param L pointer to the lua_State
  * \return 6 Numa* on the Lua stack (mean, median, mode, modecount, var, rootvar)
@@ -5954,7 +5954,7 @@ CorrelationScoreThresholded(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (val).
  * Arg #3 is expected to be a l_int32 (factor).
- * Arg #4 is optional and, if given, expected to be a Box* (box).
+ * Arg #4 is an optional Box* (box).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -9808,10 +9808,10 @@ GetAutoFormat(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string describing the type of stats (type).
- * Arg #3 is optional and, if given, expected to be a Pix* (pixm).
- * Arg #4 is optional and, if given, expected to be a l_int32 (x).
- * Arg #5 is optional and, if given, expected to be a l_int32 (y).
- * Arg #6 is optional and, if given, expected to be a l_int32 (factor).
+ * Arg #3 is an optional Pix* (pixm).
+ * Arg #4 is an optional l_int32 (x).
+ * Arg #5 is an optional l_int32 (y).
+ * Arg #6 is an optional l_int32 (factor).
  * </pre>
  * \param L pointer to the lua_State
  * \return 3 numbers on the Lua stack (rval, gval, bval)
@@ -9838,10 +9838,10 @@ GetAverageMasked(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string describing the type of stats (type).
- * Arg #3 is optional and, if given, expected to be a Pix* (pixm).
- * Arg #4 is optional and, if given, expected to be a l_int32 (x).
- * Arg #5 is optional and, if given, expected to be a l_int32 (y).
- * Arg #6 is optional and, if given, expected to be a l_int32 (factor).
+ * Arg #3 is an optional Pix* (pixm).
+ * Arg #4 is an optional l_int32 (x).
+ * Arg #5 is an optional l_int32 (y).
+ * Arg #6 is an optional l_int32 (factor).
  * </pre>
  * \param L pointer to the lua_State
  * \return 3 numbers on the Lua stack (rval, gval, bval)
@@ -10075,7 +10075,7 @@ GetBinnedColor(lua_State *L)
  * Arg #2 is expected to be a l_int32 (nbins).
  * Arg #3 is expected to be a l_int32 (factor).
  * Arg #4 is expected to be a string defining the selected color (color).
- * Arg #5 is optional and, if given, expected to be a l_int32 (fontsize).
+ * Arg #5 is an optional l_int32 (fontsize).
  * </pre>
  * \param L pointer to the lua_State
  * \return 2 integers and 1 table on the Lua stack (minval, maxval, carray)
@@ -10834,7 +10834,7 @@ GetLocalSkewTransform(lua_State *L)
  * \brief Get the maximum value for Pix* (%pixs) optionally in rect Box* (%box).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is optional and, if given, expected to be a Box*.
+ * Arg #2 is an optional Box*.
  * </pre>
  * \param L pointer to the lua_State
  * \return 3 integers on the Lua stack (maxval, xmax, ymax)
@@ -11041,10 +11041,10 @@ GetPixel(lua_State *L)
  * \brief Get the pixel average for Pix* (%pixs) optionally masked with Pix* (%pixm).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is optional and, if given, expected to be a Pix* (pixm).
- * Arg #3 is optional and, if given, expected to be a l_int32 (x).
- * Arg #4 is optional and, if given, expected to be a l_int32 (y).
- * Arg #5 is optional and, if given, expected to be a l_int32 (factor).
+ * Arg #2 is an optional Pix* (pixm).
+ * Arg #3 is an optional l_int32 (x).
+ * Arg #4 is an optional l_int32 (y).
+ * Arg #5 is an optional l_int32 (factor).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -12339,7 +12339,7 @@ LocateBarcodes(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (dist).
- * Arg #3 is optional and, if given, expected to be a boolean (getbox).
+ * Arg #3 is an optional boolean (getbox).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack or 2 Pix* and Box* on the Lua stack
@@ -14211,7 +14211,7 @@ PaintBoxaRandom(lua_State *L)
  * Arg #6 is expected to be a l_int32 (mindist).
  * Arg #7 is expected to be a l_int32 (tilesize).
  * Arg #8 is expected to be a l_int32 (ntiles).
- * Arg #9 is optional and, if given, expected to be a l_int32 (distblend).
+ * Arg #9 is an optional l_int32 (distblend).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -17389,7 +17389,7 @@ RotateWithAlpha(lua_State *L)
  * \brief Get the row stats for Pix* (%pixs) as six Numa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is optional and, if given, expected to be a Box* (box).
+ * Arg #2 is an optional Box* (box).
  * </pre>
  * \param L pointer to the lua_State
  * \return 6 Numa* on the Lua stack (mean, median, mode, modecount, var, rootvar)
@@ -21876,7 +21876,7 @@ VarThresholdToBinary(lua_State *L)
  * \brief Build the variance by column of Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is optional and, if given, expected to be a Box* (box).
+ * Arg #2 is an optional Box* (box).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -21895,7 +21895,7 @@ VarianceByColumn(lua_State *L)
  * \brief Build the variance by row of Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is optional and, if given, expected to be a Box* (box).
+ * Arg #2 is an optional Box* (box).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -21914,7 +21914,7 @@ VarianceByRow(lua_State *L)
  * \brief Build the square root of the variance inside a Box* (%box) of Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is optional and, if given, expected to be a Box* (box).
+ * Arg #2 is an optional Box* (box).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack

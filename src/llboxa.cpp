@@ -321,7 +321,7 @@ ClipToBox(lua_State *L)
  * \brief Combine overlaps in boxes of Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
- * Arg #2 is optional and, if given, expected to be a Pixa* (pixadb).
+ * Arg #2 is an optional Pixa* (pixadb).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* on the Lua stack
@@ -341,7 +341,7 @@ CombineOverlaps(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa1).
  * Arg #2 is expected to be a another Boxa* (boxa2).
- * Arg #3 is optional and, if given, expected to be a Pixa* (pixadb).
+ * Arg #3 is an optional Pixa* (pixadb).
  * </pre>
  * \param L pointer to the lua_State
  * \return 2 Boxa* on the Lua stack
@@ -366,7 +366,7 @@ CombineOverlapsInPair(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa1).
  * Arg #2 is expected to be another Boxa* (boxa2).
  * Arg #3 is expected to be a l_int32 (areathresh).
- * Arg #3 is optional and, if given, expected to be a Pix* (pixdb).
+ * Arg #3 is an optional Pix* (pixdb).
  * </pre>
  * \param L pointer to the lua_State
  * \return 3 one integer (%nsame) and two numbers (%diffarea, %diffxor) on the Lua stack
@@ -602,7 +602,7 @@ ExtractAsNuma(lua_State *L)
  * \brief Extract Boxa* (%boxa) as six Pta* (%ptal, %ptar, %ptat, %ptab, %ptaw, %ptah).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
- * Arg #2 is optional and, if given, expected to be a boolean (keepinvalid).
+ * Arg #2 is an optional boolean (keepinvalid).
  * </pre>
  * \param L pointer to the lua_State
  * \return 6 Pta* on the Lua stack (%ptal, %ptar, %ptat, %ptab, %ptaw, %ptah)
@@ -650,7 +650,7 @@ ExtractSortedPattern(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a string describing the use flag (useflag).
- * Arg #3 is optional and, if given, expected to be a boolean (debug).
+ * Arg #3 is an optional boolean (debug).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* (%boxa) on the Lua stack
@@ -805,7 +805,7 @@ GetBoxGeometry(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a l_int32 (wc)
  * Arg #3 is expected to be a l_int32 (hc)
- * Arg #4 is optional and, if given, expected to be a boolean (exactflag)
+ * Arg #4 is an optional boolean (exactflag)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 number on the Lua stack (%fract)
@@ -1041,7 +1041,7 @@ GetValidCount(lua_State *L)
  * \brief Get white blocks for boxes from a Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
- * Arg #2 is optional and, if given, expected to be a Box* (box)
+ * Arg #2 is an optional Box* (box)
  * Arg #3 is expected to be a string describing the sort by type (sortflag).
  * Arg #4 is expected to be a l_int32 (maxboxes)
  * Arg #5 is expected to be a l_float32 (maxoverlap)
@@ -1162,7 +1162,7 @@ GetWhiteblocks(lua_State *L)
  * Arg #3 is expected to be a l_int32 (range).
  * Arg #4 is expected to be a l_float32 (min_overlap).
  * Arg #5 is expected to be a l_float32 (max_ratio).
- * Arg #6 is optional and, if given, expected to be a Numa* (namap).
+ * Arg #6 is an optional Numa* (namap).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* on the Lua stack
@@ -1265,8 +1265,8 @@ IsFull(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxad).
  * Arg #2 is expected to be another Boxa* (boxas).
- * Arg #3 is optional and, if given, expected to be a l_int32 (istart).
- * Arg #4 is optional and, if given, expected to be a l_int32 (iend).
+ * Arg #3 is an optional l_int32 (istart).
+ * Arg #4 is an optional l_int32 (iend).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -1287,7 +1287,7 @@ Join(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_int32 (factor).
- * Arg #3 is optional and, if given, expected to be a boolean (debug).
+ * Arg #3 is an optional boolean (debug).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* (%boxa) on the Lua stack
@@ -1960,7 +1960,7 @@ SizeVariation(lua_State *L)
  * Arg #3 is expected to be a string describing the sub flag (subflag).
  * Arg #4 is expected to be a l_int32 (maxdiff).
  * Arg #5 is expected to be a l_int32 (extrapixels).
- * Arg #5 is optional and, if given, expected to be a boolean (debug).
+ * Arg #5 is an optional boolean (debug).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* (%boxa) on the Lua stack
@@ -1987,7 +1987,7 @@ SmoothSequenceLS(lua_State *L)
  * Arg #3 is expected to be a string describing the sub flag (subflag).
  * Arg #4 is expected to be a l_int32 (maxdiff).
  * Arg #5 is expected to be a l_int32 (extrapixels).
- * Arg #5 is optional and, if given, expected to be a boolean (debug).
+ * Arg #5 is an optional boolean (debug).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* (%boxa) on the Lua stack
@@ -2160,7 +2160,7 @@ Translate(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_int32 (halfwin).
- * Arg #3 is optional and, if given, expected to be a boolean (debug).
+ * Arg #3 is an optional boolean (debug).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* (%boxa) on the Lua stack
@@ -2261,6 +2261,7 @@ ll_check_Boxa_opt(const char *_fun, lua_State *L, int arg)
         return nullptr;
     return ll_check_Boxa(_fun, L, arg);
 }
+
 /**
  * \brief Push Boxa* user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
@@ -2275,6 +2276,7 @@ ll_push_Boxa(const char *_fun, lua_State *L, Boxa *boxa)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, LL_BOXA, boxa);
 }
+
 /**
  * \brief Create and push a new Boxa*.
  * \param L pointer to the lua_State
@@ -2283,8 +2285,31 @@ ll_push_Boxa(const char *_fun, lua_State *L, Boxa *boxa)
 int
 ll_new_Boxa(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_Boxa");
+    Boxa* boxa = nullptr;
+    if (lua_isuserdata(L, 1)) {
+        Boxa *boxas = ll_check_Boxa_opt(_fun, L, 1);
+        if (boxas) {
+            boxa = boxaCopy(boxas, L_COPY);
+        } else {
+            luaL_Stream *stream = ll_check_stream(_fun, L, 1);
+            boxa = boxaReadStream(stream->f);
+        }
+    }
+    if (!boxa && lua_isinteger(L, 1)) {
+        l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+        boxa = boxaCreate(n);
+    }
+    if (!boxa && lua_isstring(L, 1)) {
+        const char* filename = ll_check_string(_fun, L, 1);
+        boxa = boxaRead(filename);
+    }
+    if (!boxa) {
+        boxa = boxaCreate(1);
+    }
+    return ll_push_Boxa(_fun, L, boxa);
 }
+
 /**
  * \brief Register the BOX methods and functions in the LL_BOX meta table.
  * \param L pointer to the lua_State
@@ -2295,7 +2320,7 @@ ll_register_Boxa(lua_State *L)
 {
     static const luaL_Reg methods[] = {
         {"__gc",                    Destroy},               /* garbage collect */
-        {"__new",                   Create},                /* new Boxa */
+        {"__new",                   ll_new_Boxa},           /* Boxa(n) */
         {"__len",                   GetCount},              /* #boxa */
         {"__tostring",              toString},
         {"AddBox",                  AddBox},
@@ -2398,7 +2423,7 @@ ll_register_Boxa(lua_State *L)
         LUA_SENTINEL
     };
 
-    lua_pushcfunction(L, Create);
+    lua_pushcfunction(L, ll_new_Boxa);
     lua_setglobal(L, LL_BOXA);
     return ll_register_class(L, LL_BOXA, methods, functions);
 }
