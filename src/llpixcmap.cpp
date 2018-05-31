@@ -177,6 +177,52 @@ AddColor(lua_State *L)
 }
 
 /**
+ * \brief AddColorizedGrayToCmap() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
+ * Arg #2 is expected to be a l_int32 (type).
+ * Arg #3 is expected to be a l_int32 (rval).
+ * Arg #4 is expected to be a l_int32 (gval).
+ * Arg #5 is expected to be a l_int32 (bval).
+ *
+ * Notes:
+ *      (1) If type == L_PAINT_LIGHT, it colorizes non-black pixels,
+ *          preserving antialiasing.
+ *          If type == L_PAINT_DARK, it colorizes non-white pixels,
+ *          preserving antialiasing.
+ *      (2) This increases the colormap size by the number of
+ *          different gray (non-black or non-white) colors in the
+ *          input colormap.  If there is not enough room in the colormap
+ *          for this expansion, it returns 1 (treated as a warning);
+ *          the caller should check the return value.
+ *      (3) This can be used to determine if the new colors will fit in
+ *          the cmap, using null for &na.  Returns 0 if they fit; 2 if
+ *          they don't fit.
+ *      (4) The mapping table contains, for each gray color found, the
+ *          index of the corresponding colorized pixel.  Non-gray
+ *          pixels are assigned the invalid index 256.
+ *      (5) See pixColorGrayCmap() for usage.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+AddColorizedGrayToCmap(lua_State *L)
+{
+    LL_FUNC("AddColorizedGrayToCmap");
+    PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
+    l_int32 type = ll_check_paint_flags(_fun, L, 2, L_PAINT_LIGHT);
+    l_int32 rval = ll_opt_l_int32(_fun, L, 3, 128);
+    l_int32 gval = ll_opt_l_int32(_fun, L, 4, 128);
+    l_int32 bval = ll_opt_l_int32(_fun, L, 5, 128);
+    Numa *na = nullptr;
+    if (addColorizedGrayToCmap(cmap, type, rval, gval, bval, &na))
+        return ll_push_nil(L);
+    ll_push_Numa(_fun, L, na);
+    return 1;
+}
+
+/**
  * \brief Add a nearest color to a PixColormap* (%cmap).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).

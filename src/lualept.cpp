@@ -1041,6 +1041,21 @@ ll_check_lstring(const char *_fun, lua_State *L, int arg, size_t *plen)
 }
 
 /**
+ * \brief Check if an argument is a string and return its length.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \param plen optional pointer to a size_t where to store the string length
+ * \return l_int32 for the integer; lua_error if out of bounds
+ */
+const l_uint8 *
+ll_check_lbytes(const char *_fun, lua_State *L, int arg, size_t *plen)
+{
+    const char *str = ll_check_lstring(_fun, L, arg, plen);
+    return reinterpret_cast<const l_uint8 *>(str);
+}
+
+/**
  * \brief Return an user data argument (%arg) as luaL_Stream*.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
@@ -3357,6 +3372,46 @@ const char*
 ll_string_value_flags(l_int32 value_flags)
 {
     return ll_string_tbl(value_flags, tbl_value_flags, ARRAYSIZE(tbl_value_flags));
+}
+
+/**
+ * \brief Table of paint type names and enumeration values.
+ * <pre>
+ * Paint flags.
+ * </pre>
+ */
+static const lept_enums_t tbl_paint_flags[] = {
+    TBL_ENTRY("paint-light",    L_PAINT_LIGHT),
+    TBL_ENTRY("light",          L_PAINT_LIGHT),
+    TBL_ENTRY("l",              L_PAINT_LIGHT),
+    TBL_ENTRY("paint-dark",     L_PAINT_DARK),
+    TBL_ENTRY("dark",           L_PAINT_DARK),
+    TBL_ENTRY("d",              L_PAINT_DARK)
+};
+
+/**
+ * \brief Check for a paint type name.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \param dflt default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_paint_flags(const char *_fun, lua_State* L, int arg, l_int32 dflt)
+{
+    return ll_check_tbl(_fun, L, arg, dflt, tbl_paint_flags, ARRAYSIZE(tbl_paint_flags));
+}
+
+/**
+ * \brief Return a string for paint type enumeration value.
+ * \param paint_type paint_type value
+ * \return const string with the name
+ */
+const char*
+ll_string_paint_flags(l_int32 paint_type)
+{
+    return ll_string_tbl(paint_type, tbl_paint_flags, ARRAYSIZE(tbl_paint_flags));
 }
 
 /*====================================================================*

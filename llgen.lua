@@ -417,6 +417,7 @@ function parse(fd, str)
 				PIXCOMP		= "PixComp",
 				PIXACOMP	= "PixaComp",
 				PIXCMAP		= "PixColormap",
+				PIXTILING	= "PixTiling",
 				PTA		= "Pta",
 				PTAA		= "Ptaa",
 				SARRAY		= "Sarray",

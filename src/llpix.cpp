@@ -874,6 +874,35 @@ AddTextlines(lua_State *L)
 }
 
 /**
+ * \brief AdjacentOnPixelInRaster() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_int32 (x).
+ * Arg #3 is expected to be a l_int32 (y).
+ *
+ * Notes:
+ *      (1) Search is in 4-connected directions first; then on diagonals.
+ *          This allows traversal along a 4-connected boundary.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 2 on the Lua stack
+ */
+static int
+AdjacentOnPixelInRaster(lua_State *L)
+{
+    LL_FUNC("AdjacentOnPixelInRaster");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 x = ll_check_l_int32(_fun, L, 2);
+    l_int32 y = ll_check_l_int32(_fun, L, 3);
+    l_int32 xa = 0;
+    l_int32 ya = 0;
+    adjacentOnPixelInRaster(pixs, x, y, &xa, &ya);
+    ll_push_l_int32(_fun, L, xa);
+    ll_push_l_int32(_fun, L, ya);
+    return 2;
+}
+
+/**
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
@@ -15204,8 +15233,7 @@ ReadHeaderMem(lua_State *L)
 {
     LL_FUNC("ReadHeaderMem");
     size_t len = 0;
-    const char *str = ll_check_lstring(_fun, L, 1, &len);
-    const l_uint8 *data = reinterpret_cast<const l_uint8 *>(str);
+    const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &len);
     l_int32 format = 0;
     l_int32 w = 0;
     l_int32 h = 0;
@@ -15214,12 +15242,12 @@ ReadHeaderMem(lua_State *L)
     l_int32 iscmap = 0;
     if (pixReadHeaderMem(data, len, &format, &w, &h, &bps, &spp, &iscmap))
         return ll_push_nil(L);
-    ll_push_l_int32(_fun, L, format);
+    ll_push_string(_fun, L, ll_string_input_format(format));
     ll_push_l_int32(_fun, L, w);
     ll_push_l_int32(_fun, L, h);
     ll_push_l_int32(_fun, L, bps);
     ll_push_l_int32(_fun, L, spp);
-    ll_push_l_int32(_fun, L, iscmap);
+    ll_push_boolean(_fun, L, iscmap == 1);
     return 6;
 }
 
@@ -23392,8 +23420,7 @@ ll_new_Pix(lua_State *L)
 
     if (!pix && lua_isstring(L, 1)) {
         size_t size = 0;
-        const char* str = ll_check_lstring(_fun, L, 1, &size);
-        const l_uint8 *data = reinterpret_cast<const l_uint8 *>(str);
+        const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &size);
         DBG(LOG_NEW_CLASS, "%s: create for %s* = %p, %s = %llu\n", _fun,
             "data", reinterpret_cast<const void *>(data),
             "size", static_cast<l_uint64>(size));
@@ -23456,6 +23483,7 @@ ll_register_Pix(lua_State *L)
         {"AddSingleTextblock",              AddSingleTextblock},
         {"AddText",                         AddText},
         {"AddTextlines",                    AddTextlines},
+        {"AdjacentOnPixelInRaster",         AdjacentOnPixelInRaster},
         {"AddWithIndicator",                AddWithIndicator},
         {"Affine",                          Affine},
         {"AffineColor",                     AffineColor},

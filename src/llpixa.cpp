@@ -636,8 +636,7 @@ ll_new_Pixa(lua_State *L)
 
     if (!pixa && lua_isstring(L, 1)) {
         size_t size = 0;
-        const char* str = ll_check_lstring(_fun, L, 1, &size);
-        const l_uint8 *data = reinterpret_cast<const l_uint8 *>(str);
+        const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &size);
         DBG(LOG_NEW_CLASS, "%s: create for %s* = %p, %s = %llu\n", _fun,
             "data", reinterpret_cast<const void *>(data),
             "size", static_cast<l_uint64>(size));

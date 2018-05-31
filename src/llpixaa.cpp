@@ -501,6 +501,7 @@ ll_push_Pixaa(const char *_fun, lua_State *L, Pixaa *pixaa)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, LL_PIXAA, pixaa);
 }
+
 /**
  * \brief Create a new Pixaa*.
  * \param L pointer to the lua_State
@@ -509,8 +510,53 @@ ll_push_Pixaa(const char *_fun, lua_State *L, Pixaa *pixaa)
 int
 ll_new_Pixaa(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_Pixaa");
+    Pixaa *pixaa = nullptr;
+
+    if (lua_isuserdata(L, 1)) {
+        Pixa *pixa = ll_opt_Pixa(_fun, L, 1);
+        if (pixa) {
+            l_int32 n = ll_opt_l_int32(_fun, L, 2, 1);
+            l_int32 type = ll_check_consecutive_skip_by(_fun, L, 3, L_CHOOSE_CONSECUTIVE);
+            l_int32 copyflag = ll_check_access_storage(_fun, L, 4, L_COPY);
+            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+                LL_PIXA, reinterpret_cast<void *>(pixa));
+            pixaa = pixaaCreateFromPixa(pixa, n, type, copyflag);
+        } else  {
+            luaL_Stream* stream = ll_check_stream(_fun, L, 1);
+            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+                LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
+            pixaa = pixaaReadStream(stream->f);
+        }
+    }
+
+    if (!pixaa && lua_isstring(L, 1)) {
+        const char* filename = ll_check_string(_fun, L, 1);
+            DBG(LOG_NEW_CLASS, "%s: create for %s = '%s'\n", _fun,
+                "filename", filename);
+        pixaa = pixaaRead(filename);
+    }
+
+    if (!pixaa && lua_isstring(L, 1)) {
+        size_t size = 0;
+        const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &size);
+        DBG(LOG_NEW_CLASS, "%s: create for %s* = %p, %s = %llu\n", _fun,
+            "data", reinterpret_cast<const void *>(data),
+            "size", static_cast<l_uint64>(size));
+        pixaa = pixaaReadMem(data, size);
+    }
+
+    if (!pixaa) {
+        DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
+            "n", 1);
+        pixaa = pixaaCreate(1);
+    }
+
+    DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
+        LL_PIXA, reinterpret_cast<void *>(pixaa));
+    return ll_push_Pixaa(_fun, L, pixaa);
 }
+
 /**
  * \brief Register the PIX methods and functions in the LL_PIX meta table.
  * \param L pointer to the lua_State
@@ -521,7 +567,7 @@ ll_register_Pixaa(lua_State *L)
 {
     static const luaL_Reg methods[] = {
         {"__gc",                Destroy},
-        {"__new",               Create},
+        {"__new",               ll_new_Pixaa},
         {"__len",               GetCount},
         {"AddBox",              AddBox},
         {"AddPix",              AddPix},
@@ -551,7 +597,7 @@ ll_register_Pixaa(lua_State *L)
         LUA_SENTINEL
     };
 
-    lua_pushcfunction(L, Create);
+    lua_pushcfunction(L, ll_new_Pixaa);
     lua_setglobal(L, LL_PIXAA);
     return ll_register_class(L, LL_PIXAA, methods, functions);
 }
