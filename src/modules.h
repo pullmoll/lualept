@@ -224,7 +224,7 @@ ll_calloc(const char* _fun, lua_State *L, l_int32 nmemb)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata with %name.
+ * \brief Check Lua stack at index %arg for user data with type name %tname.
  * T is the typename of the expected return value
  * \param _fun calling function's name
  * \param L pointer to the lua_State
@@ -238,6 +238,14 @@ ll_check_udata(const char *_fun, lua_State *L, int arg, const char* tname)
     return reinterpret_cast<T **>(ll_udata(_fun, L, arg, tname));
 }
 
+/**
+ * \brief Check Lua stack at index %arg for light user data.
+ * T is the typename of the return value
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg argument index
+ * \return pointer to the udata
+ */
 template<typename T> T *
 ll_check_ludata(const char *_fun, lua_State *L, int arg)
 {
@@ -251,6 +259,10 @@ extern "C" {
 #include <lauxlib.h>
 #include <lualib.h>
 
+#ifdef __cplusplus
+}
+#endif
+
 /** Lua function table (luaL_Reg array[]) sentinel */
 #define LUA_SENTINEL    {nullptr,nullptr}
 
@@ -263,12 +275,15 @@ typedef struct LuaLept {
     char str_version_lept[32];      /*!< Leptonica's version number */
 } LuaLept;
 
-/** Structure to list keys (string) with their l_int32 (enumeration) values */
-typedef struct lept_enums_s {
+/**
+ * The structure lept_enum_s is used to define key strings (key),
+ * their Leptonica enum name (name), and their enumeration value (%value)
+*/
+typedef struct lept_enum_s {
     const char *key;                /*!< string for the enumeration value */
-    const char *name;               /*!< name of the enum value in Leptonica's alltypes.h */
-    l_int32     value;              /*!< integer enumeration value */
-}   lept_enums_t;
+    const char *name;               /*!< name of the enumeration value in Leptonica's header files */
+    l_int32     value;              /*!< l_int32 with enumeration value */
+}   lept_enum_t;
 
 /* llept.c */
 extern void             ll_free(void *ptr);
@@ -310,142 +325,144 @@ extern Sarray         * ll_unpack_Sarray(const char *_fun, lua_State *L, int arg
 extern l_int32          ll_check_index(const char *_fun, lua_State *L, int arg, l_int32 imax);
 extern char             ll_check_char(const char *_fun, lua_State *L, int arg);
 extern const char     * ll_check_string(const char *_fun, lua_State *L, int arg);
-extern const char     * ll_check_lstring(const char *_fun, lua_State *L, int arg, size_t *plen);
-extern const l_uint8  * ll_check_lbytes(const char *_fun, lua_State *L, int arg, size_t *plen);
+extern const char     * ll_check_lstring(const char *_fun, lua_State *L, int arg, size_t *plen = nullptr);
+extern const l_uint8  * ll_check_lbytes(const char *_fun, lua_State *L, int arg, size_t *plen = nullptr);
 extern luaL_Stream    * ll_check_stream(const char *_fun, lua_State *L, int arg);
-extern luaL_Stream    * ll_check_stream_opt(const char *_fun, lua_State *L, int arg);
+extern luaL_Stream    * ll_opt_stream(const char *_fun, lua_State *L, int arg);
 extern l_int32          ll_check_boolean(const char *_fun, lua_State *L, int arg);
-extern l_int32          ll_opt_boolean(const char *_fun, lua_State *L, int arg, int dflt);
+extern l_int32          ll_opt_boolean(const char *_fun, lua_State *L, int arg, int def = 0);
 extern l_uint8          ll_check_l_uint8(const char *_fun, lua_State *L, int arg);
-extern l_uint8          ll_opt_l_uint8(const char *_fun, lua_State *L, int arg, l_uint32 dflt);
+extern l_uint8          ll_opt_l_uint8(const char *_fun, lua_State *L, int arg, l_uint32 def = 0);
 extern l_uint16         ll_check_l_uint16(const char *_fun, lua_State *L, int arg);
-extern l_uint16         ll_opt_l_uint16(const char *_fun, lua_State *L, int arg, l_uint32 dflt);
+extern l_uint16         ll_opt_l_uint16(const char *_fun, lua_State *L, int arg, l_uint32 def = 0);
 extern l_int32          ll_check_l_int32(const char *_fun, lua_State *L, int arg);
-extern l_int32          ll_opt_l_int32(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_opt_l_int32(const char *_fun, lua_State *L, int arg, l_int32 def = 0);
 extern l_uint32         ll_check_l_uint32(const char *_fun, lua_State *L, int arg);
-extern l_uint32         ll_opt_l_uint32(const char *_fun, lua_State *L, int arg, l_uint32 dflt);
+extern l_uint32         ll_opt_l_uint32(const char *_fun, lua_State *L, int arg, l_uint32 def = 0);
 extern l_int64          ll_check_l_int64(const char *_fun, lua_State *L, int arg);
-extern l_int64          ll_opt_l_int64(const char *_fun, lua_State *L, int arg, l_int64 dflt);
+extern l_int64          ll_opt_l_int64(const char *_fun, lua_State *L, int arg, l_int64 def = 0);
 extern l_uint64         ll_check_l_uint64(const char *_fun, lua_State *L, int arg);
-extern l_uint64         ll_opt_l_uint64(const char *_fun, lua_State *L, int arg, l_uint64 dflt);
+extern l_uint64         ll_opt_l_uint64(const char *_fun, lua_State *L, int arg, l_uint64 def = 0);
 extern l_float32        ll_check_l_float32(const char *_fun, lua_State *L, int arg);
-extern l_float32        ll_opt_l_float32(const char *_fun, lua_State *L, int arg, l_float32 dflt);
+extern l_float32        ll_opt_l_float32(const char *_fun, lua_State *L, int arg, l_float32 def = 0.0f);
 extern l_float64        ll_check_l_float64(const char *_fun, lua_State *L, int arg);
-extern l_float64        ll_opt_l_float64(const char *_fun, lua_State *L, int arg, l_float32 dflt);
-extern l_int32          ll_check_tbl(const char *_fun, lua_State *L, int arg, l_int32 dflt, const lept_enums_t *tbl, size_t len);
+extern l_float64        ll_opt_l_float64(const char *_fun, lua_State *L, int arg, l_float32 def = 0.0);
+extern int              ll_list_tbl_options(lua_State *L, const lept_enum_t *tbl, size_t len, const char *msg = nullptr);
+extern const char*      ll_string_tbl(l_int32 value, const lept_enum_t *tbl, size_t len);
+extern l_int32          ll_check_tbl(const char *_fun, lua_State *L, int arg, l_int32 def, const lept_enum_t *tbl, size_t len);
 
-extern l_int32          ll_check_access_storage(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_access_storage(const char *_fun, lua_State *L, int arg, l_int32 def = L_CLONE);
 extern const char     * ll_string_access_storage(l_int32 flag);
 
-extern l_int32          ll_check_more_less_clip(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_more_less_clip(const char *_fun, lua_State *L, int arg, l_int32 def = L_LS_BYTE);
 extern const char     * ll_string_more_less_clip(l_int32 flag);
 
-extern l_int32          ll_check_encoding(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_encoding(const char *_fun, lua_State *L, int arg, l_int32 def = L_DEFAULT_ENCODE);
 extern const char     * ll_string_encoding(l_int32 flag);
 
-extern l_int32          ll_check_input_format(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_input_format(const char *_fun, lua_State *L, int arg, l_int32 def = IFF_DEFAULT);
 extern const char     * ll_string_input_format(int format);
 
-extern l_int32          ll_check_keytype(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_keytype(const char *_fun, lua_State *L, int arg, l_int32 def = L_INT_TYPE);
 extern const char     * ll_string_keytype(l_int32 type);
 
-extern l_int32          ll_check_consecutive_skip_by(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_consecutive_skip_by(const char *_fun, lua_State *L, int arg, l_int32 def = L_CHOOSE_CONSECUTIVE);
 extern const char     * ll_string_consecutive_skip_by(l_int32 choice);
 
-extern l_int32          ll_check_component(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_component(const char *_fun, lua_State *L, int arg, l_int32 def = COLOR_RED);
 extern const char     * ll_string_component(l_int32 component);
 
-extern l_int32          ll_check_compression(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_compression(const char *_fun, lua_State *L, int arg, l_int32 def = IFF_DEFAULT);
 extern const char     * ll_string_compression(l_int32 component);
 
-extern l_int32          ll_check_choose_min_max(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_choose_min_max(const char *_fun, lua_State *L, int arg, l_int32 def = L_CHOOSE_MIN);
 extern const char     * ll_string_choose_min_max(l_int32 choice);
 
-extern l_int32          ll_check_what_is_max(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_what_is_max(const char *_fun, lua_State *L, int arg, l_int32 def = L_WHITE_IS_MAX);
 extern const char     * ll_string_what_is_max(l_int32 choice);
 
-extern l_int32          ll_check_getval(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_getval(const char *_fun, lua_State *L, int arg, l_int32 def = L_GET_WHITE_VAL);
 extern const char     * ll_string_getval(l_int32 choice);
 
-extern l_int32          ll_check_direction(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_direction(const char *_fun, lua_State *L, int arg, l_int32 def = L_HORIZONTAL_LINE);
 extern const char     * ll_string_direction(l_int32 dir);
 
-extern l_int32          ll_check_blackwhite(const char *_fun, lua_State *L, int arg, l_int32 dflt);
-extern const char     * ll_string_blackwhite(l_int32 which);
+extern l_int32          ll_check_set_black_white(const char *_fun, lua_State *L, int arg, l_int32 def = L_SET_WHITE);
+extern const char     * ll_string_set_black_white(l_int32 which);
 
-extern l_int32          ll_check_rasterop(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_rasterop(const char *_fun, lua_State *L, int arg, l_int32 def = PIX_SRC);
 extern const char     * ll_string_rasterop(l_int32 op);
 
-extern l_int32          ll_check_hint(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_hint(const char *_fun, lua_State *L, int arg, l_int32 def = 0);
 extern const char     * ll_string_hint(l_int32 dir);
 
-extern l_int32          ll_check_searchdir(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_searchdir(const char *_fun, lua_State *L, int arg, l_int32 def = L_HORIZ);
 extern const char     * ll_string_searchir(l_int32 dir);
 
-extern l_int32          ll_check_number_value(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_number_value(const char *_fun, lua_State *L, int arg, l_int32 def = L_INTEGER_VALUE);
 extern const char     * ll_string_number_value(l_int32 dir);
 
-extern l_int32          ll_check_position(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_position(const char *_fun, lua_State *L, int arg, l_int32 def = 0);
 extern const char     * ll_string_position(l_int32 dir);
 
-extern l_int32          ll_check_stats_type(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_stats_type(const char *_fun, lua_State *L, int arg, l_int32 def = L_MEAN_ABSVAL);
 extern const char     * ll_string_stats_type(l_int32 dir);
 
-extern l_int32          ll_check_select_color(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_select_color(const char *_fun, lua_State *L, int arg, l_int32 def = L_SELECT_RED);
 extern const char     * ll_string_select_color(l_int32 color);
 
-extern l_int32          ll_check_select_min_max(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_select_min_max(const char *_fun, lua_State *L, int arg, l_int32 def = L_SELECT_MIN);
 extern const char     * ll_string_select_min_max(l_int32 which);
 
-extern l_int32          ll_check_sel(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_sel(const char *_fun, lua_State *L, int arg, l_int32 def = SEL_DONT_CARE);
 extern const char     * ll_string_sel(l_int32 which);
 
-extern l_int32          ll_check_select_size(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_select_size(const char *_fun, lua_State *L, int arg, l_int32 def = L_SELECT_WIDTH);
 extern const char     * ll_string_select_size(l_int32 which);
 
-extern l_int32          ll_check_sort_by(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_sort_by(const char *_fun, lua_State *L, int arg, l_int32 def = L_SORT_BY_X);
 extern const char     * ll_string_sort_by(l_int32 sort_by);
 
-extern l_int32          ll_check_set_side(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_set_side(const char *_fun, lua_State *L, int arg, l_int32 def = L_SET_LEFT);
 extern const char     * ll_string_set_side(l_int32 which);
 
-extern l_int32          ll_check_from_side(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_from_side(const char *_fun, lua_State *L, int arg, l_int32 def = L_FROM_LEFT);
 extern const char     * ll_string_from_side(l_int32 which);
 
-extern l_int32          ll_check_adjust_sides(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_adjust_sides(const char *_fun, lua_State *L, int arg, l_int32 def = L_ADJUST_SKIP);
 extern const char     * ll_string_adjust_sides(l_int32 which);
 
-extern l_int32          ll_check_sort_mode(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_sort_mode(const char *_fun, lua_State *L, int arg, l_int32 def = L_SHELL_SORT);
 extern const char     * ll_string_sort_mode(l_int32 order);
 
-extern l_int32          ll_check_sort_order(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_sort_order(const char *_fun, lua_State *L, int arg, l_int32 def = L_SORT_INCREASING);
 extern const char     * ll_string_sort_order(l_int32 order);
 
-extern l_int32          ll_check_trans_order(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_trans_order(const char *_fun, lua_State *L, int arg, l_int32 def = L_TR_SC_RO);
 extern const char     * ll_string_trans_order(l_int32 order);
 
-extern l_int32          ll_check_relation(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_relation(const char *_fun, lua_State *L, int arg, l_int32 def = L_SELECT_IF_LT);
 extern const char     * ll_string_relation(l_int32 rotation);
 
-extern l_int32          ll_check_rotation(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_rotation(const char *_fun, lua_State *L, int arg, l_int32 def = 0);
 extern const char     * ll_string_rotation(l_int32 rotation);
 
-extern l_int32          ll_check_overlap(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_overlap(const char *_fun, lua_State *L, int arg, l_int32 def = L_COMBINE);
 extern const char     * ll_string_overlap(l_int32 rotation);
 
-extern l_int32          ll_check_subflag(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_subflag(const char *_fun, lua_State *L, int arg, l_int32 def = L_USE_MINSIZE);
 extern const char     * ll_string_subflag(l_int32 rotation);
 
-extern l_int32          ll_check_useflag(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_useflag(const char *_fun, lua_State *L, int arg, l_int32 def = L_USE_ALL_BOXES);
 extern const char     * ll_string_useflag(l_int32 rotation);
 
-extern l_int32          ll_check_negvals(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_negvals(const char *_fun, lua_State *L, int arg, l_int32 def = L_CLIP_TO_ZERO);
 extern const char     * ll_string_negvals(l_int32 rotation);
 
-extern l_int32          ll_check_value_flags(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_value_flags(const char *_fun, lua_State *L, int arg, l_int32 def = L_NEGATIVE);
 extern const char     * ll_string_value_flags(l_int32 rotation);
 
-extern l_int32          ll_check_paint_flags(const char *_fun, lua_State *L, int arg, l_int32 dflt);
+extern l_int32          ll_check_paint_flags(const char *_fun, lua_State *L, int arg, l_int32 def = L_PAINT_LIGHT);
 extern const char     * ll_string_paint_flags(l_int32 rotation);
 
 typedef L_AMAP              Amap;           /*!< Local type name for L_AMAP */
@@ -699,8 +716,5 @@ extern PdfData        * ll_opt_PdfData(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_PdfData(const char *_fun, lua_State *L, PdfData *pdfdata);
 extern int              ll_new_PdfData(lua_State *L);
 extern int              ll_register_PdfData(lua_State *L);
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* !defined(LUALEPT_EXPORTS_H) */

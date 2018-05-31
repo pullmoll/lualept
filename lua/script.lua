@@ -115,11 +115,9 @@ function box_test()
 	ba:AddBox(b)
 	ba:AddBox(b, "clone")
 	ba:AddBox(b)
-	ba:AddBox(b, "copy")
+	ba:AddBox(b, 'clone')
 	ba:AddBox(b)
 	print("... after 5x ba:AddBox()")
-
-	-- Print ba:GetCount() or short #ba
 	print(pad("#ba"), #ba)
 	print(pad("ba"), ba)
 

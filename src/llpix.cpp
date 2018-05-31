@@ -19373,7 +19373,7 @@ SetBlackOrWhite(lua_State *L)
 {
     LL_FUNC("SetBlackOrWhite");
     Pix *pix = ll_check_Pix(_fun, L, 1);
-    l_int32 op = ll_check_blackwhite(_fun, L, 2, L_SET_BLACK);
+    l_int32 op = ll_check_set_black_white(_fun, L, 2, L_SET_BLACK);
     return ll_push_boolean(_fun, L, 0 == pixSetBlackOrWhite(pix, op));
 }
 

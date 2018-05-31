@@ -52,6 +52,7 @@ static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
+    static const char params[] = "Amap* amap";
     Amap **pamap = ll_check_udata<Amap>(_fun, L, 1, LL_AMAP);
     Amap *amap = *pamap;
     DBG(LOG_DESTROY, "%s: '%s' pamap=%p amap=%p size=%d\n", _fun,
