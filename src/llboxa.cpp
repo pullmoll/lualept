@@ -241,10 +241,10 @@ AffineTransform(lua_State *L)
     LL_FUNC("AffineTransform");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 i, n;
-    l_float32 *mat;
+    l_float32 *mat = nullptr;
     if (lua_istable(L, 2)) {
         /* expect a table of 9 numbers */
-        ll_unpack_Farray(_fun, L, 2, &n);
+        mat = ll_unpack_Farray(_fun, L, 2, &n);
     } else {
         /* expect 9 numbers */
         n = 9;

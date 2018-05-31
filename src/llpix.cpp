@@ -234,11 +234,13 @@ toString(lua_State* L)
             yres = pixGetYRes(pix);
             format = ll_string_input_format(pixGetInputFormat(pix));
             snprintf(str, sizeof(str),
-                     "Pix: %p\n"
-                     "    width = %d, height = %d, depth = %d, spp = %d\n"
-                     "    wpl = %d, data = %p, size = %#" PRIx64 "\n"
-                                                                 "    xres = %d, yres = %d, refcount = %d\n", reinterpret_cast<void *>(pix),
-                     w, h, d, spp, wpl, data, size, xres, yres, refcnt);
+                    "Pix: %p\n"
+                    "    width = %d, height = %d, depth = %d, spp = %d\n"
+                    "    wpl = %d, data = %p, size = %#" PRIx64 "\n"
+                    "    xres = %d, yres = %d, refcount = %d\n"
+                    "    format = %s",
+                     reinterpret_cast<void *>(pix),
+                     w, h, d, spp, wpl, data, size, xres, yres, refcnt, format);
         }
         luaL_addstring(&B, str);
 
@@ -2684,6 +2686,7 @@ CleanupByteProcessing(lua_State *L)
     size_t size = static_cast<size_t>(pixGetHeight(pix));
     if (pixCleanupByteProcessing(pix, &lineptrs))
         return ll_push_nil(L);
+    UNUSED(size);
     // ll_push_string(_fun, L, reinterpret_cast<const char *>(lineptrs), size);
     return 1;
 }
@@ -12488,7 +12491,7 @@ MakeMaskFromLUT(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     size_t len = 0;
     const char* lut = ll_check_lstring(_fun, L, 2, &len);
-    l_int32* tab = tab = ll_calloc<l_int32>(_fun, L, 256);
+    l_int32* tab = ll_calloc<l_int32>(_fun, L, 256);
     size_t i;
     /* expand lookup-table (lut) to array of l_int32 (tab) */
     for (i = 0; i < 256 && i < len; i++)
