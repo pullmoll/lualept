@@ -541,9 +541,13 @@ ll_new_Dewarp(lua_State *L)
         Pix *pixs = ll_check_Pix_opt(_fun, L, 1);
         if (pixs) {
             l_int32 pageno = ll_check_l_int32_default(_fun, L, 2, 1);
+            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+                LL_PIX, reinterpret_cast<void *>(pixs));
             dew = dewarpCreate(pixs, pageno);
         } else {
             luaL_Stream *stream = ll_check_stream(_fun, L, 1);
+            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+                LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
             dew = dewarpReadStream(stream->f);
         }
     }
@@ -551,11 +555,15 @@ ll_new_Dewarp(lua_State *L)
     if (!dew && lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
         l_int32 pageno = ll_check_l_int32(_fun, L, 1);
         l_int32 refpage = ll_check_l_int32(_fun, L, 2);
+        DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d\n", _fun,
+            "pageno", pageno, "repage", refpage);
         dew = dewarpCreateRef(pageno, refpage);
     }
 
     if (!dew && lua_isstring(L, 1)) {
         const char *filename = ll_check_string(_fun, L, 1);
+        DBG(LOG_NEW_CLASS, "%s: create for %s = '%s'\n", _fun,
+            "filename", filename);
         dew = dewarpRead(filename);
     }
 
@@ -563,13 +571,21 @@ ll_new_Dewarp(lua_State *L)
         size_t size = 0;
         const char *str = ll_check_lstring(_fun, L, 1, &size);
         const l_uint8 *data = reinterpret_cast<const l_uint8 *>(str);
+        DBG(LOG_NEW_CLASS, "%s: create for %s* = %p, %s = %llu\n", _fun,
+            "data", reinterpret_cast<const void *>(data),
+            "size", static_cast<l_uint64>(size));
         dew = dewarpReadMem(data, size);
     }
 
     if (!dew) {
         /* FIXME: creat from null Pix* ? */
+        DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+            LL_PIX, nullptr, "n", 1);
         dew = dewarpCreate(nullptr, 1);
     }
+
+    DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
+        LL_DEWARP, reinterpret_cast<void *>(dew));
     return ll_push_Dewarp(_fun, L, dew);
 }
 

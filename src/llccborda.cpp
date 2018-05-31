@@ -446,24 +446,38 @@ ll_new_CCBorda(lua_State *L)
 {
     FUNC("ll_new_CCBorda");
     CCBorda *ccba = nullptr;
+
     if (lua_isuserdata(L, 1)) {
         Pix* pixs = ll_check_Pix_opt(_fun, L, 1);
         if (pixs) {
             l_int32 n = ll_check_l_int32_default(_fun, L, 2, 1);
+            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p, %s = %n\n", _fun,
+                LL_PIX, reinterpret_cast<void *>(pixs), "n", n);
             ccba = ccbaCreate(pixs, n);
         } else {
             luaL_Stream *stream = ll_check_stream(_fun, L, 1);
+            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+                LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
             ccba = ccbaReadStream(stream->f);
         }
     }
+
     if (!ccba && lua_isstring(L, 1)) {
         const char* filename = ll_check_string(_fun, L, 1);
+        DBG(LOG_NEW_CLASS, "%s: create for %s = '%s'\n", _fun,
+            "filename", filename);
         ccba = ccbaRead(filename);
     }
+
     if (!ccba) {
         /* FIXME: create data for no pix? */
+        DBG(LOG_NEW_CLASS, "%s: create for %s* = %p, %s = %d\n", _fun,
+            LL_PIX, nullptr, "n", 1);
         ccba = ccbaCreate(nullptr, 1);
     }
+
+    DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
+        LL_CCBORDA, reinterpret_cast<void *>(ccba));
     return ll_push_CCBorda(_fun, L, ccba);
 }
 

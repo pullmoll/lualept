@@ -500,8 +500,20 @@ ll_new_CompData(lua_State *L)
     l_int32 quality = ll_check_l_int32_default(_fun, L, 3, 75);
     l_int32 ascii85 = ll_check_boolean_default(_fun, L, 4, FALSE);
     CompData *cid = nullptr;
-    if (l_generateCIData(fname, type, quality, ascii85, &cid))
+
+    DBG(LOG_NEW_CLASS, "%s: create for %s = '%s', %s = %s, %s = %d, %s = %s\n", _fun,
+        "fname", fname,
+        "type", ll_string_compression(type),
+        "quality", quality,
+        "ascii85", ascii85 ? "true" : "false");
+    if (l_generateCIData(fname, type, quality, ascii85, &cid)) {
+        DBG(LOG_NEW_CLASS, "%s: failed to create %s*\n", _fun,
+            LL_COMPDATA);
         return ll_push_nil(L);
+    }
+
+    DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
+        LL_COMPDATA, reinterpret_cast<void *>(cid));
     ll_push_CompData(_fun, L, cid);
     return 1;
 }

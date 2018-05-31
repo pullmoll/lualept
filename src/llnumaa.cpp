@@ -446,7 +446,57 @@ ll_push_Numaa(const char *_fun, lua_State *L, Numaa *naa)
 int
 ll_new_Numaa(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_Numaa");
+    Numaa *naa = nullptr;
+
+    if (lua_isuserdata(L, 1)) {
+        luaL_Stream* stream = ll_check_stream(_fun, L, 1);
+        DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+            LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
+        naa = numaaReadStream(stream->f);
+    }
+
+    if (!naa && lua_isinteger(L, 1)) {
+        if (lua_isinteger(L, 2)) {
+            l_int32 nptr = ll_check_l_int32_default(_fun, L, 1, 1);
+            l_int32 n = ll_check_l_int32_default(_fun, L, 2, 1);
+            DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d\n", _fun,
+                "nptr", nptr, "n", n);
+            naa = numaaCreateFull(nptr, n);
+        } else {
+            l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+            DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
+                "n", n);
+            naa = numaaCreate(n);
+        }
+    }
+
+    if (!naa && lua_isstring(L, 1)) {
+        const char *filename = ll_check_string(_fun, L, 1);
+        DBG(LOG_NEW_CLASS, "%s: create for %s = '%s'\n", _fun,
+            "filename", filename);
+        naa = numaaRead(filename);
+    }
+
+    if (!naa && lua_isstring(L, 1)) {
+        size_t size = 0;
+        const char* str = ll_check_lstring(_fun, L, 1, &size);
+        const l_uint8 *data = reinterpret_cast<const l_uint8 *>(str);
+        DBG(LOG_NEW_CLASS, "%s: create for %s* = %p, %s = %llu\n", _fun,
+            "data", reinterpret_cast<const void *>(data),
+            "size", static_cast<l_uint64>(size));
+        naa = numaaReadMem(data, size);
+    }
+
+    if (!naa) {
+        DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
+            "n", 1);
+        naa = numaaCreate(1);
+    }
+
+    DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
+        LL_NUMAA, reinterpret_cast<void *>(naa));
+    return ll_push_Numaa(_fun, L, naa);
 }
 /**
  * \brief Register the NUMAA methods and functions in the LL_NUMAA meta table.
@@ -456,9 +506,9 @@ ll_new_Numaa(lua_State *L)
 int
 ll_register_Numaa(lua_State *L) {
     static const luaL_Reg methods[] = {
-        {"__gc",            Destroy},     /* garbage collector */
-        {"__new",           Create},      /* new Numa */
-        {"__len",           GetCount},    /* #numa */
+        {"__gc",            Destroy},           /* garbage collector */
+        {"__new",           ll_new_Numaa},      /* Numaa() */
+        {"__len",           GetCount},          /* #numa */
         {"__tostring",      toString},
         {"AddNuma",         AddNuma},
         {"Create",          Create},
@@ -483,7 +533,7 @@ ll_register_Numaa(lua_State *L) {
         LUA_SENTINEL
     };
 
-    lua_pushcfunction(L, Create);
+    lua_pushcfunction(L, ll_new_Numaa);
     lua_setglobal(L, LL_NUMAA);
     return ll_register_class(L, LL_NUMAA, methods, functions);
 }

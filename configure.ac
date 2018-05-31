@@ -45,12 +45,12 @@ esac
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 # Checks for typedefs, structures, and compiler characteristics.
-AC_CHECK_HEADERS([ctype.h float.h limits.h])
+AC_CHECK_HEADERS([ctype.h float.h limits.h time.h sys/time.h])
 AC_TYPE_SIZE_T
 AC_C_BIGENDIAN
 
 # Checks for library functions.
-AC_CHECK_FUNCS([strcasecmp stricmp])
+AC_CHECK_FUNCS([strcasecmp stricmp gettimeofday localtime_r localtime gmtime_r gmtime])
 
 AC_CONFIG_FILES([Makefile src/Makefile lualept.pc])
 AC_OUTPUT

@@ -171,17 +171,25 @@ ll_new_CCBord(lua_State *L)
 {
     FUNC("ll_new_CCBord");
     CCBord *ccb = nullptr;
+
     if (lua_isuserdata(L, 1)) {
         Pix* pixs = ll_check_Pix_opt(_fun, L, 1);
         if (pixs) {
-            l_int32 n = ll_check_l_int32_default(_fun, L, 2, 1);
+            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+                LL_PIX, reinterpret_cast<void *>(pixs));
             ccb = ccbCreate(pixs);
         }
     }
+
     if (!ccb) {
         /* FIXME: create data for no pix? */
+        DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+            LL_PIX, nullptr);
         ccb = ccbCreate(nullptr);
     }
+
+    DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
+        LL_CCBORD, reinterpret_cast<void *>(ccb));
     return ll_push_CCBord(_fun, L, ccb);
 }
 

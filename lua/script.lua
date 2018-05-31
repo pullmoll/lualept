@@ -272,12 +272,14 @@ function dna_test()
 	local ok = daa:Write(filename)
 	print(pad("daa:Write('"..filename.."')"), ok)
 
-	daa = daa.Read(filename)
-	print(pad("daa.Read('"..filename.."')"), ok)
+	daa = Dnaa(filename)
+	print(pad("daa = Dnaa('"..filename.."')"), daa)
+
 	local da = daa:FlattenToDna()
 	print("... after da = daa:FlattenToDna()")
 	print(pad("#da"), #da)
 	print(pad("da"), da)
+
 	local t = da:GetIArray()
 	print("da:GetIArray()", #t, t, tbl(t))
 end
@@ -377,8 +379,12 @@ function pix_test()
 		0xcccccc00, 0xdddddd00, 0xeeeeee00, 0xffffff00,
 		0x32847100, 0xc8411200, 0x01928200, 0x12479a00,
 		0x81ff2a00, 0x19f9fa00, 0x8a818b00, 0x586a9400}
-	local pix3 = Pix().DisplayColorArray(240, 4, 6, carray)
+	local pix3 = Pix()
+	print(pad("pix3 = Pix()"), pix3)
+	local pix3 = pix3.DisplayColorArray(240, 4, 6, carray)
+	print(pad("pix3 = pix3.DisplayColorArray(240, 4, 6, carray)"), pix3)
 	local pix3 = pix3:AddBorder(20, LuaLept.RGB(255,255,255))
+	print(pad("pix3 = pix3:AddBorder(20, LuaLept.RGB(255,255,255))"), pix3)
 
 	print(pad("pix3"), pix3)
 	local ok = pix3:Write(tmpdir .. "/carray.tiff", "lzw")

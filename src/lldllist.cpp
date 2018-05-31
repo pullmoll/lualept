@@ -386,9 +386,10 @@ int
 ll_new_DoubleLinkedList(lua_State *L)
 {
     FUNC("ll_new_DoubleLinkedList");
-    DoubleLinkedList *head = ll_check_ludata<DoubleLinkedList>(_fun, L, 1);
-    if (!head)
-        head =  ll_calloc<DoubleLinkedList>(_fun, L, 1);
+    DoubleLinkedList *head = ll_calloc<DoubleLinkedList>(_fun, L, 1);
+
+    DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
+        LL_DLLIST, reinterpret_cast<void *>(head));
     return ll_push_DoubleLinkedList(_fun, L, head);
 }
 

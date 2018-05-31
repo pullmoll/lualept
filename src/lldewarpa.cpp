@@ -698,6 +698,12 @@ ll_new_Dewarpa(lua_State *L)
             l_int32 sampling = ll_check_l_int32_default(_fun, L, 3, 1);
             l_int32 minlines = ll_check_l_int32_default(_fun, L, 4, 1);
             l_int32 maxdist = ll_check_l_int32_default(_fun, L, 5, 50);
+            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p, %s = %s, %s = %d, %s = %d, %s = %d\n", _fun,
+                LL_PIXACOMP, reinterpret_cast<void *>(pixac),
+                "useboth", useboth ? "true" : "false",
+                "sampling", sampling,
+                "minlines", minlines,
+                "maxdist", maxdist);
             dewa = dewarpaCreateFromPixacomp(pixac, useboth, sampling, minlines, maxdist);
         } else {
             luaL_Stream *stream = ll_check_stream(_fun, L, 1);
@@ -711,14 +717,28 @@ ll_new_Dewarpa(lua_State *L)
         l_int32 redfactor = ll_check_l_int32_default(_fun, L, 3, 1);
         l_int32 minlines = ll_check_l_int32_default(_fun, L, 4, 1);
         l_int32 maxdist = ll_check_l_int32_default(_fun, L, 5, 50);
+        DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d, %s = %d, %s = %d, %s = %d\n", _fun,
+            "nptrs", nptrs,
+            "sampling", sampling,
+            "redfactor", redfactor,
+            "minlines", minlines,
+            "maxdist", maxdist);
         dewa = dewarpaCreate(nptrs, sampling, redfactor, minlines, maxdist);
     }
 
     if (!dewa) {
         /* FIXME: default parameters? */
+        DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d, %s = %d, %s = %d, %s = %d\n", _fun,
+            "nptrs", 1,
+            "sampling", 1,
+            "redfactor", 1,
+            "minlines", 5,
+            "maxdist", 20);
         dewa = dewarpaCreate(1, 1, 1, 5, 20);
     }
 
+    DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
+        LL_DEWARPA, reinterpret_cast<void *>(dewa));
     return ll_push_Dewarpa(_fun, L, dewa);
 }
 

@@ -92,21 +92,10 @@ static int
 Create(lua_State *L)
 {
     LL_FUNC("Create");
-    Pix *pixs = ll_check_Pix_opt(_fun, L, 1);
-    Pix *pix = nullptr;
-    if (pixs) {
-        pix = pixCreateTemplate(pixs);
-    } else if (lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
-        l_int32 width = ll_check_l_int32_default(_fun, L, 1, 1);
-        l_int32 height = ll_check_l_int32_default(_fun, L, 2, 1);
-        l_int32 depth = ll_check_l_int32_default(_fun, L, 3, 1);
-        pix = pixCreate(width, height, depth);
-    } else if (lua_isstring(L, 1)) {
-        const char* filename = ll_check_string(_fun, L, 1);
-        pix = pixRead(filename);
-    } else {
-        pix = pixCreate(1, 1, 1);
-    }
+    l_int32 width = ll_check_l_int32_default(_fun, L, 1, 1);
+    l_int32 height = ll_check_l_int32_default(_fun, L, 2, 1);
+    l_int32 depth = ll_check_l_int32_default(_fun, L, 3, 1);
+    Pix *pix = pixCreate(width, height, depth);
     return ll_push_Pix(_fun, L, pix);
 }
 
@@ -23361,7 +23350,64 @@ ll_push_Pix(const char *_fun, lua_State *L, Pix *pix)
 int
 ll_new_Pix(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_Pix");
+    Pix *pix = nullptr;
+
+    if (lua_isuserdata(L, 1)) {
+        Pix *pixs = ll_check_Pix_opt(_fun, L, 1);
+        if (pixs) {
+            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+                LL_PIX, reinterpret_cast<void *>(pixs));
+            pix = pixCreateTemplate(pixs);
+        } else {
+            luaL_Stream* stream = ll_check_stream(_fun, L, 1);
+            l_int32 hint = ll_check_hint(_fun, L, 2, 0);
+            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p, %s = %s\n", _fun,
+                LUA_FILEHANDLE, reinterpret_cast<void *>(stream),
+                "hint", ll_string_hint(hint));
+            pix = pixReadStream(stream->f, hint);
+        }
+    }
+
+    if (!pix && lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
+        l_int32 width = ll_check_l_int32_default(_fun, L, 1, 1);
+        l_int32 height = ll_check_l_int32_default(_fun, L, 2, 1);
+        l_int32 depth = ll_check_l_int32_default(_fun, L, 3, 1);
+        DBG(LOG_NEW_CLASS, "%s: create for %s = %d,  %s = %d,  %s = %d\n", _fun,
+            "width", width,
+            "height", height,
+            "depth", depth);
+        pix = pixCreate(width, height, depth);
+    }
+
+    if (!pix && lua_isstring(L, 1)) {
+        const char* filename = ll_check_string(_fun, L, 1);
+            DBG(LOG_NEW_CLASS, "%s: create for %s = '%s'\n", _fun,
+                "filename", filename);
+        pix = pixRead(filename);
+    }
+
+    if (!pix && lua_isstring(L, 1)) {
+        size_t size = 0;
+        const char* str = ll_check_lstring(_fun, L, 1, &size);
+        const l_uint8 *data = reinterpret_cast<const l_uint8 *>(str);
+        DBG(LOG_NEW_CLASS, "%s: create for %s* = %p, %s = %llu\n", _fun,
+            "data", reinterpret_cast<const void *>(data),
+            "size", static_cast<l_uint64>(size));
+        pix = pixReadMem(data, size);
+    }
+
+    if (!pix) {
+        DBG(LOG_NEW_CLASS, "%s: create for %s = %d,  %s = %d,  %s = %d\n", _fun,
+            "width", 1,
+            "height", 1,
+            "depth", 1);
+        pix = pixCreate(1, 1, 1);
+    }
+
+    DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
+        LL_PIX, reinterpret_cast<void *>(pix));
+    return ll_push_Pix(_fun, L, pix);
 }
 /**
  * \brief Register the PIX methods and functions in the LL_PIX meta table.
@@ -23373,7 +23419,7 @@ ll_register_Pix(lua_State *L)
 {
     static const luaL_Reg methods[] = {
         {"__gc",                            Destroy},           /* garbage collector */
-        {"__new",                           Create},            /* new Pix */
+        {"__new",                           ll_new_Pix},        /* Pix() */
         {"__sub",                           Subtract},          /* Pix* = Pix* - Pix* */
         {"__bnot",                          Invert},            /* Pix* = not Pix* */
         {"__band",                          And},               /* Pix* = Pix* and Pix */
@@ -24395,7 +24441,7 @@ ll_register_Pix(lua_State *L)
                   ((i >> 0) & 1);
     }
 
-    lua_pushcfunction(L, Create);
+    lua_pushcfunction(L, ll_new_Pix);
     lua_setglobal(L, LL_PIX);
     return ll_register_class(L, LL_PIX, methods, functions);
 }

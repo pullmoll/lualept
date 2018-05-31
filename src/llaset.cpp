@@ -397,7 +397,11 @@ ll_new_Aset(lua_State *L)
 {
     FUNC("ll_new_Aset");
     l_int32 keytype = ll_check_keytype(_fun, L, 1, L_INT_TYPE);
+    DBG(LOG_NEW_CLASS, "%s: create for %s = %s\n", _fun,
+        "keytype", ll_string_keytype(keytype));
     Aset *aset = l_asetCreate(keytype);
+    DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
+        LL_ASET, reinterpret_cast<void *>(aset));
     return ll_push_Aset(_fun, L, aset);
 }
 /**

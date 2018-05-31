@@ -916,21 +916,34 @@ ll_new_Box(lua_State *L)
 {
     FUNC("ll_new_Box");
     Box *box = nullptr;
+
     if (lua_isuserdata(L, 1)) {
         Box *boxs = ll_check_Box_opt(_fun, L, 1);
         if (boxs) {
+            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+                LL_BOX, reinterpret_cast<void *>(boxs));
             box = boxCopy(boxs);
         }
     }
+
     if (!box && lua_isinteger(L, 1)) {
         l_int32 x = ll_check_l_int32_default(_fun, L, 1, 0);
         l_int32 y = ll_check_l_int32_default(_fun, L, 2, 0);
         l_int32 w = ll_check_l_int32_default(_fun, L, 3, 1);
         l_int32 h = ll_check_l_int32_default(_fun, L, 4, 1);
+        DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d, %s = %d, %s = %d\n", _fun,
+            "x", x, "y", y, "w", w, "h", h);
+        box = boxCreate(x,y,w,h);
     }
+
     if (!box) {
+        DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d, %s = %d, %s = %d\n", _fun,
+            "x", 0, "y", 0, "w", 0, "h", 0);
         box = boxCreate(0,0,0,0);
     }
+
+    DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
+        LL_BOX, reinterpret_cast<void *>(box));
     return ll_push_Box(_fun, L, box);
 }
 

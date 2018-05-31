@@ -424,7 +424,11 @@ ll_new_Amap(lua_State *L)
 {
     FUNC("ll_new_Amap");
     l_int32 keytype = ll_check_keytype(_fun, L, 1, L_INT_TYPE);
+    DBG(LOG_NEW_CLASS, "%s: create for %s = %s\n", _fun,
+        "keytype", ll_string_keytype(keytype));
     Amap *amap = l_amapCreate(keytype);
+    DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
+        LL_AMAP, reinterpret_cast<void *>(amap));
     return ll_push_Amap(_fun, L, amap);
 }
 

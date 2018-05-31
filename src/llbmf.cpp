@@ -246,7 +246,11 @@ ll_new_Bmf(lua_State *L)
     FUNC("ll_new_Bmf");
     const char* dir = lua_isstring(L, 1) ? ll_check_string(_fun, L, 1) : ".";
     l_int32 fontsize = ll_check_l_int32_default(_fun, L, 2, 6);
+    DBG(LOG_NEW_CLASS, "%s: create for %s = '%s', %s = %d\n", _fun,
+        "dir", dir, "fontsize", fontsize);
     L_Bmf *bmf = bmfCreate(dir, fontsize);
+    DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
+        LL_BMF, reinterpret_cast<void *>(bmf));
     return ll_push_Bmf(_fun, L, bmf);
 }
 /**

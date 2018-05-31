@@ -90,14 +90,51 @@ ll_strcasecmp(const char* dst, const char* src)
 
 #if defined(LLUA_DEBUG) && (LLUA_DEBUG>0)
 static int enabled = LOG_NEW_CLASS;
-void dbg(int enable, const char* format, ...)
+
+static const char*
+timestr(void)
+{
+    static char str[128];
+    const char* tz = "";
+#if defined(HAVE_GETTIMEOFDAY)
+    struct timeval tv;
+    if (0 == gettimeofday(&tv, nullptr)) {
+        time_t tval = static_cast<time_t>(tv.tv_sec);
+        struct tm tm;
+#if defined(HAVE_LOCALTIME_R)
+        localtime_r(&tval, &tm);
+#elif defined(HAVE_LOCALTIME)
+        memcpy(&tm, localtime(&tval), sizeof(tm));
+#elif defined(HAVE_GMTIME_R)
+        gmtime_r(&tval, &tm);
+        tz = "UTC";
+#elif defined(HAVE_GMTIME)
+        memcpy(&tm, gmtime(&tval), sizeof(tm));
+        tz = "UTC";
+#endif
+        snprintf(str, sizeof(str),
+                 "[%04d-%02d-%02d %02d:%02d:%02d.%04d%s] ",
+                 1900 + tm.tm_year, 1 + tm.tm_mon, tm.tm_mday,
+                 tm.tm_hour, tm.tm_min, tm.tm_sec,
+                 static_cast<int>(tv.tv_usec / 100), tz);
+    }
+#else
+    snprintf(str, sizeof(str), "[debug] ");
+#endif
+    return str;
+}
+
+void
+dbg(int enable, const char* format, ...)
 {
     va_list ap;
     if (0 == (enable & enabled))
         return;
+    fprintf(stdout, "%s", timestr());
     va_start(ap, format);
-    vfprintf(stderr, format, ap);
+    vfprintf(stdout, format, ap);
     va_end(ap);
+    fflush(stdout);
 }
 #endif
 

@@ -657,6 +657,7 @@ ll_push_Numa(const char *_fun, lua_State *L, Numa *na)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, LL_NUMA, na);
 }
+
 /**
  * \brief Create and push NUMA user data to the Lua stack.
  * \param L pointer to the lua_State
@@ -665,8 +666,58 @@ ll_push_Numa(const char *_fun, lua_State *L, Numa *na)
 int
 ll_new_Numa(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_Numa");
+    Numa *na = nullptr;
+
+    if (lua_isuserdata(L, 1)) {
+        Numa *das = ll_check_Numa_opt(_fun, L, 1);
+        if (das) {
+            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+                LL_NUMA, reinterpret_cast<void *>(das));
+            na = numaCopy(das);
+        } else {
+            luaL_Stream* stream = ll_check_stream(_fun, L, 1);
+            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+                LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
+            na = numaReadStream(stream->f);
+        }
+    }
+
+    if (lua_isinteger(L, 1)) {
+        l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+        DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
+            "n", n);
+        na = numaCreate(n);
+    }
+
+    if (!na && lua_isstring(L, 1)) {
+        const char *filename = ll_check_string(_fun, L, 1);
+        DBG(LOG_NEW_CLASS, "%s: create for %s = '%s'\n", _fun,
+            "filename", filename);
+        na = numaRead(filename);
+    }
+
+    if (!na && lua_isstring(L, 1)) {
+        size_t size = 0;
+        const char* str = ll_check_lstring(_fun, L, 1, &size);
+        const l_uint8 *data = reinterpret_cast<const l_uint8 *>(str);
+        DBG(LOG_NEW_CLASS, "%s: create for %s* = %p, %s = %llu\n", _fun,
+            "data", reinterpret_cast<const void *>(data),
+            "size", static_cast<l_uint64>(size));
+        na = numaReadMem(data, size);
+    }
+
+    if (!na) {
+        DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
+            "n", 1);
+        na = numaCreate(1);
+    }
+
+    DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
+        LL_NUMA, reinterpret_cast<void *>(na));
+    return ll_push_Numa(_fun, L, na);
 }
+
 /**
  * \brief Register the NUMA methods and functions in the LL_NUMA meta table.
  * \param L pointer to the lua_State
@@ -677,7 +728,7 @@ ll_register_Numa(lua_State *L)
 {
     static const luaL_Reg methods[] = {
         {"__gc",                Destroy},           /* garbage collector */
-        {"__new",               Create},            /* TODO: smart create via Create, FromArray, Read ? */
+        {"__new",               ll_new_Numa},       /* Numa() */
         {"__len",               GetCount},          /* #numa */
         {"__newitem",           ReplaceNumber},     /* numa[index] = number */
         {"__tostring",          toString},
@@ -714,7 +765,7 @@ ll_register_Numa(lua_State *L)
         LUA_SENTINEL
     };
 
-    lua_pushcfunction(L, Create);
+    lua_pushcfunction(L, ll_new_Numa);
     lua_setglobal(L, LL_NUMA);
     return ll_register_class(L, LL_NUMA, methods, functions);
 }

@@ -1299,12 +1299,12 @@ ll_new_FPix(lua_State *L)
     if (lua_isuserdata(L, 1)) {
         FPix *fpixs = ll_check_FPix_opt(_fun, L, 1);
         if (fpixs) {
-            DBG(LOG_NEW_CLASS, "%s: create from %s* %p\n", _fun,
+            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
                 LL_FPIX, reinterpret_cast<void *>(fpixs));
             fpix = fpixCreateTemplate(fpixs);
         } else {
             luaL_Stream *stream = ll_check_stream(_fun, L, 1);
-            DBG(LOG_NEW_CLASS, "%s: create from %s* %p\n", _fun,
+            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
                 LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
             fpix = fpixReadStream(stream->f);
         }
@@ -1313,14 +1313,14 @@ ll_new_FPix(lua_State *L)
     if (lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
         l_int32 width = ll_check_l_int32_default(_fun, L, 1, 1);
         l_int32 height = ll_check_l_int32_default(_fun, L, 2, 1);
-        DBG(LOG_NEW_CLASS, "%s: create from integers %s=%d, %s=%d\n", _fun,
+        DBG(LOG_NEW_CLASS, "%s: create from %s = %d, %s = %d\n", _fun,
             "width", width, "height", height);
         fpix = fpixCreate(width, height);
     }
 
     if (!fpix && lua_isstring(L, 1)) {
         const char* filename = ll_check_string(_fun, L, 1);
-        DBG(LOG_NEW_CLASS, "%s: created from %s '%s'\n", _fun,
+        DBG(LOG_NEW_CLASS, "%s: create for %s = '%s'\n", _fun,
             "filename", filename);
         fpix = fpixRead(filename);
     }
@@ -1329,20 +1329,20 @@ ll_new_FPix(lua_State *L)
         size_t size = 0;
         const char* str = ll_check_lstring(_fun, L, 1, &size);
         const l_uint8 *data = reinterpret_cast<const l_uint8 *>(str);
-        DBG(LOG_NEW_CLASS, "%s: create from %s* %p, %s %llu\n", _fun,
-            "string", reinterpret_cast<const void *>(data),
+        DBG(LOG_NEW_CLASS, "%s: create for %s* = %p, %s = %llu\n", _fun,
+            "data", reinterpret_cast<const void *>(data),
             "size", static_cast<l_uint64>(size));
         fpix = fpixReadMem(data, size);
     }
 
     if (!fpix) {
-        DBG(LOG_NEW_CLASS, "%s: createfrom integers %s=%d, %s=%d\n", _fun,
+        DBG(LOG_NEW_CLASS, "%s: createfrom %s = %d, %s = %d\n", _fun,
             "width", 1, "height", 1);
         fpix = fpixCreate(1, 1);
     }
+
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
         LL_FPIX, reinterpret_cast<void *>(fpix));
-
     return ll_push_FPix(_fun, L, fpix);
 }
 

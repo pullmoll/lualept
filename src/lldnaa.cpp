@@ -458,6 +458,8 @@ ll_new_Dnaa(lua_State *L)
 
     if (lua_isuserdata(L, 1)) {
         luaL_Stream* stream = ll_check_stream(_fun, L, 1);
+        DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+            LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
         daa = l_dnaaReadStream(stream->f);
     }
 
@@ -465,22 +467,32 @@ ll_new_Dnaa(lua_State *L)
         if (lua_isinteger(L, 2)) {
             l_int32 nptr = ll_check_l_int32_default(_fun, L, 1, 1);
             l_int32 n = ll_check_l_int32_default(_fun, L, 2, 1);
+            DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d\n", _fun,
+                "nptr", nptr, "n", n);
             daa = l_dnaaCreateFull(nptr, n);
         } else {
             l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+            DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
+                "n", n);
             daa = l_dnaaCreate(n);
         }
     }
 
     if (!daa && lua_isstring(L, 1)) {
         const char *filename = ll_check_string(_fun, L, 1);
+        DBG(LOG_NEW_CLASS, "%s: create for %s = '%s'\n", _fun,
+            "filename", filename);
         daa = l_dnaaRead(filename);
     }
 
     if (!daa) {
+        DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
+            "n", 1);
         daa = l_dnaaCreate(1);
     }
 
+    DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
+        LL_DNAA, reinterpret_cast<void *>(daa));
     return ll_push_Dnaa(_fun, L, daa);
 }
 
@@ -520,7 +532,7 @@ ll_register_Dnaa(lua_State *L) {
         LUA_SENTINEL
     };
 
-    lua_pushcfunction(L, Create);
+    lua_pushcfunction(L, ll_new_Dnaa);
     lua_setglobal(L, LL_DNAA);
     return ll_register_class(L, LL_DNAA, methods, functions);
 }
