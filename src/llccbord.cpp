@@ -141,7 +141,7 @@ ll_check_CCBord(const char *_fun, lua_State *L, int arg)
  * \return pointer to the CCBord* contained in the user data
  */
 CCBord *
-ll_check_CCBord_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_CCBord(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;
@@ -173,7 +173,7 @@ ll_new_CCBord(lua_State *L)
     CCBord *ccb = nullptr;
 
     if (lua_isuserdata(L, 1)) {
-        Pix* pixs = ll_check_Pix_opt(_fun, L, 1);
+        Pix* pixs = ll_opt_Pix(_fun, L, 1);
         if (pixs) {
             DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
                 LL_PIX, reinterpret_cast<void *>(pixs));

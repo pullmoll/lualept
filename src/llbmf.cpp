@@ -73,7 +73,7 @@ Create(lua_State *L)
 {
     LL_FUNC("Create");
     const char* dir = lua_isstring(L, 1) ? ll_check_string(_fun, L, 1) : ".";
-    l_int32 fontsize = ll_check_l_int32_default(_fun, L, 2, 6);
+    l_int32 fontsize = ll_opt_l_int32(_fun, L, 2, 6);
     L_Bmf *bmf = bmfCreate(dir, fontsize);
     return ll_push_Bmf(_fun, L, bmf);
 }
@@ -118,7 +118,7 @@ GetLineStrings(lua_State *L)
     L_Bmf *bmf = ll_check_Bmf(_fun, L, 1);
     const char* str = ll_check_string(_fun, L, 2);
     l_int32 maxw = ll_check_l_int32(_fun, L, 3);
-    l_int32 firstident = ll_check_l_int32_default(_fun, L, 4, 0);
+    l_int32 firstident = ll_opt_l_int32(_fun, L, 4, 0);
     l_int32 h = 0;
     Sarray *sa = bmfGetLineStrings(bmf, str, maxw, firstident, &h);
     ll_push_l_int32(_fun, L, h);
@@ -211,7 +211,7 @@ ll_check_Bmf(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Bmf* contained in the user data
  */
 L_Bmf *
-ll_check_Bmf_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_Bmf(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;
@@ -245,7 +245,7 @@ ll_new_Bmf(lua_State *L)
 {
     FUNC("ll_new_Bmf");
     const char* dir = lua_isstring(L, 1) ? ll_check_string(_fun, L, 1) : ".";
-    l_int32 fontsize = ll_check_l_int32_default(_fun, L, 2, 6);
+    l_int32 fontsize = ll_opt_l_int32(_fun, L, 2, 6);
     DBG(LOG_NEW_CLASS, "%s: create for %s = '%s', %s = %d\n", _fun,
         "dir", dir, "fontsize", fontsize);
     L_Bmf *bmf = bmfCreate(dir, fontsize);

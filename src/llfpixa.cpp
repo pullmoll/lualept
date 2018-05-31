@@ -73,7 +73,7 @@ static int
 Create(lua_State *L)
 {
     LL_FUNC("Create");
-    l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
     FPixa *fpixa = fpixaCreate(n);
     return ll_push_FPixa(_fun, L, fpixa);
 }
@@ -381,7 +381,7 @@ ll_check_FPixa(const char *_fun, lua_State *L, int arg)
  * \return pointer to the FPixa* contained in the user data
  */
 FPixa *
-ll_check_FPixa_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_FPixa(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;
@@ -420,7 +420,7 @@ ll_new_FPixa(lua_State *L)
         return ll_push_FPixa(_fun, L, fpixa);
     }
     if (lua_isinteger(L, 1)) {
-        l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+        l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
         FPixa *fpixa = fpixaCreate(n);
         return ll_push_FPixa(_fun, L, fpixa);
     }

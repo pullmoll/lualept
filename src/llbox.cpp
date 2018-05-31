@@ -90,10 +90,10 @@ static int
 Create(lua_State *L)
 {
     LL_FUNC("Create");
-    l_int32 x = ll_check_l_int32_default(_fun, L, 1, 0);
-    l_int32 y = ll_check_l_int32_default(_fun, L, 2, 0);
-    l_int32 w = ll_check_l_int32_default(_fun, L, 3, 1);
-    l_int32 h = ll_check_l_int32_default(_fun, L, 4, 1);
+    l_int32 x = ll_opt_l_int32(_fun, L, 1, 0);
+    l_int32 y = ll_opt_l_int32(_fun, L, 2, 0);
+    l_int32 w = ll_opt_l_int32(_fun, L, 3, 1);
+    l_int32 h = ll_opt_l_int32(_fun, L, 4, 1);
     Box *box = boxCreate(x, y, w, h);
     return ll_push_Box(_fun, L, box);
 }
@@ -169,10 +169,10 @@ AdjustSides(lua_State *L)
 {
     LL_FUNC("AdjustSides");
     Box *boxs = ll_check_Box(_fun, L, 1);
-    l_int32 delleft = ll_check_l_int32_default(_fun, L, 2, 0);
-    l_int32 delright = ll_check_l_int32_default(_fun, L, 3, 0);
-    l_int32 deltop = ll_check_l_int32_default(_fun, L, 4, 0);
-    l_int32 delbot = ll_check_l_int32_default(_fun, L, 5, 0);
+    l_int32 delleft = ll_opt_l_int32(_fun, L, 2, 0);
+    l_int32 delright = ll_opt_l_int32(_fun, L, 3, 0);
+    l_int32 deltop = ll_opt_l_int32(_fun, L, 4, 0);
+    l_int32 delbot = ll_opt_l_int32(_fun, L, 5, 0);
     Box *boxd = boxAdjustSides(nullptr, boxs, delleft, delright, deltop, delbot);
     ll_push_Box(_fun, L, boxd);
     return 1;
@@ -411,10 +411,10 @@ CreateValid(lua_State *L)
     l_int32 x, y, w, h;
     Box *box;
 
-    x = ll_check_l_int32_default(_fun, L, 1, 0);
-    y = ll_check_l_int32_default(_fun, L, 2, 0);
-    w = ll_check_l_int32_default(_fun, L, 3, 1);
-    h = ll_check_l_int32_default(_fun, L, 4, 1);
+    x = ll_opt_l_int32(_fun, L, 1, 0);
+    y = ll_opt_l_int32(_fun, L, 2, 0);
+    w = ll_opt_l_int32(_fun, L, 3, 1);
+    h = ll_opt_l_int32(_fun, L, 4, 1);
     box = boxCreateValid(x, y, w, h);
     return ll_push_Box(_fun, L, box);
 }
@@ -743,10 +743,10 @@ SetGeometry(lua_State *L)
 {
     LL_FUNC("SetGeometry");
     Box *box = ll_check_Box(_fun, L, 1);
-    l_int32 x = ll_check_l_int32_default(_fun, L, 2, 0);
-    l_int32 y = ll_check_l_int32_default(_fun, L, 3, 0);
-    l_int32 w = ll_check_l_int32_default(_fun, L, 4, 1);
-    l_int32 h = ll_check_l_int32_default(_fun, L, 5, 1);
+    l_int32 x = ll_opt_l_int32(_fun, L, 2, 0);
+    l_int32 y = ll_opt_l_int32(_fun, L, 3, 0);
+    l_int32 w = ll_opt_l_int32(_fun, L, 4, 1);
+    l_int32 h = ll_opt_l_int32(_fun, L, 5, 1);
     return ll_push_boolean(_fun, L, 0 == boxSetGeometry(box, x, y, w, h));
 }
 
@@ -767,10 +767,10 @@ SetSideLocations(lua_State *L)
 {
     LL_FUNC("SetSideLocations");
     Box *box = ll_check_Box(_fun, L, 1);
-    l_int32 l = ll_check_l_int32_default(_fun, L, 2, 0);
-    l_int32 r = ll_check_l_int32_default(_fun, L, 3, 0);
-    l_int32 t = ll_check_l_int32_default(_fun, L, 4, 0);
-    l_int32 b = ll_check_l_int32_default(_fun, L, 5, 0);
+    l_int32 l = ll_opt_l_int32(_fun, L, 2, 0);
+    l_int32 r = ll_opt_l_int32(_fun, L, 3, 0);
+    l_int32 t = ll_opt_l_int32(_fun, L, 4, 0);
+    l_int32 b = ll_opt_l_int32(_fun, L, 5, 0);
     return ll_push_boolean(_fun, L, 0 == boxSetSideLocations(box, l, r, t, b));
 }
 
@@ -794,9 +794,9 @@ Similar(lua_State *L)
     Box *box1 = ll_check_Box(_fun, L, 1);
     Box *box2 = ll_check_Box(_fun, L, 2);
     l_int32 leftdiff = ll_check_l_int32(_fun, L, 3);
-    l_int32 rightdiff = ll_check_l_int32_default(_fun, L, 4, leftdiff);
-    l_int32 topdiff = ll_check_l_int32_default(_fun, L, 5, rightdiff);
-    l_int32 botdiff = ll_check_l_int32_default(_fun, L, 6, topdiff);
+    l_int32 rightdiff = ll_opt_l_int32(_fun, L, 4, leftdiff);
+    l_int32 topdiff = ll_opt_l_int32(_fun, L, 5, rightdiff);
+    l_int32 botdiff = ll_opt_l_int32(_fun, L, 6, topdiff);
     l_int32 similar = FALSE;
     if (boxSimilar(box1, box2, leftdiff, rightdiff, topdiff, botdiff, &similar))
         return ll_push_nil(L);
@@ -822,8 +822,8 @@ Transform(lua_State *L)
     Box *boxs = ll_check_Box(_fun, L, 1);
     l_int32 shiftx = ll_check_l_int32(_fun, L, 2);
     l_int32 shifty = ll_check_l_int32(_fun, L, 3);
-    l_float32 scalex = ll_check_l_float32_default(_fun, L, 4, 1.0f);
-    l_float32 scaley = ll_check_l_float32_default(_fun, L, 5, 1.0f);
+    l_float32 scalex = ll_opt_l_float32(_fun, L, 4, 1.0f);
+    l_float32 scaley = ll_opt_l_float32(_fun, L, 5, 1.0f);
     Box *box = boxTransform(boxs, shiftx, shifty, scalex, scaley);
     ll_push_Box(_fun, L, box);
     return 1;
@@ -853,13 +853,13 @@ TransformOrdered(lua_State *L)
     l_float32 xc, yc;
     l_int32 ok = boxGetCenter(boxs, &xc, &yc);
     l_int32 order = ll_check_trans_order(_fun, L, 2, L_TR_SC_RO);
-    l_int32 shiftx = ll_check_l_int32_default(_fun, L, 3, 0);
-    l_int32 shifty = ll_check_l_int32_default(_fun, L, 4, 0);
-    l_float32 scalex = ll_check_l_float32_default(_fun, L, 5, 1.0f);
-    l_float32 scaley = ll_check_l_float32_default(_fun, L, 6, 1.0f);
-    l_int32 xcen = ll_check_l_int32_default(_fun, L, 7, ok ? static_cast<l_int32>(xc) : 0);
-    l_int32 ycen = ll_check_l_int32_default(_fun, L, 8, ok ? static_cast<l_int32>(yc) : 0);
-    l_float32 angle = ll_check_l_float32_default(_fun, L, 9, 0.0f);
+    l_int32 shiftx = ll_opt_l_int32(_fun, L, 3, 0);
+    l_int32 shifty = ll_opt_l_int32(_fun, L, 4, 0);
+    l_float32 scalex = ll_opt_l_float32(_fun, L, 5, 1.0f);
+    l_float32 scaley = ll_opt_l_float32(_fun, L, 6, 1.0f);
+    l_int32 xcen = ll_opt_l_int32(_fun, L, 7, ok ? static_cast<l_int32>(xc) : 0);
+    l_int32 ycen = ll_opt_l_int32(_fun, L, 8, ok ? static_cast<l_int32>(yc) : 0);
+    l_float32 angle = ll_opt_l_float32(_fun, L, 9, 0.0f);
     Box *box = boxTransformOrdered(boxs, shiftx, shifty, scalex, scaley, xcen, ycen, angle, order);
     return ll_push_Box(_fun, L, box);
 }
@@ -885,7 +885,7 @@ ll_check_Box(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Box* contained in the user data
  */
 Box *
-ll_check_Box_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_Box(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;
@@ -918,7 +918,7 @@ ll_new_Box(lua_State *L)
     Box *box = nullptr;
 
     if (lua_isuserdata(L, 1)) {
-        Box *boxs = ll_check_Box_opt(_fun, L, 1);
+        Box *boxs = ll_opt_Box(_fun, L, 1);
         if (boxs) {
             DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
                 LL_BOX, reinterpret_cast<void *>(boxs));
@@ -927,10 +927,10 @@ ll_new_Box(lua_State *L)
     }
 
     if (!box && lua_isinteger(L, 1)) {
-        l_int32 x = ll_check_l_int32_default(_fun, L, 1, 0);
-        l_int32 y = ll_check_l_int32_default(_fun, L, 2, 0);
-        l_int32 w = ll_check_l_int32_default(_fun, L, 3, 1);
-        l_int32 h = ll_check_l_int32_default(_fun, L, 4, 1);
+        l_int32 x = ll_opt_l_int32(_fun, L, 1, 0);
+        l_int32 y = ll_opt_l_int32(_fun, L, 2, 0);
+        l_int32 w = ll_opt_l_int32(_fun, L, 3, 1);
+        l_int32 h = ll_opt_l_int32(_fun, L, 4, 1);
         DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d, %s = %d, %s = %d\n", _fun,
             "x", x, "y", y, "w", w, "h", h);
         box = boxCreate(x,y,w,h);

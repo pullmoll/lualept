@@ -304,7 +304,7 @@ GetTextlineCenters(lua_State *L)
 {
     LL_FUNC("GetTextlineCenters");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 debugflag = ll_check_boolean_default(_fun, L, 2, FALSE);
+    l_int32 debugflag = ll_opt_boolean(_fun, L, 2, FALSE);
     Ptaa *ptaa = dewarpGetTextlineCenters(pixs, debugflag);
     return ll_push_Ptaa(_fun, L, ptaa);
 }
@@ -342,8 +342,8 @@ PopulateFullRes(lua_State *L)
     LL_FUNC("PopulateFullRes");
     Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
     Pix *pix = ll_check_Pix(_fun, L, 2);
-    l_int32 x = ll_check_l_int32_default(_fun, L, 3, 0);
-    l_int32 y = ll_check_l_int32_default(_fun, L, 4, 0);
+    l_int32 x = ll_opt_l_int32(_fun, L, 3, 0);
+    l_int32 y = ll_opt_l_int32(_fun, L, 4, 0);
     return ll_push_boolean(_fun, L, 0 == dewarpPopulateFullRes(dew, pix, x, y));
 }
 
@@ -420,7 +420,7 @@ RemoveShortLines(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Ptaa *ptaas = ll_check_Ptaa(_fun, L, 2);
     l_float32 fract = ll_check_l_float32(_fun, L, 3);
-    l_int32 debugflag = ll_check_boolean_default(_fun, L, 4, FALSE);
+    l_int32 debugflag = ll_opt_boolean(_fun, L, 4, FALSE);
     Ptaa *ptaa = dewarpRemoveShortLines(pixs, ptaas, fract, debugflag);
     return ll_push_Ptaa(_fun, L, ptaa);
 }
@@ -504,7 +504,7 @@ ll_check_Dewarp(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Dewarp* contained in the user data
  */
 Dewarp *
-ll_check_Dewarp_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_Dewarp(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;
@@ -538,9 +538,9 @@ ll_new_Dewarp(lua_State *L)
     Dewarp *dew = nullptr;
 
     if (lua_isuserdata(L, 1)) {
-        Pix *pixs = ll_check_Pix_opt(_fun, L, 1);
+        Pix *pixs = ll_opt_Pix(_fun, L, 1);
         if (pixs) {
-            l_int32 pageno = ll_check_l_int32_default(_fun, L, 2, 1);
+            l_int32 pageno = ll_opt_l_int32(_fun, L, 2, 1);
             DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
                 LL_PIX, reinterpret_cast<void *>(pixs));
             dew = dewarpCreate(pixs, pageno);

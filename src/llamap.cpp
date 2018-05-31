@@ -391,7 +391,7 @@ ll_check_Amap(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Amap* contained in the user data
  */
 Amap *
-ll_check_Amap_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_Amap(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;

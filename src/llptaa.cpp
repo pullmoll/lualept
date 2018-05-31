@@ -73,7 +73,7 @@ static int
 Create(lua_State *L)
 {
     LL_FUNC("Create");
-    l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
     Ptaa *ptaa = ptaaCreate(n);
     return ll_push_Ptaa(_fun, L, ptaa);
 }
@@ -270,7 +270,7 @@ Write(lua_State *L)
     LL_FUNC("Write");
     Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
-    l_int32 type = ll_check_boolean_default(_fun, L, 3, FALSE);
+    l_int32 type = ll_opt_boolean(_fun, L, 3, FALSE);
     return ll_push_boolean(_fun, L, 0 == ptaaWrite(filename, ptaa, type));
 }
 
@@ -292,7 +292,7 @@ WriteMem(lua_State *L)
 {
     LL_FUNC("WriteMem");
     Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
-    l_int32 type = ll_check_boolean_default(_fun, L, 2, FALSE);
+    l_int32 type = ll_opt_boolean(_fun, L, 2, FALSE);
     l_uint8 *data = nullptr;
     size_t size = 0;
     if (ptaaWriteMem(&data, &size, ptaa, type))
@@ -322,7 +322,7 @@ WriteStream(lua_State *L)
     LL_FUNC("WriteStream");
     Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    l_int32 type = ll_check_boolean_default(_fun, L, 3, FALSE);
+    l_int32 type = ll_opt_boolean(_fun, L, 3, FALSE);
     return ll_push_boolean(_fun, L, 0 == ptaaWriteStream(stream->f, ptaa, type));
 }
 
@@ -347,7 +347,7 @@ ll_check_Ptaa(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Ptaa* contained in the user data
  */
 Ptaa *
-ll_check_Ptaa_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_Ptaa(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;

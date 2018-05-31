@@ -494,8 +494,8 @@ SetValidModels(lua_State *L)
 {
     LL_FUNC("SetValidModels");
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
-    l_int32 notests = ll_check_boolean_default(_fun, L, 2, FALSE);
-    l_int32 debug = ll_check_boolean_default(_fun, L, 3, FALSE);
+    l_int32 notests = ll_opt_boolean(_fun, L, 2, FALSE);
+    l_int32 debug = ll_opt_boolean(_fun, L, 3, FALSE);
     ll_push_boolean(_fun, L, 0 == dewarpaSetValidModels(dewa, notests, debug));
 }
 
@@ -659,7 +659,7 @@ ll_check_Dewarpa(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Dewarpa* contained in the user data
  */
 Dewarpa *
-ll_check_Dewarpa_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_Dewarpa(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;
@@ -692,12 +692,12 @@ ll_new_Dewarpa(lua_State *L)
     Dewarpa *dewa = nullptr;
 
     if (lua_isuserdata(L, 1)) {
-        PixaComp *pixac = ll_check_PixaComp_opt(_fun, L, 1);
+        PixaComp *pixac = ll_opt_PixaComp(_fun, L, 1);
         if (pixac) {
-            l_int32 useboth = ll_check_boolean_default(_fun, L, 2, FALSE);
-            l_int32 sampling = ll_check_l_int32_default(_fun, L, 3, 1);
-            l_int32 minlines = ll_check_l_int32_default(_fun, L, 4, 1);
-            l_int32 maxdist = ll_check_l_int32_default(_fun, L, 5, 50);
+            l_int32 useboth = ll_opt_boolean(_fun, L, 2, FALSE);
+            l_int32 sampling = ll_opt_l_int32(_fun, L, 3, 1);
+            l_int32 minlines = ll_opt_l_int32(_fun, L, 4, 1);
+            l_int32 maxdist = ll_opt_l_int32(_fun, L, 5, 50);
             DBG(LOG_NEW_CLASS, "%s: create for %s* = %p, %s = %s, %s = %d, %s = %d, %s = %d\n", _fun,
                 LL_PIXACOMP, reinterpret_cast<void *>(pixac),
                 "useboth", useboth ? "true" : "false",
@@ -712,11 +712,11 @@ ll_new_Dewarpa(lua_State *L)
     }
 
     if (!dewa && lua_isinteger(L, 1)) {
-        l_int32 nptrs = ll_check_l_int32_default(_fun, L, 1, 1);
-        l_int32 sampling = ll_check_l_int32_default(_fun, L, 2, 1);
-        l_int32 redfactor = ll_check_l_int32_default(_fun, L, 3, 1);
-        l_int32 minlines = ll_check_l_int32_default(_fun, L, 4, 1);
-        l_int32 maxdist = ll_check_l_int32_default(_fun, L, 5, 50);
+        l_int32 nptrs = ll_opt_l_int32(_fun, L, 1, 1);
+        l_int32 sampling = ll_opt_l_int32(_fun, L, 2, 1);
+        l_int32 redfactor = ll_opt_l_int32(_fun, L, 3, 1);
+        l_int32 minlines = ll_opt_l_int32(_fun, L, 4, 1);
+        l_int32 maxdist = ll_opt_l_int32(_fun, L, 5, 50);
         DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d, %s = %d, %s = %d, %s = %d\n", _fun,
             "nptrs", nptrs,
             "sampling", sampling,

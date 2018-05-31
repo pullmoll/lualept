@@ -111,7 +111,7 @@ Insert(lua_State *L)
 {
     LL_FUNC("Insert");
     Aset *aset = ll_check_Aset(_fun, L, 1);
-    l_int32 value = ll_check_boolean_default(_fun, L, 3, TRUE);
+    l_int32 value = ll_opt_boolean(_fun, L, 3, TRUE);
     RB_TYPE key;
     int result = FALSE;
 
@@ -364,7 +364,7 @@ ll_check_Aset(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Aset* contained in the user data
  */
 Aset *
-ll_check_Aset_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_Aset(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;

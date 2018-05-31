@@ -364,8 +364,8 @@ CreateRandom(lua_State *L)
 {
     LL_FUNC("CreateRandom");
     l_int32 depth = ll_check_l_int32(_fun, L, 1);
-    l_int32 hasblack = ll_check_boolean_default(_fun, L, 2, FALSE);
-    l_int32 haswhite = ll_check_boolean_default(_fun, L, 3, FALSE);
+    l_int32 hasblack = ll_opt_boolean(_fun, L, 2, FALSE);
+    l_int32 haswhite = ll_opt_boolean(_fun, L, 3, FALSE);
     PixColormap *cmap = pixcmapCreateRandom(depth, hasblack, haswhite);
     return ll_push_PixColormap(_fun, L, cmap);
 }
@@ -385,7 +385,7 @@ DeserializeFromMemory(lua_State *L)
     LL_FUNC("DeserializeFromMemory");
     size_t len = 0;
     const char *str = ll_check_lstring(_fun, L, 1, &len);
-    l_int32 cpc = ll_check_l_int32_default(_fun, L, 2, 4);
+    l_int32 cpc = ll_opt_l_int32(_fun, L, 2, 4);
     l_int32 ncolors = static_cast<l_int32>(len / static_cast<size_t>(cpc));
     l_uint8 *data = ll_malloc<l_uint8>(_fun, L, len);
     PixColormap* cmap = nullptr;
@@ -725,7 +725,7 @@ SerializeToMemory(lua_State *L)
 {
     LL_FUNC("SerializeToMemory");
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
-    l_int32 cpc = ll_check_l_int32_default(_fun, L, 2, 4);
+    l_int32 cpc = ll_opt_l_int32(_fun, L, 2, 4);
     l_int32 ncolors = 0;
     l_uint8 *data = nullptr;
     if (pixcmapSerializeToMemory(cmap, cpc, &ncolors, &data))
@@ -770,8 +770,8 @@ SetBlackAndWhite(lua_State *L)
 {
     LL_FUNC("SetBlackAndWhite");
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
-    l_int32 setblack = ll_check_boolean_default(_fun, L, 2, FALSE);
-    l_int32 setwhite = ll_check_boolean_default(_fun, L, 3, FALSE);
+    l_int32 setblack = ll_opt_boolean(_fun, L, 2, FALSE);
+    l_int32 setwhite = ll_opt_boolean(_fun, L, 3, FALSE);
     return ll_push_boolean(_fun, L, 0 == pixcmapSetBlackAndWhite(cmap, setblack, setwhite));
 }
 
@@ -944,7 +944,7 @@ ll_check_PixColormap(const char *_fun, lua_State *L, int arg)
  * \return pointer to the PixColormap* contained in the user data
  */
 PixColormap *
-ll_check_PixColormap_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_PixColormap(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;

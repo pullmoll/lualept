@@ -1060,6 +1060,21 @@ ll_check_stream(const char *_fun, lua_State *L, int arg)
 }
 
 /**
+ * \brief Return an user data argument (%arg) as luaL_Stream*, if it is one.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the integer
+ * \return pointer to luaL_Stream or error
+ */
+luaL_Stream *
+ll_check_stream_opt(const char *_fun, lua_State *L, int arg)
+{
+    if (LUA_TUSERDATA != lua_type(L, arg))
+        return nullptr;
+    return reinterpret_cast<luaL_Stream *>(luaL_checkudata(L, arg, LUA_FILEHANDLE));
+}
+
+/**
  * \brief Check if an argument is a boolean.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
@@ -1106,7 +1121,7 @@ ll_check_l_uint8(const char *_fun, lua_State *L, int arg)
  * \return l_uint8 for the integer; lua_error if out of bounds
  */
 l_uint8
-ll_check_l_uint8_default(const char *_fun, lua_State *L, int arg, l_uint8 dflt)
+ll_opt_l_uint8(const char *_fun, lua_State *L, int arg, l_uint8 dflt)
 {
     lua_Integer val = luaL_optinteger(L, arg, dflt);
 
@@ -1147,7 +1162,7 @@ ll_check_l_uint16(const char *_fun, lua_State *L, int arg)
  * \return l_uint16 for the integer; lua_error if out of bounds
  */
 l_uint16
-ll_check_l_uint16_default(const char *_fun, lua_State *L, int arg, l_uint16 dflt)
+ll_opt_l_uint16(const char *_fun, lua_State *L, int arg, l_uint16 dflt)
 {
     lua_Integer val = luaL_optinteger(L, arg, dflt);
 
@@ -1168,7 +1183,7 @@ ll_check_l_uint16_default(const char *_fun, lua_State *L, int arg, l_uint16 dflt
  * \return l_int32 for the boolean (1 = true, 0 = false); lua_error if out of bounds
  */
 l_int32
-ll_check_boolean_default(const char *_fun, lua_State *L, int arg, int dflt)
+ll_opt_boolean(const char *_fun, lua_State *L, int arg, int dflt)
 {
     int val = lua_isboolean(L, arg) ? lua_toboolean(L, arg) : dflt;
     if (val != 0 && val != 1) {
@@ -1208,7 +1223,7 @@ ll_check_l_int32(const char *_fun, lua_State *L, int arg)
  * \return l_int32 for the integer; lua_error if out of bounds
  */
 l_int32
-ll_check_l_int32_default(const char *_fun, lua_State *L, int arg, l_int32 dflt)
+ll_opt_l_int32(const char *_fun, lua_State *L, int arg, l_int32 dflt)
 {
     lua_Integer val = luaL_optinteger(L, arg, dflt);
 
@@ -1249,7 +1264,7 @@ ll_check_l_uint32(const char *_fun, lua_State *L, int arg)
  * \return l_uint32 for the integer; lua_error if out of bounds
  */
 l_uint32
-ll_check_l_uint32_default(const char *_fun, lua_State *L, int arg, l_uint32 dflt)
+ll_opt_l_uint32(const char *_fun, lua_State *L, int arg, l_uint32 dflt)
 {
     lua_Integer val = luaL_optinteger(L, arg, dflt);
 
@@ -1291,7 +1306,7 @@ ll_check_l_int64(const char *_fun, lua_State *L, int arg)
  * \return l_int64 for the integer; lua_error if out of bounds
  */
 l_int64
-ll_check_l_int64_default(const char *_fun, lua_State *L, int arg, l_int64 dflt)
+ll_opt_l_int64(const char *_fun, lua_State *L, int arg, l_int64 dflt)
 {
     lua_Integer val = luaL_optinteger(L, arg, dflt);
 
@@ -1335,7 +1350,7 @@ ll_check_l_uint64(const char *_fun, lua_State *L, int arg)
  * \return l_uint64 for the integer; lua_error if out of bounds
  */
 l_uint64
-ll_check_l_uint64_default(const char *_fun, lua_State *L, int arg, l_uint64 dflt)
+ll_opt_l_uint64(const char *_fun, lua_State *L, int arg, l_uint64 dflt)
 {
     lua_Integer val = luaL_optinteger(L, arg, static_cast<lua_Integer>(dflt));
     l_uint64 ret = static_cast<l_uint64>(val);
@@ -1379,7 +1394,7 @@ ll_check_l_float32(const char *_fun, lua_State *L, int arg)
  * \return l_float32 for the number; lua_error if out of bounds
  */
 l_float32
-ll_check_l_float32_default(const char *_fun, lua_State *L, int arg, l_float32 dflt)
+ll_opt_l_float32(const char *_fun, lua_State *L, int arg, l_float32 dflt)
 {
     lua_Number val = luaL_optnumber(L, arg, (lua_Number)dflt);
 
@@ -1416,7 +1431,7 @@ ll_check_l_float64(const char *_fun, lua_State *L, int arg)
  * \return l_float64 for the number; lua_error if out of bounds
  */
 l_float64
-ll_check_l_float64_default(const char *_fun, lua_State *L, int arg, l_float64 dflt)
+ll_opt_l_float64(const char *_fun, lua_State *L, int arg, l_float64 dflt)
 {
     lua_Number val = luaL_optnumber(L, arg, dflt);
     (void)_fun;

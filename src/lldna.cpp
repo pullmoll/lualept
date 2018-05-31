@@ -73,7 +73,7 @@ static int
 Create(lua_State *L)
 {
     LL_FUNC("Create");
-    l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
     Dna *da = l_dnaCreate(n);
     return ll_push_Dna(_fun, L, da);
 }
@@ -583,7 +583,7 @@ ll_check_Dna(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Dna* contained in the user data
  */
 Dna *
-ll_check_Dna_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_Dna(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;
@@ -617,7 +617,7 @@ ll_new_Dna(lua_State *L)
     Dna *da = nullptr;
 
     if (lua_isuserdata(L, 1)) {
-        Dna *das = ll_check_Dna_opt(_fun, L, 1);
+        Dna *das = ll_opt_Dna(_fun, L, 1);
         if (das) {
             DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
                 LL_DNA, reinterpret_cast<void *>(das));
@@ -631,7 +631,7 @@ ll_new_Dna(lua_State *L)
     }
 
     if (lua_isinteger(L, 1)) {
-        l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+        l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
         DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
             "n", n);
         da = l_dnaCreate(n);

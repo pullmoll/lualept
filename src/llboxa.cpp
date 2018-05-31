@@ -73,7 +73,7 @@ static int
 Create(lua_State *L)
 {
     LL_FUNC("Create");
-    l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
     Boxa *boxa = boxaCreate(n);
     return ll_push_Boxa(_fun, L, boxa);
 }
@@ -167,8 +167,8 @@ AdjustHeightToTarget(lua_State *L)
     LL_FUNC("AdjustHeightToTarget");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 sides = ll_check_adjust_sides(_fun, L, 2, 0);
-    l_int32 target = ll_check_l_int32_default(_fun, L, 3, 0);
-    l_int32 thresh = ll_check_l_int32_default(_fun, L, 4, 0);
+    l_int32 target = ll_opt_l_int32(_fun, L, 3, 0);
+    l_int32 thresh = ll_opt_l_int32(_fun, L, 4, 0);
     Boxa *boxad = boxaAdjustWidthToTarget(nullptr, boxas, sides, target, thresh);
     ll_push_Boxa(_fun, L, boxad);
     return 1;
@@ -191,10 +191,10 @@ AdjustSides(lua_State *L)
 {
     LL_FUNC("AdjustSides");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
-    l_int32 delleft = ll_check_l_int32_default(_fun, L, 2, 0);
-    l_int32 delright = ll_check_l_int32_default(_fun, L, 3, 0);
-    l_int32 deltop = ll_check_l_int32_default(_fun, L, 4, 0);
-    l_int32 delbot = ll_check_l_int32_default(_fun, L, 5, 0);
+    l_int32 delleft = ll_opt_l_int32(_fun, L, 2, 0);
+    l_int32 delright = ll_opt_l_int32(_fun, L, 3, 0);
+    l_int32 deltop = ll_opt_l_int32(_fun, L, 4, 0);
+    l_int32 delbot = ll_opt_l_int32(_fun, L, 5, 0);
     Boxa *boxad = boxaAdjustSides(boxas, delleft, delright, deltop, delbot);
     ll_push_Boxa(_fun, L, boxad);
     return 1;
@@ -217,8 +217,8 @@ AdjustWidthToTarget(lua_State *L)
     LL_FUNC("AdjustWidthToTarget");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 sides = ll_check_adjust_sides(_fun, L, 2, 0);
-    l_int32 target = ll_check_l_int32_default(_fun, L, 3, 0);
-    l_int32 thresh = ll_check_l_int32_default(_fun, L, 4, 0);
+    l_int32 target = ll_opt_l_int32(_fun, L, 3, 0);
+    l_int32 thresh = ll_opt_l_int32(_fun, L, 4, 0);
     Boxa *boxad = boxaAdjustWidthToTarget(nullptr, boxas, sides, target, thresh);
     ll_push_Boxa(_fun, L, boxad);
     return 1;
@@ -331,7 +331,7 @@ CombineOverlaps(lua_State *L)
 {
     LL_FUNC("CombineOverlaps");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
-    Pixa *pixadb = ll_check_Pixa_opt(_fun, L, 2);
+    Pixa *pixadb = ll_opt_Pixa(_fun, L, 2);
     Boxa *boxad = boxaCombineOverlaps(boxas, pixadb);
     return ll_push_Boxa(_fun, L, boxad);
 }
@@ -352,7 +352,7 @@ CombineOverlapsInPair(lua_State *L)
     LL_FUNC("CombineOverlapsInPair");
     Boxa *boxa1 = ll_check_Boxa(_fun, L, 1);
     Boxa *boxa2 = ll_check_Boxa(_fun, L, 2);
-    Pixa *pixadb = ll_check_Pixa_opt(_fun, L, 3);
+    Pixa *pixadb = ll_opt_Pixa(_fun, L, 3);
     Boxa *boxad1;
     Boxa *boxad2;
     if (boxaCombineOverlapsInPair(boxa1, boxa2, &boxad1, &boxad2, pixadb))
@@ -378,7 +378,7 @@ CompareRegions(lua_State *L)
     Boxa *boxa1 = ll_check_Boxa(_fun, L, 1);
     Boxa *boxa2 = ll_check_Boxa(_fun, L, 2);
     l_int32 areathresh = ll_check_l_int32(_fun, L, 3);
-    Pix *pixdb = ll_check_Pix_opt(_fun, L, 4);
+    Pix *pixdb = ll_opt_Pix(_fun, L, 4);
     l_int32 nsame = 0;
     l_float32 diffarea = 0.0f;
     l_float32 diffxor = 0.0f;
@@ -407,9 +407,9 @@ ConstrainSize(lua_State *L)
 {
     LL_FUNC("ConstrainSize");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
-    l_int32 width = ll_check_l_int32_default(_fun, L, 2, 0);
+    l_int32 width = ll_opt_l_int32(_fun, L, 2, 0);
     l_int32 widthflag = ll_check_adjust_sides(_fun, L, 3, L_ADJUST_LEFT_AND_RIGHT);
-    l_int32 height = ll_check_l_int32_default(_fun, L, 4, 0);
+    l_int32 height = ll_opt_l_int32(_fun, L, 4, 0);
     l_int32 heightflag = ll_check_adjust_sides(_fun, L, 5, L_ADJUST_TOP_AND_BOT);
     Boxa *boxa = boxaConstrainSize(boxas, width, widthflag, height, heightflag);
     return ll_push_Boxa(_fun, L, boxa);
@@ -612,7 +612,7 @@ ExtractAsPta(lua_State *L)
 {
     LL_FUNC("ExtractAsPta");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
-    l_int32 keepinvalid = ll_check_boolean_default(_fun, L, 2, FALSE);
+    l_int32 keepinvalid = ll_opt_boolean(_fun, L, 2, FALSE);
     Pta *ptal = nullptr;
     Pta *ptar = nullptr;
     Pta *ptat = nullptr;
@@ -661,7 +661,7 @@ FillSequence(lua_State *L)
     LL_FUNC("FillSequence");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 useflag = ll_check_useflag(_fun, L, 2, L_USE_ALL_BOXES);
-    l_int32 debug = ll_check_boolean_default(_fun, L, 3, FALSE);
+    l_int32 debug = ll_opt_boolean(_fun, L, 3, FALSE);
     Boxa *boxa = boxaFillSequence(boxas, useflag, debug);
     return ll_push_Boxa(_fun, L, boxa);
 }
@@ -817,7 +817,7 @@ GetCoverage(lua_State *L)
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 wc = ll_check_l_int32(_fun, L, 2);
     l_int32 hc = ll_check_l_int32(_fun, L, 3);
-    l_int32 exactflag = ll_check_boolean_default(_fun, L, 3, FALSE);
+    l_int32 exactflag = ll_opt_boolean(_fun, L, 3, FALSE);
     l_float32 fract = 0.0f;
     if (boxaGetCoverage(boxas, wc, hc, exactflag, &fract))
         return ll_push_nil(L);
@@ -1145,11 +1145,11 @@ GetWhiteblocks(lua_State *L)
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
     l_int32 sortflag = ll_check_sort_by(_fun, L, 3, L_SORT_BY_WIDTH);
-    l_int32 maxboxes = ll_check_l_int32_default(_fun, L, 4, 100);
-    l_float32 maxoverlap = ll_check_l_float32_default(_fun, L, 5, 1.0f);
-    l_int32 maxperim = ll_check_l_int32_default(_fun, L, 6, 40);
-    l_float32 fract = ll_check_l_float32_default(_fun, L, 7, 0.0f);
-    l_int32 maxpops = ll_check_l_int32_default(_fun, L, 8, 1000);
+    l_int32 maxboxes = ll_opt_l_int32(_fun, L, 4, 100);
+    l_float32 maxoverlap = ll_opt_l_float32(_fun, L, 5, 1.0f);
+    l_int32 maxperim = ll_opt_l_int32(_fun, L, 6, 40);
+    l_float32 fract = ll_opt_l_float32(_fun, L, 7, 0.0f);
+    l_int32 maxpops = ll_opt_l_int32(_fun, L, 8, 1000);
     Boxa *boxa = boxaGetWhiteblocks(boxas, box, sortflag, maxboxes, maxoverlap, maxperim, fract, maxpops);
     return ll_push_Boxa(_fun, L, boxa);
 }
@@ -1176,7 +1176,7 @@ HandleOverlaps(lua_State *L)
     l_int32 range = ll_check_l_int32(_fun, L, 3);
     l_float32 min_overlap = ll_check_l_float32(_fun, L, 4);
     l_float32 max_ratio = ll_check_l_float32(_fun, L, 5);
-    Numa *namap = ll_check_Numa_opt(_fun, L, 6);
+    Numa *namap = ll_opt_Numa(_fun, L, 6);
     Boxa *boxad = boxaHandleOverlaps(boxas, op, range, min_overlap, max_ratio, &namap);
     return ll_push_Boxa(_fun, L, boxad);
 }
@@ -1297,8 +1297,8 @@ LinearFit(lua_State *L)
 {
     LL_FUNC("LinearFit");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
-    l_int32 factor = ll_check_l_int32_default(_fun, L, 2, 3);
-    l_int32 debug = ll_check_boolean_default(_fun, L, 3, FALSE);
+    l_int32 factor = ll_opt_l_int32(_fun, L, 2, 3);
+    l_int32 debug = ll_opt_boolean(_fun, L, 3, FALSE);
     Boxa *boxa = boxaLinearFit(boxas, factor, debug);
     return ll_push_Boxa(_fun, L, boxa);
 }
@@ -1393,7 +1393,7 @@ MergeEvenOdd(lua_State *L)
     LL_FUNC("MergeEvenOdd ");
     Boxa *boxae = ll_check_Boxa(_fun, L, 1);
     Boxa *boxao = ll_check_Boxa(_fun, L, 2);
-    l_int32 fillflag = ll_check_l_int32_default(_fun, L, 3, 0);
+    l_int32 fillflag = ll_opt_l_int32(_fun, L, 3, 0);
     Boxa *boxa = boxaMergeEvenOdd(boxae, boxao, fillflag);
     return ll_push_Boxa(_fun, L, boxa);
 }
@@ -1417,8 +1417,8 @@ ModifyWithBoxa(lua_State *L)
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     Boxa *boxam = ll_check_Boxa(_fun, L, 2);
     l_int32 subflag = ll_check_subflag(_fun, L, 3, L_USE_MINSIZE);
-    l_int32 maxdiff = ll_check_l_int32_default(_fun, L, 4, 0);
-    l_int32 extrapixels = ll_check_l_int32_default(_fun, L, 5, 0);
+    l_int32 maxdiff = ll_opt_l_int32(_fun, L, 4, 0);
+    l_int32 extrapixels = ll_opt_l_int32(_fun, L, 5, 0);
     Boxa *boxa = boxaModifyWithBoxa(boxas, boxam, subflag, maxdiff, extrapixels);
     return ll_push_Boxa(_fun, L, boxa);
 }
@@ -1549,7 +1549,7 @@ ReconcileEvenOddHeight(lua_State *L)
     l_int32 sides = ll_check_adjust_sides(_fun, L, 2, L_ADJUST_TOP_AND_BOT);
     l_int32 delh = ll_check_l_int32(_fun, L, 3);
     l_int32 op = ll_check_adjust_sides(_fun, L, 4, L_ADJUST_CHOOSE_MIN);
-    l_float32 factor = ll_check_l_float32_default(_fun, L, 5, 1.0f);
+    l_float32 factor = ll_opt_l_float32(_fun, L, 5, 1.0f);
     l_int32 start = ll_check_index(_fun, L, 6, 1);
     Boxa *boxa = boxaReconcileEvenOddHeight(boxas, sides, delh, op, factor, start);
     return ll_push_Boxa(_fun, L, boxa);
@@ -1574,7 +1574,7 @@ ReconcilePairWidth(lua_State *L)
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 delw = ll_check_l_int32(_fun, L, 2);
     l_int32 op = ll_check_adjust_sides(_fun, L, 3, L_ADJUST_CHOOSE_MIN);
-    l_float32 factor = ll_check_l_float32_default(_fun, L, 4, 1.0f);
+    l_float32 factor = ll_opt_l_float32(_fun, L, 4, 1.0f);
     Numa *na = ll_check_Numa(_fun, L, 5);
     Boxa *boxa = boxaReconcilePairWidth(boxas, delw, op, factor, na);
     return ll_push_Boxa(_fun, L, boxa);
@@ -1656,9 +1656,9 @@ Rotate(lua_State *L)
 {
     LL_FUNC("Rotate");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
-    l_float32 xc = ll_check_l_float32_default(_fun, L, 2, 1.0f);
-    l_float32 yc = ll_check_l_float32_default(_fun, L, 3, 1.0f);
-    l_float32 angle = ll_check_l_float32_default(_fun, L, 4, 1.0f);
+    l_float32 xc = ll_opt_l_float32(_fun, L, 2, 1.0f);
+    l_float32 yc = ll_opt_l_float32(_fun, L, 3, 1.0f);
+    l_float32 angle = ll_opt_l_float32(_fun, L, 4, 1.0f);
     Boxa *boxa = boxaRotate(boxas, xc, yc, angle);
     return ll_push_Boxa(_fun, L, boxa);
 }
@@ -1718,8 +1718,8 @@ Scale(lua_State *L)
 {
     LL_FUNC("Scale");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
-    l_float32 scalex = ll_check_l_float32_default(_fun, L, 2, 1.0f);
-    l_float32 scaley = ll_check_l_float32_default(_fun, L, 3, 1.0f);
+    l_float32 scalex = ll_opt_l_float32(_fun, L, 2, 1.0f);
+    l_float32 scaley = ll_opt_l_float32(_fun, L, 3, 1.0f);
     Boxa *boxa = boxaScale(boxas, scalex, scaley);
     return ll_push_Boxa(_fun, L, boxa);
 }
@@ -1859,8 +1859,8 @@ SetSide(lua_State *L)
     LL_FUNC("SetSide");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 side = ll_check_set_side(_fun, L, 2, 0);
-    l_int32 val = ll_check_l_int32_default(_fun, L, 3, 0);
-    l_int32 thresh = ll_check_l_int32_default(_fun, L, 4, 0);
+    l_int32 val = ll_opt_l_int32(_fun, L, 3, 0);
+    l_int32 thresh = ll_opt_l_int32(_fun, L, 4, 0);
     Boxa *boxad = boxaSetSide(nullptr, boxas, side, val, thresh);
     ll_push_Boxa(_fun, L, boxad);
     return 1;
@@ -1886,9 +1886,9 @@ Similar(lua_State *L)
     Boxa *boxa1 = ll_check_Boxa(_fun, L, 1);
     Boxa *boxa2 = ll_check_Boxa(_fun, L, 2);
     l_int32 leftdiff = ll_check_l_int32(_fun, L, 3);
-    l_int32 rightdiff = ll_check_l_int32_default(_fun, L, 4, leftdiff);
-    l_int32 topdiff = ll_check_l_int32_default(_fun, L, 5, rightdiff);
-    l_int32 botdiff = ll_check_l_int32_default(_fun, L, 6, topdiff);
+    l_int32 rightdiff = ll_opt_l_int32(_fun, L, 4, leftdiff);
+    l_int32 topdiff = ll_opt_l_int32(_fun, L, 5, rightdiff);
+    l_int32 botdiff = ll_opt_l_int32(_fun, L, 6, topdiff);
     l_int32 similar = FALSE;
     Numa *nasim = nullptr;
     if (boxaSimilar(boxa1, boxa2, leftdiff, rightdiff, topdiff, botdiff, 0, &similar, &nasim))
@@ -1970,11 +1970,11 @@ SmoothSequenceLS(lua_State *L)
 {
     LL_FUNC("SmoothSequenceLS");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
-    l_int32 factor = ll_check_l_int32_default(_fun, L, 2, 3);
+    l_int32 factor = ll_opt_l_int32(_fun, L, 2, 3);
     l_int32 subflag = ll_check_subflag(_fun, L, 3, L_USE_MINSIZE);
-    l_int32 maxdiff = ll_check_l_int32_default(_fun, L, 4, 0);
-    l_int32 extrapixels = ll_check_l_int32_default(_fun, L, 5, 0);
-    l_int32 debug = ll_check_boolean_default(_fun, L, 6, FALSE);
+    l_int32 maxdiff = ll_opt_l_int32(_fun, L, 4, 0);
+    l_int32 extrapixels = ll_opt_l_int32(_fun, L, 5, 0);
+    l_int32 debug = ll_opt_boolean(_fun, L, 6, FALSE);
     Boxa *boxa = boxaSmoothSequenceLS(boxas, factor, subflag, maxdiff, extrapixels, debug);
     return ll_push_Boxa(_fun, L, boxa);
 }
@@ -1997,11 +1997,11 @@ SmoothSequenceMedian(lua_State *L)
 {
     LL_FUNC("SmoothSequenceMedian");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
-    l_int32 halfwin = ll_check_l_int32_default(_fun, L, 2, 20);
+    l_int32 halfwin = ll_opt_l_int32(_fun, L, 2, 20);
     l_int32 subflag = ll_check_subflag(_fun, L, 3, L_USE_MINSIZE);
-    l_int32 maxdiff = ll_check_l_int32_default(_fun, L, 4, 0);
-    l_int32 extrapixels = ll_check_l_int32_default(_fun, L, 5, 0);
-    l_int32 debug = ll_check_boolean_default(_fun, L, 6, FALSE);
+    l_int32 maxdiff = ll_opt_l_int32(_fun, L, 4, 0);
+    l_int32 extrapixels = ll_opt_l_int32(_fun, L, 5, 0);
+    l_int32 debug = ll_opt_boolean(_fun, L, 6, FALSE);
     Boxa *boxa = boxaSmoothSequenceMedian(boxas, halfwin, subflag, maxdiff, extrapixels, debug);
     return ll_push_Boxa(_fun, L, boxa);
 }
@@ -2044,9 +2044,9 @@ Sort2d(lua_State *L)
 {
     LL_FUNC("Sort2d");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
-    l_int32 delta1 = ll_check_l_int32_default(_fun, L, 2, 0);
-    l_int32 delta2 = ll_check_l_int32_default(_fun, L, 3, 0);
-    l_int32 minh1 = ll_check_l_int32_default(_fun, L, 4, 5);
+    l_int32 delta1 = ll_opt_l_int32(_fun, L, 2, 0);
+    l_int32 delta2 = ll_opt_l_int32(_fun, L, 3, 0);
+    l_int32 minh1 = ll_opt_l_int32(_fun, L, 4, 5);
     Numaa *naad = nullptr;
     Boxaa *boxaa = boxaSort2d(boxas, &naad, delta1, delta2, minh1);
     return ll_push_Boxaa(_fun, L, boxaa) + ll_push_Numaa(_fun, L, naad);
@@ -2106,7 +2106,7 @@ SplitEvenOdd(lua_State *L)
 {
     LL_FUNC("SplitEvenOdd ");
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
-    l_int32 fillflag = ll_check_l_int32_default(_fun, L, 2, 0);
+    l_int32 fillflag = ll_opt_l_int32(_fun, L, 2, 0);
     Boxa *boxae = nullptr;
     Boxa *boxao = nullptr;
     if (boxaSplitEvenOdd(boxa, fillflag, &boxae, &boxao))
@@ -2149,8 +2149,8 @@ Translate(lua_State *L)
 {
     LL_FUNC("Translate");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
-    l_int32 transx = ll_check_l_int32_default(_fun, L, 2, 0);
-    l_int32 transy = ll_check_l_int32_default(_fun, L, 3, 0);
+    l_int32 transx = ll_opt_l_int32(_fun, L, 2, 0);
+    l_int32 transy = ll_opt_l_int32(_fun, L, 3, 0);
     Boxa *boxa = boxaTranslate(boxas, transx, transy);
     return ll_push_Boxa(_fun, L, boxa);
 }
@@ -2170,8 +2170,8 @@ WindowedMedian(lua_State *L)
 {
     LL_FUNC("WindowedMedian");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
-    l_int32 halfwin = ll_check_l_int32_default(_fun, L, 2, 3);
-    l_int32 debug = ll_check_boolean_default(_fun, L, 3, FALSE);
+    l_int32 halfwin = ll_opt_l_int32(_fun, L, 2, 3);
+    l_int32 debug = ll_opt_boolean(_fun, L, 3, FALSE);
     Boxa *boxa = boxaWindowedMedian(boxas, halfwin, debug);
     return ll_push_Boxa(_fun, L, boxa);
 }
@@ -2255,7 +2255,7 @@ ll_check_Boxa(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Boxa* contained in the user data
  */
 Boxa *
-ll_check_Boxa_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_Boxa(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;
@@ -2289,7 +2289,7 @@ ll_new_Boxa(lua_State *L)
     Boxa* boxa = nullptr;
 
     if (lua_isuserdata(L, 1)) {
-        Boxa *boxas = ll_check_Boxa_opt(_fun, L, 1);
+        Boxa *boxas = ll_opt_Boxa(_fun, L, 1);
         if (boxas) {
             DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
                 LL_BOXA, reinterpret_cast<void *>(boxas));
@@ -2303,7 +2303,7 @@ ll_new_Boxa(lua_State *L)
     }
 
     if (!boxa && lua_isinteger(L, 1)) {
-        l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+        l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
         DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
             "n", n);
         boxa = boxaCreate(n);

@@ -73,7 +73,7 @@ static int
 Create(lua_State *L)
 {
     LL_FUNC("Create");
-    l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
     Pixaa *pixaa = pixaaCreate(n);
     return ll_push_Pixaa(_fun, L, pixaa);
 }
@@ -193,7 +193,7 @@ CreateFromPixa(lua_State *L)
 {
     LL_FUNC("CreateFromPixa");
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
-    l_int32 n = ll_check_l_int32_default(_fun, L, 2, 1);
+    l_int32 n = ll_opt_l_int32(_fun, L, 2, 1);
     l_int32 type = ll_check_consecutive_skip_by(_fun, L, 3, L_CHOOSE_CONSECUTIVE);
     l_int32 copyflag = ll_check_access_storage(_fun, L, 4, L_CLONE);
     Pixaa *pixaa = pixaaCreateFromPixa(pixa, n, type, copyflag);
@@ -273,8 +273,8 @@ Join(lua_State *L)
     LL_FUNC("Join");
     Pixaa *pixaad = ll_check_Pixaa(_fun, L, 1);
     Pixaa *pixaas = ll_check_Pixaa(_fun, L, 2);
-    l_int32 istart = ll_check_l_int32_default(_fun, L, 3, 1) - 1;
-    l_int32 iend = ll_check_l_int32_default(_fun, L, 3, pixaaGetCount(pixaas, nullptr)) - 1;
+    l_int32 istart = ll_opt_l_int32(_fun, L, 3, 1) - 1;
+    l_int32 iend = ll_opt_l_int32(_fun, L, 3, pixaaGetCount(pixaas, nullptr)) - 1;
     return ll_push_boolean(_fun, L, 0 == pixaaJoin(pixaad, pixaas, istart, iend));
 }
 
@@ -319,12 +319,12 @@ ReadFromFiles(lua_State *L)
     l_int32 nfiles = 0;
     Pixaa *pixaa = nullptr;
     if (lua_isinteger(L, 2) && lua_isinteger(L, 3)) {
-        first = ll_check_l_int32_default(_fun, L, 2, 0);
-        nfiles = ll_check_l_int32_default(_fun, L, 3, 0);
+        first = ll_opt_l_int32(_fun, L, 2, 0);
+        nfiles = ll_opt_l_int32(_fun, L, 3, 0);
     } else {
         substr = ll_check_string(_fun, L, 2);
-        first = ll_check_l_int32_default(_fun, L, 3, 0);
-        nfiles = ll_check_l_int32_default(_fun, L, 4, 0);
+        first = ll_opt_l_int32(_fun, L, 3, 0);
+        nfiles = ll_opt_l_int32(_fun, L, 4, 0);
     }
     pixaa = pixaaReadFromFiles(dirname, substr, first, nfiles);
     return ll_push_Pixaa(_fun, L, pixaa);
@@ -480,7 +480,7 @@ ll_check_Pixaa(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Pixaa* contained in the user data
  */
 Pixaa *
-ll_check_Pixaa_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_Pixaa(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;

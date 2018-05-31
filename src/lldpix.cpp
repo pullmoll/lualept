@@ -73,8 +73,8 @@ static int
 Create(lua_State *L)
 {
     LL_FUNC("Create");
-    l_int32 width = ll_check_l_int32_default(_fun, L, 1, 1);
-    l_int32 height = ll_check_l_int32_default(_fun, L, 2, 1);
+    l_int32 width = ll_opt_l_int32(_fun, L, 1, 1);
+    l_int32 height = ll_opt_l_int32(_fun, L, 2, 1);
     DPix *dpix = dpixCreate(width, height);
     return ll_push_DPix(_fun, L, dpix);
 }
@@ -209,9 +209,9 @@ ConvertToPix(lua_State *L)
 {
     LL_FUNC("ConvertToPix");
     DPix *dpixs = ll_check_DPix(_fun, L, 1);
-    l_int32 outdepth = ll_check_l_int32_default(_fun, L, 2, 0);
+    l_int32 outdepth = ll_opt_l_int32(_fun, L, 2, 0);
     l_int32 negvals = ll_check_negvals(_fun, L, 3, L_CLIP_TO_ZERO);
-    l_int32 errorflag = ll_check_boolean_default(_fun, L, 4, FALSE);
+    l_int32 errorflag = ll_opt_boolean(_fun, L, 4, FALSE);
     Pix *pix = dpixConvertToPix(dpixs, outdepth, negvals, errorflag);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -778,7 +778,7 @@ ll_check_DPix(const char *_fun, lua_State *L, int arg)
  * \return pointer to the DPix* contained in the user data
  */
 DPix *
-ll_check_DPix_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_DPix(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;
@@ -816,7 +816,7 @@ ll_new_DPix(lua_State *L)
     DPix *dpix = nullptr;
 
     if (lua_isuserdata(L, 1)) {
-        DPix *dpixs = ll_check_DPix_opt(_fun, L, 1);
+        DPix *dpixs = ll_opt_DPix(_fun, L, 1);
         if (dpixs) {
             DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
                 LL_DPIX, reinterpret_cast<void *>(dpixs));
@@ -830,9 +830,9 @@ ll_new_DPix(lua_State *L)
     }
 
     if (!dpix && lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
-        l_int32 width = ll_check_l_int32_default(_fun, L, 1, 1);
-        l_int32 height = ll_check_l_int32_default(_fun, L, 2, 1);
-        DBG(LOG_NEW_CLASS, "%s: create from %s = %d, %s = %d\n", _fun,
+        l_int32 width = ll_opt_l_int32(_fun, L, 1, 1);
+        l_int32 height = ll_opt_l_int32(_fun, L, 2, 1);
+        DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d\n", _fun,
             "width", width, "height", height);
         dpix = dpixCreate(width, height);
     }
@@ -855,7 +855,7 @@ ll_new_DPix(lua_State *L)
     }
 
     if (!dpix) {
-        DBG(LOG_NEW_CLASS, "%s: createfrom %s = %d, %s = %d\n", _fun,
+        DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d\n", _fun,
             "width", 1, "height", 1);
         dpix = dpixCreate(1,1);
     }

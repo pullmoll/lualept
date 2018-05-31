@@ -75,8 +75,8 @@ static int
 Create(lua_State *L)
 {
     LL_FUNC("Create");
-    l_int32 height = ll_check_l_int32_default(_fun, L, 1, 1);
-    l_int32 width = ll_check_l_int32_default(_fun, L, 2, 1);
+    l_int32 height = ll_opt_l_int32(_fun, L, 1, 1);
+    l_int32 width = ll_opt_l_int32(_fun, L, 2, 1);
     const char *name = ll_check_string(_fun, L, 3);
     Sel *pa = selCreate(height, width, name);
     return ll_push_Sel(_fun, L, pa);
@@ -646,7 +646,7 @@ ll_check_Sel(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Sel* contained in the user data
  */
 Sel *
-ll_check_Sel_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_Sel(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;

@@ -78,8 +78,8 @@ Create(lua_State *L)
     LL_FUNC("Create");
     const char *fname = ll_check_string(_fun, L, 1);
     l_int32 type = ll_check_compression(_fun, L, 2, IFF_DEFAULT);
-    l_int32 quality = ll_check_l_int32_default(_fun, L, 3, 75);
-    l_int32 ascii85 = ll_check_boolean_default(_fun, L, 4, FALSE);
+    l_int32 quality = ll_opt_l_int32(_fun, L, 3, 75);
+    l_int32 ascii85 = ll_opt_boolean(_fun, L, 4, FALSE);
     CompData *cid = nullptr;
     if (l_generateCIData(fname, type, quality, ascii85, &cid))
         return ll_push_nil(L);
@@ -461,7 +461,7 @@ ll_check_CompData(const char *_fun, lua_State *L, int arg)
  * \return pointer to the CompData* contained in the user data
  */
 CompData *
-ll_check_CompData_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_CompData(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;
@@ -497,8 +497,8 @@ ll_new_CompData(lua_State *L)
     FUNC("ll_new_CompData");
     const char *fname = ll_check_string(_fun, L, 1);
     l_int32 type = ll_check_compression(_fun, L, 2, IFF_DEFAULT);
-    l_int32 quality = ll_check_l_int32_default(_fun, L, 3, 75);
-    l_int32 ascii85 = ll_check_boolean_default(_fun, L, 4, FALSE);
+    l_int32 quality = ll_opt_l_int32(_fun, L, 3, 75);
+    l_int32 ascii85 = ll_opt_boolean(_fun, L, 4, FALSE);
     CompData *cid = nullptr;
 
     DBG(LOG_NEW_CLASS, "%s: create for %s = '%s', %s = %s, %s = %d, %s = %s\n", _fun,

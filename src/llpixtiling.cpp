@@ -131,7 +131,7 @@ ll_check_PixTiling(const char *_fun, lua_State *L, int arg)
  * \return pointer to the PixTiling* contained in the user data
  */
 PixTiling *
-ll_check_PixTiling_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_PixTiling(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;

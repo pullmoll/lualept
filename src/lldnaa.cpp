@@ -73,7 +73,7 @@ static int
 Create(lua_State *L)
 {
     LL_FUNC("Create");
-    l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
     Dnaa *daa = l_dnaaCreate(n);
     return ll_push_Dnaa(_fun, L, daa);
 }
@@ -214,8 +214,8 @@ static int
 CreateFull(lua_State *L)
 {
     LL_FUNC("CreateFull");
-    l_int32 nptr = ll_check_l_int32_default(_fun, L, 1, 1);
-    l_int32 n = ll_check_l_int32_default(_fun, L, 2, 1);
+    l_int32 nptr = ll_opt_l_int32(_fun, L, 1, 1);
+    l_int32 n = ll_opt_l_int32(_fun, L, 2, 1);
     Dnaa *daa = l_dnaaCreateFull(nptr, n);
     return ll_push_Dnaa(_fun, L, daa);
 }
@@ -424,7 +424,7 @@ ll_check_Dnaa(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Dnaa* contained in the user data
  */
 Dnaa *
-ll_check_Dnaa_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_Dnaa(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;
@@ -465,13 +465,13 @@ ll_new_Dnaa(lua_State *L)
 
     if (!daa && lua_isinteger(L, 1)) {
         if (lua_isinteger(L, 2)) {
-            l_int32 nptr = ll_check_l_int32_default(_fun, L, 1, 1);
-            l_int32 n = ll_check_l_int32_default(_fun, L, 2, 1);
+            l_int32 nptr = ll_opt_l_int32(_fun, L, 1, 1);
+            l_int32 n = ll_opt_l_int32(_fun, L, 2, 1);
             DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d\n", _fun,
                 "nptr", nptr, "n", n);
             daa = l_dnaaCreateFull(nptr, n);
         } else {
-            l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+            l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
             DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
                 "n", n);
             daa = l_dnaaCreate(n);

@@ -355,7 +355,7 @@ Normalize(lua_State *L)
 {
     LL_FUNC("Normalize");
     Kernel *kels = ll_check_Kernel(_fun, L, 1);
-    l_float32 normsum = ll_check_l_float32_default(_fun, L, 2, 1.0f);
+    l_float32 normsum = ll_opt_l_float32(_fun, L, 2, 1.0f);
     Kernel *kel = kernelNormalize(kels, normsum);
     return ll_push_Kernel(_fun, L, kel);
 }
@@ -493,7 +493,7 @@ ll_check_Kernel(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Kernel* contained in the user data
  */
 Kernel *
-ll_check_Kernel_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_Kernel(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;
@@ -523,7 +523,60 @@ ll_push_Kernel(const char *_fun, lua_State *L, Kernel *cd)
 int
 ll_new_Kernel(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_Kernel");
+    Kernel* kel = nullptr;
+
+    if (lua_isuserdata(L, 1)) {
+        Pix *pix = ll_opt_Pix(_fun, L, 1);
+        if (pix) {
+            l_int32 cy = ll_opt_l_int32(_fun, L, 2, 0);
+            l_int32 cx = ll_opt_l_int32(_fun, L, 2, 0);
+            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+                LL_PIX, reinterpret_cast<void *>(pix));
+            kel = kernelCreateFromPix(pix, cy, cx);
+        } else {
+            luaL_Stream *stream = ll_check_stream(_fun, L, 1);
+            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+                LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
+            kel = kernelReadStream(stream->f);
+        }
+    }
+
+    if (lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
+        l_int32 height = ll_opt_l_int32(_fun, L, 1, 1);
+        l_int32 width = ll_opt_l_int32(_fun, L, 2, 1);
+        DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d\n", _fun,
+            "height", height, "width", width);
+        kel = kernelCreate(height, width);
+    }
+
+    if (!kel && lua_isstring(L, 1)) {
+        const char* filename = ll_check_string(_fun, L, 1);
+        DBG(LOG_NEW_CLASS, "%s: create for %s = '%s'\n", _fun,
+            "filename", filename);
+        kel = kernelRead(filename);
+    }
+
+    if (!kel && lua_isstring(L, 1)) {
+        l_int32 h = ll_opt_l_int32(_fun, L, 1, 3);
+        l_int32 w = ll_opt_l_int32(_fun, L, 2, 3);
+        l_int32 cy = ll_opt_l_int32(_fun, L, 3, 0);
+        l_int32 cx = ll_opt_l_int32(_fun, L, 4, 0);
+        const char* kdata = ll_check_string(_fun, L, 5);
+        DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d, %s = %d, %s = %d, %s = %s\n", _fun,
+            "h", h, "w", w, "cy", cy, "cx", cx, "kdata", kdata);
+        kel = kernelCreateFromString(h, w, cy, cx, kdata);
+    }
+
+    if (!kel) {
+        DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d\n", _fun,
+            "height", 1, "width", 1);
+        kel = kernelCreate(1, 1);
+    }
+
+    DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
+        LL_KERNEL, reinterpret_cast<void *>(kel));
+    return ll_push_Kernel(_fun, L, kel);
 }
 
 /**
@@ -535,8 +588,8 @@ int
 ll_register_Kernel(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},   /* garbage collector */
-        {"__new",               Create},
+        {"__gc",                Destroy},           /* garbage collector */
+        {"__new",               ll_new_Kernel},     /* Kernel() */
         {"__tostring",          toString},
         {"Copy",                Copy},
         {"Create",              Create},
@@ -564,7 +617,7 @@ ll_register_Kernel(lua_State *L)
         LUA_SENTINEL
     };
 
-    lua_pushcfunction(L, Create);
+    lua_pushcfunction(L, ll_new_Kernel);
     lua_setglobal(L, LL_KERNEL);
     return ll_register_class(L, LL_KERNEL, methods, functions);
 }

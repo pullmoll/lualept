@@ -316,7 +316,7 @@ ll_check_PdfData(const char *_fun, lua_State *L, int arg)
  * \return pointer to the PdfData* contained in the user data
  */
 PdfData *
-ll_check_PdfData_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_PdfData(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;

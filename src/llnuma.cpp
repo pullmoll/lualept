@@ -73,7 +73,7 @@ static int
 Create(lua_State *L)
 {
     LL_FUNC("Create");
-    l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
     Numa* na = numaCreate(n);
     return ll_push_Numa(_fun, L, na);
 }
@@ -200,9 +200,9 @@ ConvertToSarray(lua_State *L)
     LL_FUNC("ConvertToSarray");
     Numa *na = ll_check_Numa(_fun, L, 1);
     l_int32 type = ll_check_number_value(_fun, L, 2, L_FLOAT_VALUE);
-    l_int32 size1 = ll_check_l_int32_default(_fun, L, 3, 0);
-    l_int32 size2 = L_FLOAT_VALUE == type ? ll_check_l_int32_default(_fun, L, 4, 0) : 0;
-    l_int32 addzeroes = ll_check_boolean_default(_fun, L, 5, FALSE);
+    l_int32 size1 = ll_opt_l_int32(_fun, L, 3, 0);
+    l_int32 size2 = L_FLOAT_VALUE == type ? ll_opt_l_int32(_fun, L, 4, 0) : 0;
+    l_int32 addzeroes = ll_opt_boolean(_fun, L, 5, FALSE);
     Sarray *sa = numaConvertToSarray(na, size1, size2, addzeroes, type);
     ll_push_Sarray(_fun, L, sa);
     sarrayDestroy(&sa);
@@ -636,7 +636,7 @@ ll_check_Numa(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Numa* contained in the user data
  */
 Numa *
-ll_check_Numa_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_Numa(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;
@@ -670,7 +670,7 @@ ll_new_Numa(lua_State *L)
     Numa *na = nullptr;
 
     if (lua_isuserdata(L, 1)) {
-        Numa *das = ll_check_Numa_opt(_fun, L, 1);
+        Numa *das = ll_opt_Numa(_fun, L, 1);
         if (das) {
             DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
                 LL_NUMA, reinterpret_cast<void *>(das));
@@ -684,7 +684,7 @@ ll_new_Numa(lua_State *L)
     }
 
     if (lua_isinteger(L, 1)) {
-        l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+        l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
         DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
             "n", n);
         na = numaCreate(n);

@@ -356,7 +356,7 @@ ll_check_DoubleLinkedList(const char *_fun, lua_State *L, int arg)
  * \return pointer to the DoubleLinkedList* contained in the user data
  */
 DoubleLinkedList *
-ll_check_DoubleLinkedList_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_DoubleLinkedList(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;

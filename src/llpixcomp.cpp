@@ -99,7 +99,7 @@ ll_check_PixComp(const char *_fun, lua_State *L, int arg)
  * \return pointer to the PixComp* contained in the user data
  */
 PixComp *
-ll_check_PixComp_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_PixComp(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;

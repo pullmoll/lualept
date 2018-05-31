@@ -73,7 +73,7 @@ static int
 Create(lua_State *L)
 {
     LL_FUNC("Create");
-    l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
     Pixa *pixa = pixaCreate(n);
     return ll_push_Pixa(_fun, L, pixa);
 }
@@ -150,6 +150,88 @@ Copy(lua_State *L)
 }
 
 /**
+ * \brief CreateFromPix() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_int32 (n).
+ * Arg #3 is expected to be a l_int32 (cellw).
+ * Arg #4 is expected to be a l_int32 (cellh).
+ *
+ * Notes:
+ *      (1) For bpp = 1, we truncate each retrieved pix to the ON
+ *          pixels, which we assume for now start at (0,0)
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+CreateFromPix(lua_State *L)
+{
+    LL_FUNC("CreateFromPix");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 n = ll_opt_l_int32(_fun, L, 2, 1);
+    l_int32 cellw = ll_opt_l_int32(_fun, L, 3, pixGetWidth(pixs));
+    l_int32 cellh = ll_opt_l_int32(_fun, L, 4, pixGetHeight(pixs));
+    Pixa *pixa = pixaCreateFromPix(pixs, n, cellw, cellh);
+    return ll_push_Pixa(_fun, L, pixa);
+}
+
+/**
+ * \brief CreateFromPixacomp() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a PixaComp* (pixac).
+ * Arg #2 is expected to be a l_int32 (accesstype).
+ *
+ * Notes:
+ *      (1) Because the pixa has no notion of offset, the offset must
+ *          be set to 0 before the conversion, so that pixacompGetPix()
+ *          fetches all the pixcomps.  It is reset at the end.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+CreateFromPixacomp(lua_State *L)
+{
+    LL_FUNC("CreateFromPixacomp");
+    PixaComp *pixac = ll_check_PixaComp(_fun, L, 1);
+    l_int32 accesstype = ll_check_access_storage(_fun, L, 2, L_COPY);
+    Pixa *pixa = pixaCreateFromPixacomp(pixac, accesstype);
+    return ll_push_Pixa(_fun, L, pixa);
+}
+
+/**
+ * \brief Display() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
+ * Arg #2 is expected to be a l_int32 (w).
+ * Arg #3 is expected to be a l_int32 (h).
+ *
+ * Notes:
+ *      (1) This uses the boxes to place each pix in the rendered composite.
+ *      (2) Set w = h = 0 to use the b.b. of the components to determine
+ *          the size of the returned pix.
+ *      (3) Uses the first pix in pixa to determine the depth.
+ *      (4) The background is written "white".  On 1 bpp, each successive
+ *          pix is "painted" (adding foreground), whereas for grayscale
+ *          or color each successive pix is blitted with just the src.
+ *      (5) If the pixa is empty, returns an empty 1 bpp pix.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+Display(lua_State *L)
+{
+    LL_FUNC("Display");
+    Pixa *pixa = ll_check_Pixa(_fun, L, 1);
+    l_int32 w = ll_opt_l_int32(_fun, L, 2, 0);
+    l_int32 h = ll_opt_l_int32(_fun, L, 3, 0);
+    Pix *pix = pixaDisplay(pixa, w, h);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
  * \brief Get pixel aligned statistics for Pixa* (%pixa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
@@ -163,8 +245,8 @@ GetAlignedStats(lua_State *L)
     LL_FUNC("GetAlignedStats");
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
     l_int32 type = ll_check_stats_type(_fun, L, 2, L_MEAN_ABSVAL);
-    l_int32 nbins = ll_check_l_int32_default(_fun, L, 3, 2);
-    l_int32 thresh = ll_check_l_int32_default(_fun, L, 4, 0);
+    l_int32 nbins = ll_opt_l_int32(_fun, L, 3, 2);
+    l_int32 thresh = ll_opt_l_int32(_fun, L, 4, 0);
     Pix *pix = pixaGetAlignedStats(pixa, type, nbins, thresh);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -212,7 +294,7 @@ InsertPix(lua_State *L)
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, pixaGetCount(pixa));
     Pix *pixs = ll_check_Pix(_fun, L, 3);
-    Box *boxs = ll_check_Box_opt(_fun, L, 4);
+    Box *boxs = ll_opt_Box(_fun, L, 4);
     Pix *pix = pixClone(pixs);
     Box *box = boxs ? boxClone(boxs) : nullptr;
     lua_pushboolean(L, pix && 0 == pixaInsertPix(pixa, idx, pix, box));
@@ -255,8 +337,8 @@ Join(lua_State *L)
     LL_FUNC("Join");
     Pixa *pixad = ll_check_Pixa(_fun, L, 1);
     Pixa *pixas = ll_check_Pixa(_fun, L, 2);
-    l_int32 istart = ll_check_l_int32_default(_fun, L, 3, 1);
-    l_int32 iend = ll_check_l_int32_default(_fun, L, 3, pixaGetCount(pixas));
+    l_int32 istart = ll_opt_l_int32(_fun, L, 3, 1);
+    l_int32 iend = ll_opt_l_int32(_fun, L, 3, pixaGetCount(pixas));
     return ll_push_boolean(_fun, L, 0 == pixaJoin(pixad, pixas, istart, iend));
 }
 
@@ -389,11 +471,31 @@ ReplacePix(lua_State *L)
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, pixaGetCount(pixa));
     Pix *pixs = ll_check_Pix(_fun, L, 3);
-    Box *boxs = ll_check_Box_opt(_fun, L, 4);
+    Box *boxs = ll_opt_Box(_fun, L, 4);
     Pix *pix = pixClone(pixs);
     Box *box = boxs ? boxClone(boxs) : nullptr;
     lua_pushboolean(L, pix && 0 == pixaReplacePix(pixa, idx, pix, box));
     return 1;
+}
+
+/**
+ * \brief TemplatesFromComposites() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixac).
+ * Arg #2 is expected to be a Numa* (na).
+ *
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+TemplatesFromComposites(lua_State *L)
+{
+    LL_FUNC("TemplatesFromComposites");
+    Pixa *pixac = ll_check_Pixa(_fun, L, 1);
+    Numa *na = ll_check_Numa(_fun, L, 2);
+    Pixa *pixa = jbTemplatesFromComposites(pixac, na);
+    return ll_push_Pixa(_fun, L, pixa);
 }
 
 /**
@@ -475,7 +577,7 @@ ll_check_Pixa(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Pixa* contained in the user data
  */
 Pixa *
-ll_check_Pixa_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_Pixa(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;
@@ -496,6 +598,7 @@ ll_push_Pixa(const char *_fun, lua_State *L, Pixa *pixa)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, LL_PIXA, pixa);
 }
+
 /**
  * \brief Create a new Pixa*.
  * \param L pointer to the lua_State
@@ -504,8 +607,54 @@ ll_push_Pixa(const char *_fun, lua_State *L, Pixa *pixa)
 int
 ll_new_Pixa(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_Pixa");
+    Pixa *pixa = nullptr;
+
+    if (lua_isuserdata(L, 1)) {
+        Pix *pixs = ll_opt_Pix(_fun, L, 1);
+        if (pixs) {
+            l_int32 n = ll_opt_l_int32(_fun, L, 2, 1);
+            l_int32 cellw = ll_opt_l_int32(_fun, L, 3, pixGetWidth(pixs));
+            l_int32 cellh = ll_opt_l_int32(_fun, L, 4, pixGetHeight(pixs));
+            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+                LL_PIX, reinterpret_cast<void *>(pixs));
+            pixa = pixaCreateFromPix(pixs, n, cellw, cellh);
+        } else  {
+            luaL_Stream* stream = ll_check_stream(_fun, L, 1);
+            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+                LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
+            pixa = pixaReadStream(stream->f);
+        }
+    }
+
+    if (!pixa && lua_isstring(L, 1)) {
+        const char* filename = ll_check_string(_fun, L, 1);
+            DBG(LOG_NEW_CLASS, "%s: create for %s = '%s'\n", _fun,
+                "filename", filename);
+        pixa = pixaRead(filename);
+    }
+
+    if (!pixa && lua_isstring(L, 1)) {
+        size_t size = 0;
+        const char* str = ll_check_lstring(_fun, L, 1, &size);
+        const l_uint8 *data = reinterpret_cast<const l_uint8 *>(str);
+        DBG(LOG_NEW_CLASS, "%s: create for %s* = %p, %s = %llu\n", _fun,
+            "data", reinterpret_cast<const void *>(data),
+            "size", static_cast<l_uint64>(size));
+        pixa = pixaReadMem(data, size);
+    }
+
+    if (!pixa) {
+        DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
+            "n", 1);
+        pixa = pixaCreate(1);
+    }
+
+    DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
+        LL_PIXA, reinterpret_cast<void *>(pixa));
+    return ll_push_Pixa(_fun, L, pixa);
 }
+
 /**
  * \brief Register the PIX methods and functions in the LL_PIX meta table.
  * \param L pointer to the lua_State
@@ -515,31 +664,34 @@ int
 ll_register_Pixa(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},           /* garbage collector */
-        {"__new",               Create},            /* new Pixa */
-        {"__len",               GetCount},          /* #pa */
-        {"AddPix",              AddPix},
-        {"Clear",               Clear},
-        {"Copy",                Copy},
-        {"Create",              Create},
-        {"Destroy",             Destroy},
-        {"GetAlignedStats",     GetAlignedStats},
-        {"GetBoxGeometry",      GetBoxGeometry},
-        {"GetCount",            GetCount},
-        {"InsertPix",           InsertPix},
-        {"Interleave",          Interleave},
-        {"Join",                Join},
-        {"Read",                Read},
-        {"ReadFiles",           ReadFiles},
-        {"ReadMem",             ReadMem},
-        {"ReadStream",          ReadStream},
-        {"RemovePix",           RemovePix},
-        {"RemovePixAndSave",    RemovePixAndSave},
-        {"ReplacePix",          ReplacePix},
-        {"TakePix",             RemovePixAndSave},  /* alias name */
-        {"Write",               Write},
-        {"WriteMem",            WriteMem},
-        {"WriteStream",         WriteStream},
+        {"__gc",                    Destroy},           /* garbage collector */
+        {"__new",                   ll_new_Pixa},       /* Pixa() */
+        {"__len",                   GetCount},          /* #pa */
+        {"AddPix",                  AddPix},
+        {"Clear",                   Clear},
+        {"Copy",                    Copy},
+        {"Create",                  Create},
+        {"CreateFromPix",           CreateFromPix},
+        {"CreateFromPixacomp",      CreateFromPixacomp},
+        {"Destroy",                 Destroy},
+        {"GetAlignedStats",         GetAlignedStats},
+        {"GetBoxGeometry",          GetBoxGeometry},
+        {"GetCount",                GetCount},
+        {"InsertPix",               InsertPix},
+        {"Interleave",              Interleave},
+        {"Join",                    Join},
+        {"Read",                    Read},
+        {"ReadFiles",               ReadFiles},
+        {"ReadMem",                 ReadMem},
+        {"ReadStream",              ReadStream},
+        {"RemovePix",               RemovePix},
+        {"RemovePixAndSave",        RemovePixAndSave},
+        {"ReplacePix",              ReplacePix},
+        {"TakePix",                 RemovePixAndSave},  /* alias name */
+        {"TemplatesFromComposites", TemplatesFromComposites},
+        {"Write",                   Write},
+        {"WriteMem",                WriteMem},
+        {"WriteStream",             WriteStream},
         LUA_SENTINEL
     };
 
@@ -547,7 +699,7 @@ ll_register_Pixa(lua_State *L)
         LUA_SENTINEL
     };
 
-    lua_pushcfunction(L, Create);
+    lua_pushcfunction(L, ll_new_Pixa);
     lua_setglobal(L, LL_PIXA);
     return ll_register_class(L, LL_PIXA, methods, functions);
 }

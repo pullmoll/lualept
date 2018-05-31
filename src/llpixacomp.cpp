@@ -71,7 +71,7 @@ static int
 Create(lua_State *L)
 {
     LL_FUNC("Create");
-    l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
     PixaComp *pixacomp = pixacompCreate(n);
     return ll_push_PixaComp(_fun, L, pixacomp);
 }
@@ -97,7 +97,7 @@ ll_check_PixaComp(const char *_fun, lua_State *L, int arg)
  * \return pointer to the PixaComp* contained in the user data
  */
 PixaComp *
-ll_check_PixaComp_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_PixaComp(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;

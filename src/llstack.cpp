@@ -174,7 +174,7 @@ ll_check_Stack(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Stack* contained in the user data
  */
 Stack *
-ll_check_Stack_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_Stack(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;

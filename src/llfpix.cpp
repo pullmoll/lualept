@@ -72,8 +72,8 @@ static int
 Create(lua_State *L)
 {
     LL_FUNC("Create");
-    l_int32 width = ll_check_l_int32_default(_fun, L, 1, 1);
-    l_int32 height = ll_check_l_int32_default(_fun, L, 2, 1);
+    l_int32 width = ll_opt_l_int32(_fun, L, 1, 1);
+    l_int32 height = ll_opt_l_int32(_fun, L, 2, 1);
     FPix *fpix = fpixCreate(width, height);
     return ll_push_FPix(_fun, L, fpix);
 }
@@ -376,7 +376,7 @@ ConvertToPix(lua_State *L)
     FPix *fpixs = ll_check_FPix(_fun, L, 1);
     l_int32 outdepth = ll_check_l_int32(_fun, L, 2);
     l_int32 negvals = ll_check_negvals(_fun, L, 3, L_CLIP_TO_ZERO);
-    l_int32 errorflag = ll_check_boolean_default(_fun, L, 4, FALSE);
+    l_int32 errorflag = ll_opt_boolean(_fun, L, 4, FALSE);
     Pix *pix = fpixConvertToPix(fpixs, outdepth, negvals, errorflag);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -1259,7 +1259,7 @@ ll_check_FPix(const char *_fun, lua_State *L, int arg)
  * \return pointer to the FPix* contained in the user data
  */
 FPix *
-ll_check_FPix_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_FPix(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;
@@ -1297,7 +1297,7 @@ ll_new_FPix(lua_State *L)
     FPix* fpix = nullptr;
 
     if (lua_isuserdata(L, 1)) {
-        FPix *fpixs = ll_check_FPix_opt(_fun, L, 1);
+        FPix *fpixs = ll_opt_FPix(_fun, L, 1);
         if (fpixs) {
             DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
                 LL_FPIX, reinterpret_cast<void *>(fpixs));
@@ -1311,9 +1311,9 @@ ll_new_FPix(lua_State *L)
     }
 
     if (lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
-        l_int32 width = ll_check_l_int32_default(_fun, L, 1, 1);
-        l_int32 height = ll_check_l_int32_default(_fun, L, 2, 1);
-        DBG(LOG_NEW_CLASS, "%s: create from %s = %d, %s = %d\n", _fun,
+        l_int32 width = ll_opt_l_int32(_fun, L, 1, 1);
+        l_int32 height = ll_opt_l_int32(_fun, L, 2, 1);
+        DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d\n", _fun,
             "width", width, "height", height);
         fpix = fpixCreate(width, height);
     }
@@ -1336,7 +1336,7 @@ ll_new_FPix(lua_State *L)
     }
 
     if (!fpix) {
-        DBG(LOG_NEW_CLASS, "%s: createfrom %s = %d, %s = %d\n", _fun,
+        DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d\n", _fun,
             "width", 1, "height", 1);
         fpix = fpixCreate(1, 1);
     }

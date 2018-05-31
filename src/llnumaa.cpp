@@ -73,7 +73,7 @@ static int
 Create(lua_State *L)
 {
     LL_FUNC("Create");
-    l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
     Numaa *naa = numaaCreate(n);
     return ll_push_Numaa(_fun, L, naa);
 }
@@ -170,8 +170,8 @@ static int
 CreateFull(lua_State *L)
 {
     LL_FUNC("CreateFull");
-    l_int32 nptr = ll_check_l_int32_default(_fun, L, 1, 1);
-    l_int32 n = ll_check_l_int32_default(_fun, L, 2, 1);
+    l_int32 nptr = ll_opt_l_int32(_fun, L, 1, 1);
+    l_int32 n = ll_opt_l_int32(_fun, L, 2, 1);
     Numaa *naa = numaaCreateFull(nptr, n);
     return ll_push_Numaa(_fun, L, naa);
 }
@@ -417,7 +417,7 @@ ll_check_Numaa(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Numaa* contained in the user data
  */
 Numaa *
-ll_check_Numaa_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_Numaa(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;
@@ -458,13 +458,13 @@ ll_new_Numaa(lua_State *L)
 
     if (!naa && lua_isinteger(L, 1)) {
         if (lua_isinteger(L, 2)) {
-            l_int32 nptr = ll_check_l_int32_default(_fun, L, 1, 1);
-            l_int32 n = ll_check_l_int32_default(_fun, L, 2, 1);
+            l_int32 nptr = ll_opt_l_int32(_fun, L, 1, 1);
+            l_int32 n = ll_opt_l_int32(_fun, L, 2, 1);
             DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d\n", _fun,
                 "nptr", nptr, "n", n);
             naa = numaaCreateFull(nptr, n);
         } else {
-            l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+            l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
             DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
                 "n", n);
             naa = numaaCreate(n);

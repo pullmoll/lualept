@@ -75,7 +75,7 @@ Create(lua_State *L)
 {
     LL_FUNC("Create");
     Pix* pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 n = ll_check_l_int32_default(_fun, L, 2, 1);
+    l_int32 n = ll_opt_l_int32(_fun, L, 2, 1);
     CCBorda *ccba = ccbaCreate(pixs, n);
     return ll_push_CCBorda(_fun, L, ccba);
 }
@@ -414,7 +414,7 @@ ll_check_CCBorda(const char *_fun, lua_State *L, int arg)
  * \return pointer to the CCBorda* contained in the user data
  */
 CCBorda *
-ll_check_CCBorda_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_CCBorda(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;
@@ -448,9 +448,9 @@ ll_new_CCBorda(lua_State *L)
     CCBorda *ccba = nullptr;
 
     if (lua_isuserdata(L, 1)) {
-        Pix* pixs = ll_check_Pix_opt(_fun, L, 1);
+        Pix* pixs = ll_opt_Pix(_fun, L, 1);
         if (pixs) {
-            l_int32 n = ll_check_l_int32_default(_fun, L, 2, 1);
+            l_int32 n = ll_opt_l_int32(_fun, L, 2, 1);
             DBG(LOG_NEW_CLASS, "%s: create for %s* = %p, %s = %n\n", _fun,
                 LL_PIX, reinterpret_cast<void *>(pixs), "n", n);
             ccba = ccbaCreate(pixs, n);

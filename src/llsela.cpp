@@ -73,7 +73,7 @@ static int
 Create(lua_State *L)
 {
     LL_FUNC("Create");
-    l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
     Sela *pa = selaCreate(n);
     return ll_push_Sela(_fun, L, pa);
 }
@@ -546,7 +546,7 @@ MakeThinSets(lua_State *L)
 {
     LL_FUNC("MakeThinSets");
     l_int32 index = ll_check_l_int32(_fun, L, 1);
-    l_int32 debug = ll_check_boolean_default(_fun, L, 2, FALSE);
+    l_int32 debug = ll_opt_boolean(_fun, L, 2, FALSE);
     Sela *sela = selaMakeThinSets(index, debug);
     return ll_push_Sela(_fun, L, sela);
 }
@@ -572,7 +572,7 @@ ll_check_Sela(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Sela* contained in the user data
  */
 Sela *
-ll_check_Sela_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_Sela(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;

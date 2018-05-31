@@ -73,7 +73,7 @@ static int
 Create(lua_State *L)
 {
     LL_FUNC("Create");
-    l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
     Boxaa *boxaa = boxaaCreate(n);
     return ll_push_Boxaa(_fun, L, boxaa);
 }
@@ -231,7 +231,7 @@ FlattenAligned(lua_State *L)
     Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
     l_int32 num = ll_check_l_int32(_fun, L, 2);
     l_int32 copyflag = ll_check_access_storage(_fun, L, 3, L_COPY);
-    Box *fillerbox = ll_check_Box_opt(_fun, L, 4);
+    Box *fillerbox = ll_opt_Box(_fun, L, 4);
     Boxa *boxa = boxaaFlattenAligned(boxaa, num, fillerbox, copyflag);
     return ll_push_Boxa(_fun, L, boxa);
 }
@@ -529,7 +529,7 @@ ll_check_Boxaa(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Boxaa* contained in the user data
  */
 Boxaa *
-ll_check_Boxaa_opt(const char *_fun, lua_State *L, int arg)
+ll_opt_Boxaa(const char *_fun, lua_State *L, int arg)
 {
     if (!lua_isuserdata(L, arg))
         return nullptr;
@@ -562,7 +562,7 @@ ll_new_Boxaa(lua_State *L)
     Boxaa *boxaa = nullptr;
 
     if (lua_isuserdata(L, 1)) {
-        Boxaa *boxaas = ll_check_Boxaa_opt(_fun, L, 1);
+        Boxaa *boxaas = ll_opt_Boxaa(_fun, L, 1);
         if (boxaas) {
             DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
                 LL_BOXAA, reinterpret_cast<void *>(boxaas));
@@ -575,7 +575,7 @@ ll_new_Boxaa(lua_State *L)
         }
     }
     if (!boxaa && lua_isinteger(L, 1)) {
-        l_int32 n = ll_check_l_int32_default(_fun, L, 1, 1);
+        l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
         DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
             "n", n);
         boxaa = boxaaCreate(n);
