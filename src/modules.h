@@ -125,7 +125,7 @@
 #define	LL_PTA		"Pta"           /*!< Lua class: Pta (array of points, i.e. pair of l_float32) */
 #define	LL_PTAA		"Ptaa"          /*!< Lua class: Ptaa (array of Pta) */
 #define	LL_RBTNODE      "RbtreeNode"    /*!< Lua class: RbtreeNode (Amap and Aset nodes) */
-#define	LL_SARRAY	"Sarray"        /*!< Lua class: Sel */
+#define	LL_SARRAY	"Sarray"        /*!< Lua class: Sarray (array of strings) */
 #define	LL_SEL		"Sel"           /*!< Lua class: Sel */
 #define	LL_SELA		"Sela"          /*!< Lua class: array of Sel */
 #define	LL_STACK        "Stack"         /*!< Lua class: Stack */

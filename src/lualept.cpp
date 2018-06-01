@@ -31,6 +31,65 @@
 
 #include "modules.h"
 
+/**
+ * \mainpage LuaLept
+ *
+ * ## Lua language bindings for Leptonica.
+ *
+ * This is a WIP (work in progress) to create a Lua (https://www.lua.org/) wrapper
+ * for Leptonica (http://leptonica.org/).
+ *
+ * The project's goal is to cover most if not all of Leptonica's huge number of
+ * types and functions in a marriage of Lua's and Leptonica's concepts.
+ *
+ * This is my first *larger* Lua and C-Functions project and I may well be doing some
+ * things in an awkward way or even outright wrong, so feel free to point your fingers
+ * at me and tell me where I'm missing the point.
+ *
+ * Still, the project already runs some script (lua/script.lua) which I use for testing
+ * the bindings as I write the wrappers.
+ *
+ * The globals defined by this module are:
+ * - %LuaLept the main class
+ * - %LL_AMAP         Amap (key / value pairs)
+ * - %LL_ASET         Aset (key set)
+ * - %LL_BMF          Bmf (Bitmap font)
+ * - %LL_BOX          Box (quad l_int32 for x,y,w,h)
+ * - %LL_BOXA         Boxa (array of Box)
+ * - %LL_BOXAA        Boxaa (array of Boxa)
+ * - %LL_COMPDATA     CompData
+ * - %LL_CCBORD       CCBord
+ * - %LL_CCBORDA      CCBorda (array of CCBord)
+ * - %LL_DEWARP       Dewarp
+ * - %LL_DEWARPA      Dewarpa (array of Dewarp)
+ * - %LL_DLLIST       DoubleLinkedList
+ * - %LL_DNA          array of doubles (l_float64, equiv. to lua_Number)
+ * - %LL_DNAA         Dnaa (array of Dna)
+ * - %LL_DPIX         DPix
+ * - %LL_FPIX         FPix
+ * - %LL_FPIXA        FPixa (array of FPix)
+ * - %LL_KERNEL       Kernel
+ * - %LL_NUMA         Numa array of floats (l_float32)
+ * - %LL_NUMAA        Numaa (array of Numa)
+ * - %LL_PDFDATA      PdfData
+ * - %LL_PIX          Pix (pixels and meta data)
+ * - %LL_PIXA         Pixa (array of Pix)
+ * - %LL_PIXAA        Pixaa (array of Pixa)
+ * - %LL_PIXCMAP      PixColormap (color map)
+ * - %LL_PIXTILING    PixTiling
+ * - %LL_PIXCOMP      PixComp (compressed Pix)
+ * - %LL_PIXACOMP     PixaComp (array of PixComp)
+ * - %LL_PTA          Pta (array of points, i.e. pair of l_float32)
+ * - %LL_PTAA         Ptaa (array of Pta)
+ * - %LL_RBTNODE      RbtreeNode (Amap and Aset nodes)
+ * - %LL_SARRAY       Sarray (array of Leptonica strings)
+ * - %LL_SEL          Sel
+ * - %LL_SELA         array of Sel
+ * - %LL_STACK        Stack
+ *
+ * Jürgen Buchmüller <pullmoll@t-online.de>
+ */
+
 #if !defined(ARRAYSIZE)
 #define ARRAYSIZE(t) (sizeof(t)/sizeof(t[0]))
 #endif
@@ -1558,6 +1617,11 @@ ll_check_tbl(const char *_fun, lua_State *L, int arg, l_int32 def, const lept_en
  * \brief Table of access/storage flag names and enumeration values.
  * <pre>
  * Access and storage flags.
+ * L_NOCOPY      : do not copy the object; do not delete the ptr
+ * L_INSERT      : stuff it in; do not copy or clone
+ * L_COPY        : make/use a copy of the object
+ * L_CLONE       : make/use clone (ref count) of the object
+ * L_COPY_CLONE  : make a new array object (e.g., pixa) and fill the array with clones (e.g., pix)
  * </pre>
  */
 static const lept_enum_t tbl_access_storage[] = {
@@ -1698,17 +1762,17 @@ ll_string_encoding(l_int32 encoding)
 /**
  * \brief Table of input file format names and enumeration values.
  * <pre>
- *  The IFF_DEFAULT flag is used to write the file out in the
- *  same (input) file format that the pix was read from.  If the pix
- *  was not read from file, the input format field will be
- *  IFF_UNKNOWN and the output file format will be chosen to
- *  be compressed and lossless; namely, IFF_TIFF_G4 for d = 1
- *  and IFF_PNG for everything else.
+ * The IFF_DEFAULT flag is used to write the file out in the
+ * same (input) file format that the pix was read from.  If the pix
+ * was not read from file, the input format field will be
+ * IFF_UNKNOWN and the output file format will be chosen to
+ * be compressed and lossless; namely, IFF_TIFF_G4 for d = 1
+ * and IFF_PNG for everything else.
  *
- *  In the future, new format types that have defined extensions
- *  will be added before IFF_DEFAULT, and will be kept in sync with
- *  the file format extensions in writefile.c.  The positions of
- *  file formats before IFF_DEFAULT will remain invariant.
+ * In the future, new format types that have defined extensions
+ * will be added before IFF_DEFAULT, and will be kept in sync with
+ * the file format extensions in writefile.c.  The positions of
+ * file formats before IFF_DEFAULT will remain invariant.
  * </pre>
  */
 static const lept_enum_t tbl_input_format[] = {

@@ -252,7 +252,7 @@ FindTail(lua_State *L)
  *      (2) If you are searching through a list, looking for a condition
  *          to add an element, you can do something like this:
  *            L_BEGIN_LIST_FORWARD(head, elem)
- *                <identify an elem to insert after>
+ *                // identify an elem to insert after
  *                listInsertAfter(&head, elem, data);
  *            L_END_LIST
  * </pre>
@@ -282,7 +282,7 @@ InsertAfter(lua_State *L)
  *      (2) If you are searching through a list, looking for a condition
  *          to add an element, you can do something like this:
  *            L_BEGIN_LIST_FORWARD(head, elem)
- *                <identify an elem to insert before>
+ *                // identify an elem to insert before
  *                listInsertBefore(&head, elem, data);
  *            L_END_LIST
  *

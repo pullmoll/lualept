@@ -618,6 +618,7 @@ RestoreModels(lua_State *L)
  *           - useboth = 1 (TRUE)
  *          If there are multiple columns, additionally
  *           - check_columns = 0 (FALSE)
+ *
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack

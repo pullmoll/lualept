@@ -41,8 +41,10 @@
 #define LL_FUNC(x) FUNC(LL_FPIX "." x)
 
 /**
- * \brief Destroy a FPix*.
- *
+ * \brief Destroy a FPix* (%fpix).
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a FPix* (fpixs).
+ * </pre>
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack
  */
@@ -60,7 +62,10 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Printable string for a FPix*.
+ * \brief Printable string for a FPix* (%fpix).
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a FPix* (fpixs).
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
  */
@@ -207,8 +212,8 @@ AddMultConstant(lua_State *L)
 {
     LL_FUNC("AddMultConstant");
     FPix *fpix = ll_check_FPix(_fun, L, 1);
-    l_float32 addc = ll_check_l_float32(_fun, L, 2);
-    l_float32 multc = ll_check_l_float32(_fun, L, 3);
+    l_float32 addc = ll_opt_l_float32(_fun, L, 2, 0.0f);
+    l_float32 multc = ll_opt_l_float32(_fun, L, 3, 1.0f);
     return ll_push_boolean(_fun, L, 0 == fpixAddMultConstant(fpix, addc, multc));
 }
 
@@ -293,8 +298,8 @@ AffinePta(lua_State *L)
     FPix *fpixs = ll_check_FPix(_fun, L, 1);
     Pta *ptad = ll_check_Pta(_fun, L, 2);
     Pta *ptas = ll_check_Pta(_fun, L, 3);
-    l_int32 border = ll_check_l_int32(_fun, L, 4);
-    l_float32 inval = ll_check_l_float32(_fun, L, 5);
+    l_int32 border = ll_opt_l_int32(_fun, L, 4);
+    l_float32 inval = ll_opt_l_float32(_fun, L, 5);
     FPix *fpix = fpixAffinePta(fpixs, ptad, ptas, border, inval);
     return ll_push_FPix(_fun, L, fpix);
 }
@@ -524,7 +529,7 @@ static int
 Copy(lua_State *L)
 {
     LL_FUNC("Copy");
-    FPix *fpixd = ll_check_FPix(_fun, L, 1);
+    FPix *fpixd = ll_opt_FPix(_fun, L, 1);
     FPix *fpixs = ll_check_FPix(_fun, L, 2);
     FPix *fpix = fpixCopy(fpixd, fpixs);
     return ll_push_FPix(_fun, L, fpix);
@@ -629,7 +634,7 @@ static int
 EndianByteSwap(lua_State *L)
 {
     LL_FUNC("EndianByteSwap");
-    FPix *fpixd = ll_check_FPix(_fun, L, 1);
+    FPix *fpixd = ll_opt_FPix(_fun, L, 1);
     FPix *fpixs = ll_check_FPix(_fun, L, 2);
     FPix *fpix = fpixEndianByteSwap(fpixd, fpixs);
     return ll_push_FPix(_fun, L, fpix);
@@ -738,7 +743,7 @@ GetDimensions(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a FPix* (fpix).
  * </pre>
  * \param L pointer to the lua_State
- * \return 3 one number (%maxval) and 2 integers (%xmaxloc, %ymaxloc) on the Lua stack
+ * \return 3 number (%maxval) and integers (%xmaxloc, %ymaxloc) on the Lua stack
  */
 static int
 GetMax(lua_State *L)
@@ -762,7 +767,7 @@ GetMax(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a FPix* (fpix).
  * </pre>
  * \param L pointer to the lua_State
- * \return 3 one number (%minval) and 2 integers (%xminloc, %yminloc) on the Lua stack
+ * \return 3 number (%minval) and integers (%xminloc, %yminloc) on the Lua stack
  */
 static int
 GetMin(lua_State *L)
@@ -847,7 +852,7 @@ GetResolution(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a FPix* (fpix).
  * </pre>
  * \param L pointer to the lua_State
- * \return 0 on the Lua stack
+ * \return 1 l_int32 on the Lua stack
  */
 static int
 GetWpl(lua_State *L)
@@ -878,7 +883,7 @@ GetWpl(lua_State *L)
  *      (4) fpixs2 must be different from both fpixd and fpixs1.
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 on the Lua stack
+ * \return 1 FPix* on the Lua stack
  */
 static int
 LinearCombination(lua_State *L)
@@ -1168,7 +1173,7 @@ static int
 Rotate180(lua_State *L)
 {
     LL_FUNC("Rotate180");
-    FPix *fpixd = ll_check_FPix(_fun, L, 1);
+    FPix *fpixd = ll_opt_FPix(_fun, L, 1);
     FPix *fpixs = ll_check_FPix(_fun, L, 2);
     FPix *fpix = fpixRotate180(fpixd, fpixs);
     return ll_push_FPix(_fun, L, fpix);
@@ -1193,16 +1198,16 @@ Rotate90(lua_State *L)
 {
     LL_FUNC("Rotate90");
     FPix *fpixs = ll_check_FPix(_fun, L, 1);
-    l_int32 direction = ll_check_l_int32(_fun, L, 2);
-    FPix *fpix = fpixRotate90(fpixs, direction);
-    return ll_push_FPix(_fun, L, fpix);
+    l_int32 direction = ll_opt_l_int32(_fun, L, 2, 1);
+    FPix *fpixd = fpixRotate90(fpixs, direction);
+    return ll_push_FPix(_fun, L, fpixd);
 }
 
 /**
  * \brief Rotate orthogonally FPix* (%fpixs) by rotation (%quads) giving FPix* (%fpixd).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPix* (fpixs).
- * Arg #2 is expected to be a l_int32 (quads).
+ * Arg #2 is expected to be a string describing the angle (quads).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 on the Lua stack
@@ -1213,8 +1218,8 @@ RotateOrth(lua_State *L)
     LL_FUNC("RotateOrth");
     FPix *fpixs = ll_check_FPix(_fun, L, 1);
     l_int32 quads = ll_check_rotation(_fun, L, 2, 0);
-    FPix *fpix = fpixRotateOrth(fpixs, quads);
-    return ll_push_FPix(_fun, L, fpix);
+    FPix *fpixd = fpixRotateOrth(fpixs, quads);
+    return ll_push_FPix(_fun, L, fpixd);
 }
 
 /**

@@ -14632,12 +14632,6 @@ GenerateSelWithRuns(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- *
-/*!
- * \brief   pixGetAllCCBorders()
- *
- * \param[in]    pixs 1 bpp
- * \return  ccborda, or NULL on error
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 CCBorda * on the Lua stack
@@ -14700,7 +14694,9 @@ GetAutoFormat(lua_State *L)
  *          L_VARIANCE to get the average squared difference from the
  *          expected value.  The variance is the square of the stdev.
  *          For the standard deviation, we use
+ * \code
  *              sqrt(<(<x> - x)>^2) = sqrt(<x^2> - <x>^2)
+ * \endcode
  *      (3) Set the subsampling %factor > 1 to reduce the amount of
  *          computation.
  *      (4) Clipping of pixm (if it exists) to pixs is done in the inner loop.
@@ -18023,10 +18019,10 @@ ItalicWords(lua_State *L)
  *
  * Leptonica's Notes:
  *      (1) In-place operation.
- *      (2) Maximum fading fraction @maxfade occurs at the edge of the image,
- *          and the fraction goes to 0 at the fractional distance @distfract
- *          from the edge.  @maxfade must be in [0, 1].
- *      (3) @distrfact must be in [0, 1], and typically it would be <= 0.5.
+ *      (2) Maximum fading fraction %maxfade occurs at the edge of the image,
+ *          and the fraction goes to 0 at the fractional distance %distfract
+ *          from the edge.  %maxfade must be in [0, 1].
+ *      (3) %distrfact must be in [0, 1], and typically it would be <= 0.5.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -18287,7 +18283,7 @@ MakeAlphaFromMask(lua_State *L)
  *          example, a mask that discriminates against red and in favor
  *          of blue will have rc < 0.0 and bc > 0.0.
  *      (3) To make the result independent of intensity (the 'V' in HSV),
- *          select coefficients so that @thresh = 0.  Then the result
+ *          select coefficients so that %thresh = 0.  Then the result
  *          is not changed when all components are multiplied by the
  *          same constant (as long as nothing saturates).  This can be
  *          useful if, for example, the illumination is not uniform.
@@ -19925,7 +19921,7 @@ MorphSequenceMasked(lua_State *L)
  *          and calibration of the printer.  This function can be used
  *          to iteratively match a color print to the original.  On each
  *          iteration, the center offsets are set to the best match so
- *          far, and the @delta increments are typically reduced.
+ *          far, and the %delta increments are typically reduced.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
