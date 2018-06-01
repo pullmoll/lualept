@@ -31,11 +31,12 @@
 
 #include "modules.h"
 
-/*====================================================================*
+/**
+ * \file llnumaa.cpp
+ * \class Numaa
  *
- *  Lua class Numaa
- *
- *====================================================================*/
+ * An array of Numa.
+ */
 
 /** Define a function's name (_fun) with prefix LL_NUMAA */
 #define LL_FUNC(x) FUNC(LL_NUMAA "." x)

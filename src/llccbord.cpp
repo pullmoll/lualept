@@ -31,11 +31,12 @@
 
 #include "modules.h"
 
-/*====================================================================*
+/**
+ * \file llccbord.cpp
+ * \class CCBord
  *
- *  Lua class CCBord
- *
- *====================================================================*/
+ * A class for handling c.c. borders.
+ */
 
 /** Define a function's name (_fun) with prefix LL_CCBORD */
 #define LL_FUNC(x) FUNC(LL_CCBORD "." x)

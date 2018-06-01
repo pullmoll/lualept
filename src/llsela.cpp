@@ -31,11 +31,12 @@
 
 #include "modules.h"
 
-/*====================================================================*
+/**
+ * \file llsela.cpp
+ * \class Sela
  *
- *  Lua class Sela
- *
- *====================================================================*/
+ * An array of Sel.
+ */
 
 /** Define a function's name (_fun) with prefix LL_SELA */
 #define LL_FUNC(x) FUNC(LL_SELA "." x)

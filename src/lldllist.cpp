@@ -31,11 +31,12 @@
 
 #include "modules.h"
 
-/*====================================================================*
+/**
+ * \file lldllist.cpp
+ * \class DoubleLinkedList
  *
- *  Lua class DoubleLinkedList
- *
- *====================================================================*/
+ * A double linked list of pointers.
+ */
 
 /** Define a function's name (_fun) with prefix LL_DLLIST */
 #define LL_FUNC(x) FUNC(LL_DLLIST "." x)

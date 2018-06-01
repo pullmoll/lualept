@@ -31,11 +31,12 @@
 
 #include "modules.h"
 
-/*====================================================================*
+/**
+ * \file llbmf.cpp
+ * \class Bmf
  *
- *  Lua class Bmf
- *
- *====================================================================*/
+ * A bitmap font.
+ */
 
 /** Define a function's name (_fun) with prefix LL_BMF */
 #define LL_FUNC(x) FUNC(LL_BMF "." x)

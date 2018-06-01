@@ -31,11 +31,12 @@
 
 #include "modules.h"
 
-/*====================================================================*
+/**
+ * \file llstack.cpp
+ * \class Stack
  *
- *  Lua class Stack
- *
- *====================================================================*/
+ * A stack of pointers.
+ */
 
 /** Define a function's name (_fun) with prefix LL_STACK */
 #define LL_FUNC(x) FUNC(LL_STACK "." x)

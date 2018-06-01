@@ -31,11 +31,12 @@
 
 #include "modules.h"
 
-/*====================================================================*
+/**
+ * \file llpixacomp.cpp
+ * \class PixaComp
  *
- *  Lua class PixaComp
- *
- *====================================================================*/
+ * A class to handle compressed Pix.
+ */
 
 /** Define a function's name (_fun) with prefix LL_PIXACOMP */
 #define LL_FUNC(x) FUNC(LL_PIXACOMP "." x)

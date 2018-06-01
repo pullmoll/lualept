@@ -31,11 +31,12 @@
 
 #include "modules.h"
 
-/*====================================================================*
+/**
+ * \file llccborda.cpp
+ * \class CCBorda
  *
- *  Lua class CCBorda
- *
- *====================================================================*/
+ * An array of CCBord.
+ */
 
 /** Define a function's name (_fun) with prefix LL_CCBORDA */
 #define LL_FUNC(x) FUNC(LL_CCBORDA "." x)

@@ -31,11 +31,12 @@
 
 #include "modules.h"
 
-/*====================================================================*
+/**
+ * \file lldewarp.cpp
+ * \class Dewarp
  *
- *  Lua class Dewarp
- *
- *====================================================================*/
+ * A class to handle dewarping Pix.
+ */
 
 /** Define a function's name (_fun) with prefix LL_DEWARP */
 #define LL_FUNC(x) FUNC(LL_DEWARP "." x)

@@ -31,11 +31,12 @@
 
 #include "modules.h"
 
-/*====================================================================*
+/**
+ * \file llpdfdata.cpp
+ * \class PdfData
  *
- *  Lua class PdfData
- *
- *====================================================================*/
+ * A class to handle PDF data.
+ */
 
 /** Define a function's name (_fun) with prefix LL_PDFDATA */
 #define LL_FUNC(x) FUNC(LL_PDFDATA "." x)

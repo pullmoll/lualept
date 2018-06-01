@@ -31,6 +31,13 @@
 
 #include "modules.h"
 
+/**
+ * \file llpix.cpp
+ * \class Pix
+ *
+ * A 2-D array of pixels and its meta data.
+ */
+
 #if !defined(PATH_MAX)
 #ifdef _MSC_VER
 #define PATH_MAX    266
@@ -41,12 +48,6 @@
 
 /** Table of bit counts in a byte */
 static l_int32 tab8[256];
-
-/*====================================================================*
- *
- *  Lua class Pix
- *
- *====================================================================*/
 
 /** Define a function's name (_fun) with prefix LL_PIX */
 #define LL_FUNC(x) FUNC(LL_PIX "." x)

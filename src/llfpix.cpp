@@ -31,11 +31,12 @@
 
 #include "modules.h"
 
-/*====================================================================*
+/**
+ * \file llfpix.cpp
+ * \class FPix
  *
- *  Lua class FPix
- *
- *====================================================================*/
+ * A 2-D pixels array of floats (l_float32).
+ */
 
 /** Define a function's name (_fun) with prefix LL_FPIX */
 #define LL_FUNC(x) FUNC(LL_FPIX "." x)

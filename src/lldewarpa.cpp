@@ -31,11 +31,12 @@
 
 #include "modules.h"
 
-/*====================================================================*
+/**
+ * \file lldewarpa.cpp
+ * \class Dewarpa
  *
- *  Lua class Dewarpa
- *
- *====================================================================*/
+ * An array of Dewarp.
+ */
 
 /** Define a function's name (_fun) with prefix LL_DEWARPA */
 #define LL_FUNC(x) FUNC(LL_DEWARPA "." x)

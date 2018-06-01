@@ -31,11 +31,12 @@
 
 #include "modules.h"
 
-/*====================================================================*
+/**
+ * \file llpixcmap.cpp
+ * \class PixColormap
  *
- *  Lua class PixColormap
- *
- *====================================================================*/
+ * A class to handle a Pix color map ("palette").
+ */
 
 /** Define a function's name (_fun) with prefix LL_PIXCMAP */
 #define LL_FUNC(x) FUNC(LL_PIXCMAP "." x)

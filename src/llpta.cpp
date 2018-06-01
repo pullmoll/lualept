@@ -31,11 +31,12 @@
 
 #include "modules.h"
 
-/*====================================================================*
+/**
+ * \file llpta.cpp
+ * \class Pta
  *
- *  Lua class Pta
- *
- *====================================================================*/
+ * An array of points (l_float32 x and y).
+ */
 
 /** Define a function's name (_fun) with prefix LL_PTA */
 #define LL_FUNC(x) FUNC(LL_PTA "." x)

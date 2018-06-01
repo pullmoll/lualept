@@ -31,11 +31,12 @@
 
 #include "modules.h"
 
-/*====================================================================*
+/**
+ * \file llbox.cpp
+ * \class Box
  *
- *  Lua class Box
- *
- *====================================================================*/
+ * A box: a quad of l_int32 (x, y, w, h).
+ */
 
 /** Define a function's name (_fun) with prefix LL_BOX */
 #define LL_FUNC(x) FUNC(LL_BOX "." x)

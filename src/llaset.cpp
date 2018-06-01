@@ -31,11 +31,12 @@
 
 #include "modules.h"
 
-/*====================================================================*
+/**
+ * \file llaset.cpp
+ * \class Aset
  *
- *  Lua class Aset
- *
- *====================================================================*/
+ * A set of keys of type l_int64, l_uint64 or l_float64.
+ */
 
 /** Define a function's name (_fun) with prefix LL_ASET */
 #define LL_FUNC(x) FUNC(LL_ASET "." x)

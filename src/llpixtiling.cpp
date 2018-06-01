@@ -31,11 +31,12 @@
 
 #include "modules.h"
 
-/*====================================================================*
+/**
+ * \file llpixtiling.cpp
+ * \class PixTiling
  *
- *  Lua class PixTiling
- *
- *====================================================================*/
+ * A class to handle a Pix tiling.
+ */
 
 /** Define a function's name (_fun) with prefix LL_PIXTILING */
 #define LL_FUNC(x) FUNC(LL_PIXTILING "." x)

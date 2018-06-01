@@ -31,11 +31,12 @@
 
 #include "modules.h"
 
-/*====================================================================*
+/**
+ * \file lldna.cpp
+ * \class Dna
  *
- *  Lua class Dna
- *
- *====================================================================*/
+ * An array of double (l_float64) numbers.
+ */
 
 /** Define a function's name (_fun) with prefix LL_DNA */
 #define LL_FUNC(x) FUNC(LL_DNA "." x)

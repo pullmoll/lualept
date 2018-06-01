@@ -31,11 +31,12 @@
 
 #include "modules.h"
 
-/*====================================================================*
+/**
+ * \file llkernel.cpp
+ * \class Kernel
  *
- *  Lua class Kernel
- *
- *====================================================================*/
+ * A kernel.
+ */
 
 /** Define a function's name (_fun) with prefix LL_KERNEL */
 #define LL_FUNC(x) FUNC(LL_KERNEL "." x)

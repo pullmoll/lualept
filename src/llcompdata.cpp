@@ -31,11 +31,12 @@
 
 #include "modules.h"
 
-/*====================================================================*
+/**
+ * \file llcompdata.cpp
+ * \class CompData
  *
- *  Lua class CompData
- *
- *====================================================================*/
+ * A class to handle compressed data.
+ */
 
 /** Define a function's name (_fun) with prefix LL_COMPDATA */
 #define LL_FUNC(x) FUNC(LL_COMPDATA "." x)

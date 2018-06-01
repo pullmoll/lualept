@@ -31,11 +31,12 @@
 
 #include "modules.h"
 
-/*====================================================================*
+/**
+ * \file llamap.cpp
+ * \class Amap
  *
- *  Lua class Amap
- *
- *====================================================================*/
+ * A map of keys and values of type l_int64, l_uint64 or l_float64.
+ */
 
 /** Define a function's name (_fun) with prefix LL_AMAP */
 #define LL_FUNC(x) FUNC(LL_AMAP "." x)

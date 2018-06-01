@@ -49,43 +49,43 @@
  * Still, the project already runs some script (lua/script.lua) which I use for testing
  * the bindings as I write the wrappers.
  *
- * The globals defined by this module are:
- * - %LuaLept the main class
- * - %LL_AMAP         Amap (key / value pairs)
- * - %LL_ASET         Aset (key set)
- * - %LL_BMF          Bmf (Bitmap font)
- * - %LL_BOX          Box (quad l_int32 for x,y,w,h)
- * - %LL_BOXA         Boxa (array of Box)
- * - %LL_BOXAA        Boxaa (array of Boxa)
- * - %LL_COMPDATA     CompData
- * - %LL_CCBORD       CCBord
- * - %LL_CCBORDA      CCBorda (array of CCBord)
- * - %LL_DEWARP       Dewarp
- * - %LL_DEWARPA      Dewarpa (array of Dewarp)
- * - %LL_DLLIST       DoubleLinkedList
- * - %LL_DNA          array of doubles (l_float64, equiv. to lua_Number)
- * - %LL_DNAA         Dnaa (array of Dna)
- * - %LL_DPIX         DPix
- * - %LL_FPIX         FPix
- * - %LL_FPIXA        FPixa (array of FPix)
- * - %LL_KERNEL       Kernel
- * - %LL_NUMA         Numa array of floats (l_float32)
- * - %LL_NUMAA        Numaa (array of Numa)
- * - %LL_PDFDATA      PdfData
- * - %LL_PIX          Pix (pixels and meta data)
- * - %LL_PIXA         Pixa (array of Pix)
- * - %LL_PIXAA        Pixaa (array of Pixa)
- * - %LL_PIXCMAP      PixColormap (color map)
- * - %LL_PIXTILING    PixTiling
- * - %LL_PIXCOMP      PixComp (compressed Pix)
- * - %LL_PIXACOMP     PixaComp (array of PixComp)
- * - %LL_PTA          Pta (array of points, i.e. pair of l_float32)
- * - %LL_PTAA         Ptaa (array of Pta)
- * - %LL_RBTNODE      RbtreeNode (Amap and Aset nodes)
- * - %LL_SARRAY       Sarray (array of Leptonica strings)
- * - %LL_SEL          Sel
- * - %LL_SELA         array of Sel
- * - %LL_STACK        Stack
+ * The globals (or Lua <i>classes</i>) defined by this library currently are:
+ * - LuaLept the main class
+ * - Amap
+ * - Aset
+ * - Bmf
+ * - Box
+ * - Boxa
+ * - Boxaa
+ * - CompData
+ * - CCBord
+ * - CCBorda
+ * - Dewarp
+ * - Dewarpa
+ * - DoubleLinkedList
+ * - Dna
+ * - Dnaa
+ * - DPix
+ * - FPix
+ * - FPixa
+ * - Kernel
+ * - Numa
+ * - Numaa
+ * - PdfData
+ * - Pix
+ * - Pixa
+ * - Pixaa
+ * - PixColormap
+ * - PixTiling
+ * - PixComp
+ * - PixaComp
+ * - Pta
+ * - Ptaa
+ * - RbtreeNode
+ * - Sarray
+ * - Sel
+ * - Sela
+ * - Stack
  *
  * Jürgen Buchmüller <pullmoll@t-online.de>
  */
@@ -3473,11 +3473,10 @@ ll_string_paint_flags(l_int32 paint_type)
     return ll_string_tbl(paint_type, tbl_paint_flags, ARRAYSIZE(tbl_paint_flags));
 }
 
-/*====================================================================*
- *
- *  Lua class LuaLept
- *
- *====================================================================*/
+/**
+ * \class LuaLept
+ * The main class.
+ */
 
 static int
 Create(lua_State *L)

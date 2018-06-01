@@ -31,11 +31,12 @@
 
 #include "modules.h"
 
-/*====================================================================*
+/**
+ * \file lldpix.cpp
+ * \class DPix
  *
- *  Lua class DPix
- *
- *====================================================================*/
+ * A 2-D pixels array of doubles (l_float64).
+ */
 
 /** Define a function's name (_fun) with prefix LL_DPIX */
 #define LL_FUNC(x) FUNC(LL_DPIX "." x)

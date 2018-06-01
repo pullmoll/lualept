@@ -31,11 +31,12 @@
 
 #include "modules.h"
 
-/*====================================================================*
+/**
+ * \file llpixaa.cpp
+ * \class Pixaa
  *
- *  Lua class Pixaa
- *
- *====================================================================*/
+ * An array of Pixa.
+ */
 
 /** Define a function's name (_fun) with prefix LL_PIXAA */
 #define LL_FUNC(x) FUNC(LL_PIXAA "." x)

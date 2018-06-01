@@ -31,11 +31,12 @@
 
 #include "modules.h"
 
-/*====================================================================*
+/**
+ * \file llboxa.cpp
+ * \class Boxa
  *
- *  Lua class Boxa
- *
- *====================================================================*/
+ * An array of Box.
+ */
 
 /** Define a function's name (_fun) with prefix LL_BOXA */
 #define LL_FUNC(x) FUNC(LL_BOXA "." x)

@@ -31,11 +31,12 @@
 
 #include "modules.h"
 
-/*====================================================================*
+/**
+ * \file llptaa.cpp
+ * \class Ptaa
  *
- *  Lua class Ptaa
- *
- *====================================================================*/
+ * An array of Pta.
+ */
 
 /** Define a function's name (_fun) with prefix LL_PTAA */
 #define LL_FUNC(x) FUNC(LL_PTAA "." x)
