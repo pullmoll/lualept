@@ -78,23 +78,6 @@ Size(lua_State *L)
 }
 
 /**
- * \brief Create a new Aset*.
- * <pre>
- * Arg #1 is expected to be a string describing the key type (int,uint,float).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Aset* on the Lua stack
- */
-static int
-Create(lua_State *L)
-{
-    LL_FUNC("Create");
-    l_int32 keytype = ll_check_keytype(_fun, L, 1, L_INT_TYPE);
-    Aset *aset = l_asetCreate(keytype);
-    return ll_push_Aset(_fun, L, aset);
-}
-
-/**
  * \brief Insert a node into an Aset* (%aset).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Aset* (aset).
@@ -193,6 +176,23 @@ toString(lua_State *L)
     }
     luaL_pushresult(&B);
     return 1;
+}
+
+/**
+ * \brief Create a new Aset*.
+ * <pre>
+ * Arg #1 is expected to be a string describing the key type (int,uint,float).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Aset* on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    LL_FUNC("Create");
+    l_int32 keytype = ll_check_keytype(_fun, L, 1, L_INT_TYPE);
+    Aset *aset = l_asetCreate(keytype);
+    return ll_push_Aset(_fun, L, aset);
 }
 
 /**

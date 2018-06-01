@@ -44,6 +44,10 @@
  * \brief Destroy a Box*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
+ *
+ * Notes:
+ *      (1) Decrements the ref count and, if 0, destroys the box.
+ *      (2) Always nulls the input ptr.
  * </pre>
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack
@@ -59,43 +63,6 @@ Destroy(lua_State *L)
     boxDestroy(&box);
     *pbox = nullptr;
     return 0;
-}
-
-/**
- * \brief Create a new Box*.
- * <pre>
- * Arg #1 is expected to be a l_int32 (x).
- * Arg #2 is expected to be a l_int32 (y).
- * Arg #3 is expected to be a l_int32 (w).
- * Arg #4 is expected to be a l_int32 (h).
- *
- * Notes:
- *      (1) This clips the box to the +quad.  If no part of the
- *          box is in the +quad, this returns NULL.
- *      (2) We allow you to make a box with w = 0 and/or h = 0.
- *          This does not represent a valid region, but it is useful
- *          as a placeholder in a Boxa* for which the index of the
- *          box in the boxa is important.  This is an atypical
- *          situation; usually you want to put only valid boxes with
- *          nonzero width and height in a Boxa*.  If you have a Boxa*
- *          with invalid boxes, the accessor Boxa:GetValidBox()
- *          will return NULL on each invalid box.
- *      (3) If you want to create only valid boxes, use CreateValid(),
- *          which returns NULL if either w or h is 0.
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Box* on the Lua stack
- */
-static int
-Create(lua_State *L)
-{
-    LL_FUNC("Create");
-    l_int32 x = ll_opt_l_int32(_fun, L, 1, 0);
-    l_int32 y = ll_opt_l_int32(_fun, L, 2, 0);
-    l_int32 w = ll_opt_l_int32(_fun, L, 3, 1);
-    l_int32 h = ll_opt_l_int32(_fun, L, 4, 1);
-    Box *box = boxCreate(x, y, w, h);
-    return ll_push_Box(_fun, L, box);
 }
 
 /**
@@ -160,6 +127,17 @@ Equal(lua_State *L)
  * Arg #3 is expected to be a l_int32 (delright).
  * Arg #4 is expected to be a l_int32 (deltop).
  * Arg #5 is expected to be a l_int32 (delbot).
+ *
+ * Notes:
+ *      (1) Set boxd == NULL to get new box; boxd == boxs for in-place;
+ *          or otherwise to resize existing boxd.
+ *      (2) For usage, suggest one of these:
+ *               boxd = boxAdjustSides(NULL, boxs, ...);   // new
+ *               boxAdjustSides(boxs, boxs, ...);          // in-place
+ *               boxAdjustSides(boxd, boxs, ...);          // other
+ *      (3) New box dimensions are cropped at left and top to x >= 0 and y >= 0.
+ *      (4) For example, to expand in-place by 20 pixels on each side, use
+ *             boxAdjustSides(box, box, -20, 20, -20, 20);
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -183,6 +161,9 @@ AdjustSides(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box1).
  * Arg #2 is expected to be another Box* (box2).
+ *
+ * Notes:
+ *      (1) This is the geometric union of the two rectangles.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -222,6 +203,11 @@ ChangeRefcount(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * Arg #2 is expected to be a l_int32 (wi).
  * Arg #3 is expected to be a l_int32 (hi).
+ *
+ * Notes:
+ *      (1) This can be used to clip a rectangle to an image.
+ *          The clipping rectangle is assumed to have a UL corner at (0, 0),
+ *          and a LR corner at (wi - 1, hi - 1).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -241,6 +227,16 @@ ClipToRectangle(lua_State *L)
  * \brief Clip a Box* (%boxs) rectangle to width and height (w,h).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
+ *
+ * Notes:
+ *      (1) The return value should be checked.  If it is 1, the
+ *          returned parameter values are bogus.
+ *      (2) This simplifies the selection of pixel locations within
+ *          a given rectangle:
+ *             for (i = ystart; i < yend; i++ {
+ *                 ...
+ *                 for (j = xstart; j < xend; j++ {
+ *                     ....
  * </pre>
  * \param L pointer to the lua_State
  * \return 6 integers on the Lua stack (xstart,ystart,xend,yend,bw,bh)
@@ -292,6 +288,9 @@ Clone(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Box* (box1).
  * Arg #2 is expected to be another Box* (box2).
  * Arg #3 is expected to be a string describing the type of comparison (type).
+ *
+ * Notes:
+ *      (1) We're re-using the SORT enum for these comparisons.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack (-1, 0, +1)
@@ -359,6 +358,10 @@ ContainsPt(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box).
  * Arg #2 is expected to be a l_int32 (ncorners).
+ *
+ * Notes:
+ *      (1) If ncorners == 2, we select the UL and LR corners.
+ *          Otherwise we save all 4 corners in this order: UL, UR, LL, LR.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -387,6 +390,43 @@ Copy(lua_State *L)
     LL_FUNC("Copy");
     Box *boxs = ll_check_Box(_fun, L, 1);
     Box *box = boxCopy(boxs);
+    return ll_push_Box(_fun, L, box);
+}
+
+/**
+ * \brief Create a new Box*.
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (x).
+ * Arg #2 is expected to be a l_int32 (y).
+ * Arg #3 is expected to be a l_int32 (w).
+ * Arg #4 is expected to be a l_int32 (h).
+ *
+ * Notes:
+ *      (1) This clips the box to the +quad.  If no part of the
+ *          box is in the +quad, this returns NULL.
+ *      (2) We allow you to make a box with w = 0 and/or h = 0.
+ *          This does not represent a valid region, but it is useful
+ *          as a placeholder in a Boxa* for which the index of the
+ *          box in the boxa is important.  This is an atypical
+ *          situation; usually you want to put only valid boxes with
+ *          nonzero width and height in a Boxa*.  If you have a Boxa*
+ *          with invalid boxes, the accessor Boxa:GetValidBox()
+ *          will return NULL on each invalid box.
+ *      (3) If you want to create only valid boxes, use CreateValid(),
+ *          which returns NULL if either w or h is 0.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Box* on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    LL_FUNC("Create");
+    l_int32 x = ll_opt_l_int32(_fun, L, 1, 0);
+    l_int32 y = ll_opt_l_int32(_fun, L, 2, 0);
+    l_int32 w = ll_opt_l_int32(_fun, L, 3, 1);
+    l_int32 h = ll_opt_l_int32(_fun, L, 4, 1);
+    Box *box = boxCreate(x, y, w, h);
     return ll_push_Box(_fun, L, box);
 }
 
@@ -485,6 +525,9 @@ GetRefcount(lua_State *L)
  * \brief Get the BOX side locations (left, right, top, bottom).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
+ *
+ * Notes:
+ *      (1) All returned values are within the box.
  * </pre>
  * \param L pointer to the lua_State
  * \return 4 for four integers (or nil on error) on the stack
@@ -511,6 +554,11 @@ GetSideLocations(lua_State *L)
  * Arg #2 is expected to be a l_int32 (x).
  * Arg #3 is expected to be a l_int32 (y).
  * Arg #4 is expected to be a l_float32 (slope).
+ *
+ * Notes:
+ *      (1) If the intersection is at only one point (a corner), the
+ *          coordinates are returned in (x1, y1).
+ *      (2) Represent a vertical line by one with a large but finite slope.
  * </pre>
  * \param L pointer to the lua_State
  * \return 5 integers on the Lua stack (x1, y1, x2, y2, n)
@@ -605,6 +653,10 @@ OverlapArea(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box1).
  * Arg #2 is expected to be another Box* (box2).
+ *
+ * Notes:
+ *      (1) The result depends on the order of the input boxes,
+ *          because the overlap is taken as a fraction of box2.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 number on the Lua stack
@@ -626,6 +678,9 @@ OverlapFraction(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box1).
  * Arg #2 is expected to be another Box* (box2).
+ *
+ * Notes:
+ *      (1) This is the geometric intersection of the two rectangles.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -646,6 +701,10 @@ OverlapRegion(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box).
  * Arg #2 is expected to be a luaL_Stream io handle (stream).
+ *
+ * Notes:
+ *      (1) This outputs debug info.  Use serialization functions to
+ *          write to file if you want to read the data back.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -663,6 +722,14 @@ PrintStreamInfo(lua_State *L)
  * \brief Relocate one side of a Box* (%boxs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
+ *
+ * Notes:
+ *      (1) Set boxd == NULL to get new box; boxd == boxs for in-place;
+ *          or otherwise to resize existing boxd.
+ *      (2) For usage, suggest one of these:
+ *               boxd = boxRelocateOneSide(NULL, boxs, ...);   // new
+ *               boxRelocateOneSide(boxs, boxs, ...);          // in-place
+ *               boxRelocateOneSide(boxd, boxs, ...);          // other
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -686,6 +753,11 @@ RelocateOneSide(lua_State *L)
  * Arg #2 is expected to be a l_int32 (w).
  * Arg #3 is expected to be a l_int32 (h).
  * Arg #4 is expected to be a rotation angle (rotation).
+ *
+ * Notes:
+ *      (1) Rotate the image with the embedded box by the specified amount.
+ *      (2) After rotation, the rotated box is always measured with
+ *          respect to the UL corner of the image.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -707,6 +779,12 @@ RotateOrth(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box1).
  * Arg #2 is expected to be another Box* (box2).
+ *
+ * Notes:
+ *      (1) This measures horizontal and vertical separation of the
+ *          two boxes.  If the boxes are touching but have no pixels
+ *          in common, the separation is 0.  If the boxes overlap by
+ *          a distance d, the returned separation is -d.
  * </pre>
  * \param L pointer to the lua_State
  * \return 2 integers on the Lua stack
@@ -783,6 +861,11 @@ SetSideLocations(lua_State *L)
  * Arg #4 is expected to be a l_int32 (rightdiff).
  * Arg #5 is expected to be a l_int32 (topdiff).
  * Arg #6 is expected to be a l_int32 (botdiff).
+ *
+ * Notes:
+ *      (1) The values of leftdiff (etc) are the maximum allowed deviations
+ *          between the locations of the left (etc) sides.  If any side
+ *          pairs differ by more than this amount, the boxes are not similar.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -811,6 +894,10 @@ Similar(lua_State *L)
  * Arg #3 is expected to be a l_int32 (shifty).
  * Arg #4 is an optional l_float32 (scalex).
  * Arg #5 is an optional l_float32 (scaley).
+ *
+ * Notes:
+ *      (1) This is a very simple function that first shifts, then scales.
+ *      (2) If the box is invalid, a new invalid box is returned.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -841,6 +928,44 @@ Transform(lua_State *L)
  * Arg #7 is an optional l_int32 (xcen).
  * Arg #8 is an optional l_int32 (ycen).
  * Arg #9 is an optional l_float32 (angle).
+ *
+ * Notes:
+ *      (1) This allows a sequence of linear transforms, composed of
+ *          shift, scaling and rotation, where the order of the
+ *          transforms is specified.
+ *      (2) The rotation is taken about a point specified by (xcen, ycen).
+ *          Let the components of the vector from the center of rotation
+ *          to the box center be (xdif, ydif):
+ *            xdif = (bx + 0.5 * bw) - xcen
+ *            ydif = (by + 0.5 * bh) - ycen
+ *          Then the box center after rotation has new components:
+ *            bxcen = xcen + xdif * cosa + ydif * sina
+ *            bycen = ycen + ydif * cosa - xdif * sina
+ *          where cosa and sina are the cos and sin of the angle,
+ *          and the enclosing box for the rotated box has size:
+ *            rw = |bw * cosa| + |bh * sina|
+ *            rh = |bh * cosa| + |bw * sina|
+ *          where bw and bh are the unrotated width and height.
+ *          Then the box UL corner (rx, ry) is
+ *            rx = bxcen - 0.5 * rw
+ *            ry = bycen - 0.5 * rh
+ *      (3) The center of rotation specified by args %xcen and %ycen
+ *          is the point BEFORE any translation or scaling.  If the
+ *          rotation is not the first operation, this function finds
+ *          the actual center at the time of rotation.  It does this
+ *          by making the following assumptions:
+ *             (1) Any scaling is with respect to the UL corner, so
+ *                 that the center location scales accordingly.
+ *             (2) A translation does not affect the center of
+ *                 the image; it just moves the boxes.
+ *          We always use assumption (1).  However, assumption (2)
+ *          will be incorrect if the apparent translation is due
+ *          to a clipping operation that, in effect, moves the
+ *          origin of the image.  In that case, you should NOT use
+ *          these simple functions.  Instead, use the functions
+ *          in affinecompose.c, where the rotation center can be
+ *          computed from the actual clipping due to translation
+ *          of the image origin.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack

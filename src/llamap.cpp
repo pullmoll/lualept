@@ -80,23 +80,6 @@ Size(lua_State *L)
 }
 
 /**
- * \brief Create a new Amap*.
- * <pre>
- * Arg #1 is expected to be a string describing the key type (int,uint,float).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Amap* on the Lua stack
- */
-static int
-Create(lua_State *L)
-{
-    LL_FUNC("Create");
-    l_int32 keytype = ll_check_keytype(_fun, L, 1, L_INT_TYPE);
-    Amap *amap = l_amapCreate(keytype);
-    return ll_push_Amap(_fun, L, amap);
-}
-
-/**
  * \brief Insert a node into an Amap* (%amap).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Amap* (amap).
@@ -212,6 +195,23 @@ toString(lua_State *L)
     }
     luaL_pushresult(&B);
     return 1;
+}
+
+/**
+ * \brief Create a new Amap*.
+ * <pre>
+ * Arg #1 is expected to be a string describing the key type (int,uint,float).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Amap* on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    LL_FUNC("Create");
+    l_int32 keytype = ll_check_keytype(_fun, L, 1, L_INT_TYPE);
+    Amap *amap = l_amapCreate(keytype);
+    return ll_push_Amap(_fun, L, amap);
 }
 
 /**
