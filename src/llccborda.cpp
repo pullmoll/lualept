@@ -40,8 +40,6 @@
 /** Define a function's name (_fun) with prefix LL_CCBORDA */
 #define LL_FUNC(x) FUNC(LL_CCBORDA "." x)
 
-
-
 /**
  * \brief Destroy a CCBorda*.
  *
@@ -59,25 +57,6 @@ Destroy(lua_State *L)
     ccbaDestroy(&ccba);
     *pccba = nullptr;
     return 0;
-}
-
-/**
- * \brief Create a new CCBorda*.
- * <pre>
- * Arg #1 is expected to be a Pix* (pixs).
- * Arg #2 is expected to be a l_int32 (n).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 CCBorda* on the Lua stack
- */
-static int
-Create(lua_State *L)
-{
-    LL_FUNC("Create");
-    Pix* pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 n = ll_opt_l_int32(_fun, L, 2, 1);
-    CCBorda *ccba = ccbaCreate(pixs, n);
-    return ll_push_CCBorda(_fun, L, ccba);
 }
 
 /**
@@ -115,9 +94,33 @@ AddCcb(lua_State *L)
 }
 
 /**
+ * \brief Create a new CCBorda*.
+ * <pre>
+ * Arg #1 is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_int32 (n).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 CCBorda* on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    LL_FUNC("Create");
+    Pix* pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 n = ll_opt_l_int32(_fun, L, 2, 1);
+    CCBorda *ccba = ccbaCreate(pixs, n);
+    return ll_push_CCBorda(_fun, L, ccba);
+}
+
+/**
  * \brief Display the CCBora* (%ccba) in a Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
+ *
+ * Notes:
+ *      (1) Uses global ptaa, which gives each border pixel in
+ *          global coordinates, and must be computed in advance
+ *          by calling ccbaGenerateGlobalLocs().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 on the Lua stack
@@ -135,6 +138,54 @@ DisplayBorder(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
+ *
+ * Notes:
+ *      (1) Uses local ptaa, which gives each border pixel in
+ *          local coordinates, so the actual pixel positions must
+ *          be computed using all offsets.
+ *      (2) For the holes, use coordinates relative to the c.c.
+ *      (3) This is slower than Method 2.
+ *      (4) This uses topological properties (Method 1) to do scan
+ *          conversion to raster
+ *
+ *  This algorithm deserves some commentary.
+ *
+ *  I first tried the following:
+ *    ~ outer borders: 4-fill from outside, stopping at the
+ *         border, using pixFillClosedBorders()
+ *    ~ inner borders: 4-fill from outside, stopping again
+ *         at the border, XOR with the border, and invert
+ *         to get the hole.  This did not work, because if
+ *         you have a hole border that looks like:
+ *
+ *                x x x x x x
+ *                x          x
+ *                x   x x x   x
+ *                  x x o x   x
+ *                      x     x
+ *                      x     x
+ *                        x x x
+ *
+ *         if you 4-fill from the outside, the pixel 'o' will
+ *         not be filled!  XORing with the border leaves it OFF.
+ *         Inverting then gives a single bad ON pixel that is not
+ *         actually part of the hole.
+ *
+ *  So what you must do instead is 4-fill the holes from inside.
+ *  You can do this from a seedfill, using a pix with the hole
+ *  border as the filling mask.  But you need to start with a
+ *  pixel inside the hole.  How is this determined?  The best
+ *  way is from the contour.  We have a right-hand shoulder
+ *  rule for inside (i.e., the filled region).   Take the
+ *  first 2 pixels of the hole border, and compute dx and dy
+ *  (second coord minus first coord:  dx = sx - fx, dy = sy - fy).
+ *  There are 8 possibilities, depending on the values of dx and
+ *  dy (which can each be -1, 0, and +1, but not both 0).
+ *  These 8 cases can be broken into 4; see the simple algorithm below.
+ *  Once you have an interior seed pixel, you fill from the seed,
+ *  clipping with the hole border pix by filling into its invert.
+ *
+ *  You then successively XOR these interior filled components, in any order.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 on the Lua stack
@@ -152,6 +203,19 @@ DisplayImage1(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
+ *
+ * Notes:
+ *      (1) Uses local chain ptaa, which gives each border pixel in
+ *          local coordinates, so the actual pixel positions must
+ *          be computed using all offsets.
+ *      (2) Treats exterior and hole borders on equivalent
+ *          footing, and does all calculations on a pix
+ *          that spans the c.c. with a 1 pixel added boundary.
+ *      (3) This uses topological properties (Method 2) to do scan
+ *          conversion to raster
+ *      (4) The algorithm is described at the top of this file (Method 2).
+ *          It is preferred to Method 1 because it is between 1.2x and 2x
+ *          faster than Method 1.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 on the Lua stack
@@ -169,6 +233,11 @@ DisplayImage2(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
+ *
+ * Notes:
+ *      (1) Uses spglobal pta, which gives each border pixel in
+ *          global coordinates, one path per c.c., and must
+ *          be computed in advance by calling ccbaGenerateSPGlobalLocs().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 on the Lua stack
@@ -203,6 +272,16 @@ GenerateGlobalLocs(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  * Arg #2 is expected to be a l_int32 (ptsflag).
+ *
+ * Notes:
+ *      (1) This calculates the splocal rep if not yet made.
+ *      (2) It uses the local pixel values in splocal, the single
+ *          path pta, which are all relative to each c.c., to find
+ *          the corresponding global pixel locations, and stores
+ *          them in the spglobal pta.
+ *      (3) This lists only the turning points: it both makes a
+ *          valid svg file and is typically about half the size
+ *          when all border points are listed.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -220,7 +299,83 @@ GenerateSPGlobalLocs(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
+ *
+ * Notes:
+ *      (1) Generates a single border in local pixel coordinates.
+ *          For each c.c., if there is just an outer border, copy it.
+ *          If there are also hole borders, for each hole border,
+ *          determine the smallest horizontal or vertical
+ *          distance from the border to the outside of the c.c.,
+ *          and find a path through the c.c. for this cut.
+ *          We do this in a way that guarantees a pixel from the
+ *          hole border is the starting point of the path, and
+ *          we must verify that the path intersects the outer
+ *          border (if it intersects it, then it ends on it).
+ *          One can imagine pathological cases, but they may not
+ *          occur in images of text characters and un-textured
+ *          line graphics.
+ *      (2) Once it is verified that the path through the c.c.
+ *          intersects both the hole and outer borders, we
+ *          generate the full single path for all borders in the
+ *          c.c.  Starting at the start point on the outer
+ *          border, when we hit a line on a cut, we take
+ *          the cut, do the hold border, and return on the cut
+ *          to the outer border.  We compose a pta of the
+ *          outer border pts that are on cut paths, and for
+ *          every point on the outer border (as we go around),
+ *          we check against this pta.  When we find a matching
+ *          point in the pta, we do its cut path and hole border.
+ *          The single path is saved in the ccb.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+GenerateSinglePath(lua_State *L)
+{
+    LL_FUNC("GenerateSinglePath");
+    CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
+    return ll_push_boolean(_fun, L, 0 == ccbaGenerateSinglePath(ccba));
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
+ *
+ * Notes:
+ *      (1) This uses the pixel locs in the local ptaa,
+ *          which are all relative to each c.c., to find
+ *          the step directions for successive pixels in
+ *          the chain, and stores them in the step numaa.
+ *      (2) To get the step direction, use
+ *              1   2   3
+ *              0   P   4
+ *              7   6   5
+ *          where P is the previous pixel at (px, py).  The step direction
+ *          is the number (from 0 through 7) for each relative location
+ *          of the current pixel at (cx, cy).  It is easily found by
+ *          indexing into a 2-d 3x3 array (dirtab).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+GenerateStepChains(lua_State *L)
+{
+    LL_FUNC("GenerateStepChains");
+    CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
+    return ll_push_boolean(_fun, L, 0 == ccbaGenerateStepChains(ccba));
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  * Arg #2 is expected to be a l_int32 (index).
+ *
+ * Notes:
+ *      (1) This returns a clone of the ccb; it must be destroyed
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 CCBord* on the Lua stack
@@ -274,6 +429,13 @@ ReadStream(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  * Arg #2 is expected to be a l_int32 (coordtype).
+ *
+ * Notes:
+ *      (1) This uses the step chain data in each ccb to determine
+ *          the pixel locations, either global or local,
+ *          and stores them in the appropriate ptaa,
+ *          either global or local.  For the latter, the
+ *          pixel locations are relative to the c.c.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -359,38 +521,6 @@ WriteStream(lua_State *L)
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
     l_int32 result = ccbaWriteStream(stream->f, ccba);
     return ll_push_l_int32(_fun, L, result);
-}
-
-/**
- * \brief Brief comment goes here.
- * <pre>
- * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 boolean on the Lua stack
- */
-static int
-GenerateSinglePath(lua_State *L)
-{
-    LL_FUNC("GenerateSinglePath");
-    CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
-    return ll_push_boolean(_fun, L, 0 == ccbaGenerateSinglePath(ccba));
-}
-
-/**
- * \brief Brief comment goes here.
- * <pre>
- * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 boolean on the Lua stack
- */
-static int
-GenerateStepChains(lua_State *L)
-{
-    LL_FUNC("GenerateStepChains");
-    CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
-    return ll_push_boolean(_fun, L, 0 == ccbaGenerateStepChains(ccba));
 }
 
 /**

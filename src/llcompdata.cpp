@@ -62,32 +62,6 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Create a new CompData* from a file (%fname).
- * <pre>
- * Arg #1 is expected to be a string (fname).
- * Arg #2 is expected to be a l_int32 (type).
- * Arg #3 is expected to be a l_int32 (quality).
- * Arg #4 is expected to be a l_int32 (ascii85).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 on the Lua stack
- */
-static int
-Create(lua_State *L)
-{
-    LL_FUNC("Create");
-    const char *fname = ll_check_string(_fun, L, 1);
-    l_int32 type = ll_check_compression(_fun, L, 2, IFF_DEFAULT);
-    l_int32 quality = ll_opt_l_int32(_fun, L, 3, 75);
-    l_int32 ascii85 = ll_opt_boolean(_fun, L, 4, FALSE);
-    CompData *cid = nullptr;
-    if (l_generateCIData(fname, type, quality, ascii85, &cid))
-        return ll_push_nil(L);
-    ll_push_CompData(_fun, L, cid);
-    return 1;
-}
-
-/**
  * \brief Printable string for a CompData* (%cid).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sel* (sel).
@@ -151,6 +125,10 @@ toString(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CompData* (cid).
  * Arg #2 is expected to be a string (title).
+ *
+ * Notes:
+ *      (1) Caller must not destroy the cid.  It is absorbed in the
+ *          lpd and destroyed by this function.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 lstring on the Lua stack
@@ -167,6 +145,32 @@ ConvertToPdfData(lua_State *L)
         return ll_push_nil(L);
     ll_push_lstring(_fun, L, reinterpret_cast<const char *>(data), nbytes);
     ll_free(data);
+    return 1;
+}
+
+/**
+ * \brief Create a new CompData* from a file (%fname).
+ * <pre>
+ * Arg #1 is expected to be a string (fname).
+ * Arg #2 is expected to be a l_int32 (type).
+ * Arg #3 is expected to be a l_int32 (quality).
+ * Arg #4 is expected to be a l_int32 (ascii85).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    LL_FUNC("Create");
+    const char *fname = ll_check_string(_fun, L, 1);
+    l_int32 type = ll_check_compression(_fun, L, 2, IFF_DEFAULT);
+    l_int32 quality = ll_opt_l_int32(_fun, L, 3, 75);
+    l_int32 ascii85 = ll_opt_boolean(_fun, L, 4, FALSE);
+    CompData *cid = nullptr;
+    if (l_generateCIData(fname, type, quality, ascii85, &cid))
+        return ll_push_nil(L);
+    ll_push_CompData(_fun, L, cid);
     return 1;
 }
 
@@ -198,6 +202,16 @@ CreateForPdf(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string (fname).
  * Arg #2 is expected to be a l_int32 (ascii85flag).
+ *
+ * Notes:
+ *      (1) The input image is converted to one of these 4 types:
+ *           ~ 1 bpp
+ *           ~ 8 bpp, no colormap
+ *           ~ 8 bpp, colormap
+ *           ~ 32 bpp rgb
+ *      (2) Set ascii85flag:
+ *           ~ 0 for binary data (not permitted in PostScript)
+ *           ~ 1 for ascii85 (5 for 4) encoded binary data
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 CompData* on the Lua stack
@@ -217,6 +231,15 @@ FlateData(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a string (fname).
  * Arg #2 is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) If you hand this a png file, you are going to get
+ *          png predictors embedded in the flate data. So it has
+ *          come to this. http://xkcd.com/1022/
+ *      (2) Exception: if the png is interlaced or if it is RGBA,
+ *          it will be transcoded.
+ *      (3) If transcoding is required, this will not have to read from
+ *          file if you also input a pix.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 CompData* on the Lua stack
@@ -236,6 +259,12 @@ FlateDataPdf(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a string (fname).
  * Arg #2 is expected to be a l_int32 (ascii85flag).
+ *
+ * Notes:
+ *      (1) Set ascii85flag:
+ *           ~ 0 for binary data (not permitted in PostScript)
+ *           ~ 1 for ascii85 (5 for 4) encoded binary data
+ *             (not permitted in pdf)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 CompData* on the Lua stack
@@ -282,6 +311,11 @@ Generate(lua_State *L)
  * Arg #2 is expected to be a l_int32 (type).
  * Arg #3 is expected to be a l_int32 (quality).
  * Arg #4 is expected to be a l_int32 (ascii85).
+ *
+ * Notes:
+ *      (1) Set ascii85:
+ *           ~ 0 for binary data (not permitted in PostScript)
+ *           ~ 1 for ascii85 (5 for 4) encoded binary data
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 CompData* on the Lua stack
@@ -405,6 +439,14 @@ GenerateJpegPS(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a string (fname).
  * Arg #2 is expected to be a l_int32 (ascii85flag).
+ *
+ * Notes:
+ *      (1) Set ascii85flag:
+ *           ~ 0 for binary data (not permitted in PostScript)
+ *           ~ 1 for ascii85 (5 for 4) encoded binary data
+ *               (not permitted in pdf)
+ *      (2) Do not free the data.  l_generateJpegDataMem() will free
+ *          the data if it does not use ascii encoding.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 CompData* on the Lua stack
@@ -424,6 +466,9 @@ JpegData(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a lstring (str).
  * Arg #2 is expected to be a boolean (ascii85flag).
+ *
+ * Notes:
+ *      (1) See l_generateJpegData().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 CompData* on the Lua stack

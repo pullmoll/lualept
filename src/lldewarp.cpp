@@ -62,25 +62,6 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Create a new Dewarp*.
- * <pre>
- * Arg #1 is expected to be a Pix* (pixs).
- * Arg #2 is expected to be a l_int32 (pageno).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Dewarp* on the Lua stack
- */
-static int
-Create(lua_State *L)
-{
-    LL_FUNC("Create");
-    Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 pageno = ll_check_l_int32(_fun, L, 2);
-    Dewarp *dew = dewarpCreate(pixs, pageno);
-    return ll_push_Dewarp(_fun, L, dew);
-}
-
-/**
  * \brief Printable string for a Dewarp*.
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
@@ -181,6 +162,24 @@ toString(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dewarp* (dew).
  * Arg #2 is expected to be a l_int32 (opensize).
  * Arg #3 is expected to be a const (char *debugfile).
+ *
+ * Notes:
+ *      (1) This builds the horizontal and vertical disparity arrays
+ *          for an input of ruled lines, typically for calibration.
+ *          In book scanning, you could lay the ruled paper over a page.
+ *          Then for that page and several below it, you can use the
+ *          disparity correction of the line model to dewarp the pages.
+ *      (2) The dew has been initialized with the image of ruled lines.
+ *          These lines must be continuous, but we do a small amount
+ *          of pre-processing here to insure that.
+ *      (3) %opensize is typically about 8.  It must be larger than
+ *          the thickness of the lines to be extracted.  This is the
+ *          default value, which is applied if %opensize < 3.
+ *      (4) Sets vsuccess = 1 and hsuccess = 1 if the vertical and/or
+ *          horizontal disparity arrays build.
+ *      (5) Similar to dewarpBuildPageModel(), except here the vertical
+ *          and horizontal disparity arrays are both built from ruled lines.
+ *          See notes there.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -199,6 +198,47 @@ BuildLineModel(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a L_DEWARP* (dew).
  * Arg #2 is expected to be a const (char *debugfile).
+ *
+ * Notes:
+ *      (1) This is the basic function that builds the horizontal and
+ *          vertical disparity arrays, which allow determination of the
+ *          src pixel in the input image corresponding to each
+ *          dest pixel in the dewarped image.
+ *      (2) Sets vsuccess = 1 if the vertical disparity array builds.
+ *          Always attempts to build the horizontal disparity array,
+ *          even if it will not be requested (useboth == 0).
+ *          Sets hsuccess = 1 if horizontal disparity builds.
+ *      (3) The method is as follows:
+ *          (a) Estimate the points along the centers of all the
+ *              long textlines.  If there are too few lines, no
+ *              disparity models are built.
+ *          (b) From the vertical deviation of the lines, estimate
+ *              the vertical disparity.
+ *          (c) From the ends of the lines, estimate the horizontal
+ *              disparity, assuming that the text is made of lines
+ *              that are close to left and right justified.
+ *          (d) One can also compute an additional contribution to the
+ *              horizontal disparity, inferred from slopes of the top
+ *              and bottom lines.  We do not do this.
+ *      (4) In more detail for the vertical disparity:
+ *          (a) Fit a LS quadratic to center locations along each line.
+ *              This smooths the curves.
+ *          (b) Sample each curve at a regular interval, find the y-value
+ *              of the mid-point on each curve, and subtract the sampled
+ *              curve value from this value.  This is the vertical
+ *              disparity at sampled points along each curve.
+ *          (c) Fit a LS quadratic to each set of vertically aligned
+ *              disparity samples.  This smooths the disparity values
+ *              in the vertical direction.  Then resample at the same
+ *              regular interval.  We now have a regular grid of smoothed
+ *              vertical disparity valuels.
+ *      (5) Once the sampled vertical disparity array is found, it can be
+ *          interpolated to get a full resolution vertical disparity map.
+ *          This can be applied directly to the src image pixels
+ *          to dewarp the image in the vertical direction, making
+ *          all textlines horizontal.  Likewise, the horizontal
+ *          disparity array is used to left- and right-align the
+ *          longest textlines.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -212,10 +252,43 @@ BuildPageModel(lua_State *L)
 }
 
 /**
+ * \brief Create a new Dewarp*.
+ * <pre>
+ * Arg #1 is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_int32 (pageno).
+ *
+ * Notes:
+ *      (1) The input pixs is either full resolution or 2x reduced.
+ *      (2) The page number is typically 0-based.  If scanned from a book,
+ *          the even pages are usually on the left.  Disparity arrays
+ *          built for even pages should only be applied to even pages.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Dewarp* on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    LL_FUNC("Create");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 pageno = ll_check_l_int32(_fun, L, 2);
+    Dewarp *dew = dewarpCreate(pixs, pageno);
+    return ll_push_Dewarp(_fun, L, dew);
+}
+
+/**
  * \brief Create reference Dewarp* (%dew).
  * <pre>
  * Arg #1 is expected to be a l_int32 (pageno).
  * Arg #2 is expected to be a l_int32 (refpage).
+ *
+ * Notes:
+ *      (1) This specifies which dewarp struct should be used for
+ *          the given page.  It is placed in dewarpa for pages
+ *          for which no model can be built.
+ *      (2) This page and the reference page have the same parity and
+ *          the reference page is the closest page with a disparity model
+ *          to this page.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Dewarp* on the Lua stack
@@ -235,6 +308,18 @@ CreateRef(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dewarp* (dew).
  * Arg #2 is expected to be a Ptaa* (ptaa).
+ *
+ * Notes:
+ *      (1) This builds a horizontal disparity model (HDM), but
+ *          does not check it against constraints for validity.
+ *          Constraint checking is done at rendering time.
+ *      (2) Horizontal disparity is not required for a successful model;
+ *          only the vertical disparity is required.  This will not be
+ *          called if the function to build the vertical disparity fails.
+ *      (3) This sets the hsuccess flag to 1 on success.
+ *      (4) Internally in ptal1, ptar1, ptal2, ptar2: x and y are reversed,
+ *          so the 'y' value is horizontal distance across the image width.
+ *      (5) Debug output goes to /tmp/lept/dewmod/ for collection into a pdf.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -255,6 +340,33 @@ FindHorizDisparity(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixb).
  * Arg #3 is expected to be a l_float32 (fractthresh).
  * Arg #4 is expected to be a l_int32 (parity).
+ *
+ * Notes:
+ *      (1) %fractthresh is a threshold on the fractional difference in stroke
+ *          density between between left and right sides.  Process this
+ *          disparity only if the absolute value of the fractional
+ *          difference equals or exceeds this threshold.
+ *      (2) %parity indicates where the binding is: on the left for
+ *          %parity == 0 and on the right for @parity == 1.
+ *      (3) This takes a 1 bpp %pixb where both vertical and horizontal
+ *          disparity have been applied, so the text lines are straight and,
+ *          more importantly, the line end points are vertically aligned.
+ *          It estimates the foreshortening of the characters on the
+ *          binding side, and if significant, computes a one-dimensional
+ *          horizontal disparity function to compensate.
+ *      (4) The first attempt was to use the average width of the
+ *          connected components (c.c.) in vertical slices.  This does not work
+ *          reliably, because the horizontal compression of the text is
+ *          often accompanied by horizontal joining of c.c.
+ *      (5) We use the density of vertical strokes, measured by first using
+ *          a vertical opening, which improves the signal.  The result
+ *          is relatively insensitive to the size of the opening; we use
+ *          a 10-pixel opening.  The relative density is measured by
+ *          finding the number of c.c. in a full height sliding window
+ *          of width 50 pixels, and compute every 25 pixels.  Similar results
+ *          are obtained counting c.c. that either intersect the window
+ *          or are fully contained within it.
+ *      (6) Debug output goes to /tmp/lept/dewmod/ for collection into a pdf.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -276,6 +388,24 @@ FindHorizSlopeDisparity(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dewarp* (dew).
  * Arg #2 is expected to be a Ptaa* (ptaa).
  * Arg #3 is expected to be a l_int32 (rotflag).
+ *
+ * Notes:
+ *      (1) This starts with points along the centers of textlines.
+ *          It does quadratic fitting (and smoothing), first along the
+ *          lines and then in the vertical direction, to generate
+ *          the sampled vertical disparity map.  This can then be
+ *          interpolated to full resolution and used to remove
+ *          the vertical line warping.
+ *      (2) Use %rotflag == 1 if you are dewarping vertical lines, as
+ *          is done in dewarpBuildLineModel().  The usual case is for
+ *          %rotflag == 0.
+ *      (3) Note that this builds a vertical disparity model (VDM), but
+ *          does not check it against constraints for validity.
+ *          Constraint checking is done after building the models,
+ *          and before inserting reference models.
+ *      (4) This sets the vsuccess flag to 1 on success.
+ *      (5) Pix debug output goes to /tmp/dewvert/ for collection into
+ *          a pdf.  Non-pix debug output goes to /tmp.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -295,6 +425,12 @@ FindVertDisparity(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a boolean (debugflag).
+ *
+ * Notes:
+ *      (1) This in general does not have a point for each value
+ *          of x, because there will be gaps between words.
+ *          It doesn't matter because we will fit a quadratic to the
+ *          points that we do have.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Ptaa* on the Lua stack
@@ -313,6 +449,11 @@ GetTextlineCenters(lua_State *L)
  * \brief Minimize Dewarp* (%dew).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dewarp* (dew).
+ *
+ * Notes:
+ *      (1) This removes all data that is not needed for serialization.
+ *          It keeps the subsampled disparity array(s), so the full
+ *          resolution arrays can be reconstructed.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -332,6 +473,25 @@ Minimize(lua_State *L)
  * Arg #2 is expected to be a Pix* (pix).
  * Arg #3 is expected to be a l_int32 (x).
  * Arg #4 is expected to be a l_int32 (y).
+ *
+ * Notes:
+ *      (1) If the full resolution vertical and horizontal disparity
+ *          arrays do not exist, they are built from the subsampled ones.
+ *      (2) If pixs is not given, the size of the arrays is determined
+ *          by the original image from which the sampled version was
+ *          generated.  Any values of (x,y) are ignored.
+ *      (3) If pixs is given, the full resolution disparity arrays must
+ *          be large enough to accommodate it.
+ *          (a) If the arrays do not exist, the value of (x,y) determines
+ *              the origin of the full resolution arrays without extension,
+ *              relative to pixs.  Thus, (x,y) gives the amount of
+ *              slope extension in (left, top).  The (right, bottom)
+ *              extension is then determined by the size of pixs and
+ *              (x,y); the values should never be < 0.
+ *          (b) If the arrays exist and pixs is too large, the existing
+ *              full res arrays are destroyed and new ones are made,
+ *              again using (x,y) to determine the extension in the
+ *              four directions.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -389,6 +549,15 @@ ReadMem(lua_State *L)
  * \brief Read Dewarp* (%dew) from luaL_Stream* (%stream).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FILE* (fp).
+ *
+ * Notes:
+ *      (1) The dewarp struct is stored in minimized format, with only
+ *          subsampled disparity arrays.
+ *      (2) The sampling and extra horizontal disparity parameters are
+ *          stored here.  During generation of the dewarp struct, they
+ *          are passed in from the dewarpa.  In readback, it is assumed
+ *          that they are (a) the same for each page and (b) the same
+ *          as the values used to create the dewarpa.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Dewarp* on the Lua stack
@@ -447,6 +616,9 @@ Write(lua_State *L)
  * \brief Write Dewarp* (%dew) to a lstring (%data, %size).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dewarp* (dew).
+ *
+ * Notes:
+ *      (1) Serializes a dewarp in memory and puts the result in a buffer.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -470,6 +642,11 @@ WriteMem(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dewarp* (dew).
  * Arg #2 is expected to be a luaL_Stream* (stream).
+ *
+ * Notes:
+ *      (1) This should not be written if there is no sampled
+ *          vertical disparity array, which means that no model has
+ *          been built for this page.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
