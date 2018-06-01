@@ -603,7 +603,7 @@ RestoreModels(lua_State *L)
  * \brief Set check columns for Dewarpa* (%dewa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dewarpa* (dewa).
- * Arg #2 is expected to be a l_int32 (check_columns).
+ * Arg #2 is expected to be a boolean (check_columns).
  *
  * Notes:
  *      (1) This sets the 'check_columns" field.  If set, and if
@@ -614,20 +614,20 @@ RestoreModels(lua_State *L)
  *          if 0 (FALSE).
  *      (2) This field is set to 0 by default.  For horizontal disparity
  *          correction to take place on a single column of text, you must have:
- *           - a valid horizontal disparity array
- *           - useboth = 1 (TRUE)
+ *           (a) a valid horizontal disparity array
+ *           (b) useboth = 1 (TRUE)
  *          If there are multiple columns, additionally
- *           - check_columns = 0 (FALSE)
+ *           (c) check_columns = 0 (FALSE)
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 SetCheckColumns(lua_State *L)
 {
     LL_FUNC("SetCheckColumns");
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
-    l_int32 check_columns = ll_check_l_int32(_fun, L, 2);
+    l_int32 check_columns = ll_opt_boolean(_fun, L, 2, TRUE);
     return ll_push_boolean(_fun, L, 0 == dewarpaSetCheckColumns(dewa, check_columns));
 }
 

@@ -1458,6 +1458,7 @@ ll_opt_l_float64(const char *_fun, lua_State *L, int arg, l_float64 def)
  * \param L pointer to the lua_State
  * \param tbl table of key/value pairs
  * \param len length of that table
+ * \param msg message to prepend to the listing of options.
  * \return string with enumeration value names and their keys
  */
 int
