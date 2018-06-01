@@ -61,25 +61,6 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Create a new DPix*.
- * <pre>
- * Arg #1 is expected to be a l_int32 (width).
- * Arg #2 is expected to be a l_int32 (height).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 DPix* on the Lua stack
- */
-static int
-Create(lua_State *L)
-{
-    LL_FUNC("Create");
-    l_int32 width = ll_opt_l_int32(_fun, L, 1, 1);
-    l_int32 height = ll_opt_l_int32(_fun, L, 2, 1);
-    DPix *dpix = dpixCreate(width, height);
-    return ll_push_DPix(_fun, L, dpix);
-}
-
-/**
  * \brief Printable string for a DPix*.
  * \param L pointer to the lua_State
  * @return 1 string on the Lua stack
@@ -127,6 +108,12 @@ toString(lua_State* L)
  * Arg #1 (i.e. self) is expected to be a DPix* (dpix).
  * Arg #2 is expected to be a l_float64 (addc).
  * Arg #3 is expected to be a l_float64 (multc).
+ *
+ * Notes:
+ *      (1) This is an in-place operation.
+ *      (2) It can be used to multiply each pixel by a constant,
+ *          and also to add a constant to each pixel.  Multiplication
+ *          is done first.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -163,6 +150,9 @@ ChangeRefcount(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DPix* (dpixs).
+ *
+ * Notes:
+ *      (1) See pixClone() for definition and usage.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 DPix* on the Lua stack
@@ -200,6 +190,18 @@ ConvertToFPix(lua_State *L)
  * Arg #2 is expected to be a l_int32 (outdepth).
  * Arg #3 is expected to be a l_int32 (negvals).
  * Arg #4 is expected to be a l_int32 (errorflag).
+ *
+ * Notes:
+ *      (1) Use %outdepth = 0 to programmatically determine the
+ *          output depth.  If no values are greater than 255,
+ *          it will set outdepth = 8; otherwise to 16 or 32.
+ *      (2) Because we are converting a float to an unsigned int
+ *          with a specified dynamic range (8, 16 or 32 bits), errors
+ *          can occur.  If errorflag == TRUE, output the number
+ *          of values out of range, both negative and positive.
+ *      (3) If a pixel value is positive and out of range, clip to
+ *          the maximum value represented at the outdepth of 8, 16
+ *          or 32 bits.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -221,6 +223,26 @@ ConvertToPix(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DPix* (dpixd).
  * Arg #2 is expected to be a DPix* (dpixs).
+ *
+ * Notes:
+ *      (1) There are three cases:
+ *            (a) dpixd == null  (makes a new dpix; refcount = 1)
+ *            (b) dpixd == dpixs  (no-op)
+ *            (c) dpixd != dpixs  (data copy; no change in refcount)
+ *          If the refcount of dpixd > 1, case (c) will side-effect
+ *          these handles.
+ *      (2) The general pattern of use is:
+ *             dpixd = dpixCopy(dpixd, dpixs);
+ *          This will work for all three cases.
+ *          For clarity when the case is known, you can use:
+ *            (a) dpixd = dpixCopy(NULL, dpixs);
+ *            (c) dpixCopy(dpixd, dpixs);
+ *      (3) For case (c), we check if dpixs and dpixd are the same size.
+ *          If so, the data is copied directly.
+ *          Otherwise, the data is reallocated to the correct size
+ *          and the copy proceeds.  The refcount of dpixd is unchanged.
+ *      (4) This operation, like all others that may involve a pre-existing
+ *          dpixd, will side-effect any existing clones of dpixd.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 on the Lua stack
@@ -254,9 +276,38 @@ CopyResolution(lua_State *L)
 }
 
 /**
+ * \brief Create a new DPix*.
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (width).
+ * Arg #2 is expected to be a l_int32 (height).
+ *
+ * Notes:
+ *      (1) Makes a DPix of specified size, with the data array
+ *          allocated and initialized to 0.
+ *      (2) The number of pixels must be less than 2^28.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 DPix* on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    LL_FUNC("Create");
+    l_int32 width = ll_opt_l_int32(_fun, L, 1, 1);
+    l_int32 height = ll_opt_l_int32(_fun, L, 2, 1);
+    DPix *dpix = dpixCreate(width, height);
+    return ll_push_DPix(_fun, L, dpix);
+}
+
+/**
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DPix* (dpixs).
+ *
+ * Notes:
+ *      (1) Makes a DPix of the same size as the input DPix, with the
+ *          data array allocated and initialized to 0.
+ *      (2) Copies the resolution.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 on the Lua stack
@@ -275,6 +326,16 @@ CreateTemplate(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DPix* (dpixd).
  * Arg #2 is expected to be a DPix* (dpixs).
+ *
+ * Notes:
+ *      (1) On big-endian hardware, this does byte-swapping on each of
+ *          the 4-byte words in the dpix data.  On little-endians,
+ *          the data is unchanged.  This is used for serialization
+ *          of dpix; the data is serialized in little-endian byte
+ *          order because most hardware is little-endian.
+ *      (2) The operation can be either in-place or, if dpixd == NULL,
+ *          a new dpix is made.  If not in-place, caller must catch
+ *          the returned pointer.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 on the Lua stack
@@ -465,6 +526,16 @@ GetWpl(lua_State *L)
  * Arg #3 is expected to be a DPix* (dpixs2).
  * Arg #4 is expected to be a l_float32 (a).
  * Arg #5 is expected to be a l_float32 (b).
+ *
+ * Notes:
+ *      (1) Computes pixelwise linear combination: a * src1 + b * src2
+ *      (2) Alignment is to UL corner.
+ *      (3) There are 3 cases.  The result can go to a new dest,
+ *          in-place to dpixs1, or to an existing input dest:
+ *          * dpixd == null:   (src1 + src2) --> new dpixd
+ *          * dpixd == dpixs1:  (src1 + src2) --> src1  (in-place)
+ *          * dpixd != dpixs1: (src1 + src2) --> input dpixd
+ *      (4) dpixs2 must be different from both dpixd and dpixs1.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 DPix* on the Lua stack
@@ -559,6 +630,17 @@ ResizeImageData(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DPix* (dpixs).
  * Arg #2 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) The width wd of dpixd is related to ws of dpixs by:
+ *              wd = factor * (ws - 1) + 1   (and ditto for the height)
+ *          We avoid special-casing boundary pixels in the interpolation
+ *          by constructing fpixd by inserting (factor - 1) interpolated
+ *          pixels between each pixel in fpixs.  Then
+ *               wd = ws + (ws - 1) * (factor - 1)    (same as above)
+ *          This also has the advantage that if we subsample by %factor,
+ *          throwing out all the interpolated pixels, we regain the
+ *          original low resolution dpix.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 on the Lua stack
@@ -721,6 +803,9 @@ Write(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DPix* (dpix).
+ *
+ * Notes:
+ *      (1) Serializes a dpix in memory and puts the result in a buffer.
  * </pre>
  * \param L pointer to the lua_State
  * \return 2 on the Lua stack

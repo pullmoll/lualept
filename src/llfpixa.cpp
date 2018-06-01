@@ -44,6 +44,10 @@
  * \brief Destroy a FPixa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPixa* (fpixa).
+ *
+ * Notes:
+ *      (1) Decrements the ref count and, if 0, destroys the fpixa.
+ *      (2) Always nulls the input ptr.
  * </pre>
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack
@@ -59,23 +63,6 @@ Destroy(lua_State *L)
     fpixaDestroy(&fpixa);
     *pfpixa = nullptr;
     return 0;
-}
-
-/**
- * \brief Create a new FPixa*.
- * <pre>
- * Arg #1 is expected to be a l_int32 (n).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 FPixa* on the Lua stack
- */
-static int
-Create(lua_State *L)
-{
-    LL_FUNC("Create");
-    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
-    FPixa *fpixa = fpixaCreate(n);
-    return ll_push_FPixa(_fun, L, fpixa);
 }
 
 /**
@@ -136,6 +123,9 @@ ChangeRefcount(lua_State *L)
  * \brief Convert FPix* in FPixa* (%fpixas) from L*a*b* to RGB.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPixa* (fpixa).
+ *
+ * Notes:
+ *      (1) The lab image is stored in three fpix.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 FPixa* on the Lua stack
@@ -153,6 +143,10 @@ ConvertLABToRGB(lua_State *L)
  * \brief Convert FPix* in FPixa* (%fpixas) from L*a*b* to XYZ.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPixa* (fpixas).
+ *
+ * Notes:
+ *      (1) The input [l,a,b] and output [x,y,z] values are stored as
+ *          float values, each set in three fpix.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 FPixa* on the Lua stack
@@ -170,6 +164,17 @@ ConvertLABToXYZ(lua_State *L)
  * \brief Convert FPix* in FPixa* (%fpixas) from XYZ to L*a*b*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPixa* (fpixas).
+ *
+ * Notes:
+ *      (1) The input [x,y,z] and output [l,a,b] values are stored as
+ *          float values, each set in three fpix.
+ *      (2) The CIE LAB color space was invented in 1976, as an
+ *          absolute reference for specifying colors that we can
+ *          perceive, independently of the rendering device.  It was
+ *          invented to align color display and print images.
+ *          For information, see:
+ *             http://www.brucelindbloom.com/
+ *             http://en.wikipedia.org/wiki/Lab_color_space
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 FPixa* on the Lua stack
@@ -187,6 +192,11 @@ ConvertXYZToLAB(lua_State *L)
  * \brief Convert FPix* in FPixa* (%fpixas) from XYZ to a single RGB Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPixa* (fpixa).
+ *
+ * Notes:
+ *      (1) The xyz image is stored in three fpix.
+ *      (2) For values of xyz that are out of gamut for rgb, the rgb
+ *          components are set to the closest valid color.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -205,6 +215,12 @@ ConvertXYZToRGB(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPixa* (fpixa).
  * Arg #2 is expected to be a string describing the copy mode (copyflag).
+ *
+ * Notes:
+ *      copyflag may be one of
+ *        ~ L_COPY makes a new fpixa and copies each fpix
+ *        ~ L_CLONE gives a new ref-counted handle to the input fpixa
+ *        ~ L_COPY_CLONE makes a new fpixa with clones of all fpix
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 FPixa* on the Lua stack
@@ -220,11 +236,34 @@ Copy(lua_State *L)
 }
 
 /**
+ * \brief Create a new FPixa*.
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (n).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 FPixa* on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    LL_FUNC("Create");
+    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
+    FPixa *fpixa = fpixaCreate(n);
+    return ll_push_FPixa(_fun, L, fpixa);
+}
+
+/**
  * \brief Display the quad tree for FPix* in FPixa* (%fpixa) in a Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPixa* (fpixa).
  * Arg #2 is expected to be a l_int32 (factor).
  * Arg #3 is expected to be a l_int32 (fontsize).
+ *
+ * Notes:
+ *      (1) The mean and root variance fall naturally in the 8 bpp range,
+ *          but the variance is typically outside the range.  This
+ *          function displays 8 bpp pix clipped to 255, so the image
+ *          pixels will mostly be 255 (white).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack

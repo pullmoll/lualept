@@ -137,6 +137,13 @@ toString(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
  * Arg #2 is expected to be a l_int32 (color).
+ *
+ * Notes:
+ *      (1) This only adds color if not already there.
+ *      (2) The alpha component is 255 (opaque)
+ *      (3) This sets index to the requested color.
+ *      (4) If there is no room in the colormap, returns the index
+ *          of the closest color.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -161,6 +168,10 @@ AddBlackOrWhite(lua_State *L)
  * Arg #2 is expected to be a l_int32 (rval).
  * Arg #3 is expected to be a l_int32 (gval).
  * Arg #4 is expected to be a l_int32 (bval).
+ *
+ * Notes:
+ *      (1) This always adds the color if there is room.
+ *      (2) The alpha component is 255 (opaque)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -177,58 +188,18 @@ AddColor(lua_State *L)
 }
 
 /**
- * \brief AddColorizedGrayToCmap() brief comment goes here.
- * <pre>
- * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
- * Arg #2 is expected to be a l_int32 (type).
- * Arg #3 is expected to be a l_int32 (rval).
- * Arg #4 is expected to be a l_int32 (gval).
- * Arg #5 is expected to be a l_int32 (bval).
- *
- * Notes:
- *      (1) If type == L_PAINT_LIGHT, it colorizes non-black pixels,
- *          preserving antialiasing.
- *          If type == L_PAINT_DARK, it colorizes non-white pixels,
- *          preserving antialiasing.
- *      (2) This increases the colormap size by the number of
- *          different gray (non-black or non-white) colors in the
- *          input colormap.  If there is not enough room in the colormap
- *          for this expansion, it returns 1 (treated as a warning);
- *          the caller should check the return value.
- *      (3) This can be used to determine if the new colors will fit in
- *          the cmap, using null for &na.  Returns 0 if they fit; 2 if
- *          they don't fit.
- *      (4) The mapping table contains, for each gray color found, the
- *          index of the corresponding colorized pixel.  Non-gray
- *          pixels are assigned the invalid index 256.
- *      (5) See pixColorGrayCmap() for usage.
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 on the Lua stack
- */
-static int
-AddColorizedGrayToCmap(lua_State *L)
-{
-    LL_FUNC("AddColorizedGrayToCmap");
-    PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
-    l_int32 type = ll_check_paint_flags(_fun, L, 2, L_PAINT_LIGHT);
-    l_int32 rval = ll_opt_l_int32(_fun, L, 3, 128);
-    l_int32 gval = ll_opt_l_int32(_fun, L, 4, 128);
-    l_int32 bval = ll_opt_l_int32(_fun, L, 5, 128);
-    Numa *na = nullptr;
-    if (addColorizedGrayToCmap(cmap, type, rval, gval, bval, &na))
-        return ll_push_nil(L);
-    ll_push_Numa(_fun, L, na);
-    return 1;
-}
-
-/**
  * \brief Add a nearest color to a PixColormap* (%cmap).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
  * Arg #2 is expected to be a l_int32 (rval).
  * Arg #3 is expected to be a l_int32 (gval).
  * Arg #4 is expected to be a l_int32 (bval).
+ *
+ * Notes:
+ *      (1) This only adds color if not already there.
+ *      (2) The alpha component is 255 (opaque)
+ *      (3) If it's not in the colormap and there is no room to add
+ *          another color, this returns the index of the nearest color.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 lua_Integer on the Lua stack
@@ -255,6 +226,13 @@ AddNearestColor(lua_State *L)
  * Arg #2 is expected to be a l_int32 (rval).
  * Arg #3 is expected to be a l_int32 (gval).
  * Arg #4 is expected to be a l_int32 (bval).
+ *
+ * Notes:
+ *      (1) This only adds color if not already there.
+ *      (2) The alpha component is 255 (opaque)
+ *      (3) This returns the index of the new (or existing) color.
+ *      (4) Returns 2 with a warning if unable to add this color;
+ *          the caller should check the return value.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 lua_Integer on the Lua stack
@@ -282,6 +260,9 @@ AddNewColor(lua_State *L)
  * Arg #3 is expected to be a l_int32 (gval).
  * Arg #4 is expected to be a l_int32 (bval).
  * Arg #5 is expected to be a l_int32 (aval).
+ *
+ * Notes:
+ *      (1) This always adds the color if there is room.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -302,6 +283,9 @@ AddRGBA(lua_State *L)
  * \brief Clear the colors of a PixColormap*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
+ *
+ * Notes:
+ *      (1) This removes the colors by setting the count to 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -319,6 +303,14 @@ Clear(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string (data).
  * Arg #2 is expected to be a l_int32 (cpc; 0 < cpc <= 4).
+ *
+ * Notes:
+ *      (1) The number of bytes in %data is 3 * ncolors.
+ *      (2) Output is in form:
+ *             < r0g0b0 r1g1b1 ... rngnbn >
+ *          where r0, g0, b0 ... are each 2 bytes of hex ascii
+ *      (3) This is used in pdf files to express the colormap as an
+ *          array in ascii (human-readable) format.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 PixColormap* on the Lua stack
@@ -360,6 +352,9 @@ Copy(lua_State *L)
  * \brief Count gray colors of a PixColormap* (%cmap).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
+ *
+ * Notes:
+ *      (1) This counts the unique gray colors, including black and white.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -381,6 +376,10 @@ CountGrayColors(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a l_int32 (depth).
  * Arg #2 is expected to be a l_int32 (levels).
+ *
+ * Notes:
+ *      (1) Colormap has equally spaced gray color values
+ *          from black (0, 0, 0) to white (255, 255, 255).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 PixColormap* on the Lua stack
@@ -401,6 +400,22 @@ CreateLinear(lua_State *L)
  * Arg #1 is expected to be a l_int32 (depth).
  * Arg #2 is an optional boolean (hasblack).
  * Arg #3 is an optional boolean (haswhite).
+ *
+ * Notes:
+ *      (1) This sets up a colormap with random colors,
+ *          where the first color is optionally black, the last color
+ *          is optionally white, and the remaining colors are
+ *          chosen randomly.
+ *      (2) The number of randomly chosen colors is:
+ *               2^(depth) - haswhite - hasblack
+ *      (3) Because rand() is seeded, it might disrupt otherwise
+ *          deterministic results if also used elsewhere in a program.
+ *      (4) rand() is not threadsafe, and will generate garbage if run
+ *          on multiple threads at once -- though garbage is generally
+ *          what you want from a random number generator!
+ *      (5) Modern rand()s have equal randomness in low and high order
+ *          bits, but older ones don't.  Here, we're just using rand()
+ *          to choose colors for output.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 PixColormap* on the Lua stack
@@ -472,6 +487,9 @@ GetColor(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
  * Arg #2 is expected to be a l_int32 (idx).
+ *
+ * Notes:
+ *      (1) The returned alpha channel value is 255.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -555,6 +573,9 @@ GetIndex(lua_State *L)
  * \brief Get the minimum depth of a PixColormap*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
+ *
+ * Notes:
+ *      (1) On error, &mindepth is returned as 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -741,6 +762,11 @@ ReadStream(lua_State *L)
  * Arg #3 is expected to be a l_int32 (rval).
  * Arg #4 is expected to be a l_int32 (gval).
  * Arg #5 is expected to be a l_int32 (bval).
+ *
+ * Notes:
+ *      (1) This resets sets the color of an entry that has already
+ *          been set and included in the count of colors.
+ *      (2) The alpha component is 255 (opaque)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -762,6 +788,9 @@ ResetColor(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
  * Arg #2 is expected to be a l_int32 (cpc; 0 < cpc <= 4).
+ *
+ * Notes:
+ *      (1) When serializing to store in a pdf, use %cpc = 3.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
@@ -787,6 +816,12 @@ SerializeToMemory(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a l_int32 (aval).
+ *
+ * Notes:
+ *      (1) This modifies the transparency of one entry in a colormap.
+ *          The alpha component by default is 255 (opaque).
+ *          This is used when extracting the colormap from a PNG file
+ *          without decoding the image.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -886,6 +921,10 @@ ToRGBTable(lua_State *L)
  * Arg #2 is expected to be a l_int32 (rval).
  * Arg #3 is expected to be a l_int32 (gval).
  * Arg #4 is expected to be a l_int32 (bval).
+ *
+ * Notes:
+ *      (1) This checks if the color already exists or if there is
+ *          room to add it.  It makes no change in the colormap.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -930,6 +969,9 @@ Write(lua_State *L)
  * \brief Write the PixColormap* (%cmap) to memory and return it as a Lua string.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
+ *
+ * Notes:
+ *      (1) Serializes a pixcmap in memory and puts the result in a buffer.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -966,6 +1008,52 @@ WriteStream(lua_State *L)
     if (pixcmapWriteStream(stream->f, cmap))
         return ll_push_nil(L);
     lua_pushboolean(L, TRUE);
+    return 1;
+}
+
+/**
+ * \brief AddColorizedGrayToCmap() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
+ * Arg #2 is expected to be a l_int32 (type).
+ * Arg #3 is expected to be a l_int32 (rval).
+ * Arg #4 is expected to be a l_int32 (gval).
+ * Arg #5 is expected to be a l_int32 (bval).
+ *
+ * Notes:
+ *      (1) If type == L_PAINT_LIGHT, it colorizes non-black pixels,
+ *          preserving antialiasing.
+ *          If type == L_PAINT_DARK, it colorizes non-white pixels,
+ *          preserving antialiasing.
+ *      (2) This increases the colormap size by the number of
+ *          different gray (non-black or non-white) colors in the
+ *          input colormap.  If there is not enough room in the colormap
+ *          for this expansion, it returns 1 (treated as a warning);
+ *          the caller should check the return value.
+ *      (3) This can be used to determine if the new colors will fit in
+ *          the cmap, using null for &na.  Returns 0 if they fit; 2 if
+ *          they don't fit.
+ *      (4) The mapping table contains, for each gray color found, the
+ *          index of the corresponding colorized pixel.  Non-gray
+ *          pixels are assigned the invalid index 256.
+ *      (5) See pixColorGrayCmap() for usage.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+AddColorizedGrayToCmap(lua_State *L)
+{
+    LL_FUNC("AddColorizedGrayToCmap");
+    PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
+    l_int32 type = ll_check_paint_flags(_fun, L, 2, L_PAINT_LIGHT);
+    l_int32 rval = ll_opt_l_int32(_fun, L, 3, 128);
+    l_int32 gval = ll_opt_l_int32(_fun, L, 4, 128);
+    l_int32 bval = ll_opt_l_int32(_fun, L, 5, 128);
+    Numa *na = nullptr;
+    if (addColorizedGrayToCmap(cmap, type, rval, gval, bval, &na))
+        return ll_push_nil(L);
+    ll_push_Numa(_fun, L, na);
     return 1;
 }
 

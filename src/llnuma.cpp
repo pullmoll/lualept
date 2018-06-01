@@ -44,6 +44,10 @@
  * \brief Destroy a Numa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numa* (na).
+ *
+ * Notes:
+ *      (1) Decrements the ref count and, if 0, destroys the numa.
+ *      (2) Always nulls the input ptr.
  * </pre>
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack
@@ -59,23 +63,6 @@ Destroy(lua_State *L)
     numaDestroy(&na);
     *pna = nullptr;
     return 0;
-}
-
-/**
- * \brief Create a new Numa*.
- * <pre>
- * Arg #1 is expected to be a l_int32 (n).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Numa* on the Lua stack
- */
-static int
-Create(lua_State *L)
-{
-    LL_FUNC("Create");
-    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
-    Numa* na = numaCreate(n);
-    return ll_push_Numa(_fun, L, na);
 }
 
 /**
@@ -190,6 +177,10 @@ Clone(lua_State *L)
  * Arg #3 is expected to be a l_int32 (size1).
  * Arg #4 is expected to be a l_int32 (size2) for 'float'.
  * Arg #5 is expected to be a boolean (addzeroes) for 'integer'.
+ *
+ * Notes:
+ *      (1) For integer conversion, size2 is ignored.
+ *          For float conversion, addzeroes is ignored.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Sarray* (%sa) on the Lua stack
@@ -245,9 +236,31 @@ CopyParameters(lua_State *L)
 }
 
 /**
+ * \brief Create a new Numa*.
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (n).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Numa* on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    LL_FUNC("Create");
+    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
+    Numa* na = numaCreate(n);
+    return ll_push_Numa(_fun, L, na);
+}
+
+/**
  * \brief Set the number of numbers stored in the Numa* (%na) to zero.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numa*.
+ *
+ * Notes:
+ *      (1) This does not change the allocation of the array.
+ *          It just clears the number of stored numbers, so that
+ *          the array appears to be empty.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -287,6 +300,18 @@ FromArray(lua_State *L)
  * \brief Get the Numa* (%na) as a table of lua_Number.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numa*.
+ *
+ * Notes:
+ *      (1) If copyflag == L_COPY, it makes a copy which the caller
+ *          is responsible for freeing.  Otherwise, it operates
+ *          directly on the bare array of the numa.
+ *      (2) Very important: for L_NOCOPY, any writes to the array
+ *          will be in the numa.  Do not write beyond the size of
+ *          the count field, because it will not be accessible
+ *          from the numa!  If necessary, be sure to set the count
+ *          field to a larger number (such as the alloc size)
+ *          BEFORE calling this function.  Creating with numaMakeConstant()
+ *          is another way to insure full initialization.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -308,6 +333,10 @@ GetFArray(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numa* (na).
  * Arg #2 is expected to be a l_int32 (idx).
+ *
+ * Notes:
+ *      (1) Caller may need to check the function return value to
+ *          decide if a 0.0 in the returned ival is valid.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -329,6 +358,17 @@ GetFValue(lua_State *L)
  * \brief Get the Numa* (%na) as an array of lua_Integer.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numa*.
+ *
+ * Notes:
+ *      (1) A copy of the array is always made, because we need to
+ *          generate an integer array from the bare float array.
+ *          The caller is responsible for freeing the array.
+ *      (2) The array size is determined by the number of stored numbers,
+ *          not by the size of the allocated array in the Numa.
+ *      (3) This function is provided to simplify calculations
+ *          using the bare internal array, rather than continually
+ *          calling accessors on the numa.  It is typically used
+ *          on an array of size 256.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -350,6 +390,10 @@ GetIArray(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numa* (na).
  * Arg #2 is expected to be a l_int32 (idx).
+ *
+ * Notes:
+ *      (1) Caller may need to check the function return value to
+ *          decide if a 0 in the returned ival is valid.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -395,6 +439,13 @@ GetParameters(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Numa* (na).
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a l_float32 (val).
+ *
+ * Notes:
+ *      (1) This shifts na[i] --> na[i + 1] for all i >= index,
+ *          and then inserts val as na[index].
+ *      (2) It should not be used repeatedly on large arrays,
+ *          because the function is O(n).
+ *
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -466,6 +517,11 @@ ReadStream(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numa*.
  * Arg #2 is expected to be a l_int32 (idx).
+ *
+ * Notes:
+ *      (1) This shifts na[i] --> na[i - 1] for all i > index.
+ *      (2) It should not be used repeatedly on large arrays,
+ *          because the function is O(n).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -484,6 +540,13 @@ RemoveNumber(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numa* (na).
  * Arg #2 is expected to be a l_int32 (n).
+ *
+ * Notes:
+ *      (1) If newcount <= na->nalloc, this resets na->n.
+ *          Using newcount = 0 is equivalent to numaEmpty().
+ *      (2) If newcount > na->nalloc, this causes a realloc
+ *          to a size na->nalloc = newcount.
+ *      (3) All the previously unused values in na are set to 0.0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -579,6 +642,9 @@ Write(lua_State *L)
  * \brief Write the Numa* (%na) to memory and return it as a Lua string.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numa* user data.
+ *
+ * Notes:
+ *      (1) Serializes a numa in memory and puts the result in a buffer.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack

@@ -55,6 +55,10 @@ static l_int32 tab8[256];
  * \brief Destroy a Pix*.
  * <pre>
  * Arg #1 is expected to be Pix*.
+ *
+ * Notes:
+ *      (1) Decrements the ref count and, if 0, destroys the pix.
+ *      (2) Always nulls the input ptr.
  * </pre>
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack
@@ -73,37 +77,31 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Create a new Pix*.
- * <pre>
- * Arg #1 is expected to be Pix*.
- * or
- * Arg #1 is expected to be a l_int32 (width).
- * Arg #2 is expected to be a l_int32 (height).
- * Arg #3 is optional and expected to be a l_int32 (depth; default = 1).
- * or
- * Arg #1 is expected to be a string (filename).
- * or
- * No Arg creates a 1x1 1bpp Pix*
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Pix* on the Lua stack
- */
-static int
-Create(lua_State *L)
-{
-    LL_FUNC("Create");
-    l_int32 width = ll_opt_l_int32(_fun, L, 1, 1);
-    l_int32 height = ll_opt_l_int32(_fun, L, 2, 1);
-    l_int32 depth = ll_opt_l_int32(_fun, L, 3, 1);
-    Pix *pix = pixCreate(width, height, depth);
-    return ll_push_Pix(_fun, L, pix);
-}
-
-/**
  * \brief Subtract the Pix* (%pix2) from Pix* (%pix1).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This gives the set subtraction of two images with equal depth,
+ *          aligning them to the the UL corner.  pixs1 and pixs2
+ *          need not have the same width and height.
+ *      (2) Source pixs2 is always subtracted from source pixs1.
+ *          The result is
+ *                  pixs1 \ pixs2 = pixs1 & (~pixs2)
+ *      (3) There are 4 cases:
+ *            (a) pixd == null,   (src1 - src2) --> new pixd
+ *            (b) pixd == pixs1,  (src1 - src2) --> src1  (in-place)
+ *            (c) pixd == pixs2,  (src1 - src2) --> src2  (in-place)
+ *            (d) pixd != pixs1 && pixd != pixs2),
+ *                                 (src1 - src2) --> input pixd
+ *      (4) For clarity, if the case is known, use these patterns:
+ *            (a) pixd = pixSubtract(NULL, pixs1, pixs2);
+ *            (b) pixSubtract(pixs1, pixs1, pixs2);
+ *            (c) pixSubtract(pixs2, pixs1, pixs2);
+ *            (d) pixSubtract(pixd, pixs1, pixs2);
+ *      (5) The size of the result is determined by pixs1.
+ *      (6) The depths of pixs1 and pixs2 must be equal.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -124,6 +122,17 @@ Subtract(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is an optional Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This inverts pixs, for all pixel depths.
+ *      (2) There are 3 cases:
+ *           (a) pixd == null,   ~src --> new pixd
+ *           (b) pixd == pixs,   ~src --> src  (in-place)
+ *           (c) pixd != pixs,   ~src --> input pixd
+ *      (3) For clarity, if the case is known, use these patterns:
+ *           (a) pixd = pixInvert(NULL, pixs);
+ *           (b) pixInvert(pixs, pixs);
+ *           (c) pixInvert(pixd, pixs);
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -144,6 +153,26 @@ Invert(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This gives the intersection of two images with equal depth,
+ *          aligning them to the the UL corner.  pixs1 and pixs2
+ *          need not have the same width and height.
+ *      (2) There are 3 cases:
+ *            (a) pixd == null,   (src1 & src2) --> new pixd
+ *            (b) pixd == pixs1,  (src1 & src2) --> src1  (in-place)
+ *            (c) pixd != pixs1,  (src1 & src2) --> input pixd
+ *      (3) For clarity, if the case is known, use these patterns:
+ *            (a) pixd = pixAnd(NULL, pixs1, pixs2);
+ *            (b) pixAnd(pixs1, pixs1, pixs2);
+ *            (c) pixAnd(pixd, pixs1, pixs2);
+ *      (4) The size of the result is determined by pixs1.
+ *      (5) The depths of pixs1 and pixs2 must be equal.
+ *      (6) Note carefully that the order of pixs1 and pixs2 only matters
+ *          for the in-place case.  For in-place, you must have
+ *          pixd == pixs1.  Setting pixd == pixs2 gives an incorrect
+ *          result: the copy puts pixs1 image data in pixs2, and
+ *          the rasterop is then between pixs2 and pixs2 (a no-op).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -164,6 +193,26 @@ And(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This gives the union of two images with equal depth,
+ *          aligning them to the the UL corner.  pixs1 and pixs2
+ *          need not have the same width and height.
+ *      (2) There are 3 cases:
+ *            (a) pixd == null,   (src1 | src2) --> new pixd
+ *            (b) pixd == pixs1,  (src1 | src2) --> src1  (in-place)
+ *            (c) pixd != pixs1,  (src1 | src2) --> input pixd
+ *      (3) For clarity, if the case is known, use these patterns:
+ *            (a) pixd = pixOr(NULL, pixs1, pixs2);
+ *            (b) pixOr(pixs1, pixs1, pixs2);
+ *            (c) pixOr(pixd, pixs1, pixs2);
+ *      (4) The size of the result is determined by pixs1.
+ *      (5) The depths of pixs1 and pixs2 must be equal.
+ *      (6) Note carefully that the order of pixs1 and pixs2 only matters
+ *          for the in-place case.  For in-place, you must have
+ *          pixd == pixs1.  Setting pixd == pixs2 gives an incorrect
+ *          result: the copy puts pixs1 image data in pixs2, and
+ *          the rasterop is then between pixs2 and pixs2 (a no-op).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -184,6 +233,26 @@ Or(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This gives the XOR of two images with equal depth,
+ *          aligning them to the the UL corner.  pixs1 and pixs2
+ *          need not have the same width and height.
+ *      (2) There are 3 cases:
+ *            (a) pixd == null,   (src1 ^ src2) --> new pixd
+ *            (b) pixd == pixs1,  (src1 ^ src2) --> src1  (in-place)
+ *            (c) pixd != pixs1,  (src1 ^ src2) --> input pixd
+ *      (3) For clarity, if the case is known, use these patterns:
+ *            (a) pixd = pixXor(NULL, pixs1, pixs2);
+ *            (b) pixXor(pixs1, pixs1, pixs2);
+ *            (c) pixXor(pixd, pixs1, pixs2);
+ *      (4) The size of the result is determined by pixs1.
+ *      (5) The depths of pixs1 and pixs2 must be equal.
+ *      (6) Note carefully that the order of pixs1 and pixs2 only matters
+ *          for the in-place case.  For in-place, you must have
+ *          pixd == pixs1.  Setting pixd == pixs2 gives an incorrect
+ *          result: the copy puts pixs1 image data in pixs2, and
+ *          the rasterop is then between pixs2 and pixs2 (a no-op).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -274,6 +343,12 @@ toString(lua_State* L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is an optional Box* (box).
+ *
+ * Notes:
+ *      (1) This is an average over differences of adjacent pixels along
+ *          each column.
+ *      (2) To resample for a bin size different from 1, use
+ *          numaUniformSampling() on the result of this function.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -293,6 +368,12 @@ AbsDiffByColumn(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is an optional Box* (box).
+ *
+ * Notes:
+ *      (1) This is an average over differences of adjacent pixels along
+ *          each row.
+ *      (2) To resample for a bin size different from 1, use
+ *          numaUniformSampling() on the result of this function.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -313,6 +394,12 @@ AbsDiffByRow(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is an optional Box* (box).
  * Arg #2 is an optional string (dir: horizontal-line or vertical-line).
+ *
+ * Notes:
+ *      (1) This gives the average over the abs val of differences of
+ *          adjacent pixels values, along either each
+ *             row:     dir == L_HORIZONTAL_LINE
+ *             column:  dir == L_VERTICAL_LINE
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -336,6 +423,12 @@ AbsDiffInRect(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is an optional Box* (box).
+ *
+ * Notes:
+ *      (1) This gives the average over the abs val of differences of
+ *          adjacent pixels values, along a line that is either horizontal
+ *          or vertical.
+ *      (2) If horizontal, require x1 < x2; if vertical, require y1 < y2.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -361,6 +454,15 @@ AbsDiffOnLine(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs1).
  * Arg #2 is expected to be a Pix* (pixs2).
+ *
+ * Notes:
+ *      (1) The depth of pixs1 and pixs2 must be equal.
+ *      (2) Clips computation to the min size, aligning the UL corners
+ *      (3) For 8 and 16 bpp, assumes one gray component.
+ *      (4) For 32 bpp, assumes 3 color components, and ignores the
+ *          LSB of each word (the alpha channel)
+ *      (5) Computes the absolute value of the difference between
+ *          each component value.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -381,6 +483,12 @@ AbsDifference(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (op).
+ *
+ * Notes:
+ *      (1) This adds or subtracts each pixs value from pixd.
+ *      (2) This clips to the minimum of pixs and pixd, so they
+ *          do not need to be the same size.
+ *      (3) The alignment is to the origin [UL corner] of pixs & pixd.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -400,6 +508,13 @@ Accumulate(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
  * Arg #2 is expected to be a Pta* (pta).
+ *
+ * Notes:
+ *      (1) This generates an aligned (by centroid) sum of the input pix.
+ *      (2) We use only the first 256 samples; that's plenty.
+ *      (3) If pta is not input, we generate two tables, and discard
+ *          after use.  If this is called many times, it is better
+ *          to precompute the pta.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -427,6 +542,23 @@ AccumulateSamples(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pix* (pixm).
  * Arg #3 is expected to be a l_float32 (gamma).
+ *
+ * Notes:
+ *      (1) This is a simple convenience function for doing adaptive
+ *          thresholding on a grayscale image with variable background.
+ *          It uses default parameters appropriate for typical text images.
+ *      (2) %pixm is a 1 bpp mask over "image" regions, which are not
+ *          expected to have a white background.  The mask inhibits
+ *          background finding under the fg pixels of the mask.  For
+ *          images with both text and image, the image regions would
+ *          be binarized (or quantized) by a different set of operations.
+ *      (3) As %gamma is increased, the foreground pixels are reduced.
+ *      (4) Under the covers:  The default background value for normalization
+ *          is 200, so we choose 170 for 'maxval' in pixGammaTRC.  Likewise,
+ *          the default foreground threshold for normalization is 60,
+ *          so we choose 50 for 'minval' in pixGammaTRC.  Because
+ *          170 was mapped to 255, choosing 200 for the threshold is
+ *          quite safe for avoiding speckle noise from the background.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -451,6 +583,19 @@ AdaptThresholdToBinary(lua_State *L)
  * Arg #4 is expected to be a l_int32 (blackval).
  * Arg #5 is expected to be a l_int32 (whiteval).
  * Arg #6 is expected to be a l_int32 (thresh).
+ *
+ * Notes:
+ *      (1) This is a convenience function for doing adaptive thresholding
+ *          on a grayscale image with variable background.  Also see notes
+ *          in pixAdaptThresholdToBinary().
+ *      (2) Reducing %gamma increases the foreground (text) pixels.
+ *          Use a low value (e.g., 0.5) for images with light text.
+ *      (3) For normal images, see default args in pixAdaptThresholdToBinary().
+ *          For images with very light text, these values are appropriate:
+ *             gamma     ~0.5
+ *             blackval  ~70
+ *             whiteval  ~190
+ *             thresh    ~200
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -474,6 +619,15 @@ AdaptThresholdToBinaryGen(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) We don't use 1 bpp colormapped images with alpha in leptonica,
+ *          but we support generating them (here), writing to png, and reading
+ *          the png.  On reading, they are converted to 32 bpp RGBA.
+ *      (2) The background (0) pixels in pixs become fully transparent, and the
+ *          foreground (1) pixels are fully opaque.  Thus, pixd is a 1 bpp
+ *          representation of a stencil, that can be used to paint over pixels
+ *          of a backing image that are masked by the foreground in pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -494,6 +648,19 @@ AddAlphaTo1bpp(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (fract).
  * Arg #3 is expected to be a l_int32 (invert).
+ *
+ * Notes:
+ *      (1) This is a simple alpha layer generator, where typically white has
+ *          maximum transparency and black has minimum.
+ *      (2) If %invert == 1, generate the same alpha layer but invert
+ *          the input image photometrically.  This is useful for blending
+ *          over dark images, where you want dark regions in pixs, such
+ *          as text, to be lighter in the blended image.
+ *      (3) The fade %fract gives the minimum transparency (i.e.,
+ *          maximum opacity).  A small fraction is useful for adding
+ *          a watermark to an image.
+ *      (4) If pixs has a colormap, it is removed to rgb.
+ *      (5) If pixs already has an alpha layer, it is overwritten.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -518,6 +685,21 @@ AddAlphaToBlend(lua_State *L)
  * Arg #4 is expected to be a l_int32 (top).
  * Arg #5 is expected to be a l_int32 (bottom).
  * Arg #6 is expected to be a string describing the operation (op).
+ *
+ * Notes:
+ *      (1) See pixGetBlackOrWhiteVal() for possible side effect (adding
+ *          a color to a colormap).
+ *      (2) The only complication is that pixs may have a colormap.
+ *          There are two ways to add the black or white border:
+ *          (a) As done here (simplest, most efficient)
+ *          (b) l_int32 ws, hs, d;
+ *              pixGetDimensions(pixs, &ws, &hs, &d);
+ *              Pix *pixd = pixCreate(ws + left + right, hs + top + bot, d);
+ *              PixColormap *cmap = pixGetColormap(pixs);
+ *              if (cmap != NULL)
+ *                  pixSetColormap(pixd, pixcmapCopy(cmap));
+ *              pixSetBlackOrWhite(pixd, L_SET_WHITE);  // uses cmap
+ *              pixRasterop(pixd, left, top, ws, hs, PIX_SET, pixs, 0, 0);
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -543,6 +725,9 @@ AddBlackOrWhiteBorder(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (npix).
  * Arg #3 is expected to be a l_uint32 (val).
+ *
+ * Notes:
+ *      (1) See pixGetBlackOrWhiteVal() for values of black and white pixels.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -568,6 +753,28 @@ AddBorder(lua_State *L)
  * Arg #4 is expected to be a l_int32 (top).
  * Arg #5 is expected to be a l_int32 (bottom).
  * Arg #6 is expected to be a l_uint32 (val).
+ *
+ * Notes:
+ *      (1) For binary images:
+ *             white:  val = 0
+ *             black:  val = 1
+ *          For grayscale images:
+ *             white:  val = 2 ** d - 1
+ *             black:  val = 0
+ *          For rgb color images:
+ *             white:  val = 0xffffff00
+ *             black:  val = 0
+ *          For colormapped images, set val to the appropriate colormap index.
+ *      (2) If the added border is either black or white, you can use
+ *             pixAddBlackOrWhiteBorder()
+ *          The black and white values for all images can be found with
+ *             pixGetBlackOrWhiteVal()
+ *          which, if pixs is cmapped, may add an entry to the colormap.
+ *          Alternatively, if pixs has a colormap, you can find the index
+ *          of the pixel whose intensity is closest to white or black:
+ *             white: pixcmapGetRankIntensity(cmap, 1.0, &index);
+ *             black: pixcmapGetRankIntensity(cmap, 0.0, &index);
+ *          and use that for val.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -592,6 +799,13 @@ AddBorderGeneral(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (val).
+ *
+ * Notes:
+ *      (1) In-place operation.
+ *      (2) No clipping for 32 bpp.
+ *      (3) For 8 and 16 bpp, if val > 0 the result is clipped
+ *          to 0xff and 0xffff, rsp.
+ *      (4) For 8 and 16 bpp, if val < 0 the result is clipped to 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -613,6 +827,10 @@ AddConstantGray(lua_State *L)
  * Arg #3 is expected to be a l_int32 (right).
  * Arg #4 is expected to be a l_int32 (top).
  * Arg #5 is expected to be a l_int32 (bottom).
+ *
+ * Notes:
+ *      (1) This adds pixels on each side whose values are equal to
+ *          the value on the closest boundary pixel.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -636,6 +854,10 @@ AddContinuedBorder(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (stdev).
+ *
+ * Notes:
+ *      (1) This adds noise to each pixel, taken from a normal
+ *          distribution with zero mean and specified standard deviation.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -656,6 +878,18 @@ AddGaussianNoise(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs1).
  * Arg #3 is expected to be a Pix* (pixs2).
+ *
+ * Notes:
+ *      (1) Arithmetic addition of two 8, 16 or 32 bpp images.
+ *      (2) For 8 and 16 bpp, we do explicit clipping to 0xff and 0xffff,
+ *          respectively.
+ *      (3) Alignment is to UL corner.
+ *      (4) There are 3 cases.  The result can go to a new dest,
+ *          in-place to pixs1, or to an existing input dest:
+ *          * pixd == null:   (src1 + src2) --> new pixd
+ *          * pixd == pixs1:  (src1 + src2) --> src1  (in-place)
+ *          * pixd != pixs1:  (src1 + src2) --> input pixd
+ *      (5) pixs2 must be different from both pixd and pixs1.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -675,6 +909,9 @@ AddGray(lua_State *L)
  * \brief Add a gray colormap to Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) If pixs has a colormap, this is a no-op.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -691,6 +928,11 @@ AddGrayColormap8(lua_State *L)
  * \brief Add a minimal gray colormap to Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This generates a colormapped version of the input image
+ *          that has the same number of colormap entries as the
+ *          input image has unique gray levels.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -712,6 +954,21 @@ AddMinimalGrayColormap8(lua_State *L)
  * Arg #3 is expected to be a l_int32 (right).
  * Arg #4 is expected to be a l_int32 (top).
  * Arg #5 is expected to be a l_int32 (bottom).
+ *
+ * Notes:
+ *      (1) This applies what is effectively mirror boundary conditions.
+ *          For the added border pixels in pixd, the pixels in pixs
+ *          near the border are mirror-copied into the border region.
+ *      (2) This is useful for avoiding special operations near
+ *          boundaries when doing image processing operations
+ *          such as rank filters and convolution.  In use, one first
+ *          adds mirrored pixels to each side of the image.  The number
+ *          of pixels added on each side is half the filter dimension.
+ *          Then the image processing operations proceed over a
+ *          region equal to the size of the original image, and
+ *          write directly into a dest pix of the same size as pixs.
+ *      (3) The general pixRasterop() is used for an in-place operation here
+ *          because there is no overlap between the src and dest rectangles.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -738,6 +995,23 @@ AddMirroredBorder(lua_State *L)
  * Arg #3 is expected to be a l_int32 (right).
  * Arg #4 is expected to be a l_int32 (top).
  * Arg #5 is expected to be a l_int32 (bottom).
+ *
+ * Notes:
+ *      (1) This applies mirrored boundary conditions horizontally
+ *          and repeated b.c. vertically.
+ *      (2) It is specifically used for avoiding special operations
+ *          near boundaries when convolving a hue-saturation histogram
+ *          with a given window size.  The repeated b.c. are used
+ *          vertically for hue, and the mirrored b.c. are used
+ *          horizontally for saturation.  The number of pixels added
+ *          on each side is approximately (but not quite) half the
+ *          filter dimension.  The image processing operations can
+ *          then proceed over a region equal to the size of the original
+ *          image, and write directly into a dest pix of the same
+ *          size as pixs.
+ *      (3) The general pixRasterop() can be used for an in-place
+ *          operation here because there is no overlap between the
+ *          src and dest rectangles.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -761,6 +1035,14 @@ AddMixedBorder(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs1).
  * Arg #2 is expected to be a Pix* (pixs2).
+ *
+ * Notes:
+ *      (1) Clips computation to the minimum size, aligning the UL corners.
+ *      (2) Removes any colormap to RGB, and ignores the LSB of each
+ *          pixel word (the alpha channel).
+ *      (3) Adds each component value, pixelwise, clipping to 255.
+ *      (4) This is useful to combine two images where most of the
+ *          pixels are essentially black, such as in pixPerceptualDiff().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -783,6 +1065,13 @@ AddRGB(lua_State *L)
  * Arg #3 is expected to be a l_int32 (right).
  * Arg #4 is expected to be a l_int32 (top).
  * Arg #5 is expected to be a l_int32 (bottom).
+ *
+ * Notes:
+ *      (1) This applies a repeated border, as if the central part of
+ *          the image is tiled over the plane.  So, for example, the
+ *          pixels in the left border come from the right side of the image.
+ *      (2) The general pixRasterop() is used for an in-place operation here
+ *          because there is no overlap between the src and dest rectangles.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -809,6 +1098,20 @@ AddRepeatedBorder(lua_State *L)
  * Arg #3 is expected to be a string (textstr).
  * Arg #4 is expected to be a l_uint32 (val).
  * Arg #5 is expected to be a l_int32 (location).
+ *
+ * Notes:
+ *      (1) This function paints a set of lines of text over an image.
+ *          If %location is L_ADD_ABOVE or L_ADD_BELOW, the pix size
+ *          is expanded with a border and rendered over the border.
+ *      (2) %val is the pixel value to be painted through the font mask.
+ *          It should be chosen to agree with the depth of pixs.
+ *          If it is out of bounds, an intermediate value is chosen.
+ *          For RGB, use hex notation: 0xRRGGBB00, where RR is the
+ *          hex representation of the red intensity, etc.
+ *      (3) If textstr == NULL, use the text field in the pix.
+ *      (4) If there is a colormap, this does the best it can to use
+ *          the requested color, or something similar to it.
+ *      (5) Typical usage is for labelling a pix with some text data.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -834,6 +1137,11 @@ AddSingleTextblock(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a string (text).
+ *
+ * Notes:
+ *      (1) This adds the new textstring to any existing text.
+ *      (2) Either or both the existing text and the new text
+ *          string can be null.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -856,6 +1164,24 @@ AddText(lua_State *L)
  * Arg #3 is expected to be a string (textstr).
  * Arg #4 is expected to be a l_uint32 (val).
  * Arg #5 is expected to be a l_int32 (location).
+ *
+ * Notes:
+ *      (1) This function expands an image as required to paint one or
+ *          more lines of text adjacent to the image.  If %bmf == NULL,
+ *          this returns a copy.  If above or below, the lines are
+ *          centered with respect to the image; if left or right, they
+ *          are left justified.
+ *      (2) %val is the pixel value to be painted through the font mask.
+ *          It should be chosen to agree with the depth of pixs.
+ *          If it is out of bounds, an intermediate value is chosen.
+ *          For RGB, use hex notation: 0xRRGGBB00, where RR is the
+ *          hex representation of the red intensity, etc.
+ *      (3) If textstr == NULL, use the text field in the pix.  The
+ *          text field contains one or most "lines" of text, where newlines
+ *          are used as line separators.
+ *      (4) If there is a colormap, this does the best it can to use
+ *          the requested color, or something similar to it.
+ *      (5) Typical usage is for labelling a pix with some text data.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -908,6 +1234,10 @@ AdjacentOnPixelInRaster(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pixa* (pixa).
  * Arg #3 is expected to be a Numa* (na).
+ *
+ * Notes:
+ *      (1) This complements pixRemoveWithIndicator().   Here, the selected
+ *          components are added to pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -927,6 +1257,10 @@ AddWithIndicator(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) Brings in either black or white pixels from the boundary
+ *      (2) Removes any existing colormap, if necessary, before transforming
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -995,6 +1329,10 @@ AffineGray(lua_State *L)
  * Arg #2 is expected to be a Pta* (ptad).
  * Arg #3 is expected to be a Pta* (ptas).
  * Arg #4 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) Brings in either black or white pixels from the boundary
+ *      (2) Removes any existing colormap, if necessary, before transforming
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -1066,6 +1404,35 @@ AffinePtaGray(lua_State *L)
  * Arg #4 is expected to be a Pix* (pixg).
  * Arg #5 is expected to be a l_float32 (fract).
  * Arg #6 is expected to be a l_int32 (border).
+ *
+ * Notes:
+ *      (1) The alpha channel is transformed separately from pixs,
+ *          and aligns with it, being fully transparent outside the
+ *          boundary of the transformed pixs.  For pixels that are fully
+ *          transparent, a blending function like pixBlendWithGrayMask()
+ *          will give zero weight to corresponding pixels in pixs.
+ *      (2) If pixg is NULL, it is generated as an alpha layer that is
+ *          partially opaque, using %fract.  Otherwise, it is cropped
+ *          to pixs if required and %fract is ignored.  The alpha channel
+ *          in pixs is never used.
+ *      (3) Colormaps are removed.
+ *      (4) When pixs is transformed, it doesn't matter what color is brought
+ *          in because the alpha channel will be transparent (0) there.
+ *      (5) To avoid losing source pixels in the destination, it may be
+ *          necessary to add a border to the source pix before doing
+ *          the affine transformation.  This can be any non-negative number.
+ *      (6) The input %ptad and %ptas are in a coordinate space before
+ *          the border is added.  Internally, we compensate for this
+ *          before doing the affine transform on the image after the border
+ *          is added.
+ *      (7) The default setting for the border values in the alpha channel
+ *          is 0 (transparent) for the outermost ring of pixels and
+ *          (0.5 * fract * 255) for the second ring.  When blended over
+ *          a second image, this
+ *          (a) shrinks the visible image to make a clean overlap edge
+ *              with an image below, and
+ *          (b) softens the edges by weakening the aliasing there.
+ *          Use l_setAlphaMaskBorder() to change these values.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -1089,6 +1456,13 @@ AffinePtaWithAlpha(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) Brings in either black or white pixels from the boundary.
+ *      (2) Retains colormap, which you can do for a sampled transform..
+ *      (3) For 8 or 32 bpp, much better quality is obtained by the
+ *          somewhat slower pixAffine().  See that function
+ *          for relative timings between sampled and interpolated.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -1113,6 +1487,25 @@ AffineSampled(lua_State *L)
  * Arg #2 is expected to be a Pta* (ptad).
  * Arg #3 is expected to be a Pta* (ptas).
  * Arg #4 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) Brings in either black or white pixels from the boundary.
+ *      (2) Retains colormap, which you can do for a sampled transform..
+ *      (3) The 3 points must not be collinear.
+ *      (4) The order of the 3 points is arbitrary; however, to compare
+ *          with the sequential transform they must be in these locations
+ *          and in this order: origin, x-axis, y-axis.
+ *      (5) For 1 bpp images, this has much better quality results
+ *          than pixAffineSequential(), particularly for text.
+ *          It is about 3x slower, but does not require additional
+ *          border pixels.  The poor quality of pixAffineSequential()
+ *          is due to repeated quantized transforms.  It is strongly
+ *          recommended that pixAffineSampled() be used for 1 bpp images.
+ *      (6) For 8 or 32 bpp, much better quality is obtained by the
+ *          somewhat slower pixAffinePta().  See that function
+ *          for relative timings between sampled and interpolated.
+ *      (7) To repeat, use of the sequential transform,
+ *          pixAffineSequential(), for any images, is discouraged.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -1137,6 +1530,22 @@ AffineSampledPta(lua_State *L)
  * Arg #3 is expected to be a Pta* (ptas).
  * Arg #4 is expected to be a l_int32 (bw).
  * Arg #5 is expected to be a l_int32 (bh).
+ *
+ * Notes:
+ *      (1) The 3 pts must not be collinear.
+ *      (2) The 3 pts must be given in this order:
+ *           ~ origin
+ *           ~ a location along the x-axis
+ *           ~ a location along the y-axis.
+ *      (3) You must guess how much border must be added so that no
+ *          pixels are lost in the transformations from src to
+ *          dest coordinate space.  (This can be calculated but it
+ *          is a lot of work!)  For coordinate spaces that are nearly
+ *          at right angles, on a 300 ppi scanned page, the addition
+ *          of 1000 pixels on each side is usually sufficient.
+ *      (4) This is here for pedagogical reasons.  It is about 3x faster
+ *          on 1 bpp images than pixAffineSampled(), but the results
+ *          on text are much inferior.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -1159,6 +1568,14 @@ AffineSequential(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_uint32 (color).
+ *
+ * Notes:
+ *      (1) This is a convenience function that renders 32 bpp RGBA images
+ *          (with an alpha channel) over a uniform background of
+ *          value %color.  To render over a white background,
+ *          use %color = 0xffffff00.  The result is an RGB image.
+ *      (2) If pixs does not have an alpha channel, it returns a clone
+ *          of pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -1270,6 +1687,22 @@ ApplyLocalThreshold(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pix* (pixg).
  * Arg #3 is expected to be a l_int32 (target).
+ *
+ * Notes:
+ *      (1) Suppose you have an image that you want to transform based
+ *          on some photometric measurement at each point, such as the
+ *          threshold value for binarization.  Representing the photometric
+ *          measurement as an image pixg, you can threshold in input image
+ *          using pixVarThresholdToBinary().  Alternatively, you can map
+ *          the input image pointwise so that the threshold over the
+ *          entire image becomes a constant, such as 128.  For example,
+ *          if a pixel in pixg is 150 and the target is 128, the
+ *          corresponding pixel in pixs is mapped linearly to a value
+ *          (128/150) of the input value.  If the resulting mapped image
+ *          pixd were then thresholded at 128, you would obtain the
+ *          same result as a direct binarization using pixg with
+ *          pixVarThresholdToBinary().
+ *      (2) The sizes of pixs and pixg must be equal.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -1292,6 +1725,34 @@ ApplyVariableGrayMap(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Pix* (pixm).
  * Arg #4 is expected to be a l_int32 (level).
+ *
+ * Notes:
+ *      (1) This is used in phase 2 of color segmentation, where pixs
+ *          is the original input image to pixColorSegment(), and
+ *          pixd is the colormapped image returned from
+ *          pixColorSegmentCluster().  It is also used, with a mask,
+ *          in phase 4.
+ *      (2) This is an in-place operation.
+ *      (3) The colormap in pixd is unchanged.
+ *      (4) pixs and pixd must be the same size (w, h).
+ *      (5) The selection mask pixm can be null.  If it exists, it must
+ *          be the same size as pixs and pixd, and only pixels
+ *          corresponding to fg in pixm are assigned.  Set to
+ *          NULL if all pixels in pixd are to be assigned.
+ *      (6) The countarray can be null.  If it exists, it is pre-allocated
+ *          and of a size at least equal to the size of the colormap in pixd.
+ *      (7) This does a best-fit (non-greedy) assignment of pixels to
+ *          existing clusters.  Specifically, it assigns each pixel
+ *          in pixd to the color index in the pixd colormap that has a
+ *          color closest to the corresponding rgb pixel in pixs.
+ *      (8) 'level' is the octcube level used to quickly find the nearest
+ *          color in the colormap for each pixel.  For color segmentation,
+ *          this parameter is set to LEVEL_IN_OCTCUBE.
+ *      (9) We build a mapping table from octcube to colormap index so
+ *          that this function can run in a time (otherwise) independent
+ *          of the number of colors in the colormap.  This avoids a
+ *          brute-force search for the closest colormap color to each
+ *          pixel in the image.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -1317,6 +1778,12 @@ AssignToNearestColor(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is an optional Box* (box).
  * Arg #3 is an optional string (type: white-is-max or black-is-max).
+ *
+ * Notes:
+ *      (1) To resample for a bin size different from 1, use
+ *          numaUniformSampling() on the result of this function.
+ *      (2) If type == L_BLACK_IS_MAX, black pixels get the maximum
+ *          value (0xff for 8 bpp, 0xffff for 16 bpp) and white get 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -1338,6 +1805,12 @@ AverageByColumn(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is an optional Box* (box).
  * Arg #3 is an optional string (type).
+ *
+ * Notes:
+ *      (1) To resample for a bin size different from 1, use
+ *          numaUniformSampling() on the result of this function.
+ *      (2) If type == L_BLACK_IS_MAX, black pixels get the maximum
+ *          value (0xff for 8 bpp, 0xffff for 16 bpp) and white get 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -1385,6 +1858,22 @@ AverageInRect(lua_State *L)
  * Arg #5 is expected to be a l_int32 (last).
  * Arg #6 is expected to be a l_int32 (factor1).
  * Arg #7 is expected to be a l_int32 (factor2).
+ *
+ * Notes:
+ *      (1) If d != 1 bpp, colormaps are removed and the result
+ *          is converted to 8 bpp.
+ *      (2) If %dir == L_HORIZONTAL_LINE, the intensity is averaged
+ *          along each horizontal raster line (sampled by %factor1),
+ *          and the profile is the array of these averages in the
+ *          vertical direction between %first and %last raster lines,
+ *          and sampled by %factor2.
+ *      (3) If %dir == L_VERTICAL_LINE, the intensity is averaged
+ *          along each vertical line (sampled by %factor1),
+ *          and the profile is the array of these averages in the
+ *          horizontal direction between %first and %last columns,
+ *          and sampled by %factor2.
+ *      (4) The averages are measured over the central %fract of the image.
+ *          Use %fract == 1.0 to average across the entire width or height.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa * on the Lua stack
@@ -1413,6 +1902,14 @@ AverageIntensityProfile(lua_State *L)
  * Arg #4 is expected to be a l_int32 (x2).
  * Arg #5 is expected to be a l_int32 (y2).
  * Arg #6 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) The line must be either horizontal or vertical, so either
+ *          y1 == y2 (horizontal) or x1 == x2 (vertical).
+ *      (2) If horizontal, x1 must be <= x2.
+ *          If vertical, y1 must be <= y2.
+ *          characterize the intensity smoothness along a line.
+ *      (3) Input end points are clipped to the pix.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_float32 on the Lua stack
@@ -1443,6 +1940,48 @@ AverageOnLine(lua_State *L)
  * Arg #8 is expected to be a l_int32 (bgval).
  * Arg #9 is expected to be a l_int32 (smoothx).
  * Arg #10 is expected to be a l_int32 (smoothy).
+ *
+ * Notes:
+ *    (1) This is a top-level interface for normalizing the image intensity
+ *        by mapping the image so that the background is near the input
+ *        value 'bgval'.
+ *    (2) The input image is either grayscale or rgb.
+ *    (3) For each component in the input image, the background value
+ *        in each tile is estimated using the values in the tile that
+ *        are not part of the foreground, where the foreground is
+ *        determined by the input 'thresh' argument.
+ *    (4) An optional binary mask can be specified, with the foreground
+ *        pixels typically over image regions.  The resulting background
+ *        map values will be determined by surrounding pixels that are
+ *        not under the mask foreground.  The origin (0,0) of this mask
+ *        is assumed to be aligned with the origin of the input image.
+ *        This binary mask must not fully cover pixs, because then there
+ *        will be no pixels in the input image available to compute
+ *        the background.
+ *    (5) An optional grayscale version of the input pixs can be supplied.
+ *        The only reason to do this is if the input is RGB and this
+ *        grayscale version can be used elsewhere.  If the input is RGB
+ *        and this is not supplied, it is made internally using only
+ *        the green component, and destroyed after use.
+ *    (6) The dimensions of the pixel tile (sx, sy) give the amount by
+ *        by which the map is reduced in size from the input image.
+ *    (7) The threshold is used to binarize the input image, in order to
+ *        locate the foreground components.  If this is set too low,
+ *        some actual foreground may be used to determine the maps;
+ *        if set too high, there may not be enough background
+ *        to determine the map values accurately.  Typically, it's
+ *        better to err by setting the threshold too high.
+ *    (8) A 'mincount' threshold is a minimum count of pixels in a
+ *        tile for which a background reading is made, in order for that
+ *        pixel in the map to be valid.  This number should perhaps be
+ *        at least 1/3 the size of the tile.
+ *    (9) A 'bgval' target background value for the normalized image.  This
+ *        should be at least 128.  If set too close to 255, some
+ *        clipping will occur in the result.
+ *    (10) Two factors, 'smoothx' and 'smoothy', are input for smoothing
+ *        the map.  Each low-pass filter kernel dimension is
+ *        is 2 * (smoothing factor) + 1, so a
+ *        value of 0 means no smoothing. A value of 1 or 2 is recommended.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -1475,6 +2014,21 @@ BackgroundNorm(lua_State *L)
  * Arg #4 is expected to be a l_int32 (smoothx).
  * Arg #5 is expected to be a l_int32 (smoothy).
  * Arg #6 is expected to be a l_int32 (delta).
+ *
+ * Notes:
+ *      (1) This does adaptation flexibly to a quickly varying background.
+ *          For that reason, all input parameters should be small.
+ *      (2) sx and sy give the tile size; they should be in [5 - 7].
+ *      (3) The full width and height of the convolution kernel
+ *          are (2 * smoothx + 1) and (2 * smoothy + 1).  They
+ *          should be in [1 - 2].
+ *      (4) Basin filling is used to fill the large fg regions.  The
+ *          parameter %delta measures the height that the black
+ *          background is raised from the local minima.  By raising
+ *          the background, it is possible to threshold the large
+ *          fg regions to foreground.  If %delta is too large,
+ *          bg regions will be lifted, causing thickening of
+ *          the fg regions.  Use 0 to skip.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -1505,6 +2059,12 @@ BackgroundNormFlex(lua_State *L)
  * Arg #7 is expected to be a l_int32 (bgval).
  * Arg #8 is expected to be a l_int32 (smoothx).
  * Arg #9 is expected to be a l_int32 (smoothy).
+ *
+ * Notes:
+ *    (1) See notes in pixBackgroundNorm().
+ *    (2) This returns a 16 bpp pix that can be used by
+ *        pixApplyInvBackgroundGrayMap() to generate a normalized version
+ *        of the input pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -1535,6 +2095,12 @@ BackgroundNormGrayArray(lua_State *L)
  * Arg #3 is expected to be a l_int32 (reduction).
  * Arg #4 is expected to be a l_int32 (size).
  * Arg #5 is expected to be a l_int32 (bgval).
+ *
+ * Notes:
+ *    (1) See notes in pixBackgroundNormMorph().
+ *    (2) This returns a 16 bpp pix that can be used by
+ *        pixApplyInvBackgroundGrayMap() to generate a normalized version
+ *        of the input pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -1562,6 +2128,33 @@ BackgroundNormGrayArrayMorph(lua_State *L)
  * Arg #3 is expected to be a l_int32 (reduction).
  * Arg #4 is expected to be a l_int32 (size).
  * Arg #5 is expected to be a l_int32 (bgval).
+ *
+ * Notes:
+ *    (1) This is a top-level interface for normalizing the image intensity
+ *        by mapping the image so that the background is near the input
+ *        value 'bgval'.
+ *    (2) The input image is either grayscale or rgb.
+ *    (3) For each component in the input image, the background value
+ *        is estimated using a grayscale closing; hence the 'Morph'
+ *        in the function name.
+ *    (4) An optional binary mask can be specified, with the foreground
+ *        pixels typically over image regions.  The resulting background
+ *        map values will be determined by surrounding pixels that are
+ *        not under the mask foreground.  The origin (0,0) of this mask
+ *        is assumed to be aligned with the origin of the input image.
+ *        This binary mask must not fully cover pixs, because then there
+ *        will be no pixels in the input image available to compute
+ *        the background.
+ *    (5) The map is computed at reduced size (given by 'reduction')
+ *        from the input pixs and optional pixim.  At this scale,
+ *        pixs is closed to remove the background, using a square Sel
+ *        of odd dimension.  The product of reduction * size should be
+ *        large enough to remove most of the text foreground.
+ *    (6) No convolutional smoothing needs to be done on the map before
+ *        inverting it.
+ *    (7) A 'bgval' target background value for the normalized image.  This
+ *        should be at least 128.  If set too close to 255, some
+ *        clipping will occur in the result.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -1592,6 +2185,12 @@ BackgroundNormMorph(lua_State *L)
  * Arg #8 is expected to be a l_int32 (bgval).
  * Arg #9 is expected to be a l_int32 (smoothx).
  * Arg #10 is expected to be a l_int32 (smoothy).
+ *
+ * Notes:
+ *    (1) See notes in pixBackgroundNorm().
+ *    (2) This returns a set of three 16 bpp pix that can be used by
+ *        pixApplyInvBackgroundGrayMap() to generate a normalized version
+ *        of each component of the input pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 3 Pix* on the Lua stack (%pix_r, %pix_g, %pix_b)
@@ -1627,6 +2226,12 @@ BackgroundNormRGBArrays(lua_State *L)
  * Arg #3 is expected to be a l_int32 (reduction).
  * Arg #4 is expected to be a l_int32 (size).
  * Arg #5 is expected to be a l_int32 (bgval).
+ *
+ * Notes:
+ *    (1) See notes in pixBackgroundNormMorph().
+ *    (2) This returns a set of three 16 bpp pix that can be used by
+ *        pixApplyInvBackgroundGrayMap() to generate a normalized version
+ *        of each component of the input pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 3 Pix* on the Lua stack (%pixr, %pixg, %pixb)
@@ -1654,6 +2259,12 @@ BackgroundNormRGBArraysMorph(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pix* (pixim).
  * Arg #3 is expected to be a Pix* (pixg).
+ *
+ * Notes:
+ *    (1) This is a simplified interface to pixBackgroundNorm(),
+ *        where seven parameters are defaulted.
+ *    (2) The input image is either grayscale or rgb.
+ *    (3) See pixBackgroundNorm() for usage and function.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -1681,6 +2292,25 @@ BackgroundNormSimple(lua_State *L)
  * Arg #6 is expected to be a l_int32 (etransy).
  * Arg #7 is expected to be a l_int32 (maxshift).
  * Arg #12 is expected to be a l_int32 (debugflag).
+ *
+ * Notes:
+ *      (1) This maximizes the correlation score between two 1 bpp images,
+ *          by starting with an estimate of the alignment
+ *          (%etransx, %etransy) and computing the correlation around this.
+ *          It optionally returns the shift (%delx, %dely) that maximizes
+ *          the correlation score when pix2 is shifted by this amount
+ *          relative to pix1.
+ *      (2) Get the centroids of pix1 and pix2, using pixCentroid(),
+ *          to compute (%etransx, %etransy).  Get the areas using
+ *          pixCountPixels().
+ *      (3) The centroid of pix2 is shifted with respect to the centroid
+ *          of pix1 by all values between -maxshiftx and maxshiftx,
+ *          and likewise for the y shifts.  Therefore, the number of
+ *          correlations computed is:
+ *               (2 * maxshiftx + 1) * (2 * maxshifty + 1)
+ *          Consequently, if pix1 and pix2 are large, you should do this
+ *          in a coarse-to-fine sequence.  See the use of this function
+ *          in pixCompareWithTranslation().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -1718,6 +2348,48 @@ BestCorrelation(lua_State *L)
  * Arg #3 is expected to be a l_float32 (range_stdev).
  * Arg #4 is expected to be a l_int32 (ncomps).
  * Arg #5 is expected to be a l_int32 (reduction).
+ *
+ * Notes:
+ *      (1) This performs a relatively fast, separable bilateral
+ *          filtering operation.  The time is proportional to ncomps
+ *          and varies inversely approximately as the cube of the
+ *          reduction factor.  See bilateral.h for algorithm details.
+ *      (2) We impose minimum values for range_stdev and ncomps to
+ *          avoid nasty artifacts when either are too small.  We also
+ *          impose a constraint on their product:
+ *               ncomps * range_stdev >= 100.
+ *          So for values of range_stdev >= 25, ncomps can be as small as 4.
+ *          Here is a qualitative, intuitive explanation for this constraint.
+ *          Call the difference in k values between the J(k) == 'delta', where
+ *              'delta' ~ 200 / ncomps
+ *          Then this constraint is roughly equivalent to the condition:
+ *              'delta' < 2 * range_stdev
+ *          Note that at an intensity difference of (2 * range_stdev), the
+ *          range part of the kernel reduces the effect by the factor 0.14.
+ *          This constraint requires that we have a sufficient number of
+ *          PCBs (i.e, a small enough 'delta'), so that for any value of
+ *          image intensity I, there exists a k (and a PCB, J(k), such that
+ *              |I - k| < range_stdev
+ *          Any fewer PCBs and we don't have enough to support this condition.
+ *      (3) The upper limit of 30 on ncomps is imposed because the
+ *          gain in accuracy is not worth the extra computation.
+ *      (4) The size of the gaussian kernel is twice the spatial_stdev
+ *          on each side of the origin.  The minimum value of
+ *          spatial_stdev, 0.5, is required to have a finite sized
+ *          spatial kernel.  In practice, a much larger value is used.
+ *      (5) Computation of the intermediate images goes inversely
+ *          as the cube of the reduction factor.  If you can use a
+ *          reduction of 2 or 4, it is well-advised.
+ *      (6) The range kernel is defined over the absolute value of pixel
+ *          grayscale differences, and hence must have size 256 x 1.
+ *          Values in the array represent the multiplying weight
+ *          depending on the absolute gray value difference between
+ *          the source pixel and the neighboring pixel, and should
+ *          be monotonically decreasing.
+ *      (7) Interesting observation.  Run this on prog/fish24.jpg, with
+ *          range_stdev = 60, ncomps = 6, and spatial_dev = {10, 30, 50}.
+ *          As spatial_dev gets larger, we get the counter-intuitive
+ *          result that the body of the red fish becomes less blurry.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -1741,6 +2413,19 @@ Bilateral(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Kernel* (spatial_kel).
  * Arg #3 is expected to be a Kernel* (range_kel).
+ *
+ * Notes:
+ *      (1) The spatial_kel is a conventional smoothing kernel, typically a
+ *          2-d Gaussian kernel or other block kernel.  It can be either
+ *          normalized or not, but must be everywhere positive.
+ *      (2) The range_kel is defined over the absolute value of pixel
+ *          grayscale differences, and hence must have size 256 x 1.
+ *          Values in the array represent the multiplying weight for each
+ *          gray value difference between the target pixel and center of the
+ *          kernel, and should be monotonically decreasing.
+ *      (3) If range_kel == NULL, a constant weight is applied regardless
+ *          of the range value difference.  This degenerates to a regular
+ *          pixConvolve() with a normalized kernel.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -1764,6 +2449,10 @@ BilateralExact(lua_State *L)
  * Arg #3 is expected to be a l_float32 (range_stdev).
  * Arg #4 is expected to be a l_int32 (ncomps).
  * Arg #5 is expected to be a l_int32 (reduction).
+ *
+ * Notes:
+ *      (1) See pixBilateral() for constraints on the input parameters.
+ *      (2) See pixBilateral() for algorithm details.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -1787,6 +2476,9 @@ BilateralGray(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Kernel* (spatial_kel).
  * Arg #3 is expected to be a Kernel* (range_kel).
+ *
+ * Notes:
+ *      (1) See pixBilateralExact().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -1807,6 +2499,10 @@ BilateralGrayExact(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) Brings in either black or white pixels from the boundary
+ *      (2) Removes any existing colormap, if necessary, before transforming
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -1875,6 +2571,10 @@ BilinearGray(lua_State *L)
  * Arg #2 is expected to be a Pta* (ptad).
  * Arg #3 is expected to be a Pta* (ptas).
  * Arg #4 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) Brings in either black or white pixels from the boundary
+ *      (2) Removes any existing colormap, if necessary, before transforming
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -1946,6 +2646,35 @@ BilinearPtaGray(lua_State *L)
  * Arg #4 is expected to be a Pix* (pixg).
  * Arg #5 is expected to be a l_float32 (fract).
  * Arg #6 is expected to be a l_int32 (border).
+ *
+ * Notes:
+ *      (1) The alpha channel is transformed separately from pixs,
+ *          and aligns with it, being fully transparent outside the
+ *          boundary of the transformed pixs.  For pixels that are fully
+ *          transparent, a blending function like pixBlendWithGrayMask()
+ *          will give zero weight to corresponding pixels in pixs.
+ *      (2) If pixg is NULL, it is generated as an alpha layer that is
+ *          partially opaque, using %fract.  Otherwise, it is cropped
+ *          to pixs if required and %fract is ignored.  The alpha channel
+ *          in pixs is never used.
+ *      (3) Colormaps are removed.
+ *      (4) When pixs is transformed, it doesn't matter what color is brought
+ *          in because the alpha channel will be transparent (0) there.
+ *      (5) To avoid losing source pixels in the destination, it may be
+ *          necessary to add a border to the source pix before doing
+ *          the bilinear transformation.  This can be any non-negative number.
+ *      (6) The input %ptad and %ptas are in a coordinate space before
+ *          the border is added.  Internally, we compensate for this
+ *          before doing the bilinear transform on the image after
+ *          the border is added.
+ *      (7) The default setting for the border values in the alpha channel
+ *          is 0 (transparent) for the outermost ring of pixels and
+ *          (0.5 * fract * 255) for the second ring.  When blended over
+ *          a second image, this
+ *          (a) shrinks the visible image to make a clean overlap edge
+ *              with an image below, and
+ *          (b) softens the edges by weakening the aliasing there.
+ *          Use l_setAlphaMaskBorder() to change these values.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -1969,6 +2698,13 @@ BilinearPtaWithAlpha(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) Brings in either black or white pixels from the boundary.
+ *      (2) Retains colormap, which you can do for a sampled transform..
+ *      (3) For 8 or 32 bpp, much better quality is obtained by the
+ *          somewhat slower pixBilinear().  See that function
+ *          for relative timings between sampled and interpolated.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -1993,6 +2729,14 @@ BilinearSampled(lua_State *L)
  * Arg #2 is expected to be a Pta* (ptad).
  * Arg #3 is expected to be a Pta* (ptas).
  * Arg #4 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) Brings in either black or white pixels from the boundary.
+ *      (2) Retains colormap, which you can do for a sampled transform..
+ *      (3) No 3 of the 4 points may be collinear.
+ *      (4) For 8 and 32 bpp pix, better quality is obtained by the
+ *          somewhat slower pixBilinearPta().  See that
+ *          function for relative timings between sampled and interpolated.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -2017,6 +2761,10 @@ BilinearSampledPta(lua_State *L)
  * Arg #3 is expected to be a l_int32 (x).
  * Arg #4 is expected to be a l_int32 (y).
  * Arg #5 is expected to be a l_float32 (fract).
+ *
+ * Notes:
+ *      (1) This is a simple top-level interface.  For more flexibility,
+ *          call directly into pixBlendMask(), etc.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -2044,6 +2792,19 @@ Blend(lua_State *L)
  * Arg #5 is expected to be a l_float32 (gamma).
  * Arg #6 is expected to be a l_int32 (minval).
  * Arg #7 is expected to be a l_int32 (maxval).
+ *
+ * Notes:
+ *      (1) This in effect replaces light background pixels in pixs
+ *          by the input color.  It does it by alpha blending so that
+ *          there are no visible artifacts from hard cutoffs.
+ *      (2) If pixd == pixs, this is done in-place.
+ *      (3) If box == NULL, this is performed on all of pixs.
+ *      (4) The alpha component for blending is derived from pixs,
+ *          by converting to grayscale and enhancing with a TRC.
+ *      (5) The last three arguments specify the TRC operation.
+ *          Suggested values are: %gamma = 0.3, %minval = 50, %maxval = 200.
+ *          To skip the TRC, use %gamma == 1, %minval = 0, %maxval = 255.
+ *          See pixGammaTRC() for details.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -2069,6 +2830,14 @@ BlendBackgroundToColor(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Boxa* (boxa).
  * Arg #3 is expected to be a l_float32 (fract).
+ *
+ * Notes:
+ *      (1) pixs is converted to 32 bpp.
+ *      (2) This differs from pixPaintBoxaRandom(), in that the
+ *          colors here are blended with the color of pixs.
+ *      (3) We use up to 254 different colors for painting the regions.
+ *      (4) If boxes overlap, the final color depends only on the last
+ *          rect that is used.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -2092,6 +2861,22 @@ BlendBoxaRandom(lua_State *L)
  * Arg #3 is expected to be a l_int32 (x).
  * Arg #4 is expected to be a l_int32 (y).
  * Arg #5 is expected to be a l_int32 (sindex).
+ *
+ * Notes:
+ *      (1) This function combines two colormaps, and replaces the pixels
+ *          in pixs that have a specified color value with those in pixb.
+ *      (2) sindex must be in the existing colormap; otherwise an
+ *          error is returned.  In use, sindex will typically be the index
+ *          for white (255, 255, 255).
+ *      (3) Blender colors that already exist in the colormap are used;
+ *          others are added.  If any blender colors cannot be
+ *          stored in the colormap, an error is returned.
+ *      (4) In the implementation, a mapping is generated from each
+ *          original blender colormap index to the corresponding index
+ *          in the expanded colormap for pixs.  Then for each pixel in
+ *          pixs with value sindex, and which is covered by a blender pixel,
+ *          the new index corresponding to the blender pixel is substituted
+ *          for sindex.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -2119,6 +2904,20 @@ BlendCmap(lua_State *L)
  * Arg #6 is expected to be a l_float32 (fract).
  * Arg #7 is expected to be a l_int32 (transparent).
  * Arg #8 is expected to be a l_uint32 (transpix).
+ *
+ * Notes:
+ *      (1) For inplace operation (pixs1 must be 32 bpp), call it this way:
+ *            pixBlendColor(pixs1, pixs1, pixs2, ...)
+ *      (2) For generating a new pixd:
+ *            pixd = pixBlendColor(NULL, pixs1, pixs2, ...)
+ *      (3) If pixs2 is not 32 bpp rgb, it is converted.
+ *      (4) Clipping of pixs2 to pixs1 is done in the inner pixel loop.
+ *      (5) If pixs1 has a colormap, it is removed to generate a 32 bpp pix.
+ *      (6) If pixs1 has depth < 32, it is unpacked to generate a 32 bpp pix.
+ *      (7) If transparent = 0, the blending fraction (fract) is
+ *          applied equally to all pixels.
+ *      (8) If transparent = 1, all pixels of value transpix (typically
+ *          either 0 or 0xffffff00) in pixs2 are transparent in the blend.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -2186,6 +2985,30 @@ BlendColorByChannel(lua_State *L)
  * Arg #7 is expected to be a l_int32 (type).
  * Arg #8 is expected to be a l_int32 (transparent).
  * Arg #9 is expected to be a l_uint32 (transpix).
+ *
+ * Notes:
+ *      (1) For inplace operation (pixs1 not cmapped), call it this way:
+ *            pixBlendGray(pixs1, pixs1, pixs2, ...)
+ *      (2) For generating a new pixd:
+ *            pixd = pixBlendGray(NULL, pixs1, pixs2, ...)
+ *      (3) Clipping of pixs2 to pixs1 is done in the inner pixel loop.
+ *      (4) If pixs1 has a colormap, it is removed; otherwise, if pixs1
+ *          has depth < 8, it is unpacked to generate a 8 bpp pix.
+ *      (5) If transparent = 0, the blending fraction (fract) is
+ *          applied equally to all pixels.
+ *      (6) If transparent = 1, all pixels of value transpix (typically
+ *          either 0 or 0xff) in pixs2 are transparent in the blend.
+ *      (7) After processing pixs1, it is either 8 bpp or 32 bpp:
+ *          ~ if 8 bpp, the fraction of pixs2 is mixed with pixs1.
+ *          ~ if 32 bpp, each component of pixs1 is mixed with
+ *            the same fraction of pixs2.
+ *      (8) For L_BLEND_GRAY_WITH_INVERSE, the white values of the blendee
+ *          (cval == 255 in the code below) result in a delta of 0.
+ *          Thus, these pixels are intrinsically transparent!
+ *          The "pivot" value of the src, at which no blending occurs, is
+ *          128.  Compare with the adaptive pivot in pixBlendGrayAdapt().
+ *      (9) Invalid %fract defaults to 0.5 with a warning.
+ *          Invalid %type defaults to L_BLEND_GRAY with a warning.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -2217,6 +3040,34 @@ BlendGray(lua_State *L)
  * Arg #5 is expected to be a l_int32 (y).
  * Arg #6 is expected to be a l_float32 (fract).
  * Arg #7 is expected to be a l_int32 (shift).
+ *
+ * Notes:
+ *      (1) For inplace operation (pixs1 not cmapped), call it this way:
+ *            pixBlendGrayAdapt(pixs1, pixs1, pixs2, ...)
+ *          For generating a new pixd:
+ *            pixd = pixBlendGrayAdapt(NULL, pixs1, pixs2, ...)
+ *      (2) Clipping of pixs2 to pixs1 is done in the inner pixel loop.
+ *      (3) If pixs1 has a colormap, it is removed.
+ *      (4) If pixs1 has depth < 8, it is unpacked to generate a 8 bpp pix.
+ *      (5) This does a blend with inverse.  Whereas in pixGlendGray(), the
+ *          zero blend point is where the blendee pixel is 128, here
+ *          the zero blend point is found adaptively, with respect to the
+ *          median of the blendee region.  If the median is < 128,
+ *          the zero blend point is found from
+ *              median + shift.
+ *          Otherwise, if the median >= 128, the zero blend point is
+ *              median - shift.
+ *          The purpose of shifting the zero blend point away from the
+ *          median is to prevent a situation in pixBlendGray() where
+ *          the median is 128 and the blender is not visible.
+ *          The default value of shift is 64.
+ *      (6) After processing pixs1, it is either 8 bpp or 32 bpp:
+ *          ~ if 8 bpp, the fraction of pixs2 is mixed with pixs1.
+ *          ~ if 32 bpp, each component of pixs1 is mixed with
+ *            the same fraction of pixs2.
+ *      (7) The darker the blender, the more it mixes with the blendee.
+ *          A blender value of 0 has maximum mixing; a value of 255
+ *          has no mixing and hence is transparent.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -2245,6 +3096,28 @@ BlendGrayAdapt(lua_State *L)
  * Arg #4 is expected to be a l_int32 (x).
  * Arg #5 is expected to be a l_int32 (y).
  * Arg #6 is expected to be a l_float32 (fract).
+ *
+ * Notes:
+ *      (1) For inplace operation (pixs1 not cmapped), call it this way:
+ *            pixBlendGrayInverse(pixs1, pixs1, pixs2, ...)
+ *      (2) For generating a new pixd:
+ *            pixd = pixBlendGrayInverse(NULL, pixs1, pixs2, ...)
+ *      (3) Clipping of pixs2 to pixs1 is done in the inner pixel loop.
+ *      (4) If pixs1 has a colormap, it is removed; otherwise if pixs1
+ *          has depth < 8, it is unpacked to generate a 8 bpp pix.
+ *      (5) This is a no-nonsense blender.  It changes the src1 pixel except
+ *          when the src1 pixel is midlevel gray.  Use fract == 1 for the most
+ *          aggressive blending, where, if the gray pixel in pixs2 is 0,
+ *          we get a complete inversion of the color of the src pixel in pixs1.
+ *      (6) The basic logic is that each component transforms by:
+                 d  -->  c * d + (1 - c ) * (f * (1 - d) + d * (1 - f))
+ *          where c is the blender pixel from pixs2,
+ *                f is %fract,
+ *                c and d are normalized to [0...1]
+ *          This has the property that for f == 0 (no blend) or c == 1 (white):
+ *               d  -->  d
+ *          For c == 0 (black) we get maximum inversion:
+ *               d  -->  f * (1 - d) + d * (1 - f)   [inversion by fraction f]
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -2297,6 +3170,11 @@ BlendHardLight(lua_State *L)
  * Arg #2 is expected to be a Box* (box).
  * Arg #3 is expected to be a l_uint32 (val).
  * Arg #4 is expected to be a l_float32 (fract).
+ *
+ * Notes:
+ *      (1) This is an in-place function.  It blends the input color %val
+ *          with the pixels in pixs in the specified rectangle.
+ *          If no rectangle is specified, it blends over the entire image.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -2322,6 +3200,17 @@ BlendInRect(lua_State *L)
  * Arg #5 is expected to be a l_int32 (y).
  * Arg #6 is expected to be a l_float32 (fract).
  * Arg #7 is expected to be a l_int32 (type).
+ *
+ * Notes:
+ *      (1) Clipping of pixs2 to pixs1 is done in the inner pixel loop.
+ *      (2) If pixs1 has a colormap, it is removed.
+ *      (3) For inplace operation (pixs1 not cmapped), call it this way:
+ *            pixBlendMask(pixs1, pixs1, pixs2, ...)
+ *      (4) For generating a new pixd:
+ *            pixd = pixBlendMask(NULL, pixs1, pixs2, ...)
+ *      (5) Only call in-place if pixs1 does not have a colormap.
+ *      (6) Invalid %fract defaults to 0.5 with a warning.
+ *          Invalid %type defaults to L_BLEND_WITH_INVERSE with a warning.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -2349,6 +3238,28 @@ BlendMask(lua_State *L)
  * Arg #3 is expected to be a Pix* (pixg).
  * Arg #4 is expected to be a l_int32 (x).
  * Arg #5 is expected to be a l_int32 (y).
+ *
+ * Notes:
+ *      (1) The result is 8 bpp grayscale if both pixs1 and pixs2 are
+ *          8 bpp gray.  Otherwise, the result is 32 bpp rgb.
+ *      (2) pixg is an 8 bpp transparency image, where 0 is transparent
+ *          and 255 is opaque.  It determines the transparency of pixs2
+ *          when applied over pixs1.  It can be null if pixs2 is rgba,
+ *          in which case we use the alpha component of pixs2.
+ *      (3) If pixg exists, it need not be the same size as pixs2.
+ *          However, we assume their UL corners are aligned with each other,
+ *          and placed at the location (x, y) in pixs1.
+ *      (4) The pixels in pixd are a combination of those in pixs1
+ *          and pixs2, where the amount from pixs2 is proportional to
+ *          the value of the pixel (p) in pixg, and the amount from pixs1
+ *          is proportional to (255 - p).  Thus pixg is a transparency
+ *          image (usually called an alpha blender) where each pixel
+ *          can be associated with a pixel in pixs2, and determines
+ *          the amount of the pixs2 pixel in the final result.
+ *          For example, if pixg is all 0, pixs2 is transparent and
+ *          the result in pixd is simply pixs1.
+ *      (5) A typical use is for the pixs2/pixg combination to be
+ *          a small watermark that is applied to pixs1.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -2372,6 +3283,32 @@ BlendWithGrayMask(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (spatial_stdev).
  * Arg #3 is expected to be a l_float32 (range_stdev).
+ *
+ * Notes:
+ *      (1) See pixBilateralExact().  This provides an interface using
+ *          the standard deviations of the spatial and range filters.
+ *      (2) The convolution window halfwidth is 2 * spatial_stdev,
+ *          and the square filter size is 4 * spatial_stdev + 1.
+ *          The kernel captures 95% of total energy.  This is compensated
+ *          by normalization.
+ *      (3) The range_stdev is analogous to spatial_halfwidth in the
+ *          grayscale domain [0...255], and determines how much damping of the
+ *          smoothing operation is applied across edges.  The larger this
+ *          value is, the smaller the damping.  The smaller the value, the
+ *          more edge details are preserved.  These approximations are useful
+ *          for deciding the appropriate cutoff.
+ *              kernel[1 * stdev] ~= 0.6  * kernel[0]
+ *              kernel[2 * stdev] ~= 0.14 * kernel[0]
+ *              kernel[3 * stdev] ~= 0.01 * kernel[0]
+ *          If range_stdev is infinite there is no damping, and this
+ *          becomes a conventional gaussian smoothing.
+ *          This value does not affect the run time.
+ *      (4) If range_stdev is negative or zero, the range kernel is
+ *          ignored and this degenerates to a straight gaussian convolution.
+ *      (5) This is very slow for large spatial filters.  The time
+ *          on a 3GHz pentium is roughly
+ *             T = 1.2 * 10^-8 * (A * sh^2)  sec
+ *          where A = # of pixels, sh = spatial halfwidth of filter.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -2393,6 +3330,13 @@ BlockBilateralExact(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (wc).
  * Arg #3 is expected to be a l_int32 (hc).
+ *
+ * Notes:
+ *      (1) The full width and height of the convolution kernel
+ *          are (2 * wc + 1) and (2 * hc + 1)
+ *      (2) Returns a copy if both wc and hc are 0
+ *      (3) Require that w >= 2 * wc + 1 and h >= 2 * hc + 1,
+ *          where (w,h) are the dimensions of pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -2412,6 +3356,14 @@ Blockconv(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) The general recursion relation is
+ *            a(i,j) = v(i,j) + a(i-1, j) + a(i, j-1) - a(i-1, j-1)
+ *          For the first line, this reduces to the special case
+ *            a(i,j) = v(i,j) + a(i, j-1)
+ *          For the first column, the special case is
+ *            a(i,j) = v(i,j) + a(i-1, j)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -2432,6 +3384,15 @@ BlockconvAccum(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixacc).
  * Arg #3 is expected to be a l_int32 (wc).
  * Arg #4 is expected to be a l_int32 (hc).
+ *
+ * Notes:
+ *      (1) If accum pix is null, make one and destroy it before
+ *          returning; otherwise, just use the input accum pix.
+ *      (2) The full width and height of the convolution kernel
+ *          are (2 * wc + 1) and (2 * hc + 1).
+ *      (3) Returns a copy if both wc and hc are 0.
+ *      (4) Require that w >= 2 * wc + 1 and h >= 2 * hc + 1,
+ *          where (w,h) are the dimensions of pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -2455,6 +3416,17 @@ BlockconvGray(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixacc).
  * Arg #3 is expected to be a l_int32 (wc).
  * Arg #4 is expected to be a l_int32 (hc).
+ *
+ * Notes:
+ *      (1) The full width and height of the convolution kernel
+ *          are (2 * wc + 1) and (2 * hc + 1)
+ *      (2) Assumes that the input pixs is padded with (wc + 1) pixels on
+ *          left and right, and with (hc + 1) pixels on top and bottom.
+ *          The returned pix has these stripped off; they are only used
+ *          for computation.
+ *      (3) Returns a copy if both wc and hc are 0
+ *      (4) Require that w > 2 * wc + 1 and h > 2 * hc + 1,
+ *          where (w,h) are the dimensions of pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -2477,6 +3449,32 @@ BlockconvGrayTile(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (wc).
  * Arg #3 is expected to be a l_int32 (hc).
+ *
+ * Notes:
+ *      (1) The full width and height of the convolution kernel
+ *          are (2 * wc + 1) and (2 * hc + 1).
+ *      (2) Require that w >= 2 * wc + 1 and h >= 2 * hc + 1,
+ *          where (w,h) are the dimensions of pixs.
+ *      (3) Returns a copy if both wc and hc are 0.
+ *      (3) Adds mirrored border to avoid treating the boundary pixels
+ *          specially.  Note that we add wc + 1 pixels to the left
+ *          and wc to the right.  The added width is 2 * wc + 1 pixels,
+ *          and the particular choice simplifies the indexing in the loop.
+ *          Likewise, add hc + 1 pixels to the top and hc to the bottom.
+ *      (4) To get the normalized result, divide by the area of the
+ *          convolution kernel: (2 * wc + 1) * (2 * hc + 1)
+ *          Specifically, do this:
+ *               pixc = pixBlockconvGrayUnnormalized(pixs, wc, hc);
+ *               fract = 1. / ((2 * wc + 1) * (2 * hc + 1));
+ *               pixMultConstantGray(pixc, fract);
+ *               pixd = pixGetRGBComponent(pixc, L_ALPHA_CHANNEL);
+ *      (5) Unlike pixBlockconvGray(), this always computes the accumulation
+ *          pix because its size is tied to wc and hc.
+ *      (6) Compare this implementation with pixBlockconvGray(), where
+ *          most of the code in blockconvLow() is special casing for
+ *          efficiently handling the boundary.  Here, the use of
+ *          mirrored borders and destination indexing makes the
+ *          implementation very simple.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -2500,6 +3498,26 @@ BlockconvGrayUnnormalized(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hc).
  * Arg #4 is expected to be a l_int32 (nx).
  * Arg #5 is expected to be a l_int32 (ny).
+ *
+ * Notes:
+ *      (1) The full width and height of the convolution kernel
+ *          are (2 * wc + 1) and (2 * hc + 1)
+ *      (2) Returns a copy if both wc and hc are 0
+ *      (3) Require that w >= 2 * wc + 1 and h >= 2 * hc + 1,
+ *          where (w,h) are the dimensions of pixs.
+ *      (4) For nx == ny == 1, this defaults to pixBlockconv(), which
+ *          is typically about twice as fast, and gives nearly
+ *          identical results as pixBlockconvGrayTile().
+ *      (5) If the tiles are too small, nx and/or ny are reduced
+ *          a minimum amount so that the tiles are expanded to the
+ *          smallest workable size in the problematic direction(s).
+ *      (6) Why a tiled version?  Three reasons:
+ *          (a) Because the accumulator is a uint32, overflow can occur
+ *              for an image with more than 16M pixels.
+ *          (b) The accumulator array for 16M pixels is 64 MB; using
+ *              tiles reduces the size of this array.
+ *          (c) Each tile can be processed independently, in parallel,
+ *              on a multicore processor.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -2525,6 +3543,22 @@ BlockconvTiled(lua_State *L)
  * Arg #3 is expected to be a l_int32 (wc).
  * Arg #4 is expected to be a l_int32 (hc).
  * Arg #5 is expected to be a l_float32 (rank).
+ *
+ * Notes:
+ *      (1) The full width and height of the convolution kernel
+ *          are (2 * wc + 1) and (2 * hc + 1)
+ *      (2) This returns a pixd where each pixel is a 1 if the
+ *          neighborhood (2 * wc + 1) x (2 * hc + 1)) pixels
+ *          contains the rank fraction of 1 pixels.  Otherwise,
+ *          the returned pixel is 0.  Note that the special case
+ *          of rank = 0.0 is always satisfied, so the returned
+ *          pixd has all pixels with value 1.
+ *      (3) If accum pix is null, make one, use it, and destroy it
+ *          before returning; otherwise, just use the input accum pix
+ *      (4) If both wc and hc are 0, returns a copy unless rank == 0.0,
+ *          in which case this returns an all-ones image.
+ *      (5) Require that w >= 2 * wc + 1 and h >= 2 * hc + 1,
+ *          where (w,h) are the dimensions of pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -2549,6 +3583,27 @@ Blockrank(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixacc).
  * Arg #3 is expected to be a l_int32 (wc).
  * Arg #4 is expected to be a l_int32 (hc).
+ *
+ * Notes:
+ *      (1) If accum pix is null, make one and destroy it before
+ *          returning; otherwise, just use the input accum pix
+ *      (2) The full width and height of the convolution kernel
+ *          are (2 * wc + 1) and (2 * hc + 1)
+ *      (3) Use of wc = hc = 1, followed by pixInvert() on the
+ *          8 bpp result, gives a nice anti-aliased, and somewhat
+ *          darkened, result on text.
+ *      (4) Require that w >= 2 * wc + 1 and h >= 2 * hc + 1,
+ *          where (w,h) are the dimensions of pixs.
+ *      (5) Returns in each dest pixel the sum of all src pixels
+ *          that are within a block of size of the kernel, centered
+ *          on the dest pixel.  This sum is the number of src ON
+ *          pixels in the block at each location, normalized to 255
+ *          for a block containing all ON pixels.  For pixels near
+ *          the boundary, where the block is not entirely contained
+ *          within the image, we then multiply by a second normalization
+ *          factor that is greater than one, so that all results
+ *          are normalized by the number of participating pixels
+ *          within the block.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -2571,6 +3626,24 @@ Blocksum(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (halfsize).
  * Arg #3 is expected to be a Pix* (pixacc).
+ *
+ * Notes:
+ *      (1) The Census transform was invented by Ramin Zabih and John Woodfill
+ *          ("Non-parametric local transforms for computing visual
+ *          correspondence", Third European Conference on Computer Vision,
+ *          Stockholm, Sweden, May 1994); see publications at
+ *             http://www.cs.cornell.edu/~rdz/index.htm
+ *          This compares each pixel against the average of its neighbors,
+ *          in a square of odd dimension centered on the pixel.
+ *          If the pixel is greater than the average of its neighbors,
+ *          the output pixel value is 1; otherwise it is 0.
+ *      (2) This can be used as an encoding for an image that is
+ *          fairly robust against slow illumination changes, with
+ *          applications in image comparison and mosaicing.
+ *      (3) The size of the convolution kernel is (2 * halfsize + 1)
+ *          on a side.  The halfsize parameter must be >= 1.
+ *      (4) If accum pix is null, make one, use it, and destroy it
+ *          before returning; otherwise, just use the input accum pix
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -2590,6 +3663,10 @@ CensusTransform(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
+ *
+ * Notes:
+ *      (1) Any table not passed in will be made internally and destroyed
+ *          after use.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -2617,6 +3694,13 @@ Centroid(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) This first does a photometric inversion (black = 255, white = 0).
+ *          It then finds the centroid of the result.  The inversion is
+ *          done because white is usually background, so the centroid
+ *          is computed based on the "foreground" gray pixels, and the
+ *          darker the pixel, the more weight it is given.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -2658,6 +3742,12 @@ ChangeRefcount(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
+ *
+ * Notes:
+ *      (1) This should only be called if the requested format is IFF_DEFAULT.
+ *      (2) If the pix wasn't read from a file, its input format value
+ *          will be IFF_UNKNOWN, and in that case it is written out
+ *          in a compressed but lossless format.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 (%iff) on the Lua stack
@@ -2680,6 +3770,15 @@ ChooseOutputFormat(lua_State *L)
  * Arg #4 is expected to be a l_float32 (gamma).
  * Arg #5 is expected to be a l_int32 (blackval).
  * Arg #6 is expected to be a l_int32 (whiteval).
+ *
+ * Notes:
+ *    (1) This is a simplified interface for cleaning an image.
+ *        For comparison, see pixAdaptThresholdToBinaryGen().
+ *    (2) The suggested default values for the input parameters are:
+ *          gamma:    1.0  (reduce this to increase the contrast; e.g.,
+ *                          for light text)
+ *          blackval   70  (a bit more than 60)
+ *          whiteval  190  (a bit less than 200)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -2702,6 +3801,10 @@ CleanBackgroundToWhite(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
+ *
+ * Notes:
+ *      (1) This must be called after processing that was initiated
+ *          by pixSetupByteProcessing() has finished.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -2724,6 +3827,12 @@ CleanupByteProcessing(lua_State *L)
  * \brief Clear all pixels in a Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
+ *
+ * Notes:
+ *      (1) Clears all data to 0.  For 1 bpp, this is white; for grayscale
+ *          or color, this is black.
+ *      (2) Caution: for colormapped pix, this sets the color to the first
+ *          one in the colormap.  Be sure that this is the intended color!
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -2741,6 +3850,12 @@ ClearAll(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a Box* (box).
+ *
+ * Notes:
+ *      (1) Clears all data in rect to 0.  For 1 bpp, this is white;
+ *          for grayscale or color, this is black.
+ *      (2) Caution: for colormapped pix, this sets the color to the first
+ *          one in the colormap.  Be sure that this is the intended color!
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -2783,6 +3898,23 @@ ClearPixel(lua_State *L)
  * Arg #4 is expected to be a l_int32 (highthresh).
  * Arg #5 is expected to be a l_int32 (maxwidth).
  * Arg #6 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) At least one of {&pixd, &boxd} must be specified.
+ *      (2) If there are no fg pixels, the returned ptrs are null.
+ *      (3) This function attempts to locate rectangular "image" regions
+ *          of high-density fg pixels, that have well-defined edges
+ *          on the four sides.
+ *      (4) Edges are searched for on each side, iterating in order
+ *          from left, right, top and bottom.  As each new edge is
+ *          found, the search box is resized to use that location.
+ *          Once an edge is found, it is held.  If no more edges
+ *          are found in one iteration, the search fails.
+ *      (5) See pixScanForEdge() for usage of the thresholds and %maxwidth.
+ *      (6) The thresholds must be at least 1, and the low threshold
+ *          cannot be larger than the high threshold.
+ *      (7) If the low and high thresholds are both 1, this is equivalent
+ *          to pixClipBoxToForeground().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -2811,6 +3943,12 @@ ClipBoxToEdges(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Box* (boxs).
+ *
+ * Notes:
+ *      (1) At least one of {&pixd, &boxd} must be specified.
+ *      (2) If there are no fg pixels, the returned ptrs are null.
+ *      (3) Do not use &pixs for the 3rd arg or &boxs for the 4th arg;
+ *          this will leak memory.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -2838,6 +3976,23 @@ ClipBoxToForeground(lua_State *L)
  * Arg #3 is expected to be a l_int32 (x).
  * Arg #4 is expected to be a l_int32 (y).
  * Arg #5 is expected to be a l_uint32 (outval).
+ *
+ * Notes:
+ *      (1) If pixs has a colormap, it is preserved in pixd.
+ *      (2) The depth of pixd is the same as that of pixs.
+ *      (3) If the depth of pixs is 1, use %outval = 0 for white background
+ *          and 1 for black; otherwise, use the max value for white
+ *          and 0 for black.  If pixs has a colormap, the max value for
+ *          %outval is 0xffffffff; otherwise, it is 2^d - 1.
+ *      (4) When using 1 bpp pixs, this is a simple clip and
+ *          blend operation.  For example, if both pix1 and pix2 are
+ *          black text on white background, and you want to OR the
+ *          fg on the two images, let pixm be the inverse of pix2.
+ *          Then the operation takes all of pix1 that's in the bg of
+ *          pix2, and for the remainder (which are the pixels
+ *          corresponding to the fg of the pix2), paint them black
+ *          (1) in pix1.  The function call looks like
+ *             pixClipMasked(pix2, pixInvert(pix1, pix1), x, y, 1);
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -2860,6 +4015,31 @@ ClipMasked(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Box* (box).
+ *
+ * Notes:
+ *
+ *  This should be simple, but there are choices to be made.
+ *  The box is defined relative to the pix coordinates.  However,
+ *  if the box is not contained within the pix, we have two choices:
+ *
+ *      (1) clip the box to the pix
+ *      (2) make a new pix equal to the full box dimensions,
+ *          but let rasterop do the clipping and positioning
+ *          of the src with respect to the dest
+ *
+ *  Choice (2) immediately brings up the problem of what pixel values
+ *  to use that were not taken from the src.  For example, on a grayscale
+ *  image, do you want the pixels not taken from the src to be black
+ *  or white or something else?  To implement choice 2, one needs to
+ *  specify the color of these extra pixels.
+ *
+ *  So we adopt (1), and clip the box first, if necessary,
+ *  before making the dest pix and doing the rasterop.  But there
+ *  is another issue to consider.  If you want to paste the
+ *  clipped pix back into pixs, it must be properly aligned, and
+ *  it is necessary to use the clipped box for alignment.
+ *  Accordingly, this function has a third (optional) argument, which is
+ *  the input box clipped to the src pix.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -2882,6 +4062,10 @@ ClipRectangle(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Boxa* (boxa).
+ *
+ * Notes:
+ *     (1) The returned pixa includes the actual regions clipped out from
+ *         the input pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pixa * on the Lua stack
@@ -2900,6 +4084,10 @@ ClipRectangles(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) At least one of {&pixd, &box} must be specified.
+ *      (2) If there are no fg pixels, the returned ptrs are null.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -2922,6 +4110,22 @@ ClipToForeground(lua_State *L)
  * \brief Clone a Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
+ *
+ * Notes:
+ *      (1) A "clone" is simply a handle (ptr) to an existing pix.
+ *          It is implemented because (a) images can be large and
+ *          hence expensive to copy, and (b) extra handles to a data
+ *          structure need to be made with a simple policy to avoid
+ *          both double frees and memory leaks.  Pix are reference
+ *          counted.  The side effect of pixClone() is an increase
+ *          by 1 in the ref count.
+ *      (2) The protocol to be used is:
+ *          (a) Whenever you want a new handle to an existing image,
+ *              call pixClone(), which just bumps a ref count.
+ *          (b) Always call pixDestroy() on all handles.  This
+ *              decrements the ref count, nulls the handle, and
+ *              only destroys the pix when pixDestroy() has been
+ *              called on all handles.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -2941,6 +4145,21 @@ Clone(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Sel* (sel).
+ *
+ * Notes:
+ *      (1) Generic morphological closing, using hits in the Sel.
+ *      (2) This implementation is a strict dual of the opening if
+ *          symmetric boundary conditions are used (see notes at top
+ *          of this file).
+ *      (3) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (4) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixClose(NULL, pixs, ...);
+ *          (b) pixClose(pixs, pixs, ...);
+ *          (c) pixClose(pixd, pixs, ...);
+ *      (5) The size of the result is determined by pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -2963,6 +4182,20 @@ Close(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) Sel is a brick with all elements being hits
+ *      (2) The origin is at (x, y) = (hsize/2, vsize/2)
+ *      (3) Do separably if both hsize and vsize are > 1.
+ *      (4) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (5) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixCloseBrick(NULL, pixs, ...);
+ *          (b) pixCloseBrick(pixs, pixs, ...);
+ *          (c) pixCloseBrick(pixd, pixs, ...);
+ *      (6) The size of the result is determined by pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -2986,6 +4219,31 @@ CloseBrick(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) This is a 'safe' closing; we add an extra border of 32 OFF
+ *          pixels for the standard asymmetric b.c.
+ *      (2) These implement 2D brick Sels, using linear Sels generated
+ *          with selaAddBasic().
+ *      (3) A brick Sel has hits for all elements.
+ *      (4) The origin of the Sel is at (x, y) = (hsize/2, vsize/2)
+ *      (5) Do separably if both hsize and vsize are > 1.
+ *      (6) It is necessary that both horizontal and vertical Sels
+ *          of the input size are defined in the basic sela.
+ *      (7) Note that we must always set or clear the border pixels
+ *          before each operation, depending on the the b.c.
+ *          (symmetric or asymmetric).
+ *      (8) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (9) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixCloseBrickDwa(NULL, pixs, ...);
+ *          (b) pixCloseBrickDwa(pixs, pixs, ...);
+ *          (c) pixCloseBrickDwa(pixd, pixs, ...);
+ *      (10) The size of the result is determined by pixs.
+ *      (11) If either linear Sel is not found, this calls
+ *           the appropriate decomposible function.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -3009,6 +4267,34 @@ CloseBrickDwa(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) Sel is a brick with all elements being hits
+ *      (2) The origin is at (x, y) = (hsize/2, vsize/2)
+ *      (3) Do compositely for each dimension > 1.
+ *      (4) Do separably if both hsize and vsize are > 1.
+ *      (5) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (6) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixCloseCompBrick(NULL, pixs, ...);
+ *          (b) pixCloseCompBrick(pixs, pixs, ...);
+ *          (c) pixCloseCompBrick(pixd, pixs, ...);
+ *      (7) The dimensions of the resulting image are determined by pixs.
+ *      (8) CAUTION: both hsize and vsize are being decomposed.
+ *          The decomposer chooses a product of sizes (call them
+ *          'terms') for each that is close to the input size,
+ *          but not necessarily equal to it.  It attempts to optimize:
+ *             (a) for consistency with the input values: the product
+ *                 of terms is close to the input size
+ *             (b) for efficiency of the operation: the sum of the
+ *                 terms is small; ideally about twice the square
+ *                 root of the input size.
+ *          So, for example, if the input hsize = 37, which is
+ *          a prime number, the decomposer will break this into two
+ *          terms, 6 and 6, so that the net result is a dilation
+ *          with hsize = 36.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -3032,6 +4318,39 @@ CloseCompBrick(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) This implements a separable composite safe closing with 2D
+ *          brick Sels.
+ *      (2) For efficiency, it may decompose each linear morphological
+ *          operation into two (brick + comb).
+ *      (3) A brick Sel has hits for all elements.
+ *      (4) The origin of the Sel is at (x, y) = (hsize/2, vsize/2)
+ *      (5) Do separably if both hsize and vsize are > 1.
+ *      (6) It is necessary that both horizontal and vertical Sels
+ *          of the input size are defined in the basic sela.
+ *      (7) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (8) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixCloseCompBrickDwa(NULL, pixs, ...);
+ *          (b) pixCloseCompBrickDwa(pixs, pixs, ...);
+ *          (c) pixCloseCompBrickDwa(pixd, pixs, ...);
+ *      (9) The size of pixd is determined by pixs.
+ *      (10) CAUTION: both hsize and vsize are being decomposed.
+ *          The decomposer chooses a product of sizes (call them
+ *          'terms') for each that is close to the input size,
+ *           but not necessarily equal to it.  It attempts to optimize:
+ *              (a) for consistency with the input values: the product
+ *                  of terms is close to the input size
+ *              (b) for efficiency of the operation: the sum of the
+ *                  terms is small; ideally about twice the square
+ *                   root of the input size.
+ *           So, for example, if the input hsize = 37, which is
+ *           a prime number, the decomposer will break this into two
+ *           terms, 6 and 6, so that the net result is a dilation
+ *           with hsize = 36.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -3077,6 +4396,22 @@ CloseCompBrickExtendDwa(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Sel* (sel).
+ *
+ * Notes:
+ *      (1) Generalized morphological closing, using both hits and
+ *          misses in the Sel.
+ *      (2) This does a dilation using the hits, followed by a
+ *          hit-miss transform.
+ *      (3) This operation is a dual of the generalized opening.
+ *      (4) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (5) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixCloseGeneralized(NULL, pixs, ...);
+ *          (b) pixCloseGeneralized(pixs, pixs, ...);
+ *          (c) pixCloseGeneralized(pixd, pixs, ...);
+ *      (6) The size of the result is determined by pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -3098,6 +4433,10 @@ CloseGeneralized(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (hsize).
  * Arg #3 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) Sel is a brick with all elements being hits
+ *      (2) If hsize = vsize = 1, just returns a copy.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -3119,6 +4458,10 @@ CloseGray(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (hsize).
  * Arg #3 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) Special case for 1x3, 3x1 or 3x3 brick sel (all hits)
+ *      (2) If hsize = vsize = 1, just returns a copy.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -3140,6 +4483,25 @@ CloseGray3(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Sel* (sel).
+ *
+ * Notes:
+ *      (1) Generic morphological closing, using hits in the Sel.
+ *      (2) If non-symmetric boundary conditions are used, this
+ *          function adds a border of OFF pixels that is of
+ *          sufficient size to avoid losing pixels from the dilation,
+ *          and it removes the border after the operation is finished.
+ *          It thus enforces a correct extensive result for closing.
+ *      (3) If symmetric b.c. are used, it is not necessary to add
+ *          and remove this border.
+ *      (4) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (5) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixCloseSafe(NULL, pixs, ...);
+ *          (b) pixCloseSafe(pixs, pixs, ...);
+ *          (c) pixCloseSafe(pixd, pixs, ...);
+ *      (6) The size of the result is determined by pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -3162,6 +4524,25 @@ CloseSafe(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) Sel is a brick with all elements being hits
+ *      (2) The origin is at (x, y) = (hsize/2, vsize/2)
+ *      (3) Do separably if both hsize and vsize are > 1.
+ *      (4) Safe closing adds a border of 0 pixels, of sufficient size so
+ *          that all pixels in input image are processed within
+ *          32-bit words in the expanded image.  As a result, there is
+ *          no special processing for pixels near the boundary, and there
+ *          are no boundary effects.  The border is removed at the end.
+ *      (5) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (6) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixCloseBrick(NULL, pixs, ...);
+ *          (b) pixCloseBrick(pixs, pixs, ...);
+ *          (c) pixCloseBrick(pixd, pixs, ...);
+ *      (7) The size of the result is determined by pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -3185,6 +4566,39 @@ CloseSafeBrick(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) Sel is a brick with all elements being hits
+ *      (2) The origin is at (x, y) = (hsize/2, vsize/2)
+ *      (3) Do compositely for each dimension > 1.
+ *      (4) Do separably if both hsize and vsize are > 1.
+ *      (5) Safe closing adds a border of 0 pixels, of sufficient size so
+ *          that all pixels in input image are processed within
+ *          32-bit words in the expanded image.  As a result, there is
+ *          no special processing for pixels near the boundary, and there
+ *          are no boundary effects.  The border is removed at the end.
+ *      (6) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (7) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixCloseSafeCompBrick(NULL, pixs, ...);
+ *          (b) pixCloseSafeCompBrick(pixs, pixs, ...);
+ *          (c) pixCloseSafeCompBrick(pixd, pixs, ...);
+ *      (8) The dimensions of the resulting image are determined by pixs.
+ *      (9) CAUTION: both hsize and vsize are being decomposed.
+ *          The decomposer chooses a product of sizes (call them
+ *          'terms') for each that is close to the input size,
+ *          but not necessarily equal to it.  It attempts to optimize:
+ *             (a) for consistency with the input values: the product
+ *                 of terms is close to the input size
+ *             (b) for efficiency of the operation: the sum of the
+ *                 terms is small; ideally about twice the square
+ *                 root of the input size.
+ *          So, for example, if the input hsize = 37, which is
+ *          a prime number, the decomposer will break this into two
+ *          terms, 6 and 6, so that the net result is a dilation
+ *          with hsize = 36.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -3209,6 +4623,25 @@ CloseSafeCompBrick(lua_State *L)
  * Arg #3 is expected to be a l_int32 (gwhite).
  * Arg #4 is expected to be a l_int32 (bwhite).
  * Arg #5 is expected to be a l_int32 (mingray).
+ *
+ * Notes:
+ *      (1) This returns the color content in each component, which is
+ *          a measure of the deviation from gray, and is defined
+ *          as the difference between the component and the average of
+ *          the other two components.  See the discussion at the
+ *          top of this file.
+ *      (2) The three numbers (rwhite, gwhite and bwhite) can be thought
+ *          of as the values in the image corresponding to white.
+ *          They are used to compensate for an unbalanced color white point.
+ *          They must either be all 0 or all non-zero.  To turn this
+ *          off, set them all to 0.
+ *      (3) If the maximum component after white point correction,
+ *          max(r,g,b), is less than mingray, all color components
+ *          for that pixel are set to zero.
+ *          Use mingray = 0 to turn off this filtering of dark pixels.
+ *      (4) Therefore, use 0 for all four input parameters if the color
+ *          magnitude is to be calculated without either white balance
+ *          correction or dark filtering.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -3241,6 +4674,38 @@ ColorContent(lua_State *L)
  * Arg #3 is expected to be a l_int32 (lightthresh).
  * Arg #4 is expected to be a l_int32 (diffthresh).
  * Arg #5 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) This function is asking the question: to what extent does the
+ *          image appear to have color?   The amount of color a pixel
+ *          appears to have depends on both the deviation of the
+ *          individual components from their average and on the average
+ *          intensity itself.  For example, the color will be much more
+ *          obvious with a small deviation from white than the same
+ *          deviation from black.
+ *      (2) Any pixel that meets these three tests is considered a
+ *          colorful pixel:
+ *            (a) the lightest component must equal or exceed %darkthresh
+ *            (b) the darkest component must not exceed %lightthresh
+ *            (c) the max difference between components must equal or
+ *                exceed %diffthresh.
+ *      (3) The dark pixels are removed from consideration because
+ *          they don't appear to have color.
+ *      (4) The very lightest pixels are removed because if an image
+ *          has a lot of "white", the color fraction will be artificially
+ *          low, even if all the other pixels are colorful.
+ *      (5) If pixfract is very small, there are few pixels that are neither
+ *          black nor white.  If colorfract is very small, the pixels
+ *          that are neither black nor white have very little color
+ *          content.  The product 'pixfract * colorfract' gives the
+ *          fraction of pixels with significant color content.
+ *      (6) One use of this function is as a preprocessing step for median
+ *          cut quantization (colorquant2.c), which does a very poor job
+ *          splitting the color space into rectangular volume elements when
+ *          all the pixels are near the diagonal of the color cube.  For
+ *          octree quantization of an image with only gray values, the
+ *          2^(level) octcubes on the diagonal are the only ones
+ *          that can be occupied.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -3273,6 +4738,34 @@ ColorFraction(lua_State *L)
  * Arg #5 is expected to be a l_int32 (rval).
  * Arg #6 is expected to be a l_int32 (gval).
  * Arg #7 is expected to be a l_int32 (bval).
+ *
+ * Notes:
+ *      (1) This is an in-place operation; pixs is modified.
+ *          If pixs is colormapped, the operation will add colors to the
+ *          colormap.  Otherwise, pixs will be converted to 32 bpp rgb if
+ *          it is initially 8 bpp gray.
+ *      (2) If type == L_PAINT_LIGHT, it colorizes non-black pixels,
+ *          preserving antialiasing.
+ *          If type == L_PAINT_DARK, it colorizes non-white pixels,
+ *          preserving antialiasing.
+ *      (3) If box is NULL, applies function to the entire image; otherwise,
+ *          clips the operation to the intersection of the box and pix.
+ *      (4) If colormapped, calls pixColorGrayCmap(), which applies the
+ *          coloring algorithm only to pixels that are strictly gray.
+ *      (5) For RGB, determines a "gray" value by averaging; then uses this
+ *          value, plus the input rgb target, to generate the output
+ *          pixel values.
+ *      (6) thresh is only used for rgb; it is ignored for colormapped pix.
+ *          If type == L_PAINT_LIGHT, use thresh = 0 if all pixels are to
+ *          be colored (black pixels will be unaltered).
+ *          In situations where there are a lot of black pixels,
+ *          setting thresh > 0 will make the function considerably
+ *          more efficient without affecting the final result.
+ *          If type == L_PAINT_DARK, use thresh = 255 if all pixels
+ *          are to be colored (white pixels will be unaltered).
+ *          In situations where there are a lot of white pixels,
+ *          setting thresh < 255 will make the function considerably
+ *          more efficient without affecting the final result.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -3300,6 +4793,33 @@ ColorGray(lua_State *L)
  * Arg #4 is expected to be a l_int32 (rval).
  * Arg #5 is expected to be a l_int32 (gval).
  * Arg #6 is expected to be a l_int32 (bval).
+ *
+ * Notes:
+ *      (1) This is an in-place operation.
+ *      (2) If type == L_PAINT_LIGHT, it colorizes non-black pixels,
+ *          preserving antialiasing.
+ *          If type == L_PAINT_DARK, it colorizes non-white pixels,
+ *          preserving antialiasing.
+ *      (3) box gives the region to apply color; if NULL, this
+ *          colorizes the entire image.
+ *      (4) If the cmap is only 2 or 4 bpp, pixs is converted in-place
+ *          to an 8 bpp cmap.  A 1 bpp cmap is not a valid input pix.
+ *      (5) This can also be called through pixColorGray().
+ *      (6) This operation increases the colormap size by the number of
+ *          different gray (non-black or non-white) colors in the
+ *          input colormap.  If there is not enough room in the colormap
+ *          for this expansion, it returns 1 (error), and the caller
+ *          should check the return value.
+ *      (7) Using the darkness of each original pixel in the rect,
+ *          it generates a new color (based on the input rgb values).
+ *          If type == L_PAINT_LIGHT, the new color is a (generally)
+ *          darken-to-black version of the  input rgb color, where the
+ *          amount of darkening increases with the darkness of the
+ *          original pixel color.
+ *          If type == L_PAINT_DARK, the new color is a (generally)
+ *          faded-to-white version of the  input rgb color, where the
+ *          amount of fading increases with the brightness of the
+ *          original pixel color.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -3327,6 +4847,23 @@ ColorGrayCmap(lua_State *L)
  * Arg #5 is expected to be a l_int32 (rval).
  * Arg #6 is expected to be a l_int32 (gval).
  * Arg #7 is expected to be a l_int32 (bval).
+ *
+ * Notes:
+ *      (1) This generates a new image, where some of the pixels under
+ *          FG in the mask are colorized.
+ *      (2) See pixColorGray() for usage with %type and %thresh.  Note
+ *          that %thresh is only used for rgb; it is ignored for
+ *          colormapped images.  In most cases, the mask will be over
+ *          the darker parts and %type == L_PAINT_DARK.
+ *      (3) If pixs is colormapped this calls pixColorMaskedCmap(),
+ *          which adds colors to the colormap for pixd; it only adds
+ *          colors corresponding to strictly gray colors in the colormap.
+ *          Otherwise, if pixs is 8 bpp gray, pixd will be 32 bpp rgb.
+ *      (4) If pixs is 32 bpp rgb, for each pixel a "gray" value is
+ *          found by averaging.  This average is then used with the
+ *          input rgb target to generate the output pixel values.
+ *      (5) This can be used in conjunction with pixHasHighlightRed() to
+ *          add highlight color to a grayscale image.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -3355,6 +4892,17 @@ ColorGrayMasked(lua_State *L)
  * Arg #4 is expected to be a l_int32 (rval).
  * Arg #5 is expected to be a l_int32 (gval).
  * Arg #6 is expected to be a l_int32 (bval).
+ *
+ * Notes:
+ *      (1) This is an in-place operation.
+ *      (2) If type == L_PAINT_LIGHT, it colorizes non-black pixels,
+ *          preserving antialiasing.
+ *          If type == L_PAINT_DARK, it colorizes non-white pixels,
+ *          preserving antialiasing.  See pixColorGrayCmap() for details.
+ *      (3) This increases the colormap size by the number of
+ *          different gray (non-black or non-white) colors in the
+ *          input colormap.  If there is not enough room in the colormap
+ *          for this expansion, it returns 1 (error).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -3382,6 +4930,21 @@ ColorGrayMaskedCmap(lua_State *L)
  * Arg #5 is expected to be a l_int32 (rval).
  * Arg #6 is expected to be a l_int32 (gval).
  * Arg #7 is expected to be a l_int32 (bval).
+ *
+ * Notes:
+ *      (1) This generates a new image, where some of the pixels in each
+ *          box in the boxa are colorized.  See pixColorGray() for usage
+ *          with %type and %thresh.  Note that %thresh is only used for
+ *          rgb; it is ignored for colormapped images.
+ *      (2) If the input image is colormapped, the new image will be 8 bpp
+ *          colormapped if possible; otherwise, it will be converted
+ *          to 32 bpp rgb.  Only pixels that are strictly gray will be
+ *          colorized.
+ *      (3) If the input image is not colormapped, it is converted to rgb.
+ *          A "gray" value for a pixel is determined by averaging the
+ *          components, and the output rgb value is determined from this.
+ *      (4) This can be used in conjunction with pixHasHighlightRed() to
+ *          add highlight color to a grayscale image.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -3410,6 +4973,22 @@ ColorGrayRegions(lua_State *L)
  * Arg #4 is expected to be a l_int32 (rval).
  * Arg #5 is expected to be a l_int32 (gval).
  * Arg #6 is expected to be a l_int32 (bval).
+ *
+ * Notes:
+ *      (1) This is an in-place operation.
+ *      (2) If type == L_PAINT_LIGHT, it colorizes non-black pixels,
+ *          preserving antialiasing.
+ *          If type == L_PAINT_DARK, it colorizes non-white pixels,
+ *          preserving antialiasing.  See pixColorGrayCmap() for details.
+ *      (3) This can also be called through pixColorGrayRegions().
+ *      (4) This increases the colormap size by the number of
+ *          different gray (non-black or non-white) colors in the
+ *          selected regions of pixs.  If there is not enough room in
+ *          the colormap for this expansion, it returns 1 (error),
+ *          and the caller should check the return value.
+ *      (5) Because two boxes in the boxa can overlap, pixels that
+ *          are colorized in the first box must be excluded in the
+ *          second because their value exceeds the size of the map.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -3435,6 +5014,43 @@ ColorGrayRegionsCmap(lua_State *L)
  * Arg #3 is expected to be a l_int32 (gwhite).
  * Arg #4 is expected to be a l_int32 (bwhite).
  * Arg #5 is expected to be a l_int32 (type).
+ *
+ * Notes:
+ *      (1) For an RGB image, a gray pixel is one where all three components
+ *          are equal.  We define the amount of color in an RGB pixel as
+ *          a function depending on the absolute value of the differences
+ *          between the three color components.  Consider the two largest
+ *          of these differences.  The pixel component in common to these
+ *          two differences is the color farthest from the other two.
+ *          The color magnitude in an RGB pixel can be taken as one
+ *          of these three definitions:
+ *            (a) The average of these two differences.  This is the
+ *                average distance from the two components that are
+ *                nearest to each other to the third component.
+ *            (b) The minimum value of these two differences.  This is
+ *                the intermediate value of the three distances between
+ *                component values.  Stated otherwise, it is the
+ *                maximum over all components of the minimum distance
+ *                from that component to the other two components.
+ *            (c) The maximum difference between component values.
+ *      (2) As an example, suppose that R and G are the closest in
+ *          magnitude.  Then the color is determined as either:
+ *            (a) The average distance of B from these two:
+ *                   (|B - R| + |B - G|) / 2
+ *            (b) The minimum distance of B from these two:
+ *                   min(|B - R|, |B - G|).
+ *            (c) The maximum distance of B from these two:
+ *                   max(|B - R|, |B - G|)
+ *      (3) The three methods for choosing the color magnitude from
+ *          the components are selected with these flags:
+ *            (a) L_MAX_DIFF_FROM_AVERAGE_2
+ *            (b) L_MAX_MIN_DIFF_FROM_2
+ *            (c) L_MAX_DIFF
+ *      (4) The three numbers (rwhite, gwhite and bwhite) can be thought
+ *          of as the values in the image corresponding to white.
+ *          They are used to compensate for an unbalanced color white point.
+ *          They must either be all 0 or all non-zero.  To turn this
+ *          off, set them all to 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -3459,6 +5075,12 @@ ColorMagnitude(lua_State *L)
  * Arg #2 is expected to be a l_int32 (type).
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) This does the morph operation on each component separately,
+ *          and recombines the result.
+ *      (2) Sel is a brick with all elements being hits.
+ *      (3) If hsize = vsize = 1, just returns a copy.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -3482,6 +5104,33 @@ ColorMorph(lua_State *L)
  * Arg #2 is expected to be a string (sequence).
  * Arg #3 is expected to be a l_int32 (dispsep).
  * Arg #4 is expected to be a l_int32 (dispy).
+ *
+ * Notes:
+ *      (1) This works on 32 bpp rgb images.
+ *      (2) Each component is processed separately.
+ *      (3) This runs a pipeline of operations; no branching is allowed.
+ *      (4) This only uses brick SELs.
+ *      (5) A new image is always produced; the input image is not changed.
+ *      (6) This contains an interpreter, allowing sequences to be
+ *          generated and run.
+ *      (7) Sel sizes (width, height) must each be odd numbers.
+ *      (8) The format of the sequence string is defined below.
+ *      (9) Intermediate results can optionally be displayed.
+ *      (10) The sequence string is formatted as follows:
+ *            ~ An arbitrary number of operations,  each separated
+ *              by a '+' character.  White space is ignored.
+ *            ~ Each operation begins with a case-independent character
+ *              specifying the operation:
+ *                 d or D  (dilation)
+ *                 e or E  (erosion)
+ *                 o or O  (opening)
+ *                 c or C  (closing)
+ *            ~ The args to the morphological operations are bricks of hits,
+ *              and are formatted as a.b, where a and b are horizontal and
+ *              vertical dimensions, rsp. (each must be an odd number)
+ *           Example valid sequences are:
+ *             "c5.3 + o7.5"
+ *             "D9.1"
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -3507,6 +5156,33 @@ ColorMorphSequence(lua_State *L)
  * Arg #4 is expected to be a l_int32 (selsize).
  * Arg #5 is expected to be a l_int32 (finalcolors).
  * Arg #6 is expected to be a l_int32 (debugflag).
+ *
+ * Notes:
+ *      (1) The goal is to generate a small number of colors.
+ *          Typically this would be specified by 'finalcolors',
+ *          a number that would be somewhere between 3 and 6.
+ *          The parameter 'maxcolors' specifies the maximum number of
+ *          colors generated in the first phase.  This should be
+ *          larger than finalcolors, perhaps twice as large.
+ *          If more than 'maxcolors' are generated in the first phase
+ *          using the input 'maxdist', the distance is repeatedly
+ *          increased by a multiplicative factor until the condition
+ *          is satisfied.  The implicit relation between 'maxdist'
+ *          and 'maxcolors' is thus adjusted programmatically.
+ *      (2) As a very rough guideline, given a target value of 'finalcolors',
+ *          here are approximate values of 'maxdist' and 'maxcolors'
+ *          to start with:
+ *
+ *               finalcolors    maxcolors    maxdist
+ *               -----------    ---------    -------
+ *                   3             6          100
+ *                   4             8           90
+ *                   5            10           75
+ *                   6            12           60
+ *
+ *          For a given number of finalcolors, if you use too many
+ *          maxcolors, the result will be noisy.  If you use too few,
+ *          the result will be a relatively poor assignment of colors.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -3530,6 +5206,13 @@ ColorSegment(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (selsize).
+ *
+ * Notes:
+ *      (1) This operation is in-place.
+ *      (2) This is phase 3 of color segmentation.  It is the first
+ *          part of a two-step noise removal process.  Colors with a
+ *          large population are closed first; this operation absorbs
+ *          small sets of intercolated pixels of a different color.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -3554,6 +5237,17 @@ ColorSegmentClean(lua_State *L)
  * Arg #2 is expected to be a l_int32 (maxdist).
  * Arg #3 is expected to be a l_int32 (maxcolors).
  * Arg #4 is expected to be a l_int32 (debugflag).
+ *
+ * Notes:
+ *      (1) This is phase 1.  See description in pixColorSegment().
+ *      (2) Greedy unsupervised classification.  If the limit 'maxcolors'
+ *          is exceeded, the computation is repeated with a larger
+ *          allowed cluster size.
+ *      (3) On each successive iteration, 'maxdist' is increased by a
+ *          constant factor.  See comments in pixColorSegment() for
+ *          a guideline on parameter selection.
+ *          Note that the diagonal of the 8-bit rgb color cube is about
+ *          440, so for 'maxdist' = 440, you are guaranteed to get 1 color!
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -3576,6 +5270,15 @@ ColorSegmentCluster(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (finalcolors).
+ *
+ * Notes:
+ *      (1) This operation is in-place.
+ *      (2) This is phase 4 of color segmentation, and the second part
+ *          of the 2-step noise removal.  Only 'finalcolors' different
+ *          colors are retained, with colors with smaller populations
+ *          being replaced by the nearest color of the remaining colors.
+ *          For highest accuracy, for pixels that are being replaced,
+ *          we find the nearest colormap color  to the original rgb color.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -3597,6 +5300,20 @@ ColorSegmentRemoveColors(lua_State *L)
  * Arg #2 is expected to be a l_float32 (rfract).
  * Arg #3 is expected to be a l_float32 (gfract).
  * Arg #4 is expected to be a l_float32 (bfract).
+ *
+ * Notes:
+ *      (1) This allows independent fractional shifts of the r,g and b
+ *          components.  A positive shift pushes to saturation (255);
+ *          a negative shift pushes toward 0 (black).
+ *      (2) The effect can be imagined using a color wheel that consists
+ *          (for our purposes) of these 6 colors, separated by 60 degrees:
+ *             red, magenta, blue, cyan, green, yellow
+ *      (3) So, for example, a negative shift of the blue component
+ *          (bfract < 0) could be accompanied by positive shifts
+ *          of red and green to make an image more yellow.
+ *      (4) Examples of limiting cases:
+ *            rfract = 1 ==> r = 255
+ *            rfract = -1 ==> r = 0
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -3619,6 +5336,11 @@ ColorShiftRGB(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_uint32 (color).
  * Arg #3 is expected to be a boolean (cmapflag).
+ *
+ * Notes:
+ *      (1) This applies the specific color to the grayscale image.
+ *      (2) If pixs already has a colormap, it is removed to gray
+ *          before colorizing.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -3640,6 +5362,64 @@ ColorizeGray(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (thresh).
  * Arg #3 is expected to be a boolean (debug).
+ *
+ * Notes:
+ *      (1) This function finds a measure of the number of colors that are
+ *          found in low-gradient regions of an image.  By its
+ *          magnitude relative to some threshold (not specified in
+ *          this function), it gives a good indication of whether
+ *          quantization will generate posterization.   This number
+ *          is larger for images with regions of slowly varying
+ *          intensity (if 8 bpp) or color (if rgb). Such images, if
+ *          quantized, may require dithering to avoid posterization,
+ *          and lossless compression is then expected to be poor.
+ *      (2) If pixs has a colormap, the number of colors returned is
+ *          the number in the colormap.
+ *      (3) It is recommended that document images be reduced to a width
+ *          of 800 pixels before applying this function.  Then it can
+ *          be expected that color detection will be fairly accurate
+ *          and the number of colors will reflect both the content and
+ *          the type of compression to be used.  For less than 15 colors,
+ *          there is unlikely to be a halftone image, and lossless
+ *          quantization should give both a good visual result and
+ *          better compression.
+ *      (4) When using the default threshold on the gradient (15),
+ *          images (both gray and rgb) where ncolors is greater than
+ *          about 15 will compress poorly with either lossless
+ *          compression or dithered quantization, and they may be
+ *          posterized with non-dithered quantization.
+ *      (5) For grayscale images, or images without significant color,
+ *          this returns the number of significant gray levels in
+ *          the low-gradient regions.  The actual number of gray levels
+ *          can be large due to jpeg compression noise in the background.
+ *      (6) Similarly, for color images, the actual number of different
+ *          (r,g,b) colors in the low-gradient regions (rather than the
+ *          number of occupied level 4 octcubes) can be quite large, e.g.,
+ *          due to jpeg compression noise, even for regions that appear
+ *          to be of a single color.  By quantizing to level 4 octcubes,
+ *          most of these superfluous colors are removed from the counting.
+ *      (7) The image is tested for color.  If there is very little color,
+ *          it is thresholded to gray and the number of gray levels in
+ *          the low gradient regions is found.  If the image has color,
+ *          the number of occupied level 4 octcubes is found.
+ *      (8) The number of colors in the low-gradient regions increases
+ *          monotonically with the threshold %thresh on the edge gradient.
+ *      (9) Background: grayscale and color quantization is often useful
+ *          to achieve highly compressed images with little visible
+ *          distortion.  However, gray or color washes (regions of
+ *          low gradient) can defeat this approach to high compression.
+ *          How can one determine if an image is expected to compress
+ *          well using gray or color quantization?  We use the fact that
+ *            * gray washes, when quantized with less than 50 intensities,
+ *              have posterization (visible boundaries between regions
+ *              of uniform 'color') and poor lossless compression
+ *            * color washes, when quantized with level 4 octcubes,
+ *              typically result in both posterization and the occupancy
+ *              of many level 4 octcubes.
+ *          Images can have colors either intrinsically or as jpeg
+ *          compression artifacts.  This function reduces but does not
+ *          completely eliminate measurement of jpeg quantization noise
+ *          in the white background of grayscale or color images.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -3665,6 +5445,16 @@ ColorsForQuantization(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is an optional Box* (box).
+ *
+ * Notes:
+ *      (1) This computes numas that represent row vectors of statistics,
+ *          with each of its values derived from the corresponding col of a Pix.
+ *      (2) Use NULL on input to prevent computation of any of the 5 numas.
+ *      (3) Other functions that compute pixel column statistics are:
+ *             pixCountPixelsByColumn()
+ *             pixAverageByColumn()
+ *             pixVarianceByColumn()
+ *             pixGetColumnStats()
  * </pre>
  * \param L pointer to the lua_State
  * \return 6 Numa* on the Lua stack (mean, median, mode, modecount, var, rootvar)
@@ -3697,6 +5487,25 @@ ColumnStats(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Pix* (pixm) with 1 bit/pixel.
+ *
+ * Notes:
+ *      (1) In-place operation; pixd is changed.
+ *      (2) This sets each pixel in pixd that co-locates with an ON
+ *          pixel in pixm to the corresponding value of pixs.
+ *      (3) pixs and pixd must be the same depth and not colormapped.
+ *      (4) All three input pix are aligned at the UL corner, and the
+ *          operation is clipped to the intersection of all three images.
+ *      (5) If pixm == NULL, it's a no-op.
+ *      (6) Implementation: see notes in pixCombineMaskedGeneral().
+ *          For 8 bpp selective masking, you might guess that it
+ *          would be faster to generate an 8 bpp version of pixm,
+ *          using pixConvert1To8(pixm, 0, 255), and then use a
+ *          general combine operation
+ *               d = (d & ~m) | (s & m)
+ *          on a word-by-word basis.  Not always.  The word-by-word
+ *          combine takes a time that is independent of the mask data.
+ *          If the mask is relatively sparse, the byte-check method
+ *          is actually faster!
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -3719,6 +5528,35 @@ CombineMasked(lua_State *L)
  * Arg #3 is expected to be a Pix* (pixm) with 1 bit/pixel.
  * Arg #4 is expected to be a l_int32 (x).
  * Arg #5 is expected to be a l_int32 (y).
+ *
+ * Notes:
+ *      (1) In-place operation; pixd is changed.
+ *      (2) This is a generalized version of pixCombinedMasked(), where
+ *          the source and mask can be placed at the same (arbitrary)
+ *          location relative to pixd.
+ *      (3) pixs and pixd must be the same depth and not colormapped.
+ *      (4) The UL corners of both pixs and pixm are aligned with
+ *          the point (x, y) of pixd, and the operation is clipped to
+ *          the intersection of all three images.
+ *      (5) If pixm == NULL, it's a no-op.
+ *      (6) Implementation.  There are two ways to do these.  In the first,
+ *          we use rasterop, ORing the part of pixs under the mask
+ *          with pixd (which has been appropriately cleared there first).
+ *          In the second, the mask is used one pixel at a time to
+ *          selectively replace pixels of pixd with those of pixs.
+ *          Here, we use rasterop for 1 bpp and pixel-wise replacement
+ *          for 8 and 32 bpp.  To use rasterop for 8 bpp, for example,
+ *          we must first generate an 8 bpp version of the mask.
+ *          The code is simple:
+ *
+ *             Pix *pixm8 = pixConvert1To8(NULL, pixm, 0, 255);
+ *             Pix *pixt = pixAnd(NULL, pixs, pixm8);
+ *             pixRasterop(pixd, x, y, wmin, hmin, PIX_DST & PIX_NOT(PIX_SRC),
+ *                         pixm8, 0, 0);
+ *             pixRasterop(pixd, x, y, wmin, hmin, PIX_SRC | PIX_DST,
+ *                         pixt, 0, 0);
+ *             pixDestroy(&pixt);
+ *             pixDestroy(&pixm8);
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -3741,6 +5579,12 @@ CombineMaskedGeneral(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix1).
  * Arg #2 is expected to be a Pix* (pix2).
  * Arg #3 is expected to be a l_int32 (comptype).
+ *
+ * Notes:
+ *      (1) The two images are aligned at the UL corner, and do not
+ *          need to be the same size.
+ *      (2) If using L_COMPARE_SUBTRACT, pix2 is subtracted from pix1.
+ *      (3) The total number of pixels is determined by pix1.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -3768,6 +5612,12 @@ CompareBinary(lua_State *L)
  * Arg #2 is expected to be a Pix* (pix2).
  * Arg #3 is expected to be a l_int32 (comptype).
  * Arg #4 is expected to be a l_int32 (plottype).
+ *
+ * Notes:
+ *      (1) See pixCompareGrayOrRGB() for details.
+ *      (2) Use pixCompareGrayOrRGB() if the input pix are colormapped.
+ *      (3) Note: setting %plottype > 0 can result in writing named
+ *                output files.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -3806,6 +5656,54 @@ CompareGray(lua_State *L)
  * Arg #8 is expected to be a l_int32 (nx).
  * Arg #9 is expected to be a l_int32 (ny).
  * Arg #11 is expected to be a l_int32 (debugflag).
+ *
+ * Notes:
+ *      (1) This function compares two grayscale photo regions.  It can
+ *          do it with a single histogram from each region, or with a
+ *          set of (nx * ny) spatially aligned histograms.  For both
+ *          cases, align the regions using the centroid of the inverse
+ *          image, and crop to the smallest of the two.
+ *      (2) An initial filter gives %score = 0 if the ratio of widths
+ *          and heights (smallest / largest) does not exceed a
+ *          threshold %minratio.  This must be between 0.5 and 1.0.
+ *          If set at 1.0, both images must be exactly the same size.
+ *          A typical value for %minratio is 0.9.
+ *      (3) The lightest values in the histogram can be disregarded.
+ *          Set %maxgray to the lightest value to be kept.  For example,
+ *          to eliminate white (255), set %maxgray = 254.  %maxgray must
+ *          be >= 200.
+ *      (4) For an efficient representation of the histogram, normalize
+ *          using a multiplicative factor so that the number in the
+ *          maximum bucket is 255.  It then takes 256 bytes to store.
+ *      (5) When comparing the histograms of two regions:
+ *          ~ Use %maxgray = 254 to ignore the white pixels, the number
+ *            of which may be sensitive to the crop region if the pixels
+ *            outside that region are white.
+ *          ~ Use the Earth Mover distance (EMD), with the histograms
+ *            normalized so that the sum over bins is the same.
+ *            Further normalize by dividing by 255, so that the result
+ *            is in [0.0 ... 1.0].
+ *      (6) Get a similarity score S = 1.0 - k * D, where
+ *            k is a constant, say in the range 5-10
+ *            D = normalized EMD
+ *          and for multiple tiles, take the Min(S) to be the final score.
+ *          Using aligned tiles gives protection against accidental
+ *          similarity of the overall grayscale histograms.
+ *          A small number of aligned tiles works well.
+ *      (7) With debug on, you get a pdf that shows, for each tile,
+ *          the images, histograms and score.
+ *      (8) When to use:
+ *          (a) Because this function should not be used on text or
+ *              line graphics, which can give false positive results
+ *              (i.e., high scores for different images), the input
+ *              images should be filtered.
+ *          (b) To filter, first use pixDecideIfText().  If that function
+ *              says the image is text, do not use it.  If the function
+ *              says it is not text, it still may be line graphics, and
+ *              in that case, use:
+ *                 pixGetGrayHistogramTiled()
+ *                 grayInterHistogramStats()
+ *              to determine whether it is photo or line graphics.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -3838,6 +5736,28 @@ CompareGrayByHisto(lua_State *L)
  * Arg #2 is expected to be a Pix* (pix2).
  * Arg #3 is expected to be a l_int32 (comptype).
  * Arg #4 is expected to be a l_int32 (plottype).
+ *
+ * Notes:
+ *      (1) The two images are aligned at the UL corner, and do not
+ *          need to be the same size.  If they are not the same size,
+ *          the comparison will be made over overlapping pixels.
+ *      (2) If there is a colormap, it is removed and the result
+ *          is either gray or RGB depending on the colormap.
+ *      (3) If RGB, each component is compared separately.
+ *      (4) If type is L_COMPARE_ABS_DIFF, pix2 is subtracted from pix1
+ *          and the absolute value is taken.
+ *      (5) If type is L_COMPARE_SUBTRACT, pix2 is subtracted from pix1
+ *          and the result is clipped to 0.
+ *      (6) The plot output types are specified in gplot.h.
+ *          Use 0 if no difference plot is to be made.
+ *      (7) If the images are pixelwise identical, no difference
+ *          plot is made, even if requested.  The result (TRUE or FALSE)
+ *          is optionally returned in the parameter 'same'.
+ *      (8) The average difference (either subtracting or absolute value)
+ *          is optionally returned in the parameter 'diff'.
+ *      (9) The RMS difference is optionally returned in the
+ *          parameter 'rmsdiff'.  For RGB, we return the average of
+ *          the RMS differences for each of the components.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -3875,6 +5795,43 @@ CompareGrayOrRGB(lua_State *L)
  * Arg #7 is expected to be a l_int32 (nx).
  * Arg #8 is expected to be a l_int32 (ny).
  * Arg #10 is expected to be a l_int32 (debugflag).
+ *
+ * Notes:
+ *      (1) This function compares two grayscale photo regions.  If a
+ *          box is given, the region is clipped; otherwise assume
+ *          the entire images are photo regions.  This is done with a
+ *          set of (nx * ny) spatially aligned histograms, which are
+ *          aligned using the centroid of the inverse image.
+ *      (2) An initial filter gives %score = 0 if the ratio of widths
+ *          and heights (smallest / largest) does not exceed a
+ *          threshold %minratio.  This must be between 0.5 and 1.0.
+ *          If set at 1.0, both images must be exactly the same size.
+ *          A typical value for %minratio is 0.9.
+ *      (3) Because this function should not be used on text or
+ *          line graphics, which can give false positive results
+ *          (i.e., high scores for different images), filter the images
+ *          using pixGenPhotoHistos(), which returns tiled histograms
+ *          only if an image is not text and comparison is expected
+ *          to work with histograms.  If either image fails the test,
+ *          the comparison returns a score of 0.0.
+ *      (4) The white value counts in the histograms are removed; they
+ *          are typically pixels that were padded to achieve alignment.
+ *      (5) For an efficient representation of the histogram, normalize
+ *          using a multiplicative factor so that the number in the
+ *          maximum bucket is 255.  It then takes 256 bytes to store.
+ *      (6) When comparing the histograms of two regions, use the
+ *          Earth Mover distance (EMD), with the histograms normalized
+ *          so that the sum over bins is the same.  Further normalize
+ *          by dividing by 255, so that the result is in [0.0 ... 1.0].
+ *      (7) Get a similarity score S = 1.0 - k * D, where
+ *            k is a constant, say in the range 5-10
+ *            D = normalized EMD
+ *          and for multiple tiles, take the Min(S) to be the final score.
+ *          Using aligned tiles gives protection against accidental
+ *          similarity of the overall grayscale histograms.
+ *          A small number of aligned tiles works well.
+ *      (8) With debug on, you get a pdf that shows, for each tile,
+ *          the images, histograms and score.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -3906,6 +5863,11 @@ ComparePhotoRegionsByHisto(lua_State *L)
  * Arg #2 is expected to be a Pix* (pix2).
  * Arg #3 is expected to be a l_int32 (comptype).
  * Arg #4 is expected to be a l_int32 (plottype).
+ *
+ * Notes:
+ *      (1) See pixCompareGrayOrRGB() for details.
+ *      (2) Note: setting %plottype > 0 can result in writing named
+ *                output files.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -3937,6 +5899,22 @@ CompareRGB(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix1).
  * Arg #2 is expected to be a Pix* (pix2).
  * Arg #3 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) This answers the question: if the pixel values in each
+ *          component are compared by absolute difference, for
+ *          any value of difference, what is the fraction of
+ *          pixel pairs that have a difference of this magnitude
+ *          or greater.  For a difference of 0, the fraction is 1.0.
+ *          In this sense, it is a mapping from pixel difference to
+ *          rank order of difference.
+ *      (2) The two images are aligned at the UL corner, and do not
+ *          need to be the same size.  If they are not the same size,
+ *          the comparison will be made over overlapping pixels.
+ *      (3) If there is a colormap, it is removed and the result
+ *          is either gray or RGB depending on the colormap.
+ *      (4) If RGB, pixel differences for each component are aggregated
+ *          into a single histogram.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa * on the Lua stack
@@ -3960,6 +5938,18 @@ CompareRankDifference(lua_State *L)
  * Arg #3 is expected to be a l_int32 (sx).
  * Arg #4 is expected to be a l_int32 (sy).
  * Arg #5 is expected to be a l_int32 (type).
+ *
+ * Notes:
+ *      (1) With L_MEAN_ABSVAL, we compute for each tile the
+ *          average abs value of the pixel component difference between
+ *          the two (aligned) images.  With L_ROOT_MEAN_SQUARE, we
+ *          compute instead the rms difference over all components.
+ *      (2) The two input pix must be the same depth.  Comparison is made
+ *          using UL corner alignment.
+ *      (3) For 32 bpp, the distance between corresponding tiles
+ *          is found by averaging the measured difference over all three
+ *          components of each pixel in the tile.
+ *      (4) The result, pixdiff, contains one pixel for each source tile.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -3987,6 +5977,23 @@ CompareTiled(lua_State *L)
  * Arg #2 is expected to be a Pix* (pix2).
  * Arg #3 is expected to be a l_int32 (thresh).
  * Arg #7 is expected to be a l_int32 (debugflag).
+ *
+ * Notes:
+ *      (1) This does a coarse-to-fine search for best translational
+ *          alignment of two images, measured by a scoring function
+ *          that is the correlation between the fg pixels.
+ *      (2) The threshold is used if the images aren't 1 bpp.
+ *      (3) With debug on, you get a pdf that shows, as a grayscale
+ *          image, the score as a function of shift from the initial
+ *          estimate, for each of the four levels.  The shift is 0 at
+ *          the center of the image.
+ *      (4) With debug on, you also get a pdf that shows the
+ *          difference at the best alignment between the two images,
+ *          at each of the four levels.  The red and green pixels
+ *          show locations where one image has a fg pixel and the
+ *          other doesn't.  The black pixels are where both images
+ *          have fg pixels, and white pixels are where neither image
+ *          has fg pixels.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -4020,6 +6027,18 @@ CompareWithTranslation(lua_State *L)
  * Arg #5 is expected to be a l_float32 (rdenom).
  * Arg #6 is expected to be a l_float32 (gdenom).
  * Arg #7 is expected to be a l_float32 (bdenom).
+ *
+ * Notes:
+ *      (1) This stores a function of the component values of each
+ *          input pixel in %fpixd.
+ *      (2) The function is a ratio of linear combinations of component values.
+ *          There are two special cases for denominator coefficients:
+ *          (a) The denominator is 1.0: input 0 for all denominator coefficients
+ *          (b) Only one component is used in the denominator: input 1.0
+ *              for that denominator component and 0.0 for the other two.
+ *      (3) If the denominator is 0, multiply by an arbitrary number that
+ *          is much larger than 1.  Choose 256 "arbitrarily".
+ *
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 FPix * on the Lua stack
@@ -4045,6 +6064,29 @@ ComponentFunction(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Box* (box).
  * Arg #3 is expected to be a l_int32 (dist).
+ *
+ * Notes:
+ *      (1) There are several ways to test if a connected component has
+ *          an essentially rectangular boundary, such as:
+ *           a. Fraction of fill into the bounding box
+ *           b. Max-min distance of fg pixel from periphery of bounding box
+ *           c. Max depth of bg intrusions into component within bounding box
+ *          The weakness of (a) is that it is highly sensitive to holes
+ *          within the c.c.  The weakness of (b) is that it can have
+ *          arbitrarily large intrusions into the c.c.  Method (c) tests
+ *          the integrity of the outer boundary of the c.c., with respect
+ *          to the enclosing bounding box, so we use it.
+ *      (2) This tests if the connected component within the box conforms
+ *          to the box at all points on the periphery within %dist.
+ *          Inside, at a distance from the box boundary that is greater
+ *          than %dist, we don't care about the pixels in the c.c.
+ *      (3) We can think of the conforming condition as follows:
+ *          No pixel inside a distance %dist from the boundary
+ *          can connect to the boundary through a path through the bg.
+ *          To implement this, we need to do a flood fill.  We can go
+ *          either from inside toward the boundary, or the other direction.
+ *          It's easiest to fill from the boundary, and then verify that
+ *          there are no filled pixels farther than %dist from the boundary.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -4068,6 +6110,11 @@ ConformsToRectangle(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (connectivity).
+ *
+ * Notes:
+ *      (1) This is the top-level call for getting bounding boxes or
+ *          a pixa of the components, and it can be used instead
+ *          of either pixConnCompBB() or pixConnCompPixa(), rsp.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa * on the Lua stack
@@ -4090,6 +6137,12 @@ ConnComp(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (connect).
+ *
+ * Notes:
+ *      (1) The pixel values in pixd label the area of the fg component
+ *          to which the pixel belongs.  Pixels in the bg are labelled 0.
+ *      (2) For purposes of visualization, the output can be converted
+ *          to 8 bpp, using pixConvert32To8() or pixMaxDynamicRange().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -4109,6 +6162,13 @@ ConnCompAreaTransform(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (connectivity).
+ *
+ * Notes:
+ *     (1) Finds bounding boxes of 4- or 8-connected components
+ *         in a binary image.
+ *     (2) This works on a copy of the input pix.  The c.c. are located
+ *         in raster order and erased one at a time.  In the process,
+ *         the b.b. is computed and saved.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa * on the Lua stack
@@ -4131,6 +6191,28 @@ ConnCompBB(lua_State *L)
  * Arg #3 is expected to be a l_float32 (x).
  * Arg #4 is expected to be a l_float32 (y).
  * Arg #5 is expected to be a boolean (debug).
+ *
+ * Notes:
+ *      (1) This adds a pixel and updates the labeled connected components.
+ *          Before calling this function, initialize the process using
+ *          pixConnCompIncrInit().
+ *      (2) As a result of adding a pixel, one of the following can happen,
+ *          depending on the number of neighbors with non-zero value:
+ *          (a) nothing: the pixel is already a member of a c.c.
+ *          (b) no neighbors: a new component is added, increasing the
+ *              number of c.c.
+ *          (c) one neighbor: the pixel is added to an existing c.c.
+ *          (d) more than one neighbor: the added pixel causes joining of
+ *              two or more c.c., reducing the number of c.c.  A maximum
+ *              of 4 c.c. can be joined.
+ *      (3) When two c.c. are joined, the pixels in the larger index are
+ *          relabeled to those of the smaller in pixs, and their locations
+ *          are transferred to the pta with the smaller index in the ptaa.
+ *          The pta corresponding to the larger index is then deleted.
+ *      (4) This is an efficient implementation of a "union-find" operation,
+ *          which supports the generation and merging of disjoint sets
+ *          of pixels.  This function can be called about 1.3 million times
+ *          per second.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -4156,6 +6238,18 @@ ConnCompIncrAdd(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (conn).
+ *
+ * Notes:
+ *      (1) This labels the connected components in a 1 bpp pix, and
+ *          additionally sets up a ptaa that lists the locations of pixels
+ *          in each of the components.
+ *      (2) It can be used to initialize the output image and arrays for
+ *          an application that maintains information about connected
+ *          components incrementally as pixels are added.
+ *      (3) pixs can be empty or have some foreground pixels.
+ *      (4) The connectivity is stored in pixd->special.
+ *      (5) Always initialize with the first pta in ptaa being empty
+ *          and representing the background value (index 0) in the pix.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -4182,6 +6276,19 @@ ConnCompIncrInit(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (connectivity).
+ *
+ * Notes:
+ *      (1) This finds bounding boxes of 4- or 8-connected components
+ *          in a binary image, and saves images of each c.c
+ *          in a pixa array.
+ *      (2) It sets up 2 temporary pix, and for each c.c. that is
+ *          located in raster order, it erases the c.c. from one pix,
+ *          then uses the b.b. to extract the c.c. from the two pix using
+ *          an XOR, and finally erases the c.c. from the second pix.
+ *      (3) A clone of the returned boxa (where all boxes in the array
+ *          are clones) is inserted into the pixa.
+ *      (4) If the input is valid, this always returns a boxa and a pixa.
+ *          If pixs is empty, the boxa and pixa will be empty.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa * on the Lua stack
@@ -4205,6 +6312,18 @@ ConnCompPixa(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (connect).
  * Arg #3 is expected to be a l_int32 (depth).
+ *
+ * Notes:
+ *      (1) pixd is 8, 16 or 32 bpp, and the pixel values label the
+ *          fg component, starting with 1.  Pixels in the bg are labelled 0.
+ *      (2) If %depth = 0, the depth of pixd is 8 if the number of c.c.
+ *          is less than 254, 16 if the number of c.c is less than 0xfffe,
+ *          and 32 otherwise.
+ *      (3) If %depth = 8, the assigned label for the n-th component is
+ *          1 + n % 254.  We use mod 254 because 0 is uniquely assigned
+ *          to black: e.g., see pixcmapCreateRandom().  Likewise,
+ *          if %depth = 16, the assigned label uses mod(2^16 - 2), and
+ *          if %depth = 32, no mod is taken.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -4230,6 +6349,32 @@ ConnCompTransform(lua_State *L)
  * Arg #5 is expected to be a l_int32 (mindiff).
  * Arg #6 is expected to be a l_int32 (smoothx).
  * Arg #7 is expected to be a l_int32 (smoothy).
+ *
+ * Notes:
+ *      (1) This function adaptively attempts to expand the contrast
+ *          to the full dynamic range in each tile.  If the contrast in
+ *          a tile is smaller than %mindiff, it uses the min and max
+ *          pixel values from neighboring tiles.  It also can use
+ *          convolution to smooth the min and max values from
+ *          neighboring tiles.  After all that processing, it is
+ *          possible that the actual pixel values in the tile are outside
+ *          the computed [min ... max] range for local contrast
+ *          normalization.  Such pixels are taken to be at either 0
+ *          (if below the min) or 255 (if above the max).
+ *      (2) pixd can be equal to pixs (in-place operation) or
+ *          null (makes a new pixd).
+ *      (3) sx and sy give the tile size; they are typically at least 20.
+ *      (4) mindiff is used to eliminate results for tiles where it is
+ *          likely that either fg or bg is missing.  A value around 50
+ *          or more is reasonable.
+ *      (5) The full width and height of the convolution kernel
+ *          are (2 * smoothx + 1) and (2 * smoothy + 1).  Some smoothing
+ *          is typically useful, and we limit the smoothing half-widths
+ *          to the range from 0 to 8.
+ *      (6) A linear TRC (gamma = 1.0) is applied to increase the contrast
+ *          in each tile.  The result can subsequently be globally corrected,
+ *          by applying pixGammaTRC() with arbitrary values of gamma
+ *          and the 0 and 255 points of the mapping.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -4255,6 +6400,25 @@ ContrastNorm(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_float32 (factor).
+ *
+ * Notes:
+ *      (1) pixd must either be null or equal to pixs.
+ *          For in-place operation, set pixd == pixs:
+ *             pixContrastTRC(pixs, pixs, ...);
+ *          To get a new image, set pixd == null:
+ *             pixd = pixContrastTRC(NULL, pixs, ...);
+ *      (2) If pixs is colormapped, the colormap is transformed,
+ *          either in-place or in a copy of pixs.
+ *      (3) Contrast is enhanced by mapping each color component
+ *          using an atan function with maximum slope at 127.
+ *          Pixels below 127 are lowered in intensity and pixels
+ *          above 127 are increased.
+ *      (4) The useful range for the contrast factor is scaled to
+ *          be in (0.0 to 1.0), but larger values can also be used.
+ *      (5) If factor == 0.0, no enhancement is performed; return a copy
+ *          unless in-place, in which case this is a no-op.
+ *      (6) For color images that are not colormapped, the mapping
+ *          is applied to each component.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -4277,6 +6441,12 @@ ContrastTRC(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Pix* (pixm).
  * Arg #4 is expected to be a l_float32 (factor).
+ *
+ * Notes:
+ *      (1) Same as pixContrastTRC() except mapping is optionally over
+ *          a subset of pixels described by pixm.
+ *      (2) Masking does not work for colormapped images.
+ *      (3) See pixContrastTRC() for details on how to use the parameters.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -4298,6 +6468,12 @@ ContrastTRCMasked(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string describing the byte selection type (type).
+ *
+ * Notes:
+ *      (1) With L_AUTO_BYTE, if the max pixel value is greater than 255,
+ *          use the MSB; otherwise, use the LSB.
+ *      (2) With L_CLIP_TO_FF, use min(pixel-value, 0xff) for each
+ *          16-bit src pixel.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4317,6 +6493,11 @@ Convert16To8(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_uint16 (val0).
  * Arg #3 is expected to be a l_uint16 (val1).
+ *
+ * Notes:
+ *      (1) If pixd is null, a new pix is made.
+ *      (2) If pixd is not null, it must be of equal width and height
+ *          as pixs.  It is always returned.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4337,6 +6518,13 @@ Convert1To16(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (val0).
  * Arg #3 is expected to be a l_int32 (val1).
+ *
+ * Notes:
+ *      (1) If pixd is null, a new pix is made.
+ *      (2) If pixd is not null, it must be of equal width and height
+ *          as pixs.  It is always returned.
+ *      (3) A simple unpacking might use val0 = 0 and val1 = 3.
+ *      (4) If you want a colormapped pixd, use pixConvert1To2Cmap().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4355,6 +6543,9 @@ Convert1To2(lua_State *L)
  * \brief Convert a binary 1bpp Pix* (%pixs) to a colormapped 2bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) Input 0 is mapped to (255, 255, 255); 1 is mapped to (0, 0, 0)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4373,6 +6564,11 @@ Convert1To2Cmap(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_uint32 (val0).
  * Arg #3 is expected to be a l_uint32 (val1).
+ *
+ * Notes:
+ *      (1) If pixd is null, a new pix is made.
+ *      (2) If pixd is not null, it must be of equal width and height
+ *          as pixs.  It is always returned.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4393,6 +6589,13 @@ Convert1To32(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_uint32 (val0).
  * Arg #3 is expected to be a l_uint32 (val1).
+ *
+ * Notes:
+ *      (1) If pixd is null, a new pix is made.
+ *      (2) If pixd is not null, it must be of equal width and height
+ *          as pixs.  It is always returned.
+ *      (3) A simple unpacking might use val0 = 0 and val1 = 15, or v.v.
+ *      (4) If you want a colormapped pixd, use pixConvert1To4Cmap().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4411,6 +6614,9 @@ Convert1To4(lua_State *L)
  * \brief Convert a binary 1bpp Pix* (%pixs) to a colormapped 4bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) Input 0 is mapped to (255, 255, 255); 1 is mapped to (0, 0, 0)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4429,6 +6635,14 @@ Convert1To4Cmap(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_uint8 (val0).
  * Arg #3 is expected to be a l_uint8 (val1).
+ *
+ * Notes:
+ *      (1) If pixd is null, a new pix is made.
+ *      (2) If pixd is not null, it must be of equal width and height
+ *          as pixs.  It is always returned.
+ *      (3) A simple unpacking might use val0 = 0 and val1 = 255, or v.v.
+ *      (4) To have a colormap associated with the 8 bpp pixd,
+ *          use pixConvert1To8Cmap().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4447,6 +6661,9 @@ Convert1To8(lua_State *L)
  * \brief Convert a binary 1bpp Pix* (%pixs) to a colormapped 8bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) Input 0 is mapped to (255, 255, 255); 1 is mapped to (0, 0, 0)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4463,6 +6680,19 @@ Convert1To8Cmap(lua_State *L)
  * \brief Convert a 24bpp Pix* (%pixs) to a 32bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) 24 bpp rgb pix are not supported in leptonica, except for a small
+ *          number of formatted write operations.  The data is a byte array,
+ *          with pixels in order r,g,b, and padded to 32 bit boundaries
+ *          in each line.
+ *      (2) Because 24 bpp rgb pix are conveniently generated by programs
+ *          such as xpdf (which has SplashBitmaps that store the raster
+ *          data in consecutive 24-bit rgb pixels), it is useful to provide
+ *          24 bpp pix that simply incorporate that data.  The only things
+ *          we can do with these are:
+ *            (a) write them to file in png, jpeg, tiff and pnm
+ *            (b) interconvert between 24 and 32 bpp in memory (for testing).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4484,6 +6714,23 @@ Convert24To32(lua_State *L)
  * Arg #4 is expected to be a l_uint8 (val2).
  * Arg #5 is expected to be a l_uint8 (val3).
  * Arg #6 is expected to be a boolean (cmapflag).
+ *
+ * Notes:
+ *      ~ A simple unpacking might use val0 = 0,
+ *        val1 = 85 (0x55), val2 = 170 (0xaa), val3 = 255.
+ *      ~ If cmapflag is TRUE:
+ *          ~ The 8 bpp image is made with a colormap.
+ *          ~ If pixs has a colormap, the input values are ignored and
+ *            the 8 bpp image is made using the colormap
+ *          ~ If pixs does not have a colormap, the input values are
+ *            used to build the colormap.
+ *      ~ If cmapflag is FALSE:
+ *          ~ The 8 bpp image is made without a colormap.
+ *          ~ If pixs has a colormap, the input values are ignored,
+ *            the colormap is removed, and the values stored in the 8 bpp
+ *            image are from the colormap.
+ *          ~ If pixs does not have a colormap, the input values are
+ *            used to populate the 8 bpp image.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4506,6 +6753,10 @@ Convert2To8(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string describing the ms/ls 2 byte selection (type).
+ *
+ * Notes:
+ *      (1) The data in pixs is typically used for labelling.
+ *          It is an array of l_uint32 values, not rgb or rgba.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4564,6 +6815,21 @@ Convert32To8(lua_State *L)
  * Arg #4 is expected to be a l_uint32 (val2).
  * Arg #5 is expected to be a l_uint32 (val3).
  * Arg #6 is expected to be a boolean (cmapflag).
+ *
+ * Notes:
+ *      ~ If cmapflag is TRUE:
+ *          ~ pixd is made with a colormap.
+ *          ~ If pixs has a colormap, it is copied and the colormap
+ *            index values are placed in pixd.
+ *          ~ If pixs does not have a colormap, a colormap with linear
+ *            trc is built and the pixel values in pixs are placed in
+ *            pixd as colormap index values.
+ *      ~ If cmapflag is FALSE:
+ *          ~ pixd is made without a colormap.
+ *          ~ If pixs has a colormap, it is removed and the values stored
+ *            in pixd are from the colormap (converted to gray).
+ *          ~ If pixs does not have a colormap, the pixel values in pixs
+ *            are used, with shift replication, to populate pixd.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4582,6 +6848,12 @@ Convert4To8(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (leftshift).
+ *
+ * Notes:
+ *      (1) For left shift of 8, the 8 bit value is replicated in both
+ *          the MSB and the LSB of the pixels in pixd.  That way, we get
+ *          proportional mapping, with a correct map from 8 bpp white
+ *          (0xff) to 16 bpp white (0xffff).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4599,6 +6871,9 @@ Convert8To16(lua_State *L)
  * \brief Convert a 8bpp Pix* (%pixs) to a 2bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) Any existing colormap is removed to gray.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4615,6 +6890,10 @@ Convert8To2(lua_State *L)
  * \brief Convert a 8bpp Pix* (%pixs) to a 32bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) If there is no colormap, replicates the gray value
+ *          into the 3 MSB of the dest pixel.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4631,6 +6910,9 @@ Convert8To32(lua_State *L)
  * \brief Convert a 8bpp Pix* (%pixs) to a 4bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) Any existing colormap is removed to gray.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4647,6 +6929,13 @@ Convert8To4(lua_State *L)
  * \brief Convert a colormapped Pix* (%pixs) to a binary 1bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This is an extreme color quantizer.  It decides which
+ *          colors map to FG (black) and which to BG (white).
+ *      (2) This uses two heuristics to make the decision:
+ *          (a) colors similar to each other are likely to be in the same class
+ *          (b) there is usually much less FG than BG.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4667,6 +6956,20 @@ ConvertCmapTo1(lua_State *L)
  * Arg #2 is expected to be a l_float32 (scalex).
  * Arg #3 is expected to be a l_float32 (scaley).
  * Arg #4 is expected to be a l_int32 (order).
+ *
+ * Notes:
+ *      (1) If pixs has a colormap, it is removed to 32 bpp rgb.
+ *          If the colormap has no color, pixConvertGrayToSubpixelRGB()
+ *          should be called instead, because it will give the same result
+ *          more efficiently.  The function pixConvertToSubpixelRGB()
+ *          will do the best thing for all cases.
+ *      (2) For horizontal subpixel splitting, the input rgb image
+ *          is rescaled by %scaley vertically and by 3.0 times
+ *          %scalex horizontally.  Then for each horizontal triplet
+ *          of pixels, the r component of the final pixel is selected
+ *          from the r component of the appropriate pixel in the triplet,
+ *          and likewise for g and b.  Vertical subpixel splitting is
+ *          handled similarly.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -4687,6 +6990,15 @@ ConvertColorToSubpixelRGB(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) For wrapping in PostScript, we convert pixs to
+ *          1 bpp, 8 bpp (gray) and 32 bpp (RGB color).
+ *      (2) Colormaps are removed.  For pixs with colormaps, the
+ *          images are converted to either 8 bpp gray or 32 bpp
+ *          RGB, depending on whether the colormap has color content.
+ *      (3) Images without colormaps, that are not 1 bpp or 32 bpp,
+ *          are converted to 8 bpp gray.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -4704,6 +7016,20 @@ ConvertForPSWrap(lua_State *L)
  * \brief Convert a gray 8bpp Pix* (%pixs) to a colormapped Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This is a simple interface for adding a colormap to a
+ *          2, 4 or 8 bpp grayscale image without causing any
+ *          quantization.  There is some similarity to operations
+ *          in grayquant.c, such as pixThresholdOn8bpp(), where
+ *          the emphasis is on quantization with an arbitrary number
+ *          of levels, and a colormap is an option.
+ *      (2) Returns a copy if pixs already has a colormap.
+ *      (3) For 8 bpp src, this is a lossless transformation.
+ *      (4) For 2 and 4 bpp src, this generates a colormap that
+ *          assumes full coverage of the gray space, with equally spaced
+ *          levels: 4 levels for d = 2 and 16 levels for d = 4.
+ *      (5) In all cases, the depth of the dest is the same as the src.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4722,6 +7048,19 @@ ConvertGrayToColormap(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (mindepth).
+ *
+ * Notes:
+ *      (1) Returns a copy if pixs already has a colormap.
+ *      (2) This is a lossless transformation; there is no quantization.
+ *          We compute the number of different gray values in pixs,
+ *          and construct a colormap that has exactly these values.
+ *      (3) 'mindepth' is the minimum depth of pixd.  If mindepth == 8,
+ *          pixd will always be 8 bpp.  Let the number of different
+ *          gray values in pixs be ngray.  If mindepth == 4, we attempt
+ *          to save pixd as a 4 bpp image, but if ngray > 16,
+ *          pixd must be 8 bpp.  Likewise, if mindepth == 2,
+ *          the depth of pixd will be 2 if ngray <= 4 and 4 if ngray > 4
+ *          but <= 16.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4741,6 +7080,12 @@ ConvertGrayToColormap8(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (gamma).
+ *
+ * Notes:
+ *      (1) For 8 bpp input, this simply adds a colormap to the input image.
+ *      (2) For 16 bpp input, it first converts to 8 bpp, using the MSB,
+ *          and then adds the colormap.
+ *      (3) The colormap is modeled after the Matlab "jet" configuration.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4761,6 +7106,22 @@ ConvertGrayToFalseColor(lua_State *L)
  * Arg #2 is expected to be a l_float32 (scalex).
  * Arg #3 is expected to be a l_float32 (scaley).
  * Arg #4 is expected to be a l_int32 (order).
+ *
+ * Notes:
+ *      (1) If pixs has a colormap, it is removed to 8 bpp.
+ *      (2) For horizontal subpixel splitting, the input gray image
+ *          is rescaled by %scaley vertically and by 3.0 times
+ *          %scalex horizontally.  Then each horizontal triplet
+ *          of pixels is mapped back to a single rgb pixel, with the
+ *          r, g and b values being assigned from the triplet of gray values.
+ *          Similar operations are used for vertical subpixel splitting.
+ *      (3) This is a form of subpixel rendering that tends to give the
+ *          resulting text a sharper and somewhat chromatic display.
+ *          For horizontal subpixel splitting, the observable difference
+ *          between %order=L_SUBPIXEL_ORDER_RGB and
+ *          %order=L_SUBPIXEL_ORDER_BGR is reduced by optical diffusers
+ *          in the display that make the pixel color appear to emerge
+ *          from the entire pixel.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -4782,6 +7143,15 @@ ConvertGrayToSubpixelRGB(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) For pixs = pixd, this is in-place; otherwise pixd must be NULL.
+ *      (2) The user takes responsibility for making sure that pixs is
+ *          in our HSV space.  The definition of our HSV space is given
+ *          in convertRGBToHSV().
+ *      (3) The h, s and v values are stored in the same places as
+ *          the r, g and b values, respectively.  Here, they are explicitly
+ *          placed in the 3 MS bytes in the pixel.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -4801,6 +7171,14 @@ ConvertHSVToRGB(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (d).
+ *
+ * Notes:
+ *      (1) This is a lossless unpacking (depth-increasing)
+ *          conversion.  If ds is the depth of pixs, then
+ *           ~ if d < ds, returns NULL
+ *           ~ if d == ds, returns a copy
+ *           ~ if d > ds, does the unpacking conversion
+ *      (2) If pixs has a colormap, this is an error.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -4824,6 +7202,12 @@ ConvertLossless(lua_State *L)
  * Arg #4 is expected to be a l_float32 (bc).
  * Arg #5 is expected to be a l_int32 (thresh).
  * Arg #6 is expected to be a string describing the relation (relation).
+ *
+ * Notes:
+ *      (1) This makes a 1 bpp mask from an RGB image, using an arbitrary
+ *          linear combination of the rgb color components, along with
+ *          a threshold and a selection choice of the gray value relative
+ *          to %thresh.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4847,6 +7231,27 @@ ConvertRGBToBinaryArb(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a boolean (ditherflag).
+ *
+ * Notes:
+ *      (1) This function has two relatively simple modes of color
+ *          quantization:
+ *            (a) If the image is made orthographically and has not more
+ *                than 256 'colors' at the level 4 octcube leaves,
+ *                it is quantized nearly exactly.  The ditherflag
+ *                is ignored.
+ *            (b) Most natural images have more than 256 different colors;
+ *                in that case we use adaptive octree quantization,
+ *                with dithering if requested.
+ *      (2) If there are not more than 256 occupied level 4 octcubes,
+ *          the color in the colormap that represents all pixels in
+ *          one of those octcubes is given by the first pixel that
+ *          falls into that octcube.
+ *      (3) If there are more than 256 colors, we use adaptive octree
+ *          color quantization.
+ *      (4) Dithering gives better visual results on images where
+ *          there is a color wash (a slow variation of color), but it
+ *          is about twice as slow and results in significantly larger
+ *          files when losslessly compressed (e.g., into png).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4868,6 +7273,9 @@ ConvertRGBToColormap(lua_State *L)
  * Arg #2 is expected to be a l_float32 (rwt).
  * Arg #3 is expected to be a l_float32 (gwt).
  * Arg #4 is expected to be a l_float32 (bwt).
+ *
+ * Notes:
+ *      (1) Use a weighted average of the RGB values.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4891,6 +7299,12 @@ ConvertRGBToGray(lua_State *L)
  * Arg #2 is expected to be a l_float32 (rc).
  * Arg #3 is expected to be a l_float32 (gc).
  * Arg #4 is expected to be a l_float32 (bc).
+ *
+ * Notes:
+ *      (1) This converts to gray using an arbitrary linear combination
+ *          of the rgb color components.  It differs from pixConvertToGray(),
+ *          which uses only positive coefficients that sum to 1.
+ *      (2) The gray output values are clipped to 0 and 255.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4911,6 +7325,14 @@ ConvertRGBToGrayArb(lua_State *L)
  * \brief Convert a 32bpp Pix* (%pixs) to a gray 8bpp Pix* (%pix); fast version.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This function should be used if speed of conversion
+ *          is paramount, and the green channel can be used as
+ *          a fair representative of the RGB intensity.  It is
+ *          several times faster than pixConvertRGBToGray().
+ *      (2) To combine RGB to gray conversion with subsampling,
+ *          use pixScaleRGBToGrayFast() instead.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4929,6 +7351,15 @@ ConvertRGBToGrayFast(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string defining the min/max type (type).
+ *
+ * Notes:
+ *      (1) This chooses various components or combinations of them,
+ *          from the three RGB sample values.  In addition to choosing
+ *          the min, max, and maxdiff (difference between max and min),
+ *          this also allows boosting the min and max about a reference
+ *          value.
+ *      (2) The default reference value for boosting the min and max
+ *          is 200.  This can be changed with l_setNeutralBoostVal()
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4948,6 +7379,25 @@ ConvertRGBToGrayMinMax(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (refval).
+ *
+ * Notes:
+ *      (1) This returns the max component value, boosted by
+ *          the saturation. The maximum boost occurs where
+ *          the maximum component value is equal to some reference value.
+ *          This particular weighting is due to Dany Qumsiyeh.
+ *      (2) For gray pixels (zero saturation), this returns
+ *          the intensity of any component.
+ *      (3) For fully saturated pixels ('fullsat'), this rises linearly
+ *          with the max value and has a slope equal to 255 divided
+ *          by the reference value; for a max value greater than
+ *          the reference value, it is clipped to 255.
+ *      (4) For saturation values in between, the output is a linear
+ *          combination of (2) and (3), weighted by saturation.
+ *          It falls between these two curves, and does not exceed 255.
+ *      (5) This can be useful for distinguishing an object that has nonzero
+ *          saturation from a gray background.  For this, the refval
+ *          should be chosen near the expected value of the background,
+ *          to achieve maximum saturation boost there.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -4967,6 +7417,31 @@ ConvertRGBToGraySatBoost(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) For pixs = pixd, this is in-place; otherwise pixd must be NULL.
+ *      (2) The definition of our HSV space is given in convertRGBToHSV().
+ *      (3) The h, s and v values are stored in the same places as
+ *          the r, g and b values, respectively.  Here, they are explicitly
+ *          placed in the 3 MS bytes in the pixel.
+ *      (4) Normalizing to 1 and considering the r,g,b components,
+ *          a simple way to understand the HSV space is:
+ *           ~ v = max(r,g,b)
+ *           ~ s = (max - min) / max
+ *           ~ h ~ (mid - min) / (max - min)  [apart from signs and constants]
+ *      (5) Normalizing to 1, some properties of the HSV space are:
+ *           ~ For gray values (r = g = b) along the continuum between
+ *             black and white:
+ *                s = 0  (becoming undefined as you approach black)
+ *                h is undefined everywhere
+ *           ~ Where one component is saturated and the others are zero:
+ *                v = 1
+ *                s = 1
+ *                h = 0 (r = max), 1/3 (g = max), 2/3 (b = max)
+ *           ~ Where two components are saturated and the other is zero:
+ *                v = 1
+ *                s = 1
+ *                h = 1/2 (if r = 0), 5/6 (if g = 0), 1/6 (if b = 0)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -4985,6 +7460,13 @@ ConvertRGBToHSV(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) The conversion to HSV hue is in-lined here.
+ *      (2) If there is a colormap, it is removed.
+ *      (3) If you just want the hue component, this does it
+ *          at about 10 Mpixels/sec/GHz, which is about
+ *          2x faster than using pixConvertRGBToHSV()
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -5002,6 +7484,10 @@ ConvertRGBToHue(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) The [l,a,b] values are stored as float values in three fpix
+ *          that are returned in a fpixa.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 FPixa * on the Lua stack
@@ -5019,6 +7505,9 @@ ConvertRGBToLAB(lua_State *L)
  * \brief Convert a 32bpp Pix* (%pixs) to a luminance 8bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) Use a standard luminance conversion.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -5036,6 +7525,12 @@ ConvertRGBToLuminance(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) The conversion to HSV sat is in-lined here.
+ *      (2) If there is a colormap, it is removed.
+ *      (3) If you just want the saturation component, this does it
+ *          at about 12 Mpixels/sec/GHz.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -5053,6 +7548,12 @@ ConvertRGBToSaturation(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) The conversion to HSV sat is in-lined here.
+ *      (2) If there is a colormap, it is removed.
+ *      (3) If you just want the value component, this does it
+ *          at about 35 Mpixels/sec/GHz.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -5070,6 +7571,26 @@ ConvertRGBToValue(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) The [x,y,z] values are stored as float values in three fpix
+ *          that are returned in a fpixa.
+ *      (2) The XYZ color space was defined in 1931 as a reference model that
+ *          simulates human color perception.  When Y is taken as luminance,
+ *          the values of X and Z constitute a color plane representing
+ *          all the hues that can be perceived.  This gamut of colors
+ *          is larger than the gamuts that can be displayed or printed.
+ *          For example, although all rgb values map to XYZ, the converse
+ *          is not true.
+ *      (3) The value of the coefficients depends on the illuminant.  We use
+ *          coefficients for converting sRGB under D65 (the spectrum from
+ *          a 6500 degree K black body; an approximation to daylight color).
+ *          See, e.g.,
+ *             http://www.cs.rit.edu/~ncs/color/t_convert.html
+ *          For more general information on color transforms, see:
+ *             http://www.brucelindbloom.com/
+ *             http://user.engineering.uiowa.edu/~aip/Misc/ColorFAQ.html
+ *             http://en.wikipedia.org/wiki/CIE_1931_color_space
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 FPixa * on the Lua stack
@@ -5088,6 +7609,24 @@ ConvertRGBToXYZ(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) For pixs = pixd, this is in-place; otherwise pixd must be NULL.
+ *      (2) The Y, U and V values are stored in the same places as
+ *          the r, g and b values, respectively.  Here, they are explicitly
+ *          placed in the 3 MS bytes in the pixel.
+ *      (3) Normalizing to 1 and considering the r,g,b components,
+ *          a simple way to understand the YUV space is:
+ *           ~ Y = weighted sum of (r,g,b)
+ *           ~ U = weighted difference between Y and B
+ *           ~ V = weighted difference between Y and R
+ *      (4) Following video conventions, Y, U and V are in the range:
+ *             Y: [16, 235]
+ *             U: [16, 240]
+ *             V: [16, 240]
+ *      (5) For the coefficients in the transform matrices, see eq. 4 in
+ *          "Frequently Asked Questions about Color" by Charles Poynton,
+ *          //http://user.engineering.uiowa.edu/~aip/Misc/ColorFAQ.html
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -5107,6 +7646,13 @@ ConvertRGBToYUV(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (threshold).
+ *
+ * Notes:
+ *      (1) This is a top-level function, with simple default values
+ *          used in pixConvertTo8() if unpacking is necessary.
+ *      (2) Any existing colormap is removed.
+ *      (3) If the input image has 1 bpp and no colormap, the operation is
+ *          lossless and a copy is returned.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -5143,6 +7689,10 @@ ConvertTo16(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
  * Arg #3 is expected to be a l_int32 (threshold).
+ *
+ * Notes:
+ *      (1) This is a quick and dirty, top-level converter.
+ *      (2) See pixConvertTo1() for default values.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -5161,6 +7711,13 @@ ConvertTo1BySampling(lua_State *L)
  * \brief Convert a Pix* (%pixs) to a 2bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This is a top-level function, with simple default values
+ *          used in pixConvertTo8() if unpacking is necessary.
+ *      (2) Any existing colormap is removed; the result is always gray.
+ *      (3) If the input image has 2 bpp and no colormap, the operation is
+ *          lossless and a copy is returned.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -5177,6 +7734,9 @@ ConvertTo2(lua_State *L)
  * \brief Convert a Pix* (%pixs) to a 32bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) Never returns a clone of pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -5194,6 +7754,10 @@ ConvertTo32(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) This is a fast, quick/dirty, top-level converter.
+ *      (2) See pixConvertTo32() for default values.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -5211,6 +7775,13 @@ ConvertTo32BySampling(lua_State *L)
  * \brief Convert a Pix* (%pixs) to a 4bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This is a top-level function, with simple default values
+ *          used in pixConvertTo8() if unpacking is necessary.
+ *      (2) Any existing colormap is removed; the result is always gray.
+ *      (3) If the input image has 4 bpp and no colormap, the operation is
+ *          lossless and a copy is returned.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -5228,6 +7799,22 @@ ConvertTo4(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a boolean (cmapflag).
+ *
+ * Notes:
+ *      (1) This is a top-level function, with simple default values
+ *          for unpacking.
+ *      (2) The result, pixd, is made with a colormap if specified.
+ *          It is always a new image -- never a clone.  For example,
+ *          if d == 8, and cmapflag matches the existence of a cmap
+ *          in pixs, the operation is lossless and it returns a copy.
+ *      (3) The default values used are:
+ *          ~ 1 bpp: val0 = 255, val1 = 0
+ *          ~ 2 bpp: 4 bpp:  even increments over dynamic range
+ *          ~ 8 bpp: lossless if cmap matches cmapflag
+ *          ~ 16 bpp: use most significant byte
+ *      (4) If 32 bpp RGB, this is converted to gray.  If you want
+ *          to do color quantization, you must specify the type
+ *          explicitly, using the color quantization code.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -5247,6 +7834,10 @@ ConvertTo8(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
  * Arg #3 is expected to be a boolean (cmapflag).
+ *
+ * Notes:
+ *      (1) This is a fast, quick/dirty, top-level converter.
+ *      (2) See pixConvertTo8() for default values.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -5266,6 +7857,17 @@ ConvertTo8BySampling(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a boolean (ditherflag).
+ *
+ * Notes:
+ *      (1) This is a top-level function, with simple default values
+ *          for unpacking.
+ *      (2) The result, pixd, is always made with a colormap.
+ *      (3) If d == 8, the operation is lossless and it returns a copy.
+ *      (4) The default values used for increasing depth are:
+ *          ~ 1 bpp: val0 = 255, val1 = 0
+ *          ~ 2 bpp: 4 bpp:  even increments over dynamic range
+ *      (5) For 16 bpp, use the most significant byte.
+ *      (6) For 32 bpp RGB, use octcube quantization with optional dithering.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -5285,6 +7887,14 @@ ConvertTo8Colormap(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is exptected to be a string describing the copy/clone mode (copyflag).
  * Arg #3 is exptected to be a boolean (wanrflag).
+ *
+ * Notes:
+ *      (1) If there is a colormap, the colormap is removed to 8 or 32 bpp,
+ *          depending on whether the colors in the colormap are all gray.
+ *      (2) If the input is either rgb or 8 bpp without a colormap,
+ *          this returns either a clone or a copy, depending on %copyflag.
+ *      (3) Otherwise, the pix is converted to 8 bpp grayscale.
+ *          In all cases, pixd does not have a colormap.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -5304,6 +7914,12 @@ ConvertTo8Or32(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (ncomps).
+ *
+ * Notes:
+ *      (1) If colormapped, remove to grayscale.
+ *      (2) If 32 bpp and %ncomps == 3, this is RGB; convert to luminance.
+ *          In all other cases the src image is treated as having a single
+ *          component of pixel values.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 DPix * on the Lua stack
@@ -5323,6 +7939,12 @@ ConvertToDPix(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (ncomps).
+ *
+ * Notes:
+ *      (1) If colormapped, remove to grayscale.
+ *      (2) If 32 bpp and %ncomps == 3, this is RGB; convert to luminance.
+ *          In all other cases the src image is treated as having a single
+ *          component of pixel values.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 FPix * on the Lua stack
@@ -5349,6 +7971,13 @@ ConvertToFPix(lua_State *L)
  * Arg #7 is expected to be a l_int32 (res).
  * Arg #8 is expected to be a string (title).
  * Arg #9 is expected to be a string describing the position (position).
+ *
+ * Notes:
+ *      (1) If %res == 0 and the input resolution field is 0,
+ *          this will use DEFAULT_INPUT_RES.
+ *      (2) This only writes data to fileout if it is the last
+ *          image to be written on the page.
+ *      (3) See comments in convertToPdf().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -5384,6 +8013,13 @@ ConvertToPdf(lua_State *L)
  * Arg #6 is expected to be a l_int32 (res).
  * Arg #7 is expected to be a string (title).
  * Arg #8 is expected to be a string describing the position (position).
+ *
+ * Notes:
+ *      (1) If %res == 0 and the input resolution field is 0,
+ *          this will use DEFAULT_INPUT_RES.
+ *      (2) This only writes %data if it is the last image to be
+ *          written on the page.
+ *      (3) See comments in convertToPdf().
  * </pre>
  * \param L pointer to the lua_State
  * \return 2 lstring (%data, %nbytes) and PdfData* (%lpd) on the Lua stack
@@ -5422,6 +8058,9 @@ ConvertToPdfData(lua_State *L)
  * Arg #6 is expected to be a l_int32 (quality).
  * Arg #7 is expected to be a l_float32 (scalefactor).
  * Arg #8 is expected to be a string (title).
+ *
+ * Notes:
+ *      (1) See convertToPdfSegmented() for details.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -5458,6 +8097,9 @@ ConvertToPdfDataSegmented(lua_State *L)
  * Arg #7 is expected to be a l_float32 (scalefactor).
  * Arg #8 is expected to be a string (title).
  * Arg #9 is expected to be a string (fileout).
+ *
+ * Notes:
+ *      (1) See convertToPdfSegmented() for details.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -5485,6 +8127,21 @@ ConvertToPdfSegmented(lua_State *L)
  * Arg #2 is expected to be a l_float32 (scalex).
  * Arg #3 is expected to be a l_float32 (scaley).
  * Arg #4 is expected to be a l_int32 (order).
+ *
+ * Notes:
+ *      (1) If pixs has a colormap, it is removed based on its contents
+ *          to either 8 bpp gray or rgb.
+ *      (2) For horizontal subpixel splitting, the input image
+ *          is rescaled by %scaley vertically and by 3.0 times
+ *          %scalex horizontally.  Then each horizontal triplet
+ *          of pixels is mapped back to a single rgb pixel, with the
+ *          r, g and b values being assigned based on the pixel triplet.
+ *          For gray triplets, the r, g, and b values are set equal to
+ *          the three gray values.  For color triplets, the r, g and b
+ *          values are set equal to the components from the appropriate
+ *          subpixel.  Vertical subpixel splitting is handled similarly.
+ *      (3) See pixConvertGrayToSubpixelRGB() and
+ *          pixConvertColorToSubpixelRGB() for further details.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -5506,6 +8163,14 @@ ConvertToSubpixelRGB(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) For pixs = pixd, this is in-place; otherwise pixd must be NULL.
+ *      (2) The user takes responsibility for making sure that pixs is
+ *          in YUV space.
+ *      (3) The Y, U and V values are stored in the same places as
+ *          the r, g and b values, respectively.  Here, they are explicitly
+ *          placed in the 3 MS bytes in the pixel.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -5527,6 +8192,38 @@ ConvertYUVToRGB(lua_State *L)
  * Arg #2 is expected to be a Kernel* (kel).
  * Arg #3 is expected to be a l_int32 (outdepth).
  * Arg #4 is expected to be a l_int32 (normflag).
+ *
+ * Notes:
+ *      (1) This gives a convolution with an arbitrary kernel.
+ *      (2) The input pixs must have only one sample/pixel.
+ *          To do a convolution on an RGB image, use pixConvolveRGB().
+ *      (3) The parameter %outdepth determines the depth of the result.
+ *          If the kernel is normalized to unit sum, the output values
+ *          can never exceed 255, so an output depth of 8 bpp is sufficient.
+ *          If the kernel is not normalized, it may be necessary to use
+ *          16 or 32 bpp output to avoid overflow.
+ *      (4) If normflag == 1, the result is normalized by scaling all
+ *          kernel values for a unit sum.  If the sum of kernel values
+ *          is very close to zero, the kernel can not be normalized and
+ *          the convolution will not be performed.  A warning is issued.
+ *      (5) The kernel values can be positive or negative, but the
+ *          result for the convolution can only be stored as a positive
+ *          number.  Consequently, if it goes negative, the choices are
+ *          to clip to 0 or take the absolute value.  We're choosing
+ *          to take the absolute value.  (Another possibility would be
+ *          to output a second unsigned image for the negative values.)
+ *          If you want to get a clipped result, or to keep the negative
+ *          values in the result, use fpixConvolve(), with the
+ *          converters in fpix2.c between pix and fpix.
+ *      (6) This uses a mirrored border to avoid special casing on
+ *          the boundaries.
+ *      (7) To get a subsampled output, call l_setConvolveSampling().
+ *          The time to make a subsampled output is reduced by the
+ *          product of the sampling factors.
+ *      (8) The function is slow, running at about 12 machine cycles for
+ *          each pixel-op in the convolution.  For example, with a 3 GHz
+ *          cpu, a 1 Mpixel grayscale image, and a kernel with
+ *          (sx * sy) = 25 elements, the convolution takes about 100 msec.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -5548,6 +8245,21 @@ Convolve(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Kernel* (kel).
+ *
+ * Notes:
+ *      (1) This gives a convolution on an RGB image using an
+ *          arbitrary kernel (which we normalize to keep each
+ *          component within the range [0 ... 255].
+ *      (2) The input pixs must be RGB.
+ *      (3) The kernel values can be positive or negative, but the
+ *          result for the convolution can only be stored as a positive
+ *          number.  Consequently, if it goes negative, we clip the
+ *          result to 0.
+ *      (4) To get a subsampled output, call l_setConvolveSampling().
+ *          The time to make a subsampled output is reduced by the
+ *          product of the sampling factors.
+ *      (5) This uses a mirrored border to avoid special casing on
+ *          the boundaries.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -5568,6 +8280,22 @@ ConvolveRGB(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Kernel* (kelx).
  * Arg #3 is expected to be a Kernel* (kely).
+ *
+ * Notes:
+ *      (1) This does a convolution on an RGB image using a separable
+ *          kernel that is a sequence of convolutions in x and y.  The two
+ *          one-dimensional kernel components must be input separately;
+ *          the full kernel is the product of these components.
+ *          The support for the full kernel is thus a rectangular region.
+ *      (2) The kernel values can be positive or negative, but the
+ *          result for the convolution can only be stored as a positive
+ *          number.  Consequently, if it goes negative, we clip the
+ *          result to 0.
+ *      (3) To get a subsampled output, call l_setConvolveSampling().
+ *          The time to make a subsampled output is reduced by the
+ *          product of the sampling factors.
+ *      (4) This uses a mirrored border to avoid special casing on
+ *          the boundaries.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -5591,6 +8319,37 @@ ConvolveRGBSep(lua_State *L)
  * Arg #3 is expected to be a Kernel* (kely).
  * Arg #4 is expected to be a l_int32 (outdepth).
  * Arg #5 is expected to be a l_int32 (normflag).
+ *
+ * Notes:
+ *      (1) This does a convolution with a separable kernel that is
+ *          is a sequence of convolutions in x and y.  The two
+ *          one-dimensional kernel components must be input separately;
+ *          the full kernel is the product of these components.
+ *          The support for the full kernel is thus a rectangular region.
+ *      (2) The input pixs must have only one sample/pixel.
+ *          To do a convolution on an RGB image, use pixConvolveSepRGB().
+ *      (3) The parameter %outdepth determines the depth of the result.
+ *          If the kernel is normalized to unit sum, the output values
+ *          can never exceed 255, so an output depth of 8 bpp is sufficient.
+ *          If the kernel is not normalized, it may be necessary to use
+ *          16 or 32 bpp output to avoid overflow.
+ *      (2) The %normflag parameter is used as in pixConvolve().
+ *      (4) The kernel values can be positive or negative, but the
+ *          result for the convolution can only be stored as a positive
+ *          number.  Consequently, if it goes negative, the choices are
+ *          to clip to 0 or take the absolute value.  We're choosing
+ *          the former for now.  Another possibility would be to output
+ *          a second unsigned image for the negative values.
+ *      (5) Warning: if you use l_setConvolveSampling() to get a
+ *          subsampled output, and the sampling factor is larger than
+ *          the kernel half-width, it is faster to use the non-separable
+ *          version pixConvolve().  This is because the first convolution
+ *          here must be done on every raster line, regardless of the
+ *          vertical sampling factor.  If the sampling factor is smaller
+ *          than kernel half-width, it's faster to use the separable
+ *          convolution.
+ *      (6) This uses mirrored borders to avoid special casing on
+ *          the boundaries.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -5615,6 +8374,24 @@ ConvolveSep(lua_State *L)
  * Arg #2 is expected to be a Kernel* (kel1).
  * Arg #3 is expected to be a Kernel* (kel2).
  * Arg #4 is expected to be a l_int32 (force8).
+ *
+ * Notes:
+ *      (1) This does a convolution with either a single kernel or
+ *          a pair of separable kernels, and automatically applies whatever
+ *          bias (shift) is required so that the resulting pixel values
+ *          are non-negative.
+ *      (2) The kernel is always normalized.  If there are no negative
+ *          values in the kernel, a standard normalized convolution is
+ *          performed, with 8 bpp output.  If the sum of kernel values is
+ *          very close to zero, the kernel can not be normalized and
+ *          the convolution will not be performed.  An error message results.
+ *      (3) If there are negative values in the kernel, the pix is
+ *          converted to an fpix, the convolution is done on the fpix, and
+ *          a bias (shift) may need to be applied.
+ *      (4) If force8 == TRUE and the range of values after the convolution
+ *          is > 255, the output values will be scaled to fit in [0 ... 255].
+ *          If force8 == FALSE, the output will be either 8 or 16 bpp,
+ *          to accommodate the dynamic range of output values without scaling.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -5638,6 +8415,26 @@ ConvolveWithBias(lua_State *L)
  * \brief Copy a Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
+ *
+ * Notes:
+ *      (1) There are three cases:
+ *            (a) pixd == null  (makes a new pix; refcount = 1)
+ *            (b) pixd == pixs  (no-op)
+ *            (c) pixd != pixs  (data copy; no change in refcount)
+ *          If the refcount of pixd > 1, case (c) will side-effect
+ *          these handles.
+ *      (2) The general pattern of use is:
+ *             pixd = pixCopy(pixd, pixs);
+ *          This will work for all three cases.
+ *          For clarity when the case is known, you can use:
+ *            (a) pixd = pixCopy(NULL, pixs);
+ *            (c) pixCopy(pixd, pixs);
+ *      (3) For case (c), we check if pixs and pixd are the same
+ *          size (w,h,d).  If so, the data is copied directly.
+ *          Otherwise, the data is reallocated to the correct size
+ *          and the copy proceeds.  The refcount of pixd is unchanged.
+ *      (4) This operation, like all others that may involve a pre-existing
+ *          pixd, will side-effect any existing clones of pixd.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -5659,6 +8456,15 @@ Copy(lua_State *L)
  * Arg #3 is expected to be a l_int32 (right).
  * Arg #4 is expected to be a l_int32 (top).
  * Arg #5 is expected to be a l_int32 (bottom).
+ *
+ * Notes:
+ *      (1) pixd can be null, but otherwise it must be the same size
+ *          and depth as pixs.  Always returns pixd.
+ *      (2) This is useful in situations where by setting a few border
+ *          pixels we can avoid having to copy all pixels in pixs into
+ *          pixd as an initialization step for some operation.
+ *          Nevertheless, for safety, if making a new pixd, all the
+ *          non-border pixels are initialized to 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -5682,6 +8488,10 @@ CopyBorder(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This always destroys any colormap in pixd (except if
+ *          the operation is a no-op.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -5737,6 +8547,10 @@ CopyInputFormat(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a string with the component name (comp).
+ *
+ * Notes:
+ *      (1) The two images are registered to the UL corner.  The sizes
+ *          are usually the same, and a warning is issued if they differ.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -5810,6 +8624,19 @@ CopyText(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix1).
  * Arg #2 is expected to be a Pix* (pix2).
+ *
+ * Notes:
+ *      (1) The correlation is a number between 0.0 and 1.0,
+ *          based on foreground similarity:
+ *                           (|1 AND 2|)**2
+ *            correlation =  --------------
+ *                             |1| * |2|
+ *          where |x| is the count of foreground pixels in image x.
+ *          If the images are identical, this is 1.0.
+ *          If they have no fg pixels in common, this is 0.0.
+ *          If one or both images have no fg pixels, the correlation is 0.0.
+ *      (2) Typically the two images are of equal size, but this
+ *          is not enforced.  Instead, the UL corners are aligned.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -5838,6 +8665,55 @@ CorrelationBinary(lua_State *L)
  * Arg #6 is expected to be a l_float32 (dely).
  * Arg #7 is expected to be a l_int32 (maxdiffw).
  * Arg #8 is expected to be a l_int32 (maxdiffh).
+ *
+ * Notes:
+ *  We check first that the two pix are roughly the same size.
+ *  For jbclass (jbig2) applications at roughly 300 ppi, maxdiffw and
+ *  maxdiffh should be at least 2.
+ *
+ *  Only if they meet that criterion do we compare the bitmaps.
+ *  The centroid difference is used to align the two images to the
+ *  nearest integer for the correlation.
+ *
+ *  The correlation score is the ratio of the square of the number of
+ *  pixels in the AND of the two bitmaps to the product of the number
+ *  of ON pixels in each.  Denote the number of ON pixels in pix1
+ *  by |1|, the number in pix2 by |2|, and the number in the AND
+ *  of pix1 and pix2 by |1 & 2|.  The correlation score is then
+ *  (|1 & 2|)**2 / (|1|*|2|).
+ *
+ *  This score is compared with an input threshold, which can
+ *  be modified depending on the weight of the template.
+ *  The modified threshold is
+ *     thresh + (1.0 - thresh) * weight * R
+ *  where
+ *     weight is a fixed input factor between 0.0 and 1.0
+ *     R = |2| / area(2)
+ *  and area(2) is the total number of pixels in 2 (i.e., width x height).
+ *
+ *  To understand why a weight factor is useful, consider what happens
+ *  with thick, sans-serif characters that look similar and have a value
+ *  of R near 1.  Different characters can have a high correlation value,
+ *  and the classifier will make incorrect substitutions.  The weight
+ *  factor raises the threshold for these characters.
+ *
+ *  Yet another approach to reduce such substitutions is to run the classifier
+ *  in a non-greedy way, matching to the template with the highest
+ *  score, not the first template with a score satisfying the matching
+ *  constraint.  However, this is not particularly effective.
+ *
+ *  The implementation here gives the same result as in
+ *  pixCorrelationScoreSimple(), where a temporary Pix is made to hold
+ *  the AND and implementation uses rasterop:
+ *      pixt = pixCreateTemplate(pix1);
+ *      pixRasterop(pixt, idelx, idely, wt, ht, PIX_SRC, pix2, 0, 0);
+ *      pixRasterop(pixt, 0, 0, wi, hi, PIX_SRC & PIX_DST, pix1, 0, 0);
+ *      pixCountPixels(pixt, &count, tab);
+ *      pixDestroy(&pixt);
+ *  However, here it is done in a streaming fashion, counting as it goes,
+ *  and touching memory exactly once, giving a 3-4x speedup over the
+ *  simple implementation.  This very fast correlation matcher was
+ *  contributed by William Rucklidge.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -5872,6 +8748,24 @@ CorrelationScore(lua_State *L)
  * Arg #4 is expected to be a l_int32 (area2).
  * Arg #5 is expected to be a l_int32 (delx).
  * Arg #6 is expected to be a l_int32 (dely).
+ *
+ * Notes:
+ *      (1) This finds the correlation between two 1 bpp images,
+ *          when pix2 is shifted by (delx, dely) with respect
+ *          to each other.
+ *      (2) This is implemented by starting with a copy of pix1 and
+ *          ANDing its pixels with those of a shifted pix2.
+ *      (3) Get the pixel counts for area1 and area2 using piCountPixels().
+ *      (4) A good estimate for a shift that would maximize the correlation
+ *          is to align the centroids (cx1, cy1; cx2, cy2), giving the
+ *          relative translations etransx and etransy:
+ *             etransx = cx1 - cx2
+ *             etransy = cy1 - cy2
+ *          Typically delx is chosen to be near etransx; ditto for dely.
+ *          This function is used in pixBestCorrelation(), where the
+ *          translations delx and dely are varied to find the best alignment.
+ *      (5) We do not check the sizes of pix1 and pix2, because they should
+ *          be comparable.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -5906,6 +8800,12 @@ CorrelationScoreShifted(lua_State *L)
  * Arg #6 is expected to be a l_float32 (dely).
  * Arg #7 is expected to be a l_int32 (maxdiffw).
  * Arg #8 is expected to be a l_int32 (maxdiffh).
+ *
+ * Notes:
+ *      (1) This calculates exactly the same value as pixCorrelationScore().
+ *          It is 2-3x slower, but much simpler to understand.
+ *      (2) The returned correlation score is 0.0 if the width or height
+ *          exceed %maxdiffw or %maxdiffh.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -5943,6 +8843,41 @@ CorrelationScoreSimple(lua_State *L)
  * Arg #7 is expected to be a l_int32 (maxdiffw).
  * Arg #8 is expected to be a l_int32 (maxdiffh).
  * Arg #11 is expected to be a l_float32 (score_threshold).
+ *
+ * Notes:
+ *  We check first that the two pix are roughly the same size.
+ *  Only if they meet that criterion do we compare the bitmaps.
+ *  The centroid difference is used to align the two images to the
+ *  nearest integer for the correlation.
+ *
+ *  The correlation score is the ratio of the square of the number of
+ *  pixels in the AND of the two bitmaps to the product of the number
+ *  of ON pixels in each.  Denote the number of ON pixels in pix1
+ *  by |1|, the number in pix2 by |2|, and the number in the AND
+ *  of pix1 and pix2 by |1 & 2|.  The correlation score is then
+ *  (|1 & 2|)**2 / (|1|*|2|).
+ *
+ *  This score is compared with an input threshold, which can
+ *  be modified depending on the weight of the template.
+ *  The modified threshold is
+ *     thresh + (1.0 - thresh) * weight * R
+ *  where
+ *     weight is a fixed input factor between 0.0 and 1.0
+ *     R = |2| / area(2)
+ *  and area(2) is the total number of pixels in 2 (i.e., width x height).
+ *
+ *  To understand why a weight factor is useful, consider what happens
+ *  with thick, sans-serif characters that look similar and have a value
+ *  of R near 1.  Different characters can have a high correlation value,
+ *  and the classifier will make incorrect substitutions.  The weight
+ *  factor raises the threshold for these characters.
+ *
+ *  Yet another approach to reduce such substitutions is to run the classifier
+ *  in a non-greedy way, matching to the template with the highest
+ *  score, not the first template with a score satisfying the matching
+ *  constraint.  However, this is not particularly effective.
+ *
+ *  This very fast correlation matcher was contributed by William Rucklidge.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -5976,6 +8911,12 @@ CorrelationScoreThresholded(lua_State *L)
  * Arg #2 is expected to be a l_int32 (val).
  * Arg #3 is expected to be a l_int32 (factor).
  * Arg #4 is an optional Box* (box).
+ *
+ * Notes:
+ *      (1) If pixs is cmapped, %val is compared to the colormap index;
+ *          otherwise, %val is compared to the grayscale value.
+ *      (2) Set the subsampling %factor > 1 to reduce the amount of computation.
+ *          If %factor > 1, multiply the count by %factor * %factor.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -5999,6 +8940,10 @@ CountArbInRect(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a Box* (box).
+ *
+ * Notes:
+ *      (1) To resample for a bin size different from 1, use
+ *          numaUniformSampling() on the result of this function.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa * on the Lua stack
@@ -6018,6 +8963,10 @@ CountByColumn(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a Box* (box).
+ *
+ * Notes:
+ *      (1) To resample for a bin size different from 1, use
+ *          numaUniformSampling() on the result of this function.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa * on the Lua stack
@@ -6172,6 +9121,15 @@ CountRGBColors(lua_State *L)
  * Arg #3 is expected to be a l_float32 (peakfract).
  * Arg #4 is expected to be a l_float32 (clipfract).
  * Arg #5 is expected to be a Pixa* (pixadb).
+ *
+ * Notes:
+ *      (1) It is assumed that pixs has the correct resolution set.
+ *          If the resolution is 0, we set to 300 and issue a warning.
+ *      (2) If necessary, the image is scaled to between 37 and 75 ppi;
+ *          most of the processing is done at this resolution.
+ *      (3) If no text is found (essentially a blank page),
+ *          this returns ncols = 0.
+ *      (4) For debug output, input a pre-allocated pixa.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -6190,6 +9148,33 @@ CountTextColumns(lua_State *L)
         return ll_push_nil(L);
     ll_push_l_int32(_fun, L, ncols);
     return 1;
+}
+
+/**
+ * \brief Create a new Pix*.
+ * <pre>
+ * Arg #1 is expected to be Pix*.
+ * or
+ * Arg #1 is expected to be a l_int32 (width).
+ * Arg #2 is expected to be a l_int32 (height).
+ * Arg #3 is optional and expected to be a l_int32 (depth; default = 1).
+ * or
+ * Arg #1 is expected to be a string (filename).
+ * or
+ * No Arg creates a 1x1 1bpp Pix*
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    LL_FUNC("Create");
+    l_int32 width = ll_opt_l_int32(_fun, L, 1, 1);
+    l_int32 height = ll_opt_l_int32(_fun, L, 2, 1);
+    l_int32 depth = ll_opt_l_int32(_fun, L, 3, 1);
+    Pix *pix = pixCreate(width, height, depth);
+    return ll_push_Pix(_fun, L, pix);
 }
 
 /**
@@ -6215,6 +9200,17 @@ CreateFromPixcomp(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a l_int32 (width).
  * Arg #2 is expected to be a l_int32 (height).
  * Arg #3 is expected to be a l_int32 (depth).
+ *
+ * Notes:
+ *      (1) It is assumed that all 32 bit pix have 3 spp.  If there is
+ *          a valid alpha channel, this will be set to 4 spp later.
+ *      (2) If the number of bytes to be allocated is larger than the
+ *          maximum value in an int32, we can get overflow, resulting
+ *          in a smaller amount of memory actually being allocated.
+ *          Later, an attempt to access memory that wasn't allocated will
+ *          cause a crash.  So to avoid crashing a program (or worse)
+ *          with bad (or malicious) input, this is where we limit the
+ *          requested allocation of image data in a typesafe way.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -6240,6 +9236,10 @@ CreateHeader(lua_State *L)
  * Arg #3 is optional and expected to be a l_int32 (depth; default = 1).
  * or
  * No Arg creates a 1x1 1bpp uninitialized Pix*.
+ *
+ * Notes:
+ *      (1) Must set pad bits to avoid reading unitialized data, because
+ *          some optimized routines (e.g., pixConnComp()) read from pad bits.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -6269,6 +9269,18 @@ CreateNoInit(lua_State *L)
  * Arg #1 is expected to be a Pix* (pixr).
  * Arg #2 is expected to be a Pix* (pixg).
  * Arg #3 is expected to be a Pix* (pixb).
+ *
+ * Notes:
+ *      (1) the 4th byte, sometimes called the "alpha channel",
+ *          and which is often used for blending between different
+ *          images, is left with 0 value.
+ *      (2) see Note (4) in pix.h for details on storage of
+ *          8-bit samples within each 32-bit word.
+ *      (3) This implementation, setting the r, g and b components
+ *          sequentially, is much faster than setting them in parallel
+ *          by constructing an RGB dest pixel and writing it to dest.
+ *          The reason is there are many more cache misses when reading
+ *          from 3 input images simultaneously.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* (pixd) on the Lua stack
@@ -6294,6 +9306,11 @@ CreateRGBImage(lua_State *L)
  * Arg #3 is optional and expected to be a l_int32 (depth; default = 1).
  * or
  * No Arg creates a 1x1 1bpp uninitialized Pix*.
+ *
+ * Notes:
+ *      (1) Makes a Pix of the same size as the input Pix, with the
+ *          data array allocated and initialized to 0.
+ *      (2) Copies the other fields, including colormap if it exists.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -6317,6 +9334,11 @@ CreateTemplate(lua_State *L)
  * Arg #3 is optional and expected to be a l_int32 (depth; default = 1).
  * or
  * No Arg creates a 1x1 1bpp uninitialized Pix*.
+ *
+ * Notes:
+ *      (1) Makes a Pix of the same size as the input Pix, with
+ *          the data array allocated but not initialized to 0.
+ *      (2) Copies the other fields, including colormap if it exists.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -6336,6 +9358,11 @@ CreateTemplateNoInit(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix1).
  * Arg #2 is expected to be a Pix* (pix2).
  * Arg #3 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) This finds the maximum crop boxes for two 8 bpp images when
+ *          their centroids of their photometric inverses are aligned.
+ *          Black pixels have weight 255; white pixels have weight 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -6361,6 +9388,12 @@ CropAlignedToCentroid(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs1).
  * Arg #2 is expected to be a Pix* (pixs2).
+ *
+ * Notes:
+ *      (1) This resizes pixs1 and/or pixs2 by cropping at the right
+ *          and bottom, so that they're the same size.
+ *      (2) If a pix doesn't need to be cropped, a clone is returned.
+ *      (3) Note: the images are implicitly aligned to the UL corner.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -6386,6 +9419,11 @@ CropToMatch(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (w).
  * Arg #3 is expected to be a l_int32 (h).
+ *
+ * Notes:
+ *      (1) If either w or h is smaller than the corresponding dimension
+ *          of pixs, this returns a cropped image; otherwise it returns
+ *          a clone of pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -6408,6 +9446,19 @@ CropToSize(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (thresh).
  * Arg #4 is expected to be a l_int32 (satlimit).
+ *
+ * Notes:
+ *      (1) This darkens gray pixels, by a fraction (sat/%satlimit), where
+ *          the sat, the saturation, is the component difference (max - min).
+ *          The pixel value is unchanged if sat >= %satlimit.  A typical
+ *          value of %satlimit might be 50; the larger the value, the
+ *          more that pixels with a smaller saturation will be darkened.
+ *      (2) Pixels with max component >= %thresh are unchanged. This can be
+ *          used to prevent bright pixels with low saturation from being
+ *          darkened.  Setting thresh == 0 is a no-op; setting %thresh == 255
+ *          causes the darkening to be applied to all pixels.
+ *      (3) This function is useful to enhance pixels relative to a
+ *          gray background.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -6433,6 +9484,20 @@ DarkenGray(lua_State *L)
  * Arg #4 is expected to be a l_int32 (ny).
  * Arg #5 is expected to be a l_float32 (thresh).
  * Arg #6 is expected to be a Pixa* (pixadebug).
+ *
+ * Notes:
+ *      (1) The input image must be 8 bpp (no colormap), and padded with
+ *          white pixels so the centroid of photo-inverted pixels is at
+ *          the center of the image.
+ *      (2) If the pix is not almost certainly a photoimage, the returned
+ *          histograms (%naa) are null.
+ *      (3) If histograms are generated, the white (255) count is set
+ *          to 0.  This removes all pixels values above 230, including
+ *          white padding from the centroid matching operation, from
+ *          consideration.  The resulting histograms are then normalized
+ *          so the maximum count is 255.
+ *      (4) Default for %thresh is 1.3; this seems sufficiently conservative.
+ *      (5) Use %pixadebug == NULL unless debug output is requested.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -6461,6 +9526,36 @@ DecideIfPhotoImage(lua_State *L)
  * Arg #2 is expected to be a Box* (box).
  * Arg #3 is expected to be a l_int32 (orient).
  * Arg #5 is expected to be a Pixa* (pixadb).
+ *
+ * Notes:
+ *      (1) It is assumed that pixs has the correct resolution set.
+ *          If the resolution is 0, we assume it is 300 ppi and issue a warning.
+ *      (2) If %orient == L_LANDSCAPE_MODE, the image is rotated 90 degrees
+ *          clockwise before being analyzed.
+ *      (3) The interpretation of the returned score:
+ *            -1     undetermined
+ *             0     no table
+ *             1     unlikely to have a table
+ *             2     likely to have a table
+ *             3     even more likely to have a table
+ *             4     extremely likely to have a table
+ *          * Setting the condition for finding a table at score >= 2 works
+ *            well, except for false positives on kanji and landscape text.
+ *          * These false positives can be removed by setting the condition
+ *            at score >= 3, but recall is lowered because it will not find
+ *            tables without either horizontal or vertical lines.
+ *      (4) Most of the processing takes place at 75 ppi.
+ *      (5) Internally, three numbers are determined, for horizontal and
+ *          vertical fg lines, and for vertical bg lines.  From these,
+ *          four tests are made to decide if there is a table occupying
+ *          a significant part of the image.
+ *      (6) Images have arbitrary content and would be likely to trigger
+ *          this detector, so they are checked for first, and if found,
+ *          return with a 0 (no table) score.
+ *      (7) Musical scores (tablature) are likely to trigger the detector.
+ *      (8) Tables of content with more than 2 columns are likely to
+ *          trigger the detector.
+ *      (9) For debug output, input a pre-allocated pixa.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -6486,6 +9581,20 @@ DecideIfTable(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Box* (box).
  * Arg #4 is expected to be a Pixa* (pixadb).
+ *
+ * Notes:
+ *      (1) It is assumed that pixs has the correct resolution set.
+ *          If the resolution is 0, we set to 300 and issue a warning.
+ *      (2) If necessary, the image is scaled to 300 ppi; most of the
+ *          processing is done at this resolution.
+ *      (3) Text is assumed to be in horizontal lines.
+ *      (4) Because thin vertical lines are removed before filtering for
+ *          text lines, this should identify tables as text.
+ *      (5) If %box is null and pixs contains both text lines and line art,
+ *          this function might return %istext == true.
+ *      (6) If the input pixs is empty, or for some other reason the
+ *          result can not be determined, return -1.
+ *      (7) For debug output, input a pre-allocated pixa.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -6509,6 +9618,10 @@ DecideIfText(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a constl_uint32* (data).
  * Arg #2 is expected to be a size_t (nbytes).
+ *
+ * Notes:
+ *      (1) See pixSerializeToMemory() for the binary format.
+ *      (2) Note the image size limits.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -6529,6 +9642,13 @@ DeserializeFromMemory(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (redsearch).
+ *
+ * Notes:
+ *      (1) This binarizes if necessary and finds the skew angle.  If the
+ *          angle is large enough and there is sufficient confidence,
+ *          it returns a deskewed image; otherwise, it returns a clone.
+ *      (2) Typical values at 300 ppi for %redsearch are 2 and 4.
+ *          At 75 ppi, one should use %redsearch = 1.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -6551,6 +9671,10 @@ Deskew(lua_State *L)
  * Arg #3 is expected to be a Box* (box).
  * Arg #4 is expected to be a l_int32 (margin).
  * Arg #5 is expected to be a l_int32 (threshold).
+ *
+ * Notes:
+ *     (1) The (optional) angle returned is the angle in degrees (cw positive)
+ *         necessary to rotate the image so that it is deskewed.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -6578,6 +9702,12 @@ DeskewBarcode(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (redsearch).
+ *
+ * Notes:
+ *      (1) This binarizes if necessary and does both horizontal
+ *          and vertical deskewing, using the default parameters in
+ *          the underlying pixDeskew().  See usage there.
+ *      (2) This may return a clone.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -6601,6 +9731,11 @@ DeskewBoth(lua_State *L)
  * Arg #4 is expected to be a l_float32 (sweepdelta).
  * Arg #5 is expected to be a l_int32 (redsearch).
  * Arg #6 is expected to be a l_int32 (thresh).
+ *
+ * Notes:
+ *      (1) This binarizes if necessary and finds the skew angle.  If the
+ *          angle is large enough and there is sufficient confidence,
+ *          it returns a deskewed image; otherwise, it returns a clone.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -6634,6 +9769,24 @@ DeskewGeneral(lua_State *L)
  * Arg #5 is expected to be a l_float32 (sweeprange).
  * Arg #6 is expected to be a l_float32 (sweepdelta).
  * Arg #7 is expected to be a l_float32 (minbsdelta).
+ *
+ * Notes:
+ *      (1) This function allows deskew of a page whose skew changes
+ *          approximately linearly with vertical position.  It uses
+ *          a projective transform that in effect does a differential
+ *          shear about the LHS of the page, and makes all text lines
+ *          horizontal.
+ *      (2) The origin of the keystoning can be either a cheap document
+ *          feeder that rotates the page as it is passed through, or a
+ *          camera image taken from either the left or right side
+ *          of the vertical.
+ *      (3) The image transformation is a projective warping,
+ *          not a rotation.  Apart from this function, the text lines
+ *          must be properly aligned vertically with respect to each
+ *          other.  This can be done by pre-processing the page; e.g.,
+ *          by rotating or horizontally shearing it.
+ *          Typically, this can be achieved by vertically aligning
+ *          the page edge.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -6678,6 +9831,18 @@ DestroyColormap(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Sel* (sel).
+ *
+ * Notes:
+ *      (1) This dilates src using hits in Sel.
+ *      (2) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (3) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixDilate(NULL, pixs, ...);
+ *          (b) pixDilate(pixs, pixs, ...);
+ *          (c) pixDilate(pixd, pixs, ...);
+ *      (4) The size of the result is determined by pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -6700,6 +9865,20 @@ Dilate(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) Sel is a brick with all elements being hits
+ *      (2) The origin is at (x, y) = (hsize/2, vsize/2)
+ *      (3) Do separably if both hsize and vsize are > 1.
+ *      (4) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (5) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixDilateBrick(NULL, pixs, ...);
+ *          (b) pixDilateBrick(pixs, pixs, ...);
+ *          (c) pixDilateBrick(pixd, pixs, ...);
+ *      (6) The size of the result is determined by pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -6723,6 +9902,28 @@ DilateBrick(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
+ *
+ *          dwamorph2_reg.c.  (Note: because this was a regression test,
+ *          dwamorph1_reg also builds and runs the application program.)
+ * Notes:
+ *      (1) These implement 2D brick Sels, using linear Sels generated
+ *          with selaAddBasic().
+ *      (2) A brick Sel has hits for all elements.
+ *      (3) The origin of the Sel is at (x, y) = (hsize/2, vsize/2)
+ *      (4) Do separably if both hsize and vsize are > 1.
+ *      (5) It is necessary that both horizontal and vertical Sels
+ *          of the input size are defined in the basic sela.
+ *      (6) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (7) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixDilateBrickDwa(NULL, pixs, ...);
+ *          (b) pixDilateBrickDwa(pixs, pixs, ...);
+ *          (c) pixDilateBrickDwa(pixd, pixs, ...);
+ *      (8) The size of pixd is determined by pixs.
+ *      (9) If either linear Sel is not found, this calls
+ *          the appropriate decomposible function.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -6746,6 +9947,34 @@ DilateBrickDwa(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) Sel is a brick with all elements being hits
+ *      (2) The origin is at (x, y) = (hsize/2, vsize/2)
+ *      (3) Do compositely for each dimension > 1.
+ *      (4) Do separably if both hsize and vsize are > 1.
+ *      (5) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (6) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixDilateCompBrick(NULL, pixs, ...);
+ *          (b) pixDilateCompBrick(pixs, pixs, ...);
+ *          (c) pixDilateCompBrick(pixd, pixs, ...);
+ *      (7) The dimensions of the resulting image are determined by pixs.
+ *      (8) CAUTION: both hsize and vsize are being decomposed.
+ *          The decomposer chooses a product of sizes (call them
+ *          'terms') for each that is close to the input size,
+ *          but not necessarily equal to it.  It attempts to optimize:
+ *             (a) for consistency with the input values: the product
+ *                 of terms is close to the input size
+ *             (b) for efficiency of the operation: the sum of the
+ *                 terms is small; ideally about twice the square
+ *                 root of the input size.
+ *          So, for example, if the input hsize = 37, which is
+ *          a prime number, the decomposer will break this into two
+ *          terms, 6 and 6, so that the net result is a dilation
+ *          with hsize = 36.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -6769,6 +9998,38 @@ DilateCompBrick(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) These implement a separable composite dilation with 2D brick Sels.
+ *      (2) For efficiency, it may decompose each linear morphological
+ *          operation into two (brick + comb).
+ *      (3) A brick Sel has hits for all elements.
+ *      (4) The origin of the Sel is at (x, y) = (hsize/2, vsize/2)
+ *      (5) Do separably if both hsize and vsize are > 1.
+ *      (6) It is necessary that both horizontal and vertical Sels
+ *          of the input size are defined in the basic sela.
+ *      (7) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (8) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixDilateCompBrickDwa(NULL, pixs, ...);
+ *          (b) pixDilateCompBrickDwa(pixs, pixs, ...);
+ *          (c) pixDilateCompBrickDwa(pixd, pixs, ...);
+ *      (9) The size of pixd is determined by pixs.
+ *      (10) CAUTION: both hsize and vsize are being decomposed.
+ *          The decomposer chooses a product of sizes (call them
+ *          'terms') for each that is close to the input size,
+ *           but not necessarily equal to it.  It attempts to optimize:
+ *              (a) for consistency with the input values: the product
+ *                  of terms is close to the input size
+ *              (b) for efficiency of the operation: the sum of the
+ *                  terms is small; ideally about twice the square
+ *                   root of the input size.
+ *           So, for example, if the input hsize = 37, which is
+ *           a prime number, the decomposer will break this into two
+ *           terms, 6 and 6, so that the net result is a dilation
+ *           with hsize = 36.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -6792,6 +10053,24 @@ DilateCompBrickDwa(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) Ankur Jain suggested and implemented extending the composite
+ *          DWA operations beyond the 63 pixel limit.  This is a
+ *          simplified and approximate implementation of the extension.
+ *          This allows arbitrary Dwa morph operations using brick Sels,
+ *          by decomposing the horizontal and vertical dilations into
+ *          a sequence of 63-element dilations plus a dilation of size
+ *          between 3 and 62.
+ *      (2) The 63-element dilations are exact, whereas the extra dilation
+ *          is approximate, because the underlying decomposition is
+ *          in pixDilateCompBrickDwa().  See there for further details.
+ *      (3) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (4) There is no need to call this directly:  pixDilateCompBrickDwa()
+ *          calls this function if either brick dimension exceeds 63.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -6814,6 +10093,10 @@ DilateCompBrickExtendDwa(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (hsize).
  * Arg #3 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) Sel is a brick with all elements being hits
+ *      (2) If hsize = vsize = 1, just returns a copy.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -6835,6 +10118,10 @@ DilateGray(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (hsize).
  * Arg #3 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) Special case for 1x3, 3x1 or 3x3 brick sel (all hits)
+ *      (2) If hsize = vsize = 1, just returns a copy.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -6856,6 +10143,36 @@ DilateGray3(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (x).
  * Arg #3 is expected to be a l_int32 (y).
+ *
+ * Notes:
+ *      (1) This is debugging code that displays an image on the screen.
+ *          It uses a static internal variable to number the output files
+ *          written by a single process.  Behavior with a shared library
+ *          may be unpredictable.
+ *      (2) It does nothing unless LeptDebugOK == TRUE.
+ *      (3) It uses these programs to display the image:
+ *             On Unix: xzgv, xli or xv
+ *             On Windows: i_view
+ *          The display program must be on your $PATH variable.  It is
+ *          chosen by setting the global var_DISPLAY_PROG, using
+ *          l_chooseDisplayProg().  Default on Unix is xzgv.
+ *      (4) Images with dimensions larger than MAX_DISPLAY_WIDTH or
+ *          MAX_DISPLAY_HEIGHT are downscaled to fit those constraints.
+ *          This is particularly important for displaying 1 bpp images
+ *          with xv, because xv automatically downscales large images
+ *          by subsampling, which looks poor.  For 1 bpp, we use
+ *          scale-to-gray to get decent-looking anti-aliased images.
+ *          In all cases, we write a temporary file to /tmp/lept/disp,
+ *          that is read by the display program.
+ *      (5) The temporary file is written as png if, after initial
+ *          processing for special cases, any of these obtain:
+ *            * pix dimensions are smaller than some thresholds
+ *            * pix depth is less than 8 bpp
+ *            * pix is colormapped
+ *      (6) For spp == 4, we call pixDisplayLayersRGBA() to show 3
+ *          versions of the image: the image with a fully opaque
+ *          alpha, the alpha, and the image as it would appear with
+ *          a white background.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -6906,6 +10223,16 @@ DisplayColorArray(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix1).
  * Arg #2 is expected to be a Pix* (pix2).
+ *
+ * Notes:
+ *      (1) This gives a color representation of the difference between
+ *          pix1 and pix2.  The color difference depends on the order.
+ *          The pixels in pixd have 4 colors:
+ *           * unchanged:  black (on), white (off)
+ *           * on in pix1, off in pix2: red
+ *           * on in pix2, off in pix1: green
+ *      (2) This aligns the UL corners of pix1 and pix2, and crops
+ *          to the overlapping pixels.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -6928,6 +10255,11 @@ DisplayDiffBinary(lua_State *L)
  * Arg #3 is expected to be a l_int32 (scalefactor).
  * Arg #4 is expected to be a l_uint32 (hitcolor).
  * Arg #5 is expected to be a l_uint32 (misscolor).
+ *
+ * Notes:
+ *    (1) We don't allow scalefactor to be larger than MAX_SEL_SCALEFACTOR
+ *    (2) The colors are conveniently given as 4 bytes in hex format,
+ *        such as 0xff008800.  The least significant byte is ignored.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -6951,6 +10283,13 @@ DisplayHitMissSel(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (val).
  * Arg #3 is expected to be a l_int32 (maxw).
+ *
+ * Notes:
+ *      (1) Use %val == 0xffffff00 for white background.
+ *      (2) Three views are given:
+ *           ~ the image with a fully opaque alpha
+ *           ~ the alpha layer
+ *           ~ the image as it would appear with a white background.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* (pixd) on the Lua stack
@@ -6977,6 +10316,18 @@ DisplayLayersRGBA(lua_State *L)
  * Arg #6 is expected to be a l_uint32 (color).
  * Arg #7 is expected to be a l_float32 (scale).
  * Arg #8 is expected to be a l_int32 (nlevels).
+ *
+ * Notes:
+ *    (1) A 4 bpp colormapped image is generated.
+ *    (2) If scale <= 1.0, do scale to gray for the output, and threshold
+ *        to nlevels of gray.
+ *    (3) You can use various functions in selgen to create a Sel
+ *        that will generate pixe from pixs.
+ *    (4) This function is applied after pixe has been computed.
+ *        It finds the centroid of each c.c., and colors the output
+ *        pixels using pixp (appropriately aligned) as a stencil.
+ *        Alignment is done using the origin of the Sel and the
+ *        centroid of the eroded image to place the stencil pixp.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -7003,6 +10354,15 @@ DisplayMatchedPattern(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Pta* (pta).
+ *
+ * Notes:
+ *      (1) To write on an existing pixs, pixs must be 32 bpp and
+ *          call with pixd == pixs:
+ *             pixDisplayPta(pixs, pixs, pta);
+ *          To write to a new pix, use pixd == NULL and call:
+ *             pixd = pixDisplayPta(NULL, pixs, pta);
+ *      (2) On error, returns pixd to avoid losing pixs if called as
+ *             pixs = pixDisplayPta(pixs, pixs, pta);
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -7028,6 +10388,17 @@ DisplayPta(lua_State *L)
  * Arg #5 is expected to be a l_int32 (cx).
  * Arg #6 is expected to be a l_int32 (cy).
  * Arg #7 is expected to be a l_uint32 (color).
+ *
+ * Notes:
+ *      (1) To write on an existing pixs, pixs must be 32 bpp and
+ *          call with pixd == pixs:
+ *             pixDisplayPtaPattern(pixs, pixs, pta, ...);
+ *          To write to a new pix, use pixd == NULL and call:
+ *             pixd = pixDisplayPtaPattern(NULL, pixs, pta, ...);
+ *      (2) On error, returns pixd to avoid losing pixs if called as
+ *             pixs = pixDisplayPtaPattern(pixs, pixs, pta, ...);
+ *      (3) A typical pattern to be used is a circle, generated with
+ *             generatePtaFilledCircle()
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -7075,6 +10446,18 @@ DisplayPtaa(lua_State *L)
  * Arg #4 is expected to be a Pix* (pixp).
  * Arg #5 is expected to be a l_int32 (cx).
  * Arg #6 is expected to be a l_int32 (cy).
+ *
+ * Notes:
+ *      (1) To write on an existing pixs, pixs must be 32 bpp and
+ *          call with pixd == pixs:
+ *             pixDisplayPtaPattern(pixs, pixs, pta, ...);
+ *          To write to a new pix, use pixd == NULL and call:
+ *             pixd = pixDisplayPtaPattern(NULL, pixs, pta, ...);
+ *      (2) Puts a random color on each pattern associated with a pta.
+ *      (3) On error, returns pixd to avoid losing pixs if called as
+ *             pixs = pixDisplayPtaPattern(pixs, pixs, pta, ...);
+ *      (4) A typical pattern to be used is a circle, generated with
+ *             generatePtaFilledCircle()
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -7101,6 +10484,10 @@ DisplayPtaaPattern(lua_State *L)
  * Arg #3 is expected to be a l_int32 (y).
  * Arg #4 is expected to be a string (title).
  * Arg #5 is expected to be a l_int32 (dispflag).
+ *
+ * Notes:
+ *      (1) See notes for pixDisplay().
+ *      (2) This displays the image if dispflag == 1; otherwise it punts.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -7127,6 +10514,24 @@ DisplayWithTitle(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (reduction).
+ *
+ * Notes:
+ *      (0) Deprecated.
+ *      (1) This is a simple interface for writing a set of files.
+ *      (2) This uses jpeg output for pix that are 32 bpp or 8 bpp
+ *          without a colormap; otherwise, it uses png.
+ *      (3) To erase any previously written files in the output directory:
+ *             pixDisplayWrite(NULL, -1);
+ *      (4) If reduction > 1 and depth == 1, this does a scale-to-gray
+ *          reduction.
+ *      (5) This function uses a static internal variable to number
+ *          output files written by a single process.  Behavior
+ *          with a shared library may be unpredictable.
+ *      (6) For 16 bpp, this displays the full dynamic range with log scale.
+ *          Alternative image transforms to generate 8 bpp pix are:
+ *             pix8 = pixMaxDynamicRange(pixt, L_LINEAR_SCALE);
+ *             pix8 = pixConvert16To8(pixt, 0);  // low order byte
+ *             pix8 = pixConvert16To8(pixt, 1);  // high order byte
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -7147,6 +10552,38 @@ DisplayWrite(lua_State *L)
  * Arg #2 is expected to be a l_int32 (connectivity).
  * Arg #3 is expected to be a l_int32 (outdepth).
  * Arg #4 is expected to be a l_int32 (boundcond).
+ *
+ * Notes:
+ *      (1) This computes the distance of each pixel from the nearest
+ *          background pixel.  All bg pixels therefore have a distance of 0,
+ *          and the fg pixel distances increase linearly from 1 at the
+ *          boundary.  It can also be used to compute the distance of
+ *          each pixel from the nearest fg pixel, by inverting the input
+ *          image before calling this function.  Then all fg pixels have
+ *          a distance 0 and the bg pixel distances increase linearly
+ *          from 1 at the boundary.
+ *      (2) The algorithm, described in Leptonica on the page on seed
+ *          filling and connected components, is due to Luc Vincent.
+ *          In brief, we generate an 8 or 16 bpp image, initialized
+ *          with the fg pixels of the input pix set to 1 and the
+ *          1-boundary pixels (i.e., the boundary pixels of width 1 on
+ *          the four sides set as either:
+ *            * L_BOUNDARY_BG: 0
+ *            * L_BOUNDARY_FG:  max
+ *          where max = 0xff for 8 bpp and 0xffff for 16 bpp.
+ *          Then do raster/anti-raster sweeps over all pixels interior
+ *          to the 1-boundary, where the value of each new pixel is
+ *          taken to be 1 more than the minimum of the previously-seen
+ *          connected pixels (using either 4 or 8 connectivity).
+ *          Finally, set the 1-boundary pixels using the mirrored method;
+ *          this removes the max values there.
+ *      (3) Using L_BOUNDARY_BG clamps the distance to 0 at the
+ *          boundary.  Using L_BOUNDARY_FG allows the distance
+ *          at the image boundary to "float".
+ *      (4) For 4-connected, one could initialize only the left and top
+ *          1-boundary pixels, and go all the way to the right
+ *          and bottom; then coming back reset left and top.  But we
+ *          instead use a method that works for both 4- and 8-connected.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -7189,6 +10626,13 @@ DitherTo2bpp(lua_State *L)
  * Arg #2 is expected to be a l_int32 (lowerclip).
  * Arg #3 is expected to be a l_int32 (upperclip).
  * Arg #4 is expected to be a l_int32 (cmapflag).
+ *
+ * Notes:
+ *      (1) See comments above in pixDitherTo2bpp() for details.
+ *      (2) The input parameters lowerclip and upperclip specify the range
+ *          of lower and upper values (near 0 and 255, rsp) that are
+ *          clipped to black and white without propagating the excess.
+ *          For that reason, lowerclip and upperclip should be small numbers.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -7228,6 +10672,13 @@ DitherToBinary(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (lowerclip).
  * Arg #3 is expected to be a l_int32 (upperclip).
+ *
+ * Notes:
+ *      (1) See comments above in pixDitherToBinary() for details.
+ *      (2) The input parameters lowerclip and upperclip specify the range
+ *          of lower and upper values (near 0 and 255, rsp) that are
+ *          clipped to black and white without propagating the excess.
+ *          For that reason, lowerclip and upperclip should be small numbers.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -7250,6 +10701,11 @@ DitherToBinarySpec(lua_State *L)
  * Arg #2 is expected to be a Boxa* (boxa).
  * Arg #3 is expected to be a l_int32 (width).
  * Arg #4 is expected to be a l_uint32 (val).
+ *
+ * Notes:
+ *      (1) If pixs is 1 bpp or is colormapped, it is converted to 8 bpp
+ *          and the boxa is drawn using a colormap; otherwise,
+ *          it is converted to 32 bpp rgb.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -7272,6 +10728,12 @@ DrawBoxa(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Boxa* (boxa).
  * Arg #3 is expected to be a l_int32 (width).
+ *
+ * Notes:
+ *      (1) If pixs is 1 bpp, we draw the boxa using a colormap;
+ *          otherwise, we convert to 32 bpp.
+ *      (2) We use up to 254 different colors for drawing the boxes.
+ *      (3) If boxes overlap, the later ones draw over earlier ones.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -7295,6 +10757,36 @@ DrawBoxaRandom(lua_State *L)
  * Arg #3 is expected to be a l_int32 (incolor).
  * Arg #4 is expected to be a l_int32 (width).
  * Arg #5 is expected to be a l_int32 (height).
+ *
+ * Notes:
+ *      (1) For very small rotations, just return a clone.
+ *      (2) Generate larger image to embed pixs if necessary, and
+ *          place the center of the input image in the center.
+ *      (3) Rotation brings either white or black pixels in
+ *          from outside the image.  For colormapped images where
+ *          there is no white or black, a new color is added if
+ *          possible for these pixels; otherwise, either the
+ *          lightest or darkest color is used.  In most cases,
+ *          the colormap will be removed prior to rotation.
+ *      (4) The dest is to be expanded so that no image pixels
+ *          are lost after rotation.  Input of the original width
+ *          and height allows the expansion to stop at the maximum
+ *          required size, which is a square with side equal to
+ *          sqrt(w*w + h*h).
+ *      (5) For an arbitrary angle, the expansion can be found by
+ *          considering the UL and UR corners.  As the image is
+ *          rotated, these move in an arc centered at the center of
+ *          the image.  Normalize to a unit circle by dividing by half
+ *          the image diagonal.  After a rotation of T radians, the UL
+ *          and UR corners are at points T radians along the unit
+ *          circle.  Compute the x and y coordinates of both these
+ *          points and take the max of absolute values; these represent
+ *          the half width and half height of the containing rectangle.
+ *          The arithmetic is done using formulas for sin(a+b) and cos(a+b),
+ *          where b = T.  For the UR corner, sin(a) = h/d and cos(a) = w/d.
+ *          For the UL corner, replace a by (pi - a), and you have
+ *          sin(pi - a) = h/d, cos(pi - a) = -w/d.  The equations
+ *          given below follow directly.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -7316,6 +10808,20 @@ EmbedForRotation(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This is used on little-endian platforms to swap
+ *          the bytes within a word; bytes 0 and 3 are swapped,
+ *          and bytes 1 and 2 are swapped.
+ *      (2) This is required for little-endians in situations
+ *          where we convert from a serialized byte order that is
+ *          in raster order, as one typically has in file formats,
+ *          to one with MSB-to-the-left in each 32-bit word, or v.v.
+ *          See pix.h for a description of the canonical format
+ *          (MSB-to-the left) that is used for both little-endian
+ *          and big-endian platforms.   For big-endians, the
+ *          MSB-to-the-left word order has the bytes in raster
+ *          order when serialized, so no byte flipping is required.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -7332,6 +10838,22 @@ EndianByteSwap(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This is used to convert the data in a pix to a
+ *          serialized byte buffer in raster order, and, for RGB,
+ *          in order RGBA.  This requires flipping bytes within
+ *          each 32-bit word for little-endian platforms, because the
+ *          words have a MSB-to-the-left rule, whereas byte raster-order
+ *          requires the left-most byte in each word to be byte 0.
+ *          For big-endians, no swap is necessary, so this returns a clone.
+ *      (2) Unlike pixEndianByteSwap(), which swaps the bytes in-place,
+ *          this returns a new pix (or a clone).  We provide this
+ *          because often when serialization is done, the source
+ *          pix needs to be restored to canonical little-endian order,
+ *          and this requires a second byte swap.  In such a situation,
+ *          it is twice as fast to make a new pix in big-endian order,
+ *          use it, and destroy it.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -7349,6 +10871,13 @@ EndianByteSwapNew(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This is used on little-endian platforms to swap the
+ *          2-byte entities within a 32-bit word.
+ *      (2) This is equivalent to a full byte swap, as performed
+ *          by pixEndianByteSwap(), followed by byte swaps in
+ *          each of the 16-bit entities separately.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -7365,6 +10894,17 @@ EndianTwoByteSwap(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This is used on little-endian platforms to swap the
+ *          2-byte entities within a 32-bit word.
+ *      (2) This is equivalent to a full byte swap, as performed
+ *          by pixEndianByteSwap(), followed by byte swaps in
+ *          each of the 16-bit entities separately.
+ *      (3) Unlike pixEndianTwoByteSwap(), which swaps the shorts in-place,
+ *          this returns a new pix (or a clone).  We provide this
+ *          to avoid having to swap twice in situations where the input
+ *          pix must be restored to canonical little-endian order.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -7383,6 +10923,26 @@ EndianTwoByteSwapNew(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix1).
  * Arg #2 is expected to be a Pix* (pix2).
+ *
+ * Notes:
+ *      (1) Equality is defined as having the same pixel values for
+ *          each respective image pixel.
+ *      (2) This works on two pix of any depth.  If one or both pix
+ *          have a colormap, the depths can be different and the
+ *          two pix can still be equal.
+ *      (3) This ignores the alpha component for 32 bpp images.
+ *      (4) If both pix have colormaps and the depths are equal,
+ *          use the pixEqualWithCmap() function, which does a fast
+ *          comparison if the colormaps are identical and a relatively
+ *          slow comparison otherwise.
+ *      (5) In all other cases, any existing colormaps must first be
+ *          removed before doing pixel comparison.  After the colormaps
+ *          are removed, the resulting two images must have the same depth.
+ *          The "lowest common denominator" is RGB, but this is only
+ *          chosen when necessary, or when both have colormaps but
+ *          different depths.
+ *      (6) For images without colormaps that are not 32 bpp, all bits
+ *          in the image part of the data array must be identical.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -7406,6 +10966,12 @@ Equal(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix1).
  * Arg #2 is expected to be a Pix* (pix2).
  * Arg #3 is expected to be a l_int32 (use_alpha).
+ *
+ * Notes:
+ *      (1) See notes in pixEqual().
+ *      (2) This is more general than pixEqual(), in that for 32 bpp
+ *          RGBA images, where spp = 4, you can optionally include
+ *          the alpha component in the comparison.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -7429,6 +10995,16 @@ EqualWithAlpha(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix1).
  * Arg #2 is expected to be a Pix* (pix2).
+ *
+ * Notes:
+ *      (1) This returns same = TRUE if the images have identical content.
+ *      (2) Both pix must have a colormap, and be of equal size and depth.
+ *          If these conditions are not satisfied, it is not an error;
+ *          the returned result is same = FALSE.
+ *      (3) We then check whether the colormaps are the same; if so,
+ *          the comparison proceeds 32 bits at a time.
+ *      (4) If the colormaps are different, the comparison is done by
+ *          slow brute force.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -7453,6 +11029,28 @@ EqualWithCmap(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_float32 (fract).
  * Arg #4 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) pixd must either be null or equal to pixs.
+ *          For in-place operation, set pixd == pixs:
+ *             pixEqualizeTRC(pixs, pixs, ...);
+ *          To get a new image, set pixd == null:
+ *             pixd = pixEqualizeTRC(NULL, pixs, ...);
+ *      (2) In histogram equalization, a tone reproduction curve
+ *          mapping is used to make the number of pixels at each
+ *          intensity equal.
+ *      (3) If fract == 0.0, no equalization is performed; return a copy
+ *          unless in-place, in which case this is a no-op.
+ *          If fract == 1.0, equalization is complete.
+ *      (4) Set the subsampling factor > 1 to reduce the amount of computation.
+ *      (5) If pixs is colormapped, the colormap is removed and
+ *          converted to rgb or grayscale.
+ *      (6) If pixs has color, equalization is done in each channel
+ *          separately.
+ *      (7) Note that even if there is a colormap, we can get an
+ *          in-place operation because the intermediate image pixt
+ *          is copied back to pixs (which for in-place is the same
+ *          as pixd).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -7475,6 +11073,18 @@ EqualizeTRC(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Sel* (sel).
+ *
+ * Notes:
+ *      (1) This erodes src using hits in Sel.
+ *      (2) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (3) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixErode(NULL, pixs, ...);
+ *          (b) pixErode(pixs, pixs, ...);
+ *          (c) pixErode(pixd, pixs, ...);
+ *      (4) The size of the result is determined by pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -7497,6 +11107,20 @@ Erode(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) Sel is a brick with all elements being hits
+ *      (2) The origin is at (x, y) = (hsize/2, vsize/2)
+ *      (3) Do separably if both hsize and vsize are > 1.
+ *      (4) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (5) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixErodeBrick(NULL, pixs, ...);
+ *          (b) pixErodeBrick(pixs, pixs, ...);
+ *          (c) pixErodeBrick(pixd, pixs, ...);
+ *      (6) The size of the result is determined by pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -7520,6 +11144,29 @@ ErodeBrick(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) These implement 2D brick Sels, using linear Sels generated
+ *          with selaAddBasic().
+ *      (2) A brick Sel has hits for all elements.
+ *      (3) The origin of the Sel is at (x, y) = (hsize/2, vsize/2)
+ *      (4) Do separably if both hsize and vsize are > 1.
+ *      (5) It is necessary that both horizontal and vertical Sels
+ *          of the input size are defined in the basic sela.
+ *      (6) Note that we must always set or clear the border pixels
+ *          before each operation, depending on the the b.c.
+ *          (symmetric or asymmetric).
+ *      (7) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (8) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixErodeBrickDwa(NULL, pixs, ...);
+ *          (b) pixErodeBrickDwa(pixs, pixs, ...);
+ *          (c) pixErodeBrickDwa(pixd, pixs, ...);
+ *      (9) The size of the result is determined by pixs.
+ *      (10) If either linear Sel is not found, this calls
+ *           the appropriate decomposible function.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -7543,6 +11190,34 @@ ErodeBrickDwa(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) Sel is a brick with all elements being hits
+ *      (2) The origin is at (x, y) = (hsize/2, vsize/2)
+ *      (3) Do compositely for each dimension > 1.
+ *      (4) Do separably if both hsize and vsize are > 1.
+ *      (5) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (6) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixErodeCompBrick(NULL, pixs, ...);
+ *          (b) pixErodeCompBrick(pixs, pixs, ...);
+ *          (c) pixErodeCompBrick(pixd, pixs, ...);
+ *      (7) The dimensions of the resulting image are determined by pixs.
+ *      (8) CAUTION: both hsize and vsize are being decomposed.
+ *          The decomposer chooses a product of sizes (call them
+ *          'terms') for each that is close to the input size,
+ *          but not necessarily equal to it.  It attempts to optimize:
+ *             (a) for consistency with the input values: the product
+ *                 of terms is close to the input size
+ *             (b) for efficiency of the operation: the sum of the
+ *                 terms is small; ideally about twice the square
+ *                 root of the input size.
+ *          So, for example, if the input hsize = 37, which is
+ *          a prime number, the decomposer will break this into two
+ *          terms, 6 and 6, so that the net result is a dilation
+ *          with hsize = 36.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -7566,6 +11241,38 @@ ErodeCompBrick(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) These implement a separable composite erosion with 2D brick Sels.
+ *      (2) For efficiency, it may decompose each linear morphological
+ *          operation into two (brick + comb).
+ *      (3) A brick Sel has hits for all elements.
+ *      (4) The origin of the Sel is at (x, y) = (hsize/2, vsize/2)
+ *      (5) Do separably if both hsize and vsize are > 1.
+ *      (6) It is necessary that both horizontal and vertical Sels
+ *          of the input size are defined in the basic sela.
+ *      (7) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (8) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixErodeCompBrickDwa(NULL, pixs, ...);
+ *          (b) pixErodeCompBrickDwa(pixs, pixs, ...);
+ *          (c) pixErodeCompBrickDwa(pixd, pixs, ...);
+ *      (9) The size of pixd is determined by pixs.
+ *      (10) CAUTION: both hsize and vsize are being decomposed.
+ *          The decomposer chooses a product of sizes (call them
+ *          'terms') for each that is close to the input size,
+ *           but not necessarily equal to it.  It attempts to optimize:
+ *              (a) for consistency with the input values: the product
+ *                  of terms is close to the input size
+ *              (b) for efficiency of the operation: the sum of the
+ *                  terms is small; ideally about twice the square
+ *                   root of the input size.
+ *           So, for example, if the input hsize = 37, which is
+ *           a prime number, the decomposer will break this into two
+ *           terms, 6 and 6, so that the net result is a dilation
+ *           with hsize = 36.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -7589,6 +11296,11 @@ ErodeCompBrickDwa(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) See pixDilateCompBrickExtendDwa() for usage.
+ *      (2) There is no need to call this directly:  pixErodeCompBrickDwa()
+ *          calls this function if either brick dimension exceeds 63.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -7611,6 +11323,10 @@ ErodeCompBrickExtendDwa(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (hsize).
  * Arg #3 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) Sel is a brick with all elements being hits
+ *      (2) If hsize = vsize = 1, just returns a copy.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -7632,6 +11348,15 @@ ErodeGray(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (hsize).
  * Arg #3 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) Special case for 1x3, 3x1 or 3x3 brick sel (all hits)
+ *      (2) If hsize = vsize = 1, just returns a copy.
+ *      (3) It would be nice not to add a border, but it is required
+ *          if we want the same results as from the general case.
+ *          We add 4 bytes on the left to speed up the copying, and
+ *          8 bytes at the right and bottom to allow unrolling of
+ *          the computation of 8 pixels.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -7653,6 +11378,9 @@ ErodeGray3(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (darkthresh).
  * Arg #3 is expected to be a l_float32 (edgecrop).
+ *
+ * Notes:
+ *      (1) Caller should check that return bg value is > 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -7736,6 +11464,9 @@ ExpandReplicate(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (addw).
  * Arg #3 is expected to be a l_int32 (addh).
+ *
+ * Notes:
+ *      (1) The pixel values are extended to the left and down, as required.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -7779,6 +11510,14 @@ ExtractBarcodeCrossings(lua_State *L)
  * Arg #2 is expected to be a l_float32 (thresh).
  * Arg #3 is expected to be a l_float32 (binfract).
  * Arg #6 is expected to be a l_int32 (debugflag).
+ *
+ * Notes:
+ *     (1) The widths are alternating black/white, starting with black
+ *         and ending with black.
+ *     (2) This method uses the widths of the bars directly, in terms
+ *         of the (float) number of pixels between transitions.
+ *         The histograms of these widths for black and white bars is
+ *         generated and interpreted.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa * on the Lua stack
@@ -7806,6 +11545,18 @@ ExtractBarcodeWidths1(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (thresh).
  * Arg #5 is expected to be a l_int32 (debugflag).
+ *
+ * Notes:
+ *      (1) The widths are alternating black/white, starting with black
+ *          and ending with black.
+ *      (2) The optional best decoding window width is the width of the window
+ *          that is used to make a decision about whether a transition occurs.
+ *          It is approximately the average width in pixels of the narrowest
+ *          white and black bars (i.e., those corresponding to unit width).
+ *      (3) The optional return signal %nac is a sequence of 0s, 1s,
+ *          and perhaps a few 2s, giving the number of crossings in each window.
+ *          On the occasion where there is a '2', it is interpreted as
+ *          as ending two runs: the previous one and another one that has length 1.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa * on the Lua stack
@@ -7869,6 +11620,10 @@ ExtractBorderConnComps(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (type).
+ *
+ * Notes:
+ *      (1) Extracts the fg or bg boundary pixels for each component.
+ *          Components are assumed to end at the boundary of pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -7911,6 +11666,16 @@ ExtractData(lua_State *L)
  * Arg #4 is expected to be a l_int32 (x2).
  * Arg #5 is expected to be a l_int32 (y2).
  * Arg #6 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) Input end points are clipped to the pix.
+ *      (2) If the line is either horizontal, or closer to horizontal
+ *          than to vertical, the points will be extracted from left
+ *          to right in the pix.  Likewise, if the line is vertical,
+ *          or closer to vertical than to horizontal, the points will
+ *          be extracted from top to bottom.
+ *      (3) Can be used with numaCountReverals(), for example, to
+ *          characterize the intensity smoothness along a line.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa * on the Lua stack
@@ -7938,6 +11703,28 @@ ExtractOnLine(lua_State *L)
  * Arg #4 is expected to be a l_int32 (adjw).
  * Arg #5 is expected to be a l_int32 (adjh).
  * Arg #6 is expected to be a Pixa* (pixadb).
+ *
+ * Notes:
+ *      (1) This function assumes that textlines have sufficient
+ *          vertical separation and small enough skew so that a
+ *          horizontal dilation sufficient to join words will not join
+ *          textlines.  It aggressively joins textlines across multiple
+ *          columns, so if that is not desired, you must either (a) make
+ *          sure that %pixs is a single column of text or (b) use instead
+ *          pixExtractTextlines(), which is more conservative
+ *          about joining text fragments that have vertical overlap.
+ *      (2) This first removes components from pixs that are either
+ *          very wide (> %maxw) or very tall (> %maxh).
+ *      (3) For reasonable accuracy, the resolution of pixs should be
+ *          at least 100 ppi.  For reasonable efficiency, the resolution
+ *          should not exceed 600 ppi.
+ *      (4) This can be used to determine if some region of a scanned
+ *          image is horizontal text.
+ *      (5) As an example, for a pix with resolution 300 ppi, a reasonable
+ *          set of parameters is:
+ *             pixExtractRawTextlines(pix, 150, 150, 0, 0, NULL);
+ *      (6) The output pixa is composed of subimages, one for each textline,
+ *          and the boxa in the pixa tells where in %pixs each textline goes.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pixa * on the Lua stack
@@ -7967,6 +11754,34 @@ ExtractRawTextlines(lua_State *L)
  * Arg #6 is expected to be a l_int32 (adjw).
  * Arg #7 is expected to be a l_int32 (adjh).
  * Arg #8 is expected to be a Pixa* (pixadb).
+ *
+ * Notes:
+ *      (1) This function assumes that textline fragments have sufficient
+ *          vertical separation and small enough skew so that a
+ *          horizontal dilation sufficient to join words will not join
+ *          textlines.  It does not guarantee that horizontally adjacent
+ *          textline fragments on the same line will be joined.
+ *      (2) For images with multiple columns, it attempts to avoid joining
+ *          textlines across the space between columns.  If that is not
+ *          a concern, you can also use pixExtractRawTextlines(),
+ *          which will join them with alacrity.
+ *      (3) This first removes components from pixs that are either
+ *          wide (> %maxw) or tall (> %maxh).
+ *      (4) A final filtering operation removes small components, such
+ *          that width < %minw or height < %minh.
+ *      (5) For reasonable accuracy, the resolution of pixs should be
+ *          at least 100 ppi.  For reasonable efficiency, the resolution
+ *          should not exceed 600 ppi.
+ *      (6) This can be used to determine if some region of a scanned
+ *          image is horizontal text.
+ *      (7) As an example, for a pix with resolution 300 ppi, a reasonable
+ *          set of parameters is:
+ *             pixExtractTextlines(pix, 150, 150, 36, 20, 5, 5, NULL);
+ *          The defaults minw and minh for 300 ppi are about 36 and 20,
+ *          so the same result is obtained with:
+ *             pixExtractTextlines(pix, 150, 150, 0, 0, 5, 5, NULL);
+ *      (8) The output pixa is composed of subimages, one for each textline,
+ *          and the boxa in the pixa tells where in %pixs each textline goes.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pixa * on the Lua stack
@@ -7990,10 +11805,119 @@ ExtractTextlines(lua_State *L)
 /**
  * \brief Brief comment goes here.
  * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
+ * Arg #2 is expected to be a Pix* (pixs).
+ * Arg #3 is expected to be a string (selname).
+ *
+ * Notes:
+ *      (1) This is a dwa implementation of the hit-miss transform
+ *          on pixs by the sel.
+ *      (2) The sel must be limited in size to not more than 31 pixels
+ *          about the origin.  It must have at least one hit, and it
+ *          can have any number of misses.
+ *      (3) This handles all required setting of the border pixels
+ *          before erosion and dilation.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix * on the Lua stack
+ */
+static int
+FHMTGen_1(lua_State *L)
+{
+    LL_FUNC("FHMTGen_1");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
+    const char *selname = ll_check_string(_fun, L, 3);
+    Pix *pix = pixFHMTGen_1(pixd, pixs, selname);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
+ * Arg #2 is expected to be a Pix* (pixs).
+ * Arg #3 is expected to be a l_int32 (operation).
+ * Arg #4 is expected to be a char* (selname).
+ *
+ * Notes:
+ *      (1) This is a dwa operation, and the Sels must be limited in
+ *          size to not more than 31 pixels about the origin.
+ *      (2) A border of appropriate size (32 pixels, or 64 pixels
+ *          for safe closing with asymmetric b.c.) must be added before
+ *          this function is called.
+ *      (3) This handles all required setting of the border pixels
+ *          before erosion and dilation.
+ *      (4) The closing operation is safe; no pixels can be removed
+ *          near the boundary.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix * on the Lua stack
+ */
+static int
+FMorphopGen_1(lua_State *L)
+{
+    LL_FUNC("FMorphopGen_1");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
+    l_int32 operation = ll_check_l_int32(_fun, L, 3);
+    const char *name = ll_check_string(_fun, L, 4);
+    /* XXX: deconstify */
+    char *selname = reinterpret_cast<char *>(reinterpret_cast<l_intptr_t>(name));
+    Pix *pix = pixFMorphopGen_1(pixd, pixs, operation, selname);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
+ * Arg #2 is expected to be a Pix* (pixs).
+ * Arg #3 is expected to be a l_int32 (operation).
+ * Arg #4 is expected to be a char* (selname).
+ *
+ * Notes:
+ *      (1) This is a dwa operation, and the Sels must be limited in
+ *          size to not more than 31 pixels about the origin.
+ *      (2) A border of appropriate size (32 pixels, or 64 pixels
+ *          for safe closing with asymmetric b.c.) must be added before
+ *          this function is called.
+ *      (3) This handles all required setting of the border pixels
+ *          before erosion and dilation.
+ *      (4) The closing operation is safe; no pixels can be removed
+ *          near the boundary.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix * on the Lua stack
+ */
+static int
+FMorphopGen_2(lua_State *L)
+{
+    LL_FUNC("FMorphopGen_2");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
+    l_int32 operation = ll_check_l_int32(_fun, L, 3);
+    const char *name = ll_check_string(_fun, L, 4);
+    char *selname = reinterpret_cast<char *>(reinterpret_cast<l_intptr_t>(name));
+    Pix *pix = pixFMorphopGen_2(pixd, pixs, operation, selname);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pix* (pixb).
  * Arg #3 is expected to be a l_float32 (factor).
  * Arg #4 is expected to be a l_int32 (type).
+ *
+ * Notes:
+ *      (1) This function combines two pix aligned to the UL corner; they
+ *          need not be the same size.
+ *      (2) Each pixel in pixb is multiplied by 'factor' divided by 255, and
+ *          clipped to the range [0 ... 1].  This gives the fade fraction
+ *          to be appied to pixs.  Fade either to white (L_BLEND_TO_WHITE)
+ *          or to black (L_BLEND_TO_BLACK).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -8017,6 +11941,22 @@ FadeWithGray(lua_State *L)
  * Arg #2 is expected to be a l_int32 (xsize).
  * Arg #3 is expected to be a l_int32 (ysize).
  * Arg #4 is expected to be a l_int32 (type).
+ *
+ * Notes:
+ *      (1) Don't be fooled. This is NOT a tophat.  It is a tophat-like
+ *          operation, where the result is similar to what you'd get
+ *          if you used an erosion instead of an opening, or a dilation
+ *          instead of a closing.
+ *      (2) Instead of opening or closing at full resolution, it does
+ *          a fast downscale/minmax operation, then a quick small smoothing
+ *          at low res, a replicative expansion of the "background"
+ *          to full res, and finally a removal of the background level
+ *          from the input image.  The smoothing step may not be important.
+ *      (3) It does not remove noise as well as a tophat, but it is
+ *          5 to 10 times faster.
+ *          If you need the preciseness of the tophat, don't use this.
+ *      (4) The L_TOPHAT_WHITE flag emphasizes small bright regions,
+ *          whereas the L_TOPHAT_BLACK flag emphasizes small dark regions.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -8043,6 +11983,32 @@ FastTophat(lua_State *L)
  * Arg #5 is expected to be a l_int32 (darkthresh).
  * Arg #6 is expected to be a l_int32 (lightthresh).
  * Arg #7 is expected to be a l_int32 (diffthresh).
+ *
+ * Notes:
+ *      (1) This is the "few colors" version of pixMedianCutQuantMixed().
+ *          It fails (returns NULL) if it finds more than maxncolors, but
+ *          otherwise it gives the same result.
+ *      (2) Recommended input parameters are:
+ *              %maxncolors:  20
+ *              %darkthresh:  20
+ *              %lightthresh: 244
+ *              %diffthresh:  15  (any higher can miss colors differing
+ *                                 slightly from gray)
+ *      (3) Both ncolor and ngray should be at least equal to maxncolors.
+ *          If they're not, they are automatically increased, and a
+ *          warning is given.
+ *      (4) If very little color content is found, the input is
+ *          converted to gray and quantized in equal intervals.
+ *      (5) This can be useful for quantizing orthographically generated
+ *          images such as color maps, where there may be more than 256 colors
+ *          because of aliasing or jpeg artifacts on text or lines, but
+ *          there are a relatively small number of solid colors.
+ *      (6) Example of usage:
+ *             // Try to quantize, using default values for mixed med cut
+ *             Pix *pixq = pixFewColorsMedianCutQuantMixed(pixs, 100, 20,
+ *                             0, 0, 0, 0);
+ *             if (!pixq)  // too many colors; don't quantize
+ *                 pixq = pixClone(pixs);
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -8067,6 +12033,27 @@ FewColorsMedianCutQuantMixed(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (level).
+ *
+ * Notes:
+ *      (1) Generates a colormapped image, where the colormap table values
+ *          are the averages of all pixels that are found in the octcube.
+ *      (2) This fails if there are more than 256 colors (i.e., more
+ *          than 256 occupied octcubes).
+ *      (3) Often level 3 (512 octcubes) will succeed because not more
+ *          than half of them are occupied with 1 or more pixels.
+ *      (4) The depth of the result, which is either 2, 4 or 8 bpp,
+ *          is the minimum required to hold the number of colors that
+ *          are found.
+ *      (5) This can be useful for quantizing orthographically generated
+ *          images such as color maps, where there may be more than 256 colors
+ *          because of aliasing or jpeg artifacts on text or lines, but
+ *          there are a relatively small number of solid colors.  Then,
+ *          use with level = 3 can often generate a compact and accurate
+ *          representation of the original RGB image.  For this purpose,
+ *          it is better than pixFewColorsOctcubeQuant2(), because it
+ *          uses the average value of pixels in the octcube rather
+ *          than the first found pixel.  It is also simpler to use,
+ *          because it generates the histogram internally.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -8088,6 +12075,35 @@ FewColorsOctcubeQuant1(lua_State *L)
  * Arg #2 is expected to be a l_int32 (level).
  * Arg #3 is expected to be a Numa* (na).
  * Arg #4 is expected to be a l_int32 (ncolors).
+ *
+ * Notes:
+ *      (1) Generates a colormapped image, where the colormap table values
+ *          are the averages of all pixels that are found in the octcube.
+ *      (2) This fails if there are more than 256 colors (i.e., more
+ *          than 256 occupied octcubes).
+ *      (3) Often level 3 (512 octcubes) will succeed because not more
+ *          than half of them are occupied with 1 or more pixels.
+ *      (4) For an image with not more than 256 colors, it is unlikely
+ *          that two pixels of different color will fall in the same
+ *          octcube at level = 4.   However it is possible, and this
+ *          function optionally returns %nerrors, the number of pixels
+ *          where, because more than one color is in the same octcube,
+ *          the pixel color is not exactly reproduced in the colormap.
+ *          The colormap for an occupied leaf of the octree contains
+ *          the color of the first pixel encountered in that octcube.
+ *      (5) This differs from pixFewColorsOctcubeQuant1(), which also
+ *          requires not more than 256 occupied leaves, but represents
+ *          the color of each leaf by an average over the pixels in
+ *          that leaf.  This also requires precomputing the histogram
+ *          of occupied octree leaves, which is generated using
+ *          pixOctcubeHistogram().
+ *      (6) This is used in pixConvertRGBToColormap() for images that
+ *          are determined, by their histogram, to have relatively few
+ *          colors.  This typically happens with orthographically
+ *          produced images (as oppopsed to natural images), where
+ *          it is expected that most of the pixels within a leaf
+ *          octcube have exactly the same color, and quantization to
+ *          that color is lossless.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -8117,6 +12133,41 @@ FewColorsOctcubeQuant2(lua_State *L)
  * Arg #5 is expected to be a l_int32 (diffthresh).
  * Arg #6 is expected to be a l_float32 (minfract).
  * Arg #7 is expected to be a l_int32 (maxspan).
+ *
+ * Notes:
+ *      (1) First runs pixFewColorsOctcubeQuant1().  If this succeeds,
+ *          it separates the color from gray(ish) entries in the cmap,
+ *          and re-quantizes the gray pixels.  The result has some pixels
+ *          in color and others in gray.
+ *      (2) This fails if there are more than 256 colors (i.e., more
+ *          than 256 occupied octcubes in the color quantization).
+ *      (3) Level 3 (512 octcubes) will usually succeed because not more
+ *          than half of them are occupied with 1 or more pixels.
+ *      (4) This uses the criterion from pixColorFraction() for deciding
+ *          if a colormap entry is color; namely, if the color components
+ *          are not too close to either black or white, and the maximum
+ *          difference between component values equals or exceeds a threshold.
+ *      (5) For quantizing the gray pixels, it uses a histogram-based
+ *          method where input parameters determining the buckets are
+ *          the minimum population fraction and the maximum allowed size.
+ *      (6) Recommended input parameters are:
+ *              %level:  3 or 4  (3 is default)
+ *              %darkthresh:  20
+ *              %lightthresh: 244
+ *              %diffthresh: 20
+ *              %minfract: 0.05
+ *              %maxspan: 15
+ *          These numbers are intended to be conservative (somewhat over-
+ *          sensitive) in color detection,  It's usually better to pay
+ *          extra with octcube quantization of a grayscale image than
+ *          to use grayscale quantization on an image that has some
+ *          actual color.  Input 0 on any of these to get the default.
+ *      (7) This can be useful for quantizing orthographically generated
+ *          images such as color maps, where there may be more than 256 colors
+ *          because of aliasing or jpeg artifacts on text or lines, but
+ *          there are a relatively small number of solid colors.  It usually
+ *          gives results that are better than pixOctcubeQuantMixedWithGray(),
+ *          both in size and appearance.  But it is a bit slower.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -8141,6 +12192,23 @@ FewColorsOctcubeQuantMixed(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (connectivity).
+ *
+ * Notes:
+ *      (1) This fills all bg components touching the border to fg.
+ *          It is the photometric inverse of pixRemoveBorderConnComps().
+ *      (2) Invert the result to get the "holes" left after this fill.
+ *          This can be done multiple times, extracting holes within
+ *          holes after each pair of fillings.  Specifically, this code
+ *          peels away n successive embeddings of components:
+ * \code
+ *              pix1 = <initial image>
+ *              for (i = 0; i < 2 * n; i++) {
+ *                   pix2 = pixFillBgFromBorder(pix1, 8);
+ *                   pixInvert(pix2, pix2);
+ *                   pixDestroy(&pix1);
+ *                   pix1 = pix2;
+ *              }
+ * \endcode
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -8160,6 +12228,18 @@ FillBgFromBorder(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (connectivity).
+ *
+ * Notes:
+ *      (1) Start with 1-pixel black border on otherwise white pixd
+ *      (2) Subtract input pixs to remove border pixels that were
+ *          also on the closed border
+ *      (3) Use the inverted pixs as the filling mask to fill in
+ *          all the pixels from the outer border to the closed border
+ *          on pixs
+ *      (4) Invert the result to get the filled component, including
+ *          the input border
+ *      (5) If the borders are 4-c.c., use 8-c.c. filling, and v.v.
+ *      (6) Closed borders within c.c. that represent holes, etc., are filled.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -8181,6 +12261,24 @@ FillClosedBorders(lua_State *L)
  * Arg #2 is expected to be a l_int32 (minsize).
  * Arg #3 is expected to be a l_float32 (maxhfract).
  * Arg #4 is expected to be a l_float32 (minfgfract).
+ *
+ * Notes:
+ *      (1) This does not fill holes that are smaller in area than 'minsize'.
+ *      (2) This does not fill holes with an area larger than
+ *          'maxhfract' times the fg area of the c.c.
+ *      (3) This does not expand the fg of the c.c. to bounding rect if
+ *          the fg area is less than 'minfgfract' times the area of the
+ *          bounding rect.
+ *      (4) The decisions are made as follows:
+ *           ~ Decide if we are filling the holes; if so, when using
+ *             the fg area, include the filled holes.
+ *           ~ Decide based on the fg area if we are filling to a bounding rect.
+ *             If so, do it.
+ *             If not, fill the holes if the condition is satisfied.
+ *      (5) The choice of minsize depends on the resolution.
+ *      (6) For solidifying image mask regions on printed materials,
+ *          which tend to be rectangular, values for maxhfract
+ *          and minfgfract around 0.5 are reasonable.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -8204,6 +12302,29 @@ FillHolesToBoundingRect(lua_State *L)
  * Arg #2 is expected to be a l_int32 (nx).
  * Arg #3 is expected to be a l_int32 (ny).
  * Arg #4 is expected to be a l_int32 (filltype).
+ *
+ * Notes:
+ *      (1) This is an in-place operation on pix (the map).  pix is
+ *          typically a low-resolution version of some other image
+ *          from which it was derived, where each pixel in pix
+ *          corresponds to a rectangular tile (say, m x n) of pixels
+ *          in the larger image.  All we need to know about the larger
+ *          image is whether or not the rightmost column and bottommost
+ *          row of pixels in pix correspond to tiles that are
+ *          only partially covered by pixels in the larger image.
+ *      (2) Typically, some number of pixels in the input map are
+ *          not known, and their values must be determined by near
+ *          pixels that are known.  These unknown pixels are the 'holes'.
+ *          They can take on only two values, 0 and 255, and the
+ *          instruction about which to fill is given by the filltype flag.
+ *      (3) The "holes" can come from two sources.  The first is when there
+ *          are not enough foreground or background pixels in a tile;
+ *          the second is when a tile is at least partially covered
+ *          by an image mask.  If we're filling holes in a fg mask,
+ *          the holes are initialized to black (0) and use L_FILL_BLACK.
+ *          For filling holes in a bg mask, initialize the holes to
+ *          white (255) and use L_FILL_WHITE.
+ *      (4) If w is the map width, nx = w or nx = w - 1; ditto for h and ny.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -8226,6 +12347,14 @@ FillMapHoles(lua_State *L)
  * Arg #2 is expected to be a Pta* (pta).
  * Arg #3 is expected to be a l_int32 (xmin).
  * Arg #4 is expected to be a l_int32 (ymin).
+ *
+ * Notes:
+ *      (1) This fills the interior of the polygon, returning a
+ *          new pix.  It works for both convex and non-convex polygons.
+ *      (2) To generate a filled polygon from a pta:
+ *            PIX *pixt = pixRenderPolygon(pta, 1, &xmin, &ymin);
+ *            PIX *pixd = pixFillPolygon(pixt, pta, xmin, ymin);
+ *            pixDestroy(&pixt);
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -8248,6 +12377,12 @@ FillPolygon(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_uint32 (offset).
  * Arg #3 is expected to be a l_int32 (depth).
+ *
+ * Notes:
+ *      (1) The offset must be >= 0 and should not exceed 0x40000000.
+ *      (2) The offset is subtracted from the src 32 bpp image
+ *      (3) For 8 bpp dest, the result is clipped to [0, 0xff]
+ *      (4) For 16 bpp dest, the result is clipped to [0, 0xffff]
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -8269,6 +12404,10 @@ FinalAccumulate(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_uint32 (offset).
  * Arg #3 is expected to be a l_uint32 (threshold).
+ *
+ * Notes:
+ *      (1) The offset must be >= 0 and should not exceed 0x40000000.
+ *      (2) The offset is subtracted from the src 32 bpp image
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -8288,6 +12427,11 @@ FinalAccumulateThreshold(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This finds the ratio of the number of fg pixels to the
+ *          size of the pix (w * h).  It is typically used for a
+ *          single connected component.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -8312,6 +12456,17 @@ FindAreaFraction(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Box* (box).
  * Arg #3 is expected to be a Pix* (pixm).
+ *
+ * Notes:
+ *      (1) This finds the ratio of the number of masked fg pixels
+ *          in pixs to the total number of fg pixels in pixs.
+ *          It is typically used for a single connected component.
+ *          If there are no fg pixels, this returns a ratio of 0.0.
+ *      (2) The box gives the location of the pix relative to that
+ *          of the UL corner of the mask.  Therefore, the rasterop
+ *          is performed with the pix translated to its location
+ *          (x, y) in the mask before ANDing.
+ *          If box == NULL, the UL corners of pixs and pixm are aligned.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -8336,6 +12491,13 @@ FindAreaFractionMasked(lua_State *L)
  * \brief Find the area to perimeter ratio in Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) The area is the number of fg pixels that are not on the
+ *          boundary (i.e., are not 8-connected to a bg pixel), and the
+ *          perimeter is the number of fg boundary pixels.  Returns
+ *          0.0 if there are no fg pixels.
+ *      (2) This function is retained because clients are using it.
  * </pre>
  * \param L pointer to the lua_State
  * \return 3 integers on the Lua stack (thresh, fgbal, bgval)
@@ -8357,6 +12519,29 @@ FindAreaPerimRatio(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Pixa* (pixadb).
+ *
+ * Notes:
+ *      (1) Input binary image must have text lines already aligned
+ *          horizontally.  This can be done by either rotating the
+ *          image with pixDeskew(), or, if a projective transform
+ *          is required, by doing pixDeskewLocal() first.
+ *      (2) Input null for &pta if you don't want this returned.
+ *          The pta will come in pairs of points (left and right end
+ *          of each baseline).
+ *      (3) Caution: this will not work properly on text with multiple
+ *          columns, where the lines are not aligned between columns.
+ *          If there are multiple columns, they should be extracted
+ *          separately before finding the baselines.
+ *      (4) This function constructs different types of output
+ *          for baselines; namely, a set of raster line values and
+ *          a set of end points of each baseline.
+ *      (5) This function was designed to handle short and long text lines
+ *          without using dangerous thresholds on the peak heights.  It does
+ *          this by combining the differential signal with a morphological
+ *          analysis of the locations of the text lines.  One can also
+ *          combine this data to normalize the peak heights, by weighting
+ *          the differential signal in the region of each baseline
+ *          by the inverse of the width of the text line found there.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa * on the Lua stack
@@ -8386,6 +12571,47 @@ FindBaselines(lua_State *L)
  * Arg #7 is expected to be a l_int32 (colordiff).
  * Arg #8 is expected to be a l_float32 (edgefract).
  * Arg #12 is expected to be a Pixa* (pixadb).
+ *
+ * Notes:
+ *      (1) This function tries to determine if there is a significant
+ *          color or darker region on a scanned page image, where part
+ *          of the image is background that is either white or reddish.
+ *          This also allows extraction of regions of colored pixels that
+ *          have a smaller red component than blue or green components.
+ *      (2) If %pixm exists, pixels under its fg are combined with
+ *          dark pixels to make a mask of pixels not to be considered
+ *          as color candidates.
+ *      (3) There are four thresholds.
+ *          * %lightthresh: compute the average value of each rgb pixel,
+ *            and make 10 buckets by value.  If the lightest bucket gray
+ *            value is below %lightthresh, the image is not considered
+ *            to have a light bg, and this returns 0.0 for %colorfract.
+ *          * %darkthresh: ignore pixels darker than this (typ. fg text).
+ *            We make a 1 bpp mask of these pixels, and then dilate it to
+ *            remove all vestiges of fg from their vicinity.
+ *          * %mindiff: consider pixels with either (b - r) or (g - r)
+ *            being at least this value, as having color.
+ *          * %colordiff: consider pixels where the (max - min) difference
+ *            of the pixel components exceeds this value, as having color.
+ *      (4) All components of color pixels that are touching the image
+ *          border are removed.  Additionally, all pixels within some
+ *          normalized distance %edgefract from the image border can
+ *          be removed.  This insures that dark pixels near the edge
+ *          of the image are not included.
+ *      (5) This returns in %pcolorfract the fraction of pixels that have
+ *          color and are not in the set consisting of an OR between
+ *          %pixm and the dilated dark pixel mask.
+ *      (6) No masks are returned unless light color pixels are found.
+ *          If colorfract > 0.0 and %pcolormask1 is defined, this returns
+ *          a 1 bpp mask with fg pixels over the color background.
+ *          This mask may have some holes in it.
+ *      (7) If colorfract > 0.0 and %pcolormask2 is defined, this returns
+ *          a version of colormask1 where small holes have been filled.
+ *      (8) To generate a boxa of rectangular regions from the overlap
+ *          of components in the filtered mask:
+ *                boxa1 = pixConnCompBB(colormask2, 8);
+ *                boxa2 = boxaCombineOverlaps(boxa1, NULL);
+ *          This is done here in debug mode.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -8420,6 +12646,10 @@ FindColorRegions(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) Finds the 4 corner-most pixels, as defined by a search
+ *          inward from each corner, using a 45 degree line.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pta * on the Lua stack
@@ -8437,6 +12667,12 @@ FindCornerPixels(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) At the top and bottom, we skip:
+ *           ~ at least one scanline
+ *           ~ not more than 10% of the image height
+ *           ~ not more than 5% of the image width
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -8458,6 +12694,11 @@ FindDifferentialSquareSum(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs1).
  * Arg #2 is expected to be a Pix* (pixs2).
+ *
+ * Notes:
+ *      (1) The two images are aligned at the UL corner, and the returned
+ *          image has ON pixels where the pixels in pixs1 and pixs2
+ *          have equal values.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -8481,6 +12722,17 @@ FindEqualValues(lua_State *L)
  * Arg #4 is expected to be a l_int32 (height).
  * Arg #5 is expected to be a l_int32 (npeaks).
  * Arg #6 is expected to be a l_float32 (erasefactor).
+ *
+ * Notes:
+ *      (1) pixs is a 32 bpp histogram in a pair of HSV colorspace.  It
+ *          should be thought of as a single sample with 32 bps (bits/sample).
+ *      (2) After each peak is found, the peak is erased with a window
+ *          that is centered on the peak and scaled from the sliding
+ *          window by %erasefactor.  Typically, %erasefactor is chosen
+ *          to be > 1.0.
+ *      (3) Data for a maximum of %npeaks is returned in %pta and %natot.
+ *      (4) For debugging, after the pixa is returned, display with:
+ *          pixd = pixaDisplayTiledInRows(pixa, 32, 1000, 1.0, 0, 30, 2);
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -8511,6 +12763,14 @@ FindHistoPeaksHSV(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (y).
+ *
+ * Notes:
+ *      (1) This finds foreground horizontal runs on a single scanline.
+ *      (2) To find background runs, use pixInvert() before applying
+ *          this function.
+ *      (3) The xstart and xend arrays are input.  They should be
+ *          of size w/2 + 1 to insure that they can hold
+ *          the maximum number of runs in the raster line.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -8538,6 +12798,20 @@ FindHorizontalRuns(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (polarity).
  * Arg #3 is expected to be a l_int32 (nrect).
+ *
+ * Notes:
+ *      (1) This does a greedy search to find the largest rectangles,
+ *          either black or white and without overlaps, in %pix.
+ *      (2) See pixFindLargestRectangle(), which is called multiple
+ *          times, for details.  On each call, the largest rectangle
+ *          found is painted, so that none of its pixels can be
+ *          used later, before calling it again.
+ *      (3) This function is surprisingly fast.  Although
+ *          pixFindLargestRectangle() runs at about 50 MPix/sec, when it
+ *          is run multiple times by pixFindLargeRectangles(), it processes
+ *          at 150 - 250 MPix/sec, and the time is approximately linear
+ *          in %nrect.  For example, for a 1 MPix image, searching for
+ *          the largest 50 boxes takes about 0.2 seconds.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -8563,6 +12837,45 @@ FindLargeRectangles(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (polarity).
+ *
+ * Notes:
+ *      (1) This is a simple and elegant solution to a problem in
+ *          computational geometry that at first appears to be quite
+ *          difficult: what is the largest rectangle that can be
+ *          placed in the image, covering only pixels of one polarity
+ *          (bg or fg)?  The solution is O(n), where n is the number
+ *          of pixels in the image, and it requires nothing more than
+ *          using a simple recursion relation in a single sweep of the image.
+ *      (2) In a sweep from UL to LR with left-to-right being the fast
+ *          direction, calculate the largest white rectangle at (x, y),
+ *          using previously calculated values at pixels #1 and #2:
+ *             #1:    (x, y - 1)
+ *             #2:    (x - 1, y)
+ *          We also need the most recent "black" pixels that were seen
+ *          in the current row and column.
+ *          Consider the largest area.  There are only two possibilities:
+ *             (a)  Min(w(1), horizdist) * (h(1) + 1)
+ *             (b)  Min(h(2), vertdist) * (w(2) + 1)
+ *          where
+ *             horizdist: the distance from the rightmost "black" pixel seen
+ *                        in the current row across to the current pixel
+ *             vertdist: the distance from the lowest "black" pixel seen
+ *                       in the current column down to the current pixel
+ *          and we choose the Max of (a) and (b).
+ *      (3) To convince yourself that these recursion relations are correct,
+ *          it helps to draw the maximum rectangles at #1 and #2.
+ *          Then for #1, you try to extend the rectangle down one line,
+ *          so that the height is h(1) + 1.  Do you get the full
+ *          width of #1, w(1)?  It depends on where the black pixels are
+ *          in the current row.  You know the final width is bounded by w(1)
+ *          and w(2) + 1, but the actual value depends on the distribution
+ *          of black pixels in the current row that are at a distance
+ *          from the current pixel that is between these limits.
+ *          We call that value "horizdist", and the area is then given
+ *          by the expression (a) above.  Using similar reasoning for #2,
+ *          where you attempt to extend the rectangle to the right
+ *          by 1 pixel, you arrive at (b).  The largest rectangle is
+ *          then found by taking the Max.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -8587,6 +12900,11 @@ FindLargestRectangle(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (y).
+ *
+ * Notes:
+ *      (1) This finds the longest foreground horizontal run on a scanline.
+ *      (2) To find background runs, use pixInvert() before applying
+ *          this function.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -8611,6 +12929,11 @@ FindMaxHorizontalRunOnLine(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (direction).
+ *
+ * Notes:
+ *      (1) This finds the longest foreground runs by row or column
+ *      (2) To find background runs, use pixInvert() before applying
+ *          this function.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa * on the Lua stack
@@ -8633,6 +12956,11 @@ FindMaxRuns(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (x).
+ *
+ * Notes:
+ *      (1) This finds the longest foreground vertical run on a scanline.
+ *      (2) To find background runs, use pixInvert() before applying
+ *          this function.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -8656,6 +12984,16 @@ FindMaxVerticalRunOnLine(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) Let the image have h scanlines and N fg pixels.
+ *          If the pixels were uniformly distributed on scanlines,
+ *          the sum of squares of fg pixels on each scanline would be
+ *          h * (N / h)^2.  However, if the pixels are not uniformly
+ *          distributed (e.g., for text), the sum of squares of fg
+ *          pixels will be larger.  We return in hratio and vratio the
+ *          ratio of these two values.
+ *      (2) If there are no fg pixels, hratio and vratio are returned as 0.0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -8683,6 +13021,10 @@ FindNormalizedSquareSum(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs2).
  * Arg #3 is expected to be a l_int32 (x2).
  * Arg #4 is expected to be a l_int32 (y2).
+ *
+ * Notes:
+ *      (1) The UL corner of pixs2 is placed at (x2, y2) in pixs1.
+ *      (2) This measure is similar to the correlation.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -8714,6 +13056,19 @@ FindOverlapFraction(lua_State *L)
  * Arg #3 is expected to be a l_int32 (mindist).
  * Arg #4 is expected to be a l_int32 (erasedist).
  * Arg #5 is expected to be a boolean (showmorph).
+ *
+ * Notes:
+ *      (1) This doesn't simply crop to the fg.  It attempts to remove
+ *          pixel noise and junk at the edge of the image before cropping.
+ *          The input %threshold is used if pixs is not 1 bpp.
+ *      (2) This is not intended to work on small thumbnails.  The
+ *          dimensions of pixs must be at least MinWidth x MinHeight.
+ *      (3) Debug: set showmorph to display the intermediate image in
+ *          the morphological operations on this page.
+ *      (4) Debug: to get pdf output of results when called repeatedly,
+ *          call with an existing pixac, which will add an image of this page,
+ *          with the fg outlined.  If no foreground is found, there is
+ *          no output for this page image.
  * </pre>
  * \param L pointer to the lua_State
  * \return 3 integers on the Lua stack (thresh, fgbal, bgval)
@@ -8735,6 +13090,18 @@ FindPageForeground(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) We take the 'size' as twice the sum of the width and
+ *          height of pixs, and the perimeter is the number of fg
+ *          boundary pixels.  We use the fg pixels of the boundary
+ *          because the pix may be clipped to the boundary, so an
+ *          erosion is required to count all boundary pixels.
+ *      (2) This has a large value for dendritic, fractal-like components
+ *          with highly irregular boundaries.
+ *      (3) This is typically used for a single connected component.
+ *          It has a value of about 1.0 for rectangular components with
+ *          relatively smooth boundaries.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -8757,6 +13124,18 @@ FindPerimSizeRatio(lua_State *L)
  * \brief Find the perimeter to area ratio in Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) The perimeter is the number of fg boundary pixels, and the
+ *          area is the number of fg pixels.  This returns 0.0 if
+ *          there are no fg pixels.
+ *      (2) Unlike pixFindAreaPerimRatio(), this uses the full set of
+ *          fg pixels for the area, and the ratio is taken in the opposite
+ *          order.
+ *      (3) This is typically used for a single connected component.
+ *          This always has a value <= 1.0, and if the average distance
+ *          of a fg pixel from the nearest bg pixel is d, this has
+ *          a value ~1/d.
  * </pre>
  * \param L pointer to the lua_State
  * \return 3 integers on the Lua stack (thresh, fgbal, bgval)
@@ -8780,6 +13159,14 @@ FindPerimToAreaRatio(lua_State *L)
  * Arg #2 is expected to be a l_int32 (dist).
  * Arg #3 is expected to be a l_int32 (minw).
  * Arg #4 is expected to be a l_int32 (minh).
+ *
+ * Notes:
+ *      (1) This applies the function pixConformsToRectangle() to
+ *          each 8-c.c. in pixs, and returns a boxa containing the
+ *          regions of all components that are conforming.
+ *      (2) Conforming components must satisfy both the size constraint
+ *          given by %minsize and the slop in conforming to a rectangle
+ *          determined by %dist.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa * on the Lua stack
@@ -8806,6 +13193,19 @@ FindRectangleComps(lua_State *L)
  * Arg #4 is expected to be a l_int32 (mindist).
  * Arg #5 is expected to be a l_int32 (tsize).
  * Arg #6 is expected to be a l_int32 (ntiles).
+ *
+ * Notes:
+ *      (1) This looks for one or two square tiles with conforming median
+ *          intensity and low variance, that is outside but near the input box.
+ *      (2) %mindist specifies the gap between the box and the
+ *          potential tiles.  The tiles are given an overlap of 50%.
+ *          %ntiles specifies the number of tiles that are tested
+ *          beyond %mindist for each row or column.
+ *      (3) For example, if %mindist = 20, %tilesize = 50 and %ntiles = 3,
+ *          a horizontal search to the right will have 3 tiles in each row,
+ *          with left edges at 20, 45 and 70 from the right edge of the
+ *          input %box.  The number of rows of tiles is determined by
+ *          the height of %box and %tsize, with the 50% overlap..
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -8830,6 +13230,13 @@ FindRepCloseTile(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This is a simple high-level interface, that uses default
+ *          values of the parameters for reasonable speed and accuracy.
+ *      (2) The angle returned is the negative of the skew angle of
+ *          the image.  It is the angle required for deskew.
+ *          Clockwise rotations are positive angles.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -8853,6 +13260,11 @@ FindSkew(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (redsearch).
+ *
+ * Notes:
+ *      (1) This binarizes if necessary and finds the skew angle.  If the
+ *          angle is large enough and there is sufficient confidence,
+ *          it returns a deskewed image; otherwise, it returns a clone.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -8913,6 +13325,10 @@ FindSkewOrthogonalRange(lua_State *L)
  * Arg #3 is expected to be a l_int32 (reduction).
  * Arg #4 is expected to be a l_float32 (sweeprange).
  * Arg #5 is expected to be a l_float32 (sweepdelta).
+ *
+ * Notes:
+ *      (1) This examines the 'score' for skew angles with equal intervals.
+ *      (2) Caller must check the return value for validity of the result.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -8941,6 +13357,18 @@ FindSkewSweep(lua_State *L)
  * Arg #6 is expected to be a l_float32 (sweeprange).
  * Arg #7 is expected to be a l_float32 (sweepdelta).
  * Arg #8 is expected to be a l_float32 (minbsdelta).
+ *
+ * Notes:
+ *      (1) This finds the skew angle, doing first a sweep through a set
+ *          of equal angles, and then doing a binary search until
+ *          convergence.
+ *      (2) Caller must check the return value for validity of the result.
+ *      (3) In computing the differential line sum variance score, we sum
+ *          the result over scanlines, but we always skip:
+ *           ~ at least one scanline
+ *           ~ not more than 10% of the image height
+ *           ~ not more than 5% of the image width
+ *      (4) See also notes in pixFindSkewSweepAndSearchScore()
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -8974,6 +13402,25 @@ FindSkewSweepAndSearch(lua_State *L)
  * Arg #8 is expected to be a l_float32 (sweeprange).
  * Arg #9 is expected to be a l_float32 (sweepdelta).
  * Arg #10 is expected to be a l_float32 (minbsdelta).
+ *
+ * Notes:
+ *      (1) This finds the skew angle, doing first a sweep through a set
+ *          of equal angles, and then doing a binary search until convergence.
+ *      (2) There are two built-in constants that determine if the
+ *          returned confidence is nonzero:
+ *            ~ MIN_VALID_MAXSCORE (minimum allowed maxscore)
+ *            ~ MINSCORE_THRESHOLD_CONSTANT (determines minimum allowed
+ *                 minscore, by multiplying by (height * width^2)
+ *          If either of these conditions is not satisfied, the returned
+ *          confidence value will be zero.  The maxscore is optionally
+ *          returned in this function to allow evaluation of the
+ *          resulting angle by a method that is independent of the
+ *          returned confidence value.
+ *      (3) The larger the confidence value, the greater the probability
+ *          that the proper alignment is given by the angle that maximizes
+ *          variance.  It should be compared to a threshold, which depends
+ *          on the application.  Values between 3.0 and 6.0 are common.
+ *      (4) By default, the shear is about the UL corner.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -9011,6 +13458,15 @@ FindSkewSweepAndSearchScore(lua_State *L)
  * Arg #9 is expected to be a l_float32 (sweepdelta).
  * Arg #10 is expected to be a l_float32 (minbsdelta).
  * Arg #11 is expected to be a l_int32 (pivot).
+ *
+ * Notes:
+ *      (1) See notes in pixFindSkewSweepAndSearchScore().
+ *      (2) This allows choice of shear pivoting from either the UL corner
+ *          or the center.  For small angles, the ability to discriminate
+ *          angles is better with shearing from the UL corner.  However,
+ *          for large angles (say, greater than 20 degrees), it is better
+ *          to shear about the center because a shear from the UL corner
+ *          loses too much of the image.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -9042,6 +13498,9 @@ FindSkewSweepAndSearchScorePivot(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) Returns half the number of fg boundary pixels.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -9065,6 +13524,15 @@ FindStrokeLength(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (thresh).
+ *
+ * Notes:
+ *      (1) This uses two methods to estimate the stroke width:
+ *          (a) half the fg boundary length
+ *          (b) a value derived from the histogram of the fg distance transform
+ *      (2) Distance is measured in 8-connected
+ *      (3) %thresh is the minimum fraction N(dist=d)/N(dist=1) of pixels
+ *          required to determine if the pixels at distance d are above
+ *          the noise. It is typically about 0.15.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -9115,6 +13583,14 @@ FindThreshFgExtent(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (x).
+ *
+ * Notes:
+ *      (1) This finds foreground vertical runs on a single scanline.
+ *      (2) To find background runs, use pixInvert() before applying
+ *          this function.
+ *      (3) The ystart and yend arrays are input.  They should be
+ *          of size h/2 + 1 to insure that they can hold
+ *          the maximum number of runs in the raster line.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -9141,6 +13617,60 @@ FindVerticalRuns(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (ditherflag).
+ *
+ * Notes:
+ *  This simple 1-pass color quantization works by breaking the
+ *  color space into 256 pieces, with 3 bits quantized for each of
+ *  red and green, and 2 bits quantized for blue.  We shortchange
+ *  blue because the eye is least sensitive to blue.  This
+ *  division of the color space is into two levels of octrees,
+ *  followed by a further division by 4 not 8, where both
+ *  blue octrees have been combined in the third level.
+ *
+ *  The color map is generated from the 256 color centers by
+ *  taking the representative color to be the center of the
+ *  cell volume.  This gives a maximum error in the red and
+ *  green values of 16 levels, and a maximum error in the
+ *  blue sample of 32 levels.
+ *
+ *  Each pixel in the 24-bit color image is placed in its containing
+ *  cell, given by the relevant MSbits of the red, green and blue
+ *  samples.  An error-diffusion dithering is performed on each
+ *  color sample to give the appearance of good average local color.
+ *  Dithering is required; without it, the contouring and visible
+ *  color errors are very bad.
+ *
+ *  I originally implemented this algorithm in two passes,
+ *  where the first pass was used to compute the weighted average
+ *  of each sample in each pre-allocated region of color space.
+ *  The idea was to use these centroids in the dithering algorithm
+ *  of the second pass, to reduce the average error that was
+ *  being dithered.  However, with dithering, there is
+ *  virtually no difference, so there is no reason to make the
+ *  first pass.  Consequently, this 1-pass version just assigns
+ *  the pixels to the centers of the pre-allocated cells.
+ *  We use dithering to spread the difference between the sample
+ *  value and the location of the center of the cell.  For speed
+ *  and simplicity, we use integer dithering and propagate only
+ *  to the right, down, and diagonally down-right, with ratios
+ *  3/8, 3/8 and 1/4, respectively.  The results should be nearly
+ *  as good, and a bit faster, with propagation only to the right
+ *  and down.
+ *
+ *  The algorithm is very fast, because there is no search,
+ *  only fast generation of the cell index for each pixel.
+ *  We use a simple mapping from the three 8 bit rgb samples
+ *  to the 8 bit cell index; namely, r7 r6 r5 g7 g6 g5 b7 b6.
+ *  This is not in an octcube format, but it doesn't matter.
+ *  There are no storage requirements.  We could keep a
+ *  running average of the center of each sample in each
+ *  cluster, rather than using the center of the cell, but
+ *  this is just extra work, esp. with dithering.
+ *
+ *  This method gives surprisingly good results with dithering.
+ *  However, without dithering, the loss of color accuracy is
+ *  evident in regions that are very light or that have subtle
+ *  blending of colors.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -9160,6 +13690,13 @@ FixedOctcubeQuant256(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (level).
+ *
+ * Notes:
+ *      (1) Unlike the other color quantization functions, this one
+ *          generates an rgb image.
+ *      (2) The pixel values are quantized to the center of each octcube
+ *          (at the specified level) containing the pixel.  They are
+ *          not quantized to the average of the pixels in that octcube.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -9202,6 +13739,39 @@ FlipFHMTGen(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This does a left-right flip of the image, which is
+ *          equivalent to a rotation out of the plane about a
+ *          vertical line through the image center.
+ *      (2) There are 3 cases for input:
+ *          (a) pixd == null (creates a new pixd)
+ *          (b) pixd == pixs (in-place operation)
+ *          (c) pixd != pixs (existing pixd)
+ *      (3) For clarity, use these three patterns, respectively:
+ *          (a) pixd = pixFlipLR(NULL, pixs);
+ *          (b) pixFlipLR(pixs, pixs);
+ *          (c) pixFlipLR(pixd, pixs);
+ *      (4) If an existing pixd is not the same size as pixs, the
+ *          image data will be reallocated.
+ *      (5) The pixel access routines allow a trivial implementation.
+ *          However, for d < 8, it is more efficient to right-justify
+ *          each line to a 32-bit boundary and then extract bytes and
+ *          do pixel reversing.   In those cases, as in the 180 degree
+ *          rotation, we right-shift the data (if necessary) to
+ *          right-justify on the 32 bit boundary, and then read the
+ *          bytes off each raster line in reverse order, reversing
+ *          the pixels in each byte using a table.  These functions
+ *          for 1, 2 and 4 bpp were tested against the "trivial"
+ *          version (shown here for 4 bpp):
+ *              for (i = 0; i < h; i++) {
+ *                  line = data + i * wpl;
+ *                  memcpy(buffer, line, bpl);
+ *                    for (j = 0; j < w; j++) {
+ *                      val = GET_DATA_QBIT(buffer, w - 1 - j);
+ *                        SET_DATA_QBIT(line, j, val);
+ *                  }
+ *              }
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -9241,6 +13811,24 @@ FlipPixel(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This does a top-bottom flip of the image, which is
+ *          equivalent to a rotation out of the plane about a
+ *          horizontal line through the image center.
+ *      (2) There are 3 cases for input:
+ *          (a) pixd == null (creates a new pixd)
+ *          (b) pixd == pixs (in-place operation)
+ *          (c) pixd != pixs (existing pixd)
+ *      (3) For clarity, use these three patterns, respectively:
+ *          (a) pixd = pixFlipTB(NULL, pixs);
+ *          (b) pixFlipTB(pixs, pixs);
+ *          (c) pixFlipTB(pixd, pixs);
+ *      (4) If an existing pixd is not the same size as pixs, the
+ *          image data will be reallocated.
+ *      (5) This is simple and fast.  We use the memcpy function
+ *          to do all the work on aligned data, regardless of pixel
+ *          depth.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -9280,6 +13868,20 @@ ForegroundFraction(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix1).
  * Arg #2 is expected to be a Pix* (pix2).
+ *
+ * Notes:
+ *      (1) This gives the fraction of fg pixels in pix1 that are in
+ *          the intersection (i.e., under the fg) of pix2:
+ *          |1 & 2|/|1|, where |...| means the number of fg pixels.
+ *          Note that this is different from the situation where
+ *          pix1 and pix2 are reversed.
+ *      (2) Both pix1 and pix2 are registered to the UL corners.  A warning
+ *          is issued if pix1 and pix2 have different sizes.
+ *      (3) This can also be used to find the fraction of fg pixels in pix1
+ *          that are NOT under the fg of pix2: 1.0 - |1 & 2|/|1|
+ *      (4) If pix1 or pix2 are empty, this returns %fract = 0.0.
+ *      (5) For example, pix2 could be a frame around the outside of the
+ *          image, made from pixMakeFrameMask().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -9321,6 +13923,35 @@ FreeData(lua_State *L)
  * Arg #3 is expected to be a l_float32 (gamma).
  * Arg #4 is expected to be a l_int32 (minval).
  * Arg #5 is expected to be a l_int32 (maxval).
+ *
+ * Notes:
+ *      (1) pixd must either be null or equal to pixs.
+ *          For in-place operation, set pixd == pixs:
+ *             pixGammaTRC(pixs, pixs, ...);
+ *          To get a new image, set pixd == null:
+ *             pixd = pixGammaTRC(NULL, pixs, ...);
+ *      (2) If pixs is colormapped, the colormap is transformed,
+ *          either in-place or in a copy of pixs.
+ *      (3) We use a gamma mapping between minval and maxval.
+ *      (4) If gamma < 1.0, the image will appear darker;
+ *          if gamma > 1.0, the image will appear lighter;
+ *      (5) If gamma = 1.0 and minval = 0 and maxval = 255, no
+ *          enhancement is performed; return a copy unless in-place,
+ *          in which case this is a no-op.
+ *      (6) For color images that are not colormapped, the mapping
+ *          is applied to each component.
+ *      (7) minval and maxval are not restricted to the interval [0, 255].
+ *          If minval < 0, an input value of 0 is mapped to a
+ *          nonzero output.  This will turn black to gray.
+ *          If maxval > 255, an input value of 255 is mapped to
+ *          an output value less than 255.  This will turn
+ *          white (e.g., in the background) to gray.
+ *      (8) Increasing minval darkens the image.
+ *      (9) Decreasing maxval bleaches the image.
+ *      (10) Simultaneously increasing minval and decreasing maxval
+ *           will darken the image and make the colors more intense;
+ *           e.g., minval = 50, maxval = 200.
+ *      (11) See numaGammaTRC() for further examples of use.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -9347,6 +13978,12 @@ GammaTRC(lua_State *L)
  * Arg #4 is expected to be a l_float32 (gamma).
  * Arg #5 is expected to be a l_int32 (minval).
  * Arg #6 is expected to be a l_int32 (maxval).
+ *
+ * Notes:
+ *      (1) Same as pixGammaTRC() except mapping is optionally over
+ *          a subset of pixels described by pixm.
+ *      (2) Masking does not work for colormapped images.
+ *      (3) See pixGammaTRC() for details on how to use the parameters.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -9373,6 +14010,11 @@ GammaTRCMasked(lua_State *L)
  * Arg #3 is expected to be a l_float32 (gamma).
  * Arg #4 is expected to be a l_int32 (minval).
  * Arg #5 is expected to be a l_int32 (maxval).
+ *
+ * Notes:
+ *      (1) See usage notes in pixGammaTRC().
+ *      (2) This version saves the alpha channel.  It is only valid
+ *          for 32 bpp (no colormap), and is a bit slower.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -9424,6 +14066,20 @@ GenHalftoneMask(lua_State *L)
  * Arg #5 is expected to be a l_int32 (nx).
  * Arg #6 is expected to be a l_int32 (ny).
  * Arg #7 is expected to be a l_int32 (debugflag).
+ *
+ * Notes:
+ *      (1) This crops and converts to 8 bpp if necessary.  It adds a
+ *          minimal white boundary such that the centroid of the
+ *          photo-inverted image is in the center. This allows
+ *          automatic alignment with histograms of other image regions.
+ *      (2) The white value in the histogram is removed, because of
+ *          the padding.
+ *      (3) Use 0 for conservative default (1.3) for thresh.
+ *      (4) For an efficient representation of the histogram, normalize
+ *          using a multiplicative factor so that the number in the
+ *          maximum bucket is 255.  It then takes 256 bytes to store.
+ *      (5) With debug on, you get a pdf that shows, for each tile,
+ *          the images and histograms.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -9456,6 +14112,17 @@ GenPhotoHistos(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pix* (pixvws).
  * Arg #3 is expected to be a Pixa* (pixadb).
+ *
+ * Notes:
+ *      (1) Both the input masks (textline and vertical white space) and
+ *          the returned textblock mask are at the same resolution.
+ *      (2) This is not intended to work on small thumbnails.  The
+ *          dimensions of pixs must be at least MinWidth x MinHeight.
+ *      (3) The result is somewhat noisy, in that small "blocks" of
+ *          text may be included.  These can be removed by post-processing,
+ *          using, e.g.,
+ *             pixSelectBySize(pix, 60, 60, 4, L_SELECT_IF_EITHER,
+ *                             L_SELECT_IF_GTE, NULL);
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -9476,6 +14143,14 @@ GenTextblockMask(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #4 is expected to be a Pixa* (pixadb).
+ *
+ * Notes:
+ *      (1) The input pixs should be deskewed.
+ *      (2) pixs should have no halftone pixels.
+ *      (3) This is not intended to work on small thumbnails.  The
+ *          dimensions of pixs must be at least MinWidth x MinHeight.
+ *      (4) Both the input image and the returned textline mask
+ *          are at the same resolution.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -9502,6 +14177,11 @@ GenTextlineMask(lua_State *L)
  * Arg #2 is expected to be a l_int32 (type).
  * Arg #3 is expected to be a l_int32 (quality).
  * Arg #4 is expected to be a l_int32 (ascii85).
+ *
+ * Notes:
+ *      (1) Set ascii85:
+ *           ~ 0 for binary data (not permitted in PostScript)
+ *           ~ 1 for ascii85 (5 for 4) encoded binary data
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -9527,6 +14207,11 @@ GenerateCIData(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pta* (pta).
  * Arg #2 is expected to be a l_int32 (w).
  * Arg #3 is expected to be a l_int32 (h).
+ *
+ * Notes:
+ *      (1) Points are rounded to nearest ints.
+ *      (2) Any points outside (w,h) are silently discarded.
+ *      (3) Output 1 bpp pix has values 1 for each point in the pta.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -9547,6 +14232,10 @@ GenerateFromPta(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #4 is expected to be a Pixa* (pixadb).
+ *
+ * Notes:
+ *      (1) This is not intended to work on small thumbnails.  The
+ *          dimensions of pixs must be at least MinWidth x MinHeight.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -9574,6 +14263,17 @@ GenerateHalftoneMask(lua_State *L)
  * Arg #3 is expected to be a l_int32 (upper).
  * Arg #4 is expected to be a l_int32 (inband).
  * Arg #5 is expected to be a l_int32 (usecmap).
+ *
+ * Notes:
+ *      (1) Generates a 1 bpp mask pixd, the same size as pixs, where
+ *          the fg pixels in the mask are those either within the specified
+ *          band (for inband == 1) or outside the specified band
+ *          (for inband == 0).
+ *      (2) If pixs is colormapped, %usecmap determines if the colormap
+ *          values are used, or if the colormap is removed to gray and
+ *          the gray values are used.  For the latter, it generates
+ *          an approximate grayscale value for each pixel, and then looks
+ *          for gray pixels with the value %val.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -9600,6 +14300,19 @@ GenerateMaskByBand(lua_State *L)
  * Arg #4 is expected to be a l_int32 (delp).
  * Arg #5 is expected to be a l_float32 (fractm).
  * Arg #6 is expected to be a l_float32 (fractp).
+ *
+ * Notes:
+ *      (1) Generates a 1 bpp mask pixd, the same size as pixs, where
+ *          the fg pixels in the mask within a band of rgb values
+ *          surrounding %refval.  The band can be chosen in two ways
+ *          for each component:
+ *          (a) Use (%delm, %delp) to specify how many levels down and up
+ *          (b) Use (%fractm, %fractp) to specify the fractional
+ *              distance toward 0 and 255, respectively.
+ *          Note that %delm and %delp must be in [0 ... 255], whereas
+ *          %fractm and %fractp must be in [0.0 - 1.0].
+ *      (2) Either (%delm, %delp) or (%fractm, %fractp) can be used.
+ *          Set each value in the other pair to 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -9625,6 +14338,16 @@ GenerateMaskByBand32(lua_State *L)
  * Arg #2 is expected to be a l_uint32 (refval1).
  * Arg #3 is expected to be a l_uint32 (refval2).
  * Arg #4 is expected to be a l_int32 (distflag).
+ *
+ * Notes:
+ *      (1) Generates a 1 bpp mask pixd, the same size as pixs, where
+ *          the fg pixels in the mask are those where the pixel in pixs
+ *          is "closer" to refval1 than to refval2.
+ *      (2) "Closer" can be defined in several ways, such as:
+ *            ~ manhattan distance (L1)
+ *            ~ euclidean distance (L2)
+ *            ~ majority vote of the individual components
+ *          Here, we have a choice of L1 or L2.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -9647,6 +14370,15 @@ GenerateMaskByDiscr32(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (val).
  * Arg #3 is expected to be a l_int32 (usecmap).
+ *
+ * Notes:
+ *      (1) %val is the pixel value that we are selecting.  It can be
+ *          either a gray value or a colormap index.
+ *      (2) If pixs is colormapped, %usecmap determines if the colormap
+ *          index values are used, or if the colormap is removed to gray and
+ *          the gray values are used.  For the latter, it generates
+ *          an approximate grayscale value for each pixel, and then looks
+ *          for gray pixels with the value %val.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -9667,6 +14399,16 @@ GenerateMaskByValue(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (width).
+ *
+ * Notes:
+ *      (1) Similar to ptaGetBoundaryPixels(), except here:
+ *          * we only get pixels in the foreground
+ *          * we can have a "line" width greater than 1 pixel.
+ *      (2) Once generated, this can be applied to a random 1 bpp image
+ *          to add a color boundary as follows:
+ *             Pta *pta = pixGeneratePtaBoundary(pixs, width);
+ *             Pix *pix1 = pixConvert1To8Cmap(pixs);
+ *             pixRenderPtaArb(pix1, pta, rval, gval, bval);
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pta * on the Lua stack
@@ -9693,6 +14435,30 @@ GeneratePtaBoundary(lua_State *L)
  * Arg #7 is expected to be a l_int32 (botflag).
  * Arg #8 is expected to be a l_int32 (leftflag).
  * Arg #9 is expected to be a l_int32 (rightflag).
+ *
+ * Notes:
+ *    (1) All fg elements selected are exactly hitdist pixels away from
+ *        the nearest fg boundary pixel, and ditto for bg elements.
+ *        Valid inputs of hitdist and missdist are 0, 1, 2, 3 and 4.
+ *        For example, a hitdist of 0 puts the hits at the fg boundary.
+ *        Usually, the distances should be > 0 avoid the effect of
+ *        noise at the boundary.
+ *    (2) Set hitskip < 0 if no hits are to be used.  Ditto for missskip.
+ *        If both hitskip and missskip are < 0, the sel would be empty,
+ *        and NULL is returned.
+ *    (3) The 4 flags determine whether the sel is increased on that side
+ *        to allow bg misses to be placed all along that boundary.
+ *        The increase in sel size on that side is the minimum necessary
+ *        to allow the misses to be placed at mindist.  For text characters,
+ *        the topflag and botflag are typically set to 1, and the leftflag
+ *        and rightflag to 0.
+ *    (4) The input pix, as extended by the extra pixels on selected sides,
+ *        can optionally be returned.  For debugging, call
+ *        pixDisplayHitMissSel() to visualize the hit-miss sel superimposed
+ *        on the generating bitmap.
+ *    (5) This is probably the best of the three sel generators, in the
+ *        sense that you have the most flexibility with the smallest number
+ *        of hits and misses.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Sel * on the Lua stack
@@ -9728,6 +14494,23 @@ GenerateSelBoundary(lua_State *L)
  * Arg #6 is expected to be a l_int32 (botpix).
  * Arg #7 is expected to be a l_int32 (leftpix).
  * Arg #8 is expected to be a l_int32 (rightpix).
+ *
+ * Notes:
+ *    (1) Either of hitfract and missfract can be zero.  If both are zero,
+ *        the sel would be empty, and NULL is returned.
+ *    (2) No elements are selected that are less than 'distance' pixels away
+ *        from a boundary pixel of the same color.  This makes the
+ *        match much more robust to edge noise.  Valid inputs of
+ *        'distance' are 0, 1, 2, 3 and 4.  If distance is either 0 or
+ *        greater than 4, we reset it to the default value.
+ *    (3) The 4 numbers for adding rectangles of pixels outside the fg
+ *        can be use if the pattern is expected to be surrounded by bg
+ *        (white) pixels.  On the other hand, if the pattern may be near
+ *        other fg (black) components on some sides, use 0 for those sides.
+ *    (4) The input pix, as extended by the extra pixels on selected sides,
+ *        can optionally be returned.  For debugging, call
+ *        pixDisplayHitMissSel() to visualize the hit-miss sel superimposed
+ *        on the generating bitmap.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Sel * on the Lua stack
@@ -9763,6 +14546,38 @@ GenerateSelRandom(lua_State *L)
  * Arg #7 is expected to be a l_int32 (botpix).
  * Arg #8 is expected to be a l_int32 (leftpix).
  * Arg #9 is expected to be a l_int32 (rightpix).
+ *
+ * Notes:
+ *    (1) The horizontal and vertical lines along which elements are
+ *        selected are roughly equally spaced.  The actual locations of
+ *        the hits and misses are the centers of respective run-lengths.
+ *    (2) No elements are selected that are less than 'distance' pixels away
+ *        from a boundary pixel of the same color.  This makes the
+ *        match much more robust to edge noise.  Valid inputs of
+ *        'distance' are 0, 1, 2, 3 and 4.  If distance is either 0 or
+ *        greater than 4, we reset it to the default value.
+ *    (3) The 4 numbers for adding rectangles of pixels outside the fg
+ *        can be use if the pattern is expected to be surrounded by bg
+ *        (white) pixels.  On the other hand, if the pattern may be near
+ *        other fg (black) components on some sides, use 0 for those sides.
+ *    (4) The pixels added to a side allow you to have miss elements there.
+ *        There is a constraint between distance, minlength, and
+ *        the added pixels for this to work.  We illustrate using the
+ *        default values.  If you add 5 pixels to the top, and use a
+ *        distance of 1, then you end up with a vertical run of at least
+ *        4 bg pixels along the top edge of the image.  If you use a
+ *        minimum runlength of 3, each vertical line will always find
+ *        a miss near the center of its run.  However, if you use a
+ *        minimum runlength of 5, you will not get a miss on every vertical
+ *        line.  As another example, if you have 7 added pixels and a
+ *        distance of 2, you can use a runlength up to 5 to guarantee
+ *        that the miss element is recorded.  We give a warning if the
+ *        contraint does not guarantee a miss element outside the
+ *        image proper.
+ *    (5) The input pix, as extended by the extra pixels on selected sides,
+ *        can optionally be returned.  For debugging, call
+ *        pixDisplayHitMissSel() to visualize the hit-miss sel superimposed
+ *        on the generating bitmap.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Sel * on the Lua stack
@@ -9791,6 +14606,12 @@ GenerateSelWithRuns(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+/*!
+ * \brief   pixGetAllCCBorders()
+ *
+ * \param[in]    pixs 1 bpp
+ * \return  ccborda, or NULL on error
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 CCBorda * on the Lua stack
@@ -9808,6 +14629,15 @@ GetAllCCBorders(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
+ *
+ * Notes:
+ *      (1) The output formats are restricted to tiff, jpeg and png
+ *          because these are the most commonly used image formats and
+ *          the ones that are typically installed with leptonica.
+ *      (2) This decides what compression to use based on the pix.
+ *          It chooses tiff-g4 if 1 bpp without a colormap, jpeg with
+ *          quality 75 if grayscale, rgb or rgba (where it loses
+ *          the alpha layer), and lossless png for all other situations.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -9833,6 +14663,23 @@ GetAutoFormat(lua_State *L)
  * Arg #4 is an optional l_int32 (x).
  * Arg #5 is an optional l_int32 (y).
  * Arg #6 is an optional l_int32 (factor).
+ *
+ * Notes:
+ *      (1) Use L_MEAN_ABSVAL to get the average value of pixels in pixs
+ *          that are under the fg of the optional mask.  If the mask
+ *          is null, it finds the average of the pixels in pixs.
+ *      (2) Likewise, use L_ROOT_MEAN_SQUARE to get the rms value of
+ *          pixels in pixs, either masked or not; L_STANDARD_DEVIATION
+ *          to get the standard deviation from the mean of the pixels;
+ *          L_VARIANCE to get the average squared difference from the
+ *          expected value.  The variance is the square of the stdev.
+ *          For the standard deviation, we use
+ *              sqrt(<(<x> - x)>^2) = sqrt(<x^2> - <x>^2)
+ *      (3) Set the subsampling %factor > 1 to reduce the amount of
+ *          computation.
+ *      (4) Clipping of pixm (if it exists) to pixs is done in the inner loop.
+ *      (5) Input x,y are ignored unless pixm exists.
+ *      (6) A better name for this would be: pixGetPixelStatsGray()
  * </pre>
  * \param L pointer to the lua_State
  * \return 3 numbers on the Lua stack (rval, gval, bval)
@@ -9863,6 +14710,12 @@ GetAverageMasked(lua_State *L)
  * Arg #4 is an optional l_int32 (x).
  * Arg #5 is an optional l_int32 (y).
  * Arg #6 is an optional l_int32 (factor).
+ *
+ * Notes:
+ *      (1) For usage, see pixGetAverageMasked().
+ *      (2) If there is a colormap, it is removed before the 8 bpp
+ *          component images are extracted.
+ *      (3) A better name for this would be: pixGetPixelStatsRGB()
  * </pre>
  * \param L pointer to the lua_State
  * \return 3 numbers on the Lua stack (rval, gval, bval)
@@ -9893,6 +14746,14 @@ GetAverageMaskedRGB(lua_State *L)
  * Arg #2 is expected to be a string describing the type of stats (type).
  * Arg #4 is expected to be a l_int32 (sx).
  * Arg #5 is expected to be a l_int32 (sy).
+ *
+ * Notes:
+ *      (1) Only computes for tiles that are entirely contained in pixs.
+ *      (2) Use L_MEAN_ABSVAL to get the average abs value within the tile;
+ *          L_ROOT_MEAN_SQUARE to get the rms value within each tile;
+ *          L_STANDARD_DEVIATION to get the standard dev. from the average
+ *          within each tile.
+ *      (3) If colormapped, converts to 8 bpp gray.
  * </pre>
  * \param L pointer to the lua_State
  * \return 3 numbers on the Lua stack (rval, gval, bval)
@@ -9916,6 +14777,11 @@ GetAverageTiled(lua_State *L)
  * Arg #2 is expected to be a string describing the type of stats (type).
  * Arg #3 is expected to be a l_int32 (sx).
  * Arg #4 is expected to be a l_int32 (sy).
+ *
+ * Notes:
+ *      (1) For usage, see pixGetAverageTiled().
+ *      (2) If there is a colormap, it is removed before the 8 bpp
+ *          component images are extracted.
  * </pre>
  * \param L pointer to the lua_State
  * \return 3 numbers on the Lua stack (rval, gval, bval)
@@ -9945,6 +14811,11 @@ GetAverageTiledRGB(lua_State *L)
  * Arg #4 is expected to be a l_int32 (sy).
  * Arg #5 is expected to be a l_int32 (thresh).
  * Arg #6 is expected to be a l_int32 (mincount).
+ *
+ * Notes:
+ *      (1) The background is measured in regions that don't have
+ *          images.  It is then propagated into the image regions,
+ *          and finally smoothed in each image region.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -10002,6 +14873,12 @@ GetBackgroundGrayMapMorph(lua_State *L)
  * Arg #5 is expected to be a l_int32 (sy).
  * Arg #6 is expected to be a l_int32 (thresh).
  * Arg #7 is expected to be a l_int32 (mincount).
+ *
+ * Notes:
+ *      (1) If pixg, which is a grayscale version of pixs, is provided,
+ *          use this internally to generate the foreground mask.
+ *          Otherwise, a grayscale version of pixs will be generated
+ *          from the green component only, used, and destroyed.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -10066,6 +14943,19 @@ GetBackgroundRGBMapMorph(lua_State *L)
  * Arg #3 is expected to be a l_int32 (nbins).
  * Arg #4 is expected to be a l_int32 (factor).
  * Arg #5 is expected to be a Numa* (alut).
+ *
+ * Notes:
+ *      (1) This takes a color image, a grayscale (intensity) version,
+ *          a LUT from intensity to bin number, and the number of bins.
+ *          It computes the average color for pixels whose intensity
+ *          is in each bin.  This is returned as an array of l_uint32
+ *          colors in our standard RGBA ordering.
+ *      (2) This function generates equal width intensity bins and
+ *          finds the average color in each bin.  Compare this with
+ *          pixGetRankColorArray(), which rank orders the pixels
+ *          by the value of the selected component in each pixel,
+ *          sets up bins with equal population (not intensity width!),
+ *          and gets the average color in each bin.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack (carray)
@@ -10097,6 +14987,11 @@ GetBinnedColor(lua_State *L)
  * Arg #3 is expected to be a l_int32 (factor).
  * Arg #4 is expected to be a string defining the selected color (color).
  * Arg #5 is an optional l_int32 (fontsize).
+ *
+ * Notes:
+ *      (1) This returns the min and max average values of the
+ *          selected color component in the set of rank bins,
+ *          where the ranking is done using the specified component.
  * </pre>
  * \param L pointer to the lua_State
  * \return 2 integers and 1 table on the Lua stack (minval, maxval, carray)
@@ -10129,6 +15024,12 @@ GetBinnedComponentRange(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a string describing the operation (op).
+ *
+ * Notes:
+ *      (1) Side effect.  For a colormapped image, if the requested
+ *          color is not present and there is room to add it in the cmap,
+ *          it is added and the new index is returned.  If there is no room,
+ *          the index of the closest color in intensity is returned.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -10169,6 +15070,31 @@ GetBlackVal(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Box* (box).
+ *
+/*!
+ * \brief   pixGetCCBorders()
+ *
+ * \param[in]    pixs 1 bpp, one 8-connected component
+ * \param[in]    box  xul, yul, width, height in global coords
+ * \return  ccbord, or NULL on error
+ *
+ * <pre>
+ * Notes:
+ *      (1) We are finding the exterior and interior borders
+ *          of an 8-connected component.   This should be used
+ *          on a pix that has exactly one 8-connected component.
+ *      (2) Typically, pixs is a c.c. in some larger pix.  The
+ *          input box gives its location in global coordinates.
+ *          This box is saved, as well as the boxes for the
+ *          borders of any holes within the c.c., but the latter
+ *          are given in relative coords within the c.c.
+ *      (3) The calculations for the exterior border are done
+ *          on a pix with a 1-pixel
+ *          added border, but the saved pixel coordinates
+ *          are the correct (relative) ones for the input pix
+ *          (without a 1-pixel border)
+ *      (4) For the definition of the three tables -- xpostab[], ypostab[]
+ *          and qpostab[] -- see above where they are defined.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 CCBord * on the Lua stack
@@ -10188,6 +15114,11 @@ GetCCBorders(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) This generates a histogram of colormap pixel indices,
+ *          and is of size 2^d.
+ *      (2) Set the subsampling %factor > 1 to reduce the amount of computation.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -10207,6 +15138,12 @@ GetCmapHistogram(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Box* (box).
  * Arg #3 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) This generates a histogram of colormap pixel indices,
+ *          and is of size 2^d.
+ *      (2) Set the subsampling %factor > 1 to reduce the amount of computation.
+ *      (3) Clipping to the box is done in the inner loop.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -10229,6 +15166,12 @@ GetCmapHistogramInRect(lua_State *L)
  * Arg #3 is expected to be a l_int32 (x).
  * Arg #4 is expected to be a l_int32 (y).
  * Arg #5 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) This generates a histogram of colormap pixel indices,
+ *          and is of size 2^d.
+ *      (2) Set the subsampling %factor > 1 to reduce the amount of computation.
+ *      (3) Clipping of pixm to pixs is done in the inner loop.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -10250,6 +15193,10 @@ GetCmapHistogramMasked(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) This generates an ordered map from pixel value to histogram count.
+ *      (2) Use amapGetCountForColor() to use the map to look up a count.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -10268,6 +15215,11 @@ GetColorAmapHistogram(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) This generates a set of three 256 entry histograms,
+ *          one for each color component (r,g,b).
+ *      (2) Set the subsampling %factor > 1 to reduce the amount of computation.
  * </pre>
  * \param L pointer to the lua_State
  * \return 3 Numa* on the Lua stack (red, green, blue)
@@ -10294,6 +15246,12 @@ GetColorHistogram(lua_State *L)
  * Arg #3 is expected to be a l_int32 (x).
  * Arg #4 is expected to be a l_int32 (y).
  * Arg #5 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) This generates a set of three 256 entry histograms,
+ *      (2) Set the subsampling %factor > 1 to reduce the amount of computation.
+ *      (3) Clipping of pixm (if it exists) to pixs is done in the inner loop.
+ *      (4) Input x,y are ignored unless pixm exists.
  * </pre>
  * \param L pointer to the lua_State
  * \return 3 Numa* on the Lua stack (red, green, blue)
@@ -10322,6 +15280,11 @@ GetColorHistogramMasked(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixm).
  * Arg #3 is expected to be a Box* (box).
  * Arg #4 is expected to be a l_int32 (dist).
+ *
+ * Notes:
+ *      (1) This finds the average color in a set of pixels that are
+ *          roughly a distance %dist from the c.c. boundary and in the
+ *          background of the mask image.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -10361,6 +15324,21 @@ GetColormap(lua_State *L)
  * \brief Get column stats for Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This computes a row vector of statistics using each
+ *          column of a Pix.  The result is put in %rowvect.
+ *      (2) The %thresh parameter works with L_MODE_VAL only, and
+ *          sets a minimum occupancy of the mode bin.
+ *          If the occupancy of the mode bin is less than %thresh, the
+ *          mode value is returned as 0.  To always return the actual
+ *          mode value, set %thresh = 0.
+ *      (3) What is the meaning of this %thresh parameter?
+ *          For each column, the total count in the histogram is h, the
+ *          image height.  So %thresh, relative to h, gives a measure
+ *          of the ratio of the bin width to the width of the distribution.
+ *          The larger %thresh, the narrower the distribution must be
+ *          for the mode value to be returned (instead of returning 0).
  * </pre>
  * \param L pointer to the lua_State
  * \return nbins numbers on the Lua stack (colvect[])
@@ -10431,6 +15409,15 @@ GetDepth(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix1).
  * Arg #2 is expected to be a Pix* (pix2).
  * Arg #3 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) The two images are aligned at the UL corner, and do not
+ *          need to be the same size.  If they are not the same size,
+ *          the comparison will be made over overlapping pixels.
+ *      (2) If there is a colormap, it is removed and the result
+ *          is either gray or RGB depending on the colormap.
+ *      (3) If RGB, the maximum difference between pixel components is
+ *          saved in the histogram.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa * on the Lua stack
@@ -10454,6 +15441,32 @@ GetDifferenceHistogram(lua_State *L)
  * Arg #3 is expected to be a l_int32 (factor).
  * Arg #4 is expected to be a l_int32 (mindiff).
  * Arg #7 is expected to be a l_int32 (details).
+ *
+ * Notes:
+ *      (1) This takes a threshold %mindiff and describes the difference
+ *          between two images in terms of two numbers:
+ *            (a) the fraction of pixels, %fractdiff, whose difference
+ *                equals or exceeds the threshold %mindiff, and
+ *            (b) the average value %avediff of the difference in pixel value
+ *                for the pixels in the set given by (a), after you subtract
+ *                %mindiff.  The reason for subtracting %mindiff is that
+ *                you then get a useful measure for the rate of falloff
+ *                of the distribution for larger differences.  For example,
+ *                if %mindiff = 10 and you find that %avediff = 2.5, it
+ *                says that of the pixels with diff > 10, the average of
+ *                their diffs is just mindiff + 2.5 = 12.5.  This is a
+ *                fast falloff in the histogram with increasing difference.
+ *      (2) The two images are aligned at the UL corner, and do not
+ *          need to be the same size.  If they are not the same size,
+ *          the comparison will be made over overlapping pixels.
+ *      (3) If there is a colormap, it is removed and the result
+ *          is either gray or RGB depending on the colormap.
+ *      (4) If RGB, the maximum difference between pixel components is
+ *          saved in the histogram.
+ *      (5) Set %details == 1 to see the difference histogram and get
+ *          an output that shows for each value of %mindiff, what are the
+ *          minimum values required for fractdiff and avediff in order
+ *          that the two pix will be considered similar.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -10522,6 +15535,12 @@ GetEdgeProfile(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
  * Arg #3 is expected to be a string describing the type (type; min or max).
+ *
+ * Notes:
+ *      (1) If pixs is grayscale, the result is returned in &grayval.
+ *          Otherwise, if there is a colormap or d == 32,
+ *          each requested color component is returned.  At least
+ *          one color component (address) must be input.
  * </pre>
  * \param L pointer to the lua_State
  * \return 4 integers on the Lua stack (rval, gval, bval, grayval)
@@ -10550,6 +15569,14 @@ GetExtremeValue(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) If pixs has a colormap, it is converted to 8 bpp gray.
+ *          If you want a histogram of the colormap indices, use
+ *          pixGetCmapHistogram().
+ *      (2) If pixs does not have a colormap, the output histogram is
+ *          of size 2^d, where d is the depth of pixs.
+ *      (3) Set the subsampling factor > 1 to reduce the amount of computation.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -10569,6 +15596,13 @@ GetGrayHistogram(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Box* (box).
  * Arg #3 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) If pixs is cmapped, it is converted to 8 bpp gray.
+ *          If you want a histogram of the colormap indices, use
+ *          pixGetCmapHistogramInRect().
+ *      (2) This always returns a 256-value histogram of pixel values.
+ *      (3) Set the subsampling %factor > 1 to reduce the amount of computation.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -10591,6 +15625,15 @@ GetGrayHistogramInRect(lua_State *L)
  * Arg #3 is expected to be a l_int32 (x).
  * Arg #4 is expected to be a l_int32 (y).
  * Arg #5 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) If pixs is cmapped, it is converted to 8 bpp gray.
+ *          If you want a histogram of the colormap indices, use
+ *          pixGetCmapHistogramMasked().
+ *      (2) This always returns a 256-value histogram of pixel values.
+ *      (3) Set the subsampling factor > 1 to reduce the amount of computation.
+ *      (4) Clipping of pixm (if it exists) to pixs is done in the inner loop.
+ *      (5) Input x,y are ignored unless pixm exists.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -10614,6 +15657,11 @@ GetGrayHistogramMasked(lua_State *L)
  * Arg #2 is expected to be a l_int32 (factor).
  * Arg #3 is expected to be a l_int32 (nx).
  * Arg #4 is expected to be a l_int32 (ny).
+ *
+ * Notes:
+ *      (1) If pixs is cmapped, it is converted to 8 bpp gray.
+ *      (2) This returns a set of 256-value histograms of pixel values.
+ *      (3) Set the subsampling factor > 1 to reduce the amount of computation.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numaa* on the Lua stack
@@ -10654,6 +15702,13 @@ GetHeight(lua_State *L)
  * Arg #3 is expected to be a Box* (box).
  * Arg #4 is expected to be a l_int32 (xs).
  * Arg #5 is expected to be a l_int32 (ys).
+ *
+ * Notes:
+ *      (1) we trace out hole border on pixs without addition
+ *          of single pixel added border to pixs
+ *      (2) therefore all coordinates are relative within the c.c. (pixs)
+ *      (3) same position tables and stopping condition as for
+ *          exterior borders
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -10694,6 +15749,11 @@ GetInputFormat(lua_State *L)
  * Arg #2 is expected to be a l_int32 (bgval).
  * Arg #3 is expected to be a l_int32 (smoothx).
  * Arg #4 is expected to be a l_int32 (smoothy).
+ *
+ * Notes:
+ *     (1) bgval should typically be > 120 and < 240
+ *     (2) pixd is a normalization image; the original image is
+ *       multiplied by pixd and the result is divided by 256.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -10766,6 +15826,67 @@ GetLastOnPixelInRun(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
+ *
+ * Notes:
+ *      (1) This is intended to be used for fast random pixel access.
+ *          For example, for an 8 bpp image,
+ *              val = GET_DATA_BYTE(lines8[i], j);
+ *          is equivalent to, but much faster than,
+ *              pixGetPixel(pix, j, i, &val);
+ *      (2) How much faster?  For 1 bpp, it's from 6 to 10x faster.
+ *          For 8 bpp, it's an amazing 30x faster.  So if you are
+ *          doing random access over a substantial part of the image,
+ *          use this line ptr array.
+ *      (3) When random access is used in conjunction with a stack,
+ *          queue or heap, the overall computation time depends on
+ *          the operations performed on each struct that is popped
+ *          or pushed, and whether we are using a priority queue (O(logn))
+ *          or a queue or stack (O(1)).  For example, for maze search,
+ *          the overall ratio of time for line ptrs vs. pixGet/Set* is
+ *             Maze type     Type                   Time ratio
+ *               binary      queue                     0.4
+ *               gray        heap (priority queue)     0.6
+ *      (4) Because this returns a void** and the accessors take void*,
+ *          the compiler cannot check the pointer types.  It is
+ *          strongly recommended that you adopt a naming scheme for
+ *          the returned ptr arrays that indicates the pixel depth.
+ *          (This follows the original intent of Simonyi's "Hungarian"
+ *          application notation, where naming is used proactively
+ *          to make errors visibly obvious.)  By doing this, you can
+ *          tell by inspection if the correct accessor is used.
+ *          For example, for an 8 bpp pixg:
+ *              void **lineg8 = pixGetLinePtrs(pixg, NULL);
+ *              val = GET_DATA_BYTE(lineg8[i], j);  // fast access; BYTE, 8
+ *              ...
+ *              LEPT_FREE(lineg8);  // don't forget this
+ *      (5) These are convenient for accessing bytes sequentially in an
+ *          8 bpp grayscale image.  People who write image processing code
+ *          on 8 bpp images are accustomed to grabbing pixels directly out
+ *          of the raster array.  Note that for little endians, you first
+ *          need to reverse the byte order in each 32-bit word.
+ *          Here's a typical usage pattern:
+ *              pixEndianByteSwap(pix);   // always safe; no-op on big-endians
+ *              l_uint8 **lineptrs = (l_uint8 **)pixGetLinePtrs(pix, NULL);
+ *              pixGetDimensions(pix, &w, &h, NULL);
+ *              for (i = 0; i < h; i++) {
+ *                  l_uint8 *line = lineptrs[i];
+ *                  for (j = 0; j < w; j++) {
+ *                      val = line[j];
+ *                      ...
+ *                  }
+ *              }
+ *              pixEndianByteSwap(pix);  // restore big-endian order
+ *              LEPT_FREE(lineptrs);
+ *          This can be done even more simply as follows:
+ *              l_uint8 **lineptrs = pixSetupByteProcessing(pix, &w, &h);
+ *              for (i = 0; i < h; i++) {
+ *                  l_uint8 *line = lineptrs[i];
+ *                  for (j = 0; j < w; j++) {
+ *                      val = line[j];
+ *                      ...
+ *                  }
+ *              }
+ *              pixCleanupByteProcessing(pix, lineptrs);
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 void ** on the Lua stack
@@ -10793,6 +15914,20 @@ GetLinePtrs(lua_State *L)
  * Arg #6 is expected to be a l_float32 (sweepdelta).
  * Arg #7 is expected to be a l_float32 (minbsdelta).
  * Arg #8 is expected to be a boolean (debug).
+ *
+ * Notes:
+ *      (1) The local skew is measured in a set of overlapping strips.
+ *          We then do a least square linear fit parameters to get
+ *          the slope and intercept parameters a and b in
+ *              skew-angle = a * y + b  (degrees)
+ *          for the local skew as a function of raster line y.
+ *          This is then used to make naskew, which can be interpreted
+ *          as the computed skew angle (in degrees) at the left edge
+ *          of each raster line.
+ *      (2) naskew can then be used to find the baselines of text, because
+ *          each text line has a baseline that should intersect
+ *          the left edge of the image with the angle given by this
+ *          array, evaluated at the raster line of intersection.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa * on the Lua stack
@@ -10828,6 +15963,14 @@ GetLocalSkewAngles(lua_State *L)
  * Arg #5 is expected to be a l_float32 (sweeprange).
  * Arg #6 is expected to be a l_float32 (sweepdelta).
  * Arg #7 is expected to be a l_float32 (minbsdelta).
+ *
+ * Notes:
+ *      (1) This generates two pairs of points in the src, each pair
+ *          corresponding to a pair of points that would lie along
+ *          the same raster line in a transformed (dewarped) image.
+ *      (2) The sets of 4 src and 4 dest points returned by this function
+ *          can then be used, in a projective or bilinear transform,
+ *          to remove keystoning in the src.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -10856,6 +15999,13 @@ GetLocalSkewTransform(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is an optional Box*.
+ *
+ * Notes:
+ *      (1) This can be used to find the maximum and its location
+ *          in a 2-dimensional histogram, where the x and y directions
+ *          represent two color components (e.g., saturation and hue).
+ *      (2) Note that here a 32 bpp pixs has pixel values that are simply
+ *          numbers.  They are not 8 bpp components in a colorspace.
  * </pre>
  * \param L pointer to the lua_State
  * \return 3 integers on the Lua stack (maxval, xmax, ymax)
@@ -10902,6 +16052,14 @@ GetMomentByColumn(lua_State *L)
  * Arg #2 is expected to be a l_int32 (sigbits).
  * Arg #3 is expected to be a l_int32 (factor).
  * Arg #4 is expected to be a l_int32 (ncolors).
+ *
+ * Notes:
+ *      (1) This finds the %ncolors most populated cubes in rgb colorspace,
+ *          where the cube size depends on %sigbits as
+ *               cube side = (256 >> sigbits)
+ *      (2) The rgb color components are found at the center of the cube.
+ *      (3) The output array of colors can be displayed using
+ *               pixDisplayColorArray(array, ncolors, ...);
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -10929,6 +16087,16 @@ GetMostPopulatedColors(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a CCBord* (ccb).
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Box* (box).
+ *
+ * Notes:
+ *      (1) the border is saved in relative coordinates within
+ *          the c.c. (pixs).  Because the calculation is done
+ *          in pixb with added 1 pixel border, we must subtract
+ *          1 from each pixel value before storing it.
+ *      (2) the stopping condition is that after the first pixel is
+ *          returned to, the next pixel is the second pixel.  Having
+ *          these 2 pixels recur in sequence proves the path is closed,
+ *          and we do not store the second pixel again.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -10949,6 +16117,14 @@ GetOuterBorder(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Box* (box).
+ *
+ * Notes:
+ *      (1) We are finding the exterior border of a single 8-connected
+ *          component.
+ *      (2) If box is NULL, the outline returned is in the local coords
+ *          of the input pix.  Otherwise, box is assumed to give the
+ *          location of the pix in global coordinates, and the returned
+ *          pta will be in those global coordinates.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pta * on the Lua stack
@@ -10986,6 +16162,27 @@ GetOuterBordersPtaa(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix1).
  * Arg #2 is expected to be a Pix* (pix2).
  * Arg #3 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) This computes the power S/N ratio, in dB, for the difference
+ *          between two images.  By convention, the power S/N
+ *          for a grayscale image is ('log' == log base 10,
+ *          and 'ln == log base e):
+ *            PSNR = 10 * log((255/MSE)^2)
+ *                 = 4.3429 * ln((255/MSE)^2)
+ *                 = -4.3429 * ln((MSE/255)^2)
+ *          where MSE is the mean squared error.
+ *          Here are some examples:
+ *             MSE             PSNR
+ *             ---             ----
+ *             10              28.1
+ *             3               38.6
+ *             1               48.1
+ *             0.1             68.1
+ *      (2) If pix1 and pix2 have the same pixel values, the MSE = 0.0
+ *          and the PSNR is infinity.  For that case, this returns
+ *          PSNR = 1000, which corresponds to the very small MSE of
+ *          about 10^(-48).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_float32 on the Lua stack
@@ -11011,6 +16208,38 @@ GetPSNR(lua_State *L)
  * Arg #3 is expected to be a l_int32 (sampling).
  * Arg #4 is expected to be a l_int32 (dilation).
  * Arg #5 is expected to be a l_int32 (mindiff).
+ *
+ * Notes:
+ *      (1) This takes 2 pix and determines, using 2 input parameters:
+ *           * %dilation specifies the amount of grayscale or color
+ *             dilation to apply to the images, to compensate for
+ *             a small amount of misregistration.  A typical number might
+ *             be 5, which uses a 5x5 Sel.  Grayscale dilation expands
+ *             lighter pixels into darker pixel regions.
+ *           * %mindiff determines the threshold on the difference in
+ *             pixel values to be counted -- two pixels are not similar
+ *             if their difference in value is at least %mindiff.  For
+ *             color pixels, we use the maximum component difference.
+ *      (2) The pixelwise comparison is always done with the UL corners
+ *          aligned.  The sizes of pix1 and pix2 need not be the same,
+ *          although in practice it can be useful to scale to the same size.
+ *      (3) If there is a colormap, it is removed and the result
+ *          is either gray or RGB depending on the colormap.
+ *      (4) Two optional diff images can be retrieved (typ. for debugging):
+ *           pixdiff1: the gray or color difference
+ *           pixdiff2: thresholded to 1 bpp for pixels exceeding %mindiff
+ *      (5) The returned value of fract can be compared to some threshold,
+ *          which is application dependent.
+ *      (6) This method is in analogy to the two-sided hausdorff transform,
+ *          except here it is for d > 1.  For d == 1 (see pixRankHaustest()),
+ *          we verify that when one pix1 is dilated, it covers at least a
+ *          given fraction of the pixels in pix2, and v.v.; in that
+ *          case, the two pix are sufficiently similar.  Here, we
+ *          do an analogous thing: subtract the dilated pix1 from pix2 to
+ *          get a 1-sided hausdorff-like transform.  Then do it the
+ *          other way.  Take the component-wise max of the two results,
+ *          and threshold to get the fraction of pixels with a difference
+ *          below the threshold.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -11041,6 +16270,19 @@ GetPerceptualDiff(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a l_int32 (x).
  * Arg #3 is expected to be a l_int32 (y).
+ *
+ * Notes:
+ *      (1) This returns the value in the data array.  If the pix is
+ *          colormapped, it returns the colormap index, not the rgb value.
+ *      (2) Because of the function overhead and the parameter checking,
+ *          this is much slower than using the GET_DATA_*() macros directly.
+ *          Speed on a 1 Mpixel RGB image, using a 3 GHz machine:
+ *            * pixGet/pixSet: ~25 Mpix/sec
+ *            * GET_DATA/SET_DATA: ~350 MPix/sec
+ *          If speed is important and you're doing random access into
+ *          the pix, use pixGetLinePtrs() and the array access macros.
+ *      (3) If the point is outside the image, this returns an error (1),
+ *          with 0 in %pval.  To avoid spamming output, it fails silently.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -11066,6 +16308,20 @@ GetPixel(lua_State *L)
  * Arg #3 is an optional l_int32 (x).
  * Arg #4 is an optional l_int32 (y).
  * Arg #5 is an optional l_int32 (factor).
+ *
+ * Notes:
+ *      (1) For rgb pix, this is a more direct computation of the
+ *          average value of the pixels in %pixs that are under the
+ *          mask %pixm. It is faster than pixGetPixelStats(), which
+ *          calls pixGetAverageMaskedRGB() and has the overhead of
+ *          generating a temporary pix of each of the three components;
+ *          this can take most of the time if %factor > 1.
+ *      (2) If %pixm is null, this gives the average value of all
+ *          pixels in %pixs.  The returned value is an integer.
+ *      (3) For color %pixs, the returned pixel value is in the standard
+ *          uint32 RGBA packing.
+ *      (4) Clipping of pixm (if it exists) to pixs is done in the inner loop.
+ *      (5) Input x,y are ignored if %pixm does not exist.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -11091,6 +16347,12 @@ GetPixelAverage(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string describing the type of stats (type).
  * Arg #3 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) Simple function to get one of four statistical values of an image.
+ *      (2) It does not take a mask: it uses the entire image.
+ *      (3) To get the average pixel value of an RGB image, suggest using
+ *          pixGetPixelAverage(), which is considerably faster.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -11113,6 +16375,14 @@ GetPixelStats(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string with the component name (comp).
+ *
+ * Notes:
+ *      (1) Three calls to this function generate the r, g and b 8 bpp
+ *          component images.  This is much faster than generating the
+ *          three images in parallel, by extracting a src pixel and setting
+ *          the pixels of each component image from it.  The reason is
+ *          there are many more cache misses when writing to three
+ *          output images simultaneously.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* (pixd) on the Lua stack
@@ -11132,6 +16402,9 @@ GetRGBComponent(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (comp).
+ *
+ * Notes:
+ *      (1) In leptonica, we do not support alpha in colormaps.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -11152,6 +16425,12 @@ GetRGBComponentCmap(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (sigbits).
  * Arg #3 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) This uses a simple, fast method of indexing into an rgb image.
+ *      (2) The output is a 1D histogram of count vs. rgb-index, which
+ *          uses red sigbits as the most significant and blue as the least.
+ *      (3) This function produces the same result as pixMedianCutHisto().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa * on the Lua stack
@@ -11171,6 +16450,10 @@ GetRGBHistogram(lua_State *L)
  * \brief Extract red, green and blue components from Pix* (pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This puts rgb components from the input line in pixs
+ *          into the given buffers.
  * </pre>
  * \param L pointer to the lua_State
  * \return 3 lstrings on the Lua stack (%bufr, %bufg, %bufb)
@@ -11230,6 +16513,9 @@ GetRGBPixel(lua_State *L)
  * \brief Get a random pixel's value from Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
+ *
+ * Notes:
+ *      (1) If the pix is colormapped, it returns the rgb value.
  * </pre>
  * \param L pointer to the lua_State
  * \return 3 l_int32 on the Lua stack (val, x, y)
@@ -11255,6 +16541,9 @@ GetRandomPixel(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
  * Arg #3 is expected to be a l_int32 (color).
+ *
+ * Notes:
+ *      (1) If pixs is 8 bpp grayscale, the color selection type is ignored.
  * </pre>
  * \param L pointer to the lua_State
  * \return 2 integers on the Lua stack (minval, maxval)
@@ -11281,6 +16570,26 @@ GetRangeValues(lua_State *L)
  * Arg #2 is expected to be a l_int32 (nbins).
  * Arg #3 is expected to be a l_int32 (factor).
  * Arg #4 is expected to be a string defining the selected color (color).
+ *
+ * Notes:
+ *      (1) The color selection flag is one of: L_SELECT_RED, L_SELECT_GREEN,
+ *          L_SELECT_BLUE, L_SELECT_MIN, L_SELECT_MAX, L_SELECT_AVERAGE,
+ *          L_SELECT_HUE, L_SELECT_SATURATION.
+ *      (2) Then it finds the histogram of the selected color type in each
+ *          RGB pixel.  For each of the %nbins sets of pixels,
+ *          ordered by this color type value, find the average RGB color,
+ *          and return this as a "rank color" array.  The output array
+ *          has %nbins colors.
+ *      (3) Set the subsampling factor > 1 to reduce the amount of
+ *          computation.  Typically you want at least 10,000 pixels
+ *          for reasonable statistics.
+ *      (4) The rank color as a function of rank can then be found from
+ *             rankint = (l_int32)(rank * (nbins - 1) + 0.5);
+ *             extractRGBValues(array[rankint], &rval, &gval, &bval);
+ *          where the rank is in [0.0 ... 1.0].
+ *          This function is meant to be simple and approximate.
+ *      (5) Compare this with pixGetBinnedColor(), which generates equal
+ *          width intensity bins and finds the average color in each bin.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack (carray)
@@ -11309,6 +16618,12 @@ GetRankColorArray(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
  * Arg #3 is expected to be a l_float32 (rank).
+ *
+ * Notes:
+ *      (1) Simple function to get rank values of an image.
+ *          For a color image, the median value (rank = 0.5) can be
+ *          used to linearly remap the colors based on the median
+ *          of a target image, using pixLinearMapToTargetColor().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -11335,6 +16650,22 @@ GetRankValue(lua_State *L)
  * Arg #4 is expected to be a l_int32 (y).
  * Arg #5 is expected to be a l_int32 (factor).
  * Arg #6 is expected to be a l_float32 (rank).
+ *
+ * Notes:
+ *      (1) Computes the rank value of pixels in pixs that are under
+ *          the fg of the optional mask.  If the mask is null, it
+ *          computes the average of the pixels in pixs.
+ *      (2) Set the subsampling %factor > 1 to reduce the amount of
+ *          computation.
+ *      (3) Clipping of pixm (if it exists) to pixs is done in the inner loop.
+ *      (4) Input x,y are ignored unless pixm exists.
+ *      (5) The rank must be in [0.0 ... 1.0], where the brightest pixel
+ *          has rank 1.0.  For the median pixel value, use 0.5.
+ *      (6) The histogram can optionally be returned, so that other rank
+ *          values can be extracted without recomputing the histogram.
+ *          In that case, just use
+ *              numaHistogramGetValFromRank(na, rank, &val);
+ *          on the returned Numa for additional rank values.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 number (value) and a Numa* (histogram) on the Lua stack
@@ -11367,6 +16698,16 @@ GetRankValueMasked(lua_State *L)
  * Arg #4 is expected to be a l_int32 (y).
  * Arg #5 is expected to be a l_int32 (factor).
  * Arg #6 is expected to be a l_float32 (rank).
+ *
+ * Notes:
+ *      (1) Computes the rank component values of pixels in pixs that
+ *          are under the fg of the optional mask.  If the mask is null, it
+ *          computes the average of the pixels in pixs.
+ *      (2) Set the subsampling %factor > 1 to reduce the amount of
+ *          computation.
+ *      (4) Input x,y are ignored unless pixm exists.
+ *      (5) The rank must be in [0.0 ... 1.0], where the brightest pixel
+ *          has rank 1.0.  For the median pixel value, use 0.5.
  * </pre>
  * \param L pointer to the lua_State
  * \return 3 numbers on the Lua stack (rval, gval, bval)
@@ -11394,6 +16735,12 @@ GetRankValueMaskedRGB(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This returns the raster data as a byte string, padded to the
+ *          byte.  For 1 bpp, the first pixel is the MSbit in the first byte.
+ *          For rgb, the bytes are in (rgb) order.  This is the format
+ *          required for flate encoding of pixels in a PostScript file.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -11432,6 +16779,10 @@ GetRefcount(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #5 is expected to be a Pixa* (pixadb).
+ *
+ * Notes:
+ *      (1) It is best to deskew the image before segmenting.
+ *      (2) Passing in %pixadb enables debug output.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -11477,6 +16828,26 @@ GetResolution(lua_State *L)
  * \brief Get row stats for Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This computes a column vector of statistics using each
+ *          row of a Pix.  The result is put in %colvect.
+ *      (2) The %thresh parameter works with L_MODE_VAL only, and
+ *          sets a minimum occupancy of the mode bin.
+ *          If the occupancy of the mode bin is less than %thresh, the
+ *          mode value is returned as 0.  To always return the actual
+ *          mode value, set %thresh = 0.
+ *      (3) What is the meaning of this %thresh parameter?
+ *          For each row, the total count in the histogram is w, the
+ *          image width.  So %thresh, relative to w, gives a measure
+ *          of the ratio of the bin width to the width of the distribution.
+ *          The larger %thresh, the narrower the distribution must be
+ *          for the mode value to be returned (instead of returning 0).
+ *      (4) If the Pix consists of a set of corresponding columns,
+ *          one for each Pix in a Pixa, the width of the Pix is the
+ *          number of Pix in the Pixa and the column vector can
+ *          be stored as a column in a Pix of the same size as
+ *          each Pix in the Pixa.
  * </pre>
  * \param L pointer to the lua_State
  * \return nbins numbers on the Lua stack (colvect[])
@@ -11506,6 +16877,25 @@ GetRowStats(lua_State *L)
  * Arg #2 is expected to be a l_int32 (x).
  * Arg #3 is expected to be a l_int32 (y).
  * Arg #4 is expected to be a l_int32 (minlength).
+ *
+ * Notes:
+ *      (1) Action: this function computes the fg (black) and bg (white)
+ *          pixel runlengths along the specified horizontal or vertical line,
+ *          and returns a Numa of the "center" pixels of each fg run
+ *          whose length equals or exceeds the minimum length.
+ *      (2) This only works on horizontal and vertical lines.
+ *      (3) For horizontal runs, set x = -1 and y to the value
+ *          for all points along the raster line.  For vertical runs,
+ *          set y = -1 and x to the value for all points along the
+ *          pixel column.
+ *      (4) For horizontal runs, the points in the Numa are the x
+ *          values in the center of fg runs that are of length at
+ *          least 'minlength'.  For vertical runs, the points in the
+ *          Numa are the y values in the center of fg runs, again
+ *          of length 'minlength' or greater.
+ *      (5) If there are no fg runs along the line that satisfy the
+ *          minlength constraint, the returned Numa is empty.  This
+ *          is not an error.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa * on the Lua stack
@@ -11530,6 +16920,14 @@ GetRunCentersOnLine(lua_State *L)
  * Arg #3 is expected to be a l_int32 (y1).
  * Arg #4 is expected to be a l_int32 (x2).
  * Arg #5 is expected to be a l_int32 (y2).
+ *
+ * Notes:
+ *      (1) Action: this function uses the bresenham algorithm to compute
+ *          the pixels along the specified line.  It returns a Numa of the
+ *          runlengths of the fg (black) and bg (white) runs, always
+ *          starting with a white run.
+ *      (2) If the first pixel on the line is black, the length of the
+ *          first returned run (which is white) is 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa * on the Lua stack
@@ -11554,6 +16952,16 @@ GetRunsOnLine(lua_State *L)
  * Arg #2 is expected to be a l_int32 (x).
  * Arg #3 is expected to be a l_int32 (y).
  * Arg #4 is expected to be a l_int32 (conn).
+ *
+ * Notes:
+ *      (1) The returned %neigh array is the unique set of neighboring
+ *          pixel values, of size nvals, sorted from smallest to largest.
+ *          The value 0, which represents background pixels that do
+ *          not belong to any set of connected components, is discarded.
+ *      (2) If there are no neighbors, this returns %neigh = NULL; otherwise,
+ *          the caller must free the array.
+ *      (3) For either 4 or 8 connectivity, the maximum number of unique
+ *          neighbor values is 4.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -11596,6 +17004,10 @@ GetSpp(lua_State *L)
  * \brief Get the text of a Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
+ *
+ * Notes:
+ *      (1) The text string belongs to the pix.  The caller must
+ *          NOT free it!
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
@@ -11654,6 +17066,13 @@ GetWidth(lua_State *L)
  * Arg #3 is expected to be a l_int32 (minheight).
  * Arg #4 is expected to be a l_int32 (maxwidth).
  * Arg #5 is expected to be a l_int32 (maxheight).
+ *
+ * Notes:
+ *      (1) The input should be at a resolution of between 75 and 150 ppi.
+ *      (2) This is a special version of pixGetWordsInTextlines(), that
+ *          just finds the word boxes in line order, with a numa
+ *          giving the textline index for each word.
+ *          See pixGetWordsInTextlines() for more details.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -11684,6 +17103,37 @@ GetWordBoxesInTextlines(lua_State *L)
  * Arg #3 is expected to be a l_int32 (minheight).
  * Arg #4 is expected to be a l_int32 (maxwidth).
  * Arg #5 is expected to be a l_int32 (maxheight).
+ *
+ * Notes:
+ *      (1) The input should be at a resolution of between 75 and 150 ppi.
+ *      (2) The four size constraints on saved components are all
+ *          scaled by %reduction.
+ *      (3) The result are word images (and their b.b.), extracted in
+ *          textline order, at either full res or 2x reduction,
+ *          and with a numa giving the textline index for each word.
+ *      (4) The pixa and boxa interfaces should make this type of
+ *          application simple to put together.  The steps are:
+ *           ~ generate first estimate of word masks
+ *           ~ get b.b. of these, and remove the small and big ones
+ *           ~ extract pixa of the word images, using the b.b.
+ *           ~ sort actual word images in textline order (2d)
+ *           ~ flatten them to a pixa (1d), saving the textline index
+ *             for each pix
+ *      (5) In an actual application, it may be desirable to pre-filter
+ *          the input image to remove large components, to extract
+ *          single columns of text, and to deskew them.  For example,
+ *          to remove both large components and small noisy components
+ *          that can interfere with the statistics used to estimate
+ *          parameters for segmenting by words, but still retain text lines,
+ *          the following image preprocessing can be done:
+ *                Pix *pixt = pixMorphSequence(pixs, "c40.1", 0);
+ *                Pix *pixf = pixSelectBySize(pixt, 0, 60, 8,
+ *                                     L_SELECT_HEIGHT, L_SELECT_IF_LT, NULL);
+ *                pixAnd(pixf, pixf, pixs);  // the filtered image
+ *          The closing turns text lines into long blobs, but does not
+ *          significantly increase their height.  But if there are many
+ *          small connected components in a dense texture, this is likely
+ *          to generate tall components that will be eliminated in pixf.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -11769,6 +17219,26 @@ GetYRes(lua_State *L)
  * Arg #5 is expected to be a l_int32 (bval).
  * Arg #6 is expected to be a l_int32 (factor).
  * Arg #7 is expected to be a l_float32 (rank).
+ *
+ * Notes:
+ *    (1) This is a version of pixGlobalNormRGB(), where the output
+ *        intensity is scaled back so that a controlled fraction of
+ *        pixel components is allowed to saturate.  See comments in
+ *        pixGlobalNormRGB().
+ *    (2) The value of pixd determines if the results are written to a
+ *        new pix (use NULL), in-place to pixs (use pixs), or to some
+ *        other existing pix.
+ *    (3) This does a global normalization of an image where the
+ *        r,g,b color components are not balanced.  Thus, white in pixs is
+ *        represented by a set of r,g,b values that are not all 255.
+ *    (4) The input values (rval, gval, bval) can be chosen to be the
+ *        color that, after normalization, becomes white background.
+ *        For images that are mostly background, the closer these values
+ *        are to the median component values, the closer the resulting
+ *        background will be to gray, becoming white at the brightest places.
+ *    (5) The mapval used in pixGlobalNormRGB() is computed here to
+ *        avoid saturation of any component in the image (save for a
+ *        fraction of the pixels given by the input rank value).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -11797,6 +17267,28 @@ GlobalNormNoSatRGB(lua_State *L)
  * Arg #4 is expected to be a l_int32 (gval).
  * Arg #5 is expected to be a l_int32 (bval).
  * Arg #6 is expected to be a l_int32 (mapval).
+ *
+ * Notes:
+ *    (1) The value of pixd determines if the results are written to a
+ *        new pix (use NULL), in-place to pixs (use pixs), or to some
+ *        other existing pix.
+ *    (2) This does a global normalization of an image where the
+ *        r,g,b color components are not balanced.  Thus, white in pixs is
+ *        represented by a set of r,g,b values that are not all 255.
+ *    (3) The input values (rval, gval, bval) should be chosen to
+ *        represent the gray color (mapval, mapval, mapval) in src.
+ *        Thus, this function will map (rval, gval, bval) to that gray color.
+ *    (4) Typically, mapval = 255, so that (rval, gval, bval)
+ *        corresponds to the white point of src.  In that case, these
+ *        parameters should be chosen so that few pixels have higher values.
+ *    (5) In all cases, we do a linear TRC separately on each of the
+ *        components, saturating at 255.
+ *    (6) If the input pix is 8 bpp without a colormap, you can get
+ *        this functionality with mapval = 255 by calling:
+ *            pixGammaTRC(pixd, pixs, 1.0, 0, bgval);
+ *        where bgval is the value you want to be mapped to 255.
+ *        Or more generally, if you want bgval to be mapped to mapval:
+ *            pixGammaTRC(pixd, pixs, 1.0, 0, 255 * bgval / mapval);
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -11822,6 +17314,38 @@ GlobalNormRGB(lua_State *L)
  * Arg #2 is expected to be a string (sequence).
  * Arg #3 is expected to be a l_int32 (dispsep).
  * Arg #4 is expected to be a l_int32 (dispy).
+ *
+ * Notes:
+ *      (1) This works on 8 bpp grayscale images.
+ *      (2) This runs a pipeline of operations; no branching is allowed.
+ *      (3) This only uses brick SELs.
+ *      (4) A new image is always produced; the input image is not changed.
+ *      (5) This contains an interpreter, allowing sequences to be
+ *          generated and run.
+ *      (6) The format of the sequence string is defined below.
+ *      (7) In addition to morphological operations, the composite
+ *          morph/subtract tophat can be performed.
+ *      (8) Sel sizes (width, height) must each be odd numbers.
+ *      (9) Intermediate results can optionally be displayed
+ *      (10) The sequence string is formatted as follows:
+ *            ~ An arbitrary number of operations,  each separated
+ *              by a '+' character.  White space is ignored.
+ *            ~ Each operation begins with a case-independent character
+ *              specifying the operation:
+ *                 d or D  (dilation)
+ *                 e or E  (erosion)
+ *                 o or O  (opening)
+ *                 c or C  (closing)
+ *                 t or T  (tophat)
+ *            ~ The args to the morphological operations are bricks of hits,
+ *              and are formatted as a.b, where a and b are horizontal and
+ *              vertical dimensions, rsp. (each must be an odd number)
+ *            ~ The args to the tophat are w or W (for white tophat)
+ *              or b or B (for black tophat), followed by a.b as for
+ *              the dilation, erosion, opening and closing.
+ *           Example valid sequences are:
+ *             "c5.3 + o7.5"
+ *             "c9.9 + tw9.9"
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -11844,6 +17368,11 @@ GrayMorphSequence(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a PixColormap* (cmap).
  * Arg #3 is expected to be a l_int32 (mindepth).
+ *
+ * Notes:
+ *      (1) In use, pixs is an 8 bpp grayscale image without a colormap.
+ *          If there is an existing colormap, a warning is issued and
+ *          a copy of the input pixs is returned.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -11867,6 +17396,39 @@ GrayQuantFromCmap(lua_State *L)
  * Arg #3 is expected to be a Pix* (pixm).
  * Arg #4 is expected to be a l_float32 (minfract).
  * Arg #5 is expected to be a l_int32 (maxsize).
+ *
+ * Notes:
+ *      (1) This is useful for quantizing images with relatively few
+ *          colors, but which may have both color and gray pixels.
+ *          If there are color pixels, it is assumed that an input
+ *          rgb image has been color quantized first so that:
+ *            ~ pixd has a colormap describing the color pixels
+ *            ~ pixm is a mask over the non-color pixels in pixd
+ *            ~ the colormap in pixd, and the color pixels in pixd,
+ *              have been repacked to go from 0 to n-1 (n colors)
+ *          If there are no color pixels, pixd and pixm are both null,
+ *          and all pixels in pixs are quantized to gray.
+ *      (2) A 256-entry histogram is built of the gray values in pixs.
+ *          If pixm exists, the pixels contributing to the histogram are
+ *          restricted to the fg of pixm.  A colormap and LUT are generated
+ *          from this histogram.  We break up the array into a set
+ *          of intervals, each one constituting a color in the colormap:
+ *          An interval is identified by summing histogram bins until
+ *          either the sum equals or exceeds the %minfract of the total
+ *          number of pixels, or the span itself equals or exceeds %maxsize.
+ *          The color of each bin is always an average of the pixels
+ *          that constitute it.
+ *      (3) Note that we do not specify the number of gray colors in
+ *          the colormap.  Instead, we specify two parameters that
+ *          describe the accuracy of the color assignments; this and
+ *          the actual image determine the number of resulting colors.
+ *      (4) If a mask exists and it is not the same size as pixs, make
+ *          a new mask the same size as pixs, with the original mask
+ *          aligned at the UL corners.  Set all additional pixels
+ *          in the (larger) new mask set to 1, causing those pixels
+ *          in pixd to be set as gray.
+ *      (5) We estimate the total number of colors (color plus gray);
+ *          if it exceeds 255, return null.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -11890,6 +17452,44 @@ GrayQuantFromHisto(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (height).
  * Arg #3 is expected to be a l_int32 (connectivity).
+ *
+ * Notes:
+ *      (1) It is more efficient to use a connectivity of 4 for the fill.
+ *      (2) This fills bumps to some level, and extracts the unfilled
+ *          part of the bump.  To extract the troughs of basins, first
+ *          invert pixs and then apply pixHDome().
+ *      (3) It is useful to compare the HDome operation with the TopHat.
+ *          The latter extracts peaks or valleys that have a width
+ *          not exceeding the size of the structuring element used
+ *          in the opening or closing, rsp.  The height of the peak is
+ *          irrelevant.  By contrast, for the HDome, the gray seedfill
+ *          is used to extract all peaks that have a height not exceeding
+ *          a given value, regardless of their width!
+ *      (4) Slightly more precisely, suppose you set 'height' = 40.
+ *          Then all bumps in pixs with a height greater than or equal
+ *          to 40 become, in pixd, bumps with a max value of exactly 40.
+ *          All shorter bumps have a max value in pixd equal to the height
+ *          of the bump.
+ *      (5) The method: the filling mask, pixs, is the image whose peaks
+ *          are to be extracted.  The height of a peak is the distance
+ *          between the top of the peak and the highest "leak" to the
+ *          outside -- think of a sombrero, where the leak occurs
+ *          at the highest point on the rim.
+ *            (a) Generate a seed, pixd, by subtracting some value, p, from
+ *                each pixel in the filling mask, pixs.  The value p is
+ *                the 'height' input to this function.
+ *            (b) Fill in pixd starting with this seed, clipping by pixs,
+ *                in the way described in seedfillGrayLow().  The filling
+ *                stops before the peaks in pixs are filled.
+ *                For peaks that have a height > p, pixd is filled to
+ *                the level equal to the (top-of-the-peak - p).
+ *                For peaks of height < p, the peak is left unfilled
+ *                from its highest saddle point (the leak to the outside).
+ *            (c) Subtract the filled seed (pixd) from the filling mask (pixs).
+ *          Note that in this procedure, everything is done starting
+ *          with the filling mask, pixs.
+ *      (6) For segmentation, the resulting image, pixd, can be thresholded
+ *          and used as a seed for another filling operation.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -11911,6 +17511,20 @@ HDome(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Sel* (sel).
+ *
+ * Notes:
+ *      (1) The hit-miss transform erodes the src, using both hits
+ *          and misses in the Sel.  It ANDs the shifted src for hits
+ *          and ANDs the inverted shifted src for misses.
+ *      (2) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (3) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixHMT(NULL, pixs, ...);
+ *          (b) pixHMT(pixs, pixs, ...);
+ *          (c) pixHMT(pixd, pixs, ...);
+ *      (4) The size of the result is determined by pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -11931,9 +17545,61 @@ HMT(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
+ * Arg #3 is expected to be a string (selname).
+ *
+ * Notes:
+ *      (1) This simply adds a 32 pixel border, calls the appropriate
+ *          pixFHMTGen_*(), and removes the border.
+ *          See notes below for that function.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix * on the Lua stack
+ */
+static int
+HMTDwa_1(lua_State *L)
+{
+    LL_FUNC("HMTDwa_1");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
+    const char *selname = ll_check_string(_fun, L, 3);
+    Pix *pix = pixHMTDwa_1(pixd, pixs, selname);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
+ * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (yloc).
  * Arg #4 is expected to be a l_float32 (radang).
  * Arg #5 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) There are 3 cases:
+ *            (a) pixd == null (make a new pixd)
+ *            (b) pixd == pixs (in-place)
+ *            (c) pixd != pixs
+ *      (2) For these three cases, use these patterns, respectively:
+ *              pixd = pixHShear(NULL, pixs, ...);
+ *              pixHShear(pixs, pixs, ...);
+ *              pixHShear(pixd, pixs, ...);
+ *      (3) This shear leaves the horizontal line of pixels at y = yloc
+ *          invariant.  For a positive shear angle, pixels above this
+ *          line are shoved to the right, and pixels below this line
+ *          move to the left.
+ *      (4) With positive shear angle, this can be used, along with
+ *          pixVShear(), to perform a cw rotation, either with 2 shears
+ *          (for small angles) or in the general case with 3 shears.
+ *      (5) Changing the value of yloc is equivalent to translating
+ *          the result horizontally.
+ *      (6) This brings in 'incolor' pixels from outside the image.
+ *      (7) For in-place operation, pixs cannot be colormapped,
+ *          because the in-place operation only blits in 0 or 1 bits,
+ *          not an arbitrary colormap index.
+ *      (8) The angle is brought into the range [-pi, -pi].  It is
+ *          not permitted to be within MIN_DIFF_FROM_HALF_PI radians
+ *          from either -pi/2 or pi/2.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -11958,6 +17624,11 @@ HShear(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_float32 (radang).
  * Arg #4 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) See pixHShear() for usage.
+ *      (2) This does a horizontal shear about the center, with (+) shear
+ *          pushing increasingly leftward (-x) with increasing y.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -11981,6 +17652,11 @@ HShearCenter(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_float32 (radang).
  * Arg #4 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) See pixHShear() for usage.
+ *      (2) This does a horizontal shear about the UL corner, with (+) shear
+ *          pushing increasingly leftward (-x) with increasing y.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -12004,6 +17680,14 @@ HShearCorner(lua_State *L)
  * Arg #2 is expected to be a l_int32 (yloc).
  * Arg #3 is expected to be a l_float32 (radang).
  * Arg #4 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) This is an in-place version of pixHShear(); see comments there.
+ *      (2) This brings in 'incolor' pixels from outside the image.
+ *      (3) pixs cannot be colormapped, because the in-place operation
+ *          only blits in 0 or 1 bits, not an arbitrary colormap index.
+ *      (4) Does a horizontal full-band shear about the line with (+) shear
+ *          pushing increasingly leftward (-x) with increasing y.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -12026,6 +17710,19 @@ HShearIP(lua_State *L)
  * Arg #2 is expected to be a l_int32 (yloc).
  * Arg #3 is expected to be a l_float32 (radang).
  * Arg #4 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) This does horizontal shear with linear interpolation for
+ *          accurate results on 8 bpp gray, 32 bpp rgb, or cmapped images.
+ *          It is relatively slow compared to the sampled version
+ *          implemented by rasterop, but the result is much smoother.
+ *      (2) This shear leaves the horizontal line of pixels at y = yloc
+ *          invariant.  For a positive shear angle, pixels above this
+ *          line are shoved to the right, and pixels below this line
+ *          move to the left.
+ *      (3) Any colormap is removed.
+ *      (4) The angle is brought into the range [-pi/2 + del, pi/2 - del],
+ *          where del == MIN_DIFF_FROM_HALF_PI.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -12050,6 +17747,27 @@ HShearLI(lua_State *L)
  * Arg #3 is expected to be a l_int32 (sm1v).
  * Arg #4 is expected to be a l_int32 (sm2h).
  * Arg #5 is expected to be a l_int32 (sm2v).
+ *
+ * Notes:
+ *      (1) We use symmetric smoothing filters of odd dimension,
+ *          typically use 3, 5, 7, etc.  The smoothing parameters
+ *          for these are 1, 2, 3, etc.  The filter size is related
+ *          to the smoothing parameter by
+ *               size = 2 * smoothing + 1
+ *      (2) Because we take the difference of two lowpass filters,
+ *          this is actually a bandpass filter.
+ *      (3) We allow both filters to be anisotropic.
+ *      (4) Consider either the h or v component of the 2 filters.
+ *          Depending on whether sm1 > sm2 or sm2 > sm1, we get
+ *          different halves of the smoothed gradients (or "edges").
+ *          This difference of smoothed signals looks more like
+ *          a second derivative of a transition, which we rectify
+ *          by not allowing the signal to go below zero.  If sm1 < sm2,
+ *          the sm2 transition is broader, so the difference between
+ *          sm1 and sm2 signals is positive on the upper half of
+ *          the transition.  Likewise, if sm1 > sm2, the sm1 - sm2
+ *          signal difference is positive on the lower half of
+ *          the transition.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -12074,6 +17792,19 @@ HalfEdgeByBandpass(lua_State *L)
  * Arg #2 is expected to be a l_int32 (factor).
  * Arg #3 is expected to be a l_float32 (fract).
  * Arg #4 is expected to be a l_float32 (fthresh).
+ *
+ * Notes:
+ *      (1) Pixels are identified as red if they satisfy two conditions:
+ *          (a) The components satisfy (R-B)/B > %fthresh   (red or dark fg)
+ *          (b) The red component satisfied R > 128  (red or light bg)
+ *          Masks are generated for (a) and (b), and the intersection
+ *          gives the pixels that are red but not either light bg or
+ *          dark fg.
+ *      (2) A typical value for fract = 0.0001, which gives sensitivity
+ *          to an image where a small fraction of the pixels are printed
+ *          in red.
+ *      (3) A typical value for fthresh = 2.5.  Higher values give less
+ *          sensitivity to red, and fewer false positives.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -12108,6 +17839,17 @@ HasHighlightRed(lua_State *L)
  * Arg #6 is expected to be a l_float32 (dely).
  * Arg #7 is expected to be a l_int32 (maxdiffw).
  * Arg #8 is expected to be a l_int32 (maxdiffh).
+ *
+ * Notes:
+ *  We check first that the two pix are roughly
+ *  the same size.  Only if they meet that criterion do
+ *  we compare the bitmaps.  The Hausdorff is a 2-way
+ *  check.  The centroid difference is used to align the two
+ *  images to the nearest integer for each of the checks.
+ *  These check that the dilated image of one contains
+ *  ALL the pixels of the undilated image of the other.
+ *  Checks are done in both direction.  A single pixel not
+ *  contained in either direction results in failure of the test.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -12132,6 +17874,11 @@ Haustest(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (connectivity).
+ *
+ * Notes:
+ *     (1) To get 4-c.c. holes of the 8-c.c. as foreground, use
+ *         4-connected filling; to get 8-c.c. holes of the 4-c.c.
+ *         as foreground, use 8-connected filling.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -12152,6 +17899,19 @@ HolesByFilling(lua_State *L)
  * Arg #1 is expected to be a l_int32 (w).
  * Arg #2 is expected to be a l_int32 (h).
  * Arg #3 is expected to be a l_uint32 (offset).
+ *
+ * Notes:
+ *      (1) The offset must be >= 0.
+ *      (2) The offset is used so that we can do arithmetic
+ *          with negative number results on l_uint32 data; it
+ *          prevents the l_uint32 data from going negative.
+ *      (3) Because we use l_int32 intermediate data results,
+ *          these should never exceed the max of l_int32 (0x7fffffff).
+ *          We do not permit the offset to be above 0x40000000,
+ *          which is half way between 0 and the max of l_int32.
+ *      (4) The same offset should be used for initialization,
+ *          multiplication by a constant, and final extraction!
+ *      (5) If you're only adding positive values, offset can be 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -12195,6 +17955,26 @@ IntersectionOfMorphOps(lua_State *L)
  * Arg #2 is expected to be a Boxa* (boxaw).
  * Arg #3 is expected to be a Pix* (pixw).
  * Arg #5 is expected to be a l_int32 (debugflag).
+ *
+ * Notes:
+ *      (1) You can input the bounding boxes for the words in one of
+ *          two forms: as bounding boxes (%boxaw) or as a word mask with
+ *          the word bounding boxes filled (%pixw).  For example,
+ *          to compute %pixw, you can use pixWordMaskByDilation().
+ *      (2) Alternatively, you can set both of these inputs to NULL,
+ *          in which case the word mask is generated here.  This is
+ *          done by dilating and closing the input image to connect
+ *          letters within a word, while leaving the words separated.
+ *          The parameters are chosen under the assumption that the
+ *          input is 10 to 12 pt text, scanned at about 300 ppi.
+ *      (3) sel_ital1 and sel_ital2 detect the right edges that are
+ *          nearly vertical, at approximately the angle of italic
+ *          strokes.  We use the right edge to avoid getting seeds
+ *          from lower-case 'y'.  The typical italic slant has a smaller
+ *          angle with the vertical than the 'W', so in most cases we
+ *          will not trigger on the slanted lines in the 'W'.
+ *      (4) Note that sel_ital2 is shorter than sel_ital1.  It is
+ *          more appropriate for a typical font scanned at 200 ppi.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* (%boxa) on the Lua stack
@@ -12222,6 +18002,13 @@ ItalicWords(lua_State *L)
  * Arg #3 is expected to be a l_int32 (fadeto).
  * Arg #4 is expected to be a l_float32 (distfract).
  * Arg #5 is expected to be a l_float32 (maxfade).
+ *
+ * Notes:
+ *      (1) In-place operation.
+ *      (2) Maximum fading fraction @maxfade occurs at the edge of the image,
+ *          and the fraction goes to 0 at the fractional distance @distfract
+ *          from the edge.  @maxfade must be in [0, 1].
+ *      (3) @distrfact must be in [0, 1], and typically it would be <= 0.5.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -12245,6 +18032,23 @@ LinearEdgeFade(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_uint32 (srcval).
  * Arg #4 is expected to be a l_uint32 (dstval).
+ *
+ * Notes:
+ *      (1) For each component (r, b, g) separately, this does a piecewise
+ *          linear mapping of the colors in pixs to colors in pixd.
+ *          If rs and rd are the red src and dest components in %srcval and
+ *          %dstval, then the range [0 ... rs] in pixs is mapped to
+ *          [0 ... rd] in pixd.  Likewise, the range [rs ... 255] in pixs
+ *          is mapped to [rd ... 255] in pixd.  And similarly for green
+ *          and blue.
+ *      (2) The mapping will in general change the hue of the pixels.
+ *          However, if the src and dst targets are related by
+ *          a transformation given by pixelFractionalShift(), the hue
+ *          is invariant.
+ *      (3) For inplace operation, call it this way:
+ *            pixLinearMapToTargetColor(pixs, pixs, ... )
+ *      (4) For generating a new pixd:
+ *            pixd = pixLinearMapToTargetColor(NULL, pixs, ...)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -12270,6 +18074,17 @@ LinearMapToTargetColor(lua_State *L)
  * Arg #4 is expected to be a l_int32 (sy).
  * Arg #5 is expected to be a Pix* (pixmin).
  * Arg #6 is expected to be a Pix* (pixmax).
+ *
+ * Notes:
+ *      (1) pixd can be equal to pixs (in-place operation) or
+ *          null (makes a new pixd).
+ *      (2) sx and sy give the tile size; they are typically at least 20.
+ *      (3) pixmin and pixmax are generated by pixMinMaxTiles()
+ *      (4) For each tile, this does a linear expansion of the dynamic
+ *          range so that the min value in the tile becomes 0 and the
+ *          max value in the tile becomes 255.
+ *      (5) The LUTs that do the mapping are generated as needed
+ *          and stored for reuse in an integer array within the ptr array iaa[].
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -12292,6 +18107,17 @@ LinearTRCTiled(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This generates an RGB image where each component value
+ *          is coded depending on the (x.y) location and the size
+ *          of the fg connected component that the pixel in pixs belongs to.
+ *          It is independent of the 4-fold orthogonal orientation, and
+ *          only weakly depends on translations and small angle rotations.
+ *          Background pixels are black.
+ *      (2) Such encodings can be compared between two 1 bpp images
+ *          by performing this transform and calculating the
+ *          "earth-mover" distance on the resulting R,G,B histograms.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -12311,6 +18137,29 @@ LocToColorTransform(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (maxmin).
  * Arg #3 is expected to be a l_int32 (minmax).
+ *
+ * Notes:
+ *      (1) This gives the actual local minima and maxima.
+ *          A local minimum is a pixel whose surrounding pixels all
+ *          have values at least as large, and likewise for a local
+ *          maximum.  For the local minima, %maxmin is the upper
+ *          bound for the value of pixs.  Likewise, for the local maxima,
+ *          %minmax is the lower bound for the value of pixs.
+ *      (2) The minima are found by starting with the erosion-and-equality
+ *          approach of pixSelectedLocalExtrema().  This is followed
+ *          by a qualification step, where each c.c. in the resulting
+ *          minimum mask is extracted, the pixels bordering it are
+ *          located, and they are queried.  If all of those pixels
+ *          are larger than the value of that minimum, it is a true
+ *          minimum and its c.c. is saved; otherwise the c.c. is
+ *          rejected.  Note that if a bordering pixel has the
+ *          same value as the minimum, it must then have a
+ *          neighbor that is smaller, so the component is not a
+ *          true minimum.
+ *      (3) The maxima are found by inverting the image and looking
+ *          for the minima there.
+ *      (4) The generated masks can be used as markers for
+ *          further operations.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -12361,6 +18210,27 @@ LocateBarcodes(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (dist).
  * Arg #3 is an optional boolean (getbox).
+ *
+ * Notes:
+ *      (1) This generates a 8 bpp alpha layer that is opaque (256)
+ *          over the FG of pixs, and goes transparent linearly away
+ *          from the FG pixels, decaying to 0 (transparent) is an
+ *          8-connected distance given by %dist.  If %dist == 0,
+ *          this does a simple conversion from 1 to 8 bpp.
+ *      (2) If &box == NULL, this returns an alpha mask that is the
+ *          full size of pixs.  Otherwise, the returned mask pixd covers
+ *          just the FG pixels of pixs, expanded by %dist in each
+ *          direction (if possible), and the returned box gives the
+ *          location of the returned mask relative to pixs.
+ *      (3) This is useful for painting through a mask and allowing
+ *          blending of the painted image with an underlying image
+ *          in the mask background for pixels near foreground mask pixels.
+ *          For example, with an underlying rgb image pix1, an overlaying
+ *          image rgb pix2, binary mask pixm, and dist > 0, this
+ *          blending is achieved with:
+ *              pix3 = pixMakeAlphaFromMask(pixm, dist, &box);
+ *              boxGetGeometry(box, &x, &y, NULL, NULL);
+ *              pix4 = pixBlendWithGrayMask(pix1, pix2, pix3, x, y);
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack or 2 Pix* and Box* on the Lua stack
@@ -12388,6 +18258,21 @@ MakeAlphaFromMask(lua_State *L)
  * Arg #3 is expected to be a l_float32 (gc).
  * Arg #4 is expected to be a l_float32 (bc).
  * Arg #5 is expected to be a l_float32 (thresh).
+ *
+ * Notes:
+ *      (1) This generates a 1 bpp mask image, where a 1 is written in
+ *          the mask for each pixel in pixs that satisfies
+ *               rc * rval + gc * gval + bc * bval > thresh
+ *          where rval is the red component, etc.
+ *      (2) Unlike with pixConvertToGray(), there are no constraints
+ *          on the color coefficients, which can be negative.  For
+ *          example, a mask that discriminates against red and in favor
+ *          of blue will have rc < 0.0 and bc > 0.0.
+ *      (3) To make the result independent of intensity (the 'V' in HSV),
+ *          select coefficients so that @thresh = 0.  Then the result
+ *          is not changed when all components are multiplied by the
+ *          same constant (as long as nothing saturates).  This can be
+ *          useful if, for example, the illumination is not uniform.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -12414,6 +18299,26 @@ MakeArbMaskFromRGB(lua_State *L)
  * Arg #4 is expected to be a l_float32 (hf2).
  * Arg #5 is expected to be a l_float32 (vf1).
  * Arg #6 is expected to be a l_float32 (vf2).
+ *
+ * Notes:
+ *      (1) This makes an arbitrary 1-component mask with a centered fg
+ *          frame, which can have both an inner and an outer boundary.
+ *          All input fractional distances are measured from the image
+ *          border to the frame boundary, in units of the image half-width
+ *          for hf1 and hf2 and the image half-height for vf1 and vf2.
+ *          The distances to the outer frame boundary are given by hf1
+ *          and vf1; to the inner frame boundary, by hf2 and vf2.
+ *          Input fractions are thus in [0.0 ... 1.0], with hf1 <= hf2
+ *          and vf1 <= vf2.  Horizontal and vertical frame widths are
+ *          thus independently specified.
+ *      (2) Special cases:
+ *           * full fg mask: hf1 = vf1 = 0.0, hf2 = vf2 = 1.0.
+ *           * empty fg (zero width) mask: set  hf1 = hf2  and vf1 = vf2.
+ *           * fg rectangle with no hole: set hf2 = vf2 = 1.0.
+ *           * frame touching outer boundary: set hf1 = vf1 = 0.0.
+ *      (3) The vertical thickness of the horizontal mask parts
+ *          is 0.5 * (vf2 - vf1) * h.  The horizontal thickness of the
+ *          vertical mask parts is 0.5 * (hf2 - hf1) * w.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -12437,6 +18342,14 @@ MakeFrameMask(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) pixs is a 32 bpp image in HSV colorspace; hue is in the "red"
+ *          byte, saturation is in the "green" byte.
+ *      (2) In pixd, hue is displayed vertically; saturation horizontally.
+ *          The dimensions of pixd are w = 256, h = 240, and the depth
+ *          is 32 bpp.  The value at each point is simply the number
+ *          of pixels found at that value of hue and saturation.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -12461,6 +18374,14 @@ MakeHistoHS(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) pixs is a 32 bpp image in HSV colorspace; hue is in the "red"
+ *          byte, max intensity ("value") is in the "blue" byte.
+ *      (2) In pixd, hue is displayed vertically; intensity horizontally.
+ *          The dimensions of pixd are w = 256, h = 240, and the depth
+ *          is 32 bpp.  The value at each point is simply the number
+ *          of pixels found at that value of hue and intensity.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -12485,6 +18406,14 @@ MakeHistoHV(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) pixs is a 32 bpp image in HSV colorspace; sat is in the "green"
+ *          byte, max intensity ("value") is in the "blue" byte.
+ *      (2) In pixd, sat is displayed vertically; intensity horizontally.
+ *          The dimensions of pixd are w = 256, h = 256, and the depth
+ *          is 32 bpp.  The value at each point is simply the number
+ *          of pixels found at that value of saturation and intensity.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -12509,6 +18438,12 @@ MakeHistoSV(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string of max. 256 bytes (lut).
+ *
+ * Notes:
+ *      (1) This generates a 1 bpp mask image, where a 1 is written in
+ *          the mask for each pixel in pixs that has a value corresponding
+ *          to a 1 in the LUT.
+ *      (2) The LUT should be of size 256.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -12535,6 +18470,11 @@ MakeMaskFromLUT(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (val).
+ *
+ * Notes:
+ *      (1) This generates a 1 bpp mask image, where a 1 is written in
+ *          the mask for each pixel in pixs that has a value %val.
+ *      (2) If no pixels have the value, an empty mask is generated.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -12558,6 +18498,16 @@ MakeMaskFromVal(lua_State *L)
  * Arg #4 is expected to be a l_int32 (satcenter).
  * Arg #5 is expected to be a l_int32 (sathw).
  * Arg #6 is expected to be a l_int32 (regionflag).
+ *
+ * Notes:
+ *      (1) The pixels are selected based on the specified ranges of
+ *          hue and saturation.  For selection or exclusion, the pixel
+ *          HS component values must be within both ranges.  Care must
+ *          be taken in finding the hue range because of wrap-around.
+ *      (2) Use %regionflag == L_INCLUDE_REGION to take only those
+ *          pixels within the rectangular region specified in HS space.
+ *          Use %regionflag == L_EXCLUDE_REGION to take all pixels except
+ *          those within the rectangular region specified in HS space.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -12585,6 +18535,16 @@ MakeRangeMaskHS(lua_State *L)
  * Arg #4 is expected to be a l_int32 (valcenter).
  * Arg #5 is expected to be a l_int32 (valhw).
  * Arg #6 is expected to be a l_int32 (regionflag).
+ *
+ * Notes:
+ *      (1) The pixels are selected based on the specified ranges of
+ *          hue and max intensity values.  For selection or exclusion,
+ *          the pixel HV component values must be within both ranges.
+ *          Care must be taken in finding the hue range because of wrap-around.
+ *      (2) Use %regionflag == L_INCLUDE_REGION to take only those
+ *          pixels within the rectangular region specified in HV space.
+ *          Use %regionflag == L_EXCLUDE_REGION to take all pixels except
+ *          those within the rectangular region specified in HV space.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -12612,6 +18572,15 @@ MakeRangeMaskHV(lua_State *L)
  * Arg #4 is expected to be a l_int32 (valcenter).
  * Arg #5 is expected to be a l_int32 (valhw).
  * Arg #6 is expected to be a l_int32 (regionflag).
+ *
+ * Notes:
+ *      (1) The pixels are selected based on the specified ranges of
+ *          saturation and max intensity (val).  For selection or
+ *          exclusion, the pixel SV component values must be within both ranges.
+ *      (2) Use %regionflag == L_INCLUDE_REGION to take only those
+ *          pixels within the rectangular region specified in SV space.
+ *          Use %regionflag == L_EXCLUDE_REGION to take all pixels except
+ *          those within the rectangular region specified in SV space.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -12637,6 +18606,21 @@ MakeRangeMaskSV(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Boxa* (boxa).
  * Arg #4 is expected to be a l_int32 (op).
+ *
+ * Notes:
+ *      (1) This can be used with:
+ *              pixd = NULL  (makes a new pixd)
+ *              pixd = pixs  (in-place)
+ *      (2) If pixd == NULL, this first makes a copy of pixs, and then
+ *          bit-twiddles over the boxes.  Otherwise, it operates directly
+ *          on pixs.
+ *      (3) This simple function is typically used with 1 bpp images.
+ *          It uses the 1-image rasterop function, rasteropUniLow(),
+ *          to set, clear or flip the pixels in pixd.
+ *      (4) If you want to generate a 1 bpp mask of ON pixels from the boxes
+ *          in a Boxa, in a pix of size (w,h):
+ *              pix = pixCreate(w, h, 1);
+ *              pixMaskBoxa(pix, pix, boxa, L_SET_PIXELS);
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -12658,6 +18642,11 @@ MaskBoxa(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (connectivity).
+ *
+ * Notes:
+ *      (1) This generates a mask image with ON pixels over the
+ *          b.b. of the c.c. in pixs.  If there are no ON pixels in pixs,
+ *          pixd will also have no ON pixels.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -12681,6 +18670,23 @@ MaskConnComp(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (threshdiff).
  * Arg #3 is expected to be a l_int32 (mindist).
+ *
+ * Notes:
+ *      (1) The generated mask identifies each pixel as either color or
+ *          non-color.  For a pixel to be color, it must satisfy two
+ *          constraints:
+ *            (a) The max difference between the r,g and b components must
+ *                equal or exceed a threshold %threshdiff.
+ *            (b) It must be at least %mindist (in an 8-connected way)
+ *                from the nearest non-color pixel.
+ *      (2) The distance constraint (b) is only applied if %mindist > 1.
+ *          For example, if %mindist == 2, the color pixels identified
+ *          by (a) are eroded by a 3x3 Sel.  In general, the Sel size
+ *          for erosion is 2 * (%mindist - 1) + 1.
+ *          Why have this constraint?  In scanned images that are
+ *          essentially gray, color artifacts are typically introduced
+ *          in transition regions near sharp edges that go from dark
+ *          to light, so this allows these transition regions to be removed.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -12736,6 +18742,28 @@ MaskOverColorRange(lua_State *L)
  * Arg #7 is expected to be a l_int32 (smoothx).
  * Arg #8 is expected to be a l_int32 (smoothy).
  * Arg #9 is expected to be a l_float32 (scorefract).
+ *
+ * Notes:
+ *      (1) This begins with a standard background normalization.
+ *          Additionally, there is a flexible background norm, that
+ *          will adapt to a rapidly varying background, and this
+ *          puts white pixels in the background near regions with
+ *          significant foreground.  The white pixels are turned into
+ *          a 1 bpp selection mask by binarization followed by dilation.
+ *          Otsu thresholding is performed on the input image to get an
+ *          estimate of the threshold in the non-mask regions.
+ *          The background normalized image is thresholded with two
+ *          different values, and the result is combined using
+ *          the selection mask.
+ *      (2) Note that the numbers 255 (for bgval target) and 190 (for
+ *          thresholding on pixn) are tied together, and explicitly
+ *          defined in this function.
+ *      (3) See pixBackgroundNorm() for meaning and typical values
+ *          of input parameters.  For a start, you can try:
+ *            sx, sy = 10, 15
+ *            thresh = 100
+ *            mincount = 50
+ *            smoothx, smoothy = 2
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -12765,6 +18793,13 @@ MaskedThreshOnBackgroundNorm(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (type).
+ *
+ * Notes:
+ *      (1) Scales pixel values to fit maximally within the dest 8 bpp pixd
+ *      (2) Assumes the source 'pixels' are a 1-component scalar.  For
+ *          a 32 bpp source, each pixel is treated as a single number --
+ *          not as a 3-component rgb pixel value.
+ *      (3) Uses a LUT for log scaling.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -12784,6 +18819,14 @@ MaxDynamicRange(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (type).
+ *
+ * Notes:
+ *      (1) Scales pixel values to fit maximally within a 32 bpp dest pixd
+ *      (2) All color components are scaled with the same factor, based
+ *          on the maximum r,g or b component in the image.  This should
+ *          not be used if the 32-bit value is a single number (e.g., a
+ *          count in a histogram generated by pixMakeHistoHS()).
+ *      (3) Uses a LUT for log scaling.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -12804,6 +18847,11 @@ MaxDynamicRangeRGB(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Box* (box).
  * Arg #3 is expected to be a Pix* (pixma).
+ *
+ * Notes:
+ *      (1) This function is intended to be used for many rectangles
+ *          on the same image.  It can find the mean within a
+ *          rectangle in O(1), independent of the size of the rectangle.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -12826,6 +18874,18 @@ MeanInRectangle(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) Similar to pixBlockconvAccum(), this computes the
+ *          sum of the squares of the pixel values in such a way
+ *          that the value at (i,j) is the sum of all squares in
+ *          the rectangle from the origin to (i,j).
+ *      (2) The general recursion relation (v are squared pixel values) is
+ *            a(i,j) = v(i,j) + a(i-1, j) + a(i, j-1) - a(i-1, j-1)
+ *          For the first line, this reduces to the special case
+ *            a(i,j) = v(i,j) + a(i, j-1)
+ *          For the first column, the special case is
+ *            a(i,j) = v(i,j) + a(i-1, j)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 DPix * on the Lua stack
@@ -12847,6 +18907,20 @@ MeanSquareAccum(lua_State *L)
  * Arg #3 is expected to be a l_int32 (minjump).
  * Arg #4 is expected to be a l_int32 (minreversal).
  * Arg #8 is expected to be a string (debugfile).
+ *
+ * Notes:
+ *      (1) This computes three measures of smoothness of the edge of a
+ *          connected component:
+ *            * jumps/length: (jpl) the number of jumps of size >= %minjump,
+ *              normalized to the length of the side
+ *            * jump sum/length: (jspl) the sum of all jump lengths of
+ *              size >= %minjump, normalized to the length of the side
+ *            * reversals/length: (rpl) the number of peak <--> valley
+ *              reversals, using %minreverse as a minimum deviation of
+ *              the peak or valley from its preceding extremum,
+ *              normalized to the length of the side
+ *      (2) The input pix should be a single connected component, but
+ *          this is not required.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -12899,6 +18973,12 @@ MeasureSaturation(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (sigbits).
  * Arg #3 is expected to be a l_int32 (subsample).
+ *
+ * Notes:
+ *      (1) Array is indexed by (3 * sigbits) bits.  The array size
+ *          is 2^(3 * sigbits).
+ *      (2) Indexing into the array from rgb uses red sigbits as
+ *          most significant and blue as least.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 * on the Lua stack
@@ -12920,6 +19000,10 @@ MedianCutHisto(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (ditherflag).
+ *
+ * Notes:
+ *      (1) Simple interface.  See pixMedianCutQuantGeneral() for
+ *          use of defaulted parameters.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -12944,6 +19028,32 @@ MedianCutQuant(lua_State *L)
  * Arg #5 is expected to be a l_int32 (sigbits).
  * Arg #6 is expected to be a l_int32 (maxsub).
  * Arg #7 is expected to be a l_int32 (checkbw).
+ *
+ * Notes:
+ *      (1) %maxcolors must be in the range [2 ... 256].
+ *      (2) Use %outdepth = 0 to have the output depth computed as the
+ *          minimum required to hold the actual colors found, given
+ *          the %maxcolors constraint.
+ *      (3) Use %outdepth = 1, 2, 4 or 8 to specify the output depth.
+ *          In that case, %maxcolors must not exceed 2^(outdepth).
+ *      (4) If there are fewer quantized colors in the image than %maxcolors,
+ *          the colormap is simply generated from those colors.
+ *      (5) %maxsub is the maximum allowed subsampling to be used in the
+ *          computation of the color histogram and region of occupied
+ *          color space.  The subsampling is chosen internally for
+ *          efficiency, based on the image size, but this parameter
+ *          limits it.  Use %maxsub = 0 for the internal default, which is the
+ *          maximum allowed subsampling.  Use %maxsub = 1 to prevent
+ *          subsampling.  In general use %maxsub >= 1 to specify the
+ *          maximum subsampling to be allowed, where the actual subsampling
+ *          will be the minimum of this value and the internally
+ *          determined default value.
+ *      (6) If the image appears gray because either most of the pixels
+ *          are gray or most of the pixels are essentially black or white,
+ *          the image is trivially quantized with a grayscale colormap.  The
+ *          reason is that median cut divides the color space into rectangular
+ *          regions, and it does a very poor job if all the pixels are
+ *          near the diagonal of the color space cube.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -12972,6 +19082,30 @@ MedianCutQuantGeneral(lua_State *L)
  * Arg #4 is expected to be a l_int32 (darkthresh).
  * Arg #5 is expected to be a l_int32 (lightthresh).
  * Arg #6 is expected to be a l_int32 (diffthresh).
+ *
+ * Notes:
+ *      (1) ncolor + ngray must not exceed 255.
+ *      (2) The method makes use of pixMedianCutQuantGeneral() with
+ *          minimal addition.
+ *          (a) Preprocess the image, setting all pixels with little color
+ *              to black, and populating an auxiliary 8 bpp image with the
+ *              expected colormap values corresponding to the set of
+ *              quantized gray values.
+ *          (b) Color quantize the altered input image to n + 1 colors.
+ *          (c) Augment the colormap with the gray indices, and
+ *              substitute the gray quantized values from the auxiliary
+ *              image for those in the color quantized output that had
+ *              been quantized as black.
+ *      (3) Median cut color quantization is relatively poor for grayscale
+ *          images with many colors, when compared to octcube quantization.
+ *          Thus, for images with both gray and color, it is important
+ *          to quantize the gray pixels by another method.  Here, we
+ *          are conservative in detecting color, preferring to use
+ *          a few extra bits to encode colorful pixels that push them
+ *          to gray.  This is particularly reasonable with this function,
+ *          because it handles the gray and color pixels separately,
+ *          using median cut color quantization for the color pixels
+ *          and equal-bin grayscale quantization for the non-color pixels.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13021,6 +19155,19 @@ MedianFilter(lua_State *L)
  * Arg #5 is expected to be a l_int32 (y2).
  * Arg #6 is expected to be a l_int32 (dist).
  * Arg #7 is expected to be a l_int32 (direction).
+ *
+ * Notes:
+ *      (1) If the line is more horizontal than vertical, the values
+ *          are computed for [x1, x2], and the pixels are taken
+ *          below and/or above the local y-value.  Otherwise, the
+ *          values are computed for [y1, y2] and the pixels are taken
+ *          to the left and/or right of the local x value.
+ *      (2) %direction specifies which side (or both sides) of the
+ *          line are scanned for min and max values.
+ *      (3) There are two ways to tell if the returned values of min
+ *          and max averages are valid: the returned values cannot be
+ *          negative and the function must return 0.
+ *      (4) All accessed pixels are clipped to the pix.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -13058,6 +19205,11 @@ MinMaxNearLine(lua_State *L)
  * Arg #4 is expected to be a l_int32 (mindiff).
  * Arg #5 is expected to be a l_int32 (smoothx).
  * Arg #6 is expected to be a l_int32 (smoothy).
+ *
+ * Notes:
+ *      (1) This computes filtered and smoothed values for the min and
+ *          max pixel values in each tile of the image.
+ *      (2) See pixContrastNorm() for usage.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -13088,6 +19240,16 @@ MinMaxTiles(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs1).
  * Arg #3 is expected to be a Pix* (pixs2).
  * Arg #4 is expected to be a l_int32 (type).
+ *
+ * Notes:
+ *      (1) This gives the min or max of two images, component-wise.
+ *      (2) The depth can be 8 or 16 bpp for 1 component, and 32 bpp
+ *          for a 3 component image.  For 32 bpp, ignore the LSB
+ *          of each word (the alpha channel)
+ *      (3) There are 3 cases:
+ *          ~  if pixd == null,   Min(src1, src2) --> new pixd
+ *          ~  if pixd == pixs1,  Min(src1, src2) --> src1  (in-place)
+ *          ~  if pixd != pixs1,  Min(src1, src2) --> input pixd
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13110,6 +19272,34 @@ MinOrMax(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (mincount).
  * Arg #3 is expected to be a boolean (debug).
+ *
+ * Notes:
+ *      (1) For this test, it is necessary that the text is horizontally
+ *          oriented, with ascenders going up.
+ *      (2) conf is the normalized difference between the number of
+ *          right and left facing characters with ascenders.
+ *          Left-facing are {d}; right-facing are {b, h, k}.
+ *          At least that was the expectation.  In practice, we can
+ *          really just say that it is the normalized difference in
+ *          hits using two specific hit-miss filters, textsel1 and textsel2,
+ *          after the image has been suitably pre-filtered so that
+ *          these filters are effective.  See (4) for what's really happening.
+ *      (3) A large positive conf value indicates normal text, whereas
+ *          a large negative conf value means the page is mirror reversed.
+ *      (4) The implementation is a bit tricky.  The general idea is
+ *          to fill the x-height part of characters, but not the space
+ *          between them, before doing the HMT.  This is done by
+ *          finding pixels added using two different operations -- a
+ *          horizontal close and a vertical dilation -- and adding
+ *          the intersection of these sets to the original.  It turns
+ *          out that the original intuition about the signal was largely
+ *          in error: much of the signal for right-facing characters
+ *          comes from the lower part of common x-height characters, like
+ *          the e and c, that remain open after these operations.
+ *          So it's important that the operations to close the x-height
+ *          parts of the characters are purposely weakened sufficiently
+ *          to allow these characters to remain open.  The wonders
+ *          of morphology!
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -13134,6 +19324,11 @@ MirrorDetect(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (mincount).
  * Arg #3 is expected to be a boolean (debug).
+ *
+ * Notes:
+ *      (1) We assume the text is horizontally oriented, with
+ *          ascenders going up.
+ *      (2) See notes in pixMirrorDetect().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -13158,6 +19353,17 @@ MirrorDetectDwa(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (w).
  * Arg #3 is expected to be a l_int32 (h).
+ *
+ * Notes:
+ *      (1) This uses mirrored tiling, where each row alternates
+ *          with LR flips and every column alternates with TB
+ *          flips, such that the result is a tiling with identical
+ *          2 x 2 tiles, each of which is composed of these transforms:
+ *                  -----------------
+ *                  | 1    |  LR    |
+ *                  -----------------
+ *                  | TB   |  LR/TB |
+ *                  -----------------
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -13179,6 +19385,17 @@ MirroredTiling(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_float32 (fract).
+ *
+ * Notes:
+ *      (1) If fract > 0.0, it gives the fraction that the v-parameter,
+ *          which is max(r,g,b), is moved from its initial value toward 255.
+ *          If fract < 0.0, it gives the fraction that the v-parameter
+ *          is moved from its initial value toward 0.
+ *          The limiting values for fract = -1.0 (1.0) thus set the
+ *          v-parameter to 0 (255).
+ *      (2) If fract = 0, no modification is requested; return a copy
+ *          unless in-place, in which case this is a no-op.
+ *      (3) See discussion of color-modification methods, in coloring.c.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13200,6 +19417,18 @@ ModifyBrightness(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_float32 (fract).
+ *
+ * Notes:
+ *      (1) pixd must either be null or equal to pixs.
+ *          For in-place operation, set pixd == pixs:
+ *             pixEqualizeTRC(pixs, pixs, ...);
+ *          To get a new image, set pixd == null:
+ *             pixd = pixEqualizeTRC(NULL, pixs, ...);
+ *      (1) Use fract > 0.0 to increase hue value; < 0.0 to decrease it.
+ *          1.0 (or -1.0) represents a 360 degree rotation; i.e., no change.
+ *      (2) If no modification is requested (fract = -1.0 or 0 or 1.0),
+ *          return a copy unless in-place, in which case this is a no-op.
+ *      (3) See discussion of color-modification methods, in coloring.c.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13221,6 +19450,17 @@ ModifyHue(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_float32 (fract).
+ *
+ * Notes:
+ *      (1) If fract > 0.0, it gives the fraction that the pixel
+ *          saturation is moved from its initial value toward 255.
+ *          If fract < 0.0, it gives the fraction that the pixel
+ *          saturation is moved from its initial value toward 0.
+ *          The limiting values for fract = -1.0 (1.0) thus set the
+ *          saturation to 0 (255).
+ *      (2) If fract = 0, no modification is requested; return a copy
+ *          unless in-place, in which case this is a no-op.
+ *      (3) See discussion of color-modification methods, in coloring.c.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13263,6 +19503,35 @@ ModifyStrokeWidth(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string (sequence).
  * Arg #3 is expected to be a l_int32 (dispsep).
+ *
+ * Notes:
+ *      (1) This does rasterop morphology on binary images, using composite
+ *          operations for extra speed on large Sels.
+ *      (2) Safe closing is used atomically.  However, if you implement a
+ *          closing as a sequence with a dilation followed by an
+ *          erosion, it will not be safe, and to ensure that you have
+ *          no boundary effects you must add a border in advance and
+ *          remove it at the end.
+ *      (3) For other usage details, see the notes for pixMorphSequence().
+ *      (4) The sequence string is formatted as follows:
+ *            ~ An arbitrary number of operations,  each separated
+ *              by a '+' character.  White space is ignored.
+ *            ~ Each operation begins with a case-independent character
+ *              specifying the operation:
+ *                 d or D  (dilation)
+ *                 e or E  (erosion)
+ *                 o or O  (opening)
+ *                 c or C  (closing)
+ *                 r or R  (rank binary reduction)
+ *                 x or X  (replicative binary expansion)
+ *                 b or B  (add a border of 0 pixels of this size)
+ *            ~ The args to the morphological operations are bricks of hits,
+ *              and are formatted as a.b, where a and b are horizontal and
+ *              vertical dimensions, rsp.
+ *            ~ The args to the reduction are a sequence of up to 4 integers,
+ *              each from 1 to 4.
+ *            ~ The arg to the expansion is a power of two, in the set
+ *              {2, 4, 8, 16}.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13284,6 +19553,16 @@ MorphCompSequence(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string (sequence).
  * Arg #3 is expected to be a l_int32 (dispsep).
+ *
+ * Notes:
+ *      (1) This does dwa morphology on binary images, using brick Sels.
+ *      (2) This runs a pipeline of operations; no branching is allowed.
+ *      (3) It implements all brick Sels that have dimensions up to 63
+ *          on each side, using a composite (linear + comb) when useful.
+ *      (4) A new image is always produced; the input image is not changed.
+ *      (5) This contains an interpreter, allowing sequences to be
+ *          generated and run.
+ *      (6) See pixMorphSequence() for further information about usage.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13296,6 +19575,70 @@ MorphCompSequenceDwa(lua_State *L)
     const char *sequence = ll_check_string(_fun, L, 2);
     l_int32 dispsep = ll_check_l_int32(_fun, L, 3);
     Pix *pix = pixMorphCompSequenceDwa(pixs, sequence, dispsep);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
+ * Arg #2 is expected to be a Pix* (pixs).
+ * Arg #3 is expected to be a l_int32 (operation).
+ * Arg #4 is expected to be a char* (selname).
+ *
+ * Notes:
+ *      (1) This simply adds a border, calls the appropriate
+ *          pixFMorphopGen_*(), and removes the border.
+ *          See the notes for that function.
+ *      (2) The size of the border depends on the operation
+ *          and the boundary conditions.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix * on the Lua stack
+ */
+static int
+MorphDwa_1(lua_State *L)
+{
+    LL_FUNC("MorphDwa_1");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
+    l_int32 operation = ll_check_l_int32(_fun, L, 3);
+    const char *name = ll_check_string(_fun, L, 4);
+    /* XXX: deconstify */
+    char *selname = reinterpret_cast<char *>(reinterpret_cast<l_intptr_t>(name));
+    Pix *pix = pixMorphDwa_1(pixd, pixs, operation, selname);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
+ * Arg #2 is expected to be a Pix* (pixs).
+ * Arg #3 is expected to be a l_int32 (operation).
+ * Arg #4 is expected to be a char* (selname).
+ *
+ * Notes:
+ *      (1) This simply adds a border, calls the appropriate
+ *          pixFMorphopGen_*(), and removes the border.
+ *          See the notes for that function.
+ *      (2) The size of the border depends on the operation
+ *          and the boundary conditions.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pix * on the Lua stack
+ */
+static int
+MorphDwa_2(lua_State *L)
+{
+    LL_FUNC("MorphDwa_2");
+    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
+    l_int32 operation = ll_check_l_int32(_fun, L, 3);
+    const char *name = ll_check_string(_fun, L, 4);
+    /* XXX: deconstify */
+    char *selname = reinterpret_cast<char *>(reinterpret_cast<l_intptr_t>(name));
+    Pix *pix = pixMorphDwa_2(pixd, pixs, operation, selname);
     return ll_push_Pix(_fun, L, pix);
 }
 
@@ -13328,6 +19671,64 @@ MorphGradient(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string (sequence).
  * Arg #3 is expected to be a l_int32 (dispsep).
+ *
+ * Notes:
+ *      (1) This does rasterop morphology on binary images.
+ *      (2) This runs a pipeline of operations; no branching is allowed.
+ *      (3) This only uses brick Sels, which are created on the fly.
+ *          In the future this will be generalized to extract Sels from
+ *          a Sela by name.
+ *      (4) A new image is always produced; the input image is not changed.
+ *      (5) This contains an interpreter, allowing sequences to be
+ *          generated and run.
+ *      (6) The format of the sequence string is defined below.
+ *      (7) In addition to morphological operations, rank order reduction
+ *          and replicated expansion allow operations to take place
+ *          downscaled by a power of 2.
+ *      (8) Intermediate results can optionally be displayed.
+ *      (9) Thanks to Dar-Shyang Lee, who had the idea for this and
+ *          built the first implementation.
+ *      (10) The sequence string is formatted as follows:
+ *            ~ An arbitrary number of operations,  each separated
+ *              by a '+' character.  White space is ignored.
+ *            ~ Each operation begins with a case-independent character
+ *              specifying the operation:
+ *                 d or D  (dilation)
+ *                 e or E  (erosion)
+ *                 o or O  (opening)
+ *                 c or C  (closing)
+ *                 r or R  (rank binary reduction)
+ *                 x or X  (replicative binary expansion)
+ *                 b or B  (add a border of 0 pixels of this size)
+ *            ~ The args to the morphological operations are bricks of hits,
+ *              and are formatted as a.b, where a and b are horizontal and
+ *              vertical dimensions, rsp.
+ *            ~ The args to the reduction are a sequence of up to 4 integers,
+ *              each from 1 to 4.
+ *            ~ The arg to the expansion is a power of two, in the set
+ *              {2, 4, 8, 16}.
+ *      (11) An example valid sequence is:
+ *               "b32 + o1.3 + C3.1 + r23 + e2.2 + D3.2 + X4"
+ *           In this example, the following operation sequence is carried out:
+ *             * b32: Add a 32 pixel border around the input image
+ *             * o1.3: Opening with vert sel of length 3 (e.g., 1 x 3)
+ *             * C3.1: Closing with horiz sel of length 3  (e.g., 3 x 1)
+ *             * r23: Two successive 2x2 reductions with rank 2 in the first
+ *                    and rank 3 in the second.  The result is a 4x reduced pix.
+ *             * e2.2: Erosion with a 2x2 sel (origin will be at x,y: 0,0)
+ *             * d3.2: Dilation with a 3x2 sel (origin will be at x,y: 1,0)
+ *             * X4: 4x replicative expansion, back to original resolution
+ *      (12) The safe closing is used.  However, if you implement a
+ *           closing as separable dilations followed by separable erosions,
+ *           it will not be safe.  For that situation, you need to add
+ *           a sufficiently large border as the first operation in
+ *           the sequence.  This will be removed automatically at the
+ *           end.  There are two cautions:
+ *              ~ When computing what is sufficient, remember that if
+ *                reductions are carried out, the border is also reduced.
+ *              ~ The border is removed at the end, so if a border is
+ *                added at the beginning, the result must be at the
+ *                same resolution as the input!
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13351,6 +19752,16 @@ MorphSequence(lua_State *L)
  * Arg #3 is expected to be a l_int32 (connectivity).
  * Arg #4 is expected to be a l_int32 (minw).
  * Arg #5 is expected to be a l_int32 (minh).
+ *
+ * Notes:
+ *      (1) See pixMorphSequence() for composing operation sequences.
+ *      (2) This operates separately on each c.c. in the input pix.
+ *      (3) The dilation does NOT increase the c.c. size; it is clipped
+ *          to the size of the original c.c.   This is necessary to
+ *          keep the c.c. independent after the operation.
+ *      (4) You can specify that the width and/or height must equal
+ *          or exceed a minimum size for the operation to take place.
+ *      (5) Use NULL for boxa to avoid returning the boxa.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13380,6 +19791,20 @@ MorphSequenceByComponent(lua_State *L)
  * Arg #4 is expected to be a l_int32 (connectivity).
  * Arg #5 is expected to be a l_int32 (minw).
  * Arg #6 is expected to be a l_int32 (minh).
+ *
+ * Notes:
+ *      (1) See pixMorphCompSequence() for composing operation sequences.
+ *      (2) This operates separately on the region in pixs corresponding
+ *          to each c.c. in the mask pixm.  It differs from
+ *          pixMorphSequenceByComponent() in that the latter does not have
+ *          a pixm (mask), but instead operates independently on each
+ *          component in pixs.
+ *      (3) Dilation will NOT increase the region size; the result
+ *          is clipped to the size of the mask region.  This is necessary
+ *          to make regions independent after the operation.
+ *      (4) You can specify that the width and/or height of a region must
+ *          equal or exceed a minimum size for the operation to take place.
+ *      (5) Use NULL for %pboxa to avoid returning the boxa.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13407,6 +19832,16 @@ MorphSequenceByRegion(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string (sequence).
  * Arg #3 is expected to be a l_int32 (dispsep).
+ *
+ * Notes:
+ *      (1) This does dwa morphology on binary images.
+ *      (2) This runs a pipeline of operations; no branching is allowed.
+ *      (3) This only uses brick Sels that have been pre-compiled with
+ *          dwa code.
+ *      (4) A new image is always produced; the input image is not changed.
+ *      (5) This contains an interpreter, allowing sequences to be
+ *          generated and run.
+ *      (6) See pixMorphSequence() for further information about usage.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13429,6 +19864,11 @@ MorphSequenceDwa(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixm).
  * Arg #3 is expected to be a string (sequence).
  * Arg #4 is expected to be a l_int32 (dispsep).
+ *
+ * Notes:
+ *      (1) This applies the morph sequence to the image, but only allows
+ *          changes in pixs for pixels under the background of pixm.
+ *      (5) If pixm is NULL, this is just pixMorphSequence().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13454,6 +19894,20 @@ MorphSequenceMasked(lua_State *L)
  * Arg #4 is expected to be a l_float32 (boff).
  * Arg #5 is expected to be a l_float32 (delta).
  * Arg #6 is expected to be a l_int32 (nincr).
+ *
+ * Notes:
+ *      (1) This generates a mosaic view of the effect of shifting the RGB
+ *          components.  See pixColorShiftRGB() for details on the shifting.
+ *      (2) The offsets (%roff, %goff, %boff) set the color center point,
+ *          and the deviations from this are shown separately for deltas
+ *          in r, g and b.  For each component, we show 2 * %nincr + 1
+ *          images.
+ *      (3) Usage: color prints differ from the original due to three factors:
+ *          illumination, calibration of the camera in acquisition,
+ *          and calibration of the printer.  This function can be used
+ *          to iteratively match a color print to the original.  On each
+ *          iteration, the center offsets are set to the best match so
+ *          far, and the @delta increments are typically reduced.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13478,6 +19932,11 @@ MosaicColorShiftRGB(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (factor).
  * Arg #3 is expected to be a l_uint32 (offset).
+ *
+ * Notes:
+ *      (1) The offset must be >= 0 and should not exceed 0x40000000.
+ *      (2) This multiplies each pixel, relative to offset, by the input factor
+ *      (3) The result is returned with the offset back in place.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -13500,6 +19959,13 @@ MultConstAccumulate(lua_State *L)
  * Arg #2 is expected to be a l_float32 (rfact).
  * Arg #3 is expected to be a l_float32 (gfact).
  * Arg #4 is expected to be a l_float32 (bfact).
+ *
+ * Notes:
+ *      (1) rfact, gfact and bfact can only have non-negative values.
+ *          They can be greater than 1.0.  All transformed component
+ *          values are clipped to the interval [0, 255].
+ *      (2) For multiplication with a general 3x3 matrix of constants,
+ *          use pixMultMatrixColor().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13521,6 +19987,11 @@ MultConstantColor(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (val).
+ *
+ * Notes:
+ *      (1) In-place operation; val must be >= 0.
+ *      (2) No clipping for 32 bpp.
+ *      (3) For 8 and 16 bpp, the result is clipped to 0xff and 0xffff, rsp.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -13540,6 +20011,30 @@ MultConstantGray(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Kernel* (kel).
+ *
+ * Notes:
+ *      (1) The kernel is a data structure used mostly for floating point
+ *          convolution.  Here it is a 3x3 matrix of floats that are used
+ *          to transform the pixel values by matrix multiplication:
+ *            nrval = a[0,0] * rval + a[0,1] * gval + a[0,2] * bval
+ *            ngval = a[1,0] * rval + a[1,1] * gval + a[1,2] * bval
+ *            nbval = a[2,0] * rval + a[2,1] * gval + a[2,2] * bval
+ *      (2) The matrix can be generated in several ways.
+ *          See kernel.c for details.  Here are two of them:
+ *            (a) kel = kernelCreate(3, 3);
+ *                kernelSetElement(kel, 0, 0, val00);
+ *                kernelSetElement(kel, 0, 1, val01);
+ *                ...
+ *            (b) from a static string; e.g.,:
+ *                const char *kdata = " 0.6  0.3 -0.2 "
+ *                                    " 0.1  1.2  0.4 "
+ *                                    " -0.4 0.2  0.9 ";
+ *                kel = kernelCreateFromString(3, 3, 0, 0, kdata);
+ *      (3) For the special case where the matrix is diagonal, it is easier
+ *          to use pixMultConstantColor().
+ *      (4) Matrix entries can have positive and negative values, and can
+ *          be larger than 1.0.  All transformed component values
+ *          are clipped to [0, 255].
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13561,6 +20056,14 @@ MultMatrixColor(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Box* (box).
  * Arg #4 is expected to be a l_uint32 (color).
+ *
+ * Notes:
+ *      (1) This filters all pixels in the specified region by
+ *          multiplying each component by the input color.
+ *          This leaves black invariant and transforms white to the
+ *          input color.
+ *      (2) If pixd == pixs, this is done in-place.
+ *      (3) If box == NULL, this is performed on all of pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13582,6 +20085,18 @@ MultiplyByColor(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) This returns the actual number of colors found in the image,
+ *          even if there is a colormap.  If %factor == 1 and the
+ *          number of colors differs from the number of entries
+ *          in the colormap, a warning is issued.
+ *      (2) Use %factor == 1 to find the actual number of colors.
+ *          Use %factor > 1 to quickly find the approximate number of colors.
+ *      (3) For d = 2, 4 or 8 bpp grayscale, this returns the number
+ *          of colors found in the image in 'ncolors'.
+ *      (4) For d = 32 bpp (rgb), if the number of colors is
+ *          greater than 256, this returns 0 in 'ncolors'.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -13607,6 +20122,21 @@ NumColors(lua_State *L)
  * Arg #3 is expected to be a l_int32 (lightthresh).
  * Arg #4 is expected to be a l_float32 (minfract).
  * Arg #5 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) This function is asking the question: how many perceptually
+ *          significant gray color levels is in this pix?
+ *          A color level must meet 3 criteria to be significant:
+ *            ~ it can't be too close to black
+ *            ~ it can't be too close to white
+ *            ~ it must have at least some minimum fractional population
+ *      (2) Use -1 for default values for darkthresh, lightthresh and minfract.
+ *      (3) Choose default of darkthresh = 20, because variations in very
+ *          dark pixels are not visually significant.
+ *      (4) Choose default of lightthresh = 236, because document images
+ *          that have been jpeg'd typically have near-white pixels in the
+ *          8x8 jpeg blocks, and these should not be counted.  It is desirable
+ *          to obtain a clean image by quantizing this noise away.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -13634,6 +20164,12 @@ NumSignificantGrayColors(lua_State *L)
  * Arg #2 is expected to be a l_int32 (level).
  * Arg #3 is expected to be a l_int32 (mincount).
  * Arg #4 is expected to be a l_float32 (minfract).
+ *
+ * Notes:
+ *      (1) Exactly one of (%mincount, %minfract) must be -1, so, e.g.,
+ *          if %mincount == -1, then we use %minfract.
+ *      (2) If all occupied octcubes are to count, set %mincount == 1.
+ *          Setting %minfract == 0.0 is taken to mean the same thing.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -13658,6 +20194,9 @@ NumberOccupiedOctcubes(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (level).
+ *
+ * Notes:
+ *      (1) Input NULL for &ncolors to prevent computation and return value.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa * on the Lua stack
@@ -13683,6 +20222,56 @@ OctcubeHistogram(lua_State *L)
  * Arg #3 is expected to be a l_int32 (mindepth).
  * Arg #4 is expected to be a l_int32 (level).
  * Arg #5 is expected to be a l_int32 (metric).
+ *
+ * Notes:
+ *      (1) In typical use, we are doing an operation, such as
+ *          interpolative scaling, on a colormapped pix, where it is
+ *          necessary to remove the colormap before the operation.
+ *          We then want to re-quantize the RGB result using the same
+ *          colormap.
+ *      (2) The level is used to divide the color space into octcubes.
+ *          Each input pixel is, in effect, placed at the center of an
+ *          octcube at the given level, and it is mapped into the
+ *          exact color (given in the colormap) that is the closest
+ *          to that location.  We need to know that distance, for each color
+ *          in the colormap.  The higher the level of the octtree, the smaller
+ *          the octcubes in the color space, and hence the more accurately
+ *          we can determine the closest color in the colormap; however,
+ *          the size of the LUT, which is the total number of octcubes,
+ *          increases by a factor of 8 for each increase of 1 level.
+ *          The time required to acquire a level 4 mapping table, which has
+ *          about 4K entries, is less than 1 msec, so that is the
+ *          recommended minimum size to be used.  At that size, the
+ *          octcubes have their centers 16 units apart in each (r,g,b)
+ *          direction.  If two colors are in the same octcube, the one
+ *          closest to the center will always be chosen.  The maximum
+ *          error for any component occurs when the correct color is
+ *          at a cube corner and there is an incorrect color just inside
+ *          the cube next to the opposite corner, giving an error of
+ *          14 units (out of 256) for each component.   Using a level 5
+ *          mapping table reduces the maximum error to 6 units.
+ *      (3) Typically you should use the Euclidean metric, because the
+ *          resulting voronoi cells (which are generated using the actual
+ *          colormap values as seeds) are convex for Euclidean distance
+ *          but not for Manhattan distance.  In terms of the octcubes,
+ *          convexity of the voronoi cells means that if the 8 corners
+ *          of any cube (of which the octcubes are special cases)
+ *          are all within a cell, then every point in the cube will
+ *          lie within the cell.
+ *      (4) The depth of the output pixd is equal to the maximum of
+ *          (a) %mindepth and (b) the minimum (2, 4 or 8 bpp) necessary
+ *          to hold the indices in the colormap.
+ *      (5) We build a mapping table from octcube to colormap index so
+ *          that this function can run in a time (otherwise) independent
+ *          of the number of colors in the colormap.  This avoids a
+ *          brute-force search for the closest colormap color to each
+ *          pixel in the image.
+ *      (6) This is similar to the function pixAssignToNearestColor()
+ *          used for color segmentation.
+ *      (7) Except for very small images or when using level > 4,
+ *          it takes very little time to generate the tables,
+ *          compared to the generation of the colormapped dest pix,
+ *          so one would not typically use the low-level version.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13707,6 +20296,24 @@ OctcubeQuantFromCmap(lua_State *L)
  * Arg #2 is expected to be a l_int32 (depth).
  * Arg #3 is expected to be a l_int32 (graylevels).
  * Arg #4 is expected to be a l_int32 (delta).
+ *
+ * Notes:
+ *      (1) Generates a colormapped image, where the colormap table values
+ *          have two components: octcube values representing pixels with
+ *          color content, and grayscale values for the rest.
+ *      (2) The threshold (delta) is the maximum allowable difference of
+ *          the max abs value of | r - g |, | r - b | and | g - b |.
+ *      (3) The octcube values are the averages of all pixels that are
+ *          found in the octcube, and that are far enough from gray to
+ *          be considered color.  This can roughly be visualized as all
+ *          the points in the rgb color cube that are not within a "cylinder"
+ *          of diameter approximately 'delta' along the main diagonal.
+ *      (4) We want to guarantee full coverage of the rgb color space; thus,
+ *          if the output depth is 4, the octlevel is 1 (2 x 2 x 2 = 8 cubes)
+ *          and if the output depth is 8, the octlevel is 2 (4 x 4 x 4
+ *          = 64 cubes).
+ *      (5) Consequently, we have the following constraint on the number
+ *          of allowed gray levels: for 4 bpp, 8; for 8 bpp, 192.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13729,6 +20336,10 @@ OctcubeQuantMixedWithGray(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (colors).
  * Arg #3 is expected to be a l_int32 (ditherflag).
+ *
+ *  Notes:
+ *        Leptonica also provides color quantization using a modified
+ *        form of median cut.  See colorquant2.c for details.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13752,6 +20363,34 @@ OctreeColorQuant(lua_State *L)
  * Arg #3 is expected to be a l_int32 (ditherflag).
  * Arg #4 is expected to be a l_float32 (validthresh).
  * Arg #5 is expected to be a l_float32 (colorthresh).
+ *
+ * Notes:
+ *      (1) The parameters %validthresh and %colorthresh are used to
+ *          determine if color quantization should be used on an image,
+ *          or whether, instead, it should be quantized in grayscale.
+ *          If the image has very few non-white and non-black pixels, or
+ *          if those pixels that are non-white and non-black are all
+ *          very close to either white or black, it is usually better
+ *          to treat the color as accidental and to quantize the image
+ *          to gray only.  These parameters are useful if you know
+ *          something a priori about the image.  Perhaps you know that
+ *          there is only a very small fraction of color pixels, but they're
+ *          important to preserve; then you want to use a smaller value for
+ *          these parameters.  To disable conversion to gray and force
+ *          color quantization, use %validthresh = 0.0 and %colorthresh = 0.0.
+ *      (2) See pixOctreeColorQuant() for algorithmic and implementation
+ *          details.  This function has a more general interface.
+ *      (3) See pixColorFraction() for computing the fraction of pixels
+ *          that are neither white nor black, and the fraction of those
+ *          pixels that have little color.  From the documentation there:
+ *             If pixfract is very small, there are few pixels that are
+ *             neither black nor white.  If colorfract is very small,
+ *             the pixels that are neither black nor white have very
+ *             little color content.  The product 'pixfract * colorfract'
+ *             gives the fraction of pixels with significant color content.
+ *          We test against the product %validthresh * %colorthresh
+ *          to find color in images that have either very few
+ *          intermediate gray pixels or that have many such gray pixels.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13775,6 +20414,50 @@ OctreeColorQuantGeneral(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (level).
  * Arg #3 is expected to be a l_int32 (ditherflag).
+ *
+ * Notes:
+ *      (1) This color quantization method works very well without
+ *          dithering, using octcubes at two different levels:
+ *            (a) the input %level, which is either 3 or 4
+ *            (b) level 2 (64 octcubes to cover the entire color space)
+ *      (2) For best results, using %level = 4 is recommended.
+ *          Why do we provide an option for using level 3?  Because
+ *          there are 512 octcubes at level 3, and for many images
+ *          not more than 256 are filled.  As a result, on some images
+ *          a very accurate quantized representation is possible using
+ *          %level = 3.
+ *      (3) This first breaks up the color space into octcubes at the
+ *          input %level, and computes, for each octcube, the average
+ *          value of the pixels that are in it.
+ *      (4) Then there are two possible situations:
+ *            (a) If there are not more than 256 populated octcubes,
+ *                it returns a cmapped pix with those values assigned.
+ *            (b) Otherwise, it selects 192 octcubes containing the largest
+ *                number of pixels and quantizes pixels within those octcubes
+ *                to their average.  Then, to handle the residual pixels
+ *                that are not in those 192 octcubes, it generates a
+ *                level 2 octree consisting of 64 octcubes, and within
+ *                each octcube it quantizes the residual pixels to their
+ *                average within each of those level 2 octcubes.
+ *      (5) Unpopulated level 2 octcubes are represented in the colormap
+ *          by their centers.  This, of course, has no effect unless
+ *          dithering is used for the output image.
+ *      (6) The depth of pixd is the minimum required to support the
+ *          number of colors found at %level; namely, 2, 4 or 8.
+ *      (7) This function works particularly well on images such as maps,
+ *          where there are a relatively small number of well-populated
+ *          colors, but due to antialiasing and compression artifacts
+ *          there may be a large number of different colors.  This will
+ *          pull out and represent accurately the highly populated colors,
+ *          while still making a reasonable approximation for the others.
+ *      (8) The highest level of octcubes allowed is 4.  Use of higher
+ *          levels typically results in having a small fraction of
+ *          pixels in the most populated 192 octcubes.  As a result,
+ *          most of the pixels are represented at level 2, which is
+ *          not sufficiently accurate.
+ *      (9) Dithering shows artifacts on some images.  If you plan to
+ *          dither, pixOctreeColorQuant() and pixFixedOctcubeQuant256()
+ *          usually give better results.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13817,6 +20500,18 @@ OctreeQuantNumColors(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Sel* (sel).
+ *
+ * Notes:
+ *      (1) Generic morphological opening, using hits in the Sel.
+ *      (2) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (3) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixOpen(NULL, pixs, ...);
+ *          (b) pixOpen(pixs, pixs, ...);
+ *          (c) pixOpen(pixd, pixs, ...);
+ *      (4) The size of the result is determined by pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13839,6 +20534,20 @@ Open(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) Sel is a brick with all elements being hits
+ *      (2) The origin is at (x, y) = (hsize/2, vsize/2)
+ *      (3) Do separably if both hsize and vsize are > 1.
+ *      (4) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (5) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixOpenBrick(NULL, pixs, ...);
+ *          (b) pixOpenBrick(pixs, pixs, ...);
+ *          (c) pixOpenBrick(pixd, pixs, ...);
+ *      (6) The size of the result is determined by pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13862,6 +20571,29 @@ OpenBrick(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) These implement 2D brick Sels, using linear Sels generated
+ *          with selaAddBasic().
+ *      (2) A brick Sel has hits for all elements.
+ *      (3) The origin of the Sel is at (x, y) = (hsize/2, vsize/2)
+ *      (4) Do separably if both hsize and vsize are > 1.
+ *      (5) It is necessary that both horizontal and vertical Sels
+ *          of the input size are defined in the basic sela.
+ *      (6) Note that we must always set or clear the border pixels
+ *          before each operation, depending on the the b.c.
+ *          (symmetric or asymmetric).
+ *      (7) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (8) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixOpenBrickDwa(NULL, pixs, ...);
+ *          (b) pixOpenBrickDwa(pixs, pixs, ...);
+ *          (c) pixOpenBrickDwa(pixd, pixs, ...);
+ *      (9) The size of the result is determined by pixs.
+ *      (10) If either linear Sel is not found, this calls
+ *           the appropriate decomposible function.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13885,6 +20617,34 @@ OpenBrickDwa(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) Sel is a brick with all elements being hits
+ *      (2) The origin is at (x, y) = (hsize/2, vsize/2)
+ *      (3) Do compositely for each dimension > 1.
+ *      (4) Do separably if both hsize and vsize are > 1.
+ *      (5) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (6) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixOpenCompBrick(NULL, pixs, ...);
+ *          (b) pixOpenCompBrick(pixs, pixs, ...);
+ *          (c) pixOpenCompBrick(pixd, pixs, ...);
+ *      (7) The dimensions of the resulting image are determined by pixs.
+ *      (8) CAUTION: both hsize and vsize are being decomposed.
+ *          The decomposer chooses a product of sizes (call them
+ *          'terms') for each that is close to the input size,
+ *          but not necessarily equal to it.  It attempts to optimize:
+ *             (a) for consistency with the input values: the product
+ *                 of terms is close to the input size
+ *             (b) for efficiency of the operation: the sum of the
+ *                 terms is small; ideally about twice the square
+ *                 root of the input size.
+ *          So, for example, if the input hsize = 37, which is
+ *          a prime number, the decomposer will break this into two
+ *          terms, 6 and 6, so that the net result is a dilation
+ *          with hsize = 36.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13908,6 +20668,38 @@ OpenCompBrick(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) These implement a separable composite opening with 2D brick Sels.
+ *      (2) For efficiency, it may decompose each linear morphological
+ *          operation into two (brick + comb).
+ *      (3) A brick Sel has hits for all elements.
+ *      (4) The origin of the Sel is at (x, y) = (hsize/2, vsize/2)
+ *      (5) Do separably if both hsize and vsize are > 1.
+ *      (6) It is necessary that both horizontal and vertical Sels
+ *          of the input size are defined in the basic sela.
+ *      (7) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (8) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixOpenCompBrickDwa(NULL, pixs, ...);
+ *          (b) pixOpenCompBrickDwa(pixs, pixs, ...);
+ *          (c) pixOpenCompBrickDwa(pixd, pixs, ...);
+ *      (9) The size of pixd is determined by pixs.
+ *      (10) CAUTION: both hsize and vsize are being decomposed.
+ *          The decomposer chooses a product of sizes (call them
+ *          'terms') for each that is close to the input size,
+ *           but not necessarily equal to it.  It attempts to optimize:
+ *              (a) for consistency with the input values: the product
+ *                  of terms is close to the input size
+ *              (b) for efficiency of the operation: the sum of the
+ *                  terms is small; ideally about twice the square
+ *                   root of the input size.
+ *           So, for example, if the input hsize = 37, which is
+ *           a prime number, the decomposer will break this into two
+ *           terms, 6 and 6, so that the net result is a dilation
+ *           with hsize = 36.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13953,6 +20745,21 @@ OpenCompBrickExtendDwa(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Sel* (sel).
+ *
+ * Notes:
+ *      (1) Generalized morphological opening, using both hits and
+ *          misses in the Sel.
+ *      (2) This does a hit-miss transform, followed by a dilation
+ *          using the hits.
+ *      (3) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (4) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixOpenGeneralized(NULL, pixs, ...);
+ *          (b) pixOpenGeneralized(pixs, pixs, ...);
+ *          (c) pixOpenGeneralized(pixd, pixs, ...);
+ *      (5) The size of the result is determined by pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13974,6 +20781,10 @@ OpenGeneralized(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (hsize).
  * Arg #3 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) Sel is a brick with all elements being hits
+ *      (2) If hsize = vsize = 1, just returns a copy.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -13995,6 +20806,12 @@ OpenGray(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (hsize).
  * Arg #3 is expected to be a l_int32 (vsize).
+ *
+ * Notes:
+ *      (1) Special case for 1x3, 3x1 or 3x3 brick sel (all hits)
+ *      (2) If hsize = vsize = 1, just returns a copy.
+ *      (3) It would be nice not to add a border, but it is required
+ *          to get the same results as for the general case.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -14017,6 +20834,15 @@ OpenGray3(lua_State *L)
  * Arg #2 is expected to be a l_float32 (minupconf).
  * Arg #3 is expected to be a l_float32 (minratio).
  * Arg #4 is expected to be a l_int32 (debug).
+ *
+ * Notes:
+ *      (1) Simple top-level function to detect if Roman text is in
+ *          reading orientation, and to rotate the image accordingly if not.
+ *      (2) Returns a copy if no rotation is needed.
+ *      (3) See notes for pixOrientDetect() and pixOrientDecision().
+ *          Use 0.0 for default values for %minupconf and %minratio
+ *      (4) Optional output of intermediate confidence results and
+ *          the rotation performed on pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 3 l_float32 (%upconf, %leftconf) and l_int32 (%rotation) on the Lua stack
@@ -14046,6 +20872,52 @@ OrientCorrect(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (mincount).
  * Arg #3 is expected to be a boolean (debug).
+ *
+ * Notes:
+ *      (1) See "Measuring document image skew and orientation"
+ *          Dan S. Bloomberg, Gary E. Kopec and Lakshmi Dasari
+ *          IS&T/SPIE EI'95, Conference 2422: Document Recognition II
+ *          pp 302-316, Feb 6-7, 1995, San Jose, CA
+ *      (2) upconf is the normalized difference between up ascenders
+ *          and down ascenders.  The image is analyzed without rotation
+ *          for being rightside-up or upside-down.  Set &upconf to null
+ *          to skip this operation.
+ *      (3) leftconf is the normalized difference between up ascenders
+ *          and down ascenders in the image after it has been
+ *          rotated 90 degrees clockwise.  With that rotation, ascenders
+ *          projecting to the left in the source image will project up
+ *          in the rotated image.  We compute this by rotating 90 degrees
+ *          clockwise and testing for up and down ascenders.  Set
+ *          &leftconf to null to skip this operation.
+ *      (4) Note that upconf and leftconf are not linear measures of
+ *          confidence, e.g., in a range between 0 and 100.  They
+ *          measure how far you are out on the tail of a (presumably)
+ *          normal distribution.  For example, a confidence of 10 means
+ *          that it is nearly certain that the difference did not
+ *          happen at random.  However, these values must be interpreted
+ *          cautiously, taking into consideration the estimated prior
+ *          for a particular orientation or mirror flip.   The up-down
+ *          signal is very strong if applied to text with ascenders
+ *          up and down, and relatively weak for text at 90 degrees,
+ *          but even at 90 degrees, the difference can look significant.
+ *          For example, suppose the ascenders are oriented horizontally,
+ *          but the test is done vertically.  Then upconf can
+ *          be < -MIN_CONF_FOR_UP_DOWN, suggesting the text may be
+ *          upside-down.  However, if instead the test were done
+ *          horizontally, leftconf will be very much larger
+ *          (in absolute value), giving the correct orientation.
+ *      (5) If you compute both upconf and leftconf, and there is
+ *          sufficient signal, the following table determines the
+ *          cw angle necessary to rotate pixs so that the text is
+ *          rightside-up:
+ *             0 deg :           upconf >> 1,    abs(upconf) >> abs(leftconf)
+ *             90 deg :          leftconf >> 1,  abs(leftconf) >> abs(upconf)
+ *             180 deg :         upconf << -1,   abs(upconf) >> abs(leftconf)
+ *             270 deg :         leftconf << -1, abs(leftconf) >> abs(upconf)
+ *      (6) One should probably not interpret the direction unless
+ *          there are a sufficient number of counts for both orientations,
+ *          in which case neither upconf nor leftconf will be 0.0.
+ *      (7) Uses rasterop implementation of HMT.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -14072,6 +20944,15 @@ OrientDetect(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (mincount).
  * Arg #3 is expected to be a boolean (debug).
+ *
+ * Notes:
+ *      (1) Same interface as for pixOrientDetect().  See notes
+ *          there for usage.
+ *      (2) Uses auto-gen'd code for the Sels defined at the
+ *          top of this file, with some renaming of functions.
+ *          The auto-gen'd code is in fliphmtgen.c, and can
+ *          be generated by a simple executable; see prog/flipselgen.c.
+ *      (3) This runs about 2.5 times faster than the pixOrientDetect().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -14101,6 +20982,61 @@ OrientDetectDwa(lua_State *L)
  * Arg #4 is expected to be a l_int32 (smoothx).
  * Arg #5 is expected to be a l_int32 (smoothy).
  * Arg #6 is expected to be a l_float32 (scorefract).
+ *
+ *  Notes:
+ *      (1) pixOtsuAdaptiveThreshold() computes a global threshold over each
+ *          tile and performs the threshold operation, resulting in a
+ *          binary image for each tile.  These are stitched into the
+ *          final result.
+ *      (2) pixOtsuThreshOnBackgroundNorm() and
+ *          pixMaskedThreshOnBackgroundNorm() are binarization functions
+ *          that use background normalization with other techniques.
+ *      (3) Sauvola binarization computes a local threshold based on
+ *          the local average and square average.  It takes two constants:
+ *          the window size for the measurment at each pixel and a
+ *          parameter that determines the amount of normalized local
+ *          standard deviation to subtract from the local average value.
+ *      (4) pixThresholdByCC() uses the numbers of 4 and 8 connected
+ *          components at different thresholding to determine if a
+ *          global threshold can be used (for text or line-art) and the
+ *          value it should have.
+ * Notes:
+ *      (1) The Otsu method finds a single global threshold for an image.
+ *          This function allows a locally adapted threshold to be
+ *          found for each tile into which the image is broken up.
+ *      (2) The array of threshold values, one for each tile, constitutes
+ *          a highly downscaled image.  This array is optionally
+ *          smoothed using a convolution.  The full width and height of the
+ *          convolution kernel are (2 * %smoothx + 1) and (2 * %smoothy + 1).
+ *      (3) The minimum tile dimension allowed is 16.  If such small
+ *          tiles are used, it is recommended to use smoothing, because
+ *          without smoothing, each small tile determines the splitting
+ *          threshold independently.  A tile that is entirely in the
+ *          image bg will then hallucinate fg, resulting in a very noisy
+ *          binarization.  The smoothing should be large enough that no
+ *          tile is only influenced by one type (fg or bg) of pixels,
+ *          because it will force a split of its pixels.
+ *      (4) To get a single global threshold for the entire image, use
+ *          input values of %sx and %sy that are larger than the image.
+ *          For this situation, the smoothing parameters are ignored.
+ *      (5) The threshold values partition the image pixels into two classes:
+ *          one whose values are less than the threshold and another
+ *          whose values are greater than or equal to the threshold.
+ *          This is the same use of 'threshold' as in pixThresholdToBinary().
+ *      (6) The scorefract is the fraction of the maximum Otsu score, which
+ *          is used to determine the range over which the histogram minimum
+ *          is searched.  See numaSplitDistribution() for details on the
+ *          underlying method of choosing a threshold.
+ *      (7) This uses enables a modified version of the Otsu criterion for
+ *          splitting the distribution of pixels in each tile into a
+ *          fg and bg part.  The modification consists of searching for
+ *          a minimum in the histogram over a range of pixel values where
+ *          the Otsu score is within a defined fraction, %scorefract,
+ *          of the max score.  To get the original Otsu algorithm, set
+ *          %scorefract == 0.
+ *      (8) N.B. This method is NOT recommended for images with weak text
+ *          and significant background noise, such as bleedthrough, because
+ *          of the problem noted in (3) above for tiling.  Use Sauvola.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -14137,6 +21073,23 @@ OtsuAdaptiveThreshold(lua_State *L)
  * Arg #8 is expected to be a l_int32 (smoothx).
  * Arg #9 is expected to be a l_int32 (smoothy).
  * Arg #10 is expected to be a l_float32 (scorefract).
+ *
+ * Notes:
+ *      (1) This does background normalization followed by Otsu
+ *          thresholding.  Otsu binarization attempts to split the
+ *          image into two roughly equal sets of pixels, and it does
+ *          a very poor job when there are large amounts of dark
+ *          background.  By doing a background normalization first,
+ *          to get the background near 255, we remove this problem.
+ *          Then we use a modified Otsu to estimate the best global
+ *          threshold on the normalized image.
+ *      (2) See pixBackgroundNorm() for meaning and typical values
+ *          of input parameters.  For a start, you can try:
+ *            sx, sy = 10, 15
+ *            thresh = 100
+ *            mincount = 50
+ *            bgval = 255
+ *            smoothx, smoothy = 2
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -14167,6 +21120,12 @@ OtsuThreshOnBackgroundNorm(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) This add minimum white padding to an 8 bpp pix, such that
+ *          the centroid of the photometric inverse is in the center of
+ *          the resulting image.  Thus in computing the centroid,
+ *          black pixels have weight 255, and white pixels have weight 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -14187,6 +21146,21 @@ PadToCenterCentroid(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Boxa* (boxa).
  * Arg #3 is expected to be a l_uint32 (val).
+ *
+ * Notes:
+ *      (1) If pixs is 1 bpp or is colormapped, it is converted to 8 bpp
+ *          and the boxa is painted using a colormap; otherwise,
+ *          it is converted to 32 bpp rgb.
+ *      (2) There are several ways to display a box on an image:
+ *            * Paint it as a solid color
+ *            * Draw the outline
+ *            * Blend the outline or region with the existing image
+ *          We provide painting and drawing here; blending is in blend.c.
+ *          When painting or drawing, the result can be either a
+ *          cmapped image or an rgb image.  The dest will be cmapped
+ *          if the src is either 1 bpp or has a cmap that is not full.
+ *          To force RGB output, use pixConvertTo8(pixs, FALSE)
+ *          before calling any of these paint and draw functions.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -14207,6 +21181,12 @@ PaintBoxa(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Boxa* (boxa).
+ *
+ * Notes:
+ *      (1) If pixs is 1 bpp, we paint the boxa using a colormap;
+ *          otherwise, we convert to 32 bpp.
+ *      (2) We use up to 254 different colors for painting the regions.
+ *      (3) If boxes overlap, the later ones paint over earlier ones.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -14233,6 +21213,52 @@ PaintBoxaRandom(lua_State *L)
  * Arg #7 is expected to be a l_int32 (tilesize).
  * Arg #8 is expected to be a l_int32 (ntiles).
  * Arg #9 is an optional l_int32 (distblend).
+ *
+ * Notes:
+ *      (1) In-place operation; pixd is changed.
+ *      (2) If pixm == NULL, it's a no-op.
+ *      (3) The mask origin is placed at (x,y) on pixd, and the
+ *          operation is clipped to the intersection of pixd and the
+ *          fg of the mask.
+ *      (4) %tsize is the the requested size for tiling.  The actual
+ *          actual size for each c.c. will be bounded by the minimum
+ *          dimension of the c.c.
+ *      (5) For %mindist, %searchdir and %ntiles, see pixFindRepCloseTile().
+ *          They determine the set of possible tiles that can be used
+ *          to build a larger mirrored tile to paint onto pixd through
+ *          the c.c. of pixm.
+ *      (6) %distblend is used for alpha blending.  It is only applied
+ *          if there is exactly one c.c. in the mask.  Use distblend == 0
+ *          to skip blending and just paint through the 1 bpp mask.
+ *      (7) To apply blending to more than 1 component, call this function
+ *          repeatedly with %pixm, %x and %y representing one component of
+ *          the mask each time.  This would be done as follows, for an
+ *          underlying image pixs and mask pixm of components to fill:
+ *              Boxa *boxa = pixConnComp(pixm, &pixa, 8);
+ *              n = boxaGetCount(boxa);
+ *              for (i = 0; i < n; i++) {
+ *                  Pix *pix = pixaGetPix(pixa, i, L_CLONE);
+ *                  Box *box = pixaGetBox(pixa, i, L_CLONE);
+ *                  boxGetGeometry(box, &bx, &by, &bw, &bh);
+ *                  pixPaintSelfThroughMask(pixs, pix, bx, by, searchdir,
+ *                                     mindist, tilesize, ntiles, distblend);
+ *                  pixDestroy(&pix);
+ *                  boxDestroy(&box);
+ *              }
+ *              pixaDestroy(&pixa);
+ *              boxaDestroy(&boxa);
+ *      (8) If no tiles can be found, this falls back to estimating the
+ *          color near the boundary of the region to be textured.
+ *      (9) This can be used to replace the pixels in some regions of
+ *          an image by selected neighboring pixels.  The mask represents
+ *          the pixels to be replaced.  For each connected component in
+ *          the mask, this function selects up to two tiles of neighboring
+ *          pixels to be used for replacement of pixels represented by
+ *          the component (i.e., under the FG of that component in the mask).
+ *          After selection, mirror replication is used to generate an
+ *          image that is large enough to cover the component.  Alpha
+ *          blending can also be used outside of the component, but near the
+ *          edge, to blur the transition between painted and original pixels.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -14261,6 +21287,38 @@ PaintSelfThroughMask(lua_State *L)
  * Arg #3 is expected to be a l_int32 (x).
  * Arg #4 is expected to be a l_int32 (y).
  * Arg #5 is expected to be a l_uint32 (val).
+ *
+ * Notes:
+ *      (1) In-place operation.  Calls pixSetMaskedCmap() for colormapped
+ *          images.
+ *      (2) For 1, 2, 4, 8 and 16 bpp gray, we take the appropriate
+ *          number of least significant bits of val.
+ *      (3) If pixm == NULL, it's a no-op.
+ *      (4) The mask origin is placed at (x,y) on pixd, and the
+ *          operation is clipped to the intersection of rectangles.
+ *      (5) For rgb, the components in val are in the canonical locations,
+ *          with red in location COLOR_RED, etc.
+ *      (6) Implementation detail 1:
+ *          For painting with val == 0 or val == maxval, you can use rasterop.
+ *          If val == 0, invert the mask so that it's 0 over the region
+ *          into which you want to write, and use PIX_SRC & PIX_DST to
+ *          clear those pixels.  To write with val = maxval (all 1's),
+ *          use PIX_SRC | PIX_DST to set all bits under the mask.
+ *      (7) Implementation detail 2:
+ *          The rasterop trick can be used for depth > 1 as well.
+ *          For val == 0, generate the mask for depth d from the binary
+ *          mask using
+ *              pixmd = pixUnpackBinary(pixm, d, 1);
+ *          and use pixRasterop() with PIX_MASK.  For val == maxval,
+ *              pixmd = pixUnpackBinary(pixm, d, 0);
+ *          and use pixRasterop() with PIX_PAINT.
+ *          But note that if d == 32 bpp, it is about 3x faster to use
+ *          the general implementation (not pixRasterop()).
+ *      (8) Implementation detail 3:
+ *          It might be expected that the switch in the inner loop will
+ *          cause large branching delays and should be avoided.
+ *          This is not the case, because the entrance is always the
+ *          same and the compiler can correctly predict the jump.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -14284,6 +21342,11 @@ PaintThroughMask(lua_State *L)
  * Arg #2 is expected to be a Pta* (pta).
  * Arg #3 is expected to be a l_int32 (outformat).
  * Arg #4 is expected to be a string (title).
+ *
+ * Notes:
+ *      (1) This is a debugging function.
+ *      (2) Removes existing colormaps and clips the pta to the input %pixs.
+ *      (3) If the image is RGB, three separate plots are generated.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -14374,6 +21437,10 @@ ProcessBarcodes(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) Brings in either black or white pixels from the boundary
+ *      (2) Removes any existing colormap, if necessary, before transforming
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -14442,6 +21509,10 @@ ProjectiveGray(lua_State *L)
  * Arg #2 is expected to be a Pta* (ptad).
  * Arg #3 is expected to be a Pta* (ptas).
  * Arg #4 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) Brings in either black or white pixels from the boundary
+ *      (2) Removes any existing colormap, if necessary, before transforming
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -14513,6 +21584,36 @@ ProjectivePtaGray(lua_State *L)
  * Arg #4 is expected to be a Pix* (pixg).
  * Arg #5 is expected to be a l_float32 (fract).
  * Arg #6 is expected to be a l_int32 (border).
+ *
+ * Notes:
+ *      (1) The alpha channel is transformed separately from pixs,
+ *          and aligns with it, being fully transparent outside the
+ *          boundary of the transformed pixs.  For pixels that are fully
+ *          transparent, a blending function like pixBlendWithGrayMask()
+ *          will give zero weight to corresponding pixels in pixs.
+ *      (2) If pixg is NULL, it is generated as an alpha layer that is
+ *          partially opaque, using %fract.  Otherwise, it is cropped
+ *          to pixs if required and %fract is ignored.  The alpha channel
+ *          in pixs is never used.
+ *      (3) Colormaps are removed.
+ *      (4) When pixs is transformed, it doesn't matter what color is brought
+ *          in because the alpha channel will be transparent (0) there.
+ *      (5) To avoid losing source pixels in the destination, it may be
+ *          necessary to add a border to the source pix before doing
+ *          the projective transformation.  This can be any non-negative
+ *          number.
+ *      (6) The input %ptad and %ptas are in a coordinate space before
+ *          the border is added.  Internally, we compensate for this
+ *          before doing the projective transform on the image after
+ *          the border is added.
+ *      (7) The default setting for the border values in the alpha channel
+ *          is 0 (transparent) for the outermost ring of pixels and
+ *          (0.5 * fract * 255) for the second ring.  When blended over
+ *          a second image, this
+ *          (a) shrinks the visible image to make a clean overlap edge
+ *              with an image below, and
+ *          (b) softens the edges by weakening the aliasing there.
+ *          Use l_setAlphaMaskBorder() to change these values.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -14536,6 +21637,13 @@ ProjectivePtaWithAlpha(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) Brings in either black or white pixels from the boundary.
+ *      (2) Retains colormap, which you can do for a sampled transform..
+ *      (3) For 8 or 32 bpp, much better quality is obtained by the
+ *          somewhat slower pixProjective().  See that function
+ *          for relative timings between sampled and interpolated.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -14560,6 +21668,14 @@ ProjectiveSampled(lua_State *L)
  * Arg #2 is expected to be a Pta* (ptad).
  * Arg #3 is expected to be a Pta* (ptas).
  * Arg #4 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) Brings in either black or white pixels from the boundary.
+ *      (2) Retains colormap, which you can do for a sampled transform..
+ *      (3) No 3 of the 4 points may be collinear.
+ *      (4) For 8 and 32 bpp pix, better quality is obtained by the
+ *          somewhat slower pixProjectivePta().  See that
+ *          function for relative timings between sampled and interpolated.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -14585,6 +21701,22 @@ ProjectiveSampledPta(lua_State *L)
  * Arg #4 is expected to be a l_int32 (vmaxb).
  * Arg #5 is expected to be a l_int32 (operation).
  * Arg #6 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) This gives a quadratic bending, upward or downward, as you
+ *          move to the left or right.
+ *      (2) If %dir == L_WARP_TO_LEFT, the right edge is unchanged, and
+ *          the left edge pixels are moved maximally up or down.
+ *      (3) Parameters %vmaxt and %vmaxb control the maximum amount of
+ *          vertical pixel shear at the top and bottom, respectively.
+ *          If %vmaxt > 0, the vertical displacement of pixels at the
+ *          top is downward.  Likewise, if %vmaxb > 0, the vertical
+ *          displacement of pixels at the bottom is downward.
+ *      (4) If %operation == L_SAMPLED, the dest pixels are taken from
+ *          the nearest src pixel.  Otherwise, we use linear interpolation
+ *          between pairs of sampled pixels.
+ *      (5) This is for quadratic shear.  For uniform (linear) shear,
+ *          use the standard shear operators.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -14611,6 +21743,9 @@ QuadraticVShear(lua_State *L)
  * Arg #3 is expected to be a l_int32 (vmaxt).
  * Arg #4 is expected to be a l_int32 (vmaxb).
  * Arg #5 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) See pixQuadraticVShear() for details.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -14636,6 +21771,9 @@ QuadraticVShearLI(lua_State *L)
  * Arg #3 is expected to be a l_int32 (vmaxt).
  * Arg #4 is expected to be a l_int32 (vmaxb).
  * Arg #5 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) See pixQuadraticVShear() for details.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -14659,6 +21797,11 @@ QuadraticVShearSampled(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (nlevels).
  * Arg #3 is expected to be a Pix* (pix_ma).
+ *
+ * Notes:
+ *      (1) The returned fpixa has %nlevels of fpix, each containing
+ *          the mean values at its level.  Level 0 has a
+ *          single value; level 1 has 4 values; level 2 has 16; etc.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -14684,6 +21827,11 @@ QuadtreeMean(lua_State *L)
  * Arg #2 is expected to be a l_int32 (nlevels).
  * Arg #3 is expected to be a Pix* (pix_ma).
  * Arg #4 is expected to be a DPix* (dpix_msa).
+ *
+ * Notes:
+ *      (1) The returned fpixav and fpixarv have %nlevels of fpix,
+ *          each containing at the respective levels the variance
+ *          and root variance values.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -14713,6 +21861,15 @@ QuadtreeVariance(lua_State *L)
  * Arg #3 is expected to be a l_int32 (mindepth).
  * Arg #4 is expected to be a l_int32 (level).
  * Arg #5 is expected to be a l_int32 (metric).
+ *
+ * Notes:
+ *      (1) This is a top-level wrapper for quantizing either grayscale
+ *          or rgb images to a specified colormap.
+ *      (2) The actual output depth is constrained by %mindepth and
+ *          by the number of colors in %cmap.
+ *      (3) For grayscale, %level and %metric are ignored.
+ *      (4) If the cmap has color and pixs is grayscale, the color is
+ *          removed from the cmap before quantizing pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -14734,6 +21891,20 @@ QuantFromCmap(lua_State *L)
  * \brief Convert a colormapped Pix* (%pixs) to a binary 1bpp Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This is a wrapper that tests if the pix can be quantized
+ *          with good quality using a small number of colors.  If so,
+ *          it does the quantization, defining a colormap and using
+ *          pixels whose value is an index into the colormap.
+ *      (2) If the image has color, it is quantized with 8 bpp pixels.
+ *          If the image is essentially grayscale, the pixels are
+ *          either 4 or 8 bpp, depending on the size of the required
+ *          colormap.
+ *      (3) %octlevel = 4 generates a larger colormap and larger
+ *          compressed image than %octlevel = 3.  If image quality is
+ *          important, you should use %octlevel = 4.
+ *      (4) If the image already has a colormap, it returns a clone.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -14764,6 +21935,27 @@ QuantizeIfFewColors(lua_State *L)
  * Arg #7 is expected to be a l_int32 (ny).
  * Arg #8 is expected to be a l_uint32 (seed).
  * Arg #9 is expected to be a l_int32 (grayval).
+ *
+ * Notes:
+ *      (1) To generate the warped image p(x',y'), set up the transforms
+ *          that are in getWarpTransform().  For each (x',y') in the
+ *          dest, the warp function computes the originating location
+ *          (x, y) in the src.  The differences (x - x') and (y - y')
+ *          are given as a sum of products of sinusoidal terms.  Each
+ *          term is multiplied by a maximum amplitude (in pixels), and the
+ *          angle is determined by a frequency and phase, and depends
+ *          on the (x', y') value of the dest.  Random numbers with
+ *          a variable input seed are used to allow the warping to be
+ *          unpredictable.  A linear interpolation is used to find
+ *          the value for the source at (x, y); this value is written
+ *          into the dest.
+ *      (2) This can be used to generate 'captcha's, which are somewhat
+ *          randomly distorted images of text.  A typical set of parameters
+ *          for a captcha are:
+ *                    xmag = 4.0     ymag = 6.0
+ *                    xfreq = 0.10   yfreq = 0.13
+ *                    nx = 3         ny = 3
+ *          Other examples can be found in prog/warptest.c.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -14793,6 +21985,22 @@ RandomHarmonicWarp(lua_State *L)
  * Arg #3 is expected to be a string describing the direction (direction).
  * Arg #4 is expected to be a l_int32 (size).
  * Arg #5 is expected to be a l_int32 (nbins).
+ *
+ * Notes:
+ *      (1) This generates a pix where each column represents a strip of
+ *          the input image.  If %direction == L_SCAN_HORIZONTAL, the
+ *          input impage is tiled into vertical strips of width %size,
+ *          where %size is a compromise between getting better spatial
+ *          columnwise resolution (small %size) and getting better
+ *          columnwise statistical information (larger %size).  Likewise
+ *          with rows of the image if %direction == L_SCAN_VERTICAL.
+ *      (2) For L_HORIZONTAL_SCAN, the output pix contains rank binned
+ *          median colors in each column that correspond to a vertical
+ *          strip of width %size in the input image.
+ *      (3) The color selection flag is one of: L_SELECT_RED, L_SELECT_GREEN,
+ *          L_SELECT_BLUE, L_SELECT_MIN, L_SELECT_MAX, L_SELECT_AVERAGE.
+ *          It determines how the rank ordering is done.
+ *      (4) Typical input values might be %size = 5, %nbins = 10.
  * </pre>
  * \param L pointer to the lua_State
  * \return nbins integers on the Lua stack (carray[])
@@ -14814,6 +22022,10 @@ RankBinByStrip(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *     (1) The time is O(n) in the number of pixels and runs about
+ *         50 Mpixels/sec on a 3 GHz machine.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -14834,6 +22046,16 @@ RankColumnTransform(lua_State *L)
  * Arg #2 is expected to be a l_int32 (wf).
  * Arg #3 is expected to be a l_int32 (hf).
  * Arg #4 is expected to be a l_float32 (rank).
+ *
+ * Notes:
+ *      (1) This defines, for each pixel in pixs, a neighborhood of
+ *          pixels given by a rectangle "centered" on the pixel.
+ *          This set of wf*hf pixels has a distribution of values.
+ *          For each component, if the values are sorted in increasing
+ *          order, we choose the component such that rank*(wf*hf-1)
+ *          pixels have a lower or equal value and
+ *          (1-rank)*(wf*hf-1) pixels have an equal or greater value.
+ *      (2) See notes in pixRankFilterGray() for further details.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -14857,6 +22079,24 @@ RankFilter(lua_State *L)
  * Arg #2 is expected to be a l_int32 (wf).
  * Arg #3 is expected to be a l_int32 (hf).
  * Arg #4 is expected to be a l_float32 (rank).
+ *
+ * Notes:
+ *      (1) This defines, for each pixel in pixs, a neighborhood of
+ *          pixels given by a rectangle "centered" on the pixel.
+ *          This set of wf*hf pixels has a distribution of values,
+ *          and if they are sorted in increasing order, we choose
+ *          the pixel such that rank*(wf*hf-1) pixels have a lower
+ *          or equal value and (1-rank)*(wf*hf-1) pixels have an equal
+ *          or greater value.
+ *      (2) By this definition, the rank = 0.0 pixel has the lowest
+ *          value, and the rank = 1.0 pixel has the highest value.
+ *      (3) We add mirrored boundary pixels to avoid boundary effects,
+ *          and put the filter center at (0, 0).
+ *      (4) This dispatches to grayscale erosion or dilation if the
+ *          filter dimensions are odd and the rank is 0.0 or 1.0, rsp.
+ *      (5) Returns a copy if both wf and hf are 1.
+ *      (6) Uses row-major or column-major incremental updates to the
+ *          histograms depending on whether hf > wf or hv <= wf, rsp.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -14880,6 +22120,17 @@ RankFilterGray(lua_State *L)
  * Arg #2 is expected to be a l_int32 (wf).
  * Arg #3 is expected to be a l_int32 (hf).
  * Arg #4 is expected to be a l_float32 (rank).
+ *
+ * Notes:
+ *      (1) This defines, for each pixel in pixs, a neighborhood of
+ *          pixels given by a rectangle "centered" on the pixel.
+ *          This set of wf*hf pixels has a distribution of values.
+ *          For each component, if the values are sorted in increasing
+ *          order, we choose the component such that rank*(wf*hf-1)
+ *          pixels have a lower or equal value and
+ *          (1-rank)*(wf*hf-1) pixels have an equal or greater value.
+ *      (2) Apply gray rank filtering to each component independently.
+ *      (3) See notes in pixRankFilterGray() for further details.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -14904,6 +22155,14 @@ RankFilterRGB(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hf).
  * Arg #4 is expected to be a l_float32 (rank).
  * Arg #5 is expected to be a l_float32 (scalefactor).
+ *
+ * Notes:
+ *      (1) This is a convenience function that downscales, does
+ *          the rank filtering, and upscales.  Because the down-
+ *          and up-scaling functions are very fast compared to
+ *          rank filtering, the time it takes is reduced from that
+ *          for the simple rank filtering operation by approximately
+ *          the square of the scaling factor.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -14935,6 +22194,20 @@ RankFilterWithScaling(lua_State *L)
  * Arg #9 is expected to be a l_int32 (area1).
  * Arg #10 is expected to be a l_int32 (area3).
  * Arg #11 is expected to be a l_float32 (rank).
+ *
+ * Notes:
+ *  We check first that the two pix are roughly
+ *  the same size.  Only if they meet that criterion do
+ *  we compare the bitmaps.  We convert the rank value to
+ *  a number of pixels by multiplying the rank fraction by the number
+ *  of pixels in the undilated image.  The Hausdorff is a 2-way
+ *  check.  The centroid difference is used to align the two
+ *  images to the nearest integer for each of the checks.
+ *  The rank hausdorff checks that the dilated image of one
+ *  contains the rank fraction of the pixels of the undilated
+ *  image of the other.   Checks are done in both direction.
+ *  Failure of the test in either direction results in failure
+ *  of the test.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -14965,6 +22238,10 @@ RankHaustest(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *     (1) The time is O(n) in the number of pixels and runs about
+ *         100 Mpixels/sec on a 3 GHz machine.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -14990,6 +22267,130 @@ RankRowTransform(lua_State *L)
  * Arg #7 is expected to be a Pix* (pixs).
  * Arg #8 is expected to be a l_int32 (sx).
  * Arg #9 is expected to be a l_int32 (sy).
+ *
+ * Notes:
+ *      (1) This has the standard set of 9 args for rasterop.
+ *          This function is your friend; it is worth memorizing!
+ *      (2) If the operation involves only dest, this calls
+ *          rasteropUniLow().  Otherwise, checks depth of the
+ *          src and dest, and if they match, calls rasteropLow().
+ *      (3) For the two-image operation, where both pixs and pixd
+ *          are defined, they are typically different images.  However
+ *          there are cases, such as pixSetMirroredBorder(), where
+ *          in-place operations can be done, blitting pixels from
+ *          one part of pixd to another.  Consequently, we permit
+ *          such operations.  If you use them, be sure that there
+ *          is no overlap between the source and destination rectangles
+ *          in pixd (!)
+ *
+ *  Background:
+ *  -----------
+ *
+ *  There are 18 operations, described by the op codes in pix.h.
+ *
+ *  One, PIX_DST, is a no-op.
+ *
+ *  Three, PIX_CLR, PIX_SET, and PIX_NOT(PIX_DST) operate only on the dest.
+ *  These are handled by the low-level rasteropUniLow().
+ *
+ *  The other 14 involve the both the src and the dest, and depend on
+ *  the bit values of either just the src or the bit values of both
+ *  src and dest.  They are handled by rasteropLow():
+ *
+ *          PIX_SRC                             s
+ *          PIX_NOT(PIX_SRC)                   ~s
+ *          PIX_SRC | PIX_DST                   s | d
+ *          PIX_SRC & PIX_DST                   s & d
+ *          PIX_SRC ^ PIX_DST                   s ^ d
+ *          PIX_NOT(PIX_SRC) | PIX_DST         ~s | d
+ *          PIX_NOT(PIX_SRC) & PIX_DST         ~s & d
+ *          PIX_NOT(PIX_SRC) ^ PIX_DST         ~s ^ d
+ *          PIX_SRC | PIX_NOT(PIX_DST)          s | ~d
+ *          PIX_SRC & PIX_NOT(PIX_DST)          s & ~d
+ *          PIX_SRC ^ PIX_NOT(PIX_DST)          s ^ ~d
+ *          PIX_NOT(PIX_SRC | PIX_DST)         ~(s | d)
+ *          PIX_NOT(PIX_SRC & PIX_DST)         ~(s & d)
+ *          PIX_NOT(PIX_SRC ^ PIX_DST)         ~(s ^ d)
+ *
+ *  Each of these is implemented with one of three low-level
+ *  functions, depending on the alignment of the left edge
+ *  of the src and dest rectangles:
+ *      * a fastest implementation if both left edges are
+ *        (32-bit) word aligned
+ *      * a very slightly slower implementation if both left
+ *        edges have the same relative (32-bit) word alignment
+ *      * the general routine that is invoked when
+ *        both left edges have different word alignment
+ *
+ *  Of the 14 binary rasterops above, only 12 are unique
+ *  logical combinations (out of a possible 16) of src
+ *  and dst bits:
+ *
+ *        (sd)         (11)   (10)   (01)   (00)
+ *   -----------------------------------------------
+ *         s            1      1      0      0
+ *        ~s            0      1      0      1
+ *       s | d          1      1      1      0
+ *       s & d          1      0      0      0
+ *       s ^ d          0      1      1      0
+ *      ~s | d          1      0      1      1
+ *      ~s & d          0      0      1      0
+ *      ~s ^ d          1      0      0      1
+ *       s | ~d         1      1      0      1
+ *       s & ~d         0      1      0      0
+ *       s ^ ~d         1      0      0      1
+ *      ~(s | d)        0      0      0      1
+ *      ~(s & d)        0      1      1      1
+ *      ~(s ^ d)        1      0      0      1
+ *
+ *  Note that the following three operations are equivalent:
+ *      ~(s ^ d)
+ *      ~s ^ d
+ *      s ^ ~d
+ *  and in the implementation, we call them out with the first form;
+ *  namely, ~(s ^ d).
+ *
+ *  Of the 16 possible binary combinations of src and dest bits,
+ *  the remaining 4 unique ones are independent of the src bit.
+ *  They depend on either just the dest bit or on neither
+ *  the src nor dest bits:
+ *
+ *         d            1      0      1      0    (indep. of s)
+ *        ~d            0      1      0      1    (indep. of s)
+ *        CLR           0      0      0      0    (indep. of both s & d)
+ *        SET           1      1      1      1    (indep. of both s & d)
+ *
+ *  As mentioned above, three of these are implemented by
+ *  rasteropUniLow(), and one is a no-op.
+ *
+ *  How can these operation codes be represented by bits
+ *  in such a way that when the basic operations are performed
+ *  on the bits the results are unique for unique
+ *  operations, and mimic the logic table given above?
+ *
+ *  The answer is to choose a particular order of the pairings:
+ *         (sd)         (11)   (10)   (01)   (00)
+ *  (which happens to be the same as in the above table)
+ *  and to translate the result into 4-bit representations
+ *  of s and d.  For example, the Sun rasterop choice
+ *  (omitting the extra bit for clipping) is
+ *
+ *      PIX_SRC      0xc
+ *      PIX_DST      0xa
+ *
+ *  This corresponds to our pairing order given above:
+ *         (sd)         (11)   (10)   (01)   (00)
+ *  where for s = 1 we get the bit pattern
+ *       PIX_SRC:        1      1      0      0     (0xc)
+ *  and for d = 1 we get the pattern
+ *       PIX_DST:         1      0      1      0    (0xa)
+ *
+ *  OK, that's the pairing order that Sun chose.  How many different
+ *  ways can we assign bit patterns to PIX_SRC and PIX_DST to get
+ *  the boolean ops to work out?  Any of the 4 pairs can be put
+ *  in the first position, any of the remaining 3 pairs can go
+ *  in the second; and one of the remaining 2 pairs can go the the third.
+ *  There is a total of 4*3*2 = 24 ways these pairs can be permuted.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -15017,6 +22418,13 @@ Rasterop(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (op).
+ *
+ * Notes:
+ *      ~ this is a wrapper for a common 2-image raster operation
+ *      ~ both pixs and pixd must be defined
+ *      ~ the operation is performed with aligned UL corners of pixs and pixd
+ *      ~ the operation clips to the smallest pix; if the width or height
+ *        of pixd is larger than pixs, some pixels in pixd will be unchanged
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -15040,6 +22448,14 @@ RasteropFullImage(lua_State *L)
  * Arg #3 is expected to be a l_int32 (bh).
  * Arg #4 is expected to be a l_int32 (hshift).
  * Arg #5 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) This rasterop translates a horizontal band of the
+ *          image either left or right, bringing in either white
+ *          or black pixels from outside the image.
+ *      (2) The horizontal band extends the full width of pixd.
+ *      (3) If a colormap exists, the nearest color to white or black
+ *          is brought in.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -15088,6 +22504,14 @@ RasteropIP(lua_State *L)
  * Arg #3 is expected to be a l_int32 (bw).
  * Arg #4 is expected to be a l_int32 (vshift).
  * Arg #5 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) This rasterop translates a vertical band of the
+ *          image either up or down, bringing in either white
+ *          or black pixels from outside the image.
+ *      (2) The vertical band extends the full height of pixd.
+ *      (3) If a colormap exists, the nearest color to white or black
+ *          is brought in.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -15109,6 +22533,9 @@ RasteropVip(lua_State *L)
  * \brief Read Pix* from an external file (%filename).
  * <pre>
  * Arg #1 is expected to be a string (filename).
+ *
+ * Notes:
+ *      (1) See at top of file for supported formats.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -15173,6 +22600,28 @@ ReadBarcodes(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a string (fname).
+ *
+ * Notes:
+ *      (1) This allows overhead for traversal of a multipage tiff file
+ *          to be linear in the number of images.  This will also work
+ *          with a singlepage tiff file.
+ *      (2) No TIFF internal data structures are exposed to the caller
+ *          (thanks to Jeff Breidenbach).
+ *      (3) offset is the byte offset of a particular image in a multipage
+ *          tiff file. To get the first image in the file, input the
+ *          special offset value of 0.
+ *      (4) The offset is updated to point to the next image, for a
+ *          subsequent call.
+ *      (5) On the last image, the offset returned is 0.  Exit the loop
+ *          when the returned offset is 0.
+ *      (6) For reading a multipage tiff from a memory buffer, see
+ *            pixReadMemFromMultipageTiff()
+ *      (7) Example usage for reading all the images in the tif file:
+ *            size_t offset = 0;
+ *            do {
+ *                Pix *pix = pixReadFromMultipageTiff(filename, &offset);
+ *                // do something with pix
+ *            } while (offset != 0);
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15193,6 +22642,11 @@ ReadFromMultipageTiff(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a string (filename).
+ *
+ * Notes:
+ *      (1) This reads the actual headers for jpeg, png, tiff and pnm.
+ *          For bmp and gif, we cheat and read the entire file into a pix,
+ *          from which we extract the "header" information.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -15224,6 +22678,17 @@ ReadHeader(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a constl_uint8* (data).
  * Arg #2 is expected to be a size_t (size).
+ *
+ * Notes:
+ *      (1) This reads the actual headers for jpeg, png, tiff, jp2k and pnm.
+ *          For bmp and gif, we cheat and read all the data into a pix,
+ *          from which we extract the "header" information.
+ *      (2) The amount of data required depends on the format.  For
+ *          png, it requires less than 30 bytes, but for jpeg it can
+ *          require most of the compressed file.  In practice, the data
+ *          is typically the entire compressed file in memory.
+ *      (3) findFileFormatBuffer() requires up to 8 bytes to decide on
+ *          the format, which we require.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -15256,6 +22721,25 @@ ReadHeaderMem(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sarray* (sa).
  * Arg #2 is expected to be a l_int32 (index).
+ *
+ * Notes:
+ *      (1) This function is useful for selecting image files from a
+ *          directory, where the integer %index is embedded into
+ *          the file name.
+ *      (2) This is typically done by generating the sarray using
+ *          getNumberedPathnamesInDirectory(), so that the %index
+ *          pathname would have the number %index in it.  The size
+ *          of the sarray should be the largest number (plus 1) appearing
+ *          in the file names, respecting the constraints in the
+ *          call to getNumberedPathnamesInDirectory().
+ *      (3) Consequently, for some indices into the sarray, there may
+ *          be no pathnames in the directory containing that number.
+ *          By convention, we place empty C strings ("") in those
+ *          locations in the sarray, and it is not an error if such
+ *          a string is encountered and no pix is returned.
+ *          Therefore, the caller must verify that a pix is returned.
+ *      (4) See convertSegmentedPagesToPS() in src/psio1.c for an
+ *          example of usage.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -15279,6 +22763,33 @@ ReadIndexed(lua_State *L)
  * Arg #3 is expected to be a Box* (box).
  * Arg #4 is expected to be a l_int32 (hint).
  * Arg #5 is expected to be a boolean (debug).
+ *
+ * Notes:
+ *      (1) This is a special function for reading jp2k files.
+ *          The high-level pixReadStream() uses default values:
+ *             %reduction = 1
+ *             %box = NULL
+ *      (2) This decodes at either full resolution or at a reduction by
+ *          a power of 2.  The default value %reduction == 1 gives a full
+ *          resolution image.  Use %reduction > 1 to get a reduced image.
+ *          The actual values of %reduction that can be used on an image
+ *          depend on the number of resolution levels chosen when the
+ *          image was compressed.  Typical values might be 1, 2, 4, 8 and 16.
+ *          Using a value representing a reduction level that was not
+ *          stored when the file was written will fail with the message:
+ *          "failed to read the header".
+ *      (3) Use %box to decode only a part of the image.  The box is defined
+ *          at full resolution.  It is reduced internally by %reduction,
+ *          and clipping to the right and bottom of the image is automatic.
+ *      (4) We presently only handle images with 8 bits/sample (bps).
+ *          If the image has 16 bps, the read will fail.
+ *      (5) There are 4 possible values of samples/pixel (spp).
+ *          The values in brackets give the pixel values in the Pix:
+ *           spp = 1  ==>  grayscale           [8 bpp grayscale]
+ *           spp = 2  ==>  grayscale + alpha   [32 bpp rgba]
+ *           spp = 3  ==>  rgb                 [32 bpp rgb]
+ *           spp = 4  ==>  rgba                [32 bpp rgba]
+ *      (6) The %hint parameter is reserved for future use.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15303,6 +22814,28 @@ ReadJp2k(lua_State *L)
  * Arg #2 is expected to be a l_int32 (cmapflag).
  * Arg #3 is expected to be a l_int32 (reduction).
  * Arg #5 is expected to be a l_int32 (hint).
+ *
+ * Notes:
+ *      (1) This is a special function for reading jpeg files.
+ *      (2) Use this if you want the jpeg library to create
+ *          an 8 bpp colormapped image.
+ *      (3) Images reduced by factors of 2, 4 or 8 can be returned
+ *          significantly faster than full resolution images.
+ *      (4) If the jpeg data is bad, the jpeg library will continue
+ *          silently, or return warnings, or attempt to exit.  Depending
+ *          on the severity of the data corruption, there are two possible
+ *          outcomes:
+ *          (a) a possibly damaged pix can be generated, along with zero
+ *              or more warnings, or
+ *          (b) the library will attempt to exit (caught by our error
+ *              handler) and no pix will be returned.
+ *          If a pix is generated with at least one warning of data
+ *          corruption, and if L_JPEG_FAIL_ON_BAD_DATA is included in %hint,
+ *          no pix will be returned.
+ *      (5) The possible hint values are given in the enum in imageio.h:
+ *            * L_JPEG_READ_LUMINANCE
+ *            * L_JPEG_FAIL_ON_BAD_DATA
+ *          Default (0) is to do neither.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15326,6 +22859,17 @@ ReadJpeg(lua_State *L)
  * \brief Read a Pix* from a Lua string (%data).
  * <pre>
  * Arg #1 is expected to be a string (data).
+ *
+ * Notes:
+ *      (1) This is a variation of pixReadStream(), where the data is read
+ *          from a memory buffer rather than a file.
+ *      (2) On windows, this only reads tiff formatted files directly from
+ *          memory.  For other formats, it writes to a temp file and
+ *          decompresses from file.
+ *      (3) findFileFormatBuffer() requires up to 12 bytes to decide on
+ *          the format.  That determines the constraint here.  But in
+ *          fact the data must contain the entire compressed string for
+ *          the image.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pixa* on the Lua stack
@@ -15363,6 +22907,19 @@ ReadMemBmp(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a lstring (str).
+ *
+ * Notes:
+ *      (1) This is a read-from-memory version of pixReadFromMultipageTiff().
+ *          See that function for usage.
+ *      (2) If reading sequentially from the tiff data, this is more
+ *          efficient than pixReadMemTiff(), which has an overhead
+ *          proportional to the image index n.
+ *      (3) Example usage for reading all the images:
+ *            size_t offset = 0;
+ *            do {
+ *                Pix *pix = pixReadMemFromMultipageTiff(data, size, &offset);
+ *                // do something with pix
+ *            } while (offset != 0);
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15385,6 +22942,14 @@ ReadMemFromMultipageTiff(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a lstring (str).
+ *
+ * Notes:
+ *     (1) For libgif version >= 5.1, this uses the DGifOpen() buffer
+ *         interface.  No temp files are required.
+ *     (2) For libgif version < 5.1, it was necessary to write the compressed
+ *         data to file and read it back, and we couldn't use the GNU
+ *         runtime extension fmemopen() because libgif doesn't have a file
+ *         stream interface.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15408,6 +22973,13 @@ ReadMemGif(lua_State *L)
  * Arg #3 is expected to be a Box* (box).
  * Arg #4 is expected to be a l_int32 (hint).
  * Arg #5 is expected to be a boolean (debug).
+ *
+ * Notes:
+ *      (1) This crashes when reading through the fmemopen cookie.
+ *          Until we can fix this, we use the file-based work-around.
+ *          And fixing this may take some time, because the basic
+ *          stream interface is no longer supported in openjpeg.
+ *      (2) See pixReadJp2k() for usage.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15434,6 +23006,12 @@ ReadMemJp2k(lua_State *L)
  * Arg #2 is expected to be a l_int32 (cmflag).
  * Arg #3 is expected to be a l_int32 (reduction).
  * Arg #4 is expected to be a l_int32 (hint).
+ *
+ * Notes:
+ *      (1) The %size byte of %data must be a null character.
+ *      (2) The only hint flag so far is L_JPEG_READ_LUMINANCE,
+ *          given in the enum in imageio.h.
+ *      (3) See pixReadJpeg() for usage.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15459,6 +23037,9 @@ ReadMemJpeg(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a lstring (str).
+ *
+ * Notes:
+ *      (1) See pixReastreamPng().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15478,6 +23059,9 @@ ReadMemPng(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a lstring (str).
+ *
+ * Notes:
+ *      (1) The %size byte of %data must be a null character.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15517,6 +23101,16 @@ ReadMemSpix(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a constl_uint8* (cdata).
  * Arg #2 is expected to be a l_int32 (n).
+ *
+ * Notes:
+ *      (1) This is a version of pixReadTiff(), where the data is read
+ *          from a memory buffer and uncompressed.
+ *      (2) Use TIFFClose(); TIFFCleanup() doesn't free internal memstream.
+ *      (3) No warning messages on failure, because of how multi-page
+ *          TIFF reading works. You are supposed to keep trying until
+ *          it stops working.
+ *      (4) Tiff directory overhead is linear in the input page number.
+ *          If reading many images, use pixReadMemFromMultipageTiff().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15538,6 +23132,16 @@ ReadMemTiff(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a constl_uint8* (filedata).
  * Arg #2 is expected to be a size_t (filesize).
+ *
+ * Notes:
+ *      (1) When the encoded data only has 3 channels (no alpha),
+ *          WebPDecodeRGBAInto() generates a raster of 32-bit pixels, with
+ *          the alpha channel set to opaque (255).
+ *      (2) We don't need to use the gnu runtime functions like fmemopen()
+ *          for redirecting data from a stream to memory, because
+ *          the webp library has been written with memory-to-memory
+ *          functions at the lowest level (which is good!).  And, in
+ *          any event, fmemopen() doesn't work with l_binaryReadStream().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15557,6 +23161,9 @@ ReadMemWebP(lua_State *L)
  * \brief Read Pix* from a Lua io stream (%stream).
  * <pre>
  * Arg #1 is expected to be a luaL_Stream* (stream).
+ *
+ * Notes:
+ *      (1) The hint only applies to jpeg.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -15575,6 +23182,11 @@ ReadStream(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a luaL_Stream* (stream).
+ *
+ * Notes:
+ *      (1) Here are references on the bmp file format:
+ *          http://en.wikipedia.org/wiki/BMP_file_format
+ *          http://www.fortunecity.com/skyscraper/windows/364/bmpffrmt.html
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15613,6 +23225,9 @@ ReadStreamGif(lua_State *L)
  * Arg #3 is expected to be a Box* (box).
  * Arg #4 is expected to be a l_int32 (hint).
  * Arg #5 is expected to be a boolean (debug).
+ *
+ * Notes:
+ *      (1) See pixReadJp2k() for usage.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15637,6 +23252,9 @@ ReadStreamJp2k(lua_State *L)
  * Arg #2 is expected to be a l_int32 (cmapflag).
  * Arg #3 is expected to be a l_int32 (reduction).
  * Arg #5 is expected to be a l_int32 (hint).
+ *
+ * Notes:
+ *      (1) The jpeg comment, if it exists, is not stored in the pix.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15660,6 +23278,38 @@ ReadStreamJpeg(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a luaL_Stream* (stream).
+ *
+ *    Note: results can be non-deterministic if used with
+ *    multi-threaded applications.
+ *
+ *    Thanks to a memory buffering utility contributed by T. D. Hintz,
+ *    encoding png directly into memory (and decoding from memory)
+ *    is now enabled without the use of any temp files.  Unlike with webp,
+ *    it is necessary to preserve the stream interface to enable writing
+ *    pixa to memory.  So there are two independent but very similar
+ *    implementations of png reading and writing.
+ * Notes:
+ *      (1) If called from pixReadStream(), the stream is positioned
+ *          at the beginning of the file.
+ *      (2) To do sequential reads of png format images from a stream,
+ *          use pixReadStreamPng()
+ *      (3) Any image with alpha is converted to RGBA (spp = 4, with
+ *          equal red, green and blue channels) on reading.
+ *          There are three important cases with alpha:
+ *          (a) grayscale-with-alpha (spp = 2), where bpp = 8, and each
+ *              pixel has an associated alpha (transparency) value
+ *              in the second component of the image data.
+ *          (b) spp = 1, d = 1 with colormap and alpha in the trans array.
+ *              Transparency is usually associated with the white background.
+ *          (c) spp = 1, d = 8 with colormap and alpha in the trans array.
+ *              Each color in the colormap has a separate transparency value.
+ *      (4) We use the high level png interface, where the transforms are set
+ *          up in advance and the header and image are read with a single
+ *          call.  The more complicated interface, where the header is
+ *          read first and the buffers for the raster image are user-
+ *          allocated before reading the image, works for single images,
+ *          but I could not get it to work properly for the successive
+ *          png reads that are required by pixaReadStream().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15694,6 +23344,15 @@ ReadStreamPnm(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a luaL_Stream* (stream).
+ *
+ *    Note: these functions have not been extensively tested for fuzzing
+ *    (bad input data that can result in, e.g., memory faults).
+ *    The spix serialization format is only defined here, in leptonica.
+ *    The image data is uncompressed and the serialization is not intended
+ *    to be a secure file format from untrusted sources.
+ * Notes:
+ *      (1) If called from pixReadStream(), the stream is positioned
+ *          at the beginning of the file.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15712,6 +23371,11 @@ ReadStreamSpix(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a luaL_Stream* (stream).
  * Arg #2 is expected to be a l_int32 (n).
+ *
+ * Notes:
+ *      (1) No warning messages on failure, because of how multi-page
+ *          TIFF reading works. You are supposed to keep trying until
+ *          it stops working.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15748,6 +23412,13 @@ ReadStreamWebP(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a string (filename).
  * Arg #2 is expected to be a l_int32 (n).
+ *
+ * Notes:
+ *      (1) This is a version of pixRead(), specialized for tiff
+ *          files, that allows specification of the page to be returned
+ *      (2) No warning messages on failure, because of how multi-page
+ *          TIFF reading works. You are supposed to keep trying until
+ *          it stops working.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15767,6 +23438,10 @@ ReadTiff(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a string (filename).
  * Arg #2 is expected to be a l_int32 (hint).
+ *
+ * Notes:
+ *      (1) The hint is not binding, but may be used to optimize jpeg decoding.
+ *          Use 0 for no hinting.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15785,6 +23460,16 @@ ReadWithHint(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) After folding, the data is in bytes 0 and 2 of the word,
+ *          and the bits in each byte are in the following order
+ *          (with 0 being the leftmost originating pair and 7 being
+ *          the rightmost originating pair):
+ *               0 4 1 5 2 6 3 7
+ *          These need to be permuted to
+ *               0 1 2 3 4 5 6 7
+ *          which is done with an 8-bit table generated by makeSubsampleTab2x().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15806,6 +23491,16 @@ ReduceBinary2(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (level).
+ *
+ * Notes:
+ *      (1) pixd is downscaled by 2x from pixs.
+ *      (2) The rank threshold specifies the minimum number of ON
+ *          pixels in each 2x2 region of pixs that are required to
+ *          set the corresponding pixel ON in pixd.
+ *      (3) Rank filtering is done to the UL corner of each 2x2 pixel block,
+ *          using only logical operations.  Then these pixels are chosen
+ *          in the 2x subsampling process, subsampled, as described
+ *          above in pixReduceBinary2().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15831,6 +23526,10 @@ ReduceRankBinary2(lua_State *L)
  * Arg #3 is expected to be a l_int32 (level2).
  * Arg #4 is expected to be a l_int32 (level3).
  * Arg #5 is expected to be a l_int32 (level4).
+ *
+ * Notes:
+ *      (1) This performs up to four cascaded 2x rank reductions.
+ *      (2) Use level = 0 to truncate the cascade.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15852,6 +23551,9 @@ ReduceRankBinaryCascade(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This is a wrapper on pixAlphaBlendUniform()
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15890,6 +23592,9 @@ RemoveBorder(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (connectivity).
+ *
+ * Notes:
+ *      (1) This removes all fg components touching the border.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15936,6 +23641,12 @@ RemoveBorderGeneral(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (width).
  * Arg #3 is expected to be a l_int32 (height).
+ *
+ * Notes:
+ *      (1) Removes pixels as evenly as possible from the sides of the
+ *          image, leaving the central part.
+ *      (2) Returns clone if no pixels requested removed, or the target
+ *          sizes are larger than the image.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* (pixd) on the Lua stack
@@ -15957,6 +23668,21 @@ RemoveBorderToSize(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (type).
+ *
+ * Notes:
+ *      (1) If pixs does not have a colormap, a clone is returned.
+ *      (2) Otherwise, the input pixs is restricted to 1, 2, 4 or 8 bpp.
+ *      (3) Use REMOVE_CMAP_TO_BINARY only on 1 bpp pix.
+ *      (4) For grayscale conversion from RGB, use a weighted average
+ *          of RGB values, and always return an 8 bpp pix, regardless
+ *          of whether the input pixs depth is 2, 4 or 8 bpp.
+ *      (5) REMOVE_CMAP_TO_FULL_COLOR ignores the alpha component and
+ *          returns a 32 bpp pix with spp == 3 and the alpha bytes are 0.
+ *      (6) For REMOVE_CMAP_BASED_ON_SRC, if there is no color, this
+ *          returns either a 1 bpp or 8 bpp grayscale pix.
+ *          If there is color, this returns a 32 bpp pix, with either:
+ *           * 3 spp, if the alpha values are all 255 (opaque), or
+ *           * 4 spp (preserving the alpha), if any alpha values are not 255.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -15977,6 +23703,11 @@ RemoveColormap(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (type).
  * Arg #3 is expected to be a l_int32 (ifnocmap).
+ *
+ * Notes:
+ *      (1) Convenience function that allows choice between returning
+ *          a clone or a copy if pixs does not have a colormap.
+ *      (2) See pixRemoveColormap().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -16001,6 +23732,15 @@ RemoveColormapGeneral(lua_State *L)
  * Arg #4 is expected to be a l_int32 (x0).
  * Arg #5 is expected to be a l_int32 (y0).
  * Arg #6 is expected to be a l_int32 (dsize).
+ *
+ * Notes:
+ *    (1) This is in-place.
+ *    (2) You can use various functions in selgen to create a Sel
+ *        that is used to generate pixe from pixs.
+ *    (3) This function is applied after pixe has been computed.
+ *        It finds the centroid of each c.c., and subtracts
+ *        (the appropriately dilated version of) pixp, with the center
+ *        of the Sel used to align pixp with pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -16027,6 +23767,17 @@ RemoveMatchedPattern(lua_State *L)
  * Arg #3 is expected to be a Pix* (pixm).
  * Arg #4 is expected to be a l_int32 (connectivity).
  * Arg #5 is expected to be a l_int32 (bordersize).
+ *
+ * Notes:
+ *      (1) This removes each component in pixm for which there is
+ *          at least one seed in pixs.  If pixd == NULL, this returns
+ *          the result in a new pixd.  Otherwise, it is an in-place
+ *          operation on pixm.  In no situation is pixs altered,
+ *          because we do the filling with a copy of pixs.
+ *      (2) If bordersize > 0, it also clears all pixels within a
+ *          distance %bordersize of the edge of pixd.  This is here
+ *          because pixLocalExtrema() typically finds local minima
+ *          at the border.  Use %bordersize >= 2 to remove these.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -16048,6 +23799,12 @@ RemoveSeededComponents(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This is an in-place operation.
+ *      (2) If the image doesn't have a colormap, returns without error.
+ *      (3) Unusued colors are removed from the colormap, and the
+ *          image pixels are re-numbered.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -16067,6 +23824,10 @@ RemoveUnusedColors(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pixa* (pixa).
  * Arg #3 is expected to be a Numa* (na).
+ *
+ * Notes:
+ *      (1) This complements pixAddWithIndicator().   Here, the selected
+ *          components are set subtracted from pixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -16249,6 +24010,11 @@ RenderBoxaBlend(lua_State *L)
  * Arg #2 is expected to be a l_int32 (startval).
  * Arg #3 is expected to be a l_int32 (incr).
  * Arg #4 is expected to be a l_int32 (outdepth).
+ *
+ * Notes:
+ *      (1) The output can be either 1 bpp, showing just the contour
+ *          lines, or a copy of the input pixs with the contour lines
+ *          superposed.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -16502,6 +24268,11 @@ RenderHashBoxaBlend(lua_State *L)
  * Arg #9 is expected to be a l_int32 (rval).
  * Arg #10 is expected to be a l_int32 (gval).
  * Arg #11 is expected to be a l_int32 (bval).
+ *
+ * Notes:
+ *      (1) This is an in-place operation that renders hash lines
+ *          through a mask %pixm onto %pix.  The mask origin is
+ *          translated by (%x,%y) relative to the origin of %pix.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -16630,6 +24401,13 @@ RenderLineBlend(lua_State *L)
  * Arg #4 is expected to be a l_int32 (linewidth).
  * Arg #5 is expected to be a l_int32 (max).
  * Arg #6 is expected to be a l_uint32 (color).
+ *
+ * Notes:
+ *      (1) Simplified interface for plotting row or column aligned data
+ *          on a pix.
+ *      (2) This replaces %pix with a 32 bpp rgb version if it is not
+ *          already 32 bpp.  It then draws the plot on the pix.
+ *      (3) See makePlotPtaFromNumaGen() for more details.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -16660,6 +24438,13 @@ RenderPlotFromNuma(lua_State *L)
  * Arg #6 is expected to be a l_int32 (max).
  * Arg #7 is expected to be a l_int32 (drawref).
  * Arg #8 is expected to be a l_uint32 (color).
+ *
+ * Notes:
+ *      (1) General interface for plotting row or column aligned data
+ *          on a pix.
+ *      (2) This replaces %pix with a 32 bpp rgb version if it is not
+ *          already 32 bpp.  It then draws the plot on the pix.
+ *      (3) See makePlotPtaFromNumaGen() for other input parameters.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -16687,6 +24472,13 @@ RenderPlotFromNumaGen(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* (ptas).
  * Arg #2 is expected to be a l_int32 (width).
+ *
+ * Notes:
+ *      (1) The pix is the minimum size required to contain the origin
+ *          and the polygon.  For example, the max x value of the input
+ *          points is w - 1, where w is the pix width.
+ *      (2) The rendered line is 4-connected, so that an interior or
+ *          exterior 8-c.c. flood fill operation works properly.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -16714,6 +24506,9 @@ RenderPolygon(lua_State *L)
  * Arg #3 is expected to be a l_int32 (width).
  * Arg #4 is expected to be a l_int32 (op).
  * Arg #5 is expected to be a l_int32 (closeflag).
+ *
+ * Notes:
+ *      This renders a closed contour.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -16741,6 +24536,9 @@ RenderPolyline(lua_State *L)
  * Arg #5 is expected to be a l_uint8 (gval).
  * Arg #6 is expected to be a l_uint8 (bval).
  * Arg #7 is expected to be a l_int32 (closeflag).
+ *
+ * Notes:
+ *      This renders a closed contour.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -16799,6 +24597,16 @@ RenderPolylineBlend(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a Pta* (pta).
  * Arg #3 is expected to be a l_int32 (op).
+ *
+ * Notes:
+ *      (1) L_SET_PIXELS puts all image bits in each pixel to 1
+ *          (black for 1 bpp; white for depth > 1)
+ *      (2) L_CLEAR_PIXELS puts all image bits in each pixel to 0
+ *          (white for 1 bpp; black for depth > 1)
+ *      (3) L_FLIP_PIXELS reverses all image bits in each pixel
+ *      (4) This function clips the rendering to the pix.  It performs
+ *          clipping for functions such as pixRenderLine(),
+ *          pixRenderBox() and pixRenderBoxa(), that call pixRenderPta().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -16822,6 +24630,17 @@ RenderPta(lua_State *L)
  * Arg #3 is expected to be a l_uint8 (rval).
  * Arg #4 is expected to be a l_uint8 (gval).
  * Arg #5 is expected to be a l_uint8 (bval).
+ *
+ * Notes:
+ *      (1) If pix is colormapped, render this color (or the nearest
+ *          color if the cmap is full) on each pixel.
+ *      (2) The rgb components have the standard dynamic range [0 ... 255]
+ *      (3) If pix is not colormapped, do the best job you can using
+ *          the input colors:
+ *          ~ d = 1: set the pixels
+ *          ~ d = 2, 4, 8: average the input rgb value
+ *          ~ d = 32: use the input rgb value
+ *      (4) This function clips the rendering to the pix.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -16848,6 +24667,9 @@ RenderPtaArb(lua_State *L)
  * Arg #4 is expected to be a l_uint8 (gval).
  * Arg #5 is expected to be a l_uint8 (bval).
  * Arg #6 is expected to be a l_float32 (fract).
+ *
+ * Notes:
+ *      (1) This function clips the rendering to the pix.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -16874,6 +24696,20 @@ RenderPtaBlend(lua_State *L)
  * Arg #3 is expected to be a l_int32 (polyflag).
  * Arg #4 is expected to be a l_int32 (width).
  * Arg #5 is expected to be a l_int32 (closeflag).
+ *
+ * Notes:
+ *      (1) This is a debugging routine, that displays a set of
+ *          pixels, selected by the set of Ptas in a Ptaa,
+ *          in a random color in a pix.
+ *      (2) If %polyflag == 1, each Pta is considered to be a polyline,
+ *          and is rendered using %width and %closeflag.  Each polyline
+ *          is rendered in a random color.
+ *      (3) If %polyflag == 0, all points in each Pta are rendered in a
+ *          random color.  The %width and %closeflag parameters are ignored.
+ *      (4) The output pix is 8 bpp and colormapped.  Up to 254
+ *          different, randomly selected colors, can be used.
+ *      (5) The rendered pixels replace the input pixels.  They will
+ *          be clipped silently to the input pix.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -16896,6 +24732,14 @@ RenderRandomCmapPtaa(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
+ *
+ * Notes:
+ *      (1) If the sizes of data in pixs and pixd are unequal, this
+ *          frees the existing image data in pixd and allocates
+ *          an uninitialized buffer that will hold the required amount
+ *          of image data in pixs.  The image data from pixs is not
+ *          copied into the new buffer.
+ *      (2) On failure to allocate, pixd is unchanged.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -16916,6 +24760,20 @@ ResizeImageData(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixt).
  * Arg #3 is expected to be a l_int32 (w).
  * Arg #4 is expected to be a l_int32 (h).
+ *
+ * Notes:
+ *      (1) This resizes pixs to make pixd, without scaling, by either
+ *          cropping or extending separately in both width and height.
+ *          Extension is done by replicating the last row or column.
+ *          This is useful in a situation where, due to scaling
+ *          operations, two images that are expected to be the
+ *          same size can differ slightly in each dimension.
+ *      (2) You can use either an existing pixt or specify
+ *          both %w and %h.  If pixt is defined, the values
+ *          in %w and %h are ignored.
+ *      (3) If pixt is larger than pixs (or if w and/or d is larger
+ *          than the dimension of pixs, replicate the outer row and
+ *          column of pixels in pixs into pixd.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -16943,6 +24801,29 @@ ResizeToMatch(lua_State *L)
  * Arg #6 is expected to be a l_int32 (minreversal).
  * Arg #7 is expected to be a l_int32 (factor1).
  * Arg #8 is expected to be a l_int32 (factor2).
+ *
+ * Notes:
+ *      (1) If d != 1 bpp, colormaps are removed and the result
+ *          is converted to 8 bpp.
+ *      (2) If %dir == L_HORIZONTAL_LINE, the the reversals are counted
+ *          along each horizontal raster line (sampled by %factor1),
+ *          and the profile is the array of these sums in the
+ *          vertical direction between %first and %last raster lines,
+ *          and sampled by %factor2.
+ *      (3) If %dir == L_VERTICAL_LINE, the the reversals are counted
+ *          along each vertical column (sampled by %factor1),
+ *          and the profile is the array of these sums in the
+ *          horizontal direction between %first and %last columns,
+ *          and sampled by %factor2.
+ *      (4) For each row or column, the reversals are summed over the
+ *          central %fract of the image.  Use %fract == 1.0 to sum
+ *          across the entire width (of row) or height (of column).
+ *      (5) %minreversal is the relative change in intensity that is
+ *          required to resolve peaks and valleys.  A typical number for
+ *          locating text in 8 bpp might be 50.  For 1 bpp, minreversal
+ *          must be 1.
+ *      (6) The reversal profile is simply the number of reversals
+ *          in a row or column, vs the row or column index.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa * on the Lua stack
@@ -16972,6 +24853,23 @@ ReversalProfile(lua_State *L)
  * Arg #4 is expected to be a l_int32 (incolor).
  * Arg #5 is expected to be a l_int32 (width).
  * Arg #6 is expected to be a l_int32 (height).
+ *
+ * Notes:
+ *      (1) This is a high-level, simple interface for rotating images
+ *          about their center.
+ *      (2) For very small rotations, just return a clone.
+ *      (3) Rotation brings either white or black pixels in
+ *          from outside the image.
+ *      (4) The rotation type is adjusted if necessary for the image
+ *          depth and size of rotation angle.  For 1 bpp images, we
+ *          rotate either by shear or sampling.
+ *      (5) Colormaps are removed for rotation by area mapping.
+ *      (6) The dest can be expanded so that no image pixels
+ *          are lost.  To invoke expansion, input the original
+ *          width and height.  For repeated rotation, use of the
+ *          original width and height allows the expansion to
+ *          stop at the maximum required size, which is a square
+ *          with side = sqrt(w*w + h*h).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -16995,6 +24893,20 @@ Rotate(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This does a 180 rotation of the image about the center,
+ *          which is equivalent to a left-right flip about a vertical
+ *          line through the image center, followed by a top-bottom
+ *          flip about a horizontal line through the image center.
+ *      (2) There are 3 cases for input:
+ *          (a) pixd == null (creates a new pixd)
+ *          (b) pixd == pixs (in-place operation)
+ *          (c) pixd != pixs (existing pixd)
+ *      (3) For clarity, use these three patterns, respectively:
+ *          (a) pixd = pixRotate180(NULL, pixs);
+ *          (b) pixRotate180(pixs, pixs);
+ *          (c) pixRotate180(pixd, pixs);
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17017,6 +24929,20 @@ Rotate180(lua_State *L)
  * Arg #3 is expected to be a l_int32 (ycen).
  * Arg #4 is expected to be a l_float32 (angle).
  * Arg #5 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) This rotates the image about the given point, using the 2-shear
+ *          method.  It should only be used for angles smaller than
+ *          MAX_2_SHEAR_ANGLE.  For larger angles, a warning is issued.
+ *      (2) A positive angle gives a clockwise rotation.
+ *      (3) 2-shear rotation by a specified angle is equivalent
+ *          to the sequential transformations
+ *             x' = x + tan(angle) * (y - ycen)     for x-shear
+ *             y' = y + tan(angle) * (x - xcen)     for y-shear
+ *      (4) Computation of tan(angle) is performed within the shear operation.
+ *      (5) This brings in 'incolor' pixels from outside the image.
+ *      (6) If the image has an alpha layer, it is rotated separately by
+ *          two shears.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17042,6 +24968,26 @@ Rotate2Shear(lua_State *L)
  * Arg #3 is expected to be a l_int32 (ycen).
  * Arg #4 is expected to be a l_float32 (angle).
  * Arg #5 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) This rotates the image about the given point, using the 3-shear
+ *          method.  It should only be used for angles smaller than
+ *          LIMIT_SHEAR_ANGLE.  For larger angles, a warning is issued.
+ *      (2) A positive angle gives a clockwise rotation.
+ *      (3) 3-shear rotation by a specified angle is equivalent
+ *          to the sequential transformations
+ *            y' = y + tan(angle/2) * (x - xcen)     for first y-shear
+ *            x' = x + sin(angle) * (y - ycen)       for x-shear
+ *            y' = y + tan(angle/2) * (x - xcen)     for second y-shear
+ *      (4) Computation of tan(angle) is performed in the shear operations.
+ *      (5) This brings in 'incolor' pixels from outside the image.
+ *      (6) If the image has an alpha layer, it is rotated separately by
+ *          two shears.
+ *      (7) The algorithm was published by Alan Paeth: "A Fast Algorithm
+ *          for General Raster Rotation," Graphics Interface '86,
+ *          pp. 77-81, May 1986.  A description of the method, along with
+ *          an implementation, can be found in Graphics Gems, p. 179,
+ *          edited by Andrew Glassner, published by Academic Press, 1990.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17064,6 +25010,11 @@ Rotate3Shear(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (direction).
+ *
+ * Notes:
+ *      (1) This does a 90 degree rotation of the image about the center,
+ *          either cw or ccw, returning a new pix.
+ *      (2) The direction must be either 1 (cw) or -1 (ccw).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17084,6 +25035,11 @@ Rotate90(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (angle).
  * Arg #3 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) Rotates about image center.
+ *      (2) A positive angle gives a clockwise rotation.
+ *      (3) Brings in either black or white pixels from the boundary.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17105,6 +25061,11 @@ RotateAM(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (angle).
  * Arg #3 is expected to be a l_uint32 (colorval).
+ *
+ * Notes:
+ *      (1) Rotates about image center.
+ *      (2) A positive angle gives a clockwise rotation.
+ *      (3) Specify the color to be brought in from outside the image.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17126,6 +25087,11 @@ RotateAMColor(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (angle).
  * Arg #3 is expected to be a l_uint32 (fillval).
+ *
+ * Notes:
+ *      (1) Rotates the image about the UL corner.
+ *      (2) A positive angle gives a clockwise rotation.
+ *      (3) Specify the color to be brought in from outside the image.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17147,6 +25113,17 @@ RotateAMColorCorner(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (angle).
  * Arg #3 is expected to be a l_uint32 (colorval).
+ *
+ * Notes:
+ *      (1) This rotates a color image about the image center.
+ *      (2) A positive angle gives a clockwise rotation.
+ *      (3) It uses area mapping, dividing each pixel into
+ *          16 subpixels.
+ *      (4) It is about 10% to 20% faster than the more accurate linear
+ *          interpolation function pixRotateAMColor(),
+ *          which uses 256 subpixels.
+ *      (5) For some reason it shifts the image center.
+ *          No attempt is made to rotate the alpha component.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17168,6 +25145,11 @@ RotateAMColorFast(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (angle).
  * Arg #3 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) Rotates about the UL corner of the image.
+ *      (2) A positive angle gives a clockwise rotation.
+ *      (3) Brings in either black or white pixels from the boundary.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17189,6 +25171,11 @@ RotateAMCorner(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (angle).
  * Arg #3 is expected to be a l_uint8 (grayval).
+ *
+ * Notes:
+ *      (1) Rotates about image center.
+ *      (2) A positive angle gives a clockwise rotation.
+ *      (3) Specify the grayvalue to be brought in from outside the image.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17210,6 +25197,11 @@ RotateAMGray(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (angle).
  * Arg #3 is expected to be a l_uint8 (grayval).
+ *
+ * Notes:
+ *      (1) Rotates the image about the UL corner.
+ *      (2) A positive angle gives a clockwise rotation.
+ *      (3) Specify the grayvalue to be brought in from outside the image.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17231,6 +25223,21 @@ RotateAMGrayCorner(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (angle).
  * Arg #3 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) For very small rotations, just return a clone.
+ *      (2) This does a computationally expensive rotation of 1 bpp images.
+ *          The fastest rotators (using shears or subsampling) leave
+ *          visible horizontal and vertical shear lines across which
+ *          the image shear changes by one pixel.  To ameliorate the
+ *          visual effect one can introduce random dithering.  One
+ *          way to do this in a not-too-random fashion is given here.
+ *          We convert to 8 bpp, do a very small blur, rotate using
+ *          linear interpolation (same as area mapping), do a
+ *          small amount of sharpening to compensate for the initial
+ *          blur, and threshold back to binary.  The shear lines
+ *          are magically removed.
+ *      (3) This operation is about 5x slower than rotation by sampling.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17254,6 +25261,12 @@ RotateBinaryNice(lua_State *L)
  * Arg #3 is expected to be a l_int32 (ycen).
  * Arg #4 is expected to be a l_float32 (angle).
  * Arg #5 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) For very small rotations, just return a clone.
+ *      (2) Rotation brings either white or black pixels in
+ *          from outside the image.
+ *      (3) Colormaps are retained.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17298,6 +25311,15 @@ RotateOrth(lua_State *L)
  * Arg #3 is expected to be a l_int32 (ycen).
  * Arg #4 is expected to be a l_float32 (angle).
  * Arg #5 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) This rotates an image about the given point, using
+ *          either 2 or 3 shears.
+ *      (2) A positive angle gives a clockwise rotation.
+ *      (3) This brings in 'incolor' pixels from outside the image.
+ *      (4) For rotation angles larger than about 0.35 radians, we issue
+ *          a warning because you should probably be using another method
+ *          (either sampling or area mapping)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17365,6 +25387,22 @@ RotateShearCenterIP(lua_State *L)
  * Arg #3 is expected to be a l_int32 (ycen).
  * Arg #4 is expected to be a l_float32 (angle).
  * Arg #5 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) This does an in-place rotation of the image about the
+ *          specified point, using the 3-shear method.  It should only
+ *          be used for angles smaller than LIMIT_SHEAR_ANGLE.
+ *          For larger angles, a warning is issued.
+ *      (2) A positive angle gives a clockwise rotation.
+ *      (3) 3-shear rotation by a specified angle is equivalent
+ *          to the sequential transformations
+ *            y' = y + tan(angle/2) * (x - xcen)      for first y-shear
+ *            x' = x + sin(angle) * (y - ycen)        for x-shear
+ *            y' = y + tan(angle/2) * (x - xcen)      for second y-shear
+ *      (4) Computation of tan(angle) is performed in the shear operations.
+ *      (5) This brings in 'incolor' pixels from outside the image.
+ *      (6) The pix cannot be colormapped, because the in-place operation
+ *          only blits in 0 or 1 bits, not an arbitrary colormap index.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -17389,6 +25427,42 @@ RotateShearIP(lua_State *L)
  * Arg #2 is expected to be a l_float32 (angle).
  * Arg #3 is expected to be a Pix* (pixg).
  * Arg #4 is expected to be a l_float32 (fract).
+ *
+ * Notes:
+ *      (1) The alpha channel is transformed separately from pixs,
+ *          and aligns with it, being fully transparent outside the
+ *          boundary of the transformed pixs.  For pixels that are fully
+ *          transparent, a blending function like pixBlendWithGrayMask()
+ *          will give zero weight to corresponding pixels in pixs.
+ *      (2) Rotation is about the center of the image; for very small
+ *          rotations, just return a clone.  The dest is automatically
+ *          expanded so that no image pixels are lost.
+ *      (3) Rotation is by area mapping.  It doesn't matter what
+ *          color is brought in because the alpha channel will
+ *          be transparent (black) there.
+ *      (4) If pixg is NULL, it is generated as an alpha layer that is
+ *          partially opaque, using %fract.  Otherwise, it is cropped
+ *          to pixs if required and %fract is ignored.  The alpha
+ *          channel in pixs is never used.
+ *      (4) Colormaps are removed to 32 bpp.
+ *      (5) The default setting for the border values in the alpha channel
+ *          is 0 (transparent) for the outermost ring of pixels and
+ *          (0.5 * fract * 255) for the second ring.  When blended over
+ *          a second image, this
+ *          (a) shrinks the visible image to make a clean overlap edge
+ *              with an image below, and
+ *          (b) softens the edges by weakening the aliasing there.
+ *          Use l_setAlphaMaskBorder() to change these values.
+ *      (6) A subtle use of gamma correction is to remove gamma correction
+ *          before rotation and restore it afterwards.  This is done
+ *          by sandwiching this function between a gamma/inverse-gamma
+ *          photometric transform:
+ *              pixt = pixGammaTRCWithAlpha(NULL, pixs, 1.0 / gamma, 0, 255);
+ *              pixd = pixRotateWithAlpha(pixt, angle, NULL, fract);
+ *              pixGammaTRCWithAlpha(pixd, pixd, gamma, 0, 255);
+ *              pixDestroy(&pixt);
+ *          This has the side-effect of producing artifacts in the very
+ *          dark regions.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17410,6 +25484,16 @@ RotateWithAlpha(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is an optional Box* (box).
+ *
+ * Notes:
+ *      (1) This computes numas that represent column vectors of statistics,
+ *          with each of its values derived from the corresponding row of a Pix.
+ *      (2) Use NULL on input to prevent computation of any of the 5 numas.
+ *      (3) Other functions that compute pixel row statistics are:
+ *             pixCountPixelsByRow()
+ *             pixAverageByRow()
+ *             pixVarianceByRow()
+ *             pixGetRowStats()
  * </pre>
  * \param L pointer to the lua_State
  * \return 6 Numa* on the Lua stack (mean, median, mode, modecount, var, rootvar)
@@ -17466,6 +25550,17 @@ RunHistogramMorph(lua_State *L)
  * Arg #2 is expected to be a l_int32 (color).
  * Arg #3 is expected to be a l_int32 (direction).
  * Arg #4 is expected to be a l_int32 (depth).
+ *
+ * Notes:
+ *      (1) The dest Pix is 8 or 16 bpp, with the pixel values
+ *          equal to the runlength in which it is a member.
+ *          The length is clipped to the max pixel value if necessary.
+ *      (2) The color determines if we're labelling white or black runs.
+ *      (3) A pixel that is not a member of the chosen color gets
+ *          value 0; it belongs to a run of length 0 of the
+ *          chosen color.
+ *      (4) To convert for maximum dynamic range, either linear or
+ *          log, use pixMaxDynamicRange().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17489,6 +25584,29 @@ RunlengthTransform(lua_State *L)
  * Arg #2 is expected to be a l_int32 (whsize).
  * Arg #3 is expected to be a l_float32 (factor).
  * Arg #4 is expected to be a l_int32 (addborder).
+ *
+ * Notes:
+ *      (1) The window width and height are 2 * %whsize + 1.  The minimum
+ *          value for %whsize is 2; typically it is >= 7..
+ *      (2) The local statistics, measured over the window, are the
+ *          average and standard deviation.
+ *      (3) The measurements of the mean and standard deviation are
+ *          performed inside a border of (%whsize + 1) pixels.  If pixs does
+ *          not have these added border pixels, use %addborder = 1 to add
+ *          it here; otherwise use %addborder = 0.
+ *      (4) The Sauvola threshold is determined from the formula:
+ *            t = m * (1 - k * (1 - s / 128))
+ *          where:
+ *            t = local threshold
+ *            m = local mean
+ *            k = %factor (>= 0)   [ typ. 0.35 ]
+ *            s = local standard deviation, which is maximized at
+ *                127.5 when half the samples are 0 and half are 255.
+ *      (5) The basic idea of Niblack and Sauvola binarization is that
+ *          the local threshold should be less than the median value,
+ *          and the larger the variance, the closer to the median
+ *          it should be chosen.  Typical values for k are between
+ *          0.2 and 0.5.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -17522,6 +25640,22 @@ SauvolaBinarize(lua_State *L)
  * Arg #3 is expected to be a l_float32 (factor).
  * Arg #4 is expected to be a l_int32 (nx).
  * Arg #5 is expected to be a l_int32 (ny).
+ *
+ * Notes:
+ *      (1) The window width and height are 2 * %whsize + 1.  The minimum
+ *          value for %whsize is 2; typically it is >= 7..
+ *      (2) For nx == ny == 1, this defaults to pixSauvolaBinarize().
+ *      (3) Why a tiled version?
+ *          (a) Because the mean value accumulator is a uint32, overflow
+ *              can occur for an image with more than 16M pixels.
+ *          (b) The mean value accumulator array for 16M pixels is 64 MB.
+ *              The mean square accumulator array for 16M pixels is 128 MB.
+ *              Using tiles reduces the size of these arrays.
+ *          (c) Each tile can be processed independently, in parallel,
+ *              on a multicore processor.
+ *      (4) The Sauvola threshold is determined from the formula:
+ *              t = m * (1 - k * (1 - s / 128))
+ *          See pixSauvolaBinarize() for details.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -17550,6 +25684,32 @@ SauvolaBinarizeTiled(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixm).
  * Arg #2 is expected to be a Pix* (pixms).
  * Arg #3 is expected to be a l_float32 (factor).
+ *
+ * Notes:
+ *      (1) The Sauvola threshold is determined from the formula:
+ *            t = m * (1 - k * (1 - s / 128))
+ *          where:
+ *            t = local threshold
+ *            m = local mean
+ *            k = %factor (>= 0)   [ typ. 0.35 ]
+ *            s = local standard deviation, which is maximized at
+ *                127.5 when half the samples are 0 and half are 255.
+ *      (2) See pixSauvolaBinarize() for other details.
+ *      (3) Important definitions and relations for computing averages:
+ *            v == pixel value
+ *            E(p) == expected value of p == average of p over some pixel set
+ *            S(v) == square of v == v * v
+ *            mv == E(v) == expected pixel value == mean value
+ *            ms == E(S(v)) == expected square of pixel values
+ *               == mean square value
+ *            var == variance == expected square of deviation from mean
+ *                == E(S(v - mv)) = E(S(v) - 2 * S(v * mv) + S(mv))
+ *                                = E(S(v)) - S(mv)
+ *                                = ms - mv * mv
+ *            s == standard deviation = sqrt(var)
+ *          So for evaluating the standard deviation in the Sauvola
+ *          threshold, we take
+ *            s = sqrt(ms - mv * mv)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17605,6 +25765,30 @@ SaveTiled(lua_State *L)
  * Arg #5 is expected to be a l_int32 (space).
  * Arg #6 is expected to be a l_int32 (linewidth).
  * Arg #7 is expected to be a l_int32 (dp).
+ *
+ * Notes:
+ *      (1) Before calling this function for the first time, use
+ *          pixaCreate() to make the %pixa that will accumulate the pix.
+ *          This is passed in each time pixSaveTiled() is called.
+ *      (2) %scalefactor scales the input image.  After scaling and
+ *          possible depth conversion, the image is saved in the input
+ *          pixa, along with a box that specifies the location to
+ *          place it when tiled later.  Disable saving the pix by
+ *          setting %scalefactor == 0.0.
+ *      (3) %newrow and %space specify the location of the new pix
+ *          with respect to the last one(s) that were entered.
+ *      (4) %dp specifies the depth at which all pix are saved.  It can
+ *          be only 8 or 32 bpp.  Any colormap is removed.  This is only
+ *          used at the first invocation.
+ *      (5) This function uses two variables from call to call.
+ *          If they were static, the function would not be .so or thread
+ *          safe, and furthermore, there would be interference with two or
+ *          more pixa accumulating images at a time.  Consequently,
+ *          we use the first pix in the pixa to store and obtain both
+ *          the depth and the current position of the bottom (one pixel
+ *          below the lowest image raster line when laid out using
+ *          the boxa).  The bottom variable is stored in the input format
+ *          field, which is the only field available for storing an int.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -17637,6 +25821,25 @@ SaveTiledOutline(lua_State *L)
  * Arg #8 is expected to be a string (textstr).
  * Arg #9 is expected to be a l_uint32 (val).
  * Arg #10 is expected to be a l_int32 (location).
+ *
+ * Notes:
+ *      (1) Before calling this function for the first time, use
+ *          pixaCreate() to make the %pixa that will accumulate the pix.
+ *          This is passed in each time pixSaveTiled() is called.
+ *      (2) %outwidth is the scaled width.  After scaling, the image is
+ *          saved in the input pixa, along with a box that specifies
+ *          the location to place it when tiled later.  Disable saving
+ *          the pix by setting %outwidth == 0.
+ *      (3) %newrow and %space specify the location of the new pix
+ *          with respect to the last one(s) that were entered.
+ *      (4) All pix are saved as 32 bpp RGB.
+ *      (5) If both %bmf and %textstr are defined, this generates a pix
+ *          with the additional text; otherwise, no text is written.
+ *      (6) The text is written before scaling, so it is properly
+ *          antialiased in the scaled pix.  However, if the pix on
+ *          different calls have different widths, the size of the
+ *          text will vary.
+ *      (7) See pixSaveTiledOutline() for other implementation details.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -17687,6 +25890,9 @@ Scale(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_float32 (scalex).
  * Arg #4 is expected to be a l_float32 (scaley).
+ *
+ * Notes:
+ *      (1) This scales the alpha component of pixs and inserts into pixd.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -17709,6 +25915,26 @@ ScaleAndTransferAlpha(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_float32 (scalex).
  * Arg #3 is expected to be a l_float32 (scaley).
+ *
+ * Notes:
+ *      (1) This function should only be used when the scale factors are less
+ *          than or equal to 0.7 (i.e., more than about 1.42x reduction).
+ *          If either scale factor is larger than 0.7, we issue a warning
+ *          and call pixScaleGeneral(), which will invoke linear
+ *          interpolation without sharpening.
+ *      (2) This works only on 2, 4, 8 and 32 bpp images.  If there is
+ *          a colormap, it is removed by converting to RGB.  In other
+ *          cases, we issue a warning and call pixScaleGeneral().
+ *      (3) This is faster than pixScale() because it does not do sharpening.
+ *      (4) It does a relatively expensive area mapping computation, to
+ *          avoid antialiasing.  It is about 2x slower than pixScaleSmooth(),
+ *          but the results are much better on fine text.
+ *      (5) This is typically about 20% faster for the special cases of
+ *          2x, 4x, 8x and 16x reduction.
+ *      (6) Surprisingly, there is no speedup (and a slight quality
+ *          impairment) if you do as many successive 2x reductions as
+ *          possible, ending with a reduction with a scale factor larger
+ *          than 0.5.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17728,6 +25954,23 @@ ScaleAreaMap(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
+ *
+ * Notes:
+ *      (1) This function does an area mapping (average) for 2x
+ *          reduction.
+ *      (2) This works only on 2, 4, 8 and 32 bpp images.  If there is
+ *          a colormap, it is removed by converting to RGB.
+ *      (3) Speed on 3 GHz processor:
+ *             Color: 160 Mpix/sec
+ *             Gray: 700 Mpix/sec
+ *          This contrasts with the speed of the general pixScaleAreaMap():
+ *             Color: 35 Mpix/sec
+ *             Gray: 50 Mpix/sec
+ *      (4) From (3), we see that this special function is about 4.5x
+ *          faster for color and 14x faster for grayscale
+ *      (5) Consequently, pixScaleAreaMap2() is incorporated into the
+ *          general area map scaling function, for the special cases
+ *          of 2x, 4x, 8x and 16x reduction.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17747,6 +25990,15 @@ ScaleAreaMap2(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (wd).
  * Arg #3 is expected to be a l_int32 (hd).
+ *
+ * Notes:
+ *      (1) See notes in pixScaleAreaMap().
+ *      (2) The output scaled image has the dimension(s) you specify:
+ *          * To specify the width with isotropic scaling, set %hd = 0.
+ *          * To specify the height with isotropic scaling, set %wd = 0.
+ *          * If both %wd and %hd are specified, the image is scaled
+ *             (in general, anisotropically) to that size.
+ *          * It is an error to set both %wd and %hd to 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17768,6 +26020,11 @@ ScaleAreaMapToSize(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (scalex).
  * Arg #3 is expected to be a l_float32 (scaley).
+ *
+ * Notes:
+ *      (1) This function samples from the source without
+ *          filtering.  As a result, aliasing will occur for
+ *          subsampling (scalex and scaley < 1.0).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17788,6 +26045,11 @@ ScaleBinary(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) Simple interface to pixScaleBySampling(), for
+ *          isotropic integer reduction.
+ *      (2) If %factor == 1, returns a copy.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17808,6 +26070,12 @@ ScaleByIntSampling(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (scalex).
  * Arg #3 is expected to be a l_float32 (scaley).
+ *
+ * Notes:
+ *      (1) This function samples from the source without
+ *          filtering.  As a result, aliasing will occur for
+ *          subsampling (%scalex and/or %scaley < 1.0).
+ *      (2) If %scalex == 1.0 and %scaley == 1.0, returns a copy.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17829,6 +26097,15 @@ ScaleBySampling(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (wd).
  * Arg #3 is expected to be a l_int32 (hd).
+ *
+ * Notes:
+ *      (1) This guarantees that the output scaled image has the
+ *          dimension(s) you specify.
+ *           ~ To specify the width with isotropic scaling, set %hd = 0.
+ *           ~ To specify the height with isotropic scaling, set %wd = 0.
+ *           ~ If both %wd and %hd are specified, the image is scaled
+ *             (in general, anisotropically) to that size.
+ *           ~ It is an error to set both %wd and %hd to 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17848,6 +26125,15 @@ ScaleBySamplingToSize(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This is a special case of linear interpolated scaling,
+ *          for 2x upscaling.  It is about 8x faster than using
+ *          the generic pixScaleColorLI(), and about 4x faster than
+ *          using the special 2x scale function pixScaleGray2xLI()
+ *          on each of the three components separately.
+ *      (2) The speed on intel hardware is about
+ *          80 * 10^6 dest-pixels/sec/GHz.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17865,6 +26151,17 @@ ScaleColor2xLI(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This is a special case of color linear interpolated scaling,
+ *          for 4x upscaling.  It is about 3x faster than using
+ *          the generic pixScaleColorLI().
+ *      (2) The speed on intel hardware is about
+ *          30 * 10^6 dest-pixels/sec/GHz
+ *      (3) This scales each component separately, using pixScaleGray4xLI().
+ *          It would be about 4x faster to inline the color code properly,
+ *          in analogy to scaleColor4xLILow(), and I leave this as
+ *          an exercise for someone who really needs it.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17884,6 +26181,20 @@ ScaleColor4xLI(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (scalex).
  * Arg #3 is expected to be a l_float32 (scaley).
+ *
+ * Notes:
+ *      (1) If either scale factor is larger than 0.7, we issue a warning
+ *          and call pixScaleGeneral(), which will invoke area mapping
+ *          without sharpening.  This is particularly important for
+ *          document images with sharp edges.
+ *      (2) For the general case, it's about 4x faster to manipulate
+ *          the color pixels directly, rather than to make images
+ *          out of each of the 3 components, scale each component
+ *          using the pixScaleGrayLI(), and combine the results back
+ *          into an rgb image.
+ *      (3) The speed on intel hardware for the general case (not 2x)
+ *          is about 10 * 10^6 dest-pixels/sec/GHz.  (The special 2x
+ *          case runs at about 80 * 10^6 dest-pixels/sec/GHz.)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17907,6 +26218,22 @@ ScaleColorLI(lua_State *L)
  * Arg #3 is expected to be a l_float32 (scaley).
  * Arg #4 is expected to be a l_float32 (sharpfract).
  * Arg #5 is expected to be a l_int32 (sharpwidth).
+ *
+ * Notes:
+ *      (1) See pixScale() for usage.
+ *      (2) This interface may change in the future, as other special
+ *          cases are added.
+ *      (3) The actual sharpening factors used depend on the maximum
+ *          of the two scale factors (maxscale):
+ *            maxscale <= 0.2:        no sharpening
+ *            0.2 < maxscale < 1.4:   uses the input parameters
+ *            maxscale >= 1.4:        no sharpening
+ *      (4) To avoid sharpening for grayscale and color images with
+ *          scaling factors between 0.2 and 1.4, call this function
+ *          with %sharpfract == 0.0.
+ *      (5) To use arbitrary sharpening in conjunction with scaling,
+ *          call this function with %sharpfract = 0.0, and follow this
+ *          with a call to pixUnsharpMasking() with your chosen parameters.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17928,6 +26255,13 @@ ScaleGeneral(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This is a special case of gray linear interpolated scaling,
+ *          for 2x upscaling.  It is about 6x faster than using
+ *          the generic pixScaleGrayLI().
+ *      (2) The speed on intel hardware is about
+ *          100 * 10^6 dest-pixels/sec/GHz
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17945,6 +26279,16 @@ ScaleGray2xLI(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This does 2x upscale on pixs, using linear interpolation,
+ *          followed by Floyd-Steinberg dithering to binary.
+ *      (2) Buffers are used to avoid making a large grayscale image.
+ *          ~ Two line buffers are used for the src, required for the 2x
+ *            LI upscale.
+ *          ~ Three line buffers are used for the intermediate image.
+ *            Two are filled with each 2xLI row operation; the third is
+ *            needed because the upscale and dithering ops are out of sync.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17963,6 +26307,11 @@ ScaleGray2xLIDither(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (thresh).
+ *
+ * Notes:
+ *      (1) This does 2x upscale on pixs, using linear interpolation,
+ *          followed by thresholding to binary.
+ *      (2) Buffers are used to avoid making a large grayscale image.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17981,6 +26330,13 @@ ScaleGray2xLIThresh(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This is a special case of gray linear interpolated scaling,
+ *          for 4x upscaling.  It is about 12x faster than using
+ *          the generic pixScaleGrayLI().
+ *      (2) The speed on intel hardware is about
+ *          160 * 10^6 dest-pixels/sec/GHz.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -17998,6 +26354,21 @@ ScaleGray4xLI(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This does 4x upscale on pixs, using linear interpolation,
+ *          followed by Floyd-Steinberg dithering to binary.
+ *      (2) Buffers are used to avoid making a large grayscale image.
+ *          ~ Two line buffers are used for the src, required for the
+ *            4xLI upscale.
+ *          ~ Five line buffers are used for the intermediate image.
+ *            Four are filled with each 4xLI row operation; the fifth
+ *            is needed because the upscale and dithering ops are
+ *            out of sync.
+ *      (3) If a full 4x expanded grayscale image can be kept in memory,
+ *          this function is only about 5% faster than separately doing
+ *          a linear interpolation to a large grayscale image, followed
+ *          by error-diffusion dithering to binary.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -18016,6 +26387,15 @@ ScaleGray4xLIDither(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (thresh).
+ *
+ * Notes:
+ *      (1) This does 4x upscale on pixs, using linear interpolation,
+ *          followed by thresholding to binary.
+ *      (2) Buffers are used to avoid making a large grayscale image.
+ *      (3) If a full 4x expanded grayscale image can be kept in memory,
+ *          this function is only about 10% faster than separately doing
+ *          a linear interpolation to a large grayscale image, followed
+ *          by thresholding to binary.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -18058,6 +26438,18 @@ ScaleGrayLI(lua_State *L)
  * Arg #2 is expected to be a l_int32 (xfact).
  * Arg #3 is expected to be a l_int32 (yfact).
  * Arg #4 is expected to be a l_int32 (type).
+ *
+ * Notes:
+ *      (1) The downscaled pixels in pixd are the min, max or (max - min)
+ *          of the corresponding set of xfact * yfact pixels in pixs.
+ *      (2) Using L_CHOOSE_MIN is equivalent to a grayscale erosion,
+ *          using a brick Sel of size (xfact * yfact), followed by
+ *          subsampling within each (xfact * yfact) cell.  Using
+ *          L_CHOOSE_MAX is equivalent to the corresponding dilation.
+ *      (3) Using L_CHOOSE_MAXDIFF finds the difference between max
+ *          and min values in each cell.
+ *      (4) For the special case of downscaling by 2x in both directions,
+ *          pixScaleGrayMinMax2() is about 2x more efficient.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -18079,6 +26471,23 @@ ScaleGrayMinMax(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (type).
+ *
+ * Notes:
+ *      (1) Special version for 2x reduction.  The downscaled pixels
+ *          in pixd are the min, max or (max - min) of the corresponding
+ *          set of 4 pixels in pixs.
+ *      (2) The max and min operations are a special case (for levels 1
+ *          and 4) of grayscale analog to the binary rank scaling operation
+ *          pixReduceRankBinary2().  Note, however, that because of
+ *          the photometric definition that higher gray values are
+ *          lighter, the erosion-like L_CHOOSE_MIN will darken
+ *          the resulting image, corresponding to a threshold level 1
+ *          in the binary case.  Likewise, L_CHOOSE_MAX will lighten
+ *          the pixd, corresponding to a threshold level of 4.
+ *      (3) To choose any of the four rank levels in a 2x grayscale
+ *          reduction, use pixScaleGrayRank2().
+ *      (4) This runs at about 70 MPix/sec/GHz of source data for
+ *          erosion and dilation.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -18098,6 +26507,19 @@ ScaleGrayMinMax2(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (rank).
+ *
+ * Notes:
+ *      (1) Rank 2x reduction.  If rank == 1(4), the downscaled pixels
+ *          in pixd are the min(max) of the corresponding set of
+ *          4 pixels in pixs.  Values 2 and 3 are intermediate.
+ *      (2) This is the grayscale analog to the binary rank scaling operation
+ *          pixReduceRankBinary2().  Here, because of the photometric
+ *          definition that higher gray values are lighter, rank 1 gives
+ *          the darkest pixel, whereas rank 4 gives the lightest pixel.
+ *          This is opposite to the binary rank operation.
+ *      (3) For rank = 1 and 4, this calls pixScaleGrayMinMax2(),
+ *          which runs at about 70 MPix/sec/GHz of source data.
+ *          For rank 2 and 3, this runs 3x slower, at about 25 MPix/sec/GHz.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -18120,6 +26542,10 @@ ScaleGrayRank2(lua_State *L)
  * Arg #3 is expected to be a l_int32 (level2).
  * Arg #4 is expected to be a l_int32 (level3).
  * Arg #5 is expected to be a l_int32 (level4).
+ *
+ * Notes:
+ *      (1) This performs up to four cascaded 2x rank reductions.
+ *      (2) Use level = 0 to truncate the cascade.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -18143,6 +26569,13 @@ ScaleGrayRankCascade(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
  * Arg #3 is expected to be a l_int32 (thresh).
+ *
+ * Notes:
+ *      (1) This does simultaneous subsampling by an integer factor and
+ *          thresholding from gray to binary.
+ *      (2) It is designed for maximum speed, and is used for quickly
+ *          generating a downsized binary image from a higher resolution
+ *          gray image.  This would typically be used for image analysis.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -18164,6 +26597,20 @@ ScaleGrayToBinaryFast(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (scalex).
  * Arg #3 is expected to be a l_float32 (scaley).
+ *
+ * Notes:
+ *      (1) This function should only be used when the scale factors are
+ *          greater than or equal to 0.7, and typically greater than 1.
+ *          If either scale factor is larger than 0.7, we issue a warning
+ *          and call pixScaleGeneral(), which will invoke area mapping
+ *          without sharpening.
+ *      (2) This works on 2, 4, 8, 16 and 32 bpp images, as well as on
+ *          2, 4 and 8 bpp images that have a colormap.  If there is a
+ *          colormap, it is removed to either gray or RGB, depending
+ *          on the colormap.
+ *      (3) This does a linear interpolation on the src image.
+ *      (4) It dispatches to much faster implementations for
+ *          the special cases of 2x and 4x expansion.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -18185,6 +26632,11 @@ ScaleLI(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs1).
  * Arg #2 is expected to be a Pix* (pixs2).
  * Arg #3 is expected to be a l_float32 (scale).
+ *
+ * Notes:
+ *      (1) See notes in pixScaleToGrayMipmap().
+ *      (2) This function suffers from aliasing effects that are
+ *          easily seen in document images.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -18206,6 +26658,14 @@ ScaleMipmap(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
  * Arg #3 is expected to be a l_int32 (thresh).
+ *
+ * Notes:
+ *      (1) This does simultaneous subsampling by an integer factor and
+ *          conversion from RGB to gray to binary.
+ *      (2) It is designed for maximum speed, and is used for quickly
+ *          generating a downsized binary image from a higher resolution
+ *          RGB image.  This would typically be used for image analysis.
+ *      (3) It uses the green channel to represent the RGB pixel intensity.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -18250,6 +26710,14 @@ ScaleRGBToGray2(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
  * Arg #3 is expected to be a l_int32 (color).
+ *
+ * Notes:
+ *      (1) This does simultaneous subsampling by an integer factor and
+ *          extraction of the color from the RGB pix.
+ *      (2) It is designed for maximum speed, and is used for quickly
+ *          generating a downsized grayscale image from a higher resolution
+ *          RGB image.  This would typically be used for image analysis.
+ *      (3) The standard color byte order (RGBA) is assumed.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -18291,6 +26759,28 @@ ScaleResolution(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (scalex).
  * Arg #3 is expected to be a l_float32 (scaley).
+ *
+ * Notes:
+ *      (1) This function should only be used when the scale factors are less
+ *          than or equal to 0.7 (i.e., more than about 1.42x reduction).
+ *          If either scale factor is larger than 0.7, we issue a warning
+ *          and call pixScaleGeneral(), which will invoke linear
+ *          interpolation without sharpening.
+ *      (2) This works only on 2, 4, 8 and 32 bpp images, and if there is
+ *          a colormap, it is removed by converting to RGB.  In other
+ *          cases, we issue a warning and call pixScaleGeneral().
+ *      (3) It does simple (flat filter) convolution, with a filter size
+ *          commensurate with the amount of reduction, to avoid antialiasing.
+ *      (4) It does simple subsampling after smoothing, which is appropriate
+ *          for this range of scaling.  Linear interpolation gives essentially
+ *          the same result with more computation for these scale factors,
+ *          so we don't use it.
+ *      (5) The result is the same as doing a full block convolution followed by
+ *          subsampling, but this is faster because the results of the block
+ *          convolution are only computed at the subsampling locations.
+ *          In fact, the computation time is approximately independent of
+ *          the scale factor, because the convolution kernel is adjusted
+ *          so that each source pixel is summed approximately once.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -18312,6 +26802,15 @@ ScaleSmooth(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (wd).
  * Arg #3 is expected to be a l_int32 (hd).
+ *
+ * Notes:
+ *      (1) See notes in pixScaleSmooth().
+ *      (2) The output scaled image has the dimension(s) you specify:
+ *          * To specify the width with isotropic scaling, set %hd = 0.
+ *          * To specify the height with isotropic scaling, set %wd = 0.
+ *          * If both %wd and %hd are specified, the image is scaled
+ *             (in general, anisotropically) to that size.
+ *          * It is an error to set both %wd and %hd to 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -18332,6 +26831,62 @@ ScaleSmoothToSize(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (scalefactor).
+ *
+ * Notes:
+ *
+ *  For faster scaling in the range of scalefactors from 0.0625 to 0.5,
+ *  with very little difference in quality, use pixScaleToGrayFast().
+ *
+ *  Binary images have sharp edges, so they intrinsically have very
+ *  high frequency content.  To avoid aliasing, they must be low-pass
+ *  filtered, which tends to blur the edges.  How can we keep relatively
+ *  crisp edges without aliasing?  The trick is to do binary upscaling
+ *  followed by a power-of-2 scaleToGray.  For large reductions, where
+ *  you don't end up with much detail, some corners can be cut.
+ *
+ *  The intent here is to get high quality reduced grayscale
+ *  images with relatively little computation.  We do binary
+ *  pre-scaling followed by scaleToGrayN() for best results,
+ *  esp. to avoid excess blur when the scale factor is near
+ *  an inverse power of 2.  Where a low-pass filter is required,
+ *  we use simple convolution kernels: either the hat filter for
+ *  linear interpolation or a flat filter for larger downscaling.
+ *  Other choices, such as a perfect bandpass filter with infinite extent
+ *  (the sinc) or various approximations to it (e.g., lanczos), are
+ *  unnecessarily expensive.
+ *
+ *  The choices made are as follows:
+ *      (1) Do binary upscaling before scaleToGrayN() for scalefactors > 1/8
+ *      (2) Do binary downscaling before scaleToGray8() for scalefactors
+ *          between 1/16 and 1/8.
+ *      (3) Use scaleToGray16() before grayscale downscaling for
+ *          scalefactors less than 1/16
+ *  Another reasonable choice would be to start binary downscaling
+ *  for scalefactors below 1/4, rather than below 1/8 as we do here.
+ *
+ *  The general scaling rules, not all of which are used here, go as follows:
+ *      (1) For grayscale upscaling, use pixScaleGrayLI().  However,
+ *          note that edges will be visibly blurred for scalefactors
+ *          near (but above) 1.0.  Replication will avoid edge blur,
+ *          and should be considered for factors very near 1.0.
+ *      (2) For grayscale downscaling with a scale factor larger than
+ *          about 0.7, use pixScaleGrayLI().  For scalefactors near
+ *          (but below) 1.0, you tread between Scylla and Charybdis.
+ *          pixScaleGrayLI() again gives edge blurring, but
+ *          pixScaleBySampling() gives visible aliasing.
+ *      (3) For grayscale downscaling with a scale factor smaller than
+ *          about 0.7, use pixScaleSmooth()
+ *      (4) For binary input images, do as much scale to gray as possible
+ *          using the special integer functions (2, 3, 4, 8 and 16).
+ *      (5) It is better to upscale in binary, followed by scaleToGrayN()
+ *          than to do scaleToGrayN() followed by an upscale using either
+ *          LI or oversampling.
+ *      (6) It may be better to downscale in binary, followed by
+ *          scaleToGrayN() than to first use scaleToGrayN() followed by
+ *          downscaling.  For downscaling between 8x and 16x, this is
+ *          a reasonable option.
+ *      (7) For reductions greater than 16x, it's reasonable to use
+ *          scaleToGray16() followed by further grayscale downscaling.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -18384,6 +26939,12 @@ ScaleToGray2(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) Speed is about 100 x 10^6 src-pixels/sec/GHz.
+ *          Another way to express this is it processes 1 src pixel
+ *          in about 10 cycles.
+ *      (2) The width of pixd is truncated is truncated to a factor of 8.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -18401,6 +26962,9 @@ ScaleToGray3(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) The width of pixd is truncated is truncated to a factor of 2.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -18418,6 +26982,9 @@ ScaleToGray4(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) The width of pixd is truncated is truncated to a factor of 8.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -18453,6 +27020,18 @@ ScaleToGray8(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (scalefactor).
+ *
+ * Notes:
+ *      (1) See notes in pixScaleToGray() for the basic approach.
+ *      (2) This function is considerably less expensive than pixScaleToGray()
+ *          for scalefactor in the range (0.0625 ... 0.5), and the
+ *          quality is nearly as good.
+ *      (3) Unlike pixScaleToGray(), which does binary upscaling before
+ *          downscaling for scale factors >= 0.0625, pixScaleToGrayFast()
+ *          first downscales in binary for all scale factors < 0.5, and
+ *          then does a 2x scale-to-gray as the final step.  For
+ *          scale factors < 0.0625, both do a 16x scale-to-gray, followed
+ *          by further grayscale reduction.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -18472,6 +27051,27 @@ ScaleToGrayFast(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (scalefactor).
+ *
+ * Notes:
+ *
+ *  This function is here mainly for pedagogical reasons.
+ *  Mip-mapping is widely used in graphics for texture mapping, because
+ *  the texture changes smoothly with scale.  This is accomplished by
+ *  constructing a multiresolution pyramid and, for each pixel,
+ *  doing a linear interpolation between corresponding pixels in
+ *  the two planes of the pyramid that bracket the desired resolution.
+ *  The computation is very efficient, and is implemented in hardware
+ *  in high-end graphics cards.
+ *
+ *  We can use mip-mapping for scale-to-gray by using two scale-to-gray
+ *  reduced images (we don't need the entire pyramid) selected from
+ *  the set {2x, 4x, ... 16x}, and interpolating.  However, we get
+ *  severe aliasing, probably because we are subsampling from the
+ *  higher resolution image.  The method is very fast, but the result
+ *  is very poor.  In fact, the results don't look any better than
+ *  either subsampling off the higher-res grayscale image or oversampling
+ *  on the lower-res image.  Consequently, this method should NOT be used
+ *  for generating reduced images, scale-to-gray or otherwise.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -18492,6 +27092,14 @@ ScaleToGrayMipmap(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (wd).
  * Arg #3 is expected to be a l_int32 (hd).
+ *
+ * Notes:
+ *      (1) The output scaled image has the dimension(s) you specify:
+ *          * To specify the width with isotropic scaling, set %hd = 0.
+ *          * To specify the height with isotropic scaling, set %wd = 0.
+ *          * If both %wd and %hd are specified, the image is scaled
+ *             (in general, anisotropically) to that size.
+ *          * It is an error to set both %wd and %hd to 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -18536,6 +27144,38 @@ ScaleToSizeRel(lua_State *L)
  * Arg #3 is expected to be a l_float32 (scaley).
  * Arg #4 is expected to be a Pix* (pixg).
  * Arg #5 is expected to be a l_float32 (fract).
+ *
+ * Notes:
+ *      (1) The alpha channel is transformed separately from pixs,
+ *          and aligns with it, being fully transparent outside the
+ *          boundary of the transformed pixs.  For pixels that are fully
+ *          transparent, a blending function like pixBlendWithGrayMask()
+ *          will give zero weight to corresponding pixels in pixs.
+ *      (2) Scaling is done with area mapping or linear interpolation,
+ *          depending on the scale factors.  Default sharpening is done.
+ *      (3) If pixg is NULL, it is generated as an alpha layer that is
+ *          partially opaque, using %fract.  Otherwise, it is cropped
+ *          to pixs if required, and %fract is ignored.  The alpha
+ *          channel in pixs is never used.
+ *      (4) Colormaps are removed to 32 bpp.
+ *      (5) The default setting for the border values in the alpha channel
+ *          is 0 (transparent) for the outermost ring of pixels and
+ *          (0.5 * fract * 255) for the second ring.  When blended over
+ *          a second image, this
+ *          (a) shrinks the visible image to make a clean overlap edge
+ *              with an image below, and
+ *          (b) softens the edges by weakening the aliasing there.
+ *          Use l_setAlphaMaskBorder() to change these values.
+ *      (6) A subtle use of gamma correction is to remove gamma correction
+ *          before scaling and restore it afterwards.  This is done
+ *          by sandwiching this function between a gamma/inverse-gamma
+ *          photometric transform:
+ *              pixt = pixGammaTRCWithAlpha(NULL, pixs, 1.0 / gamma, 0, 255);
+ *              pixd = pixScaleWithAlpha(pixt, scalex, scaley, NULL, fract);
+ *              pixGammaTRCWithAlpha(pixd, pixd, gamma, 0, 255);
+ *              pixDestroy(&pixt);
+ *          This has the side-effect of producing artifacts in the very
+ *          dark regions.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -18563,6 +27203,20 @@ ScaleWithAlpha(lua_State *L)
  * Arg #5 is expected to be a l_int32 (maxwidth).
  * Arg #6 is expected to be a l_int32 (factor).
  * Arg #7 is expected to be a l_int32 (scanflag).
+ *
+ * Notes:
+ *      (1) If there are no fg pixels, the position is set to 0.
+ *          Caller must check the return value!
+ *      (2) Use %box == NULL to scan from edge of pixs
+ *      (3) As the scan progresses, the location where the sum of
+ *          pixels equals or excees %lowthresh is noted (loc).  The
+ *          scan is stopped when the sum of pixels equals or exceeds
+ *          %highthresh.  If the scan distance between loc and that
+ *          point does not exceed %maxwidth, an edge is found and
+ *          its position is taken to be loc.  %maxwidth implicitly
+ *          sets a minimum on the required gradient of the edge.
+ *      (4) The thresholds must be at least 1, and the low threshold
+ *          cannot be larger than the high threshold.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -18591,6 +27245,11 @@ ScanForEdge(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Box* (box).
  * Arg #3 is expected to be a l_int32 (scanflag).
+ *
+ * Notes:
+ *      (1) If there are no fg pixels, the position is set to 0.
+ *          Caller must check the return value!
+ *      (2) Use %box == NULL to scan from edge of pixs
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -18617,6 +27276,36 @@ ScanForForeground(lua_State *L)
  * Arg #3 is expected to be a l_int32 (yi).
  * Arg #4 is expected to be a l_int32 (xf).
  * Arg #5 is expected to be a l_int32 (yf).
+ *
+ * Notes:
+ *      (1) Because of the overhead in calling pixGetPixel() and
+ *          pixSetPixel(), we have used raster line pointers and the
+ *          GET_DATA* and SET_DATA* macros for many of the pix accesses.
+ *      (2) Commentary:
+ *            The goal is to find the shortest path between beginning and
+ *          end points, without going through walls, and there are many
+ *          ways to solve this problem.
+ *            We use a queue to implement a breadth-first search.  Two auxiliary
+ *          "image" data structures can be used: one to mark the visited
+ *          pixels and one to give the direction to the parent for each
+ *          visited pixel.  The first structure is used to avoid putting
+ *          pixels on the queue more than once, and the second is used
+ *          for retracing back to the origin, like the breadcrumbs in
+ *          Hansel and Gretel.  Each pixel taken off the queue is destroyed
+ *          after it is used to locate the allowed neighbors.  In fact,
+ *          only one distance image is required, if you initialize it
+ *          to some value that signifies "not yet visited."  (We use
+ *          a binary image for marking visited pixels because it is clearer.)
+ *          This method for a simple search of a binary maze is implemented in
+ *          pixSearchBinaryMaze().
+ *            An alternative method would store the (manhattan) distance
+ *          from the start point with each pixel on the queue.  The children
+ *          of each pixel get a distance one larger than the parent.  These
+ *          values can be stored in an auxiliary distance map image
+ *          that is constructed simultaneously with the search.  Once the
+ *          end point is reached, the distance map is used to backtrack
+ *          along a minimum path.  There may be several equal length
+ *          minimum paths, any one of which can be chosen this way.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pta * on the Lua stack
@@ -18673,6 +27362,10 @@ SearchGrayMaze(lua_State *L)
  * Arg #3 is expected to be a l_int32 (x).
  * Arg #4 is expected to be a l_int32 (y).
  * Arg #5 is expected to be a l_int32 (connectivity).
+ *
+ * Notes:
+ *      (1) This removes the component from pixs with a fg pixel at (x,y).
+ *      (2) See pixSeedfill4() and pixSeedfill8() for details.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -18697,6 +27390,13 @@ Seedfill(lua_State *L)
  * Arg #2 is expected to be a Stack* (stack).
  * Arg #3 is expected to be a l_int32 (x).
  * Arg #4 is expected to be a l_int32 (y).
+ *
+ * Notes:
+ *      (1) This is Paul Heckbert's stack-based 4-cc seedfill algorithm.
+ *      (2) This operates on the input 1 bpp pix to remove the fg seed
+ *          pixel, at (x,y), and all pixels that are 4-connected to it.
+ *          The seed pixel at (x,y) must initially be ON.
+ *      (3) Reference: see pixSeedFill4BB()
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -18720,6 +27420,27 @@ Seedfill4(lua_State *L)
  * Arg #2 is expected to be a Stack* (stack).
  * Arg #3 is expected to be a l_int32 (x).
  * Arg #4 is expected to be a l_int32 (y).
+ *
+ * Notes:
+ *      (1) This is Paul Heckbert's stack-based 4-cc seedfill algorithm.
+ *      (2) This operates on the input 1 bpp pix to remove the fg seed
+ *          pixel, at (x,y), and all pixels that are 4-connected to it.
+ *          The seed pixel at (x,y) must initially be ON.
+ *      (3) Returns the bounding box of the erased 4-cc component.
+ *      (4) Reference: see Paul Heckbert's stack-based seed fill algorithm
+ *          in "Graphic Gems", ed. Andrew Glassner, Academic
+ *          Press, 1990.  The algorithm description is given
+ *          on pp. 275-277; working C code is on pp. 721-722.)
+ *          The code here follows Heckbert's exactly, except
+ *          we use function calls instead of macros for
+ *          pushing data on and popping data off the stack.
+ *          This makes sense to do because Heckbert's fixed-size
+ *          stack with macros is dangerous: images exist that
+ *          will overrun the stack and crash.   The stack utility
+ *          here grows dynamically as needed, and the fillseg
+ *          structures that are not in use are stored in another
+ *          stack for reuse.  It should be noted that the
+ *          overhead in the function calls (vs. macros) is negligible.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box * on the Lua stack
@@ -18743,6 +27464,13 @@ Seedfill4BB(lua_State *L)
  * Arg #2 is expected to be a Stack* (stack).
  * Arg #3 is expected to be a l_int32 (x).
  * Arg #4 is expected to be a l_int32 (y).
+ *
+ * Notes:
+ *      (1) This is Paul Heckbert's stack-based 8-cc seedfill algorithm.
+ *      (2) This operates on the input 1 bpp pix to remove the fg seed
+ *          pixel, at (x,y), and all pixels that are 8-connected to it.
+ *          The seed pixel at (x,y) must initially be ON.
+ *      (3) Reference: see pixSeedFill8BB()
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -18766,6 +27494,20 @@ Seedfill8(lua_State *L)
  * Arg #2 is expected to be a Stack* (stack).
  * Arg #3 is expected to be a l_int32 (x).
  * Arg #4 is expected to be a l_int32 (y).
+ *
+ * Notes:
+ *      (1) This is Paul Heckbert's stack-based 8-cc seedfill algorithm.
+ *      (2) This operates on the input 1 bpp pix to remove the fg seed
+ *          pixel, at (x,y), and all pixels that are 8-connected to it.
+ *          The seed pixel at (x,y) must initially be ON.
+ *      (3) Returns the bounding box of the erased 8-cc component.
+ *      (4) Reference: see Paul Heckbert's stack-based seed fill algorithm
+ *          in "Graphic Gems", ed. Andrew Glassner, Academic
+ *          Press, 1990.  The algorithm description is given
+ *          on pp. 275-277; working C code is on pp. 721-722.)
+ *          The code here follows Heckbert's closely, except
+ *          the leak checks are changed for 8 connectivity.
+ *          See comments on pixSeedfill4BB() for more details.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box * on the Lua stack
@@ -18790,6 +27532,10 @@ Seedfill8BB(lua_State *L)
  * Arg #3 is expected to be a l_int32 (x).
  * Arg #4 is expected to be a l_int32 (y).
  * Arg #5 is expected to be a l_int32 (connectivity).
+ *
+ * Notes:
+ *      (1) This is the high-level interface to Paul Heckbert's
+ *          stack-based seedfill algorithm.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box * on the Lua stack
@@ -18814,6 +27560,25 @@ SeedfillBB(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Pix* (pixm).
  * Arg #4 is expected to be a l_int32 (connectivity).
+ *
+ * Notes:
+ *      (1) This is for binary seedfill (aka "binary reconstruction").
+ *      (2) There are 3 cases:
+ *            (a) pixd == null (make a new pixd)
+ *            (b) pixd == pixs (in-place)
+ *            (c) pixd != pixs
+ *      (3) If you know the case, use these patterns for clarity:
+ *            (a) pixd = pixSeedfillBinary(NULL, pixs, ...);
+ *            (b) pixSeedfillBinary(pixs, pixs, ...);
+ *            (c) pixSeedfillBinary(pixd, pixs, ...);
+ *      (4) The resulting pixd contains the filled seed.  For some
+ *          applications you want to OR it with the inverse of
+ *          the filling mask.
+ *      (5) The input seed and mask images can be different sizes, but
+ *          in typical use the difference, if any, would be only
+ *          a few pixels in each direction.  If the sizes differ,
+ *          the clipping is handled by the low-level function
+ *          seedfillBinaryLow().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -18839,6 +27604,25 @@ SeedfillBinary(lua_State *L)
  * Arg #4 is expected to be a l_int32 (connectivity).
  * Arg #5 is expected to be a l_int32 (xmax).
  * Arg #6 is expected to be a l_int32 (ymax).
+ *
+ * Notes:
+ *      (1) See usage for pixSeedfillBinary(), which has unrestricted fill.
+ *          In pixSeedfillBinary(), the filling distance is unrestricted
+ *          and can be larger than pixs, depending on the topology of
+ *          th mask.
+ *      (2) There are occasions where it is useful not to permit the
+ *          fill to go more than a certain distance into the mask.
+ *          %xmax specifies the maximum horizontal distance allowed
+ *          in the fill; %ymax does likewise in the vertical direction.
+ *      (3) Operationally, the max "distance" allowed for the fill
+ *          is a linear distance from the original seed, independent
+ *          of the actual mask topology.
+ *      (4) Another formulation of this problem, not implemented,
+ *          would use the manhattan distance from the seed, as
+ *          determined by a breadth-first search starting at the seed
+ *          boundaries and working outward where the mask fg allows.
+ *          How this might use the constraints of separate xmax and ymax
+ *          is not clear.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -18863,6 +27647,20 @@ SeedfillBinaryRestricted(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pix* (pixm).
  * Arg #3 is expected to be a l_int32 (connectivity).
+ *
+ * Notes:
+ *      (1) This is an in-place filling operation on the seed, pixs,
+ *          where the clipping mask is always above or at the level
+ *          of the seed as it is filled.
+ *      (2) For details of the operation, see the description in
+ *          seedfillGrayLow() and the code there.
+ *      (3) As an example of use, see the description in pixHDome().
+ *          There, the seed is an image where each pixel is a fixed
+ *          amount smaller than the corresponding mask pixel.
+ *      (4) Reference paper :
+ *            L. Vincent, Morphological grayscale reconstruction in image
+ *            analysis: applications and efficient algorithms, IEEE Transactions
+ *            on  Image Processing, vol. 2, no. 2, pp. 176-201, 1993.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -18885,6 +27683,26 @@ SeedfillGray(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixm).
  * Arg #3 is expected to be a l_int32 (delta).
  * Arg #4 is expected to be a l_int32 (connectivity).
+ *
+ * Notes:
+ *      (1) This fills from a seed within basins defined by a filling mask.
+ *          The seed value(s) are greater than the corresponding
+ *          filling mask value, and the result has the bottoms of
+ *          the basins raised by the initial seed value.
+ *      (2) The seed has value 255 except where pixb has fg (1), which
+ *          are the seed 'locations'.  At the seed locations, the seed
+ *          value is the corresponding value of the mask pixel in pixm
+ *          plus %delta.  If %delta == 0, we return a copy of pixm.
+ *      (3) The actual filling is done using the standard grayscale filling
+ *          operation on the inverse of the mask and using the inverse
+ *          of the seed image.  After filling, we return the inverse of
+ *          the filled seed.
+ *      (4) As an example of use: pixm can describe a grayscale image
+ *          of text, where the (dark) text pixels are basins of
+ *          low values; pixb can identify the local minima in pixm (say, at
+ *          the bottom of the basins); and delta is the amount that we wish
+ *          to raise (lighten) the basins.  We construct the seed
+ *          (a.k.a marker) image from pixb, pixm and %delta.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -18907,6 +27725,23 @@ SeedfillGrayBasin(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pix* (pixm).
  * Arg #3 is expected to be a l_int32 (connectivity).
+ *
+ * Notes:
+ *      (1) This is an in-place filling operation on the seed, pixs,
+ *          where the clipping mask is always below or at the level
+ *          of the seed as it is filled.  Think of filling up a basin
+ *          to a particular level, given by the maximum seed value
+ *          in the basin.  Outside the filled region, the mask
+ *          is above the filling level.
+ *      (2) Contrast this with pixSeedfillGray(), where the clipping mask
+ *          is always above or at the level of the fill.  An example
+ *          of its use is the hdome fill, where the seed is an image
+ *          where each pixel is a fixed amount smaller than the
+ *          corresponding mask pixel.
+ *      (3) The basin fill, pixSeedfillGrayBasin(), is a special case
+ *          where the seed pixel values are generated from the mask,
+ *          and where the implementation uses pixSeedfillGray() by
+ *          inverting both the seed and mask.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -18928,6 +27763,19 @@ SeedfillGrayInv(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pix* (pixm).
  * Arg #3 is expected to be a l_int32 (connectivity).
+ *
+ * Notes:
+ *      (1) This is an in-place filling operation on the seed, pixs,
+ *          where the clipping mask is always below or at the level
+ *          of the seed as it is filled.  Think of filling up a basin
+ *          to a particular level, given by the maximum seed value
+ *          in the basin.  Outside the filled region, the mask
+ *          is above the filling level.
+ *      (2) Contrast this with pixSeedfillGraySimple(), where the clipping mask
+ *          is always above or at the level of the fill.  An example
+ *          of its use is the hdome fill, where the seed is an image
+ *          where each pixel is a fixed amount smaller than the
+ *          corresponding mask pixel.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -18949,6 +27797,20 @@ SeedfillGrayInvSimple(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pix* (pixm).
  * Arg #3 is expected to be a l_int32 (connectivity).
+ *
+ * Notes:
+ *      (1) This is an in-place filling operation on the seed, pixs,
+ *          where the clipping mask is always above or at the level
+ *          of the seed as it is filled.
+ *      (2) For details of the operation, see the description in
+ *          seedfillGrayLowSimple() and the code there.
+ *      (3) As an example of use, see the description in pixHDome().
+ *          There, the seed is an image where each pixel is a fixed
+ *          amount smaller than the corresponding mask pixel.
+ *      (4) Reference paper :
+ *            L. Vincent, Morphological grayscale reconstruction in image
+ *            analysis: applications and efficient algorithms, IEEE Transactions
+ *            on  Image Processing, vol. 2, no. 2, pp. 176-201, 1993.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -18971,6 +27833,13 @@ SeedfillGraySimple(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixm).
  * Arg #3 is expected to be a l_int32 (maxiters).
  * Arg #4 is expected to be a l_int32 (connectivity).
+ *
+ * Notes:
+ *    (1) This is in general a very inefficient method for filling
+ *        from a seed into a mask.  Use it for a small number of iterations,
+ *        but if you expect more than a few iterations, use
+ *        pixSeedfillBinary().
+ *    (2) We use a 3x3 brick SEL for 8-cc filling and a 3x3 plus SEL for 4-cc.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -18992,6 +27861,37 @@ SeedfillMorph(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (connectivity).
+ *
+ * Notes:
+ *      (1) The raster/anti-raster method for implementing this filling
+ *          operation was suggested by Ray Smith.
+ *      (2) This takes an arbitrary set of nonzero pixels in pixs, which
+ *          can be sparse, and spreads (extrapolates) the values to
+ *          fill all the pixels in pixd with the nonzero value it is
+ *          closest to in pixs.  This is similar (though not completely
+ *          equivalent) to doing a Voronoi tiling of the image, with a
+ *          tile surrounding each pixel that has a nonzero value.
+ *          All pixels within a tile are then closer to its "central"
+ *          pixel than to any others.  Then assign the value of the
+ *          "central" pixel to each pixel in the tile.
+ *      (3) This is implemented by computing a distance function in parallel
+ *          with the fill.  The distance function uses free boundary
+ *          conditions (assumed maxval outside), and it controls the
+ *          propagation of the pixels in pixd away from the nonzero
+ *          (seed) values.  This is done in 2 traversals (raster/antiraster).
+ *          In the raster direction, whenever the distance function
+ *          is nonzero, the spread pixel takes on the value of its
+ *          predecessor that has the minimum distance value.  In the
+ *          antiraster direction, whenever the distance function is nonzero
+ *          and its value is replaced by a smaller value, the spread
+ *          pixel takes the value of the predecessor with the minimum
+ *          distance value.
+ *      (4) At boundaries where a pixel is equidistant from two
+ *          nearest nonzero (seed) pixels, the decision of which value
+ *          to use is arbitrary (greedy in search for minimum distance).
+ *          This can give rise to strange-looking results, particularly
+ *          for 4-connectivity where the L1 distance is computed from
+ *          steps in N,S,E and W directions (no diagonals).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -19013,6 +27913,17 @@ Seedspread(lua_State *L)
  * Arg #2 is expected to be a l_float32 (thresh).
  * Arg #3 is expected to be a l_int32 (connectivity).
  * Arg #4 is expected to be a l_int32 (type).
+ *
+ * Notes:
+ *      (1) The args specify constraints on the amount of foreground
+ *          coverage of the components that are kept.
+ *      (2) If unchanged, returns a copy of pixs.  Otherwise,
+ *          returns a new pix with the filtered components.
+ *      (3) This filters components based on the fraction of fg pixels
+ *          of the component in its bounding box.
+ *      (4) Use L_SELECT_IF_LT or L_SELECT_IF_LTE to save components
+ *          with less than the threshold fraction of foreground, and
+ *          L_SELECT_IF_GT or L_SELECT_IF_GTE to remove them.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -19039,6 +27950,18 @@ SelectByAreaFraction(lua_State *L)
  * Arg #2 is expected to be a l_float32 (thresh).
  * Arg #3 is expected to be a l_int32 (connectivity).
  * Arg #4 is expected to be a l_int32 (type).
+ *
+ * Notes:
+ *      (1) The args specify constraints on the size of the
+ *          components that are kept.
+ *      (2) If unchanged, returns a copy of pixs.  Otherwise,
+ *          returns a new pix with the filtered components.
+ *      (3) This filters components with smooth vs. dendritic shape, using
+ *          the ratio of the fg boundary pixels to the circumference of
+ *          the bounding box, and comparing it to a threshold value.
+ *      (4) Use L_SELECT_IF_LT or L_SELECT_IF_LTE to save the smooth
+ *          boundary components, and L_SELECT_IF_GT or L_SELECT_IF_GTE
+ *          to remove them.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -19065,6 +27988,17 @@ SelectByPerimSizeRatio(lua_State *L)
  * Arg #2 is expected to be a l_float32 (thresh).
  * Arg #3 is expected to be a l_int32 (connectivity).
  * Arg #4 is expected to be a l_int32 (type).
+ *
+ * Notes:
+ *      (1) The args specify constraints on the size of the
+ *          components that are kept.
+ *      (2) If unchanged, returns a copy of pixs.  Otherwise,
+ *          returns a new pix with the filtered components.
+ *      (3) This filters "thick" components, where a thick component
+ *          is defined to have a ratio of boundary to interior pixels
+ *          that is smaller than a given threshold value.
+ *      (4) Use L_SELECT_IF_LT or L_SELECT_IF_LTE to save the thicker
+ *          components, and L_SELECT_IF_GT or L_SELECT_IF_GTE to remove them.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -19093,6 +28027,18 @@ SelectByPerimToAreaRatio(lua_State *L)
  * Arg #4 is expected to be a l_int32 (connectivity).
  * Arg #5 is expected to be a l_int32 (type).
  * Arg #6 is expected to be a l_int32 (relation).
+ *
+ * Notes:
+ *      (1) The args specify constraints on the size of the
+ *          components that are kept.
+ *      (2) If unchanged, returns a copy of pixs.  Otherwise,
+ *          returns a new pix with the filtered components.
+ *      (3) If the selection type is L_SELECT_WIDTH, the input
+ *          height is ignored, and v.v.
+ *      (4) To keep small components, use relation = L_SELECT_IF_LT or
+ *          L_SELECT_IF_LTE.
+ *          To keep large components, use relation = L_SELECT_IF_GT or
+ *          L_SELECT_IF_GTE.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -19121,6 +28067,16 @@ SelectBySize(lua_State *L)
  * Arg #2 is expected to be a l_float32 (thresh).
  * Arg #3 is expected to be a l_int32 (connectivity).
  * Arg #4 is expected to be a l_int32 (type).
+ *
+ * Notes:
+ *      (1) The args specify constraints on the width-to-height ratio
+ *          for components that are kept.
+ *      (2) If unchanged, returns a copy of pixs.  Otherwise,
+ *          returns a new pix with the filtered components.
+ *      (3) This filters components based on the width-to-height ratios.
+ *      (4) Use L_SELECT_IF_LT or L_SELECT_IF_LTE to save components
+ *          with less than the threshold ratio, and
+ *          L_SELECT_IF_GT or L_SELECT_IF_GTE to remove them.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -19167,6 +28123,20 @@ SelectDefaultPdfEncoding(lua_State *L)
  * Arg #2 is expected to be a l_float32 (areaslop).
  * Arg #3 is expected to be a l_int32 (yslop).
  * Arg #4 is expected to be a l_int32 (connectivity).
+ *
+ * Notes:
+ *      (1) This selects a box near the top (first) and left (second)
+ *          of the image, from the set of all boxes that have
+ *                area >= %areaslop * (area of biggest box),
+ *          where %areaslop is some fraction; say ~ 0.9.
+ *      (2) For all boxes satisfying the above condition, select
+ *          the left-most box that is within %yslop (say, 20) pixels
+ *          of the box nearest the top.
+ *      (3) This can be used to reliably select a specific one of
+ *          the largest regions in an image, for applications where
+ *          there are expected to be small variations in region size
+ *          and location.
+ *      (4) See boxSelectLargeULBox() for implementation details.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box * on the Lua stack
@@ -19188,6 +28158,16 @@ SelectLargeULComp(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pix* (pixm).
+ *
+ * Notes:
+ *      (1) For each 8 connected component in pixm, this finds
+ *          a pixel in pixs that has the lowest value, and saves
+ *          it in a Pta.  If several pixels in pixs have the same
+ *          minimum value, it picks the first one found.
+ *      (2) For a mask pixm of true local minima, all pixels in each
+ *          connected component have the same value in pixs, so it is
+ *          fastest to select one of them using a special seedfill
+ *          operation.  Not yet implemented.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -19212,6 +28192,27 @@ SelectMinInConnComp(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (mindist).
+ *
+ * Notes:
+ *      (1) This selects those local 3x3 minima that are at least a
+ *          specified distance from the nearest local 3x3 maxima, and v.v.
+ *          for the selected set of local 3x3 maxima.
+ *          The local 3x3 minima is the set of pixels whose value equals
+ *          the value after a 3x3 brick erosion, and the local 3x3 maxima
+ *          is the set of pixels whose value equals the value after
+ *          a 3x3 brick dilation.
+ *      (2) mindist is the minimum distance allowed between
+ *          local 3x3 minima and local 3x3 maxima, in an 8-connected sense.
+ *          mindist == 1 keeps all pixels found in step 1.
+ *          mindist == 0 removes all pixels from each mask that are
+ *          both a local 3x3 minimum and a local 3x3 maximum.
+ *          mindist == 1 removes any local 3x3 minimum pixel that touches a
+ *          local 3x3 maximum pixel, and likewise for the local maxima.
+ *          To make the decision, visualize each local 3x3 minimum pixel
+ *          as being surrounded by a square of size (2 * mindist + 1)
+ *          on each side, such that no local 3x3 maximum pixel is within
+ *          that square; and v.v.
+ *      (3) The generated masks can be used as markers for further operations.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -19258,6 +28259,20 @@ SelectiveConnCompFill(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This does a fast serialization of the principal elements
+ *          of the pix, as follows:
+ *            "spix"    (4 bytes) -- ID for file type
+ *            w         (4 bytes)
+ *            h         (4 bytes)
+ *            d         (4 bytes)
+ *            wpl       (4 bytes)
+ *            ncolors   (4 bytes) -- in colormap; 0 if there is no colormap
+ *            cdata     (4 * ncolors)  -- size of serialized colormap array
+ *            rdatasize (4 bytes) -- size of serialized raster data
+ *                                   = 4 * wpl * h
+ *            rdata     (rdatasize)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -19278,6 +28293,13 @@ SerializeToMemory(lua_State *L)
  * \brief Set all pixels in a Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
+ *
+ * Notes:
+ *      (1) Sets all data to 1.  For 1 bpp, this is black; for grayscale
+ *          or color, this is white.
+ *      (2) Caution: for colormapped pix, this sets the pixel value to the
+ *          maximum value supported by the colormap: 2^d - 1.  However, this
+ *          color may not be defined, because the colormap may not be full.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolane on the Lua stack
@@ -19313,6 +28335,18 @@ SetAllArbitrary(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (grayval).
+ *
+ * Notes:
+ *      (1) N.B.  For all images, %grayval == 0 represents black and
+ *          %grayval == 255 represents white.
+ *      (2) For depth < 8, we do our best to approximate the gray level.
+ *          For 1 bpp images, any %grayval < 128 is black; >= 128 is white.
+ *          For 32 bpp images, each r,g,b component is set to %grayval,
+ *          and the alpha component is preserved.
+ *      (3) If pix is colormapped, it adds the gray value, replicated in
+ *          all components, to the colormap if it's not there and there
+ *          is room.  If the colormap is full, it finds the closest color in
+ *          L2 distance of components.  This index is written to all pixels.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -19330,6 +28364,16 @@ SetAllGray(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) The generated alpha component is transparent over white
+ *          (background) pixels in pixs, and quickly grades to opaque
+ *          away from the transparent parts.  This is a cheap and
+ *          dirty alpha generator.  The 2 pixel gradation is useful
+ *          to blur the boundary between the transparent region
+ *          (that will render entirely from a backing image) and
+ *          the remainder which renders from pixs.
+ *      (2) All alpha component bits in pixs are overwritten.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -19364,6 +28408,14 @@ SetBlack(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a string describing an operation (op).
+ *
+ * Notes:
+ *      (1) Function for setting all pixels in an image to either black
+ *          or white.
+ *      (2) If pixs is colormapped, it adds black or white to the
+ *          colormap if it's not there and there is room.  If the colormap
+ *          is full, it finds the closest color in intensity.
+ *          This index is written to all pixels.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -19427,6 +28479,18 @@ SetBorderRingVal(lua_State *L)
  * Arg #4 is expected to be a l_int32 (top).
  * Arg #5 is expected to be a l_int32 (bottom).
  * Arg #6 is expected to be a l_uint32 (val).
+ *
+ * Notes:
+ *      (1) The border region is defined to be the region in the
+ *          image within a specific distance of each edge.  Here, we
+ *          allow the pixels within a specified distance of each
+ *          edge to be set independently.  This sets the pixels
+ *          in the border region to the given input value.
+ *      (2) For efficiency, use pixSetOrClearBorder() if
+ *          you're setting the border to either black or white.
+ *      (3) If d != 32, the input value should be masked off
+ *          to the appropriate number of least significant bits.
+ *      (4) The code is easily generalized for 2 or 4 bpp.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -19449,6 +28513,12 @@ SetBorderVal(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (sampling).
+ *
+ * Notes:
+ *      (1) The default is for 2x2 chroma subsampling because the files are
+ *          considerably smaller and the appearance is typically satisfactory.
+ *          To get full resolution output in the chroma channels for
+ *          jpeg writing, call this with %sampling == 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -19490,6 +28560,10 @@ SetColormap(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a string with the component name (comp).
  * Arg #3 is expected to be a l_int32 (val).
+ *
+ * Notes:
+ *      (1) For example, this can be used to set the alpha component to opaque:
+ *              pixSetComponentArbitrary(pix, L_ALPHA_CHANNEL, 255)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -19590,6 +28664,13 @@ SetHeight(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a Box* (box).
+ *
+ * Notes:
+ *      (1) Sets all data in rect to 1.  For 1 bpp, this is black;
+ *          for grayscale or color, this is white.
+ *      (2) Caution: for colormapped pix, this sets the pixel value to the
+ *          maximum value supported by the colormap: 2^d - 1.  However, this
+ *          color may not be defined, because the colormap may not be full.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -19609,6 +28690,13 @@ SetInRect(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a Box* (box).
  * Arg #3 is expected to be a l_uint32 (val).
+ *
+ * Notes:
+ *      (1) For colormapped pix, be sure the value is the intended
+ *          one in the colormap.
+ *      (2) Caution: for colormapped pix, this sets each pixel in the
+ *          rect to the color at the index equal to val.  Be sure that
+ *          this index exists in the colormap and that it is the intended one!
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -19647,6 +28735,16 @@ SetInputFormat(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs1).
  * Arg #2 is expected to be a Pix* (pixs2).
  * Arg #3 is expected to be a l_int32 (mindiff).
+ *
+ * Notes:
+ *      (1) This compares corresponding pixels in pixs1 and pixs2.
+ *          When they differ by less than %mindiff, set the pixel
+ *          values to 0 in each.  Each pixel typically represents a tile
+ *          in a larger image, and a very small difference between
+ *          the min and max in the tile indicates that the min and max
+ *          values are not to be trusted.
+ *      (2) If contrast (pixel difference) detection is expected to fail,
+ *          caller should check return value.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -19668,6 +28766,27 @@ SetLowContrast(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixm) with 1 bit/pixel.
  * Arg #3 is expected to be a l_uint32 (val).
+ *
+ * Notes:
+ *      (1) In-place operation.
+ *      (2) NOTE: For cmapped images, this calls pixSetMaskedCmap().
+ *          %val must be the 32-bit color representation of the RGB pixel.
+ *          It is not the index into the colormap!
+ *      (2) If pixm == NULL, a warning is given.
+ *      (3) This is an implicitly aligned operation, where the UL
+ *          corners of pixd and pixm coincide.  A warning is
+ *          issued if the two image sizes differ significantly,
+ *          but the operation proceeds.
+ *      (4) Each pixel in pixd that co-locates with an ON pixel
+ *          in pixm is set to the specified input value.
+ *          Other pixels in pixd are not changed.
+ *      (5) You can visualize this as painting the color through
+ *          the mask, as a stencil.
+ *      (6) If you do not want to have the UL corners aligned,
+ *          use the function pixSetMaskedGeneral(), which requires
+ *          you to input the UL corner of pixm relative to pixd.
+ *      (7) Implementation details: see comments in pixPaintThroughMask()
+ *          for when we use rasterop to do the painting.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -19692,6 +28811,18 @@ SetMasked(lua_State *L)
  * Arg #5 is expected to be a l_int32 (rval).
  * Arg #6 is expected to be a l_int32 (gval).
  * Arg #7 is expected to be a l_int32 (bval).
+ *
+ * Notes:
+ *      (1) This is an in-place operation.
+ *      (2) It paints a single color through the mask (as a stencil).
+ *      (3) The mask origin is placed at (x,y) on pixs, and the
+ *          operation is clipped to the intersection of the mask and pixs.
+ *      (4) If pixm == NULL, a warning is given.
+ *      (5) Typically, pixm is a small binary mask located somewhere
+ *          on the larger pixs.
+ *      (6) If the color is in the colormap, it is used.  Otherwise,
+ *          it is added if possible; an error is returned if the
+ *          colormap is already full.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -19719,6 +28850,23 @@ SetMaskedCmap(lua_State *L)
  * Arg #3 is expected to be a l_uint32 (val).
  * Arg #4 is expected to be a l_int32 (x).
  * Arg #5 is expected to be a l_int32 (y).
+ *
+ * Notes:
+ *      (1) This is an in-place operation.
+ *      (2) Alignment is explicit.  If you want the UL corners of
+ *          the two images to be aligned, use pixSetMasked().
+ *      (3) A typical use would be painting through the foreground
+ *          of a small binary mask pixm, located somewhere on a
+ *          larger pixd.  Other pixels in pixd are not changed.
+ *      (4) You can visualize this as painting the color through
+ *          the mask, as a stencil.
+ *      (5) This uses rasterop to handle clipping and different depths of pixd.
+ *      (6) If pixd has a colormap, you should call pixPaintThroughMask().
+ *      (7) Why is this function here, if pixPaintThroughMask() does the
+ *          same thing, and does it more generally?  I've retained it here
+ *          to show how one can paint through a mask using only full
+ *          image rasterops, rather than pixel peeking in pixm and poking
+ *          in pixd.  It's somewhat baroque, but I found it amusing.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -19743,6 +28891,14 @@ SetMaskedGeneral(lua_State *L)
  * Arg #3 is expected to be a l_int32 (right).
  * Arg #4 is expected to be a l_int32 (top).
  * Arg #5 is expected to be a l_int32 (bottom).
+ *
+ * Notes:
+ *      (1) This applies what is effectively mirror boundary conditions
+ *          to a border region in the image.  It is in-place.
+ *      (2) This is useful for setting pixels near the border to a
+ *          value representative of the near pixels to the interior.
+ *      (3) The general pixRasterop() is used for an in-place operation here
+ *          because there is no overlap between the src and dest rectangles.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -19768,6 +28924,16 @@ SetMirroredBorder(lua_State *L)
  * Arg #4 is expected to be a l_int32 (top).
  * Arg #5 is expected to be a l_int32 (bottom).
  * Arg #6 is expected to be a operation (op = PIX_SET or PIX_CLR).
+ *
+ * Notes:
+ *      (1) The border region is defined to be the region in the
+ *          image within a specific distance of each edge.  Here, we
+ *          allow the pixels within a specified distance of each
+ *          edge to be set independently.  This either sets or
+ *          clears all pixels in the border region.
+ *      (2) For binary images, use PIX_SET for black and PIX_CLR for white.
+ *      (3) For grayscale or color images, use PIX_SET for white
+ *          and PIX_CLR for black.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -19790,6 +28956,25 @@ SetOrClearBorder(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (val).
+ *
+ * Notes:
+ *      (1) The pad bits are the bits that expand each scanline to a
+ *          multiple of 32 bits.  They are usually not used in
+ *          image processing operations.  When boundary conditions
+ *          are important, as in seedfill, they must be set properly.
+ *      (2) This sets the value of the pad bits (if any) in the last
+ *          32-bit word in each scanline.
+ *      (3) For 32 bpp pix, there are no pad bits, so this is a no-op.
+ *      (4) When writing formatted output, such as tiff, png or jpeg,
+ *          the pad bits have no effect on the raster image that is
+ *          generated by reading back from the file.  However, in some
+ *          cases, the compressed file itself will depend on the pad
+ *          bits.  This is seen, for example, in Windows with 2 and 4 bpp
+ *          tiff-compressed images that have pad bits on each scanline.
+ *          It is sometimes convenient to use a golden file with a
+ *          byte-by-byte check to verify invariance.  Consequently,
+ *          and because setting the pad bits is cheap, the pad bits are
+ *          set to 0 before writing these compressed files.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -19810,6 +28995,16 @@ SetPadBits(lua_State *L)
  * Arg #2 is expected to be a l_int32 (by).
  * Arg #3 is expected to be a l_int32 (bh).
  * Arg #4 is expected to be a l_int32 (val).
+ *
+ * Notes:
+ *      (1) The pad bits are the bits that expand each scanline to a
+ *          multiple of 32 bits.  They are usually not used in
+ *          image processing operations.  When boundary conditions
+ *          are important, as in seedfill, they must be set properly.
+ *      (2) This sets the value of the pad bits (if any) in the last
+ *          32-bit word in each scanline, within the specified
+ *          band of raster lines.
+ *      (3) For 32 bpp pix, there are no pad bits, so this is a no-op.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -19832,6 +29027,14 @@ SetPadBitsBand(lua_State *L)
  * Arg #2 is expected to be a l_int32 (x).
  * Arg #3 is expected to be a l_int32 (y).
  * Arg #4 is expected to be a l_uint32 (val).
+ *
+ * Notes:
+ *      (1) Warning: the input value is not checked for overflow with respect
+ *          the the depth of %pix, and the sign bit (if any) is ignored.
+ *          * For d == 1, %val > 0 sets the bit on.
+ *          * For d == 2, 4, 8 and 16, %val is masked to the maximum allowable
+ *            pixel value, and any (invalid) higher order bits are discarded.
+ *      (2) See pixGetPixel() for information on performance.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -19889,6 +29092,12 @@ SetPixelColumn(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a string with the component name (comp).
+ *
+ * Notes:
+ *      (1) This places the 8 bpp pixel in pixs into the
+ *          specified component (properly interleaved) in pixd,
+ *      (2) The two images are registered to the UL corner; the sizes
+ *          need not be the same, but a warning is issued if they differ.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -19958,6 +29167,22 @@ SetResolution(lua_State *L)
  * Arg #4 is expected to be a l_int32 (rval).
  * Arg #5 is expected to be a l_int32 (gval).
  * Arg #6 is expected to be a l_int32 (bval).
+ *
+ * Notes:
+ *      (1) This is an in-place operation.
+ *      (2) It sets all pixels in region that have the color specified
+ *          by the colormap index 'sindex' to the new color.
+ *      (3) sindex must be in the existing colormap; otherwise an
+ *          error is returned.
+ *      (4) If the new color exists in the colormap, it is used;
+ *          otherwise, it is added to the colormap.  If it cannot be
+ *          added because the colormap is full, an error is returned.
+ *      (5) If box is NULL, applies function to the entire image; otherwise,
+ *          clips the operation to the intersection of the box and pix.
+ *      (6) An example of use would be to set to a specific color all
+ *          the light (background) pixels within a certain region of
+ *          a 3-level 2 bpp image, while leaving light pixels outside
+ *          this region unchanged.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -19987,6 +29212,17 @@ SetSelectCmap(lua_State *L)
  * Arg #6 is expected to be a l_int32 (rval).
  * Arg #7 is expected to be a l_int32 (gval).
  * Arg #8 is expected to be a l_int32 (bval).
+ *
+ * Notes:
+ *      (1) This is an in-place operation.
+ *      (2) This paints through the fg of pixm and replaces all pixels
+ *          in pixs that have a particular value (sindex) with the new color.
+ *      (3) If pixm == NULL, a warning is given.
+ *      (4) sindex must be in the existing colormap; otherwise an
+ *          error is returned.
+ *      (5) If the new color exists in the colormap, it is used;
+ *          otherwise, it is added to the colormap.  If the colormap
+ *          is full, an error is returned.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -20049,6 +29285,12 @@ SetSpp(lua_State *L)
  * Arg #2 is expected to be a l_int32 (width).
  * Arg #3 is expected to be a l_int32 (thinfirst).
  * Arg #4 is expected to be a l_int32 (connectivity).
+ *
+ * Notes:
+ *      (1) See notes in pixaSetStrokeWidth().
+ *      (2) A white border of sufficient width to avoid boundary
+ *          artifacts in the thickening step is added before thinning.
+ *      (3) %connectivity == 8 usually gives a slightly smoother result.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -20070,6 +29312,10 @@ SetStrokeWidth(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a string (text).
+ *
+ * Notes:
+ *      (1) This removes any existing textstring and puts a copy of
+ *          the input textstring there.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -20095,6 +29341,20 @@ SetText(lua_State *L)
  * Arg #6 is expected to be a l_int32 (y0).
  * Arg #7 is expected to be a l_int32 (wtext).
  * Arg #8 is expected to be a l_int32 (firstindent).
+ *
+ * Notes:
+ *      (1) This function paints a set of lines of text over an image.
+ *      (2) %val is the pixel value to be painted through the font mask.
+ *          It should be chosen to agree with the depth of pixs.
+ *          If it is out of bounds, an intermediate value is chosen.
+ *          For RGB, use hex notation: 0xRRGGBB00, where RR is the
+ *          hex representation of the red intensity, etc.
+ *          The last two hex digits are 00 (byte value 0), assigned to
+ *          the A component.  Note that, as usual, RGBA proceeds from
+ *          left to right in the order from MSB to LSB (see pix.h
+ *          for details).
+ *      (3) If there is a colormap, this does the best it can to use
+ *          the requested color, or something similar to it.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -20127,6 +29387,20 @@ SetTextblock(lua_State *L)
  * Arg #4 is expected to be a l_uint32 (val).
  * Arg #5 is expected to be a l_int32 (x0).
  * Arg #6 is expected to be a l_int32 (y0).
+ *
+ * Notes:
+ *      (1) This function paints a line of text over an image.
+ *      (2) %val is the pixel value to be painted through the font mask.
+ *          It should be chosen to agree with the depth of pixs.
+ *          If it is out of bounds, an intermediate value is chosen.
+ *          For RGB, use hex notation: 0xRRGGBB00, where RR is the
+ *          hex representation of the red intensity, etc.
+ *          The last two hex digits are 00 (byte value 0), assigned to
+ *          the A component.  Note that, as usual, RGBA proceeds from
+ *          left to right in the order from MSB to LSB (see pix.h
+ *          for details).
+ *      (3) If there is a colormap, this does the best it can to use
+ *          the requested color, or something similar to it.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -20155,6 +29429,49 @@ SetTextline(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_uint32 (val).
+ *
+ * Notes:
+ *      (1) This sets the r, g and b components under every fully
+ *          transparent alpha component to %val.  The alpha components
+ *          are unchanged.
+ *      (2) Full transparency is denoted by alpha == 0.  Setting
+ *          all pixels to a constant %val where alpha is transparent
+ *          can improve compressibility by reducing the entropy.
+ *      (3) The visual result depends on how the image is displayed.
+ *          (a) For display devices that respect the use of the alpha
+ *              layer, this will not affect the appearance.
+ *          (b) For typical leptonica operations, alpha is ignored,
+ *              so there will be a change in appearance because this
+ *              resets the rgb values in the fully transparent region.
+ *      (4) pixRead() and pixWrite() will, by default, read and write
+ *          4-component (rgba) pix in png format.  To ignore the alpha
+ *          component after reading, or omit it on writing, pixSetSpp(..., 3).
+ *      (5) Here are some examples:
+ *          * To convert all fully transparent pixels in a 4 component
+ *            (rgba) png file to white:
+ *              pixs = pixRead(<infile>);
+ *              pixd = pixSetUnderTransparency(pixs, 0xffffff00, 0);
+ *          * To write pixd with the alpha component:
+ *              pixWrite(<outfile>, pixd, IFF_PNG);
+ *          * To write and rgba image without the alpha component, first do:
+ *              pixSetSpp(pixd, 3);
+ *            If you later want to use the alpha, spp must be reset to 4.
+ *          * (fancier) To remove the alpha by blending the image over
+ *            a white background:
+ *              pixRemoveAlpha()
+ *            This changes all pixel values where the alpha component is
+ *            not opaque (255).
+ *      (6) Caution.  rgb images in leptonica typically have value 0 in
+ *          the alpha channel, which is fully transparent.  If spp for
+ *          such an image were changed from 3 to 4, the image becomes
+ *          fully transparent, and this function will set each pixel to %val.
+ *          If you really want to set every pixel to the same value,
+ *          use pixSetAllArbitrary().
+ *      (7) This is useful for compressing an RGBA image where the part
+ *          of the image that is fully transparent is random junk; compression
+ *          is typically improved by setting that region to a constant.
+ *          For rendering as a 3 component RGB image over a uniform
+ *          background of arbitrary color, use pixAlphaBlendUniform().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -20258,6 +29575,18 @@ SetYRes(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (compval).
+ *
+ * Notes:
+ *      (1) Valid zlib compression values are in the interval [0 ... 9],
+ *          where, as defined in zlib.h:
+ *            0         Z_NO_COMPRESSION
+ *            1         Z_BEST_SPEED    (poorest compression)
+ *            9         Z_BEST_COMPRESSION
+ *          For the default value, use either of these:
+ *            6         Z_DEFAULT_COMPRESSION
+ *           -1         (resolves to Z_DEFAULT_COMPRESSION)
+ *      (2) If you use the defined constants in zlib.h instead of the
+ *          compression integers given above, you must include zlib.h.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -20276,6 +29605,22 @@ SetZlibCompression(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
+ *
+ * Notes:
+ *      (1) This is a simple helper for processing 8 bpp images with
+ *          direct byte access.  It can swap byte order within each word.
+ *      (2) After processing, you must call pixCleanupByteProcessing(),
+ *          which frees the lineptr array and restores byte order.
+ *      (3) Usage:
+ *              l_uint8 **lineptrs = pixSetupByteProcessing(pix, &w, &h);
+ *              for (i = 0; i < h; i++) {
+ *                  l_uint8 *line = lineptrs[i];
+ *                  for (j = 0; j < w; j++) {
+ *                      val = line[j];
+ *                      ...
+ *                  }
+ *              }
+ *              pixCleanupByteProcessing(pix, lineptrs);
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_uint8 ** on the Lua stack
@@ -20324,6 +29669,36 @@ ShiftAndTransferAlpha(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_uint32 (srcval).
  * Arg #4 is expected to be a l_uint32 (dstval).
+ *
+ * Notes:
+ *      (1) For each component (r, b, g) separately, this does a linear
+ *          mapping of the colors in pixs to colors in pixd.
+ *          Let rs and rd be the red src and dest components in %srcval and
+ *          %dstval, and rval is the red component of the src pixel.
+ *          Then for all pixels in pixs, the mapping for the red
+ *          component from pixs to pixd is:
+ *             if (rd <= rs)   (shift toward black)
+ *                 rval --> (rd/rs) * rval
+ *             if (rd > rs)    (shift toward white)
+ *                (255 - rval) --> ((255 - rs)/(255 - rd)) * (255 - rval)
+ *          Thus if rd <= rs, the red component of all pixels is
+ *          mapped by the same fraction toward white, and if rd > rs,
+ *          they are mapped by the same fraction toward black.
+ *          This is essentially a different linear TRC (gamma = 1)
+ *          for each component.  The source and target color inputs are
+ *          just used to generate the three fractions.
+ *      (2) Note that this mapping differs from that in
+ *          pixLinearMapToTargetColor(), which maps rs --> rd and does
+ *          a piecewise stretching in between.
+ *      (3) For inplace operation, call it this way:
+ *            pixFractionalShiftByComponent(pixs, pixs, ... )
+ *      (4) For generating a new pixd:
+ *            pixd = pixLinearMapToTargetColor(NULL, pixs, ...)
+ *      (5) A simple application is to color a grayscale image.
+ *          A light background can be colored using srcval = 0xffffff00
+ *          and picking a target background color for dstval.
+ *          A dark foreground can be colored by using srcval = 0x0
+ *          and choosing a target foreground color for dstval.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -20349,6 +29724,12 @@ ShiftByComponent(lua_State *L)
  * Arg #4 is expected to be a l_uint32 (seed).
  * Arg #5 is expected to be a l_uint32 (color).
  * Arg #6 is expected to be a l_int32 (cmapflag).
+ *
+ * Notes:
+ *      (1) This uses typical default values for generating captchas.
+ *          The magnitudes of the harmonic warp are typically to be
+ *          smaller when more terms are used, even though the phases
+ *          are random.  See, for example, prog/warptest.c.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -20374,6 +29755,21 @@ SimpleCaptcha(lua_State *L)
  * Arg #2 is expected to be a l_int32 (sigbits).
  * Arg #3 is expected to be a l_int32 (factor).
  * Arg #4 is expected to be a l_int32 (ncolors).
+ *
+ * Notes:
+ *      (1) If you want to do color quantization for real, use octcube
+ *          or modified median cut.  This function shows that it is
+ *          easy to make a simple quantizer based solely on the population
+ *          in cells of a given size in rgb color space.
+ *      (2) The %ncolors most populated cells at the %sigbits level form
+ *          the colormap for quantizing, and this uses octcube indexing
+ *          under the covers to assign each pixel to the nearest color.
+ *      (3) %sigbits is restricted to 2, 3 and 4.  At the low end, the
+ *          color discrimination is very crude; at the upper end, a set of
+ *          similar colors can dominate the result.  Interesting results
+ *          are generally found for %sigbits = 3 and ncolors ~ 20.
+ *      (4) See also pixColorSegment() for a method of quantizing the
+ *          colors to generate regions of similar color.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -20413,6 +29809,16 @@ SizesEqual(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pix* (pixm).
  * Arg #3 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) The pixels in pixs corresponding to those in each
+ *          8-connected region in the mask are set to the average value.
+ *      (2) This is required for adaptive mapping to avoid the
+ *          generation of stripes in the background map, due to
+ *          variations in the pixel values near the edges of mask regions.
+ *      (3) This function is optimized for background smoothing, where
+ *          there are a relatively small number of components.  It will
+ *          be inefficient if used where there are many small components.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -20436,6 +29842,15 @@ SmoothConnectedRegions(lua_State *L)
  * Arg #3 is expected to be a l_uint32 (srcval).
  * Arg #4 is expected to be a l_uint32 (dstval).
  * Arg #5 is expected to be a l_int32 (diff).
+ *
+ * Notes:
+ *      (1) For inplace operation, call it this way:
+ *           pixSnapColor(pixs, pixs, ... )
+ *      (2) For generating a new pixd:
+ *           pixd = pixSnapColor(NULL, pixs, ...)
+ *      (3) If pixs has a colormap, it is handled by pixSnapColorCmap().
+ *      (4) All pixels within 'diff' of 'srcval', componentwise,
+ *          will be changed to 'dstval'.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -20461,6 +29876,15 @@ SnapColor(lua_State *L)
  * Arg #3 is expected to be a l_uint32 (srcval).
  * Arg #4 is expected to be a l_uint32 (dstval).
  * Arg #5 is expected to be a l_int32 (diff).
+ *
+ * Notes:
+ *      (1) For inplace operation, call it this way:
+ *           pixSnapCcmap(pixs, pixs, ... )
+ *      (2) For generating a new pixd:
+ *           pixd = pixSnapCmap(NULL, pixs, ...)
+ *      (3) pixs must have a colormap.
+ *      (4) All colors within 'diff' of 'srcval', componentwise,
+ *          will be changed to 'dstval'.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -20483,6 +29907,20 @@ SnapColorCmap(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (orientflag).
+ *
+ * Notes:
+ *      (1) Invert pixd to see larger gradients as darker (grayscale).
+ *      (2) To generate a binary image of the edges, threshold
+ *          the result using pixThresholdToBinary().  If the high
+ *          edge values are to be fg (1), invert after running
+ *          pixThresholdToBinary().
+ *      (3) Label the pixels as follows:
+ *              1    4    7
+ *              2    5    8
+ *              3    6    9
+ *          Read the data incrementally across the image and unroll
+ *          the loop.
+ *      (4) This runs at about 45 Mpix/sec on a 3 GHz processor.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -20508,6 +29946,60 @@ SobelEdgeFilter(lua_State *L)
  * Arg #6 is expected to be a l_int32 (maxbg).
  * Arg #7 is expected to be a l_int32 (maxcomps).
  * Arg #8 is expected to be a l_int32 (remainder).
+ *
+ * Notes:
+ *      (1) This generates a boxa of rectangles that covers
+ *          the fg of a mask.  It does so by a greedy partitioning of
+ *          the mask, choosing the largest rectangle found from
+ *          each of the four directions at each step.
+ *      (2) The input parameters give some flexibility for boundary
+ *          noise.  The resulting set of rectangles must cover all
+ *          the fg pixels and, in addition, may cover some bg pixels.
+ *          Using small input parameters on a noiseless mask (i.e., one
+ *          that has only large vertical and horizontal edges) will
+ *          result in a proper covering of only the fg pixels of the mask.
+ *      (3) The input is assumed to be a single connected component, that
+ *          may have holes.  From each side, sweep inward, counting
+ *          the pixels.  If the count becomes greater than %minsum,
+ *          and we have moved forward a further amount %skipdist,
+ *          record that count ('countref'), but don't accept if the scan
+ *          contains more than %maxbg bg pixels.  Continue the scan
+ *          until we reach a count that differs from countref by at
+ *          least %delta, at which point the propagation stops.  The box
+ *          swept out gets a score, which is the sum of fg pixels
+ *          minus a penalty.  The penalty is the number of bg pixels
+ *          in the box.  This is done from all four sides, and the
+ *          side with the largest score is saved as a rectangle.
+ *          The process repeats until there is either no rectangle
+ *          left, or there is one that can't be captured from any
+ *          direction.  For the latter case, we simply accept the
+ *          last rectangle.
+ *      (4) The input box is only used to specify the location of
+ *          the UL corner of pix, with respect to an origin that
+ *          typically represents the UL corner of an underlying image,
+ *          of which pix is one component.  If %box is null,
+ *          the UL corner is taken to be (0, 0).
+ *      (5) The parameter %maxcomps gives the maximum number of allowed
+ *          rectangles extracted from any single connected component.
+ *          Use 0 if no limit is to be applied.
+ *      (6) The flag %remainder specifies whether we take a final bounding
+ *          box for anything left after the maximum number of allowed
+ *          rectangle is extracted.
+ *      (7) So if %maxcomps > 0, it specifies that we want no more than
+ *          the first %maxcomps rectangles that satisfy the input
+ *          criteria.  After this, we can get a final rectangle that
+ *          bounds everything left over by setting %remainder == 1.
+ *          If %remainder == 0, we only get rectangles that satisfy
+ *          the input criteria.
+ *      (8) It should be noted that the removal of rectangles can
+ *          break the original c.c. into several c.c.
+ *      (9) Summing up:
+ *            * If %maxcomp == 0, the splitting proceeds as far as possible.
+ *            * If %maxcomp > 0, the splitting stops when %maxcomps are
+ *                found, or earlier if no more components can be selected.
+ *            * If %remainder == 1 and components remain that cannot be
+ *                selected, they are returned as a single final rectangle;
+ *                otherwise, they are ignored.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa * on the Lua stack
@@ -20534,6 +30026,12 @@ SplitComponentIntoBoxa(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (delta).
  * Arg #3 is expected to be a l_int32 (mindel).
+ *
+ * Notes:
+ *      (1) This will split the most obvious cases of touching characters.
+ *          The split points it is searching for are narrow and deep
+ *          minimima in the vertical pixel projection profile, after a
+ *          large vertical closing has been applied to the component.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa * on the Lua stack
@@ -20558,6 +30056,10 @@ SplitComponentWithProfile(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (scorefract).
  * Arg #3 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) See numaSplitDistribution() for details on the underlying
+ *          method of choosing a threshold.
  * </pre>
  * \param L pointer to the lua_State
  * \return 3 integers on the Lua stack (thresh, fgbal, bgval)
@@ -20589,6 +30091,26 @@ SplitDistributionFgBg(lua_State *L)
  * Arg #5 is expected to be a l_int32 (maxbg).
  * Arg #6 is expected to be a l_int32 (maxcomps).
  * Arg #7 is expected to be a l_int32 (remainder).
+ *
+ * Notes:
+ *      (1) This generates a boxa of rectangles that covers
+ *          the fg of a mask.  For each 8-connected component in pixs,
+ *          it does a greedy partitioning, choosing the largest
+ *          rectangle found from each of the four directions at each iter.
+ *          See pixSplitComponentIntoBoxa() for details.
+ *      (2) The input parameters give some flexibility for boundary
+ *          noise.  The resulting set of rectangles may cover some
+ *          bg pixels.
+ *      (3) This should be used when there are a small number of
+ *          mask components, each of which has sides that are close
+ *          to horizontal and vertical.  The input parameters %delta
+ *          and %maxbg determine whether or not holes in the mask are covered.
+ *      (4) The parameter %maxcomps gives the maximum number of allowed
+ *          rectangles extracted from any single connected component.
+ *          Use 0 if no limit is to be applied.
+ *      (5) The flag %remainder specifies whether we take a final bounding
+ *          box for anything left after the maximum number of allowed
+ *          rectangle is extracted.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa * on the Lua stack
@@ -20614,6 +30136,14 @@ SplitIntoBoxa(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (minw).
  * Arg #3 is expected to be a l_int32 (minh).
+ *
+ * Notes:
+ *      (1) This is a simple function that attempts to find split points
+ *          based on vertical pixel profiles.
+ *      (2) It should be given an image that has an arbitrary number
+ *          of text characters.
+ *      (3) The returned pixa includes the boxes from which the
+ *          (possibly split) components are extracted.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -20643,6 +30173,25 @@ SplitIntoCharacters(lua_State *L)
  * Arg #3 is expected to be a l_float32 (rwt).
  * Arg #4 is expected to be a l_float32 (gwt).
  * Arg #5 is expected to be a l_float32 (bwt).
+ *
+ * Notes:
+ *      (1) pix1 and pix2 are a pair of stereo images, ideally taken
+ *          concurrently in the same plane, with some lateral translation.
+ *      (2) The output red channel is determined from %pix1.
+ *          The output green and blue channels are taken from the green
+ *          and blue channels, respectively, of %pix2.
+ *      (3) The weights determine how much of each component in %pix1
+ *          goes into the output red channel.  The sum of weights
+ *          must be 1.0.  If it's not, we scale the weights to
+ *          satisfy this criterion.
+ *      (4) The most general pixel mapping allowed here is:
+ *            rval = rwt * r1 + gwt * g1 + bwt * b1  (from pix1)
+ *            gval = g2   (from pix2)
+ *            bval = b2   (from pix2)
+ *      (5) The simplest method is to use rwt = 1.0, gwt = 0.0, bwt = 0.0,
+ *          but this causes unpleasant visual artifacts with red in the image.
+ *          Use of green and blue from %pix1 in the red channel,
+ *          instead of red, tends to fix that problem.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -20669,6 +30218,21 @@ StereoFromPair(lua_State *L)
  * Arg #4 is expected to be a l_int32 (hmax).
  * Arg #5 is expected to be a l_int32 (operation).
  * Arg #6 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) If %hmax > 0, this is an increase in the coordinate value of
+ *          pixels in pixd, relative to the same pixel in pixs.
+ *      (2) If %dir == L_WARP_TO_LEFT, the pixels on the right edge of
+ *          the image are not moved. So, for example, if %hmax > 0
+ *          and %dir == L_WARP_TO_LEFT, the pixels in pixd are
+ *          contracted toward the right edge of the image, relative
+ *          to those in pixs.
+ *      (3) If %type == L_LINEAR_WARP, the pixel positions are moved
+ *          to the left or right by an amount that varies linearly with
+ *          the horizontal location.
+ *      (4) If %operation == L_SAMPLED, the dest pixels are taken from
+ *          the nearest src pixel.  Otherwise, we use linear interpolation
+ *          between pairs of sampled pixels.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -20695,6 +30259,9 @@ StretchHorizontal(lua_State *L)
  * Arg #3 is expected to be a l_int32 (type).
  * Arg #4 is expected to be a l_int32 (hmax).
  * Arg #5 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) See pixStretchHorizontal() for details.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -20720,6 +30287,9 @@ StretchHorizontalLI(lua_State *L)
  * Arg #3 is expected to be a l_int32 (type).
  * Arg #4 is expected to be a l_int32 (hmax).
  * Arg #5 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) See pixStretchHorizontal() for details.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -20744,6 +30314,24 @@ StretchHorizontalSampled(lua_State *L)
  * Arg #2 is expected to be a l_int32 (color).
  * Arg #3 is expected to be a l_int32 (depth).
  * Arg #4 is expected to be a l_int32 (nangles).
+ *
+ * Notes:
+ *      (1) The dest Pix is 8 or 16 bpp, with the pixel values
+ *          equal to the stroke width in which it is a member.
+ *          The values are clipped to the max pixel value if necessary.
+ *      (2) The color determines if we're labelling white or black strokes.
+ *      (3) A pixel that is not a member of the chosen color gets
+ *          value 0; it belongs to a width of length 0 of the
+ *          chosen color.
+ *      (4) This chooses, for each dest pixel, the minimum of sets
+ *          of runlengths through each pixel.  Here are the sets:
+ *            nangles    increment          set
+ *            -------    ---------    --------------------------------
+ *               2          90       {0, 90}
+ *               4          45       {0, 45, 90, 135}
+ *               6          30       {0, 30, 60, 90, 120, 150}
+ *               8          22.5     {0, 22.5, 45, 67.5, 90, 112.5, 135, 157.5}
+ *      (5) Runtime scales linearly with (nangles - 2).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -20765,6 +30353,20 @@ StrokeWidthTransform(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (skip).
+ *
+ * Notes:
+ *      (1) If skip = 0, we take all the fg pixels.
+ *      (2) We try to traverse the boundaries in a regular way.
+ *          Some pixels may be missed, and these are then subsampled
+ *          randomly with a fraction determined by 'skip'.
+ *      (3) The most natural approach is to use a depth first (stack-based)
+ *          method to find the fg pixels.  However, the pixel runs are
+ *          4-connected and there are relatively few branches.  So
+ *          instead of doing a proper depth-first search, we get nearly
+ *          the same result using two nested while loops: the outer
+ *          one continues a raster-based search for the next fg pixel,
+ *          and the inner one does a reasonable job running along
+ *          each 4-connected coutour.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pta * on the Lua stack
@@ -20785,6 +30387,18 @@ SubsampleBoundaryPixels(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs1).
  * Arg #3 is expected to be a Pix* (pixs2).
+ *
+ * Notes:
+ *      (1) Arithmetic subtraction of two 8, 16 or 32 bpp images.
+ *      (2) Source pixs2 is always subtracted from source pixs1.
+ *      (3) Do explicit clipping to 0.
+ *      (4) Alignment is to UL corner.
+ *      (5) There are 3 cases.  The result can go to a new dest,
+ *          in-place to pixs1, or to an existing input dest:
+ *          (a) pixd == null   (src1 - src2) --> new pixd
+ *          (b) pixd == pixs1  (src1 - src2) --> src1  (in-place)
+ *          (d) pixd != pixs1  (src1 - src2) --> input pixd
+ *      (6) pixs2 must be different from both pixd and pixs1.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -20805,6 +30419,34 @@ SubtractGray(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
+ *
+ * Notes:
+ *      (1) Simple operation to change the handle name safely.
+ *          After this operation, the original image in pixd has
+ *          been destroyed, pixd points to what was pixs, and
+ *          the input pixs ptr has been nulled.
+ *      (2) This works safely whether or not pixs and pixd are cloned.
+ *          If pixs is cloned, the other handles still point to
+ *          the original image, with the ref count reduced by 1.
+ *      (3) Usage example:
+ * \code
+ *            Pix *pix1 = pixRead("...");
+ *            Pix *pix2 = function(pix1, ...);
+ *            pixSwapAndDestroy(&pix1, &pix2);
+ *            pixDestroy(&pix1);  // holds what was in pix2
+ * \endcode
+ *          Example with clones ([] shows ref count of image generated
+ *                               by the function):
+ * \code
+ *            Pix *pixs = pixRead("...");
+ *            Pix *pix1 = pixClone(pixs);
+ *            Pix *pix2 = function(pix1, ...);   [1]
+ *            Pix *pix3 = pixClone(pix2);   [1] --> [2]
+ *            pixSwapAndDestroy(&pix1, &pix2);
+ *            pixDestroy(&pixs);  // still holds read image
+ *            pixDestroy(&pix1);  // holds what was in pix2  [2] --> [1]
+ *            pixDestroy(&pix3);  // holds what was in pix2  [1] --> [0]
+ * \endcode
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -20829,6 +30471,17 @@ SwapAndDestroy(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pix* (pixm).
  * Arg #3 is expected to be a Numa* (na).
+ *
+ * Notes:
+ *      (1) This operation is in-place on pixs.
+ *      (2) For 32 bpp, this applies the same map to each of the r,g,b
+ *          components.
+ *      (3) The mapping array is of size 256, and it maps the input
+ *          index into values in the range [0, 255].
+ *      (4) If defined, the optional 1 bpp mask pixm has its origin
+ *          aligned with pixs, and the map function is applied only
+ *          to pixels in pixs under the fg of pixm.
+ *      (5) For 32 bpp, this does not save the alpha channel.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -20848,6 +30501,14 @@ TRCMap(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This is a lightweight test to determine if a 1 bpp image
+ *          can be further cropped without loss of fg pixels.
+ *          If it cannot, canclip is set to 0.
+ *      (2) It does not test for the existence of any fg pixels.
+ *          If there are no fg pixels, it will return %canclip = 1.
+ *          Check the output of the subsequent call to pixClipToForeground().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -20874,6 +30535,36 @@ TestClipToForeground(lua_State *L)
  * Arg #5 is expected to be a l_float32 (maxfract).
  * Arg #6 is expected to be a l_float32 (maxave).
  * Arg #8 is expected to be a l_int32 (details).
+ *
+ * Notes:
+ *      (1) This takes 2 pix that are the same size and determines using
+ *          3 input parameters if they are "similar".  The first parameter
+ *          %mindiff establishes a criterion of pixel-to-pixel similarity:
+ *          two pixels are not similar if their difference in value is
+ *          at least mindiff.  Then %maxfract and %maxave are thresholds
+ *          on the number and distribution of dissimilar pixels
+ *          allowed for the two pix to be similar.   If the pix are
+ *          to be similar, neither threshold can be exceeded.
+ *      (2) In setting the %maxfract and %maxave thresholds, you have
+ *          these options:
+ *            (a) Base the comparison only on %maxfract.  Then set
+ *                %maxave = 0.0 or 256.0.  (If 0, we always ignore it.)
+ *            (b) Base the comparison only on %maxave.  Then set
+ *                %maxfract = 1.0.
+ *            (c) Base the comparison on both thresholds.
+ *      (3) Example of values that can be expected at mindiff = 15 when
+ *          comparing lossless png encoding with jpeg encoding, q=75:
+ *             (smoothish bg)       fractdiff = 0.01, avediff = 2.5
+ *             (natural scene)      fractdiff = 0.13, avediff = 3.5
+ *          To identify these images as 'similar', select maxfract
+ *          and maxave to be upper bounds of what you expect.
+ *      (4) See pixGetDifferenceStats() for a discussion of why we subtract
+ *          mindiff from the computed average diff of the nonsimilar pixels
+ *          to get the 'avediff' returned by that function.
+ *      (5) If there is a colormap, it is removed and the result
+ *          is either gray or RGB depending on the colormap.
+ *      (6) If RGB, the maximum difference between pixel components is
+ *          saved in the histogram.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -20903,6 +30594,40 @@ TestForSimilarity(lua_State *L)
  * Arg #2 is expected to be a l_int32 (type).
  * Arg #3 is expected to be a l_int32 (connectivity).
  * Arg #4 is expected to be a l_int32 (maxiters).
+ *
+ * Notes:
+ *      (1) See "Connectivity-preserving morphological image transformations,"
+ *          Dan S. Bloomberg, in SPIE Visual Communications and Image
+ *          Processing, Conference 1606, pp. 320-334, November 1991,
+ *          Boston, MA.   A web version is available at
+ *              http://www.leptonica.com/papers/conn.pdf
+ *      (2) This is a simple interface for two of the best iterative
+ *          morphological thinning algorithms, for 4-c.c and 8-c.c.
+ *          Each iteration uses a mixture of parallel operations
+ *          (using several different 3x3 Sels) and serial operations.
+ *          Specifically, each thinning iteration consists of
+ *          four sequential thinnings from each of four directions.
+ *          Each of these thinnings is a parallel composite
+ *          operation, where the union of a set of HMTs are set
+ *          subtracted from the input.  For 4-cc thinning, we
+ *          use 3 HMTs in parallel, and for 8-cc thinning we use 4 HMTs.
+ *      (3) A "good" thinning algorithm is one that generates a skeleton
+ *          that is near the medial axis and has neither pruned
+ *          real branches nor left extra dendritic branches.
+ *      (4) Duality between operations on fg and bg require switching
+ *          the connectivity.  To thin the foreground, which is the usual
+ *          situation, use type == L_THIN_FG.  Thickening the foreground
+ *          is equivalent to thinning the background (type == L_THIN_BG),
+ *          where the alternate connectivity gets preserved.
+ *          For example, to thicken the fg with 2 rounds of iterations
+ *          using 4-c.c., thin the bg using Sels that preserve 8-connectivity:
+ *             Pix *pix = pixThinConnected(pixs, L_THIN_BG, 8, 2);
+ *      (5) This makes and destroys the sela set each time. It's not a large
+ *          overhead, but if you are calling this thousands of times on
+ *          very small images, you can avoid the overhead; e.g.
+ *             Sela *sela = selaMakeThinSets(1, 0);  // for 4-c.c.
+ *             Pix *pix = pixThinConnectedBySet(pixs, L_THIN_FG, sela, 0);
+ *          using set 1 for 4-c.c. and set 5 for 8-c.c operations.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -20926,6 +30651,23 @@ ThinConnected(lua_State *L)
  * Arg #2 is expected to be a l_int32 (type).
  * Arg #3 is expected to be a Sela* (sela).
  * Arg #4 is expected to be a l_int32 (maxiters).
+ *
+ * Notes:
+ *      (1) See notes in pixThinConnected().
+ *      (2) This takes a sela representing one of 11 sets of HMT Sels.
+ *          The HMTs from this set are run in parallel and the result
+ *          is OR'd before being subtracted from the source.  For each
+ *          iteration, this "parallel" thin is performed four times
+ *          sequentially, for sels rotated by 90 degrees in all four
+ *          directions.
+ *      (3) The "parallel" and "sequential" nomenclature is standard
+ *          in digital filtering.  Here, "parallel" operations work on the
+ *          same source (pixd), and accumulate the results in a temp
+ *          image before actually applying them to the source (in this
+ *          case, using an in-place subtraction).  "Sequential" operations
+ *          operate directly on the source (pixd) to produce the result
+ *          (in this case, with four sequential thinning operations, one
+ *          from each of four directions).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -20949,6 +30691,24 @@ ThinConnectedBySet(lua_State *L)
  * Arg #2 is expected to be a l_int32 (d).
  * Arg #3 is expected to be a l_int32 (nlevels).
  * Arg #4 is expected to be a l_int32 (cmapflag).
+ *
+ * Notes:
+ *      (1) This uses, by default, equally spaced "target" values
+ *          that depend on the number of levels, with thresholds
+ *          halfway between.  For N levels, with separation (N-1)/255,
+ *          there are N-1 fixed thresholds.
+ *      (2) For 1 bpp destination, the number of levels can only be 2
+ *          and if a cmap is made, black is (0,0,0) and white
+ *          is (255,255,255), which is opposite to the convention
+ *          without a colormap.
+ *      (3) For 1, 2 and 4 bpp, the nlevels arg is used if a colormap
+ *          is made; otherwise, we take the most significant bits
+ *          from the src that will fit in the dest.
+ *      (4) For 8 bpp, the input pixs is quantized to nlevels.  The
+ *          dest quantized with that mapping, either through a colormap
+ *          table or directly with 8 bit values.
+ *      (5) Typically you should not use make a colormap for 1 bpp dest.
+ *      (6) This is not dithering.  Each pixel is treated independently.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -20976,6 +30736,40 @@ Threshold8(lua_State *L)
  * Arg #6 is expected to be a l_float32 (thresh48).
  * Arg #7 is expected to be a l_float32 (threshdiff).
  * Arg #10 is expected to be a l_int32 (debugflag).
+ *
+ * Notes:
+ *      (1) This finds a global threshold based on connected components.
+ *          Although slow, it is reasonable to use it in a situation where
+ *          (a) the background in the image is relatively uniform, and
+ *          (b) the result will be fed to an OCR program that accepts 1 bpp
+ *              images and works best with easily segmented characters.
+ *          The reason for (b) is that this selects a threshold with a
+ *          minimum number of both broken characters and merged characters.
+ *      (2) If the pix has color, it is converted to gray using the
+ *          max component.
+ *      (3) Input 0 to use default values for any of these inputs:
+ *          %start, %end, %incr, %thresh48, %threshdiff.
+ *      (4) This approach can be understood as follows.  When the
+ *          binarization threshold is varied, the numbers of c.c. identify
+ *          four regimes:
+ *          (a) For low thresholds, text is broken into small pieces, and
+ *              the number of c.c. is large, with the 4 c.c. significantly
+ *              exceeding the 8 c.c.
+ *          (b) As the threshold rises toward the optimum value, the text
+ *              characters coalesce and there is very little difference
+ *              between the numbers of 4 and 8 c.c, which both go
+ *              through a minimum.
+ *          (c) Above this, the image background gets noisy because some
+ *              pixels are(thresholded to foreground, and the numbers
+ *              of c.c. quickly increase, with the 4 c.c. significantly
+ *              larger than the 8 c.c.
+ *          (d) At even higher thresholds, the image background noise
+ *              coalesces as it becomes mostly foreground, and the
+ *              number of c.c. drops quickly.
+ *      (5) If there is no global threshold that distinguishes foreground
+ *          text from background (e.g., weak text over a background that
+ *          has significant variation and/or bleedthrough), this returns 1,
+ *          which the caller should check.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -21034,6 +30828,35 @@ ThresholdForFgBg(lua_State *L)
  * Arg #4 is expected to be a l_int32 (use_average).
  * Arg #5 is expected to be a l_int32 (setblack).
  * Arg #6 is expected to be a l_int32 (setwhite).
+ *
+ * Notes:
+ *      (1) This function allows exact specification of the quantization bins.
+ *          The string %edgevals is a space-separated set of values
+ *          specifying the dividing points between output quantization bins.
+ *          These threshold values are assigned to the bin with higher
+ *          values, so that each of them is the smallest value in their bin.
+ *      (2) The output image (pixd) depth is specified by %outdepth.  The
+ *          number of bins is the number of edgevals + 1.  The
+ *          relation between outdepth and the number of bins is:
+ *               outdepth = 2       nbins <= 4
+ *               outdepth = 4       nbins <= 16
+ *               outdepth = 8       nbins <= 256
+ *          With %outdepth == 0, the minimum required depth for the
+ *          given number of bins is used.
+ *          The output pixd has a colormap.
+ *      (3) The last 3 args determine the specific values that go into
+ *          the colormap.
+ *      (4) For %use_average:
+ *            ~ if TRUE, the average value of pixels falling in the bin is
+ *              chosen as the representative gray value.  Otherwise,
+ *            ~ if FALSE, the central value of each bin is chosen as
+ *              the representative value.
+ *          The colormap holds the representative value.
+ *      (5) For %setblack, if TRUE the darkest color is set to (0,0,0).
+ *      (6) For %setwhite, if TRUE the lightest color is set to (255,255,255).
+ *      (7) An alternative to using this function to quantize to
+ *          unequally-spaced bins is to first transform the 8 bpp pixs
+ *          using pixGammaTRC(), and follow this with pixThresholdTo4bpp().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -21058,6 +30881,16 @@ ThresholdGrayArb(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (nlevels).
  * Arg #3 is expected to be a l_int32 (cmapflag).
+ *
+ * Notes:
+ *      (1) Valid values for nlevels is the set {2,...,256}.
+ *      (2) Any colormap on the input pixs is removed to 8 bpp grayscale.
+ *      (3) If cmapflag == 1, a colormap of size 'nlevels' is made,
+ *          and the pixel values in pixs are replaced by their
+ *          appropriate color indices.  Otherwise, the pixel values
+ *          are the actual thresholded (i.e., quantized) grayscale values.
+ *      (4) If you don't want the thresholding to be equally spaced,
+ *          first transform the input 8 bpp src using pixGammaTRC().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -21078,6 +30911,13 @@ ThresholdOn8bpp(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (thresh).
+ *
+ * Notes:
+ *      (1) This sums the ON pixels and returns immediately if the count
+ *          goes above threshold.  It is therefore more efficient
+ *          for matching images (by running this function on the xor of
+ *          the 2 images) than using pixCountPixels(), which counts all
+ *          pixels before returning.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -21107,6 +30947,28 @@ ThresholdPixelSum(lua_State *L)
  * Arg #7 is expected to be a l_int32 (minval).
  * Arg #8 is expected to be a l_int32 (maxval).
  * Arg #9 is expected to be a l_int32 (targetthresh).
+ *
+ * Notes:
+ *      (1) The basis of this approach is the use of seed spreading
+ *          on a (possibly) sparse set of estimates for the local threshold.
+ *          The resulting dense estimates are smoothed by convolution
+ *          and used to either threshold the input image or normalize it
+ *          with a local transformation that linearly maps the pixels so
+ *          that the local threshold estimate becomes constant over the
+ *          resulting image.  This approach is one of several that
+ *          have been suggested (and implemented) by Ray Smith.
+ *      (2) You can use either the Sobel or TwoSided edge filters.
+ *          The results appear to be similar, using typical values
+ *          of edgethresh in the rang 10-20.
+ *      (3) To skip the trc enhancement, use gamma = 1.0, minval = 0
+ *          and maxval = 255.
+ *      (4) For the normalized image pixd, each pixel is linearly mapped
+ *          in such a way that the local threshold is equal to targetthresh.
+ *      (5) The full width and height of the convolution kernel
+ *          are (2 * smoothx + 1) and (2 * smoothy + 1).
+ *      (6) This function can be used with the pixtiling utility if the
+ *          images are too large.  See pixOtsuAdaptiveThreshold() for
+ *          an example of this.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -21141,6 +31003,40 @@ ThresholdSpreadNorm(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (nlevels).
  * Arg #3 is expected to be a l_int32 (cmapflag).
+ *
+ * Notes:
+ *      (1) Valid values for nlevels is the set {2, 3, 4}.
+ *      (2) Any colormap on the input pixs is removed to 8 bpp grayscale.
+ *      (3) This function is typically invoked with cmapflag == 1.
+ *          In the situation where no colormap is desired, nlevels is
+ *          ignored and pixs is thresholded to 4 levels.
+ *      (4) The target output colors are equally spaced, with the
+ *          darkest at 0 and the lightest at 255.  The thresholds are
+ *          chosen halfway between adjacent output values.  A table
+ *          is built that specifies the mapping from src to dest.
+ *      (5) If cmapflag == 1, a colormap of size 'nlevels' is made,
+ *          and the pixel values in pixs are replaced by their
+ *          appropriate color indices.  The number of holdouts,
+ *          4 - nlevels, will be between 0 and 2.
+ *      (6) If you don't want the thresholding to be equally spaced,
+ *          either first transform the 8 bpp src using pixGammaTRC().
+ *          or, if cmapflag == 1, after calling this function you can use
+ *          pixcmapResetColor() to change any individual colors.
+ *      (7) If a colormap is generated, it will specify (to display
+ *          programs) exactly how each level is to be represented in RGB
+ *          space.  When representing text, 3 levels is far better than
+ *          2 because of the antialiasing of the single gray level,
+ *          and 4 levels (black, white and 2 gray levels) is getting
+ *          close to the perceptual quality of a (nearly continuous)
+ *          grayscale image.  With 2 bpp, you can set up a colormap
+ *          and allocate from 2 to 4 levels to represent antialiased text.
+ *          Any left over colormap entries can be used for coloring regions.
+ *          For the same number of levels, the file size of a 2 bpp image
+ *          is about 10% smaller than that of a 4 bpp result for the same
+ *          number of levels.  For both 2 bpp and 4 bpp, using 4 levels you
+ *          get compression far better than that of jpeg, because the
+ *          quantization to 4 levels will remove the jpeg ringing in the
+ *          background near character edges.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -21162,6 +31058,42 @@ ThresholdTo2bpp(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (nlevels).
  * Arg #3 is expected to be a l_int32 (cmapflag).
+ *
+ * Notes:
+ *      (1) Valid values for nlevels is the set {2, ... 16}.
+ *      (2) Any colormap on the input pixs is removed to 8 bpp grayscale.
+ *      (3) This function is typically invoked with cmapflag == 1.
+ *          In the situation where no colormap is desired, nlevels is
+ *          ignored and pixs is thresholded to 16 levels.
+ *      (4) The target output colors are equally spaced, with the
+ *          darkest at 0 and the lightest at 255.  The thresholds are
+ *          chosen halfway between adjacent output values.  A table
+ *          is built that specifies the mapping from src to dest.
+ *      (5) If cmapflag == 1, a colormap of size 'nlevels' is made,
+ *          and the pixel values in pixs are replaced by their
+ *          appropriate color indices.  The number of holdouts,
+ *          16 - nlevels, will be between 0 and 14.
+ *      (6) If you don't want the thresholding to be equally spaced,
+ *          either first transform the 8 bpp src using pixGammaTRC().
+ *          or, if cmapflag == 1, after calling this function you can use
+ *          pixcmapResetColor() to change any individual colors.
+ *      (7) If a colormap is generated, it will specify, to display
+ *          programs, exactly how each level is to be represented in RGB
+ *          space.  When representing text, 3 levels is far better than
+ *          2 because of the antialiasing of the single gray level,
+ *          and 4 levels (black, white and 2 gray levels) is getting
+ *          close to the perceptual quality of a (nearly continuous)
+ *          grayscale image.  Therefore, with 4 bpp, you can set up a
+ *          colormap, allocate a relatively small fraction of the 16
+ *          possible values to represent antialiased text, and use the
+ *          other colormap entries for other things, such as coloring
+ *          text or background.  Two other reasons for using a small number
+ *          of gray values for antialiased text are (1) PNG compression
+ *          gets worse as the number of levels that are used is increased,
+ *          and (2) using a small number of levels will filter out most of
+ *          the jpeg ringing that is typically introduced near sharp edges
+ *          of text.  This filtering is partly responsible for the improved
+ *          compression.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -21182,6 +31114,14 @@ ThresholdTo4bpp(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (thresh).
+ *
+ * Notes:
+ *      (1) If the source pixel is less than the threshold value,
+ *          the dest will be 1; otherwise, it will be 0.
+ *      (2) For example, for 8 bpp src pix, if %thresh == 256, the dest
+ *          1 bpp pix is all ones (fg), and if %thresh == 0, the dest
+ *          pix is all zeros (bg).
+ *
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -21203,6 +31143,12 @@ ThresholdToBinary(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (threshval).
  * Arg #4 is expected to be a l_int32 (setval).
+ *
+ * Notes:
+ *    ~ operation can be in-place (pixs == pixd) or to a new pixd
+ *    ~ if setval > threshval, sets pixels with a value >= threshval to setval
+ *    ~ if setval < threshval, sets pixels with a value <= threshval to setval
+ *    ~ if setval == threshval, no-op
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -21229,6 +31175,21 @@ ThresholdToValue(lua_State *L)
  * Arg #5 is expected to be a l_int32 (h).
  * Arg #6 is expected to be a l_int32 (xoverlap).
  * Arg #7 is expected to be a l_int32 (yoverlap).
+ *
+ * Notes:
+ *      (1) We put a clone of pixs in the PixTiling.
+ *      (2) The input to pixTilingCreate() for horizontal tiling can be
+ *          either the number of tiles across the image or the approximate
+ *          width of the tiles.  If the latter, the actual width will be
+ *          determined by making all tiles but the last of equal width, and
+ *          making the last as close to the others as possible.  The same
+ *          consideration is applied independently to the vertical tiling.
+ *          To specify tile width, set nx = 0; to specify the number of
+ *          tiles horizontally across the image, set w = 0.
+ *      (3) If pixs is to be tiled in one-dimensional strips, use ny = 1 for
+ *          vertical strips and nx = 1 for horizontal strips.
+ *      (4) The overlap must not be larger than the width or height of
+ *          the leftmost or topmost tile(s).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 PixTiling * on the Lua stack
@@ -21333,6 +31294,13 @@ TilingGetTile(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixTiling* (pt).
+ *
+ * Notes:
+ *      (1) The default for paint is to strip out the overlap pixels
+ *          that are added by pixTilingGetTile().  However, some
+ *          operations will generate an image with these pixels
+ *          stripped off.  This tells the paint operation not
+ *          to strip the added boundary pixels when painting.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -21378,6 +31346,14 @@ TilingPaintTile(lua_State *L)
  * Arg #2 is expected to be a l_int32 (hsize).
  * Arg #3 is expected to be a l_int32 (vsize).
  * Arg #4 is expected to be a l_int32 (type).
+ *
+ * Notes:
+ *      (1) Sel is a brick with all elements being hits
+ *      (2) If hsize = vsize = 1, returns an image with all 0 data.
+ *      (3) The L_TOPHAT_WHITE flag emphasizes small bright regions,
+ *          whereas the L_TOPHAT_BLACK flag emphasizes small dark regions.
+ *          The L_TOPHAT_WHITE tophat can be accomplished by doing a
+ *          L_TOPHAT_BLACK tophat on the inverse, or v.v.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -21401,6 +31377,48 @@ Tophat(lua_State *L)
  * Arg #2 is expected to be another Pix* (pixs).
  * Arg #3 is optional and expected to be a boolean (copytext).
  * Arg #4 is optional and expected to be a boolean (copyformat).
+ *
+ * Notes:
+ *      (1) This does a complete data transfer from pixs to pixd,
+ *          followed by the destruction of pixs (refcount permitting).
+ *      (2) If the refcount of pixs is 1, pixs is destroyed.  Otherwise,
+ *          the data in pixs is copied (rather than transferred) to pixd.
+ *      (3) This operation, like all others with a pre-existing pixd,
+ *          will side-effect any existing clones of pixd.  The pixd
+ *          refcount does not change.
+ *      (4) When might you use this?  Suppose you have an in-place Pix
+ *          function (returning void) with the typical signature:
+ *              void function-inplace(PIX *pix, ...)
+ *          where "..." are non-pointer input parameters, and suppose
+ *          further that you sometimes want to return an arbitrary Pix
+ *          in place of the input Pix.  There are two ways you can do this:
+ *          (a) The straightforward way is to change the function
+ *              signature to take the address of the Pix ptr:
+ * \code
+ *                  void function-inplace(PIX **ppix, ...) {
+ *                      PIX *pixt = function-makenew(*ppix);
+ *                      pixDestroy(ppix);
+ *                      *ppix = pixt;
+ *                      return;
+ *                  }
+ * \endcode
+ *              Here, the input and returned pix are different, as viewed
+ *              by the calling function, and the inplace function is
+ *              expected to destroy the input pix to avoid a memory leak.
+ *          (b) Keep the signature the same and use pixTransferAllData()
+ *              to return the new Pix in the input Pix struct:
+ * \code
+ *                  void function-inplace(PIX *pix, ...) {
+ *                      PIX *pixt = function-makenew(pix);
+ *                      pixTransferAllData(pix, &pixt, 0, 0);
+ *                               // pixDestroy() is called on pixt
+ *                      return;
+ *                  }
+ * \endcode
+ *              Here, the input and returned pix are the same, as viewed
+ *              by the calling function, and the inplace function must
+ *              never destroy the input pix, because the calling function
+ *              maintains an unchanged handle to it.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -21427,6 +31445,16 @@ TransferAllData(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hshift).
  * Arg #4 is expected to be a l_int32 (vshift).
  * Arg #5 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) The general pattern is:
+ *            pixd = pixTranslate(pixd, pixs, ...);
+ *          For clarity, when you know the case, use one of these:
+ *            pixd = pixTranslate(NULL, pixs, ...);  // new
+ *            pixTranslate(pixs, pixs, ...);         // in-place
+ *            pixTranslate(pixd, pixs, ...);         // to existing pixd
+ *      (2) If an existing pixd is not the same size as pixs, the
+ *          image data will be reallocated.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -21449,6 +31477,25 @@ Translate(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (orientflag).
+ *
+ * Notes:
+ *      (1) For detecting vertical edges, this considers the
+ *          difference of the central pixel from those on the left
+ *          and right.  For situations where the gradient is the same
+ *          sign on both sides, this computes and stores the minimum
+ *          (absolute value of the) difference.  The reason for
+ *          checking the sign is that we are looking for pixels within
+ *          a transition.  By contrast, for single pixel noise, the pixel
+ *          value is either larger than or smaller than its neighbors,
+ *          so the gradient would change direction on each side.  Horizontal
+ *          edges are handled similarly, looking for vertical gradients.
+ *      (2) To generate a binary image of the edges, threshold
+ *          the result using pixThresholdToBinary().  If the high
+ *          edge values are to be fg (1), invert after running
+ *          pixThresholdToBinary().
+ *      (3) This runs at about 60 Mpix/sec on a 3 GHz processor.
+ *          It is about 30% faster than Sobel, and the results are
+ *          similar.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -21490,6 +31537,10 @@ UnionOfMorphOps(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (depth).
  * Arg #2 is expected to be a boolean (invert).
+ *
+ * Notes:
+ *      (1) This function calls special cases of pixConvert1To*(),
+ *          for 2, 4, 8, 16 and 32 bpp destinations.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -21510,6 +31561,14 @@ UnpackBinary(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (halfwidth).
  * Arg #3 is expected to be a l_float32 (fract).
+ *
+ * Notes:
+ *      (1) We use symmetric smoothing filters of odd dimension,
+ *          typically use sizes of 3, 5, 7, etc.  The %halfwidth parameter
+ *          for these is (size - 1)/2; i.e., 1, 2, 3, etc.
+ *      (2) The fract parameter is typically taken in the
+ *          range:  0.2 < fract < 0.7
+ *      (3) Returns a clone if no sharpening is requested.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -21532,6 +31591,33 @@ UnsharpMasking(lua_State *L)
  * Arg #2 is expected to be a l_int32 (halfwidth).
  * Arg #3 is expected to be a l_float32 (fract).
  * Arg #4 is expected to be a l_int32 (direction).
+ *
+ * Notes:
+ *      (1) The fast version uses separable 1-D filters directly on
+ *          the input image.  The halfwidth is either 1 (full width = 3)
+ *          or 2 (full width = 5).
+ *      (2) The fract parameter is typically taken in the
+ *            range:  0.2 < fract < 0.7
+ *      (3) To skip horizontal sharpening, use %fracth = 0.0; ditto for %fractv
+ *      (4) For one dimensional filtering (as an example):
+ *          For %halfwidth = 1, the low-pass filter is
+ *              L:    1/3    1/3   1/3
+ *          and the high-pass filter is
+ *              H = I - L:   -1/3   2/3   -1/3
+ *          For %halfwidth = 2, the low-pass filter is
+ *              L:    1/5    1/5   1/5    1/5    1/5
+ *          and the high-pass filter is
+ *              H = I - L:   -1/5  -1/5   4/5  -1/5   -1/5
+ *          The new sharpened pixel value is found by adding some fraction
+ *          of the high-pass filter value (which sums to 0) to the
+ *          initial pixel value:
+ *              N = I + fract * H
+ *      (5) For 2D, the sharpening filter is not separable, because the
+ *          vertical filter depends on the horizontal location relative
+ *          to the filter origin, and v.v.   So we either do the full
+ *          2D filter (for %halfwidth == 1) or do the low-pass
+ *          convolution separably and then compose with the original pix.
+ *      (6) Returns a clone if no sharpening is requested.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -21554,6 +31640,14 @@ UnsharpMaskingFast(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (halfwidth).
  * Arg #3 is expected to be a l_float32 (fract).
+ *
+ * Notes:
+ *      (1) We use symmetric smoothing filters of odd dimension,
+ *          typically use sizes of 3, 5, 7, etc.  The %halfwidth parameter
+ *          for these is (size - 1)/2; i.e., 1, 2, 3, etc.
+ *      (2) The fract parameter is typically taken in the range:
+ *          0.2 < fract < 0.7
+ *      (3) Returns a clone if no sharpening is requested.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -21576,6 +31670,11 @@ UnsharpMaskingGray(lua_State *L)
  * Arg #2 is expected to be a l_int32 (halfwidth).
  * Arg #3 is expected to be a l_float32 (fract).
  * Arg #4 is expected to be a l_int32 (direction).
+ *
+ * Notes:
+ *      (1) For usage and explanation of the algorithm, see notes
+ *          in pixUnsharpMaskingFast().
+ *      (2) Returns a clone if no sharpening is requested.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -21598,6 +31697,11 @@ UnsharpMaskingGray1D(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (halfwidth).
  * Arg #3 is expected to be a l_float32 (fract).
+ *
+ * Notes:
+ *      (1) This is for %halfwidth == 1, 2.
+ *      (2) The lowpass filter is implemented separably.
+ *      (3) Returns a clone if no sharpening is requested.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -21620,6 +31724,11 @@ UnsharpMaskingGray2D(lua_State *L)
  * Arg #2 is expected to be a l_int32 (halfwidth).
  * Arg #3 is expected to be a l_float32 (fract).
  * Arg #4 is expected to be a l_int32 (direction).
+ *
+ * Notes:
+ *      (1) For usage and explanation of the algorithm, see notes
+ *          in pixUnsharpMaskingFast().
+ *      (2) Returns a clone if no sharpening is requested.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -21642,6 +31751,16 @@ UnsharpMaskingGrayFast(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (mincount).
  * Arg #3 is expected to be a boolean (debug).
+ *
+ * Notes:
+ *      (1) Special (typical, slightly faster) case, where the pixels
+ *          identified through the HMT (hit-miss transform) are not
+ *          clipped by a truncated word mask pixm.  See pixOrientDetect()
+ *          and pixUpDownDetectGeneral() for details.
+ *      (2) The returned confidence is the normalized difference
+ *          between the number of detected up and down ascenders,
+ *          assuming that the text is either rightside-up or upside-down
+ *          and not rotated at a 90 degree angle.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -21666,6 +31785,18 @@ UpDownDetect(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (mincount).
  * Arg #4 is expected to be a boolean (debug).
+ *
+ * Notes:
+ *      (1) Faster (DWA) version of pixUpDownDetect().
+ *      (2) This is a special case (but typical and slightly faster) of
+ *          pixUpDownDetectGeneralDwa(), where the pixels identified
+ *          through the HMT (hit-miss transform) are not clipped by
+ *          a truncated word mask pixm.  See pixUpDownDetectGeneral()
+ *          for usage and other details.
+ *      (3) The returned confidence is the normalized difference
+ *          between the number of detected up and down ascenders,
+ *          assuming that the text is either rightside-up or upside-down
+ *          and not rotated at a 90 degree angle.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -21691,6 +31822,32 @@ UpDownDetectDwa(lua_State *L)
  * Arg #2 is expected to be a l_int32 (mincount).
  * Arg #3 is expected to be a l_int32 (npixels).
  * Arg #4 is expected to be a boolean (debug).
+ *
+ * Notes:
+ *      (1) See pixOrientDetect() for other details.
+ *      (2) %conf is the normalized difference between the number of
+ *          detected up and down ascenders, assuming that the text
+ *          is either rightside-up or upside-down and not rotated
+ *          at a 90 degree angle.
+ *      (3) The typical mode of operation is %npixels == 0.
+ *          If %npixels > 0, this removes HMT matches at the
+ *          beginning and ending of "words."  This is useful for
+ *          pages that may have mostly digits, because if npixels == 0,
+ *          leading "1" and "3" digits can register as having
+ *          ascenders or descenders, and "7" digits can match descenders.
+ *          Consequently, a page image of only digits may register
+ *          as being upside-down.
+ *      (4) We want to count the number of instances found using the HMT.
+ *          An expensive way to do this would be to count the
+ *          number of connected components.  A cheap way is to do a rank
+ *          reduction cascade that reduces each component to a single
+ *          pixel, and results (after two or three 2x reductions)
+ *          in one pixel for each of the original components.
+ *          After the reduction, you have a much smaller pix over
+ *          which to count pixels.  We do only 2 reductions, because
+ *          this function is designed to work for input pix between
+ *          150 and 300 ppi, and an 8x reduction on a 150 ppi image
+ *          is going too far -- components will get merged.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -21717,6 +31874,9 @@ UpDownDetectGeneral(lua_State *L)
  * Arg #2 is expected to be a l_int32 (mincount).
  * Arg #3 is expected to be a l_int32 (npixels).
  * Arg #4 is expected to be a boolean (debug).
+ *
+ * Notes:
+ *      (1) See the notes in pixUpDownDetectGeneral() for usage.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_float32 (%conf) on the Lua stack
@@ -21740,6 +31900,15 @@ UpDownDetectGeneralDwa(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) This returns color = TRUE if three things are obtained:
+ *          (a) the pix has a colormap
+ *          (b) the colormap has at least one color entry
+ *          (c) a color entry is actually used
+ *      (2) It is used in pixEqual() for comparing two images, in a
+ *          situation where it is required to know if the colormap
+ *          has color entries that are actually used in the image.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -21764,6 +31933,32 @@ UsesCmapColor(lua_State *L)
  * Arg #3 is expected to be a l_int32 (xloc).
  * Arg #4 is expected to be a l_float32 (radang).
  * Arg #5 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) There are 3 cases:
+ *            (a) pixd == null (make a new pixd)
+ *            (b) pixd == pixs (in-place)
+ *            (c) pixd != pixs
+ *      (2) For these three cases, use these patterns, respectively:
+ *              pixd = pixVShear(NULL, pixs, ...);
+ *              pixVShear(pixs, pixs, ...);
+ *              pixVShear(pixd, pixs, ...);
+ *      (3) This shear leaves the vertical line of pixels at x = xloc
+ *          invariant.  For a positive shear angle, pixels to the right
+ *          of this line are shoved downward, and pixels to the left
+ *          of the line move upward.
+ *      (4) With positive shear angle, this can be used, along with
+ *          pixHShear(), to perform a cw rotation, either with 2 shears
+ *          (for small angles) or in the general case with 3 shears.
+ *      (5) Changing the value of xloc is equivalent to translating
+ *          the result vertically.
+ *      (6) This brings in 'incolor' pixels from outside the image.
+ *      (7) For in-place operation, pixs cannot be colormapped,
+ *          because the in-place operation only blits in 0 or 1 bits,
+ *          not an arbitrary colormap index.
+ *      (8) The angle is brought into the range [-pi, -pi].  It is
+ *          not permitted to be within MIN_DIFF_FROM_HALF_PI radians
+ *          from either -pi/2 or pi/2.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -21788,6 +31983,11 @@ VShear(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_float32 (radang).
  * Arg #4 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) See pixVShear() for usage.
+ *      (2) This does a vertical shear about the center, with (+) shear
+ *          pushing increasingly downward (+y) with increasing x.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -21811,6 +32011,11 @@ VShearCenter(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_float32 (radang).
  * Arg #4 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) See pixVShear() for usage.
+ *      (2) This does a vertical shear about the UL corner, with (+) shear
+ *          pushing increasingly downward (+y) with increasing x.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -21834,6 +32039,14 @@ VShearCorner(lua_State *L)
  * Arg #2 is expected to be a l_int32 (xloc).
  * Arg #3 is expected to be a l_float32 (radang).
  * Arg #4 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) This is an in-place version of pixVShear(); see comments there.
+ *      (2) This brings in 'incolor' pixels from outside the image.
+ *      (3) pixs cannot be colormapped, because the in-place operation
+ *          only blits in 0 or 1 bits, not an arbitrary colormap index.
+ *      (4) Does a vertical full-band shear about the line with (+) shear
+ *          pushing increasingly downward (+y) with increasing x.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -21857,6 +32070,19 @@ VShearIP(lua_State *L)
  * Arg #2 is expected to be a l_int32 (xloc).
  * Arg #3 is expected to be a l_float32 (radang).
  * Arg #4 is expected to be a l_int32 (incolor).
+ *
+ * Notes:
+ *      (1) This does vertical shear with linear interpolation for
+ *          accurate results on 8 bpp gray, 32 bpp rgb, or cmapped images.
+ *          It is relatively slow compared to the sampled version
+ *          implemented by rasterop, but the result is much smoother.
+ *      (2) This shear leaves the vertical line of pixels at x = xloc
+ *          invariant.  For a positive shear angle, pixels to the right
+ *          of this line are shoved downward, and pixels to the left
+ *          of the line move upward.
+ *      (3) Any colormap is removed.
+ *      (4) The angle is brought into the range [-pi/2 + del, pi/2 - del],
+ *          where del == MIN_DIFF_FROM_HALF_PI.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -21878,6 +32104,10 @@ VShearLI(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pix* (pixg).
+ *
+ * Notes:
+ *      (1) If the pixel in pixs is less than the corresponding pixel
+ *          in pixg, the dest will be 1; otherwise it will be 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -21897,6 +32127,12 @@ VarThresholdToBinary(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is an optional Box* (box).
+ *
+ * Notes:
+ *      (1) To resample for a bin size different from 1, use
+ *          numaUniformSampling() on the result of this function.
+ *      (2) We are actually computing the RMS deviation in each row.
+ *          This is the square root of the variance.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -21916,6 +32152,12 @@ VarianceByColumn(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is an optional Box* (box).
+ *
+ * Notes:
+ *      (1) To resample for a bin size different from 1, use
+ *          numaUniformSampling() on the result of this function.
+ *      (2) We are actually computing the RMS deviation in each row.
+ *          This is the square root of the variance.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* on the Lua stack
@@ -21959,6 +32201,12 @@ VarianceInRect(lua_State *L)
  * Arg #2 is expected to be a Box* (box).
  * Arg #3 is expected to be a Pix* (pix_ma).
  * Arg #4 is expected to be a DPix* (dpix_msa).
+ *
+ * Notes:
+ *      (1) This function is intended to be used for many rectangles
+ *          on the same image.  It can find the variance and/or the
+ *          square root of the variance within a rectangle in O(1),
+ *          independent of the size of the rectangle.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -21990,6 +32238,70 @@ VarianceInRectangle(lua_State *L)
  * Arg #5 is expected to be a l_int32 (ybendt).
  * Arg #6 is expected to be a l_int32 (ybendb).
  * Arg #7 is expected to be a l_int32 (redleft).
+ *
+ * Notes:
+ *      (1) This function splits out the red channel, mucks around with
+ *          it, then recombines with the unmolested cyan channel.
+ *      (2) By using a quadratically increasing shift of the red
+ *          pixels horizontally and away from the vertical centerline,
+ *          the image appears to bend quadratically out of the image
+ *          plane, symmetrically with respect to the vertical center
+ *          line.  A positive value of %zbend causes the plane to be
+ *          curved away from the viewer.  We use linearly interpolated
+ *          stretching to avoid the appearance of kinks in the curve.
+ *      (3) The parameters %zshiftt and %zshiftb tilt the image plane
+ *          about a horizontal line through the center, and at the
+ *          same time move that line either in toward the viewer or away.
+ *          This is implemented by a combination of horizontal shear
+ *          about the center line (for the tilt) and horizontal
+ *          translation (to move the entire plane in or out).
+ *          A positive value of %zshiftt moves the top of the plane
+ *          away from the viewer, and a positive value of %zshiftb
+ *          moves the bottom of the plane away.  We use linear interpolated
+ *          shear to avoid visible vertical steps in the tilted image.
+ *      (4) The image can be bent in the plane and about the vertical
+ *          centerline.  The centerline does not shift, and the
+ *          parameter %ybend gives the relative shift at left and right
+ *          edges, with a downward shift for positive values of %ybend.
+ *      (6) When writing out a steroscopic (red/cyan) image in jpeg,
+ *          first call pixSetChromaSampling(pix, 0) to get sufficient
+ *          resolution in the red channel.
+ *      (7) Typical values are:
+ *             zbend = 20
+ *             zshiftt = 15
+ *             zshiftb = -15
+ *             ybendt = 30
+ *             ybendb = 0
+ *          If the disparity z-values are too large, it is difficult for
+ *          the brain to register the two images.
+ *      (8) This function has been cleverly reimplemented by Jeff Breidenbach.
+ *          The original implementation used two 32 bpp rgb images,
+ *          and merged them at the end.  The result is somewhat faded,
+ *          and has a parameter "thresh" that controls the amount of
+ *          color in the result.  (The present implementation avoids these
+ *          two problems, skipping both the colorization and the alpha
+ *          blending at the end, and is about 3x faster)
+ *          The basic operations with 32 bpp are as follows:
+ *               // Immediate conversion to 32 bpp
+ *            Pix *pixt1 = pixConvertTo32(pixs);
+ *               // Do vertical shear
+ *            Pix *pixr = pixQuadraticVerticalShear(pixt1, L_WARP_TO_RIGHT,
+ *                                                  ybendt, ybendb,
+ *                                                  L_BRING_IN_WHITE);
+ *               // Colorize two versions, toward red and cyan
+ *            Pix *pixc = pixCopy(NULL, pixr);
+ *            l_int32 thresh = 150;  // if higher, get less original color
+ *            pixColorGray(pixr, NULL, L_PAINT_DARK, thresh, 255, 0, 0);
+ *            pixColorGray(pixc, NULL, L_PAINT_DARK, thresh, 0, 255, 255);
+ *               // Shift the red pixels; e.g., by stretching
+ *            Pix *pixrs = pixStretchHorizontal(pixr, L_WARP_TO_RIGHT,
+ *                                              L_QUADRATIC_WARP, zbend,
+ *                                              L_INTERPOLATED,
+ *                                              L_BRING_IN_WHITE);
+ *               // Blend the shifted red and unshifted cyan 50:50
+ *            Pix *pixg = pixCreate(w, h, 8);
+ *            pixSetAllArbitrary(pixg, 128);
+ *            pixd = pixBlendWithGrayMask(pixrs, pixc, pixg, 0, 0);
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -22017,6 +32329,23 @@ WarpStereoscopic(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hc).
  * Arg #4 is expected to be a l_int32 (hasborder).
  * Arg #5 is expected to be a l_int32 (normflag).
+ *
+ * Notes:
+ *      (1) The input and output depths are the same.
+ *      (2) A set of border pixels of width (wc + 1) on left and right,
+ *          and of height (hc + 1) on top and bottom, must be on the
+ *          pix before the accumulator is found.  The output pixd
+ *          (after convolution) has this border removed.
+ *          If %hasborder = 0, the required border is added.
+ *      (3) Typically, %normflag == 1.  However, if you want the sum
+ *          within the window, rather than a normalized convolution,
+ *          use %normflag == 0.
+ *      (4) This builds a block accumulator pix, uses it here, and
+ *          destroys it.
+ *      (5) The added border, along with the use of an accumulator array,
+ *          allows computation without special treatment of pixels near
+ *          the image boundary, and runs in a time that is independent
+ *          of the size of the convolution kernel.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -22041,6 +32370,27 @@ WindowedMean(lua_State *L)
  * Arg #2 is expected to be a l_int32 (wc).
  * Arg #3 is expected to be a l_int32 (hc).
  * Arg #4 is expected to be a l_int32 (hasborder).
+ *
+ * Notes:
+ *      (1) A set of border pixels of width (wc + 1) on left and right,
+ *          and of height (hc + 1) on top and bottom, must be on the
+ *          pix before the accumulator is found.  The output pixd
+ *          (after convolution) has this border removed.
+ *          If %hasborder = 0, the required border is added.
+ *      (2) The advantage is that we are unaffected by the boundary, and
+ *          it is not necessary to treat pixels within %wc and %hc of the
+ *          border differently.  This is because processing for pixd
+ *          only takes place for pixels in pixs for which the
+ *          kernel is entirely contained in pixs.
+ *      (3) Why do we have an added border of width (%wc + 1) and
+ *          height (%hc + 1), when we only need %wc and %hc pixels
+ *          to satisfy this condition?  Answer: the accumulators
+ *          are asymmetric, requiring an extra row and column of
+ *          pixels at top and left to work accurately.
+ *      (4) The added border, along with the use of an accumulator array,
+ *          allows computation without special treatment of pixels near
+ *          the image boundary, and runs in a time that is independent
+ *          of the size of the convolution kernel.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -22064,6 +32414,29 @@ WindowedMeanSquare(lua_State *L)
  * Arg #2 is expected to be a l_int32 (wc).
  * Arg #3 is expected to be a l_int32 (hc).
  * Arg #4 is expected to be a l_int32 (hasborder).
+ *
+ * Notes:
+ *      (1) This is a high-level convenience function for calculating
+ *          any or all of these derived images.
+ *      (2) If %hasborder = 0, a border is added and the result is
+ *          computed over all pixels in pixs.  Otherwise, no border is
+ *          added and the border pixels are removed from the output images.
+ *      (3) These statistical measures over the pixels in the
+ *          rectangular window are:
+ *            ~ average value: <p>  (pixm)
+ *            ~ average squared value: <p*p> (pixms)
+ *            ~ variance: <(p - <p>)*(p - <p>)> = <p*p> - <p>*<p>  (pixv)
+ *            ~ square-root of variance: (pixrv)
+ *          where the brackets < .. > indicate that the average value is
+ *          to be taken over the window.
+ *      (4) Note that the variance is just the mean square difference from
+ *          the mean value; and the square root of the variance is the
+ *          root mean square difference from the mean, sometimes also
+ *          called the 'standard deviation'.
+ *      (5) The added border, along with the use of an accumulator array,
+ *          allows computation without special treatment of pixels near
+ *          the image boundary, and runs in a time that is independent
+ *          of the size of the convolution kernel.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -22094,6 +32467,18 @@ WindowedStats(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixm).
  * Arg #2 is expected to be a Pix* (pixms).
+ *
+ * Notes:
+ *      (1) The mean and mean square values are precomputed, using
+ *          pixWindowedMean() and pixWindowedMeanSquare().
+ *      (2) Either or both of the variance and square-root of variance
+ *          are returned as an fpix, where the variance is the
+ *          average over the window of the mean square difference of
+ *          the pixel value from the mean:
+ *                <(p - <p>)*(p - <p>)> = <p*p> - <p>*<p>
+ *      (3) To visualize the results:
+ *            ~ for both, use fpixDisplayMaxDynamicRange().
+ *            ~ for rms deviation, simply convert the output fpix to pix,
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -22122,6 +32507,16 @@ WindowedVariance(lua_State *L)
  * Arg #4 is expected to be a l_int32 (c1).
  * Arg #5 is expected to be a l_int32 (c2).
  * Arg #6 is expected to be a l_int32 (size).
+ *
+ * Notes:
+ *      (1) The returned variance array traverses the line starting
+ *          from the smallest coordinate, min(c1,c2).
+ *      (2) Line end points are clipped to pixs.
+ *      (3) The reference point for the variance calculation is the center of
+ *          the window.  Therefore, the numa start parameter from
+ *          pixExtractOnLine() is incremented by %size/2,
+ *          to align the variance values with the pixel coordinate.
+ *      (4) The square root of the variance is the RMS deviation from the mean.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -22152,6 +32547,10 @@ WindowedVarianceOnLine(lua_State *L)
  * Arg #4 is expected to be a l_int32 (maxwidth).
  * Arg #5 is expected to be a l_int32 (maxheight).
  * Arg #8 is expected to be a Pixa* (pixadb).
+ *
+ * Notes:
+ *      (1) Returns a pruned set of word boxes.
+ *      (2) See pixWordMaskByDilation().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -22180,6 +32579,26 @@ WordBoxesByDilation(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #4 is expected to be a Pixa* (pixadb).
+ *
+ * Notes:
+ *      (1) This gives an estimate of the word masks.  See
+ *          pixWordBoxesByDilation() for further filtering of the word boxes.
+ *      (2) The resolution should be between 75 and 150 ppi, and the optimal
+ *          dilation will be between 3 and 10.
+ *      (3) A good size for dilating to get word masks is optionally returned.
+ *      (4) Typically, the number of c.c. reduced with each successive
+ *          dilation (stored in nadiff) decreases quickly to a minimum
+ *          (where the characters in a word are joined), and then
+ *          increases again as the smaller number of words are joined.
+ *          For the typical case, you can then look for this minimum
+ *          and dilate to get the word mask.  However, there are many
+ *          cases where the function is not so simple. For example, if the
+ *          pix has been upscaled 2x, the nadiff function oscillates, with
+ *          every other value being zero!  And for some images it tails
+ *          off without a clear minimum to indicate where to break.
+ *          So a more simple and robust method is to find the dilation
+ *          where the initial number of c.c. has been reduced by some
+ *          fraction (we use a 70% reduction).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -22205,6 +32624,17 @@ WordMaskByDilation(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a string (filename).
  * Arg #3 is expected to be a string with the input format name (format).
+ *
+ * Notes:
+ *      (1) Open for write using binary mode (with the "b" flag)
+ *          to avoid having Windows automatically translate the NL
+ *          into CRLF, which corrupts image files.  On non-windows
+ *          systems this flag should be ignored, per ISO C90.
+ *          Thanks to Dave Bryan for pointing this out.
+ *      (2) If the default image format IFF_DEFAULT is requested:
+ *          use the input format if known; otherwise, use a lossless format.
+ *      (3) The default jpeg quality is 75.  For some other value,
+ *          Use l_jpegSetQuality().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -22243,6 +32673,13 @@ WriteAutoFormat(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a string (fname).
  * Arg #3 is expected to be a l_int32 (format).
+ *
+ * Notes:
+ *      (1) Debug version, intended for use in the library when writing
+ *          to files in a temp directory with names that are compiled in.
+ *          This is used instead of pixWrite() for all such library calls.
+ *      (2) The global variable LeptDebugOK defaults to 0, and can be set
+ *          or cleared by the function setLeptDebugOK().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -22264,6 +32701,11 @@ WriteDebug(lua_State *L)
  * Arg #2 is expected to be a string (filename).
  * Arg #3 is expected to be a l_int32 (quality).
  * Arg #4 is expected to be a l_int32 (progressive).
+ *
+ * Notes:
+ *      (1) This determines the output format from the filename extension.
+ *      (2) The last two args are ignored except for requests for jpeg files.
+ *      (3) The jpeg default quality is 75.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -22288,6 +32730,21 @@ WriteImpliedFormat(lua_State *L)
  * Arg #4 is expected to be a l_int32 (nlevels).
  * Arg #5 is expected to be a l_int32 (hint).
  * Arg #6 is expected to be a boolean (debug).
+ *
+ * Notes:
+ *      (1) The %quality parameter is the SNR.  The useful range is narrow:
+ *             SNR < 27  (terrible quality)
+ *             SNR = 34  (default; approximately equivalent to jpeg quality 75)
+ *             SNR = 40  (very high quality)
+ *             SNR = 45  (nearly lossless)
+ *          Use 0 for default.
+ *      (2) The %nlevels parameter is the number of resolution levels
+ *          to be written.  For example, with nlevels == 5, images with
+ *          reduction factors of 1, 2, 4, 8 and 16 are encoded, and retrieval
+ *          is done at the level requested when reading.  For default,
+ *          use either 5 or 0.
+ *      (3) The %hint parameter is not yet in use.
+ *      (4) For now, we only support 1 "layer" for quality.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -22332,6 +32789,15 @@ WriteJpeg(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa* user data.
  * Arg #2 is expected to be a string with the input format name (format).
+ *
+ * Notes:
+ *      (1) On windows, this will only write tiff and PostScript to memory.
+ *          For other formats, it requires open_memstream(3).
+ *      (2) PostScript output is uncompressed, in hex ascii.
+ *          Most printers support level 2 compression (tiff_g4 for 1 bpp,
+ *          jpeg for 8 and 32 bpp).
+ *      (3) The default jpeg quality is 75.  For some other value,
+ *          Use l_jpegSetQuality().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 lstring (%data, %size) on the Lua stack
@@ -22355,6 +32821,17 @@ WriteMem(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) 2 bpp bmp files are not valid in the spec, and are
+ *          written as 8 bpp.
+ *      (2) pix with depth <= 8 bpp are written with a colormap.
+ *          16 bpp gray and 32 bpp rgb pix are written without a colormap.
+ *      (3) The transparency component in an rgb pix is ignored.
+ *          All 32 bpp pix have the bmp alpha component set to 255 (opaque).
+ *      (4) The bmp colormap entries, RGBA_QUAD, are the same as
+ *          the ones used for colormaps in leptonica.  This allows
+ *          a simple memcpy for bmp output.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 lstring (%fdata, %fsize) on the Lua stack
@@ -22377,6 +32854,9 @@ WriteMemBmp(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 is expected to be a Pix* (pix).
+ *
+ * Notes:
+ *      (1) See comments in pixReadMemGif()
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 lstring (%data, %size) on the Lua stack
@@ -22403,6 +32883,10 @@ WriteMemGif(lua_State *L)
  * Arg #3 is expected to be a l_int32 (nlevels).
  * Arg #4 is expected to be a l_int32 (hint).
  * Arg #5 is expected to be a l_int32 (debug).
+ *
+ * Notes:
+ *      (1) See pixWriteJp2k() for usage.  This version writes to
+ *          memory instead of to a file stream.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 lstring (%data, %size) on the Lua stack
@@ -22431,6 +32915,10 @@ WriteMemJp2k(lua_State *L)
  * Arg #3 is expected to be a Pix* (pix).
  * Arg #4 is expected to be a l_int32 (quality).
  * Arg #5 is expected to be a l_int32 (progressive).
+ *
+ * Notes:
+ *      (1) See pixWriteStreamJpeg() for usage.  This version writes to
+ *          memory instead of to a file stream.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 lstring (%data, %size) on the Lua stack
@@ -22458,6 +32946,11 @@ WriteMemJpeg(lua_State *L)
  * Arg #2 is expected to be a Box* (box).
  * Arg #3 is expected to be a l_int32 (res).
  * Arg #4 is expected to be a l_float32 (scale).
+ *
+ * Notes:
+ *      (1) See pixWriteStringPS() for usage.
+ *      (2) This is just a wrapper for pixWriteStringPS(), which
+ *          writes uncompressed image data to memory.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 lstring (%data, %size) on the Lua stack
@@ -22483,6 +32976,10 @@ WriteMemPS(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 is expected to be a Pix* (pix).
+ *
+ * Notes:
+ *      (1) See pixWriteStreamPnm() for usage.  This version writes to
+ *          memory instead of to a file stream.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 lstring (%data, %size) on the Lua stack
@@ -22507,6 +33004,12 @@ WriteMemPam(lua_State *L)
  * Arg #1 is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (res).
  * Arg #3 is expected to be a string (title).
+ *
+ * Notes:
+ *      (1) This is the simplest interface for writing a single image
+ *          with pdf encoding to memory.  It uses G4 encoding for 1 bpp,
+ *          JPEG encoding for 8 bpp (no cmap) and 32 bpp, and FLATE
+ *          encoding for everything else.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 lstring (%data, %nbytes) on the Lua stack
@@ -22532,6 +33035,9 @@ WriteMemPdf(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_float32 (gamma).
+ *
+ * Notes:
+ *      (1) See pixWriteStreamPng()
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 lstring (%filedata, %filesize) on the Lua stack
@@ -22555,6 +33061,10 @@ WriteMemPng(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 is expected to be a Pix* (pix).
+ *
+ * Notes:
+ *      (1) See pixWriteStreamPnm() for usage.  This version writes to
+ *          memory instead of to a file stream.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 lstring (%data, %size) on the Lua stack
@@ -22657,6 +33167,14 @@ WriteMemTiffCustom(lua_State *L)
  * Arg #1 is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (quality).
  * Arg #3 is expected to be a l_int32 (lossless).
+ *
+ * Notes:
+ *      (1) Lossless and lossy encoding are entirely different in webp.
+ *          %quality applies to lossy, and is ignored for lossless.
+ *      (2) The input image is converted to RGB if necessary.  If spp == 3,
+ *          we set the alpha channel to fully opaque (255), and
+ *          WebPEncodeRGBA() then removes the alpha chunk when encoding,
+ *          setting the internal header field has_alpha to 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 lstring (%encdata, %encsize) on the Lua stack
@@ -22706,6 +33224,14 @@ WriteMixedToPS(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a string (filein).
  * Arg #2 is expected to be a string (fileout).
+ *
+ * Notes:
+ *      (1) This is a simple wrapper function that generates an
+ *          uncompressed PS file, with a bounding box.
+ *      (2) The bounding box is required when a program such as TeX
+ *          (through epsf) places and rescales the image.
+ *      (3) The bounding box is sized for fitting the image to an
+ *          8.5 x 11.0 inch page.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -22725,6 +33251,10 @@ WritePSEmbed(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a string (filename).
  * Arg #3 is expected to be a l_float32 (gamma).
+ *
+ * Notes:
+ *      (1) Special version for writing png with a specified gamma.
+ *          When using pixWrite(), no field is given for gamma.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -22828,6 +33358,11 @@ WriteStreamBmp(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a luaL_Stream* (stream).
+ *
+ * Notes:
+ *      (1) All output gif have colormaps.  If the pix is 32 bpp rgb,
+ *          this quantizes the colors and writes out 8 bpp.
+ *          If the pix is 16 bpp grayscale, it converts to 8 bpp first.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -22850,6 +33385,11 @@ WriteStreamGif(lua_State *L)
  * Arg #4 is expected to be a l_int32 (nlevels).
  * Arg #5 is expected to be a l_int32 (hint).
  * Arg #6 is expected to be a boolean (debug).
+ *
+ * Notes:
+ *      (1) See pixWriteJp2k() for usage.
+ *      (2) For an encoder with more encoding options, see, e.g.,
+ *    https://github.com/OpenJPEG/openjpeg/blob/master/tests/test_tile_encoder.c
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -22874,6 +33414,28 @@ WriteStreamJp2k(lua_State *L)
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * Arg #3 is expected to be a l_int32 (quality).
  * Arg #4 is expected to be a l_int32 (progressive).
+ *
+ * Notes:
+ *      (1) Progressive encoding gives better compression, at the
+ *          expense of slower encoding and decoding.
+ *      (2) Standard chroma subsampling is 2x2 on both the U and V
+ *          channels.  For highest quality, use no subsampling; this
+ *          option is set by pixSetChromaSampling(pix, 0).
+ *      (3) The only valid pixel depths in leptonica are 1, 2, 4, 8, 16
+ *          and 32 bpp.  However, it is possible, and in some cases desirable,
+ *          to write out a jpeg file using an rgb pix that has 24 bpp.
+ *          This can be created by appending the raster data for a 24 bpp
+ *          image (with proper scanline padding) directly to a 24 bpp
+ *          pix that was created without a data array.
+ *      (4) There are two compression paths in this function:
+ *          * Grayscale image, no colormap: compress as 8 bpp image.
+ *          * rgb full color image: copy each line into the color
+ *            line buffer, and compress as three 8 bpp images.
+ *      (5) Under the covers, the jpeg library transforms rgb to a
+ *          luminance-chromaticity triple, each component of which is
+ *          also 8 bits, and compresses that.  It uses 2 Huffman tables,
+ *          a higher resolution one (with more quantization levels)
+ *          for luminosity and a lower resolution one for the chromas.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -22897,6 +33459,12 @@ WriteStreamJpeg(lua_State *L)
  * Arg #3 is expected to be a Box* (box).
  * Arg #4 is expected to be a l_int32 (res).
  * Arg #5 is expected to be a l_float32 (scale).
+ *
+ * Notes:
+ *      (1) This writes image in PS format, optionally scaled,
+ *          adjusted for the printer resolution, and with
+ *          a bounding box.
+ *      (2) For details on use of parameters, see pixWriteStringPS().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -22918,6 +33486,11 @@ WriteStreamPS(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a luaL_Stream* (stream).
+ *
+ * Notes:
+ *      (1) This writes arbitrary PAM (P7) packed format.
+ *      (2) 24 bpp rgb are not supported in leptonica, but this will
+ *          write them out as a packed array of bytes (3 to a pixel).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -22938,6 +33511,12 @@ WriteStreamPam(lua_State *L)
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * Arg #3 is expected to be a l_int32 (res).
  * Arg #4 is expected to be a string (title).
+ *
+ * Notes:
+ *      (1) This is the simplest interface for writing a single image
+ *          with pdf encoding to a stream.  It uses G4 encoding for 1 bpp,
+ *          JPEG encoding for 8 bpp (no cmap) and 32 bpp, and FLATE
+ *          encoding for everything else.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -22959,6 +33538,69 @@ WriteStreamPdf(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * Arg #3 is expected to be a l_float32 (gamma).
+ *
+ * Notes:
+ *      (1) If called from pixWriteStream(), the stream is positioned
+ *          at the beginning of the file.
+ *      (2) To do sequential writes of png format images to a stream,
+ *          use pixWriteStreamPng() directly.
+ *      (3) gamma is an optional png chunk.  If no gamma value is to be
+ *          placed into the file, use gamma = 0.0.  Otherwise, if
+ *          gamma > 0.0, its value is written into the header.
+ *      (4) The use of gamma in png is highly problematic.  For an illuminating
+ *          discussion, see:  http://hsivonen.iki.fi/png-gamma/
+ *      (5) What is the effect/meaning of gamma in the png file?  This
+ *          gamma, which we can call the 'source' gamma, is the
+ *          inverse of the gamma that was used in enhance.c to brighten
+ *          or darken images.  The 'source' gamma is supposed to indicate
+ *          the intensity mapping that was done at the time the
+ *          image was captured.  Display programs typically apply a
+ *          'display' gamma of 2.2 to the output, which is intended
+ *          to linearize the intensity based on the response of
+ *          thermionic tubes (CRTs).  Flat panel LCDs have typically
+ *          been designed to give a similar response as CRTs (call it
+ *          "backward compatibility").  The 'display' gamma is
+ *          in some sense the inverse of the 'source' gamma.
+ *          jpeg encoders attached to scanners and cameras will lighten
+ *          the pixels, applying a gamma corresponding to approximately
+ *          a square-root relation of output vs input:
+ *                output = input^(gamma)
+ *          where gamma is often set near 0.4545  (1/gamma is 2.2).
+ *          This is stored in the image file.  Then if the display
+ *          program reads the gamma, it will apply a display gamma,
+ *          typically about 2.2; the product is 1.0, and the
+ *          display program produces a linear output.  This works because
+ *          the dark colors were appropriately boosted by the scanner,
+ *          as described by the 'source' gamma, so they should not
+ *          be further boosted by the display program.
+ *      (6) As an example, with xv and display, if no gamma is stored,
+ *          the program acts as if gamma were 0.4545, multiplies this by 2.2,
+ *          and does a linear rendering.  Taking this as a baseline
+ *          brightness, if the stored gamma is:
+ *              > 0.4545, the image is rendered lighter than baseline
+ *              < 0.4545, the image is rendered darker than baseline
+ *          In contrast, gqview seems to ignore the gamma chunk in png.
+ *      (7) The only valid pixel depths in leptonica are 1, 2, 4, 8, 16
+ *          and 32.  However, it is possible, and in some cases desirable,
+ *          to write out a png file using an rgb pix that has 24 bpp.
+ *          For example, the open source xpdf SplashBitmap class generates
+ *          24 bpp rgb images.  Consequently, we enable writing 24 bpp pix.
+ *          To generate such a pix, you can make a 24 bpp pix without data
+ *          and assign the data array to the pix; e.g.,
+ *              pix = pixCreateHeader(w, h, 24);
+ *              pixSetData(pix, rgbdata);
+ *          See pixConvert32To24() for an example, where we get rgbdata
+ *          from the 32 bpp pix.  Caution: do not call pixSetPadBits(),
+ *          because the alignment is wrong and you may erase part of the
+ *          last pixel on each line.
+ *      (8) If the pix has a colormap, it is written to file.  In most
+ *          situations, the alpha component is 255 for each colormap entry,
+ *          which is opaque and indicates that it should be ignored.
+ *          However, if any alpha component is not 255, it is assumed that
+ *          the alpha values are valid, and they are written to the png
+ *          file in a tRNS segment.  On readback, the tRNS segment is
+ *          identified, and the colormapped image with alpha is converted
+ *          to a 4 spp rgba image.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -22978,6 +33620,14 @@ WriteStreamPng(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a luaL_Stream* (stream).
+ *
+ * Notes:
+ *      (1) This writes "raw" packed format only:
+ *          1 bpp --> pbm (P4)
+ *          2, 4, 8, 16 bpp, no colormap or grayscale colormap --> pgm (P5)
+ *          2, 4, 8 bpp with color-valued colormap, or rgb --> rgb ppm (P6)
+ *      (2) 24 bpp rgb are not supported in leptonica, but this will
+ *          write them out as a packed array of bytes (3 to a pixel).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -23015,6 +33665,20 @@ WriteStreamSpix(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * Arg #3 is expected to be a l_int32 (comptype).
+ *
+ * Notes:
+ *      (1) This writes a single image to a file stream opened for writing.
+ *      (2) For images with bpp > 1, this resets the comptype, if
+ *          necessary, to write uncompressed data.
+ *      (3) G3 and G4 are only defined for 1 bpp.
+ *      (4) We only allow PACKBITS for bpp = 1, because for bpp > 1
+ *          it typically expands images that are not synthetically generated.
+ *      (5) G4 compression is typically about twice as good as G3.
+ *          G4 is excellent for binary compression of text/line-art,
+ *          but terrible for halftones and dithered patterns.  (In
+ *          fact, G4 on halftones can give a file that is larger
+ *          than uncompressed!)  If a binary image has dithered
+ *          regions, it is usually better to compress with png.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -23080,6 +33744,36 @@ WriteStreamWebP(lua_State *L)
  * Arg #2 is expected to be a Box* (box).
  * Arg #3 is expected to be a l_int32 (res).
  * Arg #4 is expected to be a l_float32 (scale).
+ *
+ * Notes:
+ *      (1) OK, this seems a bit complicated, because there are various
+ *          ways to scale and not to scale.  Here's a summary:
+ *      (2) If you don't want any scaling at all:
+ *           * if you are using a box:
+ *               set w = 0, h = 0, and use scale = 1.0; it will print
+ *               each pixel unscaled at printer resolution
+ *           * if you are not using a box:
+ *               set scale = 1.0; it will print at printer resolution
+ *      (3) If you want the image to be a certain size in inches:
+ *           * you must use a box and set the box (w,h) in mils
+ *      (4) If you want the image to be scaled by a scale factor != 1.0:
+ *           * if you are using a box:
+ *               set w = 0, h = 0, and use the desired scale factor;
+ *               the higher the printer resolution, the smaller the
+ *               image will actually appear.
+ *           * if you are not using a box:
+ *               set the desired scale factor; the higher the printer
+ *               resolution, the smaller the image will actually appear.
+ *      (5) Another complication is the proliferation of distance units:
+ *           * The interface distances are in milli-inches.
+ *           * Three different units are used internally:
+ *              ~ pixels  (units of 1/res inch)
+ *              ~ printer pts (units of 1/72 inch)
+ *              ~ inches
+ *           * Here is a quiz on volume units from a reviewer:
+ *             How many UK milli-cups in a US kilo-teaspoon?
+ *               (Hint: 1.0 US cup = 0.75 UK cup + 0.2 US gill;
+ *                      1.0 US gill = 24.0 US teaspoons)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 string (%str) on the Lua stack
@@ -23105,6 +33799,14 @@ WriteStringPS(lua_State *L)
  * Arg #2 is expected to be a Box* (box).
  * Arg #3 is expected to be a l_int32 (comptype).
  * Arg #4 is expected to be a string (modestr).
+ *
+ * Notes:
+ *      (1) For multipage tiff, write the first pix with mode "w" and
+ *          all subsequent pix with mode "a".
+ *      (2) For multipage tiff, there is considerable overhead in the
+ *          machinery to append an image and add the directory entry,
+ *          and the time required for each image increases linearly
+ *          with the number of images in the file.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -23157,6 +33859,9 @@ WriteTiffCustom(lua_State *L)
  * Arg #2 is expected to be a string (filename).
  * Arg #3 is expected to be a l_int32 (quality).
  * Arg #4 is expected to be a l_int32 (lossless).
+ *
+ * Notes:
+ *      (1) Special top-level function allowing specification of quality.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -23176,6 +33881,14 @@ WriteWebP(lua_State *L)
  * \brief Check if all pixels in Pix* (%pixs) are 0.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+ * Notes:
+ *      (1) For a binary image, if there are no fg (black) pixels, empty = 1.
+ *      (2) For a grayscale image, if all pixels are black (0), empty = 1.
+ *      (3) For an RGB image, if all 4 components in every pixel is 0,
+ *          empty = 1.
+ *      (4) For a colormapped image, pixel values are 0.  The colormap
+ *          is ignored.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -23189,147 +33902,6 @@ Zero(lua_State *L)
     if (pixZero(pixs, &empty))
         return ll_push_nil(L);
     return ll_push_boolean(_fun, L, empty);
-}
-
-/**
- * \brief Brief comment goes here.
- * <pre>
- * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
- * Arg #2 is expected to be a Pix* (pixs).
- * Arg #3 is expected to be a string (selname).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Pix * on the Lua stack
- */
-static int
-FHMTGen_1(lua_State *L)
-{
-    LL_FUNC("FHMTGen_1");
-    Pix *pixd = ll_check_Pix(_fun, L, 1);
-    Pix *pixs = ll_check_Pix(_fun, L, 2);
-    const char *selname = ll_check_string(_fun, L, 3);
-    Pix *pix = pixFHMTGen_1(pixd, pixs, selname);
-    return ll_push_Pix(_fun, L, pix);
-}
-
-/**
- * \brief Brief comment goes here.
- * <pre>
- * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
- * Arg #2 is expected to be a Pix* (pixs).
- * Arg #3 is expected to be a l_int32 (operation).
- * Arg #4 is expected to be a char* (selname).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Pix * on the Lua stack
- */
-static int
-FMorphopGen_1(lua_State *L)
-{
-    LL_FUNC("FMorphopGen_1");
-    Pix *pixd = ll_check_Pix(_fun, L, 1);
-    Pix *pixs = ll_check_Pix(_fun, L, 2);
-    l_int32 operation = ll_check_l_int32(_fun, L, 3);
-    const char *name = ll_check_string(_fun, L, 4);
-    /* XXX: deconstify */
-    char *selname = reinterpret_cast<char *>(reinterpret_cast<l_intptr_t>(name));
-    Pix *pix = pixFMorphopGen_1(pixd, pixs, operation, selname);
-    return ll_push_Pix(_fun, L, pix);
-}
-
-/**
- * \brief Brief comment goes here.
- * <pre>
- * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
- * Arg #2 is expected to be a Pix* (pixs).
- * Arg #3 is expected to be a l_int32 (operation).
- * Arg #4 is expected to be a char* (selname).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Pix * on the Lua stack
- */
-static int
-FMorphopGen_2(lua_State *L)
-{
-    LL_FUNC("FMorphopGen_2");
-    Pix *pixd = ll_check_Pix(_fun, L, 1);
-    Pix *pixs = ll_check_Pix(_fun, L, 2);
-    l_int32 operation = ll_check_l_int32(_fun, L, 3);
-    const char *name = ll_check_string(_fun, L, 4);
-    char *selname = reinterpret_cast<char *>(reinterpret_cast<l_intptr_t>(name));
-    Pix *pix = pixFMorphopGen_2(pixd, pixs, operation, selname);
-    return ll_push_Pix(_fun, L, pix);
-}
-
-/**
- * \brief Brief comment goes here.
- * <pre>
- * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
- * Arg #2 is expected to be a Pix* (pixs).
- * Arg #3 is expected to be a string (selname).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Pix * on the Lua stack
- */
-static int
-HMTDwa_1(lua_State *L)
-{
-    LL_FUNC("HMTDwa_1");
-    Pix *pixd = ll_check_Pix(_fun, L, 1);
-    Pix *pixs = ll_check_Pix(_fun, L, 2);
-    const char *selname = ll_check_string(_fun, L, 3);
-    Pix *pix = pixHMTDwa_1(pixd, pixs, selname);
-    return ll_push_Pix(_fun, L, pix);
-}
-
-/**
- * \brief Brief comment goes here.
- * <pre>
- * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
- * Arg #2 is expected to be a Pix* (pixs).
- * Arg #3 is expected to be a l_int32 (operation).
- * Arg #4 is expected to be a char* (selname).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Pix * on the Lua stack
- */
-static int
-MorphDwa_1(lua_State *L)
-{
-    LL_FUNC("MorphDwa_1");
-    Pix *pixd = ll_check_Pix(_fun, L, 1);
-    Pix *pixs = ll_check_Pix(_fun, L, 2);
-    l_int32 operation = ll_check_l_int32(_fun, L, 3);
-    const char *name = ll_check_string(_fun, L, 4);
-    /* XXX: deconstify */
-    char *selname = reinterpret_cast<char *>(reinterpret_cast<l_intptr_t>(name));
-    Pix *pix = pixMorphDwa_1(pixd, pixs, operation, selname);
-    return ll_push_Pix(_fun, L, pix);
-}
-
-/**
- * \brief Brief comment goes here.
- * <pre>
- * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
- * Arg #2 is expected to be a Pix* (pixs).
- * Arg #3 is expected to be a l_int32 (operation).
- * Arg #4 is expected to be a char* (selname).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Pix * on the Lua stack
- */
-static int
-MorphDwa_2(lua_State *L)
-{
-    LL_FUNC("MorphDwa_2");
-    Pix *pixd = ll_check_Pix(_fun, L, 1);
-    Pix *pixs = ll_check_Pix(_fun, L, 2);
-    l_int32 operation = ll_check_l_int32(_fun, L, 3);
-    const char *name = ll_check_string(_fun, L, 4);
-    /* XXX: deconstify */
-    char *selname = reinterpret_cast<char *>(reinterpret_cast<l_intptr_t>(name));
-    Pix *pix = pixMorphDwa_2(pixd, pixs, operation, selname);
-    return ll_push_Pix(_fun, L, pix);
 }
 
 /**

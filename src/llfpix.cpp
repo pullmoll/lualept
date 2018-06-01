@@ -60,25 +60,6 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Create a new FPix*.
- *
- * Arg #1 is expected to be a l_int32 (width).
- * Arg #2 is expected to be a l_int32 (height).
- *
- * \param L pointer to the lua_State
- * \return 1 FPix* on the Lua stack
- */
-static int
-Create(lua_State *L)
-{
-    LL_FUNC("Create");
-    l_int32 width = ll_opt_l_int32(_fun, L, 1, 1);
-    l_int32 height = ll_opt_l_int32(_fun, L, 2, 1);
-    FPix *fpix = fpixCreate(width, height);
-    return ll_push_FPix(_fun, L, fpix);
-}
-
-/**
  * \brief Printable string for a FPix*.
  * \param L pointer to the lua_State
  * @return 1 string on the Lua stack
@@ -128,6 +109,9 @@ toString(lua_State* L)
  * Arg #3 is expected to be a l_int32 (right).
  * Arg #4 is expected to be a l_int32 (top).
  * Arg #5 is expected to be a l_int32 (bot).
+ *
+ * Notes:
+ *      (1) Adds border of '0' 32-bit pixels
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 FPix* on the Lua stack
@@ -153,6 +137,10 @@ AddBorder(lua_State *L)
  * Arg #3 is expected to be a l_int32 (right).
  * Arg #4 is expected to be a l_int32 (top).
  * Arg #5 is expected to be a l_int32 (bot).
+ *
+ * Notes:
+ *      (1) This adds pixels on each side whose values are equal to
+ *          the value on the closest boundary pixel.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 FPix* on the Lua stack
@@ -178,6 +166,9 @@ AddContinuedBorder(lua_State *L)
  * Arg #3 is expected to be a l_int32 (right).
  * Arg #4 is expected to be a l_int32 (top).
  * Arg #5 is expected to be a l_int32 (bot).
+ *
+ * Notes:
+ *      (1) See pixAddMirroredBorder() for situations of usage.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 FPix* on the Lua stack
@@ -201,6 +192,12 @@ AddMirroredBorder(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a FPix* (fpix).
  * Arg #2 is expected to be a l_float32 (addc).
  * Arg #3 is expected to be a l_float32 (multc).
+ *
+ * Notes:
+ *      (1) This is an in-place operation.
+ *      (2) It can be used to multiply each pixel by a constant,
+ *          and also to add a constant to each pixel.  Multiplication
+ *          is done first.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -223,6 +220,11 @@ AddMultConstant(lua_State *L)
  * Arg #3 is expected to be a l_int32 (right).
  * Arg #4 is expected to be a l_int32 (top).
  * Arg #5 is expected to be a l_int32 (bot).
+ *
+ * Notes:
+ *      (1) This adds pixels on each side whose values have a normal
+ *          derivative equal to the normal derivative at the boundary
+ *          of fpixs.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 on the Lua stack
@@ -270,6 +272,16 @@ Affine(lua_State *L)
  * Arg #3 is expected to be a Pta* (ptas).
  * Arg #4 is expected to be a l_int32 (border).
  * Arg #5 is expected to be a l_float32 (inval).
+ *
+ * Notes:
+ *      (1) If %border > 0, all four sides are extended by that distance,
+ *          and removed after the transformation is finished.  Pixels
+ *          that would be brought in to the trimmed result from outside
+ *          the extended region are assigned %inval.  The purpose of
+ *          extending the image is to avoid such assignments.
+ *      (2) On the other hand, you may want to give all pixels that
+ *          are brought in from outside fpixs a specific value.  In that
+ *          case, set %border == 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 on the Lua stack
@@ -292,6 +304,12 @@ AffinePta(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPix* (fpix).
  * Arg #2 is expected to be a l_int32 (ncontours).
+ *
+ * Notes:
+ *      (1) The increment is set to get approximately %ncontours.
+ *      (2) The proximity to the target value for contour display
+ *          is set to 0.15.
+ *      (3) Negative values are rendered in red; positive values as black.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 on the Lua stack
@@ -328,6 +346,9 @@ ChangeRefcount(lua_State *L)
  * \brief Clone the FPix* (%fpixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPix* (fpix).
+ *
+ * Notes:
+ *      (1) See pixClone() for definition and usage.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 on the Lua stack
@@ -365,6 +386,18 @@ ConvertToDPix(lua_State *L)
  * Arg #2 is expected to be a l_int32 (outdepth).
  * Arg #3 is expected to be a string describing what to do with negative values (negvals).
  * Arg #4 is expected to be a boolean (errorflag).
+ *
+ * Notes:
+ *      (1) Use %outdepth = 0 to programmatically determine the
+ *          output depth.  If no values are greater than 255,
+ *          it will set outdepth = 8; otherwise to 16 or 32.
+ *      (2) Because we are converting a float to an unsigned int
+ *          with a specified dynamic range (8, 16 or 32 bits), errors
+ *          can occur.  If errorflag == TRUE, output the number
+ *          of values out of range, both negative and positive.
+ *      (3) If a pixel value is positive and out of range, clip to
+ *          the maximum value represented at the outdepth of 8, 16
+ *          or 32 bits.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 on the Lua stack
@@ -387,6 +420,21 @@ ConvertToPix(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a FPix* (fpixs).
  * Arg #2 is expected to be a Kernel* (kel).
  * Arg #3 is expected to be a boolean (normflag).
+ *
+ * Notes:
+ *      (1) This gives a float convolution with an arbitrary kernel.
+ *      (2) If normflag == 1, the result is normalized by scaling all
+ *          kernel values for a unit sum.  If the sum of kernel values
+ *          is very close to zero, the kernel can not be normalized and
+ *          the convolution will not be performed.  A warning is issued.
+ *      (3) With the FPix, there are no issues about negative
+ *          array or kernel values.  The convolution is performed
+ *          with single precision arithmetic.
+ *      (4) To get a subsampled output, call l_setConvolveSampling().
+ *          The time to make a subsampled output is reduced by the
+ *          product of the sampling factors.
+ *      (5) This uses a mirrored border to avoid special casing on
+ *          the boundaries.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 on the Lua stack
@@ -409,6 +457,24 @@ Convolve(lua_State *L)
  * Arg #2 is expected to be a Kernel* (kelx).
  * Arg #3 is expected to be a Kernel* (kely).
  * Arg #4 is expected to be a l_int32 (normflag).
+ *
+ * Notes:
+ *      (1) This does a convolution with a separable kernel that is
+ *          is a sequence of convolutions in x and y.  The two
+ *          one-dimensional kernel components must be input separately;
+ *          the full kernel is the product of these components.
+ *          The support for the full kernel is thus a rectangular region.
+ *      (2) The normflag parameter is used as in fpixConvolve().
+ *      (3) Warning: if you use l_setConvolveSampling() to get a
+ *          subsampled output, and the sampling factor is larger than
+ *          the kernel half-width, it is faster to use the non-separable
+ *          version pixConvolve().  This is because the first convolution
+ *          here must be done on every raster line, regardless of the
+ *          vertical sampling factor.  If the sampling factor is smaller
+ *          than kernel half-width, it's faster to use the separable
+ *          convolution.
+ *      (4) This uses mirrored borders to avoid special casing on
+ *          the boundaries.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 on the Lua stack
@@ -430,6 +496,26 @@ ConvolveSep(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPix* (fpixd).
  * Arg #2 is expected to be a FPix* (fpixs).
+ *
+ * Notes:
+ *      (1) There are three cases:
+ *            (a) fpixd == null  (makes a new fpix; refcount = 1)
+ *            (b) fpixd == fpixs  (no-op)
+ *            (c) fpixd != fpixs  (data copy; no change in refcount)
+ *          If the refcount of fpixd > 1, case (c) will side-effect
+ *          these handles.
+ *      (2) The general pattern of use is:
+ *             fpixd = fpixCopy(fpixd, fpixs);
+ *          This will work for all three cases.
+ *          For clarity when the case is known, you can use:
+ *            (a) fpixd = fpixCopy(NULL, fpixs);
+ *            (c) fpixCopy(fpixd, fpixs);
+ *      (3) For case (c), we check if fpixs and fpixd are the same size.
+ *          If so, the data is copied directly.
+ *          Otherwise, the data is reallocated to the correct size
+ *          and the copy proceeds.  The refcount of fpixd is unchanged.
+ *      (4) This operation, like all others that may involve a pre-existing
+ *          fpixd, will side-effect any existing clones of fpixd.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 on the Lua stack
@@ -463,9 +549,33 @@ CopyResolution(lua_State *L)
 }
 
 /**
+ * \brief Create a new FPix*.
+ *
+ * Arg #1 is expected to be a l_int32 (width).
+ * Arg #2 is expected to be a l_int32 (height).
+ *
+ * \param L pointer to the lua_State
+ * \return 1 FPix* on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    LL_FUNC("Create");
+    l_int32 width = ll_opt_l_int32(_fun, L, 1, 1);
+    l_int32 height = ll_opt_l_int32(_fun, L, 2, 1);
+    FPix *fpix = fpixCreate(width, height);
+    return ll_push_FPix(_fun, L, fpix);
+}
+
+/**
  * \brief Create a FPix* (%fpix) from a template FPix* (%fpixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPix* (fpixs).
+ *
+ * Notes:
+ *      (1) Makes a FPix of the same size as the input FPix, with the
+ *          data array allocated and initialized to 0.
+ *      (2) Copies the resolution.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 FPix* on the Lua stack
@@ -501,6 +611,16 @@ DisplayMaxDynamicRange(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPix* (fpixd).
  * Arg #2 is expected to be a FPix* (fpixs).
+ *
+ * Notes:
+ *      (1) On big-endian hardware, this does byte-swapping on each of
+ *          the 4-byte floats in the fpix data.  On little-endians,
+ *          the data is unchanged.  This is used for serialization
+ *          of fpix; the data is serialized in little-endian byte
+ *          order because most hardware is little-endian.
+ *      (2) The operation can be either in-place or, if fpixd == NULL,
+ *          a new fpix is made.  If not in-place, caller must catch
+ *          the returned pointer.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 on the Lua stack
@@ -539,6 +659,21 @@ FlipLR(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPix* (fpixd).
  * Arg #2 is expected to be a FPix* (fpixs).
+ *
+ * Notes:
+ *      (1) This does a top-bottom flip of the image, which is
+ *          equivalent to a rotation out of the plane about a
+ *          horizontal line through the image center.
+ *      (2) There are 3 cases for input:
+ *          (a) fpixd == null (creates a new fpixd)
+ *          (b) fpixd == fpixs (in-place operation)
+ *          (c) fpixd != fpixs (existing fpixd)
+ *      (3) For clarity, use these three patterns, respectively:
+ *          (a) fpixd = fpixFlipTB(NULL, fpixs);
+ *          (b) fpixFlipTB(fpixs, fpixs);
+ *          (c) fpixFlipTB(fpixd, fpixs);
+ *      (4) If an existing fpixd is not the same size as fpixs, the
+ *          image data will be reallocated.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 on the Lua stack
@@ -731,6 +866,16 @@ GetWpl(lua_State *L)
  * Arg #3 is expected to be a FPix* (fpixs2).
  * Arg #4 is expected to be a l_float32 (a).
  * Arg #5 is expected to be a l_float32 (b).
+ *
+ * Notes:
+ *      (1) Computes pixelwise linear combination: a * src1 + b * src2
+ *      (2) Alignment is to UL corner.
+ *      (3) There are 3 cases.  The result can go to a new dest,
+ *          in-place to fpixs1, or to an existing input dest:
+ *          * fpixd == null:   (src1 + src2) --> new fpixd
+ *          * fpixd == fpixs1:  (src1 + src2) --> src1  (in-place)
+ *          * fpixd != fpixs1: (src1 + src2) --> input fpixd
+ *      (4) fpixs2 must be different from both fpixd and fpixs1.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 on the Lua stack
@@ -754,6 +899,9 @@ LinearCombination(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a FPix* (fpix).
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * Arg #3 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) Subsampled printout of fpix for debugging.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -798,6 +946,16 @@ Projective(lua_State *L)
  * Arg #3 is expected to be a Pta* (ptas).
  * Arg #4 is expected to be a l_int32 (border).
  * Arg #5 is expected to be a l_float32 (inval).
+ *
+ * Notes:
+ *      (1) If %border > 0, all four sides are extended by that distance,
+ *          and removed after the transformation is finished.  Pixels
+ *          that would be brought in to the trimmed result from outside
+ *          the extended region are assigned %inval.  The purpose of
+ *          extending the image is to avoid such assignments.
+ *      (2) On the other hand, you may want to give all pixels that
+ *          are brought in from outside fpixs a specific value.  In that
+ *          case, set %border == 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 FPix* on the Lua stack
@@ -826,6 +984,16 @@ ProjectivePta(lua_State *L)
  * Arg #6 is expected to be a FPix* (fpixs).
  * Arg #7 is expected to be a l_int32 (sx).
  * Arg #8 is expected to be a l_int32 (sy).
+ *
+ * Notes:
+ *      (1) This is similar in structure to pixRasterop(), except
+ *          it only allows copying from the source into the destination.
+ *          For that reason, no op code is necessary.  Additionally,
+ *          all pixels are 32 bit words (float values), which makes
+ *          the copy very simple.
+ *      (2) Clipping of both src and dest fpix are done automatically.
+ *      (3) This allows in-place copying, without checking to see if
+ *          the result is valid:  use for in-place with caution!
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -928,6 +1096,12 @@ RemoveBorder(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a FPix* (fpixs).
  * Arg #2 is expected to be a l_float32 (incr).
  * Arg #3 is expected to be a l_float32 (proxim).
+ *
+ * Notes:
+ *      (1) Values are displayed when val/incr is within +-proxim
+ *          to an integer.  The default value is 0.15; smaller values
+ *          result in thinner contour lines.
+ *      (2) Negative values are rendered in red; positive values as black.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 FPix* on the Lua stack
@@ -948,6 +1122,12 @@ RenderContours(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPix* (fpixd).
  * Arg #2 is expected to be a FPix* (fpixs).
+ *
+ * Notes:
+ *      (1) If the data sizes differ, this destroys the existing
+ *          data in fpixd and allocates a new, uninitialized, data array
+ *          of the same size as the data in fpixs.  Otherwise, this
+ *          doesn't do anything.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -966,6 +1146,20 @@ ResizeImageData(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPix* (fpixd).
  * Arg #2 is expected to be a FPix* (fpixs).
+ *
+ * Notes:
+ *      (1) This does a 180 rotation of the image about the center,
+ *          which is equivalent to a left-right flip about a vertical
+ *          line through the image center, followed by a top-bottom
+ *          flip about a horizontal line through the image center.
+ *      (2) There are 3 cases for input:
+ *          (a) fpixd == null (creates a new fpixd)
+ *          (b) fpixd == fpixs (in-place operation)
+ *          (c) fpixd != fpixs (existing fpixd)
+ *      (3) For clarity, use these three patterns, respectively:
+ *          (a) fpixd = fpixRotate180(NULL, fpixs);
+ *          (b) fpixRotate180(fpixs, fpixs);
+ *          (c) fpixRotate180(fpixd, fpixs);
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 FPix* on the Lua stack
@@ -985,6 +1179,11 @@ Rotate180(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPix* (fpixs).
  * Arg #2 is expected to be a l_int32 (direction).
+ *
+ * Notes:
+ *      (1) This does a 90 degree rotation of the image about the center,
+ *          either cw or ccw, returning a new pix.
+ *      (2) The direction must be either 1 (cw) or -1 (ccw).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 FPix* on the Lua stack
@@ -1023,6 +1222,17 @@ RotateOrth(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPix* (fpixs).
  * Arg #2 is expected to be a l_int32 (factor).
+ *
+ * Notes:
+ *      (1) The width wd of fpixd is related to ws of fpixs by:
+ *              wd = factor * (ws - 1) + 1   (and ditto for the height)
+ *          We avoid special-casing boundary pixels in the interpolation
+ *          by constructing fpixd by inserting (factor - 1) interpolated
+ *          pixels between each pixel in fpixs.  Then
+ *               wd = ws + (ws - 1) * (factor - 1)    (same as above)
+ *          This also has the advantage that if we subsample by %factor,
+ *          throwing out all the interpolated pixels, we regain the
+ *          original low resolution fpix.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 on the Lua stack
@@ -1166,6 +1376,10 @@ SetWpl(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPix* (fpix).
  * Arg #2 is expected to be a l_float32 (thresh).
+ *
+ * Notes:
+ *      (1) For all values of fpix that are <= thresh, sets the pixel
+ *          in pixd to 1.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -1202,6 +1416,9 @@ Write(lua_State *L)
  * \brief Write FPix* (%fpix) to a lstring (%data, %size).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPix* (fpix).
+ *
+ * Notes:
+ *      (1) Serializes a fpix in memory and puts the result in a buffer.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 lstring on the Lua stack

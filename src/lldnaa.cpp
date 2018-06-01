@@ -62,23 +62,6 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Create a new Dnaa*.
- * <pre>
- * Arg #1 is expected to be a l_int32 (n).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 DNAA* on the Lua stack
- */
-static int
-Create(lua_State *L)
-{
-    LL_FUNC("Create");
-    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
-    Dnaa *daa = l_dnaaCreate(n);
-    return ll_push_Dnaa(_fun, L, daa);
-}
-
-/**
  * \brief Get the number of arrays stored in the Dnaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dnaa* user data.
@@ -101,6 +84,11 @@ GetCount(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dnaa* user data.
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a L_Dna* user data.
+ *
+ * Notes:
+ *      (1) Any existing l_dna is destroyed, and the input one
+ *          is inserted in its place.
+ *      (2) If the index is invalid, return 1 (error)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -185,6 +173,9 @@ AddDna(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dnaa* user data.
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a lua_Number/l_float64 (val).
+ *
+ * Notes:
+ *      (1) Adds to an existing l_dna only.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -202,10 +193,33 @@ AddNumber(lua_State *L)
 }
 
 /**
+ * \brief Create a new Dnaa*.
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (n).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 DNAA* on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    LL_FUNC("Create");
+    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
+    Dnaa *daa = l_dnaaCreate(n);
+    return ll_push_Dnaa(_fun, L, daa);
+}
+
+/**
  * \brief Create a full new Dnaa*.
  * <pre>
  * Arg #1 is expected to be a l_int32 (nptr).
  * Arg #2 is expected to be a l_int32 (n).
+ *
+ * Notes:
+ *      (1) This allocates a dnaa and fills the array with allocated dnas.
+ *          In use, after calling this function, use
+ *              l_dnaaAddNumber(dnaa, index, val);
+ *          to add val to the index-th dna in dnaa.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 DNAA* on the Lua stack
@@ -224,6 +238,11 @@ CreateFull(lua_State *L)
  * \brief Flatten a Dnaa* to a single L_Dna*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dnaa* user data.
+ *
+ * Notes:
+ *      (1) This 'flattens' the dnaa to a dna, by joining successively
+ *          each dna in the dnaa.
+ *      (2) It leaves the input dnaa unchanged.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 DNA on the Lua stack, or nil on error
@@ -355,6 +374,11 @@ ReadStream(lua_State *L)
  * \brief Truncate the arrays stored in the Dnaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dnaa* user data.
+ *
+ * Notes:
+ *      (1) This identifies the largest index containing a dna that
+ *          has any numbers within it, destroys all dna beyond that
+ *          index, and resets the count.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack

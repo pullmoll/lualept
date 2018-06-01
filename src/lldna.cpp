@@ -44,6 +44,10 @@
  * \brief Destroy a Dna*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
+ *
+ * Notes:
+ *      (1) Decrements the ref count and, if 0, destroys the l_dna.
+ *      (2) Always nulls the input ptr.
  * </pre>
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack
@@ -59,23 +63,6 @@ Destroy(lua_State *L)
     l_dnaDestroy(&da);
     *pda = nullptr;
     return 0;
-}
-
-/**
- * \brief Create a new Dna*.
- * <pre>
- * Arg #1 is expected to be a l_int32 (n).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 DNA* on the Lua stack
- */
-static int
-Create(lua_State *L)
-{
-    LL_FUNC("Create");
-    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
-    Dna *da = l_dnaCreate(n);
-    return ll_push_Dna(_fun, L, da);
 }
 
 /**
@@ -196,6 +183,9 @@ Clone(lua_State *L)
  * \brief Copy a Dna*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
+ *
+ * Notes:
+ *      (1) This removes unused ptrs above da->n.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 DNA* on the Lua stack
@@ -228,9 +218,31 @@ CopyParameters(lua_State *L)
 }
 
 /**
+ * \brief Create a new Dna*.
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (n).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 DNA* on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    LL_FUNC("Create");
+    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
+    Dna *da = l_dnaCreate(n);
+    return ll_push_Dna(_fun, L, da);
+}
+
+/**
  * \brief Set the number of stored numbes in the Dna* to zero.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
+ *
+ * Notes:
+ *      (1) This does not change the allocation of the array.
+ *          It just clears the number of stored numbers, so that
+ *          the array appears to be empty.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -270,6 +282,18 @@ FromArray(lua_State *L)
  * \brief Get the Dna* as table of lua_Number.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
+ *
+ * Notes:
+ *      (1) If copyflag == L_COPY, it makes a copy which the caller
+ *          is responsible for freeing.  Otherwise, it operates
+ *          directly on the bare array of the l_dna.
+ *      (2) Very important: for L_NOCOPY, any writes to the array
+ *          will be in the l_dna.  Do not write beyond the size of
+ *          the count field, because it will not be accessible
+ *          from the l_dna!  If necessary, be sure to set the count
+ *          field to a larger number (such as the alloc size)
+ *          BEFORE calling this function.  Creating with l_dnaMakeConstant()
+ *          is another way to insure full initialization.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 DNA* on the Lua stack
@@ -291,6 +315,10 @@ GetDArray(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * Arg #2 is expected to be a l_int32 (idx).
+ *
+ * Notes:
+ *      (1) Caller may need to check the function return value to
+ *          decide if a 0.0 in the returned ival is valid.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -312,6 +340,17 @@ GetDValue(lua_State *L)
  * \brief Get the Dna* as a table of lua_Integer.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
+ *
+ * Notes:
+ *      (1) A copy of the array is made, because we need to
+ *          generate an integer array from the bare double array.
+ *          The caller is responsible for freeing the array.
+ *      (2) The array size is determined by the number of stored numbers,
+ *          not by the size of the allocated array in the l_dna.
+ *      (3) This function is provided to simplify calculations
+ *          using the bare internal array, rather than continually
+ *          calling accessors on the l_dna.  It is typically used
+ *          on an array of size 256.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 DNA* on the Lua stack
@@ -333,6 +372,10 @@ GetIArray(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * Arg #2 is expected to be a l_int32 (idx).
+ *
+ * Notes:
+ *      (1) Caller may need to check the function return value to
+ *          decide if a 0 in the returned ival is valid.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack
@@ -378,6 +421,13 @@ GetParameters(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a lua_Number to insert into the array.
+ *
+ * Notes:
+ *      (1) This shifts da[i] --> da[i + 1] for all i >= index,
+ *          and then inserts val as da[index].
+ *      (2) It should not be used repeatedly on large arrays,
+ *          because the function is O(n).
+ *
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -417,6 +467,9 @@ Read(lua_State *L)
  * \brief Read a Dna* (%dna) from a stream (%stream).
  * <pre>
  * Arg #1 is expected to be a luaL_Stream* (stream).
+ *
+ * Notes:
+ *      (1) fscanf takes %lf to read a double; fprintf takes %f to write it.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -435,6 +488,11 @@ ReadStream(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * Arg #2 is expected to be a l_int32 (idx).
+ *
+ * Notes:
+ *      (1) This shifts da[i] --> da[i - 1] for all i > index.
+ *      (2) It should not be used repeatedly on large arrays,
+ *          because the function is O(n).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -453,6 +511,13 @@ RemoveNumber(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * Arg #2 is expected to be a l_int32 (n).
+ *
+ * Notes:
+ *      (1) If newcount <= da->nalloc, this resets da->n.
+ *          Using newcount = 0 is equivalent to l_dnaEmpty().
+ *      (2) If newcount > da->nalloc, this causes a realloc
+ *          to a size da->nalloc = newcount.
+ *      (3) All the previously unused values in da are set to 0.0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack

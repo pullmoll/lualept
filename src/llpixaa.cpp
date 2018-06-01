@@ -62,26 +62,12 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Create a new Pixaa*.
- * <pre>
- * Arg #1 is expected to be a l_int32 (n).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Pixaa* on the Lua stack
- */
-static int
-Create(lua_State *L)
-{
-    LL_FUNC("Create");
-    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
-    Pixaa *pixaa = pixaaCreate(n);
-    return ll_push_Pixaa(_fun, L, pixaa);
-}
-
-/**
  * \brief Get count for a Pixaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
+ *
+ * Notes:
+ *      (1) If paa is empty, a returned na will also be empty.
  * </pre>
  * \param L pointer to the lua_State
  * \return 2 integer (count) and Numa* (na) the Lua stack
@@ -103,6 +89,10 @@ GetCount(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * Arg #2 is expected to be a Box* user data (box).
  * Arg #3 is optionally a string defining the copyflag.
+ *
+ * Notes:
+ *      (1) The box can be used, for example, to hold the support region
+ *          of a pixa that is being added to the pixaa.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -165,6 +155,10 @@ AddPixa(lua_State *L)
  * \brief Clear the Pixaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
+ *
+ * Notes:
+ *      (1) This destroys all pixa in the pixaa, and nulls the ptrs
+ *          in the pixa ptr array.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -178,12 +172,52 @@ Clear(lua_State *L)
 }
 
 /**
+ * \brief Create a new Pixaa*.
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (n).
+ *
+ * Notes:
+ *      (1) A pixaa provides a 2-level hierarchy of images.
+ *          A common use is for segmentation masks, which are
+ *          inexpensive to store in png format.
+ *      (2) For example, suppose you want a mask for each textline
+ *          in a two-column page.  The textline masks for each column
+ *          can be represented by a pixa, of which there are 2 in the pixaa.
+ *          The boxes for the textline mask components within a column
+ *          can have their origin referred to the column rather than the page.
+ *          Then the boxa field can be used to represent the two box (regions)
+ *          for the columns, and the (x,y) components of each box can
+ *          be used to get the absolute position of the textlines on
+ *          the page.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pixaa* on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    LL_FUNC("Create");
+    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
+    Pixaa *pixaa = pixaaCreate(n);
+    return ll_push_Pixaa(_fun, L, pixaa);
+}
+
+/**
  * \brief Create a new Pixaa* from a Pixa*.
  * <pre>
  * Arg #1 is expected to be a Pixa* user data.
  * Arg #2 is expected to be a l_int32 (n).
  * Arg #3 is an optional string (type).
  * Arg #4 is an optional string (copyflag).
+ *
+ * Notes:
+ *      (1) This subdivides a pixa into a set of smaller pixa that
+ *          are accumulated into a pixaa.
+ *      (2) If type == L_CHOOSE_CONSECUTIVE, the first 'n' pix are
+ *          put in a pixa and added to pixaa, then the next 'n', etc.
+ *          If type == L_CHOOSE_SKIP_BY, the first pixa is made by
+ *          aggregating pix[0], pix[n], pix[2*n], etc.
+ *      (3) The copyflag specifies if each new pix is a copy or a clone.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pixaa* on the Lua stack
@@ -221,6 +255,10 @@ ExtendArray(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * Arg #2 is optionally a string defining the access flag (copy, clone).
+ *
+ * Notes:
+ *      (1) L_COPY returns a copy; L_CLONE returns a new reference to the boxa.
+ *      (2) In both cases, invoke boxaDestroy() on the returned boxa.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1: Boxa* on the Lua stack , or 0 on error
@@ -241,6 +279,16 @@ GetBoxa(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is optionally a string defining the access flag (copy, clone).
+ *
+ * Notes:
+ *      (1) L_COPY makes a new pixa with a copy of every pix
+ *      (2) L_CLONE just makes a new reference to the pixa,
+ *          and bumps the counter.  You would use this, for example,
+ *          when you need to extract some data from a pix within a
+ *          pixa within a pixaa.
+ *      (3) L_COPY_CLONE makes a new pixa with a clone of every pix
+ *          and box
+ *      (4) In all cases, you must invoke pixaDestroy() on the returned pixa
  * </pre>
  * \param L pointer to the lua_State
  * \return 1: Pixa* on the Lua stack , or 0 on error
@@ -263,6 +311,11 @@ GetPixa(lua_State *L)
  * Arg #2 is expected to be another Pixaa* user data.
  * Arg #3 is optional and expected to be a l_int32 (istart).
  * Arg #4 is optional and expected to be a l_int32 (iend).
+ *
+ * Notes:
+ *      (1) This appends a clone of each indicated pixa in paas to pixaad
+ *      (2) istart < 0 is taken to mean 'read from the start' (istart = 0)
+ *      (3) iend < 0 means 'read to the end'
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -282,6 +335,10 @@ Join(lua_State *L)
  * \brief Read a Pixaa* from an external file.
  * <pre>
  * Arg #1 is expected to be a string containing the filename.
+ *
+ * Notes:
+ *      (1) The pix are stored in the file as png.
+ *          If the png library is not linked, this will fail.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pixaa* on the Lua stack
@@ -352,6 +409,10 @@ ReadMem(lua_State *L)
  * \brief Read a Pixaa* from a Lua io stream (%stream).
  * <pre>
  * Arg #1 is expected to be a luaL_Stream* (stream).
+ *
+ * Notes:
+ *      (1) The pix are stored in the file as png.
+ *          If the png library is not linked, this will fail.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pixaa* on the Lua stack
@@ -371,6 +432,13 @@ ReadStream(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a Pix* user data (pixa).
+ *
+ * Notes:
+ *      (1) This allows random insertion of a pixa into a pixaa, with
+ *          destruction of any existing pixa at that location.
+ *          The input pixa is now owned by the pixaa.
+ *      (2) No other pixa in the array are affected.
+ *      (3) The index must be within the allowed set.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -389,6 +457,11 @@ ReplacePixa(lua_State *L)
  * \brief Truncate array of a Pixaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
+ *
+ * Notes:
+ *      (1) This identifies the largest index containing a pixa that
+ *          has any pix within it, destroys all pixa above that index,
+ *          and resets the count.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -406,6 +479,10 @@ Truncate(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * Arg #2 is expected to be string containing the filename.
+ *
+ * Notes:
+ *      (1) The pix are stored in the file as png.
+ *          If the png library is not linked, this will fail.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -423,6 +500,9 @@ Write(lua_State *L)
  * \brief Write the Pixaa* (%pixaa) to memory and return it as a Lua string.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
+ *
+ * Notes:
+ *      (1) Serializes a pixaa in memory and puts the result in a buffer.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -446,6 +526,10 @@ WriteMem(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * Arg #2 is expected to be a luaL_Stream* (stream).
+ *
+ * Notes:
+ *      (1) The pix are stored in the file as png.
+ *          If the png library is not linked, this will fail.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack

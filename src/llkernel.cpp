@@ -62,25 +62,6 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Create a Kernel* (%kel).
- * <pre>
- * Arg #1 is expected to be a l_int32 (height).
- * Arg #2 is expected to be a l_int32 (width).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Kernel* on the Lua stack
- */
-static int
-Create(lua_State *L)
-{
-    LL_FUNC("Create");
-    l_int32 height = ll_check_l_int32(_fun, L, 1);
-    l_int32 width = ll_check_l_int32(_fun, L, 2);
-    Kernel *kel = kernelCreate(height, width);
-    return ll_push_Kernel (_fun, L, kel);
-}
-
-/**
  * \brief Printable string for a Pix*.
  * \param L pointer to the lua_State
  * @return 1 string on the Lua stack
@@ -149,9 +130,61 @@ Copy(lua_State *L)
 }
 
 /**
+ * \brief Create a Kernel* (%kel).
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (height).
+ * Arg #2 is expected to be a l_int32 (width).
+ *
+ * Notes:
+ *      (1) kernelCreate() initializes all values to 0.
+ *      (2) After this call, (cy,cx) and nonzero data values must be
+ *          assigned.
+ *      (2) The number of kernel elements must be less than 2^29.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Kernel* on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    LL_FUNC("Create");
+    l_int32 height = ll_check_l_int32(_fun, L, 1);
+    l_int32 width = ll_check_l_int32(_fun, L, 2);
+    Kernel *kel = kernelCreate(height, width);
+    return ll_push_Kernel (_fun, L, kel);
+}
+
+/**
  * \brief Create a Kernel* (%kel) from an external file (%filename).
  * <pre>
  * Arg #1 is expected to be a string (filename).
+ *
+ * Notes:
+ *      (1) The file contains, in the following order:
+ *           ~ Any number of comment lines starting with '#' are ignored
+ *           ~ The height and width of the kernel
+ *           ~ The y and x values of the kernel origin
+ *           ~ The kernel data, formatted as lines of numbers (integers
+ *             or floats) for the kernel values in row-major order,
+ *             and with no other punctuation.
+ *             (Note: this differs from kernelCreateFromString(),
+ *             where each line must begin and end with a double-quote
+ *             to tell the compiler it's part of a string.)
+ *           ~ The kernel specification ends when a blank line,
+ *             a comment line, or the end of file is reached.
+ *      (2) All lines must be left-justified.
+ *      (3) See kernelCreateFromString() for a description of the string
+ *          format for the kernel data.  As an example, here are the lines
+ *          of a valid kernel description file  In the file, all lines
+ *          are left-justified:
+ * \code
+ *                    # small 3x3 kernel
+ *                    3 3
+ *                    1 1
+ *                    25.5   51    24.3
+ *                    70.2  146.3  73.4
+ *                    20     50.9  18.4
+ * \endcode
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Kernel* on the Lua stack
@@ -171,6 +204,9 @@ CreateFromFile(lua_State *L)
  * Arg #1 is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (cy).
  * Arg #3 is expected to be a l_int32 (cx).
+ *
+ * Notes:
+ *      (1) The origin must be positive and within the dimensions of the pix.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Kernel* on the Lua stack
@@ -194,6 +230,18 @@ CreateFromPix(lua_State *L)
  * Arg #3 is expected to be a l_int32 (cy).
  * Arg #4 is expected to be a l_int32 (cx).
  * Arg #5 is expected to be a string (kdata).
+ *
+ * Notes:
+ *      (1) The data is an array of chars, in row-major order, giving
+ *          space separated integers in the range [-255 ... 255].
+ *      (2) The only other formatting limitation is that you must
+ *          leave space between the last number in each row and
+ *          the double-quote.  If possible, it's also nice to have each
+ *          line in the string represent a line in the kernel; e.g.,
+ *              static const char *kdata =
+ *                  " 20   50   20 "
+ *                  " 70  140   70 "
+ *                  " 20   50   20 ";
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Kernel* on the Lua stack
@@ -217,6 +265,20 @@ CreateFromString(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Kernel* (kel).
  * Arg #2 is expected to be a l_int32 (size).
  * Arg #3 is expected to be a l_int32 (gthick).
+ *
+ * Notes:
+ *      (1) This gives a visual representation of a kernel.
+ *      (2) There are two modes of display:
+ *          (a) Grid lines of minimum width 2, surrounding regions
+ *              representing kernel elements of minimum size 17,
+ *              with a "plus" mark at the kernel origin, or
+ *          (b) A pix without grid lines and using 1 pixel per kernel element.
+ *      (3) For both cases, the kernel absolute value is displayed,
+ *          normalized such that the maximum absolute value is 255.
+ *      (4) Large 2D separable kernels should be used for convolution
+ *          with two 1D kernels.  However, for the bilateral filter,
+ *          the computation time is independent of the size of the
+ *          2D content kernel.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix* on the Lua stack
@@ -328,6 +390,10 @@ GetSum(lua_State *L)
  * \brief Invert a Kernel* (%kels).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Kernel* (kels).
+ *
+ * Notes:
+ *      (1) For convolution, the kernel is spatially inverted before
+ *          a "correlation" operation is done between the kernel and the image.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Kernel* on the Lua stack
@@ -346,6 +412,11 @@ Invert(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Kernel* (kels).
  * Arg #2 is expected to be a l_float32 (normsum).
+ *
+ * Notes:
+ *      (1) If the sum of kernel elements is close to 0, do not
+ *          try to calculate the normalized kernel.  Instead,
+ *          return a copy of the input kernel, with a warning.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 on the Lua stack

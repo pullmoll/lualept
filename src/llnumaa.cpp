@@ -62,23 +62,6 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Create a new Numaa*.
- * <pre>
- * Arg #1 is expected to be a l_int32 (n).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Numaa* on the Lua stack
- */
-static int
-Create(lua_State *L)
-{
-    LL_FUNC("Create");
-    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
-    Numaa *naa = numaaCreate(n);
-    return ll_push_Numaa(_fun, L, naa);
-}
-
-/**
  * \brief Get the number of arrays stored in the Numaa* (%naa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numaa* (naa).
@@ -158,10 +141,33 @@ AddNuma(lua_State *L)
 }
 
 /**
+ * \brief Create a new Numaa*.
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (n).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Numaa* on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    LL_FUNC("Create");
+    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
+    Numaa *naa = numaaCreate(n);
+    return ll_push_Numaa(_fun, L, naa);
+}
+
+/**
  * \brief Create a full new Numaa*.
  * <pre>
  * Arg #1 is expected to be a l_int32 (nptr).
  * Arg #1 is expected to be a l_int32 (n).
+ *
+ * Notes:
+ *      (1) This allocates numaa and fills the array with allocated numas.
+ *          In use, after calling this function, use
+ *              numaaAddNumber(naa, index, val);
+ *          to add val to the index-th numa in naa.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numaa* on the Lua stack
@@ -180,6 +186,13 @@ CreateFull(lua_State *L)
  * \brief Flatten the Numaa* (%naa) to a Numa* (%na).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numaa*.
+ *
+ * Notes:
+ *      (1) This 'flattens' the Numaa to a Numa, by joining successively
+ *          each Numa in the Numaa.
+ *      (2) It doesn't make any assumptions about the location of the
+ *          Numas in the Numaa array, unlike most Numaa functions.
+ *      (3) It leaves the input Numaa unchanged.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -308,6 +321,11 @@ ReadStream(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Numaa* (naa).
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a Numa* (na).
+ *
+ * Notes:
+ *      (1) Any existing numa is destroyed, and the input one
+ *          is inserted in its place.
+ *      (2) If the index is invalid, return 1 (error)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -326,6 +344,11 @@ ReplaceNuma(lua_State *L)
  * \brief Truncate the arrays stored in the Numaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numaa*.
+ *
+ * Notes:
+ *      (1) This identifies the largest index containing a numa that
+ *          has any numbers within it, destroys all numa beyond that
+ *          index, and resets the count.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -360,6 +383,9 @@ Write(lua_State *L)
  * \brief Write the Numaa* (%naa) to memory and return it as a Lua string.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numaa* user data.
+ *
+ * Notes:
+ *      (1) Serializes a numaa in memory and puts the result in a buffer.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack

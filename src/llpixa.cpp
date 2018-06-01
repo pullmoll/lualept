@@ -44,6 +44,10 @@
  * \brief Destroy a Pixa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa*.
+ *
+ * Notes:
+ *      (1) Decrements the ref count and, if 0, destroys the pixa.
+ *      (2) Always nulls the input ptr.
  * </pre>
  * \param L pointer to the lua_State
  * \return 0 nothing on the Lua stack
@@ -59,23 +63,6 @@ Destroy(lua_State *L)
     pixaDestroy(&pixa);
     *ppixa = nullptr;
     return 0;
-}
-
-/**
- * \brief Create a new Pixa*.
- * <pre>
- * Arg #1 is expected to be a l_int32 (n).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Pixa* on the Lua stack
- */
-static int
-Create(lua_State *L)
-{
-    LL_FUNC("Create");
-    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
-    Pixa *pixa = pixaCreate(n);
-    return ll_push_Pixa(_fun, L, pixa);
 }
 
 /**
@@ -118,6 +105,11 @@ AddPix(lua_State *L)
  * \brief Clear the Pixa* (%pixa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
+ *
+ * Notes:
+ *      (1) This destroys all pix in the pixa, as well as
+ *          all boxes in the boxa.  The ptrs in the pix ptr array
+ *          are all null'd.  The number of allocated pix, n, is set to 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -146,6 +138,26 @@ Copy(lua_State *L)
     Pixa *pixas = ll_check_Pixa(_fun, L, 1);
     l_int32 copyflag = ll_check_access_storage(_fun, L, 2, L_COPY);
     Pixa *pixa = pixaCopy(pixas, copyflag);
+    return ll_push_Pixa(_fun, L, pixa);
+}
+
+/**
+ * \brief Create a new Pixa*.
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (n).
+ *
+ * Notes:
+ *      (1) This creates an empty boxa.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pixa* on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    LL_FUNC("Create");
+    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
+    Pixa *pixa = pixaCreate(n);
     return ll_push_Pixa(_fun, L, pixa);
 }
 
@@ -201,40 +213,19 @@ CreateFromPixacomp(lua_State *L)
 }
 
 /**
- * \brief Display() brief comment goes here.
- * <pre>
- * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
- * Arg #2 is expected to be a l_int32 (w).
- * Arg #3 is expected to be a l_int32 (h).
- *
- * Notes:
- *      (1) This uses the boxes to place each pix in the rendered composite.
- *      (2) Set w = h = 0 to use the b.b. of the components to determine
- *          the size of the returned pix.
- *      (3) Uses the first pix in pixa to determine the depth.
- *      (4) The background is written "white".  On 1 bpp, each successive
- *          pix is "painted" (adding foreground), whereas for grayscale
- *          or color each successive pix is blitted with just the src.
- *      (5) If the pixa is empty, returns an empty 1 bpp pix.
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 on the Lua stack
- */
-static int
-Display(lua_State *L)
-{
-    LL_FUNC("Display");
-    Pixa *pixa = ll_check_Pixa(_fun, L, 1);
-    l_int32 w = ll_opt_l_int32(_fun, L, 2, 0);
-    l_int32 h = ll_opt_l_int32(_fun, L, 3, 0);
-    Pix *pix = pixaDisplay(pixa, w, h);
-    return ll_push_Pix(_fun, L, pix);
-}
-
-/**
  * \brief Get pixel aligned statistics for Pixa* (%pixa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
+ *
+ * Notes:
+ *      (1) Each pixel in the returned pix represents an average
+ *          (or median, or mode) over the corresponding pixels in each
+ *          pix in the pixa.
+ *      (2) The %thresh parameter works with L_MODE_VAL only, and
+ *          sets a minimum occupancy of the mode bin.
+ *          If the occupancy of the mode bin is less than %thresh, the
+ *          mode value is returned as 0.  To always return the actual
+ *          mode value, set %thresh = 0.  See pixGetRowStats().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -283,6 +274,14 @@ GetBoxGeometry(lua_State *L)
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a Pix* (%pixs).
  * Arg #4 is an optional Box* (%boxs).
+ *
+ * Notes:
+ *      (1) This shifts pixa[i] --> pixa[i + 1] for all i >= index,
+ *          and then inserts at pixa[index].
+ *      (2) To insert at the beginning of the array, set index = 0.
+ *      (3) It should not be used repeatedly on large arrays,
+ *          because the function is O(n).
+ *      (4) To append a pix to a pixa, it's easier to use pixaAddPix().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -307,6 +306,12 @@ InsertPix(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pixa* (pixa1).
  * Arg #2 is expected to be another Pixa* (pixa2).
  * Arg #3 is an optional string defining the storage flags (copy, clone, copy_clone).
+ *
+ * Notes:
+ *      (1) %copyflag determines if the pix are copied or cloned.
+ *          The boxes, if they exist, are copied.
+ *      (2) If the two pixa have different sizes, a warning is issued,
+ *          and the number of pairs returned is the minimum size.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pixa* on the Lua stack
@@ -327,6 +332,12 @@ Interleave(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa* (pixad).
  * Arg #2 is expected to be another Pixa* (pixas).
+ *
+ * Notes:
+ *      (1) This appends a clone of each indicated pix in pixas to pixad
+ *      (2) istart < 0 is taken to mean 'read from the start' (istart = 0)
+ *      (3) iend < 0 means 'read to the end'
+ *      (4) If pixas is NULL or contains no pix, this is a no-op.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -346,6 +357,10 @@ Join(lua_State *L)
  * \brief Read a Pixa* from an external file.
  * <pre>
  * Arg #1 is expected to be a string containing the filename.
+ *
+ * Notes:
+ *      (1) The pix are stored in the file as png.
+ *          If the png library is not linked, this will fail.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pixa* on the Lua stack
@@ -364,6 +379,13 @@ Read(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string containing the directory (dirname).
  * Arg #2 is expected to be a string (substr).
+ *
+ * Notes:
+ *      (1) %dirname is the full path for the directory.
+ *      (2) %substr is the part of the file name (excluding
+ *          the directory) that is to be matched.  All matching
+ *          filenames are read into the Pixa.  If substr is NULL,
+ *          all filenames are read into the Pixa.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pixa* on the Lua stack
@@ -400,6 +422,10 @@ ReadMem(lua_State *L)
  * \brief Read a Pixa* from a Lua io stream (%stream).
  * <pre>
  * Arg #1 is expected to be a luaL_Stream* (stream).
+ *
+ * Notes:
+ *      (1) The pix are stored in the file as png.
+ *          If the png library is not linked, this will fail.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pixa* on the Lua stack
@@ -418,6 +444,12 @@ ReadStream(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
  * Arg #2 is expected to be a l_int32 (idx).
+ *
+ * Notes:
+ *      (1) This shifts pixa[i] --> pixa[i - 1] for all i > index.
+ *      (2) It should not be used repeatedly on large arrays,
+ *          because the function is O(n).
+ *      (3) The corresponding box is removed as well, if it exists.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -436,6 +468,13 @@ RemovePix(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa*.
  * Arg #2 is expected to be a l_int32 (%idx).
+ *
+ * Notes:
+ *      (1) This shifts pixa[i] --> pixa[i - 1] for all i > index.
+ *      (2) It should not be used repeatedly on large arrays,
+ *          because the function is O(n).
+ *      (3) The corresponding box is removed as well, if it exists.
+ *      (4) The removed pix and box can either be retained or destroyed.
  * </pre>
  * \param L pointer to the lua_State
  * \return 2 Pix* (pix) and one Box* (box) on the Lua stack
@@ -460,6 +499,10 @@ RemovePixAndSave(lua_State *L)
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a Pix* (pixs).
  * Arg #4 is an optional Box* (boxs).
+ *
+ * Notes:
+ *      (1) In-place replacement of one pix.
+ *      (2) The previous pix at that location is destroyed.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -503,6 +546,10 @@ TemplatesFromComposites(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa* user data.
  * Arg #2 is expected to be string containing the filename.
+ *
+ * Notes:
+ *      (1) The pix are stored in the file as png.
+ *          If the png library is not linked, this will fail.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -520,6 +567,9 @@ Write(lua_State *L)
  * \brief Write the Pixa* (%pixa) to memory and return it as a Lua string.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa* user data.
+ *
+ * Notes:
+ *      (1) Serializes a pixa in memory and puts the result in a buffer.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -543,6 +593,10 @@ WriteMem(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa* user data.
  * Arg #2 is expected to be a luaL_Stream* (stream).
+ *
+ * Notes:
+ *      (1) The pix are stored in the file as png.
+ *          If the png library is not linked, this will fail.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -554,6 +608,37 @@ WriteStream(lua_State *L)
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
     return ll_push_boolean(_fun, L, 0 == pixaWriteStream(stream->f, pixa));
+}
+
+/**
+ * \brief Display() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
+ * Arg #2 is expected to be a l_int32 (w).
+ * Arg #3 is expected to be a l_int32 (h).
+ *
+ * Notes:
+ *      (1) This uses the boxes to place each pix in the rendered composite.
+ *      (2) Set w = h = 0 to use the b.b. of the components to determine
+ *          the size of the returned pix.
+ *      (3) Uses the first pix in pixa to determine the depth.
+ *      (4) The background is written "white".  On 1 bpp, each successive
+ *          pix is "painted" (adding foreground), whereas for grayscale
+ *          or color each successive pix is blitted with just the src.
+ *      (5) If the pixa is empty, returns an empty 1 bpp pix.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+Display(lua_State *L)
+{
+    LL_FUNC("Display");
+    Pixa *pixa = ll_check_Pixa(_fun, L, 1);
+    l_int32 w = ll_opt_l_int32(_fun, L, 2, 0);
+    l_int32 h = ll_opt_l_int32(_fun, L, 3, 0);
+    Pix *pix = pixaDisplay(pixa, w, h);
+    return ll_push_Pix(_fun, L, pix);
 }
 
 /**
