@@ -135,7 +135,7 @@ Copy(lua_State *L)
  * Arg #1 is expected to be a l_int32 (height).
  * Arg #2 is expected to be a l_int32 (width).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) kernelCreate() initializes all values to 0.
  *      (2) After this call, (cy,cx) and nonzero data values must be
  *          assigned.
@@ -159,7 +159,7 @@ Create(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string (filename).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The file contains, in the following order:
  *           ~ Any number of comment lines starting with '#' are ignored
  *           ~ The height and width of the kernel
@@ -205,7 +205,7 @@ CreateFromFile(lua_State *L)
  * Arg #2 is expected to be a l_int32 (cy).
  * Arg #3 is expected to be a l_int32 (cx).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The origin must be positive and within the dimensions of the pix.
  * </pre>
  * \param L pointer to the lua_State
@@ -231,7 +231,7 @@ CreateFromPix(lua_State *L)
  * Arg #4 is expected to be a l_int32 (cx).
  * Arg #5 is expected to be a string (kdata).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The data is an array of chars, in row-major order, giving
  *          space separated integers in the range [-255 ... 255].
  *      (2) The only other formatting limitation is that you must
@@ -266,7 +266,7 @@ CreateFromString(lua_State *L)
  * Arg #2 is expected to be a l_int32 (size).
  * Arg #3 is expected to be a l_int32 (gthick).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This gives a visual representation of a kernel.
  *      (2) There are two modes of display:
  *          (a) Grid lines of minimum width 2, surrounding regions
@@ -391,7 +391,7 @@ GetSum(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Kernel* (kels).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For convolution, the kernel is spatially inverted before
  *          a "correlation" operation is done between the kernel and the image.
  * </pre>
@@ -413,7 +413,7 @@ Invert(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Kernel* (kels).
  * Arg #2 is expected to be a l_float32 (normsum).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If the sum of kernel elements is close to 0, do not
  *          try to calculate the normalized kernel.  Instead,
  *          return a copy of the input kernel, with a warning.

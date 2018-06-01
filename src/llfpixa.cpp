@@ -45,7 +45,7 @@
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPixa* (fpixa).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Decrements the ref count and, if 0, destroys the fpixa.
  *      (2) Always nulls the input ptr.
  * </pre>
@@ -124,7 +124,7 @@ ChangeRefcount(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPixa* (fpixa).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The lab image is stored in three fpix.
  * </pre>
  * \param L pointer to the lua_State
@@ -144,7 +144,7 @@ ConvertLABToRGB(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPixa* (fpixas).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The input [l,a,b] and output [x,y,z] values are stored as
  *          float values, each set in three fpix.
  * </pre>
@@ -165,7 +165,7 @@ ConvertLABToXYZ(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPixa* (fpixas).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The input [x,y,z] and output [l,a,b] values are stored as
  *          float values, each set in three fpix.
  *      (2) The CIE LAB color space was invented in 1976, as an
@@ -193,7 +193,7 @@ ConvertXYZToLAB(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPixa* (fpixa).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The xyz image is stored in three fpix.
  *      (2) For values of xyz that are out of gamut for rgb, the rgb
  *          components are set to the closest valid color.
@@ -216,7 +216,7 @@ ConvertXYZToRGB(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a FPixa* (fpixa).
  * Arg #2 is expected to be a string describing the copy mode (copyflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      copyflag may be one of
  *        ~ L_COPY makes a new fpixa and copies each fpix
  *        ~ L_CLONE gives a new ref-counted handle to the input fpixa
@@ -259,7 +259,7 @@ Create(lua_State *L)
  * Arg #2 is expected to be a l_int32 (factor).
  * Arg #3 is expected to be a l_int32 (fontsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The mean and root variance fall naturally in the 8 bpp range,
  *          but the variance is typically outside the range.  This
  *          function displays 8 bpp pix clipped to 255, so the image

@@ -163,7 +163,7 @@ Create(lua_State *L)
  * Arg #1 is expected to be a l_int32 (nptr).
  * Arg #1 is expected to be a l_int32 (n).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This allocates numaa and fills the array with allocated numas.
  *          In use, after calling this function, use
  *              numaaAddNumber(naa, index, val);
@@ -187,7 +187,7 @@ CreateFull(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numaa*.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This 'flattens' the Numaa to a Numa, by joining successively
  *          each Numa in the Numaa.
  *      (2) It doesn't make any assumptions about the location of the
@@ -322,7 +322,7 @@ ReadStream(lua_State *L)
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a Numa* (na).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Any existing numa is destroyed, and the input one
  *          is inserted in its place.
  *      (2) If the index is invalid, return 1 (error)
@@ -345,7 +345,7 @@ ReplaceNuma(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numaa*.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This identifies the largest index containing a numa that
  *          has any numbers within it, destroys all numa beyond that
  *          index, and resets the count.
@@ -384,7 +384,7 @@ Write(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numaa* user data.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Serializes a numaa in memory and puts the result in a buffer.
  * </pre>
  * \param L pointer to the lua_State

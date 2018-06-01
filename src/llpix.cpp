@@ -56,7 +56,7 @@ static l_int32 tab8[256];
  * <pre>
  * Arg #1 is expected to be Pix*.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Decrements the ref count and, if 0, destroys the pix.
  *      (2) Always nulls the input ptr.
  * </pre>
@@ -82,7 +82,7 @@ Destroy(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This gives the set subtraction of two images with equal depth,
  *          aligning them to the the UL corner.  pixs1 and pixs2
  *          need not have the same width and height.
@@ -123,7 +123,7 @@ Subtract(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is an optional Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This inverts pixs, for all pixel depths.
  *      (2) There are 3 cases:
  *           (a) pixd == null,   ~src --> new pixd
@@ -154,7 +154,7 @@ Invert(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This gives the intersection of two images with equal depth,
  *          aligning them to the the UL corner.  pixs1 and pixs2
  *          need not have the same width and height.
@@ -194,7 +194,7 @@ And(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This gives the union of two images with equal depth,
  *          aligning them to the the UL corner.  pixs1 and pixs2
  *          need not have the same width and height.
@@ -234,7 +234,7 @@ Or(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This gives the XOR of two images with equal depth,
  *          aligning them to the the UL corner.  pixs1 and pixs2
  *          need not have the same width and height.
@@ -344,7 +344,7 @@ toString(lua_State* L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is an optional Box* (box).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is an average over differences of adjacent pixels along
  *          each column.
  *      (2) To resample for a bin size different from 1, use
@@ -369,7 +369,7 @@ AbsDiffByColumn(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is an optional Box* (box).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is an average over differences of adjacent pixels along
  *          each row.
  *      (2) To resample for a bin size different from 1, use
@@ -395,7 +395,7 @@ AbsDiffByRow(lua_State *L)
  * Arg #2 is an optional Box* (box).
  * Arg #2 is an optional string (dir: horizontal-line or vertical-line).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This gives the average over the abs val of differences of
  *          adjacent pixels values, along either each
  *             row:     dir == L_HORIZONTAL_LINE
@@ -424,7 +424,7 @@ AbsDiffInRect(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is an optional Box* (box).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This gives the average over the abs val of differences of
  *          adjacent pixels values, along a line that is either horizontal
  *          or vertical.
@@ -455,7 +455,7 @@ AbsDiffOnLine(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs1).
  * Arg #2 is expected to be a Pix* (pixs2).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The depth of pixs1 and pixs2 must be equal.
  *      (2) Clips computation to the min size, aligning the UL corners
  *      (3) For 8 and 16 bpp, assumes one gray component.
@@ -484,7 +484,7 @@ AbsDifference(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (op).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This adds or subtracts each pixs value from pixd.
  *      (2) This clips to the minimum of pixs and pixd, so they
  *          do not need to be the same size.
@@ -509,7 +509,7 @@ Accumulate(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
  * Arg #2 is expected to be a Pta* (pta).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This generates an aligned (by centroid) sum of the input pix.
  *      (2) We use only the first 256 samples; that's plenty.
  *      (3) If pta is not input, we generate two tables, and discard
@@ -543,7 +543,7 @@ AccumulateSamples(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixm).
  * Arg #3 is expected to be a l_float32 (gamma).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a simple convenience function for doing adaptive
  *          thresholding on a grayscale image with variable background.
  *          It uses default parameters appropriate for typical text images.
@@ -584,7 +584,7 @@ AdaptThresholdToBinary(lua_State *L)
  * Arg #5 is expected to be a l_int32 (whiteval).
  * Arg #6 is expected to be a l_int32 (thresh).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a convenience function for doing adaptive thresholding
  *          on a grayscale image with variable background.  Also see notes
  *          in pixAdaptThresholdToBinary().
@@ -620,7 +620,7 @@ AdaptThresholdToBinaryGen(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) We don't use 1 bpp colormapped images with alpha in leptonica,
  *          but we support generating them (here), writing to png, and reading
  *          the png.  On reading, they are converted to 32 bpp RGBA.
@@ -649,7 +649,7 @@ AddAlphaTo1bpp(lua_State *L)
  * Arg #2 is expected to be a l_float32 (fract).
  * Arg #3 is expected to be a l_int32 (invert).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a simple alpha layer generator, where typically white has
  *          maximum transparency and black has minimum.
  *      (2) If %invert == 1, generate the same alpha layer but invert
@@ -686,7 +686,7 @@ AddAlphaToBlend(lua_State *L)
  * Arg #5 is expected to be a l_int32 (bottom).
  * Arg #6 is expected to be a string describing the operation (op).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixGetBlackOrWhiteVal() for possible side effect (adding
  *          a color to a colormap).
  *      (2) The only complication is that pixs may have a colormap.
@@ -726,7 +726,7 @@ AddBlackOrWhiteBorder(lua_State *L)
  * Arg #2 is expected to be a l_int32 (npix).
  * Arg #3 is expected to be a l_uint32 (val).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixGetBlackOrWhiteVal() for values of black and white pixels.
  * </pre>
  * \param L pointer to the lua_State
@@ -754,7 +754,7 @@ AddBorder(lua_State *L)
  * Arg #5 is expected to be a l_int32 (bottom).
  * Arg #6 is expected to be a l_uint32 (val).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For binary images:
  *             white:  val = 0
  *             black:  val = 1
@@ -800,7 +800,7 @@ AddBorderGeneral(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (val).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) In-place operation.
  *      (2) No clipping for 32 bpp.
  *      (3) For 8 and 16 bpp, if val > 0 the result is clipped
@@ -828,7 +828,7 @@ AddConstantGray(lua_State *L)
  * Arg #4 is expected to be a l_int32 (top).
  * Arg #5 is expected to be a l_int32 (bottom).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This adds pixels on each side whose values are equal to
  *          the value on the closest boundary pixel.
  * </pre>
@@ -855,7 +855,7 @@ AddContinuedBorder(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (stdev).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This adds noise to each pixel, taken from a normal
  *          distribution with zero mean and specified standard deviation.
  * </pre>
@@ -879,7 +879,7 @@ AddGaussianNoise(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs1).
  * Arg #3 is expected to be a Pix* (pixs2).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Arithmetic addition of two 8, 16 or 32 bpp images.
  *      (2) For 8 and 16 bpp, we do explicit clipping to 0xff and 0xffff,
  *          respectively.
@@ -910,7 +910,7 @@ AddGray(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If pixs has a colormap, this is a no-op.
  * </pre>
  * \param L pointer to the lua_State
@@ -929,7 +929,7 @@ AddGrayColormap8(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This generates a colormapped version of the input image
  *          that has the same number of colormap entries as the
  *          input image has unique gray levels.
@@ -955,7 +955,7 @@ AddMinimalGrayColormap8(lua_State *L)
  * Arg #4 is expected to be a l_int32 (top).
  * Arg #5 is expected to be a l_int32 (bottom).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This applies what is effectively mirror boundary conditions.
  *          For the added border pixels in pixd, the pixels in pixs
  *          near the border are mirror-copied into the border region.
@@ -996,7 +996,7 @@ AddMirroredBorder(lua_State *L)
  * Arg #4 is expected to be a l_int32 (top).
  * Arg #5 is expected to be a l_int32 (bottom).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This applies mirrored boundary conditions horizontally
  *          and repeated b.c. vertically.
  *      (2) It is specifically used for avoiding special operations
@@ -1036,7 +1036,7 @@ AddMixedBorder(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs1).
  * Arg #2 is expected to be a Pix* (pixs2).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Clips computation to the minimum size, aligning the UL corners.
  *      (2) Removes any colormap to RGB, and ignores the LSB of each
  *          pixel word (the alpha channel).
@@ -1066,7 +1066,7 @@ AddRGB(lua_State *L)
  * Arg #4 is expected to be a l_int32 (top).
  * Arg #5 is expected to be a l_int32 (bottom).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This applies a repeated border, as if the central part of
  *          the image is tiled over the plane.  So, for example, the
  *          pixels in the left border come from the right side of the image.
@@ -1099,7 +1099,7 @@ AddRepeatedBorder(lua_State *L)
  * Arg #4 is expected to be a l_uint32 (val).
  * Arg #5 is expected to be a l_int32 (location).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function paints a set of lines of text over an image.
  *          If %location is L_ADD_ABOVE or L_ADD_BELOW, the pix size
  *          is expanded with a border and rendered over the border.
@@ -1138,7 +1138,7 @@ AddSingleTextblock(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a string (text).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This adds the new textstring to any existing text.
  *      (2) Either or both the existing text and the new text
  *          string can be null.
@@ -1165,7 +1165,7 @@ AddText(lua_State *L)
  * Arg #4 is expected to be a l_uint32 (val).
  * Arg #5 is expected to be a l_int32 (location).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function expands an image as required to paint one or
  *          more lines of text adjacent to the image.  If %bmf == NULL,
  *          this returns a copy.  If above or below, the lines are
@@ -1235,7 +1235,7 @@ AdjacentOnPixelInRaster(lua_State *L)
  * Arg #2 is expected to be a Pixa* (pixa).
  * Arg #3 is expected to be a Numa* (na).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This complements pixRemoveWithIndicator().   Here, the selected
  *          components are added to pixs.
  * </pre>
@@ -1258,7 +1258,7 @@ AddWithIndicator(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Brings in either black or white pixels from the boundary
  *      (2) Removes any existing colormap, if necessary, before transforming
  * </pre>
@@ -1330,7 +1330,7 @@ AffineGray(lua_State *L)
  * Arg #3 is expected to be a Pta* (ptas).
  * Arg #4 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Brings in either black or white pixels from the boundary
  *      (2) Removes any existing colormap, if necessary, before transforming
  * </pre>
@@ -1405,7 +1405,7 @@ AffinePtaGray(lua_State *L)
  * Arg #5 is expected to be a l_float32 (fract).
  * Arg #6 is expected to be a l_int32 (border).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The alpha channel is transformed separately from pixs,
  *          and aligns with it, being fully transparent outside the
  *          boundary of the transformed pixs.  For pixels that are fully
@@ -1457,7 +1457,7 @@ AffinePtaWithAlpha(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Brings in either black or white pixels from the boundary.
  *      (2) Retains colormap, which you can do for a sampled transform..
  *      (3) For 8 or 32 bpp, much better quality is obtained by the
@@ -1488,7 +1488,7 @@ AffineSampled(lua_State *L)
  * Arg #3 is expected to be a Pta* (ptas).
  * Arg #4 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Brings in either black or white pixels from the boundary.
  *      (2) Retains colormap, which you can do for a sampled transform..
  *      (3) The 3 points must not be collinear.
@@ -1531,7 +1531,7 @@ AffineSampledPta(lua_State *L)
  * Arg #4 is expected to be a l_int32 (bw).
  * Arg #5 is expected to be a l_int32 (bh).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The 3 pts must not be collinear.
  *      (2) The 3 pts must be given in this order:
  *           ~ origin
@@ -1569,7 +1569,7 @@ AffineSequential(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_uint32 (color).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a convenience function that renders 32 bpp RGBA images
  *          (with an alpha channel) over a uniform background of
  *          value %color.  To render over a white background,
@@ -1688,7 +1688,7 @@ ApplyLocalThreshold(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixg).
  * Arg #3 is expected to be a l_int32 (target).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Suppose you have an image that you want to transform based
  *          on some photometric measurement at each point, such as the
  *          threshold value for binarization.  Representing the photometric
@@ -1726,7 +1726,7 @@ ApplyVariableGrayMap(lua_State *L)
  * Arg #3 is expected to be a Pix* (pixm).
  * Arg #4 is expected to be a l_int32 (level).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is used in phase 2 of color segmentation, where pixs
  *          is the original input image to pixColorSegment(), and
  *          pixd is the colormapped image returned from
@@ -1779,7 +1779,7 @@ AssignToNearestColor(lua_State *L)
  * Arg #2 is an optional Box* (box).
  * Arg #3 is an optional string (type: white-is-max or black-is-max).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) To resample for a bin size different from 1, use
  *          numaUniformSampling() on the result of this function.
  *      (2) If type == L_BLACK_IS_MAX, black pixels get the maximum
@@ -1806,7 +1806,7 @@ AverageByColumn(lua_State *L)
  * Arg #2 is an optional Box* (box).
  * Arg #3 is an optional string (type).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) To resample for a bin size different from 1, use
  *          numaUniformSampling() on the result of this function.
  *      (2) If type == L_BLACK_IS_MAX, black pixels get the maximum
@@ -1859,7 +1859,7 @@ AverageInRect(lua_State *L)
  * Arg #6 is expected to be a l_int32 (factor1).
  * Arg #7 is expected to be a l_int32 (factor2).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If d != 1 bpp, colormaps are removed and the result
  *          is converted to 8 bpp.
  *      (2) If %dir == L_HORIZONTAL_LINE, the intensity is averaged
@@ -1903,7 +1903,7 @@ AverageIntensityProfile(lua_State *L)
  * Arg #5 is expected to be a l_int32 (y2).
  * Arg #6 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The line must be either horizontal or vertical, so either
  *          y1 == y2 (horizontal) or x1 == x2 (vertical).
  *      (2) If horizontal, x1 must be <= x2.
@@ -1941,7 +1941,7 @@ AverageOnLine(lua_State *L)
  * Arg #9 is expected to be a l_int32 (smoothx).
  * Arg #10 is expected to be a l_int32 (smoothy).
  *
- * Notes:
+ * Leptonica's Notes:
  *    (1) This is a top-level interface for normalizing the image intensity
  *        by mapping the image so that the background is near the input
  *        value 'bgval'.
@@ -2015,7 +2015,7 @@ BackgroundNorm(lua_State *L)
  * Arg #5 is expected to be a l_int32 (smoothy).
  * Arg #6 is expected to be a l_int32 (delta).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does adaptation flexibly to a quickly varying background.
  *          For that reason, all input parameters should be small.
  *      (2) sx and sy give the tile size; they should be in [5 - 7].
@@ -2060,7 +2060,7 @@ BackgroundNormFlex(lua_State *L)
  * Arg #8 is expected to be a l_int32 (smoothx).
  * Arg #9 is expected to be a l_int32 (smoothy).
  *
- * Notes:
+ * Leptonica's Notes:
  *    (1) See notes in pixBackgroundNorm().
  *    (2) This returns a 16 bpp pix that can be used by
  *        pixApplyInvBackgroundGrayMap() to generate a normalized version
@@ -2096,7 +2096,7 @@ BackgroundNormGrayArray(lua_State *L)
  * Arg #4 is expected to be a l_int32 (size).
  * Arg #5 is expected to be a l_int32 (bgval).
  *
- * Notes:
+ * Leptonica's Notes:
  *    (1) See notes in pixBackgroundNormMorph().
  *    (2) This returns a 16 bpp pix that can be used by
  *        pixApplyInvBackgroundGrayMap() to generate a normalized version
@@ -2129,7 +2129,7 @@ BackgroundNormGrayArrayMorph(lua_State *L)
  * Arg #4 is expected to be a l_int32 (size).
  * Arg #5 is expected to be a l_int32 (bgval).
  *
- * Notes:
+ * Leptonica's Notes:
  *    (1) This is a top-level interface for normalizing the image intensity
  *        by mapping the image so that the background is near the input
  *        value 'bgval'.
@@ -2186,7 +2186,7 @@ BackgroundNormMorph(lua_State *L)
  * Arg #9 is expected to be a l_int32 (smoothx).
  * Arg #10 is expected to be a l_int32 (smoothy).
  *
- * Notes:
+ * Leptonica's Notes:
  *    (1) See notes in pixBackgroundNorm().
  *    (2) This returns a set of three 16 bpp pix that can be used by
  *        pixApplyInvBackgroundGrayMap() to generate a normalized version
@@ -2227,7 +2227,7 @@ BackgroundNormRGBArrays(lua_State *L)
  * Arg #4 is expected to be a l_int32 (size).
  * Arg #5 is expected to be a l_int32 (bgval).
  *
- * Notes:
+ * Leptonica's Notes:
  *    (1) See notes in pixBackgroundNormMorph().
  *    (2) This returns a set of three 16 bpp pix that can be used by
  *        pixApplyInvBackgroundGrayMap() to generate a normalized version
@@ -2260,7 +2260,7 @@ BackgroundNormRGBArraysMorph(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixim).
  * Arg #3 is expected to be a Pix* (pixg).
  *
- * Notes:
+ * Leptonica's Notes:
  *    (1) This is a simplified interface to pixBackgroundNorm(),
  *        where seven parameters are defaulted.
  *    (2) The input image is either grayscale or rgb.
@@ -2293,7 +2293,7 @@ BackgroundNormSimple(lua_State *L)
  * Arg #7 is expected to be a l_int32 (maxshift).
  * Arg #12 is expected to be a l_int32 (debugflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This maximizes the correlation score between two 1 bpp images,
  *          by starting with an estimate of the alignment
  *          (%etransx, %etransy) and computing the correlation around this.
@@ -2349,7 +2349,7 @@ BestCorrelation(lua_State *L)
  * Arg #4 is expected to be a l_int32 (ncomps).
  * Arg #5 is expected to be a l_int32 (reduction).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This performs a relatively fast, separable bilateral
  *          filtering operation.  The time is proportional to ncomps
  *          and varies inversely approximately as the cube of the
@@ -2414,7 +2414,7 @@ Bilateral(lua_State *L)
  * Arg #2 is expected to be a Kernel* (spatial_kel).
  * Arg #3 is expected to be a Kernel* (range_kel).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The spatial_kel is a conventional smoothing kernel, typically a
  *          2-d Gaussian kernel or other block kernel.  It can be either
  *          normalized or not, but must be everywhere positive.
@@ -2450,7 +2450,7 @@ BilateralExact(lua_State *L)
  * Arg #4 is expected to be a l_int32 (ncomps).
  * Arg #5 is expected to be a l_int32 (reduction).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixBilateral() for constraints on the input parameters.
  *      (2) See pixBilateral() for algorithm details.
  * </pre>
@@ -2477,7 +2477,7 @@ BilateralGray(lua_State *L)
  * Arg #2 is expected to be a Kernel* (spatial_kel).
  * Arg #3 is expected to be a Kernel* (range_kel).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixBilateralExact().
  * </pre>
  * \param L pointer to the lua_State
@@ -2500,7 +2500,7 @@ BilateralGrayExact(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Brings in either black or white pixels from the boundary
  *      (2) Removes any existing colormap, if necessary, before transforming
  * </pre>
@@ -2572,7 +2572,7 @@ BilinearGray(lua_State *L)
  * Arg #3 is expected to be a Pta* (ptas).
  * Arg #4 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Brings in either black or white pixels from the boundary
  *      (2) Removes any existing colormap, if necessary, before transforming
  * </pre>
@@ -2647,7 +2647,7 @@ BilinearPtaGray(lua_State *L)
  * Arg #5 is expected to be a l_float32 (fract).
  * Arg #6 is expected to be a l_int32 (border).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The alpha channel is transformed separately from pixs,
  *          and aligns with it, being fully transparent outside the
  *          boundary of the transformed pixs.  For pixels that are fully
@@ -2699,7 +2699,7 @@ BilinearPtaWithAlpha(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Brings in either black or white pixels from the boundary.
  *      (2) Retains colormap, which you can do for a sampled transform..
  *      (3) For 8 or 32 bpp, much better quality is obtained by the
@@ -2730,7 +2730,7 @@ BilinearSampled(lua_State *L)
  * Arg #3 is expected to be a Pta* (ptas).
  * Arg #4 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Brings in either black or white pixels from the boundary.
  *      (2) Retains colormap, which you can do for a sampled transform..
  *      (3) No 3 of the 4 points may be collinear.
@@ -2762,7 +2762,7 @@ BilinearSampledPta(lua_State *L)
  * Arg #4 is expected to be a l_int32 (y).
  * Arg #5 is expected to be a l_float32 (fract).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a simple top-level interface.  For more flexibility,
  *          call directly into pixBlendMask(), etc.
  * </pre>
@@ -2793,7 +2793,7 @@ Blend(lua_State *L)
  * Arg #6 is expected to be a l_int32 (minval).
  * Arg #7 is expected to be a l_int32 (maxval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This in effect replaces light background pixels in pixs
  *          by the input color.  It does it by alpha blending so that
  *          there are no visible artifacts from hard cutoffs.
@@ -2831,7 +2831,7 @@ BlendBackgroundToColor(lua_State *L)
  * Arg #2 is expected to be a Boxa* (boxa).
  * Arg #3 is expected to be a l_float32 (fract).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) pixs is converted to 32 bpp.
  *      (2) This differs from pixPaintBoxaRandom(), in that the
  *          colors here are blended with the color of pixs.
@@ -2862,7 +2862,7 @@ BlendBoxaRandom(lua_State *L)
  * Arg #4 is expected to be a l_int32 (y).
  * Arg #5 is expected to be a l_int32 (sindex).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function combines two colormaps, and replaces the pixels
  *          in pixs that have a specified color value with those in pixb.
  *      (2) sindex must be in the existing colormap; otherwise an
@@ -2905,7 +2905,7 @@ BlendCmap(lua_State *L)
  * Arg #7 is expected to be a l_int32 (transparent).
  * Arg #8 is expected to be a l_uint32 (transpix).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For inplace operation (pixs1 must be 32 bpp), call it this way:
  *            pixBlendColor(pixs1, pixs1, pixs2, ...)
  *      (2) For generating a new pixd:
@@ -2986,7 +2986,7 @@ BlendColorByChannel(lua_State *L)
  * Arg #8 is expected to be a l_int32 (transparent).
  * Arg #9 is expected to be a l_uint32 (transpix).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For inplace operation (pixs1 not cmapped), call it this way:
  *            pixBlendGray(pixs1, pixs1, pixs2, ...)
  *      (2) For generating a new pixd:
@@ -3041,7 +3041,7 @@ BlendGray(lua_State *L)
  * Arg #6 is expected to be a l_float32 (fract).
  * Arg #7 is expected to be a l_int32 (shift).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For inplace operation (pixs1 not cmapped), call it this way:
  *            pixBlendGrayAdapt(pixs1, pixs1, pixs2, ...)
  *          For generating a new pixd:
@@ -3097,7 +3097,7 @@ BlendGrayAdapt(lua_State *L)
  * Arg #5 is expected to be a l_int32 (y).
  * Arg #6 is expected to be a l_float32 (fract).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For inplace operation (pixs1 not cmapped), call it this way:
  *            pixBlendGrayInverse(pixs1, pixs1, pixs2, ...)
  *      (2) For generating a new pixd:
@@ -3171,7 +3171,7 @@ BlendHardLight(lua_State *L)
  * Arg #3 is expected to be a l_uint32 (val).
  * Arg #4 is expected to be a l_float32 (fract).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is an in-place function.  It blends the input color %val
  *          with the pixels in pixs in the specified rectangle.
  *          If no rectangle is specified, it blends over the entire image.
@@ -3201,7 +3201,7 @@ BlendInRect(lua_State *L)
  * Arg #6 is expected to be a l_float32 (fract).
  * Arg #7 is expected to be a l_int32 (type).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Clipping of pixs2 to pixs1 is done in the inner pixel loop.
  *      (2) If pixs1 has a colormap, it is removed.
  *      (3) For inplace operation (pixs1 not cmapped), call it this way:
@@ -3239,7 +3239,7 @@ BlendMask(lua_State *L)
  * Arg #4 is expected to be a l_int32 (x).
  * Arg #5 is expected to be a l_int32 (y).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The result is 8 bpp grayscale if both pixs1 and pixs2 are
  *          8 bpp gray.  Otherwise, the result is 32 bpp rgb.
  *      (2) pixg is an 8 bpp transparency image, where 0 is transparent
@@ -3284,7 +3284,7 @@ BlendWithGrayMask(lua_State *L)
  * Arg #2 is expected to be a l_float32 (spatial_stdev).
  * Arg #3 is expected to be a l_float32 (range_stdev).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixBilateralExact().  This provides an interface using
  *          the standard deviations of the spatial and range filters.
  *      (2) The convolution window halfwidth is 2 * spatial_stdev,
@@ -3331,7 +3331,7 @@ BlockBilateralExact(lua_State *L)
  * Arg #2 is expected to be a l_int32 (wc).
  * Arg #3 is expected to be a l_int32 (hc).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The full width and height of the convolution kernel
  *          are (2 * wc + 1) and (2 * hc + 1)
  *      (2) Returns a copy if both wc and hc are 0
@@ -3357,7 +3357,7 @@ Blockconv(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The general recursion relation is
  *            a(i,j) = v(i,j) + a(i-1, j) + a(i, j-1) - a(i-1, j-1)
  *          For the first line, this reduces to the special case
@@ -3385,7 +3385,7 @@ BlockconvAccum(lua_State *L)
  * Arg #3 is expected to be a l_int32 (wc).
  * Arg #4 is expected to be a l_int32 (hc).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If accum pix is null, make one and destroy it before
  *          returning; otherwise, just use the input accum pix.
  *      (2) The full width and height of the convolution kernel
@@ -3417,7 +3417,7 @@ BlockconvGray(lua_State *L)
  * Arg #3 is expected to be a l_int32 (wc).
  * Arg #4 is expected to be a l_int32 (hc).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The full width and height of the convolution kernel
  *          are (2 * wc + 1) and (2 * hc + 1)
  *      (2) Assumes that the input pixs is padded with (wc + 1) pixels on
@@ -3450,7 +3450,7 @@ BlockconvGrayTile(lua_State *L)
  * Arg #2 is expected to be a l_int32 (wc).
  * Arg #3 is expected to be a l_int32 (hc).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The full width and height of the convolution kernel
  *          are (2 * wc + 1) and (2 * hc + 1).
  *      (2) Require that w >= 2 * wc + 1 and h >= 2 * hc + 1,
@@ -3499,7 +3499,7 @@ BlockconvGrayUnnormalized(lua_State *L)
  * Arg #4 is expected to be a l_int32 (nx).
  * Arg #5 is expected to be a l_int32 (ny).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The full width and height of the convolution kernel
  *          are (2 * wc + 1) and (2 * hc + 1)
  *      (2) Returns a copy if both wc and hc are 0
@@ -3544,7 +3544,7 @@ BlockconvTiled(lua_State *L)
  * Arg #4 is expected to be a l_int32 (hc).
  * Arg #5 is expected to be a l_float32 (rank).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The full width and height of the convolution kernel
  *          are (2 * wc + 1) and (2 * hc + 1)
  *      (2) This returns a pixd where each pixel is a 1 if the
@@ -3584,7 +3584,7 @@ Blockrank(lua_State *L)
  * Arg #3 is expected to be a l_int32 (wc).
  * Arg #4 is expected to be a l_int32 (hc).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If accum pix is null, make one and destroy it before
  *          returning; otherwise, just use the input accum pix
  *      (2) The full width and height of the convolution kernel
@@ -3627,7 +3627,7 @@ Blocksum(lua_State *L)
  * Arg #2 is expected to be a l_int32 (halfsize).
  * Arg #3 is expected to be a Pix* (pixacc).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The Census transform was invented by Ramin Zabih and John Woodfill
  *          ("Non-parametric local transforms for computing visual
  *          correspondence", Third European Conference on Computer Vision,
@@ -3664,7 +3664,7 @@ CensusTransform(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Any table not passed in will be made internally and destroyed
  *          after use.
  * </pre>
@@ -3695,7 +3695,7 @@ Centroid(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This first does a photometric inversion (black = 255, white = 0).
  *          It then finds the centroid of the result.  The inversion is
  *          done because white is usually background, so the centroid
@@ -3743,7 +3743,7 @@ ChangeRefcount(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This should only be called if the requested format is IFF_DEFAULT.
  *      (2) If the pix wasn't read from a file, its input format value
  *          will be IFF_UNKNOWN, and in that case it is written out
@@ -3771,7 +3771,7 @@ ChooseOutputFormat(lua_State *L)
  * Arg #5 is expected to be a l_int32 (blackval).
  * Arg #6 is expected to be a l_int32 (whiteval).
  *
- * Notes:
+ * Leptonica's Notes:
  *    (1) This is a simplified interface for cleaning an image.
  *        For comparison, see pixAdaptThresholdToBinaryGen().
  *    (2) The suggested default values for the input parameters are:
@@ -3802,7 +3802,7 @@ CleanBackgroundToWhite(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This must be called after processing that was initiated
  *          by pixSetupByteProcessing() has finished.
  * </pre>
@@ -3828,7 +3828,7 @@ CleanupByteProcessing(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Clears all data to 0.  For 1 bpp, this is white; for grayscale
  *          or color, this is black.
  *      (2) Caution: for colormapped pix, this sets the color to the first
@@ -3851,7 +3851,7 @@ ClearAll(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a Box* (box).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Clears all data in rect to 0.  For 1 bpp, this is white;
  *          for grayscale or color, this is black.
  *      (2) Caution: for colormapped pix, this sets the color to the first
@@ -3899,7 +3899,7 @@ ClearPixel(lua_State *L)
  * Arg #5 is expected to be a l_int32 (maxwidth).
  * Arg #6 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) At least one of {&pixd, &boxd} must be specified.
  *      (2) If there are no fg pixels, the returned ptrs are null.
  *      (3) This function attempts to locate rectangular "image" regions
@@ -3944,7 +3944,7 @@ ClipBoxToEdges(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Box* (boxs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) At least one of {&pixd, &boxd} must be specified.
  *      (2) If there are no fg pixels, the returned ptrs are null.
  *      (3) Do not use &pixs for the 3rd arg or &boxs for the 4th arg;
@@ -3977,7 +3977,7 @@ ClipBoxToForeground(lua_State *L)
  * Arg #4 is expected to be a l_int32 (y).
  * Arg #5 is expected to be a l_uint32 (outval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If pixs has a colormap, it is preserved in pixd.
  *      (2) The depth of pixd is the same as that of pixs.
  *      (3) If the depth of pixs is 1, use %outval = 0 for white background
@@ -4016,7 +4016,7 @@ ClipMasked(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Box* (box).
  *
- * Notes:
+ * Leptonica's Notes:
  *
  *  This should be simple, but there are choices to be made.
  *  The box is defined relative to the pix coordinates.  However,
@@ -4063,7 +4063,7 @@ ClipRectangle(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Boxa* (boxa).
  *
- * Notes:
+ * Leptonica's Notes:
  *     (1) The returned pixa includes the actual regions clipped out from
  *         the input pixs.
  * </pre>
@@ -4085,7 +4085,7 @@ ClipRectangles(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) At least one of {&pixd, &box} must be specified.
  *      (2) If there are no fg pixels, the returned ptrs are null.
  * </pre>
@@ -4111,7 +4111,7 @@ ClipToForeground(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) A "clone" is simply a handle (ptr) to an existing pix.
  *          It is implemented because (a) images can be large and
  *          hence expensive to copy, and (b) extra handles to a data
@@ -4146,7 +4146,7 @@ Clone(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Sel* (sel).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Generic morphological closing, using hits in the Sel.
  *      (2) This implementation is a strict dual of the opening if
  *          symmetric boundary conditions are used (see notes at top
@@ -4183,7 +4183,7 @@ Close(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Sel is a brick with all elements being hits
  *      (2) The origin is at (x, y) = (hsize/2, vsize/2)
  *      (3) Do separably if both hsize and vsize are > 1.
@@ -4220,7 +4220,7 @@ CloseBrick(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a 'safe' closing; we add an extra border of 32 OFF
  *          pixels for the standard asymmetric b.c.
  *      (2) These implement 2D brick Sels, using linear Sels generated
@@ -4268,7 +4268,7 @@ CloseBrickDwa(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Sel is a brick with all elements being hits
  *      (2) The origin is at (x, y) = (hsize/2, vsize/2)
  *      (3) Do compositely for each dimension > 1.
@@ -4319,7 +4319,7 @@ CloseCompBrick(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This implements a separable composite safe closing with 2D
  *          brick Sels.
  *      (2) For efficiency, it may decompose each linear morphological
@@ -4397,7 +4397,7 @@ CloseCompBrickExtendDwa(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Sel* (sel).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Generalized morphological closing, using both hits and
  *          misses in the Sel.
  *      (2) This does a dilation using the hits, followed by a
@@ -4434,7 +4434,7 @@ CloseGeneralized(lua_State *L)
  * Arg #2 is expected to be a l_int32 (hsize).
  * Arg #3 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Sel is a brick with all elements being hits
  *      (2) If hsize = vsize = 1, just returns a copy.
  * </pre>
@@ -4459,7 +4459,7 @@ CloseGray(lua_State *L)
  * Arg #2 is expected to be a l_int32 (hsize).
  * Arg #3 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Special case for 1x3, 3x1 or 3x3 brick sel (all hits)
  *      (2) If hsize = vsize = 1, just returns a copy.
  * </pre>
@@ -4484,7 +4484,7 @@ CloseGray3(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Sel* (sel).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Generic morphological closing, using hits in the Sel.
  *      (2) If non-symmetric boundary conditions are used, this
  *          function adds a border of OFF pixels that is of
@@ -4525,7 +4525,7 @@ CloseSafe(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Sel is a brick with all elements being hits
  *      (2) The origin is at (x, y) = (hsize/2, vsize/2)
  *      (3) Do separably if both hsize and vsize are > 1.
@@ -4567,7 +4567,7 @@ CloseSafeBrick(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Sel is a brick with all elements being hits
  *      (2) The origin is at (x, y) = (hsize/2, vsize/2)
  *      (3) Do compositely for each dimension > 1.
@@ -4624,7 +4624,7 @@ CloseSafeCompBrick(lua_State *L)
  * Arg #4 is expected to be a l_int32 (bwhite).
  * Arg #5 is expected to be a l_int32 (mingray).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This returns the color content in each component, which is
  *          a measure of the deviation from gray, and is defined
  *          as the difference between the component and the average of
@@ -4675,7 +4675,7 @@ ColorContent(lua_State *L)
  * Arg #4 is expected to be a l_int32 (diffthresh).
  * Arg #5 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function is asking the question: to what extent does the
  *          image appear to have color?   The amount of color a pixel
  *          appears to have depends on both the deviation of the
@@ -4739,7 +4739,7 @@ ColorFraction(lua_State *L)
  * Arg #6 is expected to be a l_int32 (gval).
  * Arg #7 is expected to be a l_int32 (bval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is an in-place operation; pixs is modified.
  *          If pixs is colormapped, the operation will add colors to the
  *          colormap.  Otherwise, pixs will be converted to 32 bpp rgb if
@@ -4794,7 +4794,7 @@ ColorGray(lua_State *L)
  * Arg #5 is expected to be a l_int32 (gval).
  * Arg #6 is expected to be a l_int32 (bval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is an in-place operation.
  *      (2) If type == L_PAINT_LIGHT, it colorizes non-black pixels,
  *          preserving antialiasing.
@@ -4848,7 +4848,7 @@ ColorGrayCmap(lua_State *L)
  * Arg #6 is expected to be a l_int32 (gval).
  * Arg #7 is expected to be a l_int32 (bval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This generates a new image, where some of the pixels under
  *          FG in the mask are colorized.
  *      (2) See pixColorGray() for usage with %type and %thresh.  Note
@@ -4893,7 +4893,7 @@ ColorGrayMasked(lua_State *L)
  * Arg #5 is expected to be a l_int32 (gval).
  * Arg #6 is expected to be a l_int32 (bval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is an in-place operation.
  *      (2) If type == L_PAINT_LIGHT, it colorizes non-black pixels,
  *          preserving antialiasing.
@@ -4931,7 +4931,7 @@ ColorGrayMaskedCmap(lua_State *L)
  * Arg #6 is expected to be a l_int32 (gval).
  * Arg #7 is expected to be a l_int32 (bval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This generates a new image, where some of the pixels in each
  *          box in the boxa are colorized.  See pixColorGray() for usage
  *          with %type and %thresh.  Note that %thresh is only used for
@@ -4974,7 +4974,7 @@ ColorGrayRegions(lua_State *L)
  * Arg #5 is expected to be a l_int32 (gval).
  * Arg #6 is expected to be a l_int32 (bval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is an in-place operation.
  *      (2) If type == L_PAINT_LIGHT, it colorizes non-black pixels,
  *          preserving antialiasing.
@@ -5015,7 +5015,7 @@ ColorGrayRegionsCmap(lua_State *L)
  * Arg #4 is expected to be a l_int32 (bwhite).
  * Arg #5 is expected to be a l_int32 (type).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For an RGB image, a gray pixel is one where all three components
  *          are equal.  We define the amount of color in an RGB pixel as
  *          a function depending on the absolute value of the differences
@@ -5076,7 +5076,7 @@ ColorMagnitude(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does the morph operation on each component separately,
  *          and recombines the result.
  *      (2) Sel is a brick with all elements being hits.
@@ -5105,7 +5105,7 @@ ColorMorph(lua_State *L)
  * Arg #3 is expected to be a l_int32 (dispsep).
  * Arg #4 is expected to be a l_int32 (dispy).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This works on 32 bpp rgb images.
  *      (2) Each component is processed separately.
  *      (3) This runs a pipeline of operations; no branching is allowed.
@@ -5157,7 +5157,7 @@ ColorMorphSequence(lua_State *L)
  * Arg #5 is expected to be a l_int32 (finalcolors).
  * Arg #6 is expected to be a l_int32 (debugflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The goal is to generate a small number of colors.
  *          Typically this would be specified by 'finalcolors',
  *          a number that would be somewhere between 3 and 6.
@@ -5207,7 +5207,7 @@ ColorSegment(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (selsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This operation is in-place.
  *      (2) This is phase 3 of color segmentation.  It is the first
  *          part of a two-step noise removal process.  Colors with a
@@ -5238,7 +5238,7 @@ ColorSegmentClean(lua_State *L)
  * Arg #3 is expected to be a l_int32 (maxcolors).
  * Arg #4 is expected to be a l_int32 (debugflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is phase 1.  See description in pixColorSegment().
  *      (2) Greedy unsupervised classification.  If the limit 'maxcolors'
  *          is exceeded, the computation is repeated with a larger
@@ -5271,7 +5271,7 @@ ColorSegmentCluster(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (finalcolors).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This operation is in-place.
  *      (2) This is phase 4 of color segmentation, and the second part
  *          of the 2-step noise removal.  Only 'finalcolors' different
@@ -5301,7 +5301,7 @@ ColorSegmentRemoveColors(lua_State *L)
  * Arg #3 is expected to be a l_float32 (gfract).
  * Arg #4 is expected to be a l_float32 (bfract).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This allows independent fractional shifts of the r,g and b
  *          components.  A positive shift pushes to saturation (255);
  *          a negative shift pushes toward 0 (black).
@@ -5337,7 +5337,7 @@ ColorShiftRGB(lua_State *L)
  * Arg #2 is expected to be a l_uint32 (color).
  * Arg #3 is expected to be a boolean (cmapflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This applies the specific color to the grayscale image.
  *      (2) If pixs already has a colormap, it is removed to gray
  *          before colorizing.
@@ -5363,7 +5363,7 @@ ColorizeGray(lua_State *L)
  * Arg #2 is expected to be a l_int32 (thresh).
  * Arg #3 is expected to be a boolean (debug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function finds a measure of the number of colors that are
  *          found in low-gradient regions of an image.  By its
  *          magnitude relative to some threshold (not specified in
@@ -5446,7 +5446,7 @@ ColorsForQuantization(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is an optional Box* (box).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This computes numas that represent row vectors of statistics,
  *          with each of its values derived from the corresponding col of a Pix.
  *      (2) Use NULL on input to prevent computation of any of the 5 numas.
@@ -5488,7 +5488,7 @@ ColumnStats(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Pix* (pixm) with 1 bit/pixel.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) In-place operation; pixd is changed.
  *      (2) This sets each pixel in pixd that co-locates with an ON
  *          pixel in pixm to the corresponding value of pixs.
@@ -5529,7 +5529,7 @@ CombineMasked(lua_State *L)
  * Arg #4 is expected to be a l_int32 (x).
  * Arg #5 is expected to be a l_int32 (y).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) In-place operation; pixd is changed.
  *      (2) This is a generalized version of pixCombinedMasked(), where
  *          the source and mask can be placed at the same (arbitrary)
@@ -5580,7 +5580,7 @@ CombineMaskedGeneral(lua_State *L)
  * Arg #2 is expected to be a Pix* (pix2).
  * Arg #3 is expected to be a l_int32 (comptype).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The two images are aligned at the UL corner, and do not
  *          need to be the same size.
  *      (2) If using L_COMPARE_SUBTRACT, pix2 is subtracted from pix1.
@@ -5613,7 +5613,7 @@ CompareBinary(lua_State *L)
  * Arg #3 is expected to be a l_int32 (comptype).
  * Arg #4 is expected to be a l_int32 (plottype).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixCompareGrayOrRGB() for details.
  *      (2) Use pixCompareGrayOrRGB() if the input pix are colormapped.
  *      (3) Note: setting %plottype > 0 can result in writing named
@@ -5657,7 +5657,7 @@ CompareGray(lua_State *L)
  * Arg #9 is expected to be a l_int32 (ny).
  * Arg #11 is expected to be a l_int32 (debugflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function compares two grayscale photo regions.  It can
  *          do it with a single histogram from each region, or with a
  *          set of (nx * ny) spatially aligned histograms.  For both
@@ -5737,7 +5737,7 @@ CompareGrayByHisto(lua_State *L)
  * Arg #3 is expected to be a l_int32 (comptype).
  * Arg #4 is expected to be a l_int32 (plottype).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The two images are aligned at the UL corner, and do not
  *          need to be the same size.  If they are not the same size,
  *          the comparison will be made over overlapping pixels.
@@ -5796,7 +5796,7 @@ CompareGrayOrRGB(lua_State *L)
  * Arg #8 is expected to be a l_int32 (ny).
  * Arg #10 is expected to be a l_int32 (debugflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function compares two grayscale photo regions.  If a
  *          box is given, the region is clipped; otherwise assume
  *          the entire images are photo regions.  This is done with a
@@ -5864,7 +5864,7 @@ ComparePhotoRegionsByHisto(lua_State *L)
  * Arg #3 is expected to be a l_int32 (comptype).
  * Arg #4 is expected to be a l_int32 (plottype).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixCompareGrayOrRGB() for details.
  *      (2) Note: setting %plottype > 0 can result in writing named
  *                output files.
@@ -5900,7 +5900,7 @@ CompareRGB(lua_State *L)
  * Arg #2 is expected to be a Pix* (pix2).
  * Arg #3 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This answers the question: if the pixel values in each
  *          component are compared by absolute difference, for
  *          any value of difference, what is the fraction of
@@ -5939,7 +5939,7 @@ CompareRankDifference(lua_State *L)
  * Arg #4 is expected to be a l_int32 (sy).
  * Arg #5 is expected to be a l_int32 (type).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) With L_MEAN_ABSVAL, we compute for each tile the
  *          average abs value of the pixel component difference between
  *          the two (aligned) images.  With L_ROOT_MEAN_SQUARE, we
@@ -5978,7 +5978,7 @@ CompareTiled(lua_State *L)
  * Arg #3 is expected to be a l_int32 (thresh).
  * Arg #7 is expected to be a l_int32 (debugflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does a coarse-to-fine search for best translational
  *          alignment of two images, measured by a scoring function
  *          that is the correlation between the fg pixels.
@@ -6028,7 +6028,7 @@ CompareWithTranslation(lua_State *L)
  * Arg #6 is expected to be a l_float32 (gdenom).
  * Arg #7 is expected to be a l_float32 (bdenom).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This stores a function of the component values of each
  *          input pixel in %fpixd.
  *      (2) The function is a ratio of linear combinations of component values.
@@ -6065,7 +6065,7 @@ ComponentFunction(lua_State *L)
  * Arg #2 is expected to be a Box* (box).
  * Arg #3 is expected to be a l_int32 (dist).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) There are several ways to test if a connected component has
  *          an essentially rectangular boundary, such as:
  *           a. Fraction of fill into the bounding box
@@ -6111,7 +6111,7 @@ ConformsToRectangle(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (connectivity).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is the top-level call for getting bounding boxes or
  *          a pixa of the components, and it can be used instead
  *          of either pixConnCompBB() or pixConnCompPixa(), rsp.
@@ -6138,7 +6138,7 @@ ConnComp(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (connect).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The pixel values in pixd label the area of the fg component
  *          to which the pixel belongs.  Pixels in the bg are labelled 0.
  *      (2) For purposes of visualization, the output can be converted
@@ -6163,7 +6163,7 @@ ConnCompAreaTransform(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (connectivity).
  *
- * Notes:
+ * Leptonica's Notes:
  *     (1) Finds bounding boxes of 4- or 8-connected components
  *         in a binary image.
  *     (2) This works on a copy of the input pix.  The c.c. are located
@@ -6192,7 +6192,7 @@ ConnCompBB(lua_State *L)
  * Arg #4 is expected to be a l_float32 (y).
  * Arg #5 is expected to be a boolean (debug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This adds a pixel and updates the labeled connected components.
  *          Before calling this function, initialize the process using
  *          pixConnCompIncrInit().
@@ -6239,7 +6239,7 @@ ConnCompIncrAdd(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (conn).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This labels the connected components in a 1 bpp pix, and
  *          additionally sets up a ptaa that lists the locations of pixels
  *          in each of the components.
@@ -6277,7 +6277,7 @@ ConnCompIncrInit(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (connectivity).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This finds bounding boxes of 4- or 8-connected components
  *          in a binary image, and saves images of each c.c
  *          in a pixa array.
@@ -6313,7 +6313,7 @@ ConnCompPixa(lua_State *L)
  * Arg #2 is expected to be a l_int32 (connect).
  * Arg #3 is expected to be a l_int32 (depth).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) pixd is 8, 16 or 32 bpp, and the pixel values label the
  *          fg component, starting with 1.  Pixels in the bg are labelled 0.
  *      (2) If %depth = 0, the depth of pixd is 8 if the number of c.c.
@@ -6350,7 +6350,7 @@ ConnCompTransform(lua_State *L)
  * Arg #6 is expected to be a l_int32 (smoothx).
  * Arg #7 is expected to be a l_int32 (smoothy).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function adaptively attempts to expand the contrast
  *          to the full dynamic range in each tile.  If the contrast in
  *          a tile is smaller than %mindiff, it uses the min and max
@@ -6401,7 +6401,7 @@ ContrastNorm(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_float32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) pixd must either be null or equal to pixs.
  *          For in-place operation, set pixd == pixs:
  *             pixContrastTRC(pixs, pixs, ...);
@@ -6442,7 +6442,7 @@ ContrastTRC(lua_State *L)
  * Arg #3 is expected to be a Pix* (pixm).
  * Arg #4 is expected to be a l_float32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Same as pixContrastTRC() except mapping is optionally over
  *          a subset of pixels described by pixm.
  *      (2) Masking does not work for colormapped images.
@@ -6469,7 +6469,7 @@ ContrastTRCMasked(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string describing the byte selection type (type).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) With L_AUTO_BYTE, if the max pixel value is greater than 255,
  *          use the MSB; otherwise, use the LSB.
  *      (2) With L_CLIP_TO_FF, use min(pixel-value, 0xff) for each
@@ -6494,7 +6494,7 @@ Convert16To8(lua_State *L)
  * Arg #2 is expected to be a l_uint16 (val0).
  * Arg #3 is expected to be a l_uint16 (val1).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If pixd is null, a new pix is made.
  *      (2) If pixd is not null, it must be of equal width and height
  *          as pixs.  It is always returned.
@@ -6519,7 +6519,7 @@ Convert1To16(lua_State *L)
  * Arg #2 is expected to be a l_int32 (val0).
  * Arg #3 is expected to be a l_int32 (val1).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If pixd is null, a new pix is made.
  *      (2) If pixd is not null, it must be of equal width and height
  *          as pixs.  It is always returned.
@@ -6544,7 +6544,7 @@ Convert1To2(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Input 0 is mapped to (255, 255, 255); 1 is mapped to (0, 0, 0)
  * </pre>
  * \param L pointer to the lua_State
@@ -6565,7 +6565,7 @@ Convert1To2Cmap(lua_State *L)
  * Arg #2 is expected to be a l_uint32 (val0).
  * Arg #3 is expected to be a l_uint32 (val1).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If pixd is null, a new pix is made.
  *      (2) If pixd is not null, it must be of equal width and height
  *          as pixs.  It is always returned.
@@ -6590,7 +6590,7 @@ Convert1To32(lua_State *L)
  * Arg #2 is expected to be a l_uint32 (val0).
  * Arg #3 is expected to be a l_uint32 (val1).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If pixd is null, a new pix is made.
  *      (2) If pixd is not null, it must be of equal width and height
  *          as pixs.  It is always returned.
@@ -6615,7 +6615,7 @@ Convert1To4(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Input 0 is mapped to (255, 255, 255); 1 is mapped to (0, 0, 0)
  * </pre>
  * \param L pointer to the lua_State
@@ -6636,7 +6636,7 @@ Convert1To4Cmap(lua_State *L)
  * Arg #2 is expected to be a l_uint8 (val0).
  * Arg #3 is expected to be a l_uint8 (val1).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If pixd is null, a new pix is made.
  *      (2) If pixd is not null, it must be of equal width and height
  *          as pixs.  It is always returned.
@@ -6662,7 +6662,7 @@ Convert1To8(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Input 0 is mapped to (255, 255, 255); 1 is mapped to (0, 0, 0)
  * </pre>
  * \param L pointer to the lua_State
@@ -6681,7 +6681,7 @@ Convert1To8Cmap(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) 24 bpp rgb pix are not supported in leptonica, except for a small
  *          number of formatted write operations.  The data is a byte array,
  *          with pixels in order r,g,b, and padded to 32 bit boundaries
@@ -6715,7 +6715,7 @@ Convert24To32(lua_State *L)
  * Arg #5 is expected to be a l_uint8 (val3).
  * Arg #6 is expected to be a boolean (cmapflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      ~ A simple unpacking might use val0 = 0,
  *        val1 = 85 (0x55), val2 = 170 (0xaa), val3 = 255.
  *      ~ If cmapflag is TRUE:
@@ -6754,7 +6754,7 @@ Convert2To8(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string describing the ms/ls 2 byte selection (type).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The data in pixs is typically used for labelling.
  *          It is an array of l_uint32 values, not rgb or rgba.
  * </pre>
@@ -6816,7 +6816,7 @@ Convert32To8(lua_State *L)
  * Arg #5 is expected to be a l_uint32 (val3).
  * Arg #6 is expected to be a boolean (cmapflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      ~ If cmapflag is TRUE:
  *          ~ pixd is made with a colormap.
  *          ~ If pixs has a colormap, it is copied and the colormap
@@ -6849,7 +6849,7 @@ Convert4To8(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (leftshift).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For left shift of 8, the 8 bit value is replicated in both
  *          the MSB and the LSB of the pixels in pixd.  That way, we get
  *          proportional mapping, with a correct map from 8 bpp white
@@ -6872,7 +6872,7 @@ Convert8To16(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Any existing colormap is removed to gray.
  * </pre>
  * \param L pointer to the lua_State
@@ -6891,7 +6891,7 @@ Convert8To2(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If there is no colormap, replicates the gray value
  *          into the 3 MSB of the dest pixel.
  * </pre>
@@ -6911,7 +6911,7 @@ Convert8To32(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Any existing colormap is removed to gray.
  * </pre>
  * \param L pointer to the lua_State
@@ -6930,7 +6930,7 @@ Convert8To4(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is an extreme color quantizer.  It decides which
  *          colors map to FG (black) and which to BG (white).
  *      (2) This uses two heuristics to make the decision:
@@ -6957,7 +6957,7 @@ ConvertCmapTo1(lua_State *L)
  * Arg #3 is expected to be a l_float32 (scaley).
  * Arg #4 is expected to be a l_int32 (order).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If pixs has a colormap, it is removed to 32 bpp rgb.
  *          If the colormap has no color, pixConvertGrayToSubpixelRGB()
  *          should be called instead, because it will give the same result
@@ -6991,7 +6991,7 @@ ConvertColorToSubpixelRGB(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For wrapping in PostScript, we convert pixs to
  *          1 bpp, 8 bpp (gray) and 32 bpp (RGB color).
  *      (2) Colormaps are removed.  For pixs with colormaps, the
@@ -7017,7 +7017,7 @@ ConvertForPSWrap(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a simple interface for adding a colormap to a
  *          2, 4 or 8 bpp grayscale image without causing any
  *          quantization.  There is some similarity to operations
@@ -7049,7 +7049,7 @@ ConvertGrayToColormap(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (mindepth).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Returns a copy if pixs already has a colormap.
  *      (2) This is a lossless transformation; there is no quantization.
  *          We compute the number of different gray values in pixs,
@@ -7081,7 +7081,7 @@ ConvertGrayToColormap8(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (gamma).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For 8 bpp input, this simply adds a colormap to the input image.
  *      (2) For 16 bpp input, it first converts to 8 bpp, using the MSB,
  *          and then adds the colormap.
@@ -7107,7 +7107,7 @@ ConvertGrayToFalseColor(lua_State *L)
  * Arg #3 is expected to be a l_float32 (scaley).
  * Arg #4 is expected to be a l_int32 (order).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If pixs has a colormap, it is removed to 8 bpp.
  *      (2) For horizontal subpixel splitting, the input gray image
  *          is rescaled by %scaley vertically and by 3.0 times
@@ -7144,7 +7144,7 @@ ConvertGrayToSubpixelRGB(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For pixs = pixd, this is in-place; otherwise pixd must be NULL.
  *      (2) The user takes responsibility for making sure that pixs is
  *          in our HSV space.  The definition of our HSV space is given
@@ -7172,7 +7172,7 @@ ConvertHSVToRGB(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (d).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a lossless unpacking (depth-increasing)
  *          conversion.  If ds is the depth of pixs, then
  *           ~ if d < ds, returns NULL
@@ -7203,7 +7203,7 @@ ConvertLossless(lua_State *L)
  * Arg #5 is expected to be a l_int32 (thresh).
  * Arg #6 is expected to be a string describing the relation (relation).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This makes a 1 bpp mask from an RGB image, using an arbitrary
  *          linear combination of the rgb color components, along with
  *          a threshold and a selection choice of the gray value relative
@@ -7232,7 +7232,7 @@ ConvertRGBToBinaryArb(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a boolean (ditherflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function has two relatively simple modes of color
  *          quantization:
  *            (a) If the image is made orthographically and has not more
@@ -7274,7 +7274,7 @@ ConvertRGBToColormap(lua_State *L)
  * Arg #3 is expected to be a l_float32 (gwt).
  * Arg #4 is expected to be a l_float32 (bwt).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Use a weighted average of the RGB values.
  * </pre>
  * \param L pointer to the lua_State
@@ -7300,7 +7300,7 @@ ConvertRGBToGray(lua_State *L)
  * Arg #3 is expected to be a l_float32 (gc).
  * Arg #4 is expected to be a l_float32 (bc).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This converts to gray using an arbitrary linear combination
  *          of the rgb color components.  It differs from pixConvertToGray(),
  *          which uses only positive coefficients that sum to 1.
@@ -7326,7 +7326,7 @@ ConvertRGBToGrayArb(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function should be used if speed of conversion
  *          is paramount, and the green channel can be used as
  *          a fair representative of the RGB intensity.  It is
@@ -7352,7 +7352,7 @@ ConvertRGBToGrayFast(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string defining the min/max type (type).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This chooses various components or combinations of them,
  *          from the three RGB sample values.  In addition to choosing
  *          the min, max, and maxdiff (difference between max and min),
@@ -7380,7 +7380,7 @@ ConvertRGBToGrayMinMax(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (refval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This returns the max component value, boosted by
  *          the saturation. The maximum boost occurs where
  *          the maximum component value is equal to some reference value.
@@ -7418,7 +7418,7 @@ ConvertRGBToGraySatBoost(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For pixs = pixd, this is in-place; otherwise pixd must be NULL.
  *      (2) The definition of our HSV space is given in convertRGBToHSV().
  *      (3) The h, s and v values are stored in the same places as
@@ -7461,7 +7461,7 @@ ConvertRGBToHSV(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The conversion to HSV hue is in-lined here.
  *      (2) If there is a colormap, it is removed.
  *      (3) If you just want the hue component, this does it
@@ -7485,7 +7485,7 @@ ConvertRGBToHue(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The [l,a,b] values are stored as float values in three fpix
  *          that are returned in a fpixa.
  * </pre>
@@ -7506,7 +7506,7 @@ ConvertRGBToLAB(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Use a standard luminance conversion.
  * </pre>
  * \param L pointer to the lua_State
@@ -7526,7 +7526,7 @@ ConvertRGBToLuminance(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The conversion to HSV sat is in-lined here.
  *      (2) If there is a colormap, it is removed.
  *      (3) If you just want the saturation component, this does it
@@ -7549,7 +7549,7 @@ ConvertRGBToSaturation(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The conversion to HSV sat is in-lined here.
  *      (2) If there is a colormap, it is removed.
  *      (3) If you just want the value component, this does it
@@ -7572,7 +7572,7 @@ ConvertRGBToValue(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The [x,y,z] values are stored as float values in three fpix
  *          that are returned in a fpixa.
  *      (2) The XYZ color space was defined in 1931 as a reference model that
@@ -7610,7 +7610,7 @@ ConvertRGBToXYZ(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For pixs = pixd, this is in-place; otherwise pixd must be NULL.
  *      (2) The Y, U and V values are stored in the same places as
  *          the r, g and b values, respectively.  Here, they are explicitly
@@ -7647,7 +7647,7 @@ ConvertRGBToYUV(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (threshold).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a top-level function, with simple default values
  *          used in pixConvertTo8() if unpacking is necessary.
  *      (2) Any existing colormap is removed.
@@ -7690,7 +7690,7 @@ ConvertTo16(lua_State *L)
  * Arg #2 is expected to be a l_int32 (factor).
  * Arg #3 is expected to be a l_int32 (threshold).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a quick and dirty, top-level converter.
  *      (2) See pixConvertTo1() for default values.
  * </pre>
@@ -7712,7 +7712,7 @@ ConvertTo1BySampling(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a top-level function, with simple default values
  *          used in pixConvertTo8() if unpacking is necessary.
  *      (2) Any existing colormap is removed; the result is always gray.
@@ -7735,7 +7735,7 @@ ConvertTo2(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Never returns a clone of pixs.
  * </pre>
  * \param L pointer to the lua_State
@@ -7755,7 +7755,7 @@ ConvertTo32(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a fast, quick/dirty, top-level converter.
  *      (2) See pixConvertTo32() for default values.
  * </pre>
@@ -7776,7 +7776,7 @@ ConvertTo32BySampling(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a top-level function, with simple default values
  *          used in pixConvertTo8() if unpacking is necessary.
  *      (2) Any existing colormap is removed; the result is always gray.
@@ -7800,7 +7800,7 @@ ConvertTo4(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a boolean (cmapflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a top-level function, with simple default values
  *          for unpacking.
  *      (2) The result, pixd, is made with a colormap if specified.
@@ -7835,7 +7835,7 @@ ConvertTo8(lua_State *L)
  * Arg #2 is expected to be a l_int32 (factor).
  * Arg #3 is expected to be a boolean (cmapflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a fast, quick/dirty, top-level converter.
  *      (2) See pixConvertTo8() for default values.
  * </pre>
@@ -7858,7 +7858,7 @@ ConvertTo8BySampling(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a boolean (ditherflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a top-level function, with simple default values
  *          for unpacking.
  *      (2) The result, pixd, is always made with a colormap.
@@ -7888,7 +7888,7 @@ ConvertTo8Colormap(lua_State *L)
  * Arg #2 is exptected to be a string describing the copy/clone mode (copyflag).
  * Arg #3 is exptected to be a boolean (wanrflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If there is a colormap, the colormap is removed to 8 or 32 bpp,
  *          depending on whether the colors in the colormap are all gray.
  *      (2) If the input is either rgb or 8 bpp without a colormap,
@@ -7915,7 +7915,7 @@ ConvertTo8Or32(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (ncomps).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If colormapped, remove to grayscale.
  *      (2) If 32 bpp and %ncomps == 3, this is RGB; convert to luminance.
  *          In all other cases the src image is treated as having a single
@@ -7940,7 +7940,7 @@ ConvertToDPix(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (ncomps).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If colormapped, remove to grayscale.
  *      (2) If 32 bpp and %ncomps == 3, this is RGB; convert to luminance.
  *          In all other cases the src image is treated as having a single
@@ -7972,7 +7972,7 @@ ConvertToFPix(lua_State *L)
  * Arg #8 is expected to be a string (title).
  * Arg #9 is expected to be a string describing the position (position).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If %res == 0 and the input resolution field is 0,
  *          this will use DEFAULT_INPUT_RES.
  *      (2) This only writes data to fileout if it is the last
@@ -8014,7 +8014,7 @@ ConvertToPdf(lua_State *L)
  * Arg #7 is expected to be a string (title).
  * Arg #8 is expected to be a string describing the position (position).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If %res == 0 and the input resolution field is 0,
  *          this will use DEFAULT_INPUT_RES.
  *      (2) This only writes %data if it is the last image to be
@@ -8059,7 +8059,7 @@ ConvertToPdfData(lua_State *L)
  * Arg #7 is expected to be a l_float32 (scalefactor).
  * Arg #8 is expected to be a string (title).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See convertToPdfSegmented() for details.
  * </pre>
  * \param L pointer to the lua_State
@@ -8098,7 +8098,7 @@ ConvertToPdfDataSegmented(lua_State *L)
  * Arg #8 is expected to be a string (title).
  * Arg #9 is expected to be a string (fileout).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See convertToPdfSegmented() for details.
  * </pre>
  * \param L pointer to the lua_State
@@ -8128,7 +8128,7 @@ ConvertToPdfSegmented(lua_State *L)
  * Arg #3 is expected to be a l_float32 (scaley).
  * Arg #4 is expected to be a l_int32 (order).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If pixs has a colormap, it is removed based on its contents
  *          to either 8 bpp gray or rgb.
  *      (2) For horizontal subpixel splitting, the input image
@@ -8164,7 +8164,7 @@ ConvertToSubpixelRGB(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For pixs = pixd, this is in-place; otherwise pixd must be NULL.
  *      (2) The user takes responsibility for making sure that pixs is
  *          in YUV space.
@@ -8193,7 +8193,7 @@ ConvertYUVToRGB(lua_State *L)
  * Arg #3 is expected to be a l_int32 (outdepth).
  * Arg #4 is expected to be a l_int32 (normflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This gives a convolution with an arbitrary kernel.
  *      (2) The input pixs must have only one sample/pixel.
  *          To do a convolution on an RGB image, use pixConvolveRGB().
@@ -8246,7 +8246,7 @@ Convolve(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Kernel* (kel).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This gives a convolution on an RGB image using an
  *          arbitrary kernel (which we normalize to keep each
  *          component within the range [0 ... 255].
@@ -8281,7 +8281,7 @@ ConvolveRGB(lua_State *L)
  * Arg #2 is expected to be a Kernel* (kelx).
  * Arg #3 is expected to be a Kernel* (kely).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does a convolution on an RGB image using a separable
  *          kernel that is a sequence of convolutions in x and y.  The two
  *          one-dimensional kernel components must be input separately;
@@ -8320,7 +8320,7 @@ ConvolveRGBSep(lua_State *L)
  * Arg #4 is expected to be a l_int32 (outdepth).
  * Arg #5 is expected to be a l_int32 (normflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does a convolution with a separable kernel that is
  *          is a sequence of convolutions in x and y.  The two
  *          one-dimensional kernel components must be input separately;
@@ -8375,7 +8375,7 @@ ConvolveSep(lua_State *L)
  * Arg #3 is expected to be a Kernel* (kel2).
  * Arg #4 is expected to be a l_int32 (force8).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does a convolution with either a single kernel or
  *          a pair of separable kernels, and automatically applies whatever
  *          bias (shift) is required so that the resulting pixel values
@@ -8416,7 +8416,7 @@ ConvolveWithBias(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) There are three cases:
  *            (a) pixd == null  (makes a new pix; refcount = 1)
  *            (b) pixd == pixs  (no-op)
@@ -8457,7 +8457,7 @@ Copy(lua_State *L)
  * Arg #4 is expected to be a l_int32 (top).
  * Arg #5 is expected to be a l_int32 (bottom).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) pixd can be null, but otherwise it must be the same size
  *          and depth as pixs.  Always returns pixd.
  *      (2) This is useful in situations where by setting a few border
@@ -8489,7 +8489,7 @@ CopyBorder(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This always destroys any colormap in pixd (except if
  *          the operation is a no-op.
  * </pre>
@@ -8548,7 +8548,7 @@ CopyInputFormat(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a string with the component name (comp).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The two images are registered to the UL corner.  The sizes
  *          are usually the same, and a warning is issued if they differ.
  * </pre>
@@ -8625,7 +8625,7 @@ CopyText(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix1).
  * Arg #2 is expected to be a Pix* (pix2).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The correlation is a number between 0.0 and 1.0,
  *          based on foreground similarity:
  *                           (|1 AND 2|)**2
@@ -8666,7 +8666,7 @@ CorrelationBinary(lua_State *L)
  * Arg #7 is expected to be a l_int32 (maxdiffw).
  * Arg #8 is expected to be a l_int32 (maxdiffh).
  *
- * Notes:
+ * Leptonica's Notes:
  *  We check first that the two pix are roughly the same size.
  *  For jbclass (jbig2) applications at roughly 300 ppi, maxdiffw and
  *  maxdiffh should be at least 2.
@@ -8749,7 +8749,7 @@ CorrelationScore(lua_State *L)
  * Arg #5 is expected to be a l_int32 (delx).
  * Arg #6 is expected to be a l_int32 (dely).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This finds the correlation between two 1 bpp images,
  *          when pix2 is shifted by (delx, dely) with respect
  *          to each other.
@@ -8801,7 +8801,7 @@ CorrelationScoreShifted(lua_State *L)
  * Arg #7 is expected to be a l_int32 (maxdiffw).
  * Arg #8 is expected to be a l_int32 (maxdiffh).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This calculates exactly the same value as pixCorrelationScore().
  *          It is 2-3x slower, but much simpler to understand.
  *      (2) The returned correlation score is 0.0 if the width or height
@@ -8844,7 +8844,7 @@ CorrelationScoreSimple(lua_State *L)
  * Arg #8 is expected to be a l_int32 (maxdiffh).
  * Arg #11 is expected to be a l_float32 (score_threshold).
  *
- * Notes:
+ * Leptonica's Notes:
  *  We check first that the two pix are roughly the same size.
  *  Only if they meet that criterion do we compare the bitmaps.
  *  The centroid difference is used to align the two images to the
@@ -8912,7 +8912,7 @@ CorrelationScoreThresholded(lua_State *L)
  * Arg #3 is expected to be a l_int32 (factor).
  * Arg #4 is an optional Box* (box).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If pixs is cmapped, %val is compared to the colormap index;
  *          otherwise, %val is compared to the grayscale value.
  *      (2) Set the subsampling %factor > 1 to reduce the amount of computation.
@@ -8941,7 +8941,7 @@ CountArbInRect(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a Box* (box).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) To resample for a bin size different from 1, use
  *          numaUniformSampling() on the result of this function.
  * </pre>
@@ -8964,7 +8964,7 @@ CountByColumn(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a Box* (box).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) To resample for a bin size different from 1, use
  *          numaUniformSampling() on the result of this function.
  * </pre>
@@ -9122,7 +9122,7 @@ CountRGBColors(lua_State *L)
  * Arg #4 is expected to be a l_float32 (clipfract).
  * Arg #5 is expected to be a Pixa* (pixadb).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) It is assumed that pixs has the correct resolution set.
  *          If the resolution is 0, we set to 300 and issue a warning.
  *      (2) If necessary, the image is scaled to between 37 and 75 ppi;
@@ -9201,7 +9201,7 @@ CreateFromPixcomp(lua_State *L)
  * Arg #2 is expected to be a l_int32 (height).
  * Arg #3 is expected to be a l_int32 (depth).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) It is assumed that all 32 bit pix have 3 spp.  If there is
  *          a valid alpha channel, this will be set to 4 spp later.
  *      (2) If the number of bytes to be allocated is larger than the
@@ -9237,7 +9237,7 @@ CreateHeader(lua_State *L)
  * or
  * No Arg creates a 1x1 1bpp uninitialized Pix*.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Must set pad bits to avoid reading unitialized data, because
  *          some optimized routines (e.g., pixConnComp()) read from pad bits.
  * </pre>
@@ -9270,7 +9270,7 @@ CreateNoInit(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixg).
  * Arg #3 is expected to be a Pix* (pixb).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) the 4th byte, sometimes called the "alpha channel",
  *          and which is often used for blending between different
  *          images, is left with 0 value.
@@ -9307,7 +9307,7 @@ CreateRGBImage(lua_State *L)
  * or
  * No Arg creates a 1x1 1bpp uninitialized Pix*.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Makes a Pix of the same size as the input Pix, with the
  *          data array allocated and initialized to 0.
  *      (2) Copies the other fields, including colormap if it exists.
@@ -9335,7 +9335,7 @@ CreateTemplate(lua_State *L)
  * or
  * No Arg creates a 1x1 1bpp uninitialized Pix*.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Makes a Pix of the same size as the input Pix, with
  *          the data array allocated but not initialized to 0.
  *      (2) Copies the other fields, including colormap if it exists.
@@ -9359,7 +9359,7 @@ CreateTemplateNoInit(lua_State *L)
  * Arg #2 is expected to be a Pix* (pix2).
  * Arg #3 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This finds the maximum crop boxes for two 8 bpp images when
  *          their centroids of their photometric inverses are aligned.
  *          Black pixels have weight 255; white pixels have weight 0.
@@ -9389,7 +9389,12 @@ CropAlignedToCentroid(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs1).
  * Arg #2 is expected to be a Pix* (pixs2).
  *
- * Notes:
+ * Leptonica's Notes:
+ *      (1) This resizes pixs1 and/or pixs2 by cropping at the right
+ *          and bottom, so that they're the same size.
+ *      (2) If a pix doesn't need to be cropped, a clone is returned.
+ *      (3) Note: the images are implicitly aligned to the UL corner.
+ * Leptonica's Notes:
  *      (1) This resizes pixs1 and/or pixs2 by cropping at the right
  *          and bottom, so that they're the same size.
  *      (2) If a pix doesn't need to be cropped, a clone is returned.
@@ -9420,7 +9425,7 @@ CropToMatch(lua_State *L)
  * Arg #2 is expected to be a l_int32 (w).
  * Arg #3 is expected to be a l_int32 (h).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If either w or h is smaller than the corresponding dimension
  *          of pixs, this returns a cropped image; otherwise it returns
  *          a clone of pixs.
@@ -9447,7 +9452,7 @@ CropToSize(lua_State *L)
  * Arg #3 is expected to be a l_int32 (thresh).
  * Arg #4 is expected to be a l_int32 (satlimit).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This darkens gray pixels, by a fraction (sat/%satlimit), where
  *          the sat, the saturation, is the component difference (max - min).
  *          The pixel value is unchanged if sat >= %satlimit.  A typical
@@ -9485,7 +9490,7 @@ DarkenGray(lua_State *L)
  * Arg #5 is expected to be a l_float32 (thresh).
  * Arg #6 is expected to be a Pixa* (pixadebug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The input image must be 8 bpp (no colormap), and padded with
  *          white pixels so the centroid of photo-inverted pixels is at
  *          the center of the image.
@@ -9527,7 +9532,7 @@ DecideIfPhotoImage(lua_State *L)
  * Arg #3 is expected to be a l_int32 (orient).
  * Arg #5 is expected to be a Pixa* (pixadb).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) It is assumed that pixs has the correct resolution set.
  *          If the resolution is 0, we assume it is 300 ppi and issue a warning.
  *      (2) If %orient == L_LANDSCAPE_MODE, the image is rotated 90 degrees
@@ -9582,7 +9587,7 @@ DecideIfTable(lua_State *L)
  * Arg #2 is expected to be a Box* (box).
  * Arg #4 is expected to be a Pixa* (pixadb).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) It is assumed that pixs has the correct resolution set.
  *          If the resolution is 0, we set to 300 and issue a warning.
  *      (2) If necessary, the image is scaled to 300 ppi; most of the
@@ -9619,7 +9624,7 @@ DecideIfText(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a constl_uint32* (data).
  * Arg #2 is expected to be a size_t (nbytes).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixSerializeToMemory() for the binary format.
  *      (2) Note the image size limits.
  * </pre>
@@ -9643,7 +9648,7 @@ DeserializeFromMemory(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (redsearch).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This binarizes if necessary and finds the skew angle.  If the
  *          angle is large enough and there is sufficient confidence,
  *          it returns a deskewed image; otherwise, it returns a clone.
@@ -9672,7 +9677,7 @@ Deskew(lua_State *L)
  * Arg #4 is expected to be a l_int32 (margin).
  * Arg #5 is expected to be a l_int32 (threshold).
  *
- * Notes:
+ * Leptonica's Notes:
  *     (1) The (optional) angle returned is the angle in degrees (cw positive)
  *         necessary to rotate the image so that it is deskewed.
  * </pre>
@@ -9703,7 +9708,7 @@ DeskewBarcode(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (redsearch).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This binarizes if necessary and does both horizontal
  *          and vertical deskewing, using the default parameters in
  *          the underlying pixDeskew().  See usage there.
@@ -9732,7 +9737,7 @@ DeskewBoth(lua_State *L)
  * Arg #5 is expected to be a l_int32 (redsearch).
  * Arg #6 is expected to be a l_int32 (thresh).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This binarizes if necessary and finds the skew angle.  If the
  *          angle is large enough and there is sufficient confidence,
  *          it returns a deskewed image; otherwise, it returns a clone.
@@ -9770,7 +9775,7 @@ DeskewGeneral(lua_State *L)
  * Arg #6 is expected to be a l_float32 (sweepdelta).
  * Arg #7 is expected to be a l_float32 (minbsdelta).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function allows deskew of a page whose skew changes
  *          approximately linearly with vertical position.  It uses
  *          a projective transform that in effect does a differential
@@ -9832,7 +9837,7 @@ DestroyColormap(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Sel* (sel).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This dilates src using hits in Sel.
  *      (2) There are three cases:
  *          (a) pixd == null   (result into new pixd)
@@ -9866,7 +9871,7 @@ Dilate(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Sel is a brick with all elements being hits
  *      (2) The origin is at (x, y) = (hsize/2, vsize/2)
  *      (3) Do separably if both hsize and vsize are > 1.
@@ -9905,7 +9910,28 @@ DilateBrick(lua_State *L)
  *
  *          dwamorph2_reg.c.  (Note: because this was a regression test,
  *          dwamorph1_reg also builds and runs the application program.)
- * Notes:
+ * Leptonica's Notes:
+ *      (1) These implement 2D brick Sels, using linear Sels generated
+ *          with selaAddBasic().
+ *      (2) A brick Sel has hits for all elements.
+ *      (3) The origin of the Sel is at (x, y) = (hsize/2, vsize/2)
+ *      (4) Do separably if both hsize and vsize are > 1.
+ *      (5) It is necessary that both horizontal and vertical Sels
+ *          of the input size are defined in the basic sela.
+ *      (6) There are three cases:
+ *          (a) pixd == null   (result into new pixd)
+ *          (b) pixd == pixs   (in-place; writes result back to pixs)
+ *          (c) pixd != pixs   (puts result into existing pixd)
+ *      (7) For clarity, if the case is known, use these patterns:
+ *          (a) pixd = pixDilateBrickDwa(NULL, pixs, ...);
+ *          (b) pixDilateBrickDwa(pixs, pixs, ...);
+ *          (c) pixDilateBrickDwa(pixd, pixs, ...);
+ *      (8) The size of pixd is determined by pixs.
+ *      (9) If either linear Sel is not found, this calls
+ *          the appropriate decomposible function.
+ *          dwamorph2_reg.c.  (Note: because this was a regression test,
+ *          dwamorph1_reg also builds and runs the application program.)
+ * Leptonica's Notes:
  *      (1) These implement 2D brick Sels, using linear Sels generated
  *          with selaAddBasic().
  *      (2) A brick Sel has hits for all elements.
@@ -9948,7 +9974,7 @@ DilateBrickDwa(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Sel is a brick with all elements being hits
  *      (2) The origin is at (x, y) = (hsize/2, vsize/2)
  *      (3) Do compositely for each dimension > 1.
@@ -9999,7 +10025,7 @@ DilateCompBrick(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) These implement a separable composite dilation with 2D brick Sels.
  *      (2) For efficiency, it may decompose each linear morphological
  *          operation into two (brick + comb).
@@ -10054,7 +10080,7 @@ DilateCompBrickDwa(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Ankur Jain suggested and implemented extending the composite
  *          DWA operations beyond the 63 pixel limit.  This is a
  *          simplified and approximate implementation of the extension.
@@ -10094,7 +10120,7 @@ DilateCompBrickExtendDwa(lua_State *L)
  * Arg #2 is expected to be a l_int32 (hsize).
  * Arg #3 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Sel is a brick with all elements being hits
  *      (2) If hsize = vsize = 1, just returns a copy.
  * </pre>
@@ -10119,7 +10145,7 @@ DilateGray(lua_State *L)
  * Arg #2 is expected to be a l_int32 (hsize).
  * Arg #3 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Special case for 1x3, 3x1 or 3x3 brick sel (all hits)
  *      (2) If hsize = vsize = 1, just returns a copy.
  * </pre>
@@ -10144,7 +10170,7 @@ DilateGray3(lua_State *L)
  * Arg #2 is expected to be a l_int32 (x).
  * Arg #3 is expected to be a l_int32 (y).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is debugging code that displays an image on the screen.
  *          It uses a static internal variable to number the output files
  *          written by a single process.  Behavior with a shared library
@@ -10224,7 +10250,7 @@ DisplayColorArray(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix1).
  * Arg #2 is expected to be a Pix* (pix2).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This gives a color representation of the difference between
  *          pix1 and pix2.  The color difference depends on the order.
  *          The pixels in pixd have 4 colors:
@@ -10256,7 +10282,7 @@ DisplayDiffBinary(lua_State *L)
  * Arg #4 is expected to be a l_uint32 (hitcolor).
  * Arg #5 is expected to be a l_uint32 (misscolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *    (1) We don't allow scalefactor to be larger than MAX_SEL_SCALEFACTOR
  *    (2) The colors are conveniently given as 4 bytes in hex format,
  *        such as 0xff008800.  The least significant byte is ignored.
@@ -10284,7 +10310,7 @@ DisplayHitMissSel(lua_State *L)
  * Arg #2 is expected to be a l_int32 (val).
  * Arg #3 is expected to be a l_int32 (maxw).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Use %val == 0xffffff00 for white background.
  *      (2) Three views are given:
  *           ~ the image with a fully opaque alpha
@@ -10317,7 +10343,7 @@ DisplayLayersRGBA(lua_State *L)
  * Arg #7 is expected to be a l_float32 (scale).
  * Arg #8 is expected to be a l_int32 (nlevels).
  *
- * Notes:
+ * Leptonica's Notes:
  *    (1) A 4 bpp colormapped image is generated.
  *    (2) If scale <= 1.0, do scale to gray for the output, and threshold
  *        to nlevels of gray.
@@ -10355,7 +10381,7 @@ DisplayMatchedPattern(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Pta* (pta).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) To write on an existing pixs, pixs must be 32 bpp and
  *          call with pixd == pixs:
  *             pixDisplayPta(pixs, pixs, pta);
@@ -10389,7 +10415,7 @@ DisplayPta(lua_State *L)
  * Arg #6 is expected to be a l_int32 (cy).
  * Arg #7 is expected to be a l_uint32 (color).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) To write on an existing pixs, pixs must be 32 bpp and
  *          call with pixd == pixs:
  *             pixDisplayPtaPattern(pixs, pixs, pta, ...);
@@ -10447,7 +10473,7 @@ DisplayPtaa(lua_State *L)
  * Arg #5 is expected to be a l_int32 (cx).
  * Arg #6 is expected to be a l_int32 (cy).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) To write on an existing pixs, pixs must be 32 bpp and
  *          call with pixd == pixs:
  *             pixDisplayPtaPattern(pixs, pixs, pta, ...);
@@ -10485,7 +10511,7 @@ DisplayPtaaPattern(lua_State *L)
  * Arg #4 is expected to be a string (title).
  * Arg #5 is expected to be a l_int32 (dispflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See notes for pixDisplay().
  *      (2) This displays the image if dispflag == 1; otherwise it punts.
  * </pre>
@@ -10515,7 +10541,7 @@ DisplayWithTitle(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (reduction).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (0) Deprecated.
  *      (1) This is a simple interface for writing a set of files.
  *      (2) This uses jpeg output for pix that are 32 bpp or 8 bpp
@@ -10553,7 +10579,7 @@ DisplayWrite(lua_State *L)
  * Arg #3 is expected to be a l_int32 (outdepth).
  * Arg #4 is expected to be a l_int32 (boundcond).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This computes the distance of each pixel from the nearest
  *          background pixel.  All bg pixels therefore have a distance of 0,
  *          and the fg pixel distances increase linearly from 1 at the
@@ -10627,7 +10653,7 @@ DitherTo2bpp(lua_State *L)
  * Arg #3 is expected to be a l_int32 (upperclip).
  * Arg #4 is expected to be a l_int32 (cmapflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See comments above in pixDitherTo2bpp() for details.
  *      (2) The input parameters lowerclip and upperclip specify the range
  *          of lower and upper values (near 0 and 255, rsp) that are
@@ -10673,7 +10699,7 @@ DitherToBinary(lua_State *L)
  * Arg #2 is expected to be a l_int32 (lowerclip).
  * Arg #3 is expected to be a l_int32 (upperclip).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See comments above in pixDitherToBinary() for details.
  *      (2) The input parameters lowerclip and upperclip specify the range
  *          of lower and upper values (near 0 and 255, rsp) that are
@@ -10702,7 +10728,7 @@ DitherToBinarySpec(lua_State *L)
  * Arg #3 is expected to be a l_int32 (width).
  * Arg #4 is expected to be a l_uint32 (val).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If pixs is 1 bpp or is colormapped, it is converted to 8 bpp
  *          and the boxa is drawn using a colormap; otherwise,
  *          it is converted to 32 bpp rgb.
@@ -10729,7 +10755,7 @@ DrawBoxa(lua_State *L)
  * Arg #2 is expected to be a Boxa* (boxa).
  * Arg #3 is expected to be a l_int32 (width).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If pixs is 1 bpp, we draw the boxa using a colormap;
  *          otherwise, we convert to 32 bpp.
  *      (2) We use up to 254 different colors for drawing the boxes.
@@ -10758,7 +10784,7 @@ DrawBoxaRandom(lua_State *L)
  * Arg #4 is expected to be a l_int32 (width).
  * Arg #5 is expected to be a l_int32 (height).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For very small rotations, just return a clone.
  *      (2) Generate larger image to embed pixs if necessary, and
  *          place the center of the input image in the center.
@@ -10809,7 +10835,7 @@ EmbedForRotation(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is used on little-endian platforms to swap
  *          the bytes within a word; bytes 0 and 3 are swapped,
  *          and bytes 1 and 2 are swapped.
@@ -10839,7 +10865,7 @@ EndianByteSwap(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is used to convert the data in a pix to a
  *          serialized byte buffer in raster order, and, for RGB,
  *          in order RGBA.  This requires flipping bytes within
@@ -10872,7 +10898,7 @@ EndianByteSwapNew(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is used on little-endian platforms to swap the
  *          2-byte entities within a 32-bit word.
  *      (2) This is equivalent to a full byte swap, as performed
@@ -10895,7 +10921,7 @@ EndianTwoByteSwap(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is used on little-endian platforms to swap the
  *          2-byte entities within a 32-bit word.
  *      (2) This is equivalent to a full byte swap, as performed
@@ -10924,7 +10950,7 @@ EndianTwoByteSwapNew(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix1).
  * Arg #2 is expected to be a Pix* (pix2).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Equality is defined as having the same pixel values for
  *          each respective image pixel.
  *      (2) This works on two pix of any depth.  If one or both pix
@@ -10967,7 +10993,7 @@ Equal(lua_State *L)
  * Arg #2 is expected to be a Pix* (pix2).
  * Arg #3 is expected to be a l_int32 (use_alpha).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See notes in pixEqual().
  *      (2) This is more general than pixEqual(), in that for 32 bpp
  *          RGBA images, where spp = 4, you can optionally include
@@ -10996,7 +11022,7 @@ EqualWithAlpha(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix1).
  * Arg #2 is expected to be a Pix* (pix2).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This returns same = TRUE if the images have identical content.
  *      (2) Both pix must have a colormap, and be of equal size and depth.
  *          If these conditions are not satisfied, it is not an error;
@@ -11030,7 +11056,7 @@ EqualWithCmap(lua_State *L)
  * Arg #3 is expected to be a l_float32 (fract).
  * Arg #4 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) pixd must either be null or equal to pixs.
  *          For in-place operation, set pixd == pixs:
  *             pixEqualizeTRC(pixs, pixs, ...);
@@ -11074,7 +11100,7 @@ EqualizeTRC(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Sel* (sel).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This erodes src using hits in Sel.
  *      (2) There are three cases:
  *          (a) pixd == null   (result into new pixd)
@@ -11108,7 +11134,7 @@ Erode(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Sel is a brick with all elements being hits
  *      (2) The origin is at (x, y) = (hsize/2, vsize/2)
  *      (3) Do separably if both hsize and vsize are > 1.
@@ -11145,7 +11171,7 @@ ErodeBrick(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) These implement 2D brick Sels, using linear Sels generated
  *          with selaAddBasic().
  *      (2) A brick Sel has hits for all elements.
@@ -11191,7 +11217,7 @@ ErodeBrickDwa(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Sel is a brick with all elements being hits
  *      (2) The origin is at (x, y) = (hsize/2, vsize/2)
  *      (3) Do compositely for each dimension > 1.
@@ -11242,7 +11268,7 @@ ErodeCompBrick(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) These implement a separable composite erosion with 2D brick Sels.
  *      (2) For efficiency, it may decompose each linear morphological
  *          operation into two (brick + comb).
@@ -11297,7 +11323,7 @@ ErodeCompBrickDwa(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixDilateCompBrickExtendDwa() for usage.
  *      (2) There is no need to call this directly:  pixErodeCompBrickDwa()
  *          calls this function if either brick dimension exceeds 63.
@@ -11324,7 +11350,7 @@ ErodeCompBrickExtendDwa(lua_State *L)
  * Arg #2 is expected to be a l_int32 (hsize).
  * Arg #3 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Sel is a brick with all elements being hits
  *      (2) If hsize = vsize = 1, just returns a copy.
  * </pre>
@@ -11349,7 +11375,7 @@ ErodeGray(lua_State *L)
  * Arg #2 is expected to be a l_int32 (hsize).
  * Arg #3 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Special case for 1x3, 3x1 or 3x3 brick sel (all hits)
  *      (2) If hsize = vsize = 1, just returns a copy.
  *      (3) It would be nice not to add a border, but it is required
@@ -11379,7 +11405,7 @@ ErodeGray3(lua_State *L)
  * Arg #2 is expected to be a l_int32 (darkthresh).
  * Arg #3 is expected to be a l_float32 (edgecrop).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Caller should check that return bg value is > 0.
  * </pre>
  * \param L pointer to the lua_State
@@ -11465,7 +11491,7 @@ ExpandReplicate(lua_State *L)
  * Arg #2 is expected to be a l_int32 (addw).
  * Arg #3 is expected to be a l_int32 (addh).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The pixel values are extended to the left and down, as required.
  * </pre>
  * \param L pointer to the lua_State
@@ -11511,7 +11537,7 @@ ExtractBarcodeCrossings(lua_State *L)
  * Arg #3 is expected to be a l_float32 (binfract).
  * Arg #6 is expected to be a l_int32 (debugflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *     (1) The widths are alternating black/white, starting with black
  *         and ending with black.
  *     (2) This method uses the widths of the bars directly, in terms
@@ -11546,7 +11572,7 @@ ExtractBarcodeWidths1(lua_State *L)
  * Arg #2 is expected to be a l_float32 (thresh).
  * Arg #5 is expected to be a l_int32 (debugflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The widths are alternating black/white, starting with black
  *          and ending with black.
  *      (2) The optional best decoding window width is the width of the window
@@ -11621,7 +11647,7 @@ ExtractBorderConnComps(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (type).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Extracts the fg or bg boundary pixels for each component.
  *          Components are assumed to end at the boundary of pixs.
  * </pre>
@@ -11667,7 +11693,7 @@ ExtractData(lua_State *L)
  * Arg #5 is expected to be a l_int32 (y2).
  * Arg #6 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Input end points are clipped to the pix.
  *      (2) If the line is either horizontal, or closer to horizontal
  *          than to vertical, the points will be extracted from left
@@ -11704,7 +11730,7 @@ ExtractOnLine(lua_State *L)
  * Arg #5 is expected to be a l_int32 (adjh).
  * Arg #6 is expected to be a Pixa* (pixadb).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function assumes that textlines have sufficient
  *          vertical separation and small enough skew so that a
  *          horizontal dilation sufficient to join words will not join
@@ -11755,7 +11781,7 @@ ExtractRawTextlines(lua_State *L)
  * Arg #7 is expected to be a l_int32 (adjh).
  * Arg #8 is expected to be a Pixa* (pixadb).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function assumes that textline fragments have sufficient
  *          vertical separation and small enough skew so that a
  *          horizontal dilation sufficient to join words will not join
@@ -11809,7 +11835,7 @@ ExtractTextlines(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a string (selname).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a dwa implementation of the hit-miss transform
  *          on pixs by the sel.
  *      (2) The sel must be limited in size to not more than 31 pixels
@@ -11840,7 +11866,7 @@ FHMTGen_1(lua_State *L)
  * Arg #3 is expected to be a l_int32 (operation).
  * Arg #4 is expected to be a char* (selname).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a dwa operation, and the Sels must be limited in
  *          size to not more than 31 pixels about the origin.
  *      (2) A border of appropriate size (32 pixels, or 64 pixels
@@ -11876,7 +11902,7 @@ FMorphopGen_1(lua_State *L)
  * Arg #3 is expected to be a l_int32 (operation).
  * Arg #4 is expected to be a char* (selname).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a dwa operation, and the Sels must be limited in
  *          size to not more than 31 pixels about the origin.
  *      (2) A border of appropriate size (32 pixels, or 64 pixels
@@ -11911,7 +11937,7 @@ FMorphopGen_2(lua_State *L)
  * Arg #3 is expected to be a l_float32 (factor).
  * Arg #4 is expected to be a l_int32 (type).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function combines two pix aligned to the UL corner; they
  *          need not be the same size.
  *      (2) Each pixel in pixb is multiplied by 'factor' divided by 255, and
@@ -11942,7 +11968,7 @@ FadeWithGray(lua_State *L)
  * Arg #3 is expected to be a l_int32 (ysize).
  * Arg #4 is expected to be a l_int32 (type).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Don't be fooled. This is NOT a tophat.  It is a tophat-like
  *          operation, where the result is similar to what you'd get
  *          if you used an erosion instead of an opening, or a dilation
@@ -11984,7 +12010,7 @@ FastTophat(lua_State *L)
  * Arg #6 is expected to be a l_int32 (lightthresh).
  * Arg #7 is expected to be a l_int32 (diffthresh).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is the "few colors" version of pixMedianCutQuantMixed().
  *          It fails (returns NULL) if it finds more than maxncolors, but
  *          otherwise it gives the same result.
@@ -12034,7 +12060,7 @@ FewColorsMedianCutQuantMixed(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (level).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Generates a colormapped image, where the colormap table values
  *          are the averages of all pixels that are found in the octcube.
  *      (2) This fails if there are more than 256 colors (i.e., more
@@ -12076,7 +12102,7 @@ FewColorsOctcubeQuant1(lua_State *L)
  * Arg #3 is expected to be a Numa* (na).
  * Arg #4 is expected to be a l_int32 (ncolors).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Generates a colormapped image, where the colormap table values
  *          are the averages of all pixels that are found in the octcube.
  *      (2) This fails if there are more than 256 colors (i.e., more
@@ -12134,7 +12160,7 @@ FewColorsOctcubeQuant2(lua_State *L)
  * Arg #6 is expected to be a l_float32 (minfract).
  * Arg #7 is expected to be a l_int32 (maxspan).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) First runs pixFewColorsOctcubeQuant1().  If this succeeds,
  *          it separates the color from gray(ish) entries in the cmap,
  *          and re-quantizes the gray pixels.  The result has some pixels
@@ -12193,7 +12219,7 @@ FewColorsOctcubeQuantMixed(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (connectivity).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This fills all bg components touching the border to fg.
  *          It is the photometric inverse of pixRemoveBorderConnComps().
  *      (2) Invert the result to get the "holes" left after this fill.
@@ -12229,7 +12255,7 @@ FillBgFromBorder(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (connectivity).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Start with 1-pixel black border on otherwise white pixd
  *      (2) Subtract input pixs to remove border pixels that were
  *          also on the closed border
@@ -12262,7 +12288,7 @@ FillClosedBorders(lua_State *L)
  * Arg #3 is expected to be a l_float32 (maxhfract).
  * Arg #4 is expected to be a l_float32 (minfgfract).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does not fill holes that are smaller in area than 'minsize'.
  *      (2) This does not fill holes with an area larger than
  *          'maxhfract' times the fg area of the c.c.
@@ -12303,7 +12329,7 @@ FillHolesToBoundingRect(lua_State *L)
  * Arg #3 is expected to be a l_int32 (ny).
  * Arg #4 is expected to be a l_int32 (filltype).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is an in-place operation on pix (the map).  pix is
  *          typically a low-resolution version of some other image
  *          from which it was derived, where each pixel in pix
@@ -12348,7 +12374,7 @@ FillMapHoles(lua_State *L)
  * Arg #3 is expected to be a l_int32 (xmin).
  * Arg #4 is expected to be a l_int32 (ymin).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This fills the interior of the polygon, returning a
  *          new pix.  It works for both convex and non-convex polygons.
  *      (2) To generate a filled polygon from a pta:
@@ -12378,7 +12404,7 @@ FillPolygon(lua_State *L)
  * Arg #2 is expected to be a l_uint32 (offset).
  * Arg #3 is expected to be a l_int32 (depth).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The offset must be >= 0 and should not exceed 0x40000000.
  *      (2) The offset is subtracted from the src 32 bpp image
  *      (3) For 8 bpp dest, the result is clipped to [0, 0xff]
@@ -12405,7 +12431,7 @@ FinalAccumulate(lua_State *L)
  * Arg #2 is expected to be a l_uint32 (offset).
  * Arg #3 is expected to be a l_uint32 (threshold).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The offset must be >= 0 and should not exceed 0x40000000.
  *      (2) The offset is subtracted from the src 32 bpp image
  * </pre>
@@ -12428,7 +12454,7 @@ FinalAccumulateThreshold(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This finds the ratio of the number of fg pixels to the
  *          size of the pix (w * h).  It is typically used for a
  *          single connected component.
@@ -12457,7 +12483,7 @@ FindAreaFraction(lua_State *L)
  * Arg #2 is expected to be a Box* (box).
  * Arg #3 is expected to be a Pix* (pixm).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This finds the ratio of the number of masked fg pixels
  *          in pixs to the total number of fg pixels in pixs.
  *          It is typically used for a single connected component.
@@ -12492,7 +12518,7 @@ FindAreaFractionMasked(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The area is the number of fg pixels that are not on the
  *          boundary (i.e., are not 8-connected to a bg pixel), and the
  *          perimeter is the number of fg boundary pixels.  Returns
@@ -12520,7 +12546,7 @@ FindAreaPerimRatio(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Pixa* (pixadb).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Input binary image must have text lines already aligned
  *          horizontally.  This can be done by either rotating the
  *          image with pixDeskew(), or, if a projective transform
@@ -12572,7 +12598,7 @@ FindBaselines(lua_State *L)
  * Arg #8 is expected to be a l_float32 (edgefract).
  * Arg #12 is expected to be a Pixa* (pixadb).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function tries to determine if there is a significant
  *          color or darker region on a scanned page image, where part
  *          of the image is background that is either white or reddish.
@@ -12647,7 +12673,7 @@ FindColorRegions(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Finds the 4 corner-most pixels, as defined by a search
  *          inward from each corner, using a 45 degree line.
  * </pre>
@@ -12668,7 +12694,7 @@ FindCornerPixels(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) At the top and bottom, we skip:
  *           ~ at least one scanline
  *           ~ not more than 10% of the image height
@@ -12695,7 +12721,7 @@ FindDifferentialSquareSum(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs1).
  * Arg #2 is expected to be a Pix* (pixs2).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The two images are aligned at the UL corner, and the returned
  *          image has ON pixels where the pixels in pixs1 and pixs2
  *          have equal values.
@@ -12723,7 +12749,7 @@ FindEqualValues(lua_State *L)
  * Arg #5 is expected to be a l_int32 (npeaks).
  * Arg #6 is expected to be a l_float32 (erasefactor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) pixs is a 32 bpp histogram in a pair of HSV colorspace.  It
  *          should be thought of as a single sample with 32 bps (bits/sample).
  *      (2) After each peak is found, the peak is erased with a window
@@ -12764,7 +12790,7 @@ FindHistoPeaksHSV(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (y).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This finds foreground horizontal runs on a single scanline.
  *      (2) To find background runs, use pixInvert() before applying
  *          this function.
@@ -12799,7 +12825,7 @@ FindHorizontalRuns(lua_State *L)
  * Arg #2 is expected to be a l_int32 (polarity).
  * Arg #3 is expected to be a l_int32 (nrect).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does a greedy search to find the largest rectangles,
  *          either black or white and without overlaps, in %pix.
  *      (2) See pixFindLargestRectangle(), which is called multiple
@@ -12838,7 +12864,7 @@ FindLargeRectangles(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (polarity).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a simple and elegant solution to a problem in
  *          computational geometry that at first appears to be quite
  *          difficult: what is the largest rectangle that can be
@@ -12901,7 +12927,7 @@ FindLargestRectangle(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (y).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This finds the longest foreground horizontal run on a scanline.
  *      (2) To find background runs, use pixInvert() before applying
  *          this function.
@@ -12930,7 +12956,7 @@ FindMaxHorizontalRunOnLine(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (direction).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This finds the longest foreground runs by row or column
  *      (2) To find background runs, use pixInvert() before applying
  *          this function.
@@ -12957,7 +12983,7 @@ FindMaxRuns(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (x).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This finds the longest foreground vertical run on a scanline.
  *      (2) To find background runs, use pixInvert() before applying
  *          this function.
@@ -12985,7 +13011,7 @@ FindMaxVerticalRunOnLine(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Let the image have h scanlines and N fg pixels.
  *          If the pixels were uniformly distributed on scanlines,
  *          the sum of squares of fg pixels on each scanline would be
@@ -13022,7 +13048,7 @@ FindNormalizedSquareSum(lua_State *L)
  * Arg #3 is expected to be a l_int32 (x2).
  * Arg #4 is expected to be a l_int32 (y2).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The UL corner of pixs2 is placed at (x2, y2) in pixs1.
  *      (2) This measure is similar to the correlation.
  * </pre>
@@ -13057,7 +13083,7 @@ FindOverlapFraction(lua_State *L)
  * Arg #4 is expected to be a l_int32 (erasedist).
  * Arg #5 is expected to be a boolean (showmorph).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This doesn't simply crop to the fg.  It attempts to remove
  *          pixel noise and junk at the edge of the image before cropping.
  *          The input %threshold is used if pixs is not 1 bpp.
@@ -13091,7 +13117,7 @@ FindPageForeground(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) We take the 'size' as twice the sum of the width and
  *          height of pixs, and the perimeter is the number of fg
  *          boundary pixels.  We use the fg pixels of the boundary
@@ -13125,7 +13151,7 @@ FindPerimSizeRatio(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The perimeter is the number of fg boundary pixels, and the
  *          area is the number of fg pixels.  This returns 0.0 if
  *          there are no fg pixels.
@@ -13160,7 +13186,7 @@ FindPerimToAreaRatio(lua_State *L)
  * Arg #3 is expected to be a l_int32 (minw).
  * Arg #4 is expected to be a l_int32 (minh).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This applies the function pixConformsToRectangle() to
  *          each 8-c.c. in pixs, and returns a boxa containing the
  *          regions of all components that are conforming.
@@ -13194,7 +13220,7 @@ FindRectangleComps(lua_State *L)
  * Arg #5 is expected to be a l_int32 (tsize).
  * Arg #6 is expected to be a l_int32 (ntiles).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This looks for one or two square tiles with conforming median
  *          intensity and low variance, that is outside but near the input box.
  *      (2) %mindist specifies the gap between the box and the
@@ -13231,7 +13257,7 @@ FindRepCloseTile(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a simple high-level interface, that uses default
  *          values of the parameters for reasonable speed and accuracy.
  *      (2) The angle returned is the negative of the skew angle of
@@ -13261,7 +13287,7 @@ FindSkew(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (redsearch).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This binarizes if necessary and finds the skew angle.  If the
  *          angle is large enough and there is sufficient confidence,
  *          it returns a deskewed image; otherwise, it returns a clone.
@@ -13326,7 +13352,7 @@ FindSkewOrthogonalRange(lua_State *L)
  * Arg #4 is expected to be a l_float32 (sweeprange).
  * Arg #5 is expected to be a l_float32 (sweepdelta).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This examines the 'score' for skew angles with equal intervals.
  *      (2) Caller must check the return value for validity of the result.
  * </pre>
@@ -13358,7 +13384,7 @@ FindSkewSweep(lua_State *L)
  * Arg #7 is expected to be a l_float32 (sweepdelta).
  * Arg #8 is expected to be a l_float32 (minbsdelta).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This finds the skew angle, doing first a sweep through a set
  *          of equal angles, and then doing a binary search until
  *          convergence.
@@ -13403,7 +13429,7 @@ FindSkewSweepAndSearch(lua_State *L)
  * Arg #9 is expected to be a l_float32 (sweepdelta).
  * Arg #10 is expected to be a l_float32 (minbsdelta).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This finds the skew angle, doing first a sweep through a set
  *          of equal angles, and then doing a binary search until convergence.
  *      (2) There are two built-in constants that determine if the
@@ -13459,7 +13485,7 @@ FindSkewSweepAndSearchScore(lua_State *L)
  * Arg #10 is expected to be a l_float32 (minbsdelta).
  * Arg #11 is expected to be a l_int32 (pivot).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See notes in pixFindSkewSweepAndSearchScore().
  *      (2) This allows choice of shear pivoting from either the UL corner
  *          or the center.  For small angles, the ability to discriminate
@@ -13499,7 +13525,7 @@ FindSkewSweepAndSearchScorePivot(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Returns half the number of fg boundary pixels.
  * </pre>
  * \param L pointer to the lua_State
@@ -13525,7 +13551,7 @@ FindStrokeLength(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (thresh).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This uses two methods to estimate the stroke width:
  *          (a) half the fg boundary length
  *          (b) a value derived from the histogram of the fg distance transform
@@ -13584,7 +13610,7 @@ FindThreshFgExtent(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (x).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This finds foreground vertical runs on a single scanline.
  *      (2) To find background runs, use pixInvert() before applying
  *          this function.
@@ -13618,7 +13644,7 @@ FindVerticalRuns(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (ditherflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *  This simple 1-pass color quantization works by breaking the
  *  color space into 256 pieces, with 3 bits quantized for each of
  *  red and green, and 2 bits quantized for blue.  We shortchange
@@ -13691,7 +13717,7 @@ FixedOctcubeQuant256(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (level).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Unlike the other color quantization functions, this one
  *          generates an rgb image.
  *      (2) The pixel values are quantized to the center of each octcube
@@ -13740,7 +13766,7 @@ FlipFHMTGen(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does a left-right flip of the image, which is
  *          equivalent to a rotation out of the plane about a
  *          vertical line through the image center.
@@ -13812,7 +13838,7 @@ FlipPixel(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does a top-bottom flip of the image, which is
  *          equivalent to a rotation out of the plane about a
  *          horizontal line through the image center.
@@ -13869,7 +13895,7 @@ ForegroundFraction(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix1).
  * Arg #2 is expected to be a Pix* (pix2).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This gives the fraction of fg pixels in pix1 that are in
  *          the intersection (i.e., under the fg) of pix2:
  *          |1 & 2|/|1|, where |...| means the number of fg pixels.
@@ -13924,7 +13950,7 @@ FreeData(lua_State *L)
  * Arg #4 is expected to be a l_int32 (minval).
  * Arg #5 is expected to be a l_int32 (maxval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) pixd must either be null or equal to pixs.
  *          For in-place operation, set pixd == pixs:
  *             pixGammaTRC(pixs, pixs, ...);
@@ -13979,7 +14005,7 @@ GammaTRC(lua_State *L)
  * Arg #5 is expected to be a l_int32 (minval).
  * Arg #6 is expected to be a l_int32 (maxval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Same as pixGammaTRC() except mapping is optionally over
  *          a subset of pixels described by pixm.
  *      (2) Masking does not work for colormapped images.
@@ -14011,7 +14037,7 @@ GammaTRCMasked(lua_State *L)
  * Arg #4 is expected to be a l_int32 (minval).
  * Arg #5 is expected to be a l_int32 (maxval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See usage notes in pixGammaTRC().
  *      (2) This version saves the alpha channel.  It is only valid
  *          for 32 bpp (no colormap), and is a bit slower.
@@ -14067,7 +14093,7 @@ GenHalftoneMask(lua_State *L)
  * Arg #6 is expected to be a l_int32 (ny).
  * Arg #7 is expected to be a l_int32 (debugflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This crops and converts to 8 bpp if necessary.  It adds a
  *          minimal white boundary such that the centroid of the
  *          photo-inverted image is in the center. This allows
@@ -14113,7 +14139,7 @@ GenPhotoHistos(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixvws).
  * Arg #3 is expected to be a Pixa* (pixadb).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Both the input masks (textline and vertical white space) and
  *          the returned textblock mask are at the same resolution.
  *      (2) This is not intended to work on small thumbnails.  The
@@ -14144,7 +14170,7 @@ GenTextblockMask(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #4 is expected to be a Pixa* (pixadb).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The input pixs should be deskewed.
  *      (2) pixs should have no halftone pixels.
  *      (3) This is not intended to work on small thumbnails.  The
@@ -14178,7 +14204,7 @@ GenTextlineMask(lua_State *L)
  * Arg #3 is expected to be a l_int32 (quality).
  * Arg #4 is expected to be a l_int32 (ascii85).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Set ascii85:
  *           ~ 0 for binary data (not permitted in PostScript)
  *           ~ 1 for ascii85 (5 for 4) encoded binary data
@@ -14208,7 +14234,7 @@ GenerateCIData(lua_State *L)
  * Arg #2 is expected to be a l_int32 (w).
  * Arg #3 is expected to be a l_int32 (h).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Points are rounded to nearest ints.
  *      (2) Any points outside (w,h) are silently discarded.
  *      (3) Output 1 bpp pix has values 1 for each point in the pta.
@@ -14233,7 +14259,7 @@ GenerateFromPta(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #4 is expected to be a Pixa* (pixadb).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is not intended to work on small thumbnails.  The
  *          dimensions of pixs must be at least MinWidth x MinHeight.
  * </pre>
@@ -14264,7 +14290,7 @@ GenerateHalftoneMask(lua_State *L)
  * Arg #4 is expected to be a l_int32 (inband).
  * Arg #5 is expected to be a l_int32 (usecmap).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Generates a 1 bpp mask pixd, the same size as pixs, where
  *          the fg pixels in the mask are those either within the specified
  *          band (for inband == 1) or outside the specified band
@@ -14301,7 +14327,7 @@ GenerateMaskByBand(lua_State *L)
  * Arg #5 is expected to be a l_float32 (fractm).
  * Arg #6 is expected to be a l_float32 (fractp).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Generates a 1 bpp mask pixd, the same size as pixs, where
  *          the fg pixels in the mask within a band of rgb values
  *          surrounding %refval.  The band can be chosen in two ways
@@ -14339,7 +14365,7 @@ GenerateMaskByBand32(lua_State *L)
  * Arg #3 is expected to be a l_uint32 (refval2).
  * Arg #4 is expected to be a l_int32 (distflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Generates a 1 bpp mask pixd, the same size as pixs, where
  *          the fg pixels in the mask are those where the pixel in pixs
  *          is "closer" to refval1 than to refval2.
@@ -14371,7 +14397,7 @@ GenerateMaskByDiscr32(lua_State *L)
  * Arg #2 is expected to be a l_int32 (val).
  * Arg #3 is expected to be a l_int32 (usecmap).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) %val is the pixel value that we are selecting.  It can be
  *          either a gray value or a colormap index.
  *      (2) If pixs is colormapped, %usecmap determines if the colormap
@@ -14400,7 +14426,7 @@ GenerateMaskByValue(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (width).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Similar to ptaGetBoundaryPixels(), except here:
  *          * we only get pixels in the foreground
  *          * we can have a "line" width greater than 1 pixel.
@@ -14436,7 +14462,7 @@ GeneratePtaBoundary(lua_State *L)
  * Arg #8 is expected to be a l_int32 (leftflag).
  * Arg #9 is expected to be a l_int32 (rightflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *    (1) All fg elements selected are exactly hitdist pixels away from
  *        the nearest fg boundary pixel, and ditto for bg elements.
  *        Valid inputs of hitdist and missdist are 0, 1, 2, 3 and 4.
@@ -14495,7 +14521,7 @@ GenerateSelBoundary(lua_State *L)
  * Arg #7 is expected to be a l_int32 (leftpix).
  * Arg #8 is expected to be a l_int32 (rightpix).
  *
- * Notes:
+ * Leptonica's Notes:
  *    (1) Either of hitfract and missfract can be zero.  If both are zero,
  *        the sel would be empty, and NULL is returned.
  *    (2) No elements are selected that are less than 'distance' pixels away
@@ -14547,7 +14573,7 @@ GenerateSelRandom(lua_State *L)
  * Arg #8 is expected to be a l_int32 (leftpix).
  * Arg #9 is expected to be a l_int32 (rightpix).
  *
- * Notes:
+ * Leptonica's Notes:
  *    (1) The horizontal and vertical lines along which elements are
  *        selected are roughly equally spaced.  The actual locations of
  *        the hits and misses are the centers of respective run-lengths.
@@ -14606,6 +14632,12 @@ GenerateSelWithRuns(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ *
+/*!
+ * \brief   pixGetAllCCBorders()
+ *
+ * \param[in]    pixs 1 bpp
+ * \return  ccborda, or NULL on error
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 CCBorda * on the Lua stack
@@ -14624,7 +14656,7 @@ GetAllCCBorders(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The output formats are restricted to tiff, jpeg and png
  *          because these are the most commonly used image formats and
  *          the ones that are typically installed with leptonica.
@@ -14658,7 +14690,7 @@ GetAutoFormat(lua_State *L)
  * Arg #5 is an optional l_int32 (y).
  * Arg #6 is an optional l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Use L_MEAN_ABSVAL to get the average value of pixels in pixs
  *          that are under the fg of the optional mask.  If the mask
  *          is null, it finds the average of the pixels in pixs.
@@ -14668,9 +14700,7 @@ GetAutoFormat(lua_State *L)
  *          L_VARIANCE to get the average squared difference from the
  *          expected value.  The variance is the square of the stdev.
  *          For the standard deviation, we use
- *          \code
  *              sqrt(<(<x> - x)>^2) = sqrt(<x^2> - <x>^2)
- *          \endcode
  *      (3) Set the subsampling %factor > 1 to reduce the amount of
  *          computation.
  *      (4) Clipping of pixm (if it exists) to pixs is done in the inner loop.
@@ -14707,7 +14737,7 @@ GetAverageMasked(lua_State *L)
  * Arg #5 is an optional l_int32 (y).
  * Arg #6 is an optional l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For usage, see pixGetAverageMasked().
  *      (2) If there is a colormap, it is removed before the 8 bpp
  *          component images are extracted.
@@ -14743,7 +14773,7 @@ GetAverageMaskedRGB(lua_State *L)
  * Arg #4 is expected to be a l_int32 (sx).
  * Arg #5 is expected to be a l_int32 (sy).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Only computes for tiles that are entirely contained in pixs.
  *      (2) Use L_MEAN_ABSVAL to get the average abs value within the tile;
  *          L_ROOT_MEAN_SQUARE to get the rms value within each tile;
@@ -14774,7 +14804,7 @@ GetAverageTiled(lua_State *L)
  * Arg #3 is expected to be a l_int32 (sx).
  * Arg #4 is expected to be a l_int32 (sy).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For usage, see pixGetAverageTiled().
  *      (2) If there is a colormap, it is removed before the 8 bpp
  *          component images are extracted.
@@ -14808,7 +14838,7 @@ GetAverageTiledRGB(lua_State *L)
  * Arg #5 is expected to be a l_int32 (thresh).
  * Arg #6 is expected to be a l_int32 (mincount).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The background is measured in regions that don't have
  *          images.  It is then propagated into the image regions,
  *          and finally smoothed in each image region.
@@ -14870,7 +14900,7 @@ GetBackgroundGrayMapMorph(lua_State *L)
  * Arg #6 is expected to be a l_int32 (thresh).
  * Arg #7 is expected to be a l_int32 (mincount).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If pixg, which is a grayscale version of pixs, is provided,
  *          use this internally to generate the foreground mask.
  *          Otherwise, a grayscale version of pixs will be generated
@@ -14940,7 +14970,7 @@ GetBackgroundRGBMapMorph(lua_State *L)
  * Arg #4 is expected to be a l_int32 (factor).
  * Arg #5 is expected to be a Numa* (alut).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This takes a color image, a grayscale (intensity) version,
  *          a LUT from intensity to bin number, and the number of bins.
  *          It computes the average color for pixels whose intensity
@@ -14984,7 +15014,7 @@ GetBinnedColor(lua_State *L)
  * Arg #4 is expected to be a string defining the selected color (color).
  * Arg #5 is an optional l_int32 (fontsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This returns the min and max average values of the
  *          selected color component in the set of rank bins,
  *          where the ranking is done using the specified component.
@@ -15021,7 +15051,7 @@ GetBinnedComponentRange(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a string describing the operation (op).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Side effect.  For a colormapped image, if the requested
  *          color is not present and there is room to add it in the cmap,
  *          it is added and the new index is returned.  If there is no room,
@@ -15067,7 +15097,7 @@ GetBlackVal(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Box* (box).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) We are finding the exterior and interior borders
  *          of an 8-connected component.   This should be used
  *          on a pix that has exactly one 8-connected component.
@@ -15103,7 +15133,7 @@ GetCCBorders(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This generates a histogram of colormap pixel indices,
  *          and is of size 2^d.
  *      (2) Set the subsampling %factor > 1 to reduce the amount of computation.
@@ -15127,7 +15157,7 @@ GetCmapHistogram(lua_State *L)
  * Arg #2 is expected to be a Box* (box).
  * Arg #3 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This generates a histogram of colormap pixel indices,
  *          and is of size 2^d.
  *      (2) Set the subsampling %factor > 1 to reduce the amount of computation.
@@ -15155,7 +15185,7 @@ GetCmapHistogramInRect(lua_State *L)
  * Arg #4 is expected to be a l_int32 (y).
  * Arg #5 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This generates a histogram of colormap pixel indices,
  *          and is of size 2^d.
  *      (2) Set the subsampling %factor > 1 to reduce the amount of computation.
@@ -15182,7 +15212,7 @@ GetCmapHistogramMasked(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This generates an ordered map from pixel value to histogram count.
  *      (2) Use amapGetCountForColor() to use the map to look up a count.
  * </pre>
@@ -15204,7 +15234,7 @@ GetColorAmapHistogram(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This generates a set of three 256 entry histograms,
  *          one for each color component (r,g,b).
  *      (2) Set the subsampling %factor > 1 to reduce the amount of computation.
@@ -15235,7 +15265,7 @@ GetColorHistogram(lua_State *L)
  * Arg #4 is expected to be a l_int32 (y).
  * Arg #5 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This generates a set of three 256 entry histograms,
  *      (2) Set the subsampling %factor > 1 to reduce the amount of computation.
  *      (3) Clipping of pixm (if it exists) to pixs is done in the inner loop.
@@ -15269,7 +15299,7 @@ GetColorHistogramMasked(lua_State *L)
  * Arg #3 is expected to be a Box* (box).
  * Arg #4 is expected to be a l_int32 (dist).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This finds the average color in a set of pixels that are
  *          roughly a distance %dist from the c.c. boundary and in the
  *          background of the mask image.
@@ -15313,7 +15343,7 @@ GetColormap(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This computes a row vector of statistics using each
  *          column of a Pix.  The result is put in %rowvect.
  *      (2) The %thresh parameter works with L_MODE_VAL only, and
@@ -15398,7 +15428,7 @@ GetDepth(lua_State *L)
  * Arg #2 is expected to be a Pix* (pix2).
  * Arg #3 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The two images are aligned at the UL corner, and do not
  *          need to be the same size.  If they are not the same size,
  *          the comparison will be made over overlapping pixels.
@@ -15430,7 +15460,7 @@ GetDifferenceHistogram(lua_State *L)
  * Arg #4 is expected to be a l_int32 (mindiff).
  * Arg #7 is expected to be a l_int32 (details).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This takes a threshold %mindiff and describes the difference
  *          between two images in terms of two numbers:
  *            (a) the fraction of pixels, %fractdiff, whose difference
@@ -15524,7 +15554,7 @@ GetEdgeProfile(lua_State *L)
  * Arg #2 is expected to be a l_int32 (factor).
  * Arg #3 is expected to be a string describing the type (type; min or max).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If pixs is grayscale, the result is returned in &grayval.
  *          Otherwise, if there is a colormap or d == 32,
  *          each requested color component is returned.  At least
@@ -15558,7 +15588,7 @@ GetExtremeValue(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If pixs has a colormap, it is converted to 8 bpp gray.
  *          If you want a histogram of the colormap indices, use
  *          pixGetCmapHistogram().
@@ -15585,7 +15615,7 @@ GetGrayHistogram(lua_State *L)
  * Arg #2 is expected to be a Box* (box).
  * Arg #3 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If pixs is cmapped, it is converted to 8 bpp gray.
  *          If you want a histogram of the colormap indices, use
  *          pixGetCmapHistogramInRect().
@@ -15614,7 +15644,7 @@ GetGrayHistogramInRect(lua_State *L)
  * Arg #4 is expected to be a l_int32 (y).
  * Arg #5 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If pixs is cmapped, it is converted to 8 bpp gray.
  *          If you want a histogram of the colormap indices, use
  *          pixGetCmapHistogramMasked().
@@ -15646,7 +15676,7 @@ GetGrayHistogramMasked(lua_State *L)
  * Arg #3 is expected to be a l_int32 (nx).
  * Arg #4 is expected to be a l_int32 (ny).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If pixs is cmapped, it is converted to 8 bpp gray.
  *      (2) This returns a set of 256-value histograms of pixel values.
  *      (3) Set the subsampling factor > 1 to reduce the amount of computation.
@@ -15691,7 +15721,7 @@ GetHeight(lua_State *L)
  * Arg #4 is expected to be a l_int32 (xs).
  * Arg #5 is expected to be a l_int32 (ys).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) we trace out hole border on pixs without addition
  *          of single pixel added border to pixs
  *      (2) therefore all coordinates are relative within the c.c. (pixs)
@@ -15738,7 +15768,7 @@ GetInputFormat(lua_State *L)
  * Arg #3 is expected to be a l_int32 (smoothx).
  * Arg #4 is expected to be a l_int32 (smoothy).
  *
- * Notes:
+ * Leptonica's Notes:
  *     (1) bgval should typically be > 120 and < 240
  *     (2) pixd is a normalization image; the original image is
  *       multiplied by pixd and the result is divided by 256.
@@ -15815,7 +15845,7 @@ GetLastOnPixelInRun(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is intended to be used for fast random pixel access.
  *          For example, for an 8 bpp image,
  *              val = GET_DATA_BYTE(lines8[i], j);
@@ -15903,7 +15933,7 @@ GetLinePtrs(lua_State *L)
  * Arg #7 is expected to be a l_float32 (minbsdelta).
  * Arg #8 is expected to be a boolean (debug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The local skew is measured in a set of overlapping strips.
  *          We then do a least square linear fit parameters to get
  *          the slope and intercept parameters a and b in
@@ -15952,7 +15982,7 @@ GetLocalSkewAngles(lua_State *L)
  * Arg #6 is expected to be a l_float32 (sweepdelta).
  * Arg #7 is expected to be a l_float32 (minbsdelta).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This generates two pairs of points in the src, each pair
  *          corresponding to a pair of points that would lie along
  *          the same raster line in a transformed (dewarped) image.
@@ -15988,7 +16018,7 @@ GetLocalSkewTransform(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is an optional Box*.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This can be used to find the maximum and its location
  *          in a 2-dimensional histogram, where the x and y directions
  *          represent two color components (e.g., saturation and hue).
@@ -16041,7 +16071,7 @@ GetMomentByColumn(lua_State *L)
  * Arg #3 is expected to be a l_int32 (factor).
  * Arg #4 is expected to be a l_int32 (ncolors).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This finds the %ncolors most populated cubes in rgb colorspace,
  *          where the cube size depends on %sigbits as
  *               cube side = (256 >> sigbits)
@@ -16076,7 +16106,7 @@ GetMostPopulatedColors(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Box* (box).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) the border is saved in relative coordinates within
  *          the c.c. (pixs).  Because the calculation is done
  *          in pixb with added 1 pixel border, we must subtract
@@ -16106,7 +16136,7 @@ GetOuterBorder(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Box* (box).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) We are finding the exterior border of a single 8-connected
  *          component.
  *      (2) If box is NULL, the outline returned is in the local coords
@@ -16151,7 +16181,7 @@ GetOuterBordersPtaa(lua_State *L)
  * Arg #2 is expected to be a Pix* (pix2).
  * Arg #3 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This computes the power S/N ratio, in dB, for the difference
  *          between two images.  By convention, the power S/N
  *          for a grayscale image is ('log' == log base 10,
@@ -16197,7 +16227,7 @@ GetPSNR(lua_State *L)
  * Arg #4 is expected to be a l_int32 (dilation).
  * Arg #5 is expected to be a l_int32 (mindiff).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This takes 2 pix and determines, using 2 input parameters:
  *           * %dilation specifies the amount of grayscale or color
  *             dilation to apply to the images, to compensate for
@@ -16259,7 +16289,7 @@ GetPerceptualDiff(lua_State *L)
  * Arg #2 is expected to be a l_int32 (x).
  * Arg #3 is expected to be a l_int32 (y).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This returns the value in the data array.  If the pix is
  *          colormapped, it returns the colormap index, not the rgb value.
  *      (2) Because of the function overhead and the parameter checking,
@@ -16297,7 +16327,7 @@ GetPixel(lua_State *L)
  * Arg #4 is an optional l_int32 (y).
  * Arg #5 is an optional l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For rgb pix, this is a more direct computation of the
  *          average value of the pixels in %pixs that are under the
  *          mask %pixm. It is faster than pixGetPixelStats(), which
@@ -16336,7 +16366,7 @@ GetPixelAverage(lua_State *L)
  * Arg #2 is expected to be a string describing the type of stats (type).
  * Arg #3 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Simple function to get one of four statistical values of an image.
  *      (2) It does not take a mask: it uses the entire image.
  *      (3) To get the average pixel value of an RGB image, suggest using
@@ -16364,7 +16394,7 @@ GetPixelStats(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string with the component name (comp).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Three calls to this function generate the r, g and b 8 bpp
  *          component images.  This is much faster than generating the
  *          three images in parallel, by extracting a src pixel and setting
@@ -16391,7 +16421,7 @@ GetRGBComponent(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (comp).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) In leptonica, we do not support alpha in colormaps.
  * </pre>
  * \param L pointer to the lua_State
@@ -16414,7 +16444,7 @@ GetRGBComponentCmap(lua_State *L)
  * Arg #2 is expected to be a l_int32 (sigbits).
  * Arg #3 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This uses a simple, fast method of indexing into an rgb image.
  *      (2) The output is a 1D histogram of count vs. rgb-index, which
  *          uses red sigbits as the most significant and blue as the least.
@@ -16439,7 +16469,7 @@ GetRGBHistogram(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This puts rgb components from the input line in pixs
  *          into the given buffers.
  * </pre>
@@ -16502,7 +16532,7 @@ GetRGBPixel(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If the pix is colormapped, it returns the rgb value.
  * </pre>
  * \param L pointer to the lua_State
@@ -16530,7 +16560,7 @@ GetRandomPixel(lua_State *L)
  * Arg #2 is expected to be a l_int32 (factor).
  * Arg #3 is expected to be a l_int32 (color).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If pixs is 8 bpp grayscale, the color selection type is ignored.
  * </pre>
  * \param L pointer to the lua_State
@@ -16559,7 +16589,7 @@ GetRangeValues(lua_State *L)
  * Arg #3 is expected to be a l_int32 (factor).
  * Arg #4 is expected to be a string defining the selected color (color).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The color selection flag is one of: L_SELECT_RED, L_SELECT_GREEN,
  *          L_SELECT_BLUE, L_SELECT_MIN, L_SELECT_MAX, L_SELECT_AVERAGE,
  *          L_SELECT_HUE, L_SELECT_SATURATION.
@@ -16607,7 +16637,7 @@ GetRankColorArray(lua_State *L)
  * Arg #2 is expected to be a l_int32 (factor).
  * Arg #3 is expected to be a l_float32 (rank).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Simple function to get rank values of an image.
  *          For a color image, the median value (rank = 0.5) can be
  *          used to linearly remap the colors based on the median
@@ -16639,7 +16669,7 @@ GetRankValue(lua_State *L)
  * Arg #5 is expected to be a l_int32 (factor).
  * Arg #6 is expected to be a l_float32 (rank).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Computes the rank value of pixels in pixs that are under
  *          the fg of the optional mask.  If the mask is null, it
  *          computes the average of the pixels in pixs.
@@ -16687,7 +16717,7 @@ GetRankValueMasked(lua_State *L)
  * Arg #5 is expected to be a l_int32 (factor).
  * Arg #6 is expected to be a l_float32 (rank).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Computes the rank component values of pixels in pixs that
  *          are under the fg of the optional mask.  If the mask is null, it
  *          computes the average of the pixels in pixs.
@@ -16724,7 +16754,7 @@ GetRankValueMaskedRGB(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This returns the raster data as a byte string, padded to the
  *          byte.  For 1 bpp, the first pixel is the MSbit in the first byte.
  *          For rgb, the bytes are in (rgb) order.  This is the format
@@ -16768,7 +16798,7 @@ GetRefcount(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #5 is expected to be a Pixa* (pixadb).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) It is best to deskew the image before segmenting.
  *      (2) Passing in %pixadb enables debug output.
  * </pre>
@@ -16817,7 +16847,7 @@ GetResolution(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This computes a column vector of statistics using each
  *          row of a Pix.  The result is put in %colvect.
  *      (2) The %thresh parameter works with L_MODE_VAL only, and
@@ -16866,7 +16896,7 @@ GetRowStats(lua_State *L)
  * Arg #3 is expected to be a l_int32 (y).
  * Arg #4 is expected to be a l_int32 (minlength).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Action: this function computes the fg (black) and bg (white)
  *          pixel runlengths along the specified horizontal or vertical line,
  *          and returns a Numa of the "center" pixels of each fg run
@@ -16909,7 +16939,7 @@ GetRunCentersOnLine(lua_State *L)
  * Arg #4 is expected to be a l_int32 (x2).
  * Arg #5 is expected to be a l_int32 (y2).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Action: this function uses the bresenham algorithm to compute
  *          the pixels along the specified line.  It returns a Numa of the
  *          runlengths of the fg (black) and bg (white) runs, always
@@ -16941,7 +16971,7 @@ GetRunsOnLine(lua_State *L)
  * Arg #3 is expected to be a l_int32 (y).
  * Arg #4 is expected to be a l_int32 (conn).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The returned %neigh array is the unique set of neighboring
  *          pixel values, of size nvals, sorted from smallest to largest.
  *          The value 0, which represents background pixels that do
@@ -16993,7 +17023,7 @@ GetSpp(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The text string belongs to the pix.  The caller must
  *          NOT free it!
  * </pre>
@@ -17055,7 +17085,7 @@ GetWidth(lua_State *L)
  * Arg #4 is expected to be a l_int32 (maxwidth).
  * Arg #5 is expected to be a l_int32 (maxheight).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The input should be at a resolution of between 75 and 150 ppi.
  *      (2) This is a special version of pixGetWordsInTextlines(), that
  *          just finds the word boxes in line order, with a numa
@@ -17092,7 +17122,7 @@ GetWordBoxesInTextlines(lua_State *L)
  * Arg #4 is expected to be a l_int32 (maxwidth).
  * Arg #5 is expected to be a l_int32 (maxheight).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The input should be at a resolution of between 75 and 150 ppi.
  *      (2) The four size constraints on saved components are all
  *          scaled by %reduction.
@@ -17208,7 +17238,7 @@ GetYRes(lua_State *L)
  * Arg #6 is expected to be a l_int32 (factor).
  * Arg #7 is expected to be a l_float32 (rank).
  *
- * Notes:
+ * Leptonica's Notes:
  *    (1) This is a version of pixGlobalNormRGB(), where the output
  *        intensity is scaled back so that a controlled fraction of
  *        pixel components is allowed to saturate.  See comments in
@@ -17256,7 +17286,7 @@ GlobalNormNoSatRGB(lua_State *L)
  * Arg #5 is expected to be a l_int32 (bval).
  * Arg #6 is expected to be a l_int32 (mapval).
  *
- * Notes:
+ * Leptonica's Notes:
  *    (1) The value of pixd determines if the results are written to a
  *        new pix (use NULL), in-place to pixs (use pixs), or to some
  *        other existing pix.
@@ -17303,7 +17333,7 @@ GlobalNormRGB(lua_State *L)
  * Arg #3 is expected to be a l_int32 (dispsep).
  * Arg #4 is expected to be a l_int32 (dispy).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This works on 8 bpp grayscale images.
  *      (2) This runs a pipeline of operations; no branching is allowed.
  *      (3) This only uses brick SELs.
@@ -17357,7 +17387,7 @@ GrayMorphSequence(lua_State *L)
  * Arg #2 is expected to be a PixColormap* (cmap).
  * Arg #3 is expected to be a l_int32 (mindepth).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) In use, pixs is an 8 bpp grayscale image without a colormap.
  *          If there is an existing colormap, a warning is issued and
  *          a copy of the input pixs is returned.
@@ -17385,7 +17415,7 @@ GrayQuantFromCmap(lua_State *L)
  * Arg #4 is expected to be a l_float32 (minfract).
  * Arg #5 is expected to be a l_int32 (maxsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is useful for quantizing images with relatively few
  *          colors, but which may have both color and gray pixels.
  *          If there are color pixels, it is assumed that an input
@@ -17441,7 +17471,7 @@ GrayQuantFromHisto(lua_State *L)
  * Arg #2 is expected to be a l_int32 (height).
  * Arg #3 is expected to be a l_int32 (connectivity).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) It is more efficient to use a connectivity of 4 for the fill.
  *      (2) This fills bumps to some level, and extracts the unfilled
  *          part of the bump.  To extract the troughs of basins, first
@@ -17500,7 +17530,7 @@ HDome(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Sel* (sel).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The hit-miss transform erodes the src, using both hits
  *          and misses in the Sel.  It ANDs the shifted src for hits
  *          and ANDs the inverted shifted src for misses.
@@ -17535,7 +17565,7 @@ HMT(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a string (selname).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This simply adds a 32 pixel border, calls the appropriate
  *          pixFHMTGen_*(), and removes the border.
  *          See notes below for that function.
@@ -17563,7 +17593,7 @@ HMTDwa_1(lua_State *L)
  * Arg #4 is expected to be a l_float32 (radang).
  * Arg #5 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) There are 3 cases:
  *            (a) pixd == null (make a new pixd)
  *            (b) pixd == pixs (in-place)
@@ -17613,7 +17643,7 @@ HShear(lua_State *L)
  * Arg #3 is expected to be a l_float32 (radang).
  * Arg #4 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixHShear() for usage.
  *      (2) This does a horizontal shear about the center, with (+) shear
  *          pushing increasingly leftward (-x) with increasing y.
@@ -17641,7 +17671,7 @@ HShearCenter(lua_State *L)
  * Arg #3 is expected to be a l_float32 (radang).
  * Arg #4 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixHShear() for usage.
  *      (2) This does a horizontal shear about the UL corner, with (+) shear
  *          pushing increasingly leftward (-x) with increasing y.
@@ -17669,7 +17699,7 @@ HShearCorner(lua_State *L)
  * Arg #3 is expected to be a l_float32 (radang).
  * Arg #4 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is an in-place version of pixHShear(); see comments there.
  *      (2) This brings in 'incolor' pixels from outside the image.
  *      (3) pixs cannot be colormapped, because the in-place operation
@@ -17699,7 +17729,7 @@ HShearIP(lua_State *L)
  * Arg #3 is expected to be a l_float32 (radang).
  * Arg #4 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does horizontal shear with linear interpolation for
  *          accurate results on 8 bpp gray, 32 bpp rgb, or cmapped images.
  *          It is relatively slow compared to the sampled version
@@ -17736,7 +17766,7 @@ HShearLI(lua_State *L)
  * Arg #4 is expected to be a l_int32 (sm2h).
  * Arg #5 is expected to be a l_int32 (sm2v).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) We use symmetric smoothing filters of odd dimension,
  *          typically use 3, 5, 7, etc.  The smoothing parameters
  *          for these are 1, 2, 3, etc.  The filter size is related
@@ -17781,7 +17811,7 @@ HalfEdgeByBandpass(lua_State *L)
  * Arg #3 is expected to be a l_float32 (fract).
  * Arg #4 is expected to be a l_float32 (fthresh).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Pixels are identified as red if they satisfy two conditions:
  *          (a) The components satisfy (R-B)/B > %fthresh   (red or dark fg)
  *          (b) The red component satisfied R > 128  (red or light bg)
@@ -17828,7 +17858,7 @@ HasHighlightRed(lua_State *L)
  * Arg #7 is expected to be a l_int32 (maxdiffw).
  * Arg #8 is expected to be a l_int32 (maxdiffh).
  *
- * Notes:
+ * Leptonica's Notes:
  *  We check first that the two pix are roughly
  *  the same size.  Only if they meet that criterion do
  *  we compare the bitmaps.  The Hausdorff is a 2-way
@@ -17863,7 +17893,7 @@ Haustest(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (connectivity).
  *
- * Notes:
+ * Leptonica's Notes:
  *     (1) To get 4-c.c. holes of the 8-c.c. as foreground, use
  *         4-connected filling; to get 8-c.c. holes of the 4-c.c.
  *         as foreground, use 8-connected filling.
@@ -17888,7 +17918,7 @@ HolesByFilling(lua_State *L)
  * Arg #2 is expected to be a l_int32 (h).
  * Arg #3 is expected to be a l_uint32 (offset).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The offset must be >= 0.
  *      (2) The offset is used so that we can do arithmetic
  *          with negative number results on l_uint32 data; it
@@ -17944,7 +17974,7 @@ IntersectionOfMorphOps(lua_State *L)
  * Arg #3 is expected to be a Pix* (pixw).
  * Arg #5 is expected to be a l_int32 (debugflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) You can input the bounding boxes for the words in one of
  *          two forms: as bounding boxes (%boxaw) or as a word mask with
  *          the word bounding boxes filled (%pixw).  For example,
@@ -17991,12 +18021,12 @@ ItalicWords(lua_State *L)
  * Arg #4 is expected to be a l_float32 (distfract).
  * Arg #5 is expected to be a l_float32 (maxfade).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) In-place operation.
- *      (2) Maximum fading fraction %maxfade occurs at the edge of the image,
- *          and the fraction goes to 0 at the fractional distance %distfract
- *          from the edge.  %maxfade must be in [0, 1].
- *      (3) %distrfact must be in [0, 1], and typically it would be <= 0.5.
+ *      (2) Maximum fading fraction @maxfade occurs at the edge of the image,
+ *          and the fraction goes to 0 at the fractional distance @distfract
+ *          from the edge.  @maxfade must be in [0, 1].
+ *      (3) @distrfact must be in [0, 1], and typically it would be <= 0.5.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -18021,7 +18051,7 @@ LinearEdgeFade(lua_State *L)
  * Arg #3 is expected to be a l_uint32 (srcval).
  * Arg #4 is expected to be a l_uint32 (dstval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For each component (r, b, g) separately, this does a piecewise
  *          linear mapping of the colors in pixs to colors in pixd.
  *          If rs and rd are the red src and dest components in %srcval and
@@ -18063,7 +18093,7 @@ LinearMapToTargetColor(lua_State *L)
  * Arg #5 is expected to be a Pix* (pixmin).
  * Arg #6 is expected to be a Pix* (pixmax).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) pixd can be equal to pixs (in-place operation) or
  *          null (makes a new pixd).
  *      (2) sx and sy give the tile size; they are typically at least 20.
@@ -18096,7 +18126,7 @@ LinearTRCTiled(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This generates an RGB image where each component value
  *          is coded depending on the (x.y) location and the size
  *          of the fg connected component that the pixel in pixs belongs to.
@@ -18126,7 +18156,7 @@ LocToColorTransform(lua_State *L)
  * Arg #2 is expected to be a l_int32 (maxmin).
  * Arg #3 is expected to be a l_int32 (minmax).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This gives the actual local minima and maxima.
  *          A local minimum is a pixel whose surrounding pixels all
  *          have values at least as large, and likewise for a local
@@ -18199,7 +18229,7 @@ LocateBarcodes(lua_State *L)
  * Arg #2 is expected to be a l_int32 (dist).
  * Arg #3 is an optional boolean (getbox).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This generates a 8 bpp alpha layer that is opaque (256)
  *          over the FG of pixs, and goes transparent linearly away
  *          from the FG pixels, decaying to 0 (transparent) is an
@@ -18247,7 +18277,7 @@ MakeAlphaFromMask(lua_State *L)
  * Arg #4 is expected to be a l_float32 (bc).
  * Arg #5 is expected to be a l_float32 (thresh).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This generates a 1 bpp mask image, where a 1 is written in
  *          the mask for each pixel in pixs that satisfies
  *               rc * rval + gc * gval + bc * bval > thresh
@@ -18257,7 +18287,7 @@ MakeAlphaFromMask(lua_State *L)
  *          example, a mask that discriminates against red and in favor
  *          of blue will have rc < 0.0 and bc > 0.0.
  *      (3) To make the result independent of intensity (the 'V' in HSV),
- *          select coefficients so that %thresh = 0.  Then the result
+ *          select coefficients so that @thresh = 0.  Then the result
  *          is not changed when all components are multiplied by the
  *          same constant (as long as nothing saturates).  This can be
  *          useful if, for example, the illumination is not uniform.
@@ -18288,7 +18318,7 @@ MakeArbMaskFromRGB(lua_State *L)
  * Arg #5 is expected to be a l_float32 (vf1).
  * Arg #6 is expected to be a l_float32 (vf2).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This makes an arbitrary 1-component mask with a centered fg
  *          frame, which can have both an inner and an outer boundary.
  *          All input fractional distances are measured from the image
@@ -18331,7 +18361,7 @@ MakeFrameMask(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) pixs is a 32 bpp image in HSV colorspace; hue is in the "red"
  *          byte, saturation is in the "green" byte.
  *      (2) In pixd, hue is displayed vertically; saturation horizontally.
@@ -18363,7 +18393,7 @@ MakeHistoHS(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) pixs is a 32 bpp image in HSV colorspace; hue is in the "red"
  *          byte, max intensity ("value") is in the "blue" byte.
  *      (2) In pixd, hue is displayed vertically; intensity horizontally.
@@ -18395,7 +18425,7 @@ MakeHistoHV(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) pixs is a 32 bpp image in HSV colorspace; sat is in the "green"
  *          byte, max intensity ("value") is in the "blue" byte.
  *      (2) In pixd, sat is displayed vertically; intensity horizontally.
@@ -18427,7 +18457,7 @@ MakeHistoSV(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a string of max. 256 bytes (lut).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This generates a 1 bpp mask image, where a 1 is written in
  *          the mask for each pixel in pixs that has a value corresponding
  *          to a 1 in the LUT.
@@ -18459,7 +18489,7 @@ MakeMaskFromLUT(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (val).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This generates a 1 bpp mask image, where a 1 is written in
  *          the mask for each pixel in pixs that has a value %val.
  *      (2) If no pixels have the value, an empty mask is generated.
@@ -18487,7 +18517,7 @@ MakeMaskFromVal(lua_State *L)
  * Arg #5 is expected to be a l_int32 (sathw).
  * Arg #6 is expected to be a l_int32 (regionflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The pixels are selected based on the specified ranges of
  *          hue and saturation.  For selection or exclusion, the pixel
  *          HS component values must be within both ranges.  Care must
@@ -18524,7 +18554,7 @@ MakeRangeMaskHS(lua_State *L)
  * Arg #5 is expected to be a l_int32 (valhw).
  * Arg #6 is expected to be a l_int32 (regionflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The pixels are selected based on the specified ranges of
  *          hue and max intensity values.  For selection or exclusion,
  *          the pixel HV component values must be within both ranges.
@@ -18561,7 +18591,7 @@ MakeRangeMaskHV(lua_State *L)
  * Arg #5 is expected to be a l_int32 (valhw).
  * Arg #6 is expected to be a l_int32 (regionflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The pixels are selected based on the specified ranges of
  *          saturation and max intensity (val).  For selection or
  *          exclusion, the pixel SV component values must be within both ranges.
@@ -18595,7 +18625,7 @@ MakeRangeMaskSV(lua_State *L)
  * Arg #3 is expected to be a Boxa* (boxa).
  * Arg #4 is expected to be a l_int32 (op).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This can be used with:
  *              pixd = NULL  (makes a new pixd)
  *              pixd = pixs  (in-place)
@@ -18631,7 +18661,7 @@ MaskBoxa(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (connectivity).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This generates a mask image with ON pixels over the
  *          b.b. of the c.c. in pixs.  If there are no ON pixels in pixs,
  *          pixd will also have no ON pixels.
@@ -18659,7 +18689,7 @@ MaskConnComp(lua_State *L)
  * Arg #2 is expected to be a l_int32 (threshdiff).
  * Arg #3 is expected to be a l_int32 (mindist).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The generated mask identifies each pixel as either color or
  *          non-color.  For a pixel to be color, it must satisfy two
  *          constraints:
@@ -18731,7 +18761,7 @@ MaskOverColorRange(lua_State *L)
  * Arg #8 is expected to be a l_int32 (smoothy).
  * Arg #9 is expected to be a l_float32 (scorefract).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This begins with a standard background normalization.
  *          Additionally, there is a flexible background norm, that
  *          will adapt to a rapidly varying background, and this
@@ -18782,7 +18812,7 @@ MaskedThreshOnBackgroundNorm(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (type).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Scales pixel values to fit maximally within the dest 8 bpp pixd
  *      (2) Assumes the source 'pixels' are a 1-component scalar.  For
  *          a 32 bpp source, each pixel is treated as a single number --
@@ -18808,7 +18838,7 @@ MaxDynamicRange(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (type).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Scales pixel values to fit maximally within a 32 bpp dest pixd
  *      (2) All color components are scaled with the same factor, based
  *          on the maximum r,g or b component in the image.  This should
@@ -18836,7 +18866,7 @@ MaxDynamicRangeRGB(lua_State *L)
  * Arg #2 is expected to be a Box* (box).
  * Arg #3 is expected to be a Pix* (pixma).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function is intended to be used for many rectangles
  *          on the same image.  It can find the mean within a
  *          rectangle in O(1), independent of the size of the rectangle.
@@ -18863,7 +18893,7 @@ MeanInRectangle(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Similar to pixBlockconvAccum(), this computes the
  *          sum of the squares of the pixel values in such a way
  *          that the value at (i,j) is the sum of all squares in
@@ -18896,7 +18926,7 @@ MeanSquareAccum(lua_State *L)
  * Arg #4 is expected to be a l_int32 (minreversal).
  * Arg #8 is expected to be a string (debugfile).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This computes three measures of smoothness of the edge of a
  *          connected component:
  *            * jumps/length: (jpl) the number of jumps of size >= %minjump,
@@ -18962,7 +18992,7 @@ MeasureSaturation(lua_State *L)
  * Arg #2 is expected to be a l_int32 (sigbits).
  * Arg #3 is expected to be a l_int32 (subsample).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Array is indexed by (3 * sigbits) bits.  The array size
  *          is 2^(3 * sigbits).
  *      (2) Indexing into the array from rgb uses red sigbits as
@@ -18989,7 +19019,7 @@ MedianCutHisto(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (ditherflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Simple interface.  See pixMedianCutQuantGeneral() for
  *          use of defaulted parameters.
  * </pre>
@@ -19017,7 +19047,7 @@ MedianCutQuant(lua_State *L)
  * Arg #6 is expected to be a l_int32 (maxsub).
  * Arg #7 is expected to be a l_int32 (checkbw).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) %maxcolors must be in the range [2 ... 256].
  *      (2) Use %outdepth = 0 to have the output depth computed as the
  *          minimum required to hold the actual colors found, given
@@ -19071,7 +19101,7 @@ MedianCutQuantGeneral(lua_State *L)
  * Arg #5 is expected to be a l_int32 (lightthresh).
  * Arg #6 is expected to be a l_int32 (diffthresh).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) ncolor + ngray must not exceed 255.
  *      (2) The method makes use of pixMedianCutQuantGeneral() with
  *          minimal addition.
@@ -19144,7 +19174,7 @@ MedianFilter(lua_State *L)
  * Arg #6 is expected to be a l_int32 (dist).
  * Arg #7 is expected to be a l_int32 (direction).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If the line is more horizontal than vertical, the values
  *          are computed for [x1, x2], and the pixels are taken
  *          below and/or above the local y-value.  Otherwise, the
@@ -19194,7 +19224,7 @@ MinMaxNearLine(lua_State *L)
  * Arg #5 is expected to be a l_int32 (smoothx).
  * Arg #6 is expected to be a l_int32 (smoothy).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This computes filtered and smoothed values for the min and
  *          max pixel values in each tile of the image.
  *      (2) See pixContrastNorm() for usage.
@@ -19229,7 +19259,7 @@ MinMaxTiles(lua_State *L)
  * Arg #3 is expected to be a Pix* (pixs2).
  * Arg #4 is expected to be a l_int32 (type).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This gives the min or max of two images, component-wise.
  *      (2) The depth can be 8 or 16 bpp for 1 component, and 32 bpp
  *          for a 3 component image.  For 32 bpp, ignore the LSB
@@ -19261,7 +19291,7 @@ MinOrMax(lua_State *L)
  * Arg #2 is expected to be a l_int32 (mincount).
  * Arg #3 is expected to be a boolean (debug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For this test, it is necessary that the text is horizontally
  *          oriented, with ascenders going up.
  *      (2) conf is the normalized difference between the number of
@@ -19313,7 +19343,7 @@ MirrorDetect(lua_State *L)
  * Arg #2 is expected to be a l_int32 (mincount).
  * Arg #3 is expected to be a boolean (debug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) We assume the text is horizontally oriented, with
  *          ascenders going up.
  *      (2) See notes in pixMirrorDetect().
@@ -19342,7 +19372,7 @@ MirrorDetectDwa(lua_State *L)
  * Arg #2 is expected to be a l_int32 (w).
  * Arg #3 is expected to be a l_int32 (h).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This uses mirrored tiling, where each row alternates
  *          with LR flips and every column alternates with TB
  *          flips, such that the result is a tiling with identical
@@ -19374,7 +19404,7 @@ MirroredTiling(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_float32 (fract).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If fract > 0.0, it gives the fraction that the v-parameter,
  *          which is max(r,g,b), is moved from its initial value toward 255.
  *          If fract < 0.0, it gives the fraction that the v-parameter
@@ -19406,7 +19436,7 @@ ModifyBrightness(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_float32 (fract).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) pixd must either be null or equal to pixs.
  *          For in-place operation, set pixd == pixs:
  *             pixEqualizeTRC(pixs, pixs, ...);
@@ -19439,7 +19469,7 @@ ModifyHue(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_float32 (fract).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If fract > 0.0, it gives the fraction that the pixel
  *          saturation is moved from its initial value toward 255.
  *          If fract < 0.0, it gives the fraction that the pixel
@@ -19492,7 +19522,7 @@ ModifyStrokeWidth(lua_State *L)
  * Arg #2 is expected to be a string (sequence).
  * Arg #3 is expected to be a l_int32 (dispsep).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does rasterop morphology on binary images, using composite
  *          operations for extra speed on large Sels.
  *      (2) Safe closing is used atomically.  However, if you implement a
@@ -19542,7 +19572,7 @@ MorphCompSequence(lua_State *L)
  * Arg #2 is expected to be a string (sequence).
  * Arg #3 is expected to be a l_int32 (dispsep).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does dwa morphology on binary images, using brick Sels.
  *      (2) This runs a pipeline of operations; no branching is allowed.
  *      (3) It implements all brick Sels that have dimensions up to 63
@@ -19574,7 +19604,7 @@ MorphCompSequenceDwa(lua_State *L)
  * Arg #3 is expected to be a l_int32 (operation).
  * Arg #4 is expected to be a char* (selname).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This simply adds a border, calls the appropriate
  *          pixFMorphopGen_*(), and removes the border.
  *          See the notes for that function.
@@ -19606,7 +19636,7 @@ MorphDwa_1(lua_State *L)
  * Arg #3 is expected to be a l_int32 (operation).
  * Arg #4 is expected to be a char* (selname).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This simply adds a border, calls the appropriate
  *          pixFMorphopGen_*(), and removes the border.
  *          See the notes for that function.
@@ -19660,7 +19690,7 @@ MorphGradient(lua_State *L)
  * Arg #2 is expected to be a string (sequence).
  * Arg #3 is expected to be a l_int32 (dispsep).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does rasterop morphology on binary images.
  *      (2) This runs a pipeline of operations; no branching is allowed.
  *      (3) This only uses brick Sels, which are created on the fly.
@@ -19741,7 +19771,7 @@ MorphSequence(lua_State *L)
  * Arg #4 is expected to be a l_int32 (minw).
  * Arg #5 is expected to be a l_int32 (minh).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixMorphSequence() for composing operation sequences.
  *      (2) This operates separately on each c.c. in the input pix.
  *      (3) The dilation does NOT increase the c.c. size; it is clipped
@@ -19780,7 +19810,7 @@ MorphSequenceByComponent(lua_State *L)
  * Arg #5 is expected to be a l_int32 (minw).
  * Arg #6 is expected to be a l_int32 (minh).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixMorphCompSequence() for composing operation sequences.
  *      (2) This operates separately on the region in pixs corresponding
  *          to each c.c. in the mask pixm.  It differs from
@@ -19821,7 +19851,7 @@ MorphSequenceByRegion(lua_State *L)
  * Arg #2 is expected to be a string (sequence).
  * Arg #3 is expected to be a l_int32 (dispsep).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does dwa morphology on binary images.
  *      (2) This runs a pipeline of operations; no branching is allowed.
  *      (3) This only uses brick Sels that have been pre-compiled with
@@ -19853,7 +19883,7 @@ MorphSequenceDwa(lua_State *L)
  * Arg #3 is expected to be a string (sequence).
  * Arg #4 is expected to be a l_int32 (dispsep).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This applies the morph sequence to the image, but only allows
  *          changes in pixs for pixels under the background of pixm.
  *      (5) If pixm is NULL, this is just pixMorphSequence().
@@ -19883,7 +19913,7 @@ MorphSequenceMasked(lua_State *L)
  * Arg #5 is expected to be a l_float32 (delta).
  * Arg #6 is expected to be a l_int32 (nincr).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This generates a mosaic view of the effect of shifting the RGB
  *          components.  See pixColorShiftRGB() for details on the shifting.
  *      (2) The offsets (%roff, %goff, %boff) set the color center point,
@@ -19895,7 +19925,7 @@ MorphSequenceMasked(lua_State *L)
  *          and calibration of the printer.  This function can be used
  *          to iteratively match a color print to the original.  On each
  *          iteration, the center offsets are set to the best match so
- *          far, and the %delta increments are typically reduced.
+ *          far, and the @delta increments are typically reduced.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -19921,7 +19951,7 @@ MosaicColorShiftRGB(lua_State *L)
  * Arg #2 is expected to be a l_float32 (factor).
  * Arg #3 is expected to be a l_uint32 (offset).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The offset must be >= 0 and should not exceed 0x40000000.
  *      (2) This multiplies each pixel, relative to offset, by the input factor
  *      (3) The result is returned with the offset back in place.
@@ -19948,7 +19978,7 @@ MultConstAccumulate(lua_State *L)
  * Arg #3 is expected to be a l_float32 (gfact).
  * Arg #4 is expected to be a l_float32 (bfact).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) rfact, gfact and bfact can only have non-negative values.
  *          They can be greater than 1.0.  All transformed component
  *          values are clipped to the interval [0, 255].
@@ -19976,7 +20006,7 @@ MultConstantColor(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (val).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) In-place operation; val must be >= 0.
  *      (2) No clipping for 32 bpp.
  *      (3) For 8 and 16 bpp, the result is clipped to 0xff and 0xffff, rsp.
@@ -20000,7 +20030,7 @@ MultConstantGray(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Kernel* (kel).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The kernel is a data structure used mostly for floating point
  *          convolution.  Here it is a 3x3 matrix of floats that are used
  *          to transform the pixel values by matrix multiplication:
@@ -20045,7 +20075,7 @@ MultMatrixColor(lua_State *L)
  * Arg #3 is expected to be a Box* (box).
  * Arg #4 is expected to be a l_uint32 (color).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This filters all pixels in the specified region by
  *          multiplying each component by the input color.
  *          This leaves black invariant and transforms white to the
@@ -20074,7 +20104,7 @@ MultiplyByColor(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This returns the actual number of colors found in the image,
  *          even if there is a colormap.  If %factor == 1 and the
  *          number of colors differs from the number of entries
@@ -20111,7 +20141,7 @@ NumColors(lua_State *L)
  * Arg #4 is expected to be a l_float32 (minfract).
  * Arg #5 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function is asking the question: how many perceptually
  *          significant gray color levels is in this pix?
  *          A color level must meet 3 criteria to be significant:
@@ -20153,7 +20183,7 @@ NumSignificantGrayColors(lua_State *L)
  * Arg #3 is expected to be a l_int32 (mincount).
  * Arg #4 is expected to be a l_float32 (minfract).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Exactly one of (%mincount, %minfract) must be -1, so, e.g.,
  *          if %mincount == -1, then we use %minfract.
  *      (2) If all occupied octcubes are to count, set %mincount == 1.
@@ -20183,7 +20213,7 @@ NumberOccupiedOctcubes(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (level).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Input NULL for &ncolors to prevent computation and return value.
  * </pre>
  * \param L pointer to the lua_State
@@ -20211,7 +20241,7 @@ OctcubeHistogram(lua_State *L)
  * Arg #4 is expected to be a l_int32 (level).
  * Arg #5 is expected to be a l_int32 (metric).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) In typical use, we are doing an operation, such as
  *          interpolative scaling, on a colormapped pix, where it is
  *          necessary to remove the colormap before the operation.
@@ -20285,7 +20315,7 @@ OctcubeQuantFromCmap(lua_State *L)
  * Arg #3 is expected to be a l_int32 (graylevels).
  * Arg #4 is expected to be a l_int32 (delta).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Generates a colormapped image, where the colormap table values
  *          have two components: octcube values representing pixels with
  *          color content, and grayscale values for the rest.
@@ -20325,7 +20355,7 @@ OctcubeQuantMixedWithGray(lua_State *L)
  * Arg #2 is expected to be a l_int32 (colors).
  * Arg #3 is expected to be a l_int32 (ditherflag).
  *
- *  Notes:
+ * Leptonica's Notes:
  *        Leptonica also provides color quantization using a modified
  *        form of median cut.  See colorquant2.c for details.
  * </pre>
@@ -20352,7 +20382,7 @@ OctreeColorQuant(lua_State *L)
  * Arg #4 is expected to be a l_float32 (validthresh).
  * Arg #5 is expected to be a l_float32 (colorthresh).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The parameters %validthresh and %colorthresh are used to
  *          determine if color quantization should be used on an image,
  *          or whether, instead, it should be quantized in grayscale.
@@ -20403,7 +20433,7 @@ OctreeColorQuantGeneral(lua_State *L)
  * Arg #2 is expected to be a l_int32 (level).
  * Arg #3 is expected to be a l_int32 (ditherflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This color quantization method works very well without
  *          dithering, using octcubes at two different levels:
  *            (a) the input %level, which is either 3 or 4
@@ -20489,7 +20519,7 @@ OctreeQuantNumColors(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Sel* (sel).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Generic morphological opening, using hits in the Sel.
  *      (2) There are three cases:
  *          (a) pixd == null   (result into new pixd)
@@ -20523,7 +20553,7 @@ Open(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Sel is a brick with all elements being hits
  *      (2) The origin is at (x, y) = (hsize/2, vsize/2)
  *      (3) Do separably if both hsize and vsize are > 1.
@@ -20560,7 +20590,7 @@ OpenBrick(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) These implement 2D brick Sels, using linear Sels generated
  *          with selaAddBasic().
  *      (2) A brick Sel has hits for all elements.
@@ -20606,7 +20636,7 @@ OpenBrickDwa(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Sel is a brick with all elements being hits
  *      (2) The origin is at (x, y) = (hsize/2, vsize/2)
  *      (3) Do compositely for each dimension > 1.
@@ -20657,7 +20687,7 @@ OpenCompBrick(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) These implement a separable composite opening with 2D brick Sels.
  *      (2) For efficiency, it may decompose each linear morphological
  *          operation into two (brick + comb).
@@ -20734,7 +20764,7 @@ OpenCompBrickExtendDwa(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a Sel* (sel).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Generalized morphological opening, using both hits and
  *          misses in the Sel.
  *      (2) This does a hit-miss transform, followed by a dilation
@@ -20770,7 +20800,7 @@ OpenGeneralized(lua_State *L)
  * Arg #2 is expected to be a l_int32 (hsize).
  * Arg #3 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Sel is a brick with all elements being hits
  *      (2) If hsize = vsize = 1, just returns a copy.
  * </pre>
@@ -20795,7 +20825,7 @@ OpenGray(lua_State *L)
  * Arg #2 is expected to be a l_int32 (hsize).
  * Arg #3 is expected to be a l_int32 (vsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Special case for 1x3, 3x1 or 3x3 brick sel (all hits)
  *      (2) If hsize = vsize = 1, just returns a copy.
  *      (3) It would be nice not to add a border, but it is required
@@ -20823,7 +20853,7 @@ OpenGray3(lua_State *L)
  * Arg #3 is expected to be a l_float32 (minratio).
  * Arg #4 is expected to be a l_int32 (debug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Simple top-level function to detect if Roman text is in
  *          reading orientation, and to rotate the image accordingly if not.
  *      (2) Returns a copy if no rotation is needed.
@@ -20861,7 +20891,7 @@ OrientCorrect(lua_State *L)
  * Arg #2 is expected to be a l_int32 (mincount).
  * Arg #3 is expected to be a boolean (debug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See "Measuring document image skew and orientation"
  *          Dan S. Bloomberg, Gary E. Kopec and Lakshmi Dasari
  *          IS&T/SPIE EI'95, Conference 2422: Document Recognition II
@@ -20933,7 +20963,7 @@ OrientDetect(lua_State *L)
  * Arg #2 is expected to be a l_int32 (mincount).
  * Arg #3 is expected to be a boolean (debug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Same interface as for pixOrientDetect().  See notes
  *          there for usage.
  *      (2) Uses auto-gen'd code for the Sels defined at the
@@ -20971,7 +21001,7 @@ OrientDetectDwa(lua_State *L)
  * Arg #5 is expected to be a l_int32 (smoothy).
  * Arg #6 is expected to be a l_float32 (scorefract).
  *
- *  Notes:
+ * Leptonica's Notes:
  *      (1) pixOtsuAdaptiveThreshold() computes a global threshold over each
  *          tile and performs the threshold operation, resulting in a
  *          binary image for each tile.  These are stitched into the
@@ -20988,7 +21018,61 @@ OrientDetectDwa(lua_State *L)
  *          components at different thresholding to determine if a
  *          global threshold can be used (for text or line-art) and the
  *          value it should have.
- * Notes:
+ * Leptonica's Notes:
+ *      (1) The Otsu method finds a single global threshold for an image.
+ *          This function allows a locally adapted threshold to be
+ *          found for each tile into which the image is broken up.
+ *      (2) The array of threshold values, one for each tile, constitutes
+ *          a highly downscaled image.  This array is optionally
+ *          smoothed using a convolution.  The full width and height of the
+ *          convolution kernel are (2 * %smoothx + 1) and (2 * %smoothy + 1).
+ *      (3) The minimum tile dimension allowed is 16.  If such small
+ *          tiles are used, it is recommended to use smoothing, because
+ *          without smoothing, each small tile determines the splitting
+ *          threshold independently.  A tile that is entirely in the
+ *          image bg will then hallucinate fg, resulting in a very noisy
+ *          binarization.  The smoothing should be large enough that no
+ *          tile is only influenced by one type (fg or bg) of pixels,
+ *          because it will force a split of its pixels.
+ *      (4) To get a single global threshold for the entire image, use
+ *          input values of %sx and %sy that are larger than the image.
+ *          For this situation, the smoothing parameters are ignored.
+ *      (5) The threshold values partition the image pixels into two classes:
+ *          one whose values are less than the threshold and another
+ *          whose values are greater than or equal to the threshold.
+ *          This is the same use of 'threshold' as in pixThresholdToBinary().
+ *      (6) The scorefract is the fraction of the maximum Otsu score, which
+ *          is used to determine the range over which the histogram minimum
+ *          is searched.  See numaSplitDistribution() for details on the
+ *          underlying method of choosing a threshold.
+ *      (7) This uses enables a modified version of the Otsu criterion for
+ *          splitting the distribution of pixels in each tile into a
+ *          fg and bg part.  The modification consists of searching for
+ *          a minimum in the histogram over a range of pixel values where
+ *          the Otsu score is within a defined fraction, %scorefract,
+ *          of the max score.  To get the original Otsu algorithm, set
+ *          %scorefract == 0.
+ *      (8) N.B. This method is NOT recommended for images with weak text
+ *          and significant background noise, such as bleedthrough, because
+ *          of the problem noted in (3) above for tiling.  Use Sauvola.
+ * Leptonica's Notes:
+ *      (1) pixOtsuAdaptiveThreshold() computes a global threshold over each
+ *          tile and performs the threshold operation, resulting in a
+ *          binary image for each tile.  These are stitched into the
+ *          final result.
+ *      (2) pixOtsuThreshOnBackgroundNorm() and
+ *          pixMaskedThreshOnBackgroundNorm() are binarization functions
+ *          that use background normalization with other techniques.
+ *      (3) Sauvola binarization computes a local threshold based on
+ *          the local average and square average.  It takes two constants:
+ *          the window size for the measurment at each pixel and a
+ *          parameter that determines the amount of normalized local
+ *          standard deviation to subtract from the local average value.
+ *      (4) pixThresholdByCC() uses the numbers of 4 and 8 connected
+ *          components at different thresholding to determine if a
+ *          global threshold can be used (for text or line-art) and the
+ *          value it should have.
+ * Leptonica's Notes:
  *      (1) The Otsu method finds a single global threshold for an image.
  *          This function allows a locally adapted threshold to be
  *          found for each tile into which the image is broken up.
@@ -21062,7 +21146,7 @@ OtsuAdaptiveThreshold(lua_State *L)
  * Arg #9 is expected to be a l_int32 (smoothy).
  * Arg #10 is expected to be a l_float32 (scorefract).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does background normalization followed by Otsu
  *          thresholding.  Otsu binarization attempts to split the
  *          image into two roughly equal sets of pixels, and it does
@@ -21109,7 +21193,7 @@ OtsuThreshOnBackgroundNorm(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This add minimum white padding to an 8 bpp pix, such that
  *          the centroid of the photometric inverse is in the center of
  *          the resulting image.  Thus in computing the centroid,
@@ -21135,7 +21219,7 @@ PadToCenterCentroid(lua_State *L)
  * Arg #2 is expected to be a Boxa* (boxa).
  * Arg #3 is expected to be a l_uint32 (val).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If pixs is 1 bpp or is colormapped, it is converted to 8 bpp
  *          and the boxa is painted using a colormap; otherwise,
  *          it is converted to 32 bpp rgb.
@@ -21170,7 +21254,7 @@ PaintBoxa(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Boxa* (boxa).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If pixs is 1 bpp, we paint the boxa using a colormap;
  *          otherwise, we convert to 32 bpp.
  *      (2) We use up to 254 different colors for painting the regions.
@@ -21202,7 +21286,7 @@ PaintBoxaRandom(lua_State *L)
  * Arg #8 is expected to be a l_int32 (ntiles).
  * Arg #9 is an optional l_int32 (distblend).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) In-place operation; pixd is changed.
  *      (2) If pixm == NULL, it's a no-op.
  *      (3) The mask origin is placed at (x,y) on pixd, and the
@@ -21276,7 +21360,7 @@ PaintSelfThroughMask(lua_State *L)
  * Arg #4 is expected to be a l_int32 (y).
  * Arg #5 is expected to be a l_uint32 (val).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) In-place operation.  Calls pixSetMaskedCmap() for colormapped
  *          images.
  *      (2) For 1, 2, 4, 8 and 16 bpp gray, we take the appropriate
@@ -21331,7 +21415,7 @@ PaintThroughMask(lua_State *L)
  * Arg #3 is expected to be a l_int32 (outformat).
  * Arg #4 is expected to be a string (title).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a debugging function.
  *      (2) Removes existing colormaps and clips the pta to the input %pixs.
  *      (3) If the image is RGB, three separate plots are generated.
@@ -21426,7 +21510,7 @@ ProcessBarcodes(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Brings in either black or white pixels from the boundary
  *      (2) Removes any existing colormap, if necessary, before transforming
  * </pre>
@@ -21498,7 +21582,7 @@ ProjectiveGray(lua_State *L)
  * Arg #3 is expected to be a Pta* (ptas).
  * Arg #4 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Brings in either black or white pixels from the boundary
  *      (2) Removes any existing colormap, if necessary, before transforming
  * </pre>
@@ -21573,7 +21657,7 @@ ProjectivePtaGray(lua_State *L)
  * Arg #5 is expected to be a l_float32 (fract).
  * Arg #6 is expected to be a l_int32 (border).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The alpha channel is transformed separately from pixs,
  *          and aligns with it, being fully transparent outside the
  *          boundary of the transformed pixs.  For pixels that are fully
@@ -21626,7 +21710,7 @@ ProjectivePtaWithAlpha(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Brings in either black or white pixels from the boundary.
  *      (2) Retains colormap, which you can do for a sampled transform..
  *      (3) For 8 or 32 bpp, much better quality is obtained by the
@@ -21657,7 +21741,7 @@ ProjectiveSampled(lua_State *L)
  * Arg #3 is expected to be a Pta* (ptas).
  * Arg #4 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Brings in either black or white pixels from the boundary.
  *      (2) Retains colormap, which you can do for a sampled transform..
  *      (3) No 3 of the 4 points may be collinear.
@@ -21690,7 +21774,7 @@ ProjectiveSampledPta(lua_State *L)
  * Arg #5 is expected to be a l_int32 (operation).
  * Arg #6 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This gives a quadratic bending, upward or downward, as you
  *          move to the left or right.
  *      (2) If %dir == L_WARP_TO_LEFT, the right edge is unchanged, and
@@ -21732,7 +21816,7 @@ QuadraticVShear(lua_State *L)
  * Arg #4 is expected to be a l_int32 (vmaxb).
  * Arg #5 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixQuadraticVShear() for details.
  * </pre>
  * \param L pointer to the lua_State
@@ -21760,7 +21844,7 @@ QuadraticVShearLI(lua_State *L)
  * Arg #4 is expected to be a l_int32 (vmaxb).
  * Arg #5 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixQuadraticVShear() for details.
  * </pre>
  * \param L pointer to the lua_State
@@ -21786,7 +21870,7 @@ QuadraticVShearSampled(lua_State *L)
  * Arg #2 is expected to be a l_int32 (nlevels).
  * Arg #3 is expected to be a Pix* (pix_ma).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The returned fpixa has %nlevels of fpix, each containing
  *          the mean values at its level.  Level 0 has a
  *          single value; level 1 has 4 values; level 2 has 16; etc.
@@ -21816,7 +21900,7 @@ QuadtreeMean(lua_State *L)
  * Arg #3 is expected to be a Pix* (pix_ma).
  * Arg #4 is expected to be a DPix* (dpix_msa).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The returned fpixav and fpixarv have %nlevels of fpix,
  *          each containing at the respective levels the variance
  *          and root variance values.
@@ -21850,7 +21934,7 @@ QuadtreeVariance(lua_State *L)
  * Arg #4 is expected to be a l_int32 (level).
  * Arg #5 is expected to be a l_int32 (metric).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a top-level wrapper for quantizing either grayscale
  *          or rgb images to a specified colormap.
  *      (2) The actual output depth is constrained by %mindepth and
@@ -21880,7 +21964,7 @@ QuantFromCmap(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a wrapper that tests if the pix can be quantized
  *          with good quality using a small number of colors.  If so,
  *          it does the quantization, defining a colormap and using
@@ -21924,7 +22008,7 @@ QuantizeIfFewColors(lua_State *L)
  * Arg #8 is expected to be a l_uint32 (seed).
  * Arg #9 is expected to be a l_int32 (grayval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) To generate the warped image p(x',y'), set up the transforms
  *          that are in getWarpTransform().  For each (x',y') in the
  *          dest, the warp function computes the originating location
@@ -21974,7 +22058,7 @@ RandomHarmonicWarp(lua_State *L)
  * Arg #4 is expected to be a l_int32 (size).
  * Arg #5 is expected to be a l_int32 (nbins).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This generates a pix where each column represents a strip of
  *          the input image.  If %direction == L_SCAN_HORIZONTAL, the
  *          input impage is tiled into vertical strips of width %size,
@@ -22011,7 +22095,7 @@ RankBinByStrip(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *     (1) The time is O(n) in the number of pixels and runs about
  *         50 Mpixels/sec on a 3 GHz machine.
  * </pre>
@@ -22035,7 +22119,7 @@ RankColumnTransform(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hf).
  * Arg #4 is expected to be a l_float32 (rank).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This defines, for each pixel in pixs, a neighborhood of
  *          pixels given by a rectangle "centered" on the pixel.
  *          This set of wf*hf pixels has a distribution of values.
@@ -22068,7 +22152,7 @@ RankFilter(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hf).
  * Arg #4 is expected to be a l_float32 (rank).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This defines, for each pixel in pixs, a neighborhood of
  *          pixels given by a rectangle "centered" on the pixel.
  *          This set of wf*hf pixels has a distribution of values,
@@ -22109,7 +22193,7 @@ RankFilterGray(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hf).
  * Arg #4 is expected to be a l_float32 (rank).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This defines, for each pixel in pixs, a neighborhood of
  *          pixels given by a rectangle "centered" on the pixel.
  *          This set of wf*hf pixels has a distribution of values.
@@ -22144,7 +22228,7 @@ RankFilterRGB(lua_State *L)
  * Arg #4 is expected to be a l_float32 (rank).
  * Arg #5 is expected to be a l_float32 (scalefactor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a convenience function that downscales, does
  *          the rank filtering, and upscales.  Because the down-
  *          and up-scaling functions are very fast compared to
@@ -22183,7 +22267,7 @@ RankFilterWithScaling(lua_State *L)
  * Arg #10 is expected to be a l_int32 (area3).
  * Arg #11 is expected to be a l_float32 (rank).
  *
- * Notes:
+ * Leptonica's Notes:
  *  We check first that the two pix are roughly
  *  the same size.  Only if they meet that criterion do
  *  we compare the bitmaps.  We convert the rank value to
@@ -22227,7 +22311,7 @@ RankHaustest(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *     (1) The time is O(n) in the number of pixels and runs about
  *         100 Mpixels/sec on a 3 GHz machine.
  * </pre>
@@ -22256,7 +22340,7 @@ RankRowTransform(lua_State *L)
  * Arg #8 is expected to be a l_int32 (sx).
  * Arg #9 is expected to be a l_int32 (sy).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This has the standard set of 9 args for rasterop.
  *          This function is your friend; it is worth memorizing!
  *      (2) If the operation involves only dest, this calls
@@ -22407,7 +22491,7 @@ Rasterop(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (op).
  *
- * Notes:
+ * Leptonica's Notes:
  *      ~ this is a wrapper for a common 2-image raster operation
  *      ~ both pixs and pixd must be defined
  *      ~ the operation is performed with aligned UL corners of pixs and pixd
@@ -22437,7 +22521,7 @@ RasteropFullImage(lua_State *L)
  * Arg #4 is expected to be a l_int32 (hshift).
  * Arg #5 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This rasterop translates a horizontal band of the
  *          image either left or right, bringing in either white
  *          or black pixels from outside the image.
@@ -22493,7 +22577,7 @@ RasteropIP(lua_State *L)
  * Arg #4 is expected to be a l_int32 (vshift).
  * Arg #5 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This rasterop translates a vertical band of the
  *          image either up or down, bringing in either white
  *          or black pixels from outside the image.
@@ -22522,7 +22606,7 @@ RasteropVip(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string (filename).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See at top of file for supported formats.
  * </pre>
  * \param L pointer to the lua_State
@@ -22589,7 +22673,7 @@ ReadBarcodes(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a string (fname).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This allows overhead for traversal of a multipage tiff file
  *          to be linear in the number of images.  This will also work
  *          with a singlepage tiff file.
@@ -22631,7 +22715,7 @@ ReadFromMultipageTiff(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a string (filename).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This reads the actual headers for jpeg, png, tiff and pnm.
  *          For bmp and gif, we cheat and read the entire file into a pix,
  *          from which we extract the "header" information.
@@ -22667,7 +22751,7 @@ ReadHeader(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a constl_uint8* (data).
  * Arg #2 is expected to be a size_t (size).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This reads the actual headers for jpeg, png, tiff, jp2k and pnm.
  *          For bmp and gif, we cheat and read all the data into a pix,
  *          from which we extract the "header" information.
@@ -22710,7 +22794,7 @@ ReadHeaderMem(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Sarray* (sa).
  * Arg #2 is expected to be a l_int32 (index).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function is useful for selecting image files from a
  *          directory, where the integer %index is embedded into
  *          the file name.
@@ -22752,7 +22836,7 @@ ReadIndexed(lua_State *L)
  * Arg #4 is expected to be a l_int32 (hint).
  * Arg #5 is expected to be a boolean (debug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a special function for reading jp2k files.
  *          The high-level pixReadStream() uses default values:
  *             %reduction = 1
@@ -22803,7 +22887,7 @@ ReadJp2k(lua_State *L)
  * Arg #3 is expected to be a l_int32 (reduction).
  * Arg #5 is expected to be a l_int32 (hint).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a special function for reading jpeg files.
  *      (2) Use this if you want the jpeg library to create
  *          an 8 bpp colormapped image.
@@ -22848,7 +22932,7 @@ ReadJpeg(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string (data).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a variation of pixReadStream(), where the data is read
  *          from a memory buffer rather than a file.
  *      (2) On windows, this only reads tiff formatted files directly from
@@ -22896,7 +22980,7 @@ ReadMemBmp(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a lstring (str).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a read-from-memory version of pixReadFromMultipageTiff().
  *          See that function for usage.
  *      (2) If reading sequentially from the tiff data, this is more
@@ -22931,7 +23015,7 @@ ReadMemFromMultipageTiff(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a lstring (str).
  *
- * Notes:
+ * Leptonica's Notes:
  *     (1) For libgif version >= 5.1, this uses the DGifOpen() buffer
  *         interface.  No temp files are required.
  *     (2) For libgif version < 5.1, it was necessary to write the compressed
@@ -22962,7 +23046,7 @@ ReadMemGif(lua_State *L)
  * Arg #4 is expected to be a l_int32 (hint).
  * Arg #5 is expected to be a boolean (debug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This crashes when reading through the fmemopen cookie.
  *          Until we can fix this, we use the file-based work-around.
  *          And fixing this may take some time, because the basic
@@ -22995,7 +23079,7 @@ ReadMemJp2k(lua_State *L)
  * Arg #3 is expected to be a l_int32 (reduction).
  * Arg #4 is expected to be a l_int32 (hint).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The %size byte of %data must be a null character.
  *      (2) The only hint flag so far is L_JPEG_READ_LUMINANCE,
  *          given in the enum in imageio.h.
@@ -23026,7 +23110,7 @@ ReadMemJpeg(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a lstring (str).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixReastreamPng().
  * </pre>
  * \param L pointer to the lua_State
@@ -23048,7 +23132,7 @@ ReadMemPng(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a lstring (str).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The %size byte of %data must be a null character.
  * </pre>
  * \param L pointer to the lua_State
@@ -23090,7 +23174,7 @@ ReadMemSpix(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a constl_uint8* (cdata).
  * Arg #2 is expected to be a l_int32 (n).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a version of pixReadTiff(), where the data is read
  *          from a memory buffer and uncompressed.
  *      (2) Use TIFFClose(); TIFFCleanup() doesn't free internal memstream.
@@ -23121,7 +23205,7 @@ ReadMemTiff(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a constl_uint8* (filedata).
  * Arg #2 is expected to be a size_t (filesize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) When the encoded data only has 3 channels (no alpha),
  *          WebPDecodeRGBAInto() generates a raster of 32-bit pixels, with
  *          the alpha channel set to opaque (255).
@@ -23150,7 +23234,7 @@ ReadMemWebP(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a luaL_Stream* (stream).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The hint only applies to jpeg.
  * </pre>
  * \param L pointer to the lua_State
@@ -23171,7 +23255,7 @@ ReadStream(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a luaL_Stream* (stream).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Here are references on the bmp file format:
  *          http://en.wikipedia.org/wiki/BMP_file_format
  *          http://www.fortunecity.com/skyscraper/windows/364/bmpffrmt.html
@@ -23214,7 +23298,7 @@ ReadStreamGif(lua_State *L)
  * Arg #4 is expected to be a l_int32 (hint).
  * Arg #5 is expected to be a boolean (debug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixReadJp2k() for usage.
  * </pre>
  * \param L pointer to the lua_State
@@ -23241,7 +23325,7 @@ ReadStreamJp2k(lua_State *L)
  * Arg #3 is expected to be a l_int32 (reduction).
  * Arg #5 is expected to be a l_int32 (hint).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The jpeg comment, if it exists, is not stored in the pix.
  * </pre>
  * \param L pointer to the lua_State
@@ -23267,16 +23351,7 @@ ReadStreamJpeg(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a luaL_Stream* (stream).
  *
- *    Note: results can be non-deterministic if used with
- *    multi-threaded applications.
- *
- *    Thanks to a memory buffering utility contributed by T. D. Hintz,
- *    encoding png directly into memory (and decoding from memory)
- *    is now enabled without the use of any temp files.  Unlike with webp,
- *    it is necessary to preserve the stream interface to enable writing
- *    pixa to memory.  So there are two independent but very similar
- *    implementations of png reading and writing.
- * Notes:
+ * Leptonica's Notes:
  *      (1) If called from pixReadStream(), the stream is positioned
  *          at the beginning of the file.
  *      (2) To do sequential reads of png format images from a stream,
@@ -23298,6 +23373,15 @@ ReadStreamJpeg(lua_State *L)
  *          allocated before reading the image, works for single images,
  *          but I could not get it to work properly for the successive
  *          png reads that are required by pixaReadStream().
+ *          Note: results can be non-deterministic if used with
+ *                multi-threaded applications.
+ *
+ *    Thanks to a memory buffering utility contributed by T. D. Hintz,
+ *    encoding png directly into memory (and decoding from memory)
+ *    is now enabled without the use of any temp files.  Unlike with webp,
+ *    it is necessary to preserve the stream interface to enable writing
+ *    pixa to memory.  So there are two independent but very similar
+ *    implementations of png reading and writing.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -23333,12 +23417,12 @@ ReadStreamPnm(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a luaL_Stream* (stream).
  *
- *    Note: these functions have not been extensively tested for fuzzing
+ * Leptonica's Note: these functions have not been extensively tested for fuzzing
  *    (bad input data that can result in, e.g., memory faults).
  *    The spix serialization format is only defined here, in leptonica.
  *    The image data is uncompressed and the serialization is not intended
  *    to be a secure file format from untrusted sources.
- * Notes:
+ * Leptonica's Notes:
  *      (1) If called from pixReadStream(), the stream is positioned
  *          at the beginning of the file.
  * </pre>
@@ -23360,7 +23444,7 @@ ReadStreamSpix(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a luaL_Stream* (stream).
  * Arg #2 is expected to be a l_int32 (n).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) No warning messages on failure, because of how multi-page
  *          TIFF reading works. You are supposed to keep trying until
  *          it stops working.
@@ -23401,7 +23485,7 @@ ReadStreamWebP(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a string (filename).
  * Arg #2 is expected to be a l_int32 (n).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a version of pixRead(), specialized for tiff
  *          files, that allows specification of the page to be returned
  *      (2) No warning messages on failure, because of how multi-page
@@ -23427,7 +23511,7 @@ ReadTiff(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a string (filename).
  * Arg #2 is expected to be a l_int32 (hint).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The hint is not binding, but may be used to optimize jpeg decoding.
  *          Use 0 for no hinting.
  * </pre>
@@ -23449,7 +23533,7 @@ ReadWithHint(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) After folding, the data is in bytes 0 and 2 of the word,
  *          and the bits in each byte are in the following order
  *          (with 0 being the leftmost originating pair and 7 being
@@ -23480,7 +23564,7 @@ ReduceBinary2(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (level).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) pixd is downscaled by 2x from pixs.
  *      (2) The rank threshold specifies the minimum number of ON
  *          pixels in each 2x2 region of pixs that are required to
@@ -23515,7 +23599,7 @@ ReduceRankBinary2(lua_State *L)
  * Arg #4 is expected to be a l_int32 (level3).
  * Arg #5 is expected to be a l_int32 (level4).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This performs up to four cascaded 2x rank reductions.
  *      (2) Use level = 0 to truncate the cascade.
  * </pre>
@@ -23540,7 +23624,7 @@ ReduceRankBinaryCascade(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a wrapper on pixAlphaBlendUniform()
  * </pre>
  * \param L pointer to the lua_State
@@ -23581,7 +23665,7 @@ RemoveBorder(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (connectivity).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This removes all fg components touching the border.
  * </pre>
  * \param L pointer to the lua_State
@@ -23630,7 +23714,7 @@ RemoveBorderGeneral(lua_State *L)
  * Arg #2 is expected to be a l_int32 (width).
  * Arg #3 is expected to be a l_int32 (height).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Removes pixels as evenly as possible from the sides of the
  *          image, leaving the central part.
  *      (2) Returns clone if no pixels requested removed, or the target
@@ -23657,7 +23741,7 @@ RemoveBorderToSize(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (type).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If pixs does not have a colormap, a clone is returned.
  *      (2) Otherwise, the input pixs is restricted to 1, 2, 4 or 8 bpp.
  *      (3) Use REMOVE_CMAP_TO_BINARY only on 1 bpp pix.
@@ -23692,7 +23776,7 @@ RemoveColormap(lua_State *L)
  * Arg #2 is expected to be a l_int32 (type).
  * Arg #3 is expected to be a l_int32 (ifnocmap).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Convenience function that allows choice between returning
  *          a clone or a copy if pixs does not have a colormap.
  *      (2) See pixRemoveColormap().
@@ -23721,7 +23805,7 @@ RemoveColormapGeneral(lua_State *L)
  * Arg #5 is expected to be a l_int32 (y0).
  * Arg #6 is expected to be a l_int32 (dsize).
  *
- * Notes:
+ * Leptonica's Notes:
  *    (1) This is in-place.
  *    (2) You can use various functions in selgen to create a Sel
  *        that is used to generate pixe from pixs.
@@ -23756,7 +23840,7 @@ RemoveMatchedPattern(lua_State *L)
  * Arg #4 is expected to be a l_int32 (connectivity).
  * Arg #5 is expected to be a l_int32 (bordersize).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This removes each component in pixm for which there is
  *          at least one seed in pixs.  If pixd == NULL, this returns
  *          the result in a new pixd.  Otherwise, it is an in-place
@@ -23788,7 +23872,7 @@ RemoveSeededComponents(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is an in-place operation.
  *      (2) If the image doesn't have a colormap, returns without error.
  *      (3) Unusued colors are removed from the colormap, and the
@@ -23813,7 +23897,7 @@ RemoveUnusedColors(lua_State *L)
  * Arg #2 is expected to be a Pixa* (pixa).
  * Arg #3 is expected to be a Numa* (na).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This complements pixAddWithIndicator().   Here, the selected
  *          components are set subtracted from pixs.
  * </pre>
@@ -23999,7 +24083,7 @@ RenderBoxaBlend(lua_State *L)
  * Arg #3 is expected to be a l_int32 (incr).
  * Arg #4 is expected to be a l_int32 (outdepth).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The output can be either 1 bpp, showing just the contour
  *          lines, or a copy of the input pixs with the contour lines
  *          superposed.
@@ -24257,7 +24341,7 @@ RenderHashBoxaBlend(lua_State *L)
  * Arg #10 is expected to be a l_int32 (gval).
  * Arg #11 is expected to be a l_int32 (bval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is an in-place operation that renders hash lines
  *          through a mask %pixm onto %pix.  The mask origin is
  *          translated by (%x,%y) relative to the origin of %pix.
@@ -24390,7 +24474,7 @@ RenderLineBlend(lua_State *L)
  * Arg #5 is expected to be a l_int32 (max).
  * Arg #6 is expected to be a l_uint32 (color).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Simplified interface for plotting row or column aligned data
  *          on a pix.
  *      (2) This replaces %pix with a 32 bpp rgb version if it is not
@@ -24427,7 +24511,7 @@ RenderPlotFromNuma(lua_State *L)
  * Arg #7 is expected to be a l_int32 (drawref).
  * Arg #8 is expected to be a l_uint32 (color).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) General interface for plotting row or column aligned data
  *          on a pix.
  *      (2) This replaces %pix with a 32 bpp rgb version if it is not
@@ -24461,7 +24545,7 @@ RenderPlotFromNumaGen(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pta* (ptas).
  * Arg #2 is expected to be a l_int32 (width).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The pix is the minimum size required to contain the origin
  *          and the polygon.  For example, the max x value of the input
  *          points is w - 1, where w is the pix width.
@@ -24495,7 +24579,7 @@ RenderPolygon(lua_State *L)
  * Arg #4 is expected to be a l_int32 (op).
  * Arg #5 is expected to be a l_int32 (closeflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      This renders a closed contour.
  * </pre>
  * \param L pointer to the lua_State
@@ -24525,7 +24609,7 @@ RenderPolyline(lua_State *L)
  * Arg #6 is expected to be a l_uint8 (bval).
  * Arg #7 is expected to be a l_int32 (closeflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      This renders a closed contour.
  * </pre>
  * \param L pointer to the lua_State
@@ -24586,7 +24670,7 @@ RenderPolylineBlend(lua_State *L)
  * Arg #2 is expected to be a Pta* (pta).
  * Arg #3 is expected to be a l_int32 (op).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) L_SET_PIXELS puts all image bits in each pixel to 1
  *          (black for 1 bpp; white for depth > 1)
  *      (2) L_CLEAR_PIXELS puts all image bits in each pixel to 0
@@ -24619,7 +24703,7 @@ RenderPta(lua_State *L)
  * Arg #4 is expected to be a l_uint8 (gval).
  * Arg #5 is expected to be a l_uint8 (bval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If pix is colormapped, render this color (or the nearest
  *          color if the cmap is full) on each pixel.
  *      (2) The rgb components have the standard dynamic range [0 ... 255]
@@ -24656,7 +24740,7 @@ RenderPtaArb(lua_State *L)
  * Arg #5 is expected to be a l_uint8 (bval).
  * Arg #6 is expected to be a l_float32 (fract).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function clips the rendering to the pix.
  * </pre>
  * \param L pointer to the lua_State
@@ -24685,7 +24769,7 @@ RenderPtaBlend(lua_State *L)
  * Arg #4 is expected to be a l_int32 (width).
  * Arg #5 is expected to be a l_int32 (closeflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a debugging routine, that displays a set of
  *          pixels, selected by the set of Ptas in a Ptaa,
  *          in a random color in a pix.
@@ -24721,7 +24805,7 @@ RenderRandomCmapPtaa(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If the sizes of data in pixs and pixd are unequal, this
  *          frees the existing image data in pixd and allocates
  *          an uninitialized buffer that will hold the required amount
@@ -24749,7 +24833,7 @@ ResizeImageData(lua_State *L)
  * Arg #3 is expected to be a l_int32 (w).
  * Arg #4 is expected to be a l_int32 (h).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This resizes pixs to make pixd, without scaling, by either
  *          cropping or extending separately in both width and height.
  *          Extension is done by replicating the last row or column.
@@ -24790,7 +24874,7 @@ ResizeToMatch(lua_State *L)
  * Arg #7 is expected to be a l_int32 (factor1).
  * Arg #8 is expected to be a l_int32 (factor2).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If d != 1 bpp, colormaps are removed and the result
  *          is converted to 8 bpp.
  *      (2) If %dir == L_HORIZONTAL_LINE, the the reversals are counted
@@ -24842,7 +24926,7 @@ ReversalProfile(lua_State *L)
  * Arg #5 is expected to be a l_int32 (width).
  * Arg #6 is expected to be a l_int32 (height).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a high-level, simple interface for rotating images
  *          about their center.
  *      (2) For very small rotations, just return a clone.
@@ -24882,7 +24966,7 @@ Rotate(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does a 180 rotation of the image about the center,
  *          which is equivalent to a left-right flip about a vertical
  *          line through the image center, followed by a top-bottom
@@ -24918,7 +25002,7 @@ Rotate180(lua_State *L)
  * Arg #4 is expected to be a l_float32 (angle).
  * Arg #5 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This rotates the image about the given point, using the 2-shear
  *          method.  It should only be used for angles smaller than
  *          MAX_2_SHEAR_ANGLE.  For larger angles, a warning is issued.
@@ -24957,7 +25041,7 @@ Rotate2Shear(lua_State *L)
  * Arg #4 is expected to be a l_float32 (angle).
  * Arg #5 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This rotates the image about the given point, using the 3-shear
  *          method.  It should only be used for angles smaller than
  *          LIMIT_SHEAR_ANGLE.  For larger angles, a warning is issued.
@@ -24999,7 +25083,7 @@ Rotate3Shear(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (direction).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does a 90 degree rotation of the image about the center,
  *          either cw or ccw, returning a new pix.
  *      (2) The direction must be either 1 (cw) or -1 (ccw).
@@ -25024,7 +25108,7 @@ Rotate90(lua_State *L)
  * Arg #2 is expected to be a l_float32 (angle).
  * Arg #3 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Rotates about image center.
  *      (2) A positive angle gives a clockwise rotation.
  *      (3) Brings in either black or white pixels from the boundary.
@@ -25050,7 +25134,7 @@ RotateAM(lua_State *L)
  * Arg #2 is expected to be a l_float32 (angle).
  * Arg #3 is expected to be a l_uint32 (colorval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Rotates about image center.
  *      (2) A positive angle gives a clockwise rotation.
  *      (3) Specify the color to be brought in from outside the image.
@@ -25076,7 +25160,7 @@ RotateAMColor(lua_State *L)
  * Arg #2 is expected to be a l_float32 (angle).
  * Arg #3 is expected to be a l_uint32 (fillval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Rotates the image about the UL corner.
  *      (2) A positive angle gives a clockwise rotation.
  *      (3) Specify the color to be brought in from outside the image.
@@ -25102,7 +25186,7 @@ RotateAMColorCorner(lua_State *L)
  * Arg #2 is expected to be a l_float32 (angle).
  * Arg #3 is expected to be a l_uint32 (colorval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This rotates a color image about the image center.
  *      (2) A positive angle gives a clockwise rotation.
  *      (3) It uses area mapping, dividing each pixel into
@@ -25134,7 +25218,7 @@ RotateAMColorFast(lua_State *L)
  * Arg #2 is expected to be a l_float32 (angle).
  * Arg #3 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Rotates about the UL corner of the image.
  *      (2) A positive angle gives a clockwise rotation.
  *      (3) Brings in either black or white pixels from the boundary.
@@ -25160,7 +25244,7 @@ RotateAMCorner(lua_State *L)
  * Arg #2 is expected to be a l_float32 (angle).
  * Arg #3 is expected to be a l_uint8 (grayval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Rotates about image center.
  *      (2) A positive angle gives a clockwise rotation.
  *      (3) Specify the grayvalue to be brought in from outside the image.
@@ -25186,7 +25270,7 @@ RotateAMGray(lua_State *L)
  * Arg #2 is expected to be a l_float32 (angle).
  * Arg #3 is expected to be a l_uint8 (grayval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Rotates the image about the UL corner.
  *      (2) A positive angle gives a clockwise rotation.
  *      (3) Specify the grayvalue to be brought in from outside the image.
@@ -25212,7 +25296,7 @@ RotateAMGrayCorner(lua_State *L)
  * Arg #2 is expected to be a l_float32 (angle).
  * Arg #3 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For very small rotations, just return a clone.
  *      (2) This does a computationally expensive rotation of 1 bpp images.
  *          The fastest rotators (using shears or subsampling) leave
@@ -25250,7 +25334,7 @@ RotateBinaryNice(lua_State *L)
  * Arg #4 is expected to be a l_float32 (angle).
  * Arg #5 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For very small rotations, just return a clone.
  *      (2) Rotation brings either white or black pixels in
  *          from outside the image.
@@ -25300,7 +25384,7 @@ RotateOrth(lua_State *L)
  * Arg #4 is expected to be a l_float32 (angle).
  * Arg #5 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This rotates an image about the given point, using
  *          either 2 or 3 shears.
  *      (2) A positive angle gives a clockwise rotation.
@@ -25376,7 +25460,7 @@ RotateShearCenterIP(lua_State *L)
  * Arg #4 is expected to be a l_float32 (angle).
  * Arg #5 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does an in-place rotation of the image about the
  *          specified point, using the 3-shear method.  It should only
  *          be used for angles smaller than LIMIT_SHEAR_ANGLE.
@@ -25416,7 +25500,7 @@ RotateShearIP(lua_State *L)
  * Arg #3 is expected to be a Pix* (pixg).
  * Arg #4 is expected to be a l_float32 (fract).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The alpha channel is transformed separately from pixs,
  *          and aligns with it, being fully transparent outside the
  *          boundary of the transformed pixs.  For pixels that are fully
@@ -25473,7 +25557,7 @@ RotateWithAlpha(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is an optional Box* (box).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This computes numas that represent column vectors of statistics,
  *          with each of its values derived from the corresponding row of a Pix.
  *      (2) Use NULL on input to prevent computation of any of the 5 numas.
@@ -25539,7 +25623,7 @@ RunHistogramMorph(lua_State *L)
  * Arg #3 is expected to be a l_int32 (direction).
  * Arg #4 is expected to be a l_int32 (depth).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The dest Pix is 8 or 16 bpp, with the pixel values
  *          equal to the runlength in which it is a member.
  *          The length is clipped to the max pixel value if necessary.
@@ -25573,7 +25657,7 @@ RunlengthTransform(lua_State *L)
  * Arg #3 is expected to be a l_float32 (factor).
  * Arg #4 is expected to be a l_int32 (addborder).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The window width and height are 2 * %whsize + 1.  The minimum
  *          value for %whsize is 2; typically it is >= 7..
  *      (2) The local statistics, measured over the window, are the
@@ -25629,7 +25713,7 @@ SauvolaBinarize(lua_State *L)
  * Arg #4 is expected to be a l_int32 (nx).
  * Arg #5 is expected to be a l_int32 (ny).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The window width and height are 2 * %whsize + 1.  The minimum
  *          value for %whsize is 2; typically it is >= 7..
  *      (2) For nx == ny == 1, this defaults to pixSauvolaBinarize().
@@ -25673,7 +25757,7 @@ SauvolaBinarizeTiled(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixms).
  * Arg #3 is expected to be a l_float32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The Sauvola threshold is determined from the formula:
  *            t = m * (1 - k * (1 - s / 128))
  *          where:
@@ -25754,7 +25838,7 @@ SaveTiled(lua_State *L)
  * Arg #6 is expected to be a l_int32 (linewidth).
  * Arg #7 is expected to be a l_int32 (dp).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Before calling this function for the first time, use
  *          pixaCreate() to make the %pixa that will accumulate the pix.
  *          This is passed in each time pixSaveTiled() is called.
@@ -25810,7 +25894,7 @@ SaveTiledOutline(lua_State *L)
  * Arg #9 is expected to be a l_uint32 (val).
  * Arg #10 is expected to be a l_int32 (location).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Before calling this function for the first time, use
  *          pixaCreate() to make the %pixa that will accumulate the pix.
  *          This is passed in each time pixSaveTiled() is called.
@@ -25879,7 +25963,7 @@ Scale(lua_State *L)
  * Arg #3 is expected to be a l_float32 (scalex).
  * Arg #4 is expected to be a l_float32 (scaley).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This scales the alpha component of pixs and inserts into pixd.
  * </pre>
  * \param L pointer to the lua_State
@@ -25904,7 +25988,7 @@ ScaleAndTransferAlpha(lua_State *L)
  * Arg #2 is expected to be a l_float32 (scalex).
  * Arg #3 is expected to be a l_float32 (scaley).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function should only be used when the scale factors are less
  *          than or equal to 0.7 (i.e., more than about 1.42x reduction).
  *          If either scale factor is larger than 0.7, we issue a warning
@@ -25943,7 +26027,7 @@ ScaleAreaMap(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function does an area mapping (average) for 2x
  *          reduction.
  *      (2) This works only on 2, 4, 8 and 32 bpp images.  If there is
@@ -25979,7 +26063,7 @@ ScaleAreaMap2(lua_State *L)
  * Arg #2 is expected to be a l_int32 (wd).
  * Arg #3 is expected to be a l_int32 (hd).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See notes in pixScaleAreaMap().
  *      (2) The output scaled image has the dimension(s) you specify:
  *          * To specify the width with isotropic scaling, set %hd = 0.
@@ -26009,7 +26093,7 @@ ScaleAreaMapToSize(lua_State *L)
  * Arg #2 is expected to be a l_float32 (scalex).
  * Arg #3 is expected to be a l_float32 (scaley).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function samples from the source without
  *          filtering.  As a result, aliasing will occur for
  *          subsampling (scalex and scaley < 1.0).
@@ -26034,7 +26118,7 @@ ScaleBinary(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Simple interface to pixScaleBySampling(), for
  *          isotropic integer reduction.
  *      (2) If %factor == 1, returns a copy.
@@ -26059,7 +26143,7 @@ ScaleByIntSampling(lua_State *L)
  * Arg #2 is expected to be a l_float32 (scalex).
  * Arg #3 is expected to be a l_float32 (scaley).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function samples from the source without
  *          filtering.  As a result, aliasing will occur for
  *          subsampling (%scalex and/or %scaley < 1.0).
@@ -26086,7 +26170,7 @@ ScaleBySampling(lua_State *L)
  * Arg #2 is expected to be a l_int32 (wd).
  * Arg #3 is expected to be a l_int32 (hd).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This guarantees that the output scaled image has the
  *          dimension(s) you specify.
  *           ~ To specify the width with isotropic scaling, set %hd = 0.
@@ -26114,7 +26198,7 @@ ScaleBySamplingToSize(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a special case of linear interpolated scaling,
  *          for 2x upscaling.  It is about 8x faster than using
  *          the generic pixScaleColorLI(), and about 4x faster than
@@ -26140,7 +26224,7 @@ ScaleColor2xLI(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a special case of color linear interpolated scaling,
  *          for 4x upscaling.  It is about 3x faster than using
  *          the generic pixScaleColorLI().
@@ -26170,7 +26254,7 @@ ScaleColor4xLI(lua_State *L)
  * Arg #2 is expected to be a l_float32 (scalex).
  * Arg #3 is expected to be a l_float32 (scaley).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If either scale factor is larger than 0.7, we issue a warning
  *          and call pixScaleGeneral(), which will invoke area mapping
  *          without sharpening.  This is particularly important for
@@ -26207,7 +26291,7 @@ ScaleColorLI(lua_State *L)
  * Arg #4 is expected to be a l_float32 (sharpfract).
  * Arg #5 is expected to be a l_int32 (sharpwidth).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixScale() for usage.
  *      (2) This interface may change in the future, as other special
  *          cases are added.
@@ -26244,7 +26328,7 @@ ScaleGeneral(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a special case of gray linear interpolated scaling,
  *          for 2x upscaling.  It is about 6x faster than using
  *          the generic pixScaleGrayLI().
@@ -26268,7 +26352,7 @@ ScaleGray2xLI(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does 2x upscale on pixs, using linear interpolation,
  *          followed by Floyd-Steinberg dithering to binary.
  *      (2) Buffers are used to avoid making a large grayscale image.
@@ -26296,7 +26380,7 @@ ScaleGray2xLIDither(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (thresh).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does 2x upscale on pixs, using linear interpolation,
  *          followed by thresholding to binary.
  *      (2) Buffers are used to avoid making a large grayscale image.
@@ -26319,7 +26403,7 @@ ScaleGray2xLIThresh(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a special case of gray linear interpolated scaling,
  *          for 4x upscaling.  It is about 12x faster than using
  *          the generic pixScaleGrayLI().
@@ -26343,7 +26427,7 @@ ScaleGray4xLI(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does 4x upscale on pixs, using linear interpolation,
  *          followed by Floyd-Steinberg dithering to binary.
  *      (2) Buffers are used to avoid making a large grayscale image.
@@ -26376,7 +26460,7 @@ ScaleGray4xLIDither(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (thresh).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does 4x upscale on pixs, using linear interpolation,
  *          followed by thresholding to binary.
  *      (2) Buffers are used to avoid making a large grayscale image.
@@ -26427,7 +26511,7 @@ ScaleGrayLI(lua_State *L)
  * Arg #3 is expected to be a l_int32 (yfact).
  * Arg #4 is expected to be a l_int32 (type).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The downscaled pixels in pixd are the min, max or (max - min)
  *          of the corresponding set of xfact * yfact pixels in pixs.
  *      (2) Using L_CHOOSE_MIN is equivalent to a grayscale erosion,
@@ -26460,7 +26544,7 @@ ScaleGrayMinMax(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (type).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Special version for 2x reduction.  The downscaled pixels
  *          in pixd are the min, max or (max - min) of the corresponding
  *          set of 4 pixels in pixs.
@@ -26496,7 +26580,7 @@ ScaleGrayMinMax2(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (rank).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Rank 2x reduction.  If rank == 1(4), the downscaled pixels
  *          in pixd are the min(max) of the corresponding set of
  *          4 pixels in pixs.  Values 2 and 3 are intermediate.
@@ -26531,7 +26615,7 @@ ScaleGrayRank2(lua_State *L)
  * Arg #4 is expected to be a l_int32 (level3).
  * Arg #5 is expected to be a l_int32 (level4).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This performs up to four cascaded 2x rank reductions.
  *      (2) Use level = 0 to truncate the cascade.
  * </pre>
@@ -26558,7 +26642,7 @@ ScaleGrayRankCascade(lua_State *L)
  * Arg #2 is expected to be a l_int32 (factor).
  * Arg #3 is expected to be a l_int32 (thresh).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does simultaneous subsampling by an integer factor and
  *          thresholding from gray to binary.
  *      (2) It is designed for maximum speed, and is used for quickly
@@ -26586,7 +26670,7 @@ ScaleGrayToBinaryFast(lua_State *L)
  * Arg #2 is expected to be a l_float32 (scalex).
  * Arg #3 is expected to be a l_float32 (scaley).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function should only be used when the scale factors are
  *          greater than or equal to 0.7, and typically greater than 1.
  *          If either scale factor is larger than 0.7, we issue a warning
@@ -26621,7 +26705,7 @@ ScaleLI(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs2).
  * Arg #3 is expected to be a l_float32 (scale).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See notes in pixScaleToGrayMipmap().
  *      (2) This function suffers from aliasing effects that are
  *          easily seen in document images.
@@ -26647,7 +26731,7 @@ ScaleMipmap(lua_State *L)
  * Arg #2 is expected to be a l_int32 (factor).
  * Arg #3 is expected to be a l_int32 (thresh).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does simultaneous subsampling by an integer factor and
  *          conversion from RGB to gray to binary.
  *      (2) It is designed for maximum speed, and is used for quickly
@@ -26699,7 +26783,7 @@ ScaleRGBToGray2(lua_State *L)
  * Arg #2 is expected to be a l_int32 (factor).
  * Arg #3 is expected to be a l_int32 (color).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does simultaneous subsampling by an integer factor and
  *          extraction of the color from the RGB pix.
  *      (2) It is designed for maximum speed, and is used for quickly
@@ -26748,7 +26832,7 @@ ScaleResolution(lua_State *L)
  * Arg #2 is expected to be a l_float32 (scalex).
  * Arg #3 is expected to be a l_float32 (scaley).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function should only be used when the scale factors are less
  *          than or equal to 0.7 (i.e., more than about 1.42x reduction).
  *          If either scale factor is larger than 0.7, we issue a warning
@@ -26791,7 +26875,7 @@ ScaleSmooth(lua_State *L)
  * Arg #2 is expected to be a l_int32 (wd).
  * Arg #3 is expected to be a l_int32 (hd).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See notes in pixScaleSmooth().
  *      (2) The output scaled image has the dimension(s) you specify:
  *          * To specify the width with isotropic scaling, set %hd = 0.
@@ -26820,7 +26904,7 @@ ScaleSmoothToSize(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (scalefactor).
  *
- * Notes:
+ * Leptonica's Notes:
  *
  *  For faster scaling in the range of scalefactors from 0.0625 to 0.5,
  *  with very little difference in quality, use pixScaleToGrayFast().
@@ -26928,7 +27012,7 @@ ScaleToGray2(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Speed is about 100 x 10^6 src-pixels/sec/GHz.
  *          Another way to express this is it processes 1 src pixel
  *          in about 10 cycles.
@@ -26951,7 +27035,7 @@ ScaleToGray3(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The width of pixd is truncated is truncated to a factor of 2.
  * </pre>
  * \param L pointer to the lua_State
@@ -26971,7 +27055,7 @@ ScaleToGray4(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The width of pixd is truncated is truncated to a factor of 8.
  * </pre>
  * \param L pointer to the lua_State
@@ -27009,7 +27093,7 @@ ScaleToGray8(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (scalefactor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See notes in pixScaleToGray() for the basic approach.
  *      (2) This function is considerably less expensive than pixScaleToGray()
  *          for scalefactor in the range (0.0625 ... 0.5), and the
@@ -27040,7 +27124,7 @@ ScaleToGrayFast(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (scalefactor).
  *
- * Notes:
+ * Leptonica's Notes:
  *
  *  This function is here mainly for pedagogical reasons.
  *  Mip-mapping is widely used in graphics for texture mapping, because
@@ -27081,7 +27165,7 @@ ScaleToGrayMipmap(lua_State *L)
  * Arg #2 is expected to be a l_int32 (wd).
  * Arg #3 is expected to be a l_int32 (hd).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The output scaled image has the dimension(s) you specify:
  *          * To specify the width with isotropic scaling, set %hd = 0.
  *          * To specify the height with isotropic scaling, set %wd = 0.
@@ -27133,7 +27217,7 @@ ScaleToSizeRel(lua_State *L)
  * Arg #4 is expected to be a Pix* (pixg).
  * Arg #5 is expected to be a l_float32 (fract).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The alpha channel is transformed separately from pixs,
  *          and aligns with it, being fully transparent outside the
  *          boundary of the transformed pixs.  For pixels that are fully
@@ -27192,7 +27276,7 @@ ScaleWithAlpha(lua_State *L)
  * Arg #6 is expected to be a l_int32 (factor).
  * Arg #7 is expected to be a l_int32 (scanflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If there are no fg pixels, the position is set to 0.
  *          Caller must check the return value!
  *      (2) Use %box == NULL to scan from edge of pixs
@@ -27234,7 +27318,7 @@ ScanForEdge(lua_State *L)
  * Arg #2 is expected to be a Box* (box).
  * Arg #3 is expected to be a l_int32 (scanflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If there are no fg pixels, the position is set to 0.
  *          Caller must check the return value!
  *      (2) Use %box == NULL to scan from edge of pixs
@@ -27265,7 +27349,7 @@ ScanForForeground(lua_State *L)
  * Arg #4 is expected to be a l_int32 (xf).
  * Arg #5 is expected to be a l_int32 (yf).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Because of the overhead in calling pixGetPixel() and
  *          pixSetPixel(), we have used raster line pointers and the
  *          GET_DATA* and SET_DATA* macros for many of the pix accesses.
@@ -27351,7 +27435,7 @@ SearchGrayMaze(lua_State *L)
  * Arg #4 is expected to be a l_int32 (y).
  * Arg #5 is expected to be a l_int32 (connectivity).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This removes the component from pixs with a fg pixel at (x,y).
  *      (2) See pixSeedfill4() and pixSeedfill8() for details.
  * </pre>
@@ -27379,7 +27463,7 @@ Seedfill(lua_State *L)
  * Arg #3 is expected to be a l_int32 (x).
  * Arg #4 is expected to be a l_int32 (y).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is Paul Heckbert's stack-based 4-cc seedfill algorithm.
  *      (2) This operates on the input 1 bpp pix to remove the fg seed
  *          pixel, at (x,y), and all pixels that are 4-connected to it.
@@ -27409,7 +27493,7 @@ Seedfill4(lua_State *L)
  * Arg #3 is expected to be a l_int32 (x).
  * Arg #4 is expected to be a l_int32 (y).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is Paul Heckbert's stack-based 4-cc seedfill algorithm.
  *      (2) This operates on the input 1 bpp pix to remove the fg seed
  *          pixel, at (x,y), and all pixels that are 4-connected to it.
@@ -27453,7 +27537,7 @@ Seedfill4BB(lua_State *L)
  * Arg #3 is expected to be a l_int32 (x).
  * Arg #4 is expected to be a l_int32 (y).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is Paul Heckbert's stack-based 8-cc seedfill algorithm.
  *      (2) This operates on the input 1 bpp pix to remove the fg seed
  *          pixel, at (x,y), and all pixels that are 8-connected to it.
@@ -27483,7 +27567,7 @@ Seedfill8(lua_State *L)
  * Arg #3 is expected to be a l_int32 (x).
  * Arg #4 is expected to be a l_int32 (y).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is Paul Heckbert's stack-based 8-cc seedfill algorithm.
  *      (2) This operates on the input 1 bpp pix to remove the fg seed
  *          pixel, at (x,y), and all pixels that are 8-connected to it.
@@ -27521,7 +27605,7 @@ Seedfill8BB(lua_State *L)
  * Arg #4 is expected to be a l_int32 (y).
  * Arg #5 is expected to be a l_int32 (connectivity).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is the high-level interface to Paul Heckbert's
  *          stack-based seedfill algorithm.
  * </pre>
@@ -27549,7 +27633,7 @@ SeedfillBB(lua_State *L)
  * Arg #3 is expected to be a Pix* (pixm).
  * Arg #4 is expected to be a l_int32 (connectivity).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is for binary seedfill (aka "binary reconstruction").
  *      (2) There are 3 cases:
  *            (a) pixd == null (make a new pixd)
@@ -27593,7 +27677,7 @@ SeedfillBinary(lua_State *L)
  * Arg #5 is expected to be a l_int32 (xmax).
  * Arg #6 is expected to be a l_int32 (ymax).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See usage for pixSeedfillBinary(), which has unrestricted fill.
  *          In pixSeedfillBinary(), the filling distance is unrestricted
  *          and can be larger than pixs, depending on the topology of
@@ -27636,7 +27720,7 @@ SeedfillBinaryRestricted(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixm).
  * Arg #3 is expected to be a l_int32 (connectivity).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is an in-place filling operation on the seed, pixs,
  *          where the clipping mask is always above or at the level
  *          of the seed as it is filled.
@@ -27672,7 +27756,7 @@ SeedfillGray(lua_State *L)
  * Arg #3 is expected to be a l_int32 (delta).
  * Arg #4 is expected to be a l_int32 (connectivity).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This fills from a seed within basins defined by a filling mask.
  *          The seed value(s) are greater than the corresponding
  *          filling mask value, and the result has the bottoms of
@@ -27714,7 +27798,7 @@ SeedfillGrayBasin(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixm).
  * Arg #3 is expected to be a l_int32 (connectivity).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is an in-place filling operation on the seed, pixs,
  *          where the clipping mask is always below or at the level
  *          of the seed as it is filled.  Think of filling up a basin
@@ -27752,7 +27836,7 @@ SeedfillGrayInv(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixm).
  * Arg #3 is expected to be a l_int32 (connectivity).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is an in-place filling operation on the seed, pixs,
  *          where the clipping mask is always below or at the level
  *          of the seed as it is filled.  Think of filling up a basin
@@ -27786,7 +27870,7 @@ SeedfillGrayInvSimple(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixm).
  * Arg #3 is expected to be a l_int32 (connectivity).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is an in-place filling operation on the seed, pixs,
  *          where the clipping mask is always above or at the level
  *          of the seed as it is filled.
@@ -27822,7 +27906,7 @@ SeedfillGraySimple(lua_State *L)
  * Arg #3 is expected to be a l_int32 (maxiters).
  * Arg #4 is expected to be a l_int32 (connectivity).
  *
- * Notes:
+ * Leptonica's Notes:
  *    (1) This is in general a very inefficient method for filling
  *        from a seed into a mask.  Use it for a small number of iterations,
  *        but if you expect more than a few iterations, use
@@ -27850,7 +27934,7 @@ SeedfillMorph(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (connectivity).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The raster/anti-raster method for implementing this filling
  *          operation was suggested by Ray Smith.
  *      (2) This takes an arbitrary set of nonzero pixels in pixs, which
@@ -27902,7 +27986,7 @@ Seedspread(lua_State *L)
  * Arg #3 is expected to be a l_int32 (connectivity).
  * Arg #4 is expected to be a l_int32 (type).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The args specify constraints on the amount of foreground
  *          coverage of the components that are kept.
  *      (2) If unchanged, returns a copy of pixs.  Otherwise,
@@ -27939,7 +28023,7 @@ SelectByAreaFraction(lua_State *L)
  * Arg #3 is expected to be a l_int32 (connectivity).
  * Arg #4 is expected to be a l_int32 (type).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The args specify constraints on the size of the
  *          components that are kept.
  *      (2) If unchanged, returns a copy of pixs.  Otherwise,
@@ -27977,7 +28061,7 @@ SelectByPerimSizeRatio(lua_State *L)
  * Arg #3 is expected to be a l_int32 (connectivity).
  * Arg #4 is expected to be a l_int32 (type).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The args specify constraints on the size of the
  *          components that are kept.
  *      (2) If unchanged, returns a copy of pixs.  Otherwise,
@@ -28016,7 +28100,7 @@ SelectByPerimToAreaRatio(lua_State *L)
  * Arg #5 is expected to be a l_int32 (type).
  * Arg #6 is expected to be a l_int32 (relation).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The args specify constraints on the size of the
  *          components that are kept.
  *      (2) If unchanged, returns a copy of pixs.  Otherwise,
@@ -28056,7 +28140,7 @@ SelectBySize(lua_State *L)
  * Arg #3 is expected to be a l_int32 (connectivity).
  * Arg #4 is expected to be a l_int32 (type).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The args specify constraints on the width-to-height ratio
  *          for components that are kept.
  *      (2) If unchanged, returns a copy of pixs.  Otherwise,
@@ -28112,7 +28196,7 @@ SelectDefaultPdfEncoding(lua_State *L)
  * Arg #3 is expected to be a l_int32 (yslop).
  * Arg #4 is expected to be a l_int32 (connectivity).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This selects a box near the top (first) and left (second)
  *          of the image, from the set of all boxes that have
  *                area >= %areaslop * (area of biggest box),
@@ -28147,7 +28231,7 @@ SelectLargeULComp(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pix* (pixm).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For each 8 connected component in pixm, this finds
  *          a pixel in pixs that has the lowest value, and saves
  *          it in a Pta.  If several pixels in pixs have the same
@@ -28181,7 +28265,7 @@ SelectMinInConnComp(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (mindist).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This selects those local 3x3 minima that are at least a
  *          specified distance from the nearest local 3x3 maxima, and v.v.
  *          for the selected set of local 3x3 maxima.
@@ -28248,7 +28332,7 @@ SelectiveConnCompFill(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does a fast serialization of the principal elements
  *          of the pix, as follows:
  *            "spix"    (4 bytes) -- ID for file type
@@ -28282,7 +28366,7 @@ SerializeToMemory(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Sets all data to 1.  For 1 bpp, this is black; for grayscale
  *          or color, this is white.
  *      (2) Caution: for colormapped pix, this sets the pixel value to the
@@ -28324,7 +28408,7 @@ SetAllArbitrary(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (grayval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) N.B.  For all images, %grayval == 0 represents black and
  *          %grayval == 255 represents white.
  *      (2) For depth < 8, we do our best to approximate the gray level.
@@ -28353,7 +28437,7 @@ SetAllGray(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The generated alpha component is transparent over white
  *          (background) pixels in pixs, and quickly grades to opaque
  *          away from the transparent parts.  This is a cheap and
@@ -28397,7 +28481,7 @@ SetBlack(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a string describing an operation (op).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Function for setting all pixels in an image to either black
  *          or white.
  *      (2) If pixs is colormapped, it adds black or white to the
@@ -28468,7 +28552,7 @@ SetBorderRingVal(lua_State *L)
  * Arg #5 is expected to be a l_int32 (bottom).
  * Arg #6 is expected to be a l_uint32 (val).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The border region is defined to be the region in the
  *          image within a specific distance of each edge.  Here, we
  *          allow the pixels within a specified distance of each
@@ -28502,7 +28586,7 @@ SetBorderVal(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (sampling).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The default is for 2x2 chroma subsampling because the files are
  *          considerably smaller and the appearance is typically satisfactory.
  *          To get full resolution output in the chroma channels for
@@ -28527,8 +28611,11 @@ SetChromaSampling(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a PixColormap* (colormap).
  *
- * Note:
- * The specified PixColormap* is empty afterwards.
+ * Leptonica's Notes:
+ *      (1) Unlike with the pix data field, pixSetColormap() destroys
+ *          any existing colormap before assigning the new one.
+ *          Because colormaps are not ref counted, it is important that
+ *          the new colormap does not belong to any other pix.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 PixColormap* on the Lua stack
@@ -28549,7 +28636,7 @@ SetColormap(lua_State *L)
  * Arg #2 is expected to be a string with the component name (comp).
  * Arg #3 is expected to be a l_int32 (val).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For example, this can be used to set the alpha component to opaque:
  *              pixSetComponentArbitrary(pix, L_ALPHA_CHANNEL, 255)
  * </pre>
@@ -28653,7 +28740,7 @@ SetHeight(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a Box* (box).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Sets all data in rect to 1.  For 1 bpp, this is black;
  *          for grayscale or color, this is white.
  *      (2) Caution: for colormapped pix, this sets the pixel value to the
@@ -28679,7 +28766,7 @@ SetInRect(lua_State *L)
  * Arg #2 is expected to be a Box* (box).
  * Arg #3 is expected to be a l_uint32 (val).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For colormapped pix, be sure the value is the intended
  *          one in the colormap.
  *      (2) Caution: for colormapped pix, this sets each pixel in the
@@ -28724,7 +28811,7 @@ SetInputFormat(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs2).
  * Arg #3 is expected to be a l_int32 (mindiff).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This compares corresponding pixels in pixs1 and pixs2.
  *          When they differ by less than %mindiff, set the pixel
  *          values to 0 in each.  Each pixel typically represents a tile
@@ -28755,7 +28842,7 @@ SetLowContrast(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixm) with 1 bit/pixel.
  * Arg #3 is expected to be a l_uint32 (val).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) In-place operation.
  *      (2) NOTE: For cmapped images, this calls pixSetMaskedCmap().
  *          %val must be the 32-bit color representation of the RGB pixel.
@@ -28800,7 +28887,7 @@ SetMasked(lua_State *L)
  * Arg #6 is expected to be a l_int32 (gval).
  * Arg #7 is expected to be a l_int32 (bval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is an in-place operation.
  *      (2) It paints a single color through the mask (as a stencil).
  *      (3) The mask origin is placed at (x,y) on pixs, and the
@@ -28839,7 +28926,7 @@ SetMaskedCmap(lua_State *L)
  * Arg #4 is expected to be a l_int32 (x).
  * Arg #5 is expected to be a l_int32 (y).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is an in-place operation.
  *      (2) Alignment is explicit.  If you want the UL corners of
  *          the two images to be aligned, use pixSetMasked().
@@ -28880,7 +28967,7 @@ SetMaskedGeneral(lua_State *L)
  * Arg #4 is expected to be a l_int32 (top).
  * Arg #5 is expected to be a l_int32 (bottom).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This applies what is effectively mirror boundary conditions
  *          to a border region in the image.  It is in-place.
  *      (2) This is useful for setting pixels near the border to a
@@ -28913,7 +29000,7 @@ SetMirroredBorder(lua_State *L)
  * Arg #5 is expected to be a l_int32 (bottom).
  * Arg #6 is expected to be a operation (op = PIX_SET or PIX_CLR).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The border region is defined to be the region in the
  *          image within a specific distance of each edge.  Here, we
  *          allow the pixels within a specified distance of each
@@ -28945,7 +29032,7 @@ SetOrClearBorder(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (val).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The pad bits are the bits that expand each scanline to a
  *          multiple of 32 bits.  They are usually not used in
  *          image processing operations.  When boundary conditions
@@ -28984,7 +29071,7 @@ SetPadBits(lua_State *L)
  * Arg #3 is expected to be a l_int32 (bh).
  * Arg #4 is expected to be a l_int32 (val).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The pad bits are the bits that expand each scanline to a
  *          multiple of 32 bits.  They are usually not used in
  *          image processing operations.  When boundary conditions
@@ -29016,7 +29103,7 @@ SetPadBitsBand(lua_State *L)
  * Arg #3 is expected to be a l_int32 (y).
  * Arg #4 is expected to be a l_uint32 (val).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Warning: the input value is not checked for overflow with respect
  *          the the depth of %pix, and the sign bit (if any) is ignored.
  *          * For d == 1, %val > 0 sets the bit on.
@@ -29081,7 +29168,7 @@ SetPixelColumn(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a string with the component name (comp).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This places the 8 bpp pixel in pixs into the
  *          specified component (properly interleaved) in pixd,
  *      (2) The two images are registered to the UL corner; the sizes
@@ -29156,7 +29243,7 @@ SetResolution(lua_State *L)
  * Arg #5 is expected to be a l_int32 (gval).
  * Arg #6 is expected to be a l_int32 (bval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is an in-place operation.
  *      (2) It sets all pixels in region that have the color specified
  *          by the colormap index 'sindex' to the new color.
@@ -29201,7 +29288,7 @@ SetSelectCmap(lua_State *L)
  * Arg #7 is expected to be a l_int32 (gval).
  * Arg #8 is expected to be a l_int32 (bval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is an in-place operation.
  *      (2) This paints through the fg of pixm and replaces all pixels
  *          in pixs that have a particular value (sindex) with the new color.
@@ -29274,7 +29361,7 @@ SetSpp(lua_State *L)
  * Arg #3 is expected to be a l_int32 (thinfirst).
  * Arg #4 is expected to be a l_int32 (connectivity).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See notes in pixaSetStrokeWidth().
  *      (2) A white border of sufficient width to avoid boundary
  *          artifacts in the thickening step is added before thinning.
@@ -29301,7 +29388,7 @@ SetStrokeWidth(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a string (text).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This removes any existing textstring and puts a copy of
  *          the input textstring there.
  * </pre>
@@ -29330,7 +29417,7 @@ SetText(lua_State *L)
  * Arg #7 is expected to be a l_int32 (wtext).
  * Arg #8 is expected to be a l_int32 (firstindent).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function paints a set of lines of text over an image.
  *      (2) %val is the pixel value to be painted through the font mask.
  *          It should be chosen to agree with the depth of pixs.
@@ -29376,7 +29463,7 @@ SetTextblock(lua_State *L)
  * Arg #5 is expected to be a l_int32 (x0).
  * Arg #6 is expected to be a l_int32 (y0).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function paints a line of text over an image.
  *      (2) %val is the pixel value to be painted through the font mask.
  *          It should be chosen to agree with the depth of pixs.
@@ -29418,7 +29505,7 @@ SetTextline(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_uint32 (val).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This sets the r, g and b components under every fully
  *          transparent alpha component to %val.  The alpha components
  *          are unchanged.
@@ -29564,7 +29651,7 @@ SetYRes(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (compval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Valid zlib compression values are in the interval [0 ... 9],
  *          where, as defined in zlib.h:
  *            0         Z_NO_COMPRESSION
@@ -29594,7 +29681,7 @@ SetZlibCompression(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a simple helper for processing 8 bpp images with
  *          direct byte access.  It can swap byte order within each word.
  *      (2) After processing, you must call pixCleanupByteProcessing(),
@@ -29658,7 +29745,7 @@ ShiftAndTransferAlpha(lua_State *L)
  * Arg #3 is expected to be a l_uint32 (srcval).
  * Arg #4 is expected to be a l_uint32 (dstval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For each component (r, b, g) separately, this does a linear
  *          mapping of the colors in pixs to colors in pixd.
  *          Let rs and rd be the red src and dest components in %srcval and
@@ -29713,7 +29800,7 @@ ShiftByComponent(lua_State *L)
  * Arg #5 is expected to be a l_uint32 (color).
  * Arg #6 is expected to be a l_int32 (cmapflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This uses typical default values for generating captchas.
  *          The magnitudes of the harmonic warp are typically to be
  *          smaller when more terms are used, even though the phases
@@ -29744,7 +29831,7 @@ SimpleCaptcha(lua_State *L)
  * Arg #3 is expected to be a l_int32 (factor).
  * Arg #4 is expected to be a l_int32 (ncolors).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If you want to do color quantization for real, use octcube
  *          or modified median cut.  This function shows that it is
  *          easy to make a simple quantizer based solely on the population
@@ -29798,7 +29885,7 @@ SizesEqual(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixm).
  * Arg #3 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The pixels in pixs corresponding to those in each
  *          8-connected region in the mask are set to the average value.
  *      (2) This is required for adaptive mapping to avoid the
@@ -29831,7 +29918,7 @@ SmoothConnectedRegions(lua_State *L)
  * Arg #4 is expected to be a l_uint32 (dstval).
  * Arg #5 is expected to be a l_int32 (diff).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For inplace operation, call it this way:
  *           pixSnapColor(pixs, pixs, ... )
  *      (2) For generating a new pixd:
@@ -29865,7 +29952,7 @@ SnapColor(lua_State *L)
  * Arg #4 is expected to be a l_uint32 (dstval).
  * Arg #5 is expected to be a l_int32 (diff).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For inplace operation, call it this way:
  *           pixSnapCcmap(pixs, pixs, ... )
  *      (2) For generating a new pixd:
@@ -29896,7 +29983,7 @@ SnapColorCmap(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (orientflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Invert pixd to see larger gradients as darker (grayscale).
  *      (2) To generate a binary image of the edges, threshold
  *          the result using pixThresholdToBinary().  If the high
@@ -29935,7 +30022,7 @@ SobelEdgeFilter(lua_State *L)
  * Arg #7 is expected to be a l_int32 (maxcomps).
  * Arg #8 is expected to be a l_int32 (remainder).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This generates a boxa of rectangles that covers
  *          the fg of a mask.  It does so by a greedy partitioning of
  *          the mask, choosing the largest rectangle found from
@@ -30015,7 +30102,7 @@ SplitComponentIntoBoxa(lua_State *L)
  * Arg #2 is expected to be a l_int32 (delta).
  * Arg #3 is expected to be a l_int32 (mindel).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This will split the most obvious cases of touching characters.
  *          The split points it is searching for are narrow and deep
  *          minimima in the vertical pixel projection profile, after a
@@ -30045,7 +30132,7 @@ SplitComponentWithProfile(lua_State *L)
  * Arg #2 is expected to be a l_float32 (scorefract).
  * Arg #3 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See numaSplitDistribution() for details on the underlying
  *          method of choosing a threshold.
  * </pre>
@@ -30080,7 +30167,7 @@ SplitDistributionFgBg(lua_State *L)
  * Arg #6 is expected to be a l_int32 (maxcomps).
  * Arg #7 is expected to be a l_int32 (remainder).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This generates a boxa of rectangles that covers
  *          the fg of a mask.  For each 8-connected component in pixs,
  *          it does a greedy partitioning, choosing the largest
@@ -30125,7 +30212,7 @@ SplitIntoBoxa(lua_State *L)
  * Arg #2 is expected to be a l_int32 (minw).
  * Arg #3 is expected to be a l_int32 (minh).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a simple function that attempts to find split points
  *          based on vertical pixel profiles.
  *      (2) It should be given an image that has an arbitrary number
@@ -30162,7 +30249,7 @@ SplitIntoCharacters(lua_State *L)
  * Arg #4 is expected to be a l_float32 (gwt).
  * Arg #5 is expected to be a l_float32 (bwt).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) pix1 and pix2 are a pair of stereo images, ideally taken
  *          concurrently in the same plane, with some lateral translation.
  *      (2) The output red channel is determined from %pix1.
@@ -30207,7 +30294,7 @@ StereoFromPair(lua_State *L)
  * Arg #5 is expected to be a l_int32 (operation).
  * Arg #6 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If %hmax > 0, this is an increase in the coordinate value of
  *          pixels in pixd, relative to the same pixel in pixs.
  *      (2) If %dir == L_WARP_TO_LEFT, the pixels on the right edge of
@@ -30248,7 +30335,7 @@ StretchHorizontal(lua_State *L)
  * Arg #4 is expected to be a l_int32 (hmax).
  * Arg #5 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixStretchHorizontal() for details.
  * </pre>
  * \param L pointer to the lua_State
@@ -30276,7 +30363,7 @@ StretchHorizontalLI(lua_State *L)
  * Arg #4 is expected to be a l_int32 (hmax).
  * Arg #5 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixStretchHorizontal() for details.
  * </pre>
  * \param L pointer to the lua_State
@@ -30303,7 +30390,7 @@ StretchHorizontalSampled(lua_State *L)
  * Arg #3 is expected to be a l_int32 (depth).
  * Arg #4 is expected to be a l_int32 (nangles).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The dest Pix is 8 or 16 bpp, with the pixel values
  *          equal to the stroke width in which it is a member.
  *          The values are clipped to the max pixel value if necessary.
@@ -30342,7 +30429,7 @@ StrokeWidthTransform(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (skip).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If skip = 0, we take all the fg pixels.
  *      (2) We try to traverse the boundaries in a regular way.
  *          Some pixels may be missed, and these are then subsampled
@@ -30376,7 +30463,7 @@ SubsampleBoundaryPixels(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs1).
  * Arg #3 is expected to be a Pix* (pixs2).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Arithmetic subtraction of two 8, 16 or 32 bpp images.
  *      (2) Source pixs2 is always subtracted from source pixs1.
  *      (3) Do explicit clipping to 0.
@@ -30408,7 +30495,7 @@ SubtractGray(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Simple operation to change the handle name safely.
  *          After this operation, the original image in pixd has
  *          been destroyed, pixd points to what was pixs, and
@@ -30460,7 +30547,7 @@ SwapAndDestroy(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixm).
  * Arg #3 is expected to be a Numa* (na).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This operation is in-place on pixs.
  *      (2) For 32 bpp, this applies the same map to each of the r,g,b
  *          components.
@@ -30490,7 +30577,7 @@ TRCMap(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a lightweight test to determine if a 1 bpp image
  *          can be further cropped without loss of fg pixels.
  *          If it cannot, canclip is set to 0.
@@ -30524,7 +30611,7 @@ TestClipToForeground(lua_State *L)
  * Arg #6 is expected to be a l_float32 (maxave).
  * Arg #8 is expected to be a l_int32 (details).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This takes 2 pix that are the same size and determines using
  *          3 input parameters if they are "similar".  The first parameter
  *          %mindiff establishes a criterion of pixel-to-pixel similarity:
@@ -30583,7 +30670,7 @@ TestForSimilarity(lua_State *L)
  * Arg #3 is expected to be a l_int32 (connectivity).
  * Arg #4 is expected to be a l_int32 (maxiters).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See "Connectivity-preserving morphological image transformations,"
  *          Dan S. Bloomberg, in SPIE Visual Communications and Image
  *          Processing, Conference 1606, pp. 320-334, November 1991,
@@ -30640,7 +30727,7 @@ ThinConnected(lua_State *L)
  * Arg #3 is expected to be a Sela* (sela).
  * Arg #4 is expected to be a l_int32 (maxiters).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See notes in pixThinConnected().
  *      (2) This takes a sela representing one of 11 sets of HMT Sels.
  *          The HMTs from this set are run in parallel and the result
@@ -30680,7 +30767,7 @@ ThinConnectedBySet(lua_State *L)
  * Arg #3 is expected to be a l_int32 (nlevels).
  * Arg #4 is expected to be a l_int32 (cmapflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This uses, by default, equally spaced "target" values
  *          that depend on the number of levels, with thresholds
  *          halfway between.  For N levels, with separation (N-1)/255,
@@ -30725,7 +30812,7 @@ Threshold8(lua_State *L)
  * Arg #7 is expected to be a l_float32 (threshdiff).
  * Arg #10 is expected to be a l_int32 (debugflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This finds a global threshold based on connected components.
  *          Although slow, it is reasonable to use it in a situation where
  *          (a) the background in the image is relatively uniform, and
@@ -30817,7 +30904,7 @@ ThresholdForFgBg(lua_State *L)
  * Arg #5 is expected to be a l_int32 (setblack).
  * Arg #6 is expected to be a l_int32 (setwhite).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function allows exact specification of the quantization bins.
  *          The string %edgevals is a space-separated set of values
  *          specifying the dividing points between output quantization bins.
@@ -30870,7 +30957,7 @@ ThresholdGrayArb(lua_State *L)
  * Arg #2 is expected to be a l_int32 (nlevels).
  * Arg #3 is expected to be a l_int32 (cmapflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Valid values for nlevels is the set {2,...,256}.
  *      (2) Any colormap on the input pixs is removed to 8 bpp grayscale.
  *      (3) If cmapflag == 1, a colormap of size 'nlevels' is made,
@@ -30900,7 +30987,7 @@ ThresholdOn8bpp(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (thresh).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This sums the ON pixels and returns immediately if the count
  *          goes above threshold.  It is therefore more efficient
  *          for matching images (by running this function on the xor of
@@ -30936,7 +31023,7 @@ ThresholdPixelSum(lua_State *L)
  * Arg #8 is expected to be a l_int32 (maxval).
  * Arg #9 is expected to be a l_int32 (targetthresh).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The basis of this approach is the use of seed spreading
  *          on a (possibly) sparse set of estimates for the local threshold.
  *          The resulting dense estimates are smoothed by convolution
@@ -30992,7 +31079,7 @@ ThresholdSpreadNorm(lua_State *L)
  * Arg #2 is expected to be a l_int32 (nlevels).
  * Arg #3 is expected to be a l_int32 (cmapflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Valid values for nlevels is the set {2, 3, 4}.
  *      (2) Any colormap on the input pixs is removed to 8 bpp grayscale.
  *      (3) This function is typically invoked with cmapflag == 1.
@@ -31047,7 +31134,7 @@ ThresholdTo2bpp(lua_State *L)
  * Arg #2 is expected to be a l_int32 (nlevels).
  * Arg #3 is expected to be a l_int32 (cmapflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Valid values for nlevels is the set {2, ... 16}.
  *      (2) Any colormap on the input pixs is removed to 8 bpp grayscale.
  *      (3) This function is typically invoked with cmapflag == 1.
@@ -31103,7 +31190,7 @@ ThresholdTo4bpp(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (thresh).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If the source pixel is less than the threshold value,
  *          the dest will be 1; otherwise, it will be 0.
  *      (2) For example, for 8 bpp src pix, if %thresh == 256, the dest
@@ -31132,7 +31219,7 @@ ThresholdToBinary(lua_State *L)
  * Arg #3 is expected to be a l_int32 (threshval).
  * Arg #4 is expected to be a l_int32 (setval).
  *
- * Notes:
+ * Leptonica's Notes:
  *    ~ operation can be in-place (pixs == pixd) or to a new pixd
  *    ~ if setval > threshval, sets pixels with a value >= threshval to setval
  *    ~ if setval < threshval, sets pixels with a value <= threshval to setval
@@ -31164,7 +31251,7 @@ ThresholdToValue(lua_State *L)
  * Arg #6 is expected to be a l_int32 (xoverlap).
  * Arg #7 is expected to be a l_int32 (yoverlap).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) We put a clone of pixs in the PixTiling.
  *      (2) The input to pixTilingCreate() for horizontal tiling can be
  *          either the number of tiles across the image or the approximate
@@ -31283,7 +31370,7 @@ TilingGetTile(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixTiling* (pt).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The default for paint is to strip out the overlap pixels
  *          that are added by pixTilingGetTile().  However, some
  *          operations will generate an image with these pixels
@@ -31335,7 +31422,7 @@ TilingPaintTile(lua_State *L)
  * Arg #3 is expected to be a l_int32 (vsize).
  * Arg #4 is expected to be a l_int32 (type).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Sel is a brick with all elements being hits
  *      (2) If hsize = vsize = 1, returns an image with all 0 data.
  *      (3) The L_TOPHAT_WHITE flag emphasizes small bright regions,
@@ -31366,7 +31453,7 @@ Tophat(lua_State *L)
  * Arg #3 is optional and expected to be a boolean (copytext).
  * Arg #4 is optional and expected to be a boolean (copyformat).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does a complete data transfer from pixs to pixd,
  *          followed by the destruction of pixs (refcount permitting).
  *      (2) If the refcount of pixs is 1, pixs is destroyed.  Otherwise,
@@ -31434,7 +31521,7 @@ TransferAllData(lua_State *L)
  * Arg #4 is expected to be a l_int32 (vshift).
  * Arg #5 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The general pattern is:
  *            pixd = pixTranslate(pixd, pixs, ...);
  *          For clarity, when you know the case, use one of these:
@@ -31466,7 +31553,7 @@ Translate(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (orientflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For detecting vertical edges, this considers the
  *          difference of the central pixel from those on the left
  *          and right.  For situations where the gradient is the same
@@ -31526,7 +31613,7 @@ UnionOfMorphOps(lua_State *L)
  * Arg #2 is expected to be a l_int32 (depth).
  * Arg #2 is expected to be a boolean (invert).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function calls special cases of pixConvert1To*(),
  *          for 2, 4, 8, 16 and 32 bpp destinations.
  * </pre>
@@ -31550,7 +31637,7 @@ UnpackBinary(lua_State *L)
  * Arg #2 is expected to be a l_int32 (halfwidth).
  * Arg #3 is expected to be a l_float32 (fract).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) We use symmetric smoothing filters of odd dimension,
  *          typically use sizes of 3, 5, 7, etc.  The %halfwidth parameter
  *          for these is (size - 1)/2; i.e., 1, 2, 3, etc.
@@ -31580,7 +31667,7 @@ UnsharpMasking(lua_State *L)
  * Arg #3 is expected to be a l_float32 (fract).
  * Arg #4 is expected to be a l_int32 (direction).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The fast version uses separable 1-D filters directly on
  *          the input image.  The halfwidth is either 1 (full width = 3)
  *          or 2 (full width = 5).
@@ -31629,7 +31716,7 @@ UnsharpMaskingFast(lua_State *L)
  * Arg #2 is expected to be a l_int32 (halfwidth).
  * Arg #3 is expected to be a l_float32 (fract).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) We use symmetric smoothing filters of odd dimension,
  *          typically use sizes of 3, 5, 7, etc.  The %halfwidth parameter
  *          for these is (size - 1)/2; i.e., 1, 2, 3, etc.
@@ -31659,7 +31746,7 @@ UnsharpMaskingGray(lua_State *L)
  * Arg #3 is expected to be a l_float32 (fract).
  * Arg #4 is expected to be a l_int32 (direction).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For usage and explanation of the algorithm, see notes
  *          in pixUnsharpMaskingFast().
  *      (2) Returns a clone if no sharpening is requested.
@@ -31686,7 +31773,7 @@ UnsharpMaskingGray1D(lua_State *L)
  * Arg #2 is expected to be a l_int32 (halfwidth).
  * Arg #3 is expected to be a l_float32 (fract).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is for %halfwidth == 1, 2.
  *      (2) The lowpass filter is implemented separably.
  *      (3) Returns a clone if no sharpening is requested.
@@ -31713,7 +31800,7 @@ UnsharpMaskingGray2D(lua_State *L)
  * Arg #3 is expected to be a l_float32 (fract).
  * Arg #4 is expected to be a l_int32 (direction).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For usage and explanation of the algorithm, see notes
  *          in pixUnsharpMaskingFast().
  *      (2) Returns a clone if no sharpening is requested.
@@ -31740,7 +31827,7 @@ UnsharpMaskingGrayFast(lua_State *L)
  * Arg #2 is expected to be a l_int32 (mincount).
  * Arg #3 is expected to be a boolean (debug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Special (typical, slightly faster) case, where the pixels
  *          identified through the HMT (hit-miss transform) are not
  *          clipped by a truncated word mask pixm.  See pixOrientDetect()
@@ -31774,7 +31861,7 @@ UpDownDetect(lua_State *L)
  * Arg #3 is expected to be a l_int32 (mincount).
  * Arg #4 is expected to be a boolean (debug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Faster (DWA) version of pixUpDownDetect().
  *      (2) This is a special case (but typical and slightly faster) of
  *          pixUpDownDetectGeneralDwa(), where the pixels identified
@@ -31811,7 +31898,7 @@ UpDownDetectDwa(lua_State *L)
  * Arg #3 is expected to be a l_int32 (npixels).
  * Arg #4 is expected to be a boolean (debug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixOrientDetect() for other details.
  *      (2) %conf is the normalized difference between the number of
  *          detected up and down ascenders, assuming that the text
@@ -31863,7 +31950,7 @@ UpDownDetectGeneral(lua_State *L)
  * Arg #3 is expected to be a l_int32 (npixels).
  * Arg #4 is expected to be a boolean (debug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See the notes in pixUpDownDetectGeneral() for usage.
  * </pre>
  * \param L pointer to the lua_State
@@ -31889,7 +31976,7 @@ UpDownDetectGeneralDwa(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This returns color = TRUE if three things are obtained:
  *          (a) the pix has a colormap
  *          (b) the colormap has at least one color entry
@@ -31922,7 +32009,7 @@ UsesCmapColor(lua_State *L)
  * Arg #4 is expected to be a l_float32 (radang).
  * Arg #5 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) There are 3 cases:
  *            (a) pixd == null (make a new pixd)
  *            (b) pixd == pixs (in-place)
@@ -31972,7 +32059,7 @@ VShear(lua_State *L)
  * Arg #3 is expected to be a l_float32 (radang).
  * Arg #4 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixVShear() for usage.
  *      (2) This does a vertical shear about the center, with (+) shear
  *          pushing increasingly downward (+y) with increasing x.
@@ -32000,7 +32087,7 @@ VShearCenter(lua_State *L)
  * Arg #3 is expected to be a l_float32 (radang).
  * Arg #4 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixVShear() for usage.
  *      (2) This does a vertical shear about the UL corner, with (+) shear
  *          pushing increasingly downward (+y) with increasing x.
@@ -32028,7 +32115,7 @@ VShearCorner(lua_State *L)
  * Arg #3 is expected to be a l_float32 (radang).
  * Arg #4 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is an in-place version of pixVShear(); see comments there.
  *      (2) This brings in 'incolor' pixels from outside the image.
  *      (3) pixs cannot be colormapped, because the in-place operation
@@ -32059,7 +32146,7 @@ VShearIP(lua_State *L)
  * Arg #3 is expected to be a l_float32 (radang).
  * Arg #4 is expected to be a l_int32 (incolor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does vertical shear with linear interpolation for
  *          accurate results on 8 bpp gray, 32 bpp rgb, or cmapped images.
  *          It is relatively slow compared to the sampled version
@@ -32093,7 +32180,7 @@ VShearLI(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pix* (pixg).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If the pixel in pixs is less than the corresponding pixel
  *          in pixg, the dest will be 1; otherwise it will be 0.
  * </pre>
@@ -32116,7 +32203,7 @@ VarThresholdToBinary(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is an optional Box* (box).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) To resample for a bin size different from 1, use
  *          numaUniformSampling() on the result of this function.
  *      (2) We are actually computing the RMS deviation in each row.
@@ -32141,7 +32228,7 @@ VarianceByColumn(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is an optional Box* (box).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) To resample for a bin size different from 1, use
  *          numaUniformSampling() on the result of this function.
  *      (2) We are actually computing the RMS deviation in each row.
@@ -32190,7 +32277,7 @@ VarianceInRect(lua_State *L)
  * Arg #3 is expected to be a Pix* (pix_ma).
  * Arg #4 is expected to be a DPix* (dpix_msa).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function is intended to be used for many rectangles
  *          on the same image.  It can find the variance and/or the
  *          square root of the variance within a rectangle in O(1),
@@ -32227,7 +32314,7 @@ VarianceInRectangle(lua_State *L)
  * Arg #6 is expected to be a l_int32 (ybendb).
  * Arg #7 is expected to be a l_int32 (redleft).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function splits out the red channel, mucks around with
  *          it, then recombines with the unmolested cyan channel.
  *      (2) By using a quadratically increasing shift of the red
@@ -32318,7 +32405,7 @@ WarpStereoscopic(lua_State *L)
  * Arg #4 is expected to be a l_int32 (hasborder).
  * Arg #5 is expected to be a l_int32 (normflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The input and output depths are the same.
  *      (2) A set of border pixels of width (wc + 1) on left and right,
  *          and of height (hc + 1) on top and bottom, must be on the
@@ -32359,7 +32446,7 @@ WindowedMean(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hc).
  * Arg #4 is expected to be a l_int32 (hasborder).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) A set of border pixels of width (wc + 1) on left and right,
  *          and of height (hc + 1) on top and bottom, must be on the
  *          pix before the accumulator is found.  The output pixd
@@ -32403,7 +32490,7 @@ WindowedMeanSquare(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hc).
  * Arg #4 is expected to be a l_int32 (hasborder).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a high-level convenience function for calculating
  *          any or all of these derived images.
  *      (2) If %hasborder = 0, a border is added and the result is
@@ -32456,7 +32543,7 @@ WindowedStats(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixm).
  * Arg #2 is expected to be a Pix* (pixms).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The mean and mean square values are precomputed, using
  *          pixWindowedMean() and pixWindowedMeanSquare().
  *      (2) Either or both of the variance and square-root of variance
@@ -32496,7 +32583,7 @@ WindowedVariance(lua_State *L)
  * Arg #5 is expected to be a l_int32 (c2).
  * Arg #6 is expected to be a l_int32 (size).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The returned variance array traverses the line starting
  *          from the smallest coordinate, min(c1,c2).
  *      (2) Line end points are clipped to pixs.
@@ -32536,7 +32623,7 @@ WindowedVarianceOnLine(lua_State *L)
  * Arg #5 is expected to be a l_int32 (maxheight).
  * Arg #8 is expected to be a Pixa* (pixadb).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Returns a pruned set of word boxes.
  *      (2) See pixWordMaskByDilation().
  * </pre>
@@ -32568,7 +32655,7 @@ WordBoxesByDilation(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #4 is expected to be a Pixa* (pixadb).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This gives an estimate of the word masks.  See
  *          pixWordBoxesByDilation() for further filtering of the word boxes.
  *      (2) The resolution should be between 75 and 150 ppi, and the optimal
@@ -32613,7 +32700,7 @@ WordMaskByDilation(lua_State *L)
  * Arg #2 is expected to be a string (filename).
  * Arg #3 is expected to be a string with the input format name (format).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Open for write using binary mode (with the "b" flag)
  *          to avoid having Windows automatically translate the NL
  *          into CRLF, which corrupts image files.  On non-windows
@@ -32662,7 +32749,7 @@ WriteAutoFormat(lua_State *L)
  * Arg #2 is expected to be a string (fname).
  * Arg #3 is expected to be a l_int32 (format).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Debug version, intended for use in the library when writing
  *          to files in a temp directory with names that are compiled in.
  *          This is used instead of pixWrite() for all such library calls.
@@ -32690,7 +32777,7 @@ WriteDebug(lua_State *L)
  * Arg #3 is expected to be a l_int32 (quality).
  * Arg #4 is expected to be a l_int32 (progressive).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This determines the output format from the filename extension.
  *      (2) The last two args are ignored except for requests for jpeg files.
  *      (3) The jpeg default quality is 75.
@@ -32719,7 +32806,7 @@ WriteImpliedFormat(lua_State *L)
  * Arg #5 is expected to be a l_int32 (hint).
  * Arg #6 is expected to be a boolean (debug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The %quality parameter is the SNR.  The useful range is narrow:
  *             SNR < 27  (terrible quality)
  *             SNR = 34  (default; approximately equivalent to jpeg quality 75)
@@ -32778,7 +32865,7 @@ WriteJpeg(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pixa* user data.
  * Arg #2 is expected to be a string with the input format name (format).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) On windows, this will only write tiff and PostScript to memory.
  *          For other formats, it requires open_memstream(3).
  *      (2) PostScript output is uncompressed, in hex ascii.
@@ -32810,7 +32897,7 @@ WriteMem(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) 2 bpp bmp files are not valid in the spec, and are
  *          written as 8 bpp.
  *      (2) pix with depth <= 8 bpp are written with a colormap.
@@ -32843,7 +32930,7 @@ WriteMemBmp(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a Pix* (pix).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See comments in pixReadMemGif()
  * </pre>
  * \param L pointer to the lua_State
@@ -32872,7 +32959,7 @@ WriteMemGif(lua_State *L)
  * Arg #4 is expected to be a l_int32 (hint).
  * Arg #5 is expected to be a l_int32 (debug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixWriteJp2k() for usage.  This version writes to
  *          memory instead of to a file stream.
  * </pre>
@@ -32904,7 +32991,7 @@ WriteMemJp2k(lua_State *L)
  * Arg #4 is expected to be a l_int32 (quality).
  * Arg #5 is expected to be a l_int32 (progressive).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixWriteStreamJpeg() for usage.  This version writes to
  *          memory instead of to a file stream.
  * </pre>
@@ -32935,7 +33022,7 @@ WriteMemJpeg(lua_State *L)
  * Arg #3 is expected to be a l_int32 (res).
  * Arg #4 is expected to be a l_float32 (scale).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixWriteStringPS() for usage.
  *      (2) This is just a wrapper for pixWriteStringPS(), which
  *          writes uncompressed image data to memory.
@@ -32965,7 +33052,7 @@ WriteMemPS(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a Pix* (pix).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixWriteStreamPnm() for usage.  This version writes to
  *          memory instead of to a file stream.
  * </pre>
@@ -32993,7 +33080,7 @@ WriteMemPam(lua_State *L)
  * Arg #2 is expected to be a l_int32 (res).
  * Arg #3 is expected to be a string (title).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is the simplest interface for writing a single image
  *          with pdf encoding to memory.  It uses G4 encoding for 1 bpp,
  *          JPEG encoding for 8 bpp (no cmap) and 32 bpp, and FLATE
@@ -33024,7 +33111,7 @@ WriteMemPdf(lua_State *L)
  * Arg #1 is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_float32 (gamma).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixWriteStreamPng()
  * </pre>
  * \param L pointer to the lua_State
@@ -33050,7 +33137,7 @@ WriteMemPng(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a Pix* (pix).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixWriteStreamPnm() for usage.  This version writes to
  *          memory instead of to a file stream.
  * </pre>
@@ -33156,7 +33243,7 @@ WriteMemTiffCustom(lua_State *L)
  * Arg #2 is expected to be a l_int32 (quality).
  * Arg #3 is expected to be a l_int32 (lossless).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Lossless and lossy encoding are entirely different in webp.
  *          %quality applies to lossy, and is ignored for lossless.
  *      (2) The input image is converted to RGB if necessary.  If spp == 3,
@@ -33213,7 +33300,7 @@ WriteMixedToPS(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a string (filein).
  * Arg #2 is expected to be a string (fileout).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a simple wrapper function that generates an
  *          uncompressed PS file, with a bounding box.
  *      (2) The bounding box is required when a program such as TeX
@@ -33240,7 +33327,7 @@ WritePSEmbed(lua_State *L)
  * Arg #2 is expected to be a string (filename).
  * Arg #3 is expected to be a l_float32 (gamma).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Special version for writing png with a specified gamma.
  *          When using pixWrite(), no field is given for gamma.
  * </pre>
@@ -33347,7 +33434,7 @@ WriteStreamBmp(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a luaL_Stream* (stream).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) All output gif have colormaps.  If the pix is 32 bpp rgb,
  *          this quantizes the colors and writes out 8 bpp.
  *          If the pix is 16 bpp grayscale, it converts to 8 bpp first.
@@ -33374,7 +33461,7 @@ WriteStreamGif(lua_State *L)
  * Arg #5 is expected to be a l_int32 (hint).
  * Arg #6 is expected to be a boolean (debug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixWriteJp2k() for usage.
  *      (2) For an encoder with more encoding options, see, e.g.,
  *    https://github.com/OpenJPEG/openjpeg/blob/master/tests/test_tile_encoder.c
@@ -33403,7 +33490,7 @@ WriteStreamJp2k(lua_State *L)
  * Arg #3 is expected to be a l_int32 (quality).
  * Arg #4 is expected to be a l_int32 (progressive).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Progressive encoding gives better compression, at the
  *          expense of slower encoding and decoding.
  *      (2) Standard chroma subsampling is 2x2 on both the U and V
@@ -33448,7 +33535,7 @@ WriteStreamJpeg(lua_State *L)
  * Arg #4 is expected to be a l_int32 (res).
  * Arg #5 is expected to be a l_float32 (scale).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This writes image in PS format, optionally scaled,
  *          adjusted for the printer resolution, and with
  *          a bounding box.
@@ -33475,7 +33562,7 @@ WriteStreamPS(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a luaL_Stream* (stream).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This writes arbitrary PAM (P7) packed format.
  *      (2) 24 bpp rgb are not supported in leptonica, but this will
  *          write them out as a packed array of bytes (3 to a pixel).
@@ -33500,7 +33587,7 @@ WriteStreamPam(lua_State *L)
  * Arg #3 is expected to be a l_int32 (res).
  * Arg #4 is expected to be a string (title).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is the simplest interface for writing a single image
  *          with pdf encoding to a stream.  It uses G4 encoding for 1 bpp,
  *          JPEG encoding for 8 bpp (no cmap) and 32 bpp, and FLATE
@@ -33527,7 +33614,7 @@ WriteStreamPdf(lua_State *L)
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * Arg #3 is expected to be a l_float32 (gamma).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If called from pixWriteStream(), the stream is positioned
  *          at the beginning of the file.
  *      (2) To do sequential writes of png format images to a stream,
@@ -33609,7 +33696,7 @@ WriteStreamPng(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a luaL_Stream* (stream).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This writes "raw" packed format only:
  *          1 bpp --> pbm (P4)
  *          2, 4, 8, 16 bpp, no colormap or grayscale colormap --> pgm (P5)
@@ -33654,7 +33741,7 @@ WriteStreamSpix(lua_State *L)
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * Arg #3 is expected to be a l_int32 (comptype).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This writes a single image to a file stream opened for writing.
  *      (2) For images with bpp > 1, this resets the comptype, if
  *          necessary, to write uncompressed data.
@@ -33733,7 +33820,7 @@ WriteStreamWebP(lua_State *L)
  * Arg #3 is expected to be a l_int32 (res).
  * Arg #4 is expected to be a l_float32 (scale).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) OK, this seems a bit complicated, because there are various
  *          ways to scale and not to scale.  Here's a summary:
  *      (2) If you don't want any scaling at all:
@@ -33788,7 +33875,7 @@ WriteStringPS(lua_State *L)
  * Arg #3 is expected to be a l_int32 (comptype).
  * Arg #4 is expected to be a string (modestr).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For multipage tiff, write the first pix with mode "w" and
  *          all subsequent pix with mode "a".
  *      (2) For multipage tiff, there is considerable overhead in the
@@ -33848,7 +33935,7 @@ WriteTiffCustom(lua_State *L)
  * Arg #3 is expected to be a l_int32 (quality).
  * Arg #4 is expected to be a l_int32 (lossless).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Special top-level function allowing specification of quality.
  * </pre>
  * \param L pointer to the lua_State
@@ -33870,7 +33957,7 @@ WriteWebP(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For a binary image, if there are no fg (black) pixels, empty = 1.
  *      (2) For a grayscale image, if all pixels are black (0), empty = 1.
  *      (3) For an RGB image, if all 4 components in every pixel is 0,

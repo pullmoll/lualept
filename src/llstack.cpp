@@ -45,7 +45,7 @@
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Stack* (lstack).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If freeflag is TRUE, frees each struct in the array.
  *      (2) If freeflag is FALSE but there are elements on the array,
  *          gives a warning and destroys the array.  This will
@@ -70,23 +70,6 @@ Destroy(lua_State *L)
     lstackDestroy(&stack, freeflag);
     *pstack = nullptr;
     return 0;
-}
-
-/**
- * \brief Create a Stack* (%lstack) of size (%nalloc).
- * <pre>
- * Arg #1 is expected to be a l_int32 (nalloc).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Stack * on the Lua stack
- */
-static int
-Create(lua_State *L)
-{
-    LL_FUNC("Create");
-    l_int32 nalloc = ll_check_l_int32(_fun, L, 1);
-    Stack *result = lstackCreate(nalloc);
-    return ll_push_Stack(_fun, L, result);
 }
 
 /**
@@ -125,6 +108,23 @@ Add(lua_State *L)
     void *item = reinterpret_cast<void *>(reinterpret_cast<l_intptr_t>(data));
     l_int32 result = lstackAdd(lstack, item);
     return ll_push_l_int32(_fun, L, result);
+}
+
+/**
+ * \brief Create a Stack* (%lstack) of size (%nalloc).
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (nalloc).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Stack * on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    LL_FUNC("Create");
+    l_int32 nalloc = ll_check_l_int32(_fun, L, 1);
+    Stack *result = lstackCreate(nalloc);
+    return ll_push_Stack(_fun, L, result);
 }
 
 /**

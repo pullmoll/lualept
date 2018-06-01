@@ -45,7 +45,7 @@
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Decrements the ref count and, if 0, destroys the box.
  *      (2) Always nulls the input ptr.
  * </pre>
@@ -128,7 +128,7 @@ Equal(lua_State *L)
  * Arg #4 is expected to be a l_int32 (deltop).
  * Arg #5 is expected to be a l_int32 (delbot).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Set boxd == NULL to get new box; boxd == boxs for in-place;
  *          or otherwise to resize existing boxd.
  *      (2) For usage, suggest one of these:
@@ -162,7 +162,7 @@ AdjustSides(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Box* (box1).
  * Arg #2 is expected to be another Box* (box2).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is the geometric union of the two rectangles.
  * </pre>
  * \param L pointer to the lua_State
@@ -204,7 +204,7 @@ ChangeRefcount(lua_State *L)
  * Arg #2 is expected to be a l_int32 (wi).
  * Arg #3 is expected to be a l_int32 (hi).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This can be used to clip a rectangle to an image.
  *          The clipping rectangle is assumed to have a UL corner at (0, 0),
  *          and a LR corner at (wi - 1, hi - 1).
@@ -228,7 +228,7 @@ ClipToRectangle(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The return value should be checked.  If it is 1, the
  *          returned parameter values are bogus.
  *      (2) This simplifies the selection of pixel locations within
@@ -289,7 +289,7 @@ Clone(lua_State *L)
  * Arg #2 is expected to be another Box* (box2).
  * Arg #3 is expected to be a string describing the type of comparison (type).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) We're re-using the SORT enum for these comparisons.
  * </pre>
  * \param L pointer to the lua_State
@@ -359,7 +359,7 @@ ContainsPt(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Box* (box).
  * Arg #2 is expected to be a l_int32 (ncorners).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If ncorners == 2, we select the UL and LR corners.
  *          Otherwise we save all 4 corners in this order: UL, UR, LL, LR.
  * </pre>
@@ -401,18 +401,18 @@ Copy(lua_State *L)
  * Arg #3 is expected to be a l_int32 (w).
  * Arg #4 is expected to be a l_int32 (h).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This clips the box to the +quad.  If no part of the
  *          box is in the +quad, this returns NULL.
  *      (2) We allow you to make a box with w = 0 and/or h = 0.
  *          This does not represent a valid region, but it is useful
- *          as a placeholder in a Boxa* for which the index of the
+ *          as a placeholder in a boxa for which the index of the
  *          box in the boxa is important.  This is an atypical
  *          situation; usually you want to put only valid boxes with
- *          nonzero width and height in a Boxa*.  If you have a Boxa*
- *          with invalid boxes, the accessor Boxa:GetValidBox()
+ *          nonzero width and height in a boxa.  If you have a boxa
+ *          with invalid boxes, the accessor boxaGetValidBox()
  *          will return NULL on each invalid box.
- *      (3) If you want to create only valid boxes, use CreateValid(),
+ *      (3) If you want to create only valid boxes, use boxCreateValid(),
  *          which returns NULL if either w or h is 0.
  * </pre>
  * \param L pointer to the lua_State
@@ -438,8 +438,8 @@ Create(lua_State *L)
  * Arg #3 is expected to be a l_int32 (w).
  * Arg #4 is expected to be a l_int32 (h).
  *
- * Notes:
- *     (1) This returns nil if either w = 0 or h = 0.
+ * Leptonica's Notes:
+ *      (1) This returns NULL if either w = 0 or h = 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -526,7 +526,7 @@ GetRefcount(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) All returned values are within the box.
  * </pre>
  * \param L pointer to the lua_State
@@ -555,7 +555,7 @@ GetSideLocations(lua_State *L)
  * Arg #3 is expected to be a l_int32 (y).
  * Arg #4 is expected to be a l_float32 (slope).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If the intersection is at only one point (a corner), the
  *          coordinates are returned in (x1, y1).
  *      (2) Represent a vertical line by one with a large but finite slope.
@@ -654,7 +654,7 @@ OverlapArea(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Box* (box1).
  * Arg #2 is expected to be another Box* (box2).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The result depends on the order of the input boxes,
  *          because the overlap is taken as a fraction of box2.
  * </pre>
@@ -679,7 +679,7 @@ OverlapFraction(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Box* (box1).
  * Arg #2 is expected to be another Box* (box2).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is the geometric intersection of the two rectangles.
  * </pre>
  * \param L pointer to the lua_State
@@ -702,7 +702,7 @@ OverlapRegion(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Box* (box).
  * Arg #2 is expected to be a luaL_Stream io handle (stream).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This outputs debug info.  Use serialization functions to
  *          write to file if you want to read the data back.
  * </pre>
@@ -723,7 +723,7 @@ PrintStreamInfo(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Set boxd == NULL to get new box; boxd == boxs for in-place;
  *          or otherwise to resize existing boxd.
  *      (2) For usage, suggest one of these:
@@ -754,7 +754,7 @@ RelocateOneSide(lua_State *L)
  * Arg #3 is expected to be a l_int32 (h).
  * Arg #4 is expected to be a rotation angle (rotation).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Rotate the image with the embedded box by the specified amount.
  *      (2) After rotation, the rotated box is always measured with
  *          respect to the UL corner of the image.
@@ -780,7 +780,7 @@ RotateOrth(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Box* (box1).
  * Arg #2 is expected to be another Box* (box2).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This measures horizontal and vertical separation of the
  *          two boxes.  If the boxes are touching but have no pixels
  *          in common, the separation is 0.  If the boxes overlap by
@@ -862,7 +862,7 @@ SetSideLocations(lua_State *L)
  * Arg #5 is expected to be a l_int32 (topdiff).
  * Arg #6 is expected to be a l_int32 (botdiff).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The values of leftdiff (etc) are the maximum allowed deviations
  *          between the locations of the left (etc) sides.  If any side
  *          pairs differ by more than this amount, the boxes are not similar.
@@ -895,7 +895,7 @@ Similar(lua_State *L)
  * Arg #4 is an optional l_float32 (scalex).
  * Arg #5 is an optional l_float32 (scaley).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a very simple function that first shifts, then scales.
  *      (2) If the box is invalid, a new invalid box is returned.
  * </pre>
@@ -929,7 +929,7 @@ Transform(lua_State *L)
  * Arg #8 is an optional l_int32 (ycen).
  * Arg #9 is an optional l_float32 (angle).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This allows a sequence of linear transforms, composed of
  *          shift, scaling and rotation, where the order of the
  *          transforms is specified.

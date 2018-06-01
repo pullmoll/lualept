@@ -99,7 +99,7 @@ toString(lua_State *L)
  * Arg #6 is expected to be a l_int32 (y).
  * Arg #7 is expected to be a string (debugfile).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This applies the disparity arrays to the specified image.
  *      (2) Specify gray color for pixels brought in from the outside:
  *          0 is black, 255 is white.  Use -1 to select pixels from the
@@ -159,7 +159,7 @@ ApplyDisparity(lua_State *L)
  * Arg #7 is expected to be a l_int32 (y).
  * Arg #8 is expected to be a string (debugfile).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This applies the disparity arrays in one of two mapping directions
  *          to the specified boxa.  It can be used in the backward direction
  *          to locate a box in the original coordinates that would have
@@ -200,7 +200,7 @@ ApplyDisparityBoxa(lua_State *L)
  * Arg #4 is expected to be a l_int32 (minlines).
  * Arg #5 is expected to be a l_int32 (maxdist).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The sampling, minlines and maxdist parameters will be
  *          applied to all images.
  *      (2) The sampling factor is used for generating the disparity arrays
@@ -244,7 +244,7 @@ Create(lua_State *L)
  * Arg #4 is expected to be a l_int32 (minlines).
  * Arg #5 is expected to be a l_int32 (maxdist).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The returned dewa has disparity arrays calculated and
  *          is ready for serialization or for use in dewarping.
  *      (2) The sampling, minlines and maxdist parameters are
@@ -339,7 +339,7 @@ Info(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dewarpa* (dewa).
  * Arg #2 is expected to be a Dewarp* (dew).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This inserts the dewarp into the array, which now owns it.
  *          It also keeps track of the largest page number stored.
  *          It must be done before the disparity model is built.
@@ -368,7 +368,7 @@ InsertDewarp(lua_State *L)
  * Arg #2 is expected to be a boolean (notests).
  * Arg #3 is expected to be a boolean (debug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This destroys all dewarp models that are invalid, and then
  *          inserts reference models where possible.
  *      (2) If %notests == 1, this ignores the curvature constraints
@@ -415,7 +415,7 @@ InsertRefModels(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dewarpa* (dewa).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This generates two numas, stored in the dewarpa, that give:
  *          (a) the page number for each dew that has a page model.
  *          (b) the page number for each dew that has either a page
@@ -441,7 +441,7 @@ ListPages(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dewarpa* (dewa).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) A page without a model has no dew.  It most likely failed to
  *          generate a vertical model, and has not been assigned a ref
  *          model from a neighboring page with a valid vertical model.
@@ -493,7 +493,7 @@ ModelStats(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dewarpa* (dewa).
  * Arg #2 is expected to be a l_int32 (pageno).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This tests if a model has been built, not if it is valid.
  * </pre>
  * \param L pointer to the lua_State
@@ -557,7 +557,7 @@ ReadMem(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a luaL_Stream* (%stream).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The serialized dewarp contains a Numa that gives the
  *          (increasing) page number of the dewarp structs that are
  *          contained.
@@ -580,7 +580,7 @@ ReadStream(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dewarpa* (dewa).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This puts all real models (and only real models) in the
  *          primary dewarpa array.  First remove all dewarps that are
  *          only references to other page models.  Then move all models
@@ -605,7 +605,7 @@ RestoreModels(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dewarpa* (dewa).
  * Arg #2 is expected to be a boolean (check_columns).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This sets the 'check_columns" field.  If set, and if
  *          'useboth' is set, this will count the number of text
  *          columns.  If the number is larger than 1, this will
@@ -614,10 +614,10 @@ RestoreModels(lua_State *L)
  *          if 0 (FALSE).
  *      (2) This field is set to 0 by default.  For horizontal disparity
  *          correction to take place on a single column of text, you must have:
- *           (a) a valid horizontal disparity array
- *           (b) useboth = 1 (TRUE)
+ *           - a valid horizontal disparity array
+ *           - useboth = 1 (TRUE)
  *          If there are multiple columns, additionally
- *           (c) check_columns = 0 (FALSE)
+ *           - check_columns = 0 (FALSE)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -642,7 +642,7 @@ SetCheckColumns(lua_State *L)
  * Arg #6 is expected to be a l_int32 (max_diff_edgecurv).
  * Arg #7 is expected to be a l_int32 (max_edgeslope).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Approximating the line by a quadratic, the coefficent
  *          of the quadratic term is the curvature, and distance
  *          units are in pixels (of course).  The curvature is very
@@ -696,7 +696,7 @@ SetCurvatures(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dewarpa* (dewa).
  * Arg #2 is expected to be a l_int32 (maxdist).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This sets the maxdist field.
  * </pre>
  * \param L pointer to the lua_State
@@ -718,7 +718,7 @@ SetMaxDistance(lua_State *L)
  * Arg #2 is expected to be a boolean (notests).
  * Arg #3 is expected to be a boolean (debug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) A valid model must meet the rendering requirements, which
  *          include whether or not a vertical disparity model exists
  *          and conditions on curvatures for vertical and horizontal
@@ -752,7 +752,7 @@ SetValidModels(lua_State *L)
  * Arg #3 is expected to be a l_int32 (first).
  * Arg #4 is expected to be a l_int32 (last).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Generates a pdf of contour plots of the disparity arrays.
  *      (2) This only shows actual models; not ref models
  * </pre>
@@ -775,7 +775,7 @@ ShowArrays(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dewarpa* (dewa).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This examines each dew in a dewarpa, and removes
  *          all that don't have their own page model (i.e., all
  *          that have "references" to nearby pages with valid models).
@@ -798,7 +798,7 @@ StripRefModels(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dewarpa* (dewa).
  * Arg #2 is expected to be a l_int32 (useboth).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This sets the useboth field.  If set, this will attempt
  *          to apply both vertical and horizontal disparity arrays.
  *          Note that a model with only a vertical disparity array will
@@ -839,7 +839,7 @@ Write(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dewarpa* (dewa).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Serializes a dewarpa in memory and puts the result in a buffer.
  * </pre>
  * \param L pointer to the lua_State

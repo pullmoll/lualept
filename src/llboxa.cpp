@@ -45,7 +45,7 @@
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa*.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Decrements the ref count and, if 0, destroys the boxa.
  *      (2) Always nulls the input ptr.
  * </pre>
@@ -170,7 +170,7 @@ AdjustHeightToTarget(lua_State *L)
  * Arg #4 is expected to be a l_int32 (deltop).
  * Arg #5 is expected to be a l_int32 (delbot).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) New box dimensions are cropped at left and top to x >= 0 and y >= 0.
  *      (2) If the width or height of a box goes to 0, we generate a box with
  *          w == 1 and h == 1, as a placeholder.
@@ -201,7 +201,7 @@ AdjustSides(lua_State *L)
  * Arg #3 is expected to be a l_int32 (target).
  * Arg #4 is expected to be a l_int32 (thresh).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Conditionally adjusts the width of each box, by moving
  *          the indicated edges (left and/or right) if the width differs
  *          by %thresh or more from %target.
@@ -270,7 +270,7 @@ AffineTransform(lua_State *L)
  * Arg #2 is expected to be a string defining the sort type (type).
  * Arg #3 is expected to be a string defining the sort order (order).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For a large number of boxes (say, greater than 1000), this
  *          O(n) binsort is much faster than the O(nlogn) shellsort.
  *          For 5000 components, this is over 20x faster than boxaSort().
@@ -297,7 +297,7 @@ BinSort(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This destroys all boxes in the boxa, setting the ptrs
  *          to null.  The number of allocated boxes, n, is set to 0.
  * </pre>
@@ -318,7 +318,7 @@ Clear(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a Box* (box).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) All boxes in boxa not intersecting with box are removed, and
  *          the remaining boxes are clipped to box.
  * </pre>
@@ -340,7 +340,7 @@ ClipToBox(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is an optional Pixa* (pixadb).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If there are no overlapping boxes, it simply returns a copy
  *          of %boxas.
  *      (2) Input an empty %pixadb, using pixaCreate(0), for debug output.
@@ -377,7 +377,7 @@ CombineOverlaps(lua_State *L)
  * Arg #2 is expected to be a another Boxa* (boxa2).
  * Arg #3 is an optional Pixa* (pixadb).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) One of three things happens to each box in %boxa1 and %boxa2:
  *           * it gets absorbed into a larger box that it overlaps with
  *           * it absorbs a smaller (by area) box that it overlaps with
@@ -416,7 +416,7 @@ CombineOverlapsInPair(lua_State *L)
  * Arg #3 is expected to be a l_int32 (areathresh).
  * Arg #3 is an optional Pix* (pixdb).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This takes 2 boxa, removes all boxes smaller than a given area,
  *          and compares the remaining boxes between the boxa.
  *      (2) The area threshold is introduced to help remove noise from
@@ -465,7 +465,7 @@ CompareRegions(lua_State *L)
  * Arg #4 is expected to be a l_int32 (height).
  * Arg #5 is expected to be a string describing the adjust sides (heightflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Forces either width or height (or both) of every box in
  *          the boxa to a specified size, by moving the indicated sides.
  *      (2) Not all input boxes need to be valid.  Median values will be
@@ -499,7 +499,7 @@ ConstrainSize(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a Box* (box).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) All boxes in boxa that are entirely outside box are removed.
  * </pre>
  * \param L pointer to the lua_State
@@ -564,7 +564,7 @@ ContainedInBoxa(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_int32 (ncorners).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If ncorners == 2, we select the UL and LR corners.
  *          Otherwise we save all 4 corners in this order: UL, UR, LL, LR.
  * </pre>
@@ -587,7 +587,7 @@ ConvertToPta(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa*.
  * Arg #2 is an optional string defining the storage flags (copyflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pix.h for description of the copyflag.
  *      (2) The copy-clone makes a new boxa that holds clones of each box.
  * </pre>
@@ -628,7 +628,7 @@ Create(lua_State *L)
  * Arg #2 is expected to be a l_int32 (num).
  * Arg #3 is an optional string defining the storage flags (copyflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This puts %num boxes from the input %boxa into each of a
  *          set of boxa within an output baa.
  *      (2) This assumes that the boxes in %boxa are in sets of %num each.
@@ -652,7 +652,7 @@ EncapsulateAligned(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa*.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Reallocs with doubled size of ptr array.
  * </pre>
  * \param L pointer to the lua_State
@@ -672,7 +672,7 @@ ExtendArray(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa*.
  * Arg #2 is expected to be a l_int32 (n).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If necessary, reallocs new boxa ptr array to %size.
  * </pre>
  * \param L pointer to the lua_State
@@ -693,7 +693,7 @@ ExtendArrayToSize(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a boolean (keepinvalid).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If you are counting or sorting values, such as determining
  *          rank order, you must remove invalid boxes.
  *      (2) If you are parametrizing the values, or doing an evaluation
@@ -729,7 +729,7 @@ ExtractAsNuma(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is an optional boolean (keepinvalid).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For most applications, such as counting, sorting, fitting
  *          to some parametrized form, plotting or filtering in general,
  *          you should remove the invalid boxes.  Each pta saves the
@@ -767,7 +767,7 @@ ExtractAsPta(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a Numa* (na).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The input is expected to come from pixGetWordBoxesInTextlines().
  *      (2) Each numa in the output consists of an average y coordinate
  *          of the first box in the textline, followed by pairs of
@@ -794,7 +794,7 @@ ExtractSortedPattern(lua_State *L)
  * Arg #2 is expected to be a string describing the use flag (useflag).
  * Arg #3 is an optional boolean (debug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This simple function replaces invalid boxes with a copy of
  *          the nearest valid box, selected from either the entire
  *          sequence (L_USE_ALL_BOXES) or from the boxes with the
@@ -840,9 +840,9 @@ FindInvalidBoxes(lua_State *L)
  * Arg #2 is expected to be a l_int32 (x).
  * Arg #3 is expected to be a l_int32 (y).
  *
- * Note:
- * x < 0 && y >= 0 horizontal line at y.
- * x >= 0 && y < 0 vertical line at x.
+ * Leptonica's Notes:
+ *      (1) See boxaGetNearestByDirection() for usage of %dist_select
+ *          and %range.
  * </pre>
  * \param L pointer to the lua_State
  * \return 2 Numaa* on the Lua stack
@@ -866,7 +866,7 @@ FindNearestBoxes(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Measures the total area of the boxes, without regard to overlaps.
  * </pre>
  * \param L pointer to the lua_State
@@ -960,7 +960,7 @@ GetBoxGeometry(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hc)
  * Arg #4 is an optional boolean (exactflag)
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The boxes in boxa are clipped to the input rectangle.
  *      (2) * When %exactflag == 1, we generate a 1 bpp pix of size
  *            wc x hc, paint all the boxes black, and count the fg pixels.
@@ -993,7 +993,7 @@ GetCoverage(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The returned w and h are the minimum size image
  *          that would contain all boxes untranslated.
  *      (2) If there are no valid boxes, returned w and h are 0 and
@@ -1025,7 +1025,7 @@ GetExtent(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See boxaGetRankVals()
  * </pre>
  * \param L pointer to the lua_State
@@ -1058,7 +1058,7 @@ GetMedianVals(lua_State *L)
  * Arg #4 is expected to be a string describing the value flag (dist_select).
  * Arg #5 is expected to be a l_int32 (range).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For efficiency, use a LR/TD sorted %boxa, which can be
  *          made by flattening a 2D sorted boxaa.  In that case,
  *          %range can be some positive integer like 50.
@@ -1095,9 +1095,12 @@ GetNearestByDirection(lua_State *L)
  * Arg #2 is expected to be a l_int32 (x).
  * Arg #3 is expected to be a l_int32 (y).
  *
- * Note:
- * x < 0 && y >= 0 horizontal line at y.
- * x >= 0 && y < 0 vertical line at x.
+ * Leptonica's Notes:
+ *      (1) For a horizontal line at some value y, get the minimum of the
+ *          distance |yc - y| from the box centroid yc value to y;
+ *          likewise minimize |xc - x| for a vertical line at x.
+ *      (2) Input y < 0, x >= 0 to indicate a vertical line at x, and
+ *          x < 0, y >= 0 for a horizontal line at y.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* on the Lua stack
@@ -1120,7 +1123,7 @@ GetNearestToLine(lua_State *L)
  * Arg #2 is expected to be a l_int32 (x).
  * Arg #3 is expected to be a l_int32 (y).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Uses euclidean distance between centroid and point.
  * </pre>
  * \param L pointer to the lua_State
@@ -1143,7 +1146,7 @@ GetNearestToPt(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_float32 (fract).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This function does not assume that all boxes in the boxa are valid
  *      (2) The four box parameters are sorted independently.
  *          For rank order, the width and height are sorted in increasing
@@ -1205,7 +1208,7 @@ GetSizes(lua_State *L)
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is an optional string defining the storage flags (copy, clone)..
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This returns NULL for an invalid box in a boxa.
  *          For a box to be valid, both the width and height must be > 0.
  *      (2) We allow invalid boxes, with w = 0 or h = 0, as placeholders
@@ -1256,7 +1259,7 @@ GetValidCount(lua_State *L)
  * Arg #7 is expected to be a l_float32 (fract)
  * Arg #8 is expected to be a l_int32 (maxpops)
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This uses the elegant Breuel algorithm, found in "Two
  *          Geometric Algorithms for Layout Analysis", 2002,
  *          url: "citeseer.ist.psu.edu/breuel02two.html".
@@ -1319,23 +1322,25 @@ GetValidCount(lua_State *L)
  *          large b.b. before starting the computation.  For example,
  *          if 'box' is an input image region containing 'boxa' b.b. of c.c.:
  *
- *          // Faster pivot choosing
- *          boxa:PermuteRandom();
+ *                   // Faster pivot choosing
+ *               boxaPermuteRandom(boxa, boxa);
  *
- *          // Remove anything either large width or height
- *          boxat = boxa:SelectBySize(maxwidth, maxheight, 'both', '<', nil)
+ *                   // Remove anything either large width or height
+ *               boxat = boxaSelectBySize(boxa, maxwidth, maxheight,
+ *                                        L_SELECT_IF_BOTH, L_SELECT_IF_LT,
+ *                                        NULL);
  *
- *          boxad = boxat:GetWhiteblocks(box, type, maxboxes,
- *                                 maxoverlap, maxperim, fract,
- *                                 maxpops);
+ *               boxad = boxaGetWhiteblocks(boxat, box, type, maxboxes,
+ *                                          maxoverlap, maxperim, fract,
+ *                                          maxpops);
  *
  *          The result will be rectangular regions of "white space" that
  *          extend into (and often through) the excluded components.
  *     (11) As a simple example, suppose you wish to find the columns on a page.
  *          First exclude large c.c. that may block the columns, and then call:
  *
- *          boxad = boxa:GetWhiteblocks(box, 'height',
- *                             20, 0.15, 200, 0.2, 2000);
+ *               boxad = boxaGetWhiteblocks(boxa, box, L_SORT_BY_HEIGHT,
+ *                                          20, 0.15, 200, 0.2, 2000);
  *
  *          to get the 20 tallest boxes with no more than 0.15 overlap
  *          between a box and any of the taller ones, and avoiding the
@@ -1371,7 +1376,7 @@ GetWhiteblocks(lua_State *L)
  * Arg #5 is expected to be a l_float32 (max_ratio).
  * Arg #6 is an optional Numa* (namap).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For all n(n-1)/2 box pairings, if two boxes overlap, either:
  *          (a) op == L_COMBINE: get the bounding region for the two,
  *              replace the larger with the bounding region, and remove
@@ -1413,7 +1418,7 @@ HandleOverlaps(lua_State *L)
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a Box* (boxs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This shifts box[i] --> box[i + 1] for all i >= index,
  *          and then inserts box as box[index].
  *      (2) To insert at the beginning of the array, set index = 0.
@@ -1441,7 +1446,7 @@ InsertBox(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a Box* (box).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) All boxes in boxa that intersect with box (i.e., are completely
  *          or partially contained in box) are retained.
  * </pre>
@@ -1505,7 +1510,7 @@ IsFull(lua_State *L)
  * Arg #3 is an optional l_int32 (istart).
  * Arg #4 is an optional l_int32 (iend).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This appends a clone of each indicated box in boxas to boxad
  *      (2) istart < 0 is taken to mean 'read from the start' (istart = 0)
  *      (3) iend < 0 means 'read to the end'
@@ -1532,7 +1537,7 @@ Join(lua_State *L)
  * Arg #2 is expected to be a l_int32 (factor).
  * Arg #3 is an optional boolean (debug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This finds a set of boxes (boxad) where each edge of each box is
  *          a linear least square fit (LSF) to the edges of the
  *          input set of boxes (boxas).  Before fitting, outliers in
@@ -1602,7 +1607,7 @@ LocationRange(lua_State *L)
  * Arg #4 is expected to be a string describing the type (type).
  * Arg #5 is expected to be a string describing the relation (relation).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The args specify constraints on the size of the
  *          components that are kept.
  *      (2) If the selection type is L_SELECT_WIDTH, the input
@@ -1636,7 +1641,7 @@ MakeSizeIndicator(lua_State *L)
  * Arg #2 is expected to be a l_float32 (ratio).
  * Arg #3 is expected to be a string describing the relation (relation).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) To keep narrow components, use relation = L_SELECT_IF_LT or
  *          L_SELECT_IF_LTE.
  *          To keep wide components, use relation = L_SELECT_IF_GT or
@@ -1664,7 +1669,7 @@ MakeWHRatioIndicator(lua_State *L)
  * Arg #2 is expected to be a Boxa* (boxao).
  * Arg #3 is optional and, if gived, expected to be a l_int32 (fillflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is essentially the inverse of boxaSplitEvenOdd().
  *          Typically, boxae and boxao were generated by boxaSplitEvenOdd(),
  *          and the value of %fillflag needs to be the same in both calls.
@@ -1694,7 +1699,7 @@ MergeEvenOdd(lua_State *L)
  * Arg #4 is expected to be a l_int32 (maxdiff).
  * Arg #5 is expected to be a l_int32 (extrapixels).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This takes two input boxa (boxas, boxam) and constructs boxad,
  *          where each box in boxad is generated from the corresponding
  *          boxes in boxas and boxam.  The rule for constructing each
@@ -1770,7 +1775,7 @@ ModifyWithBoxa(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does a pseudorandom in-place permutation of the boxes.
  *      (2) The result is guaranteed not to have any boxes in their
  *          original position, but it is not very random.  If you
@@ -1793,7 +1798,7 @@ PermutePseudorandom(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If boxad is null, make a copy of boxas and permute the copy.
  *          Otherwise, boxad must be equal to boxas, and the operation
  *          is done in-place.
@@ -1823,7 +1828,7 @@ PermuteRandom(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a l_int32 (maxoverlap).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This selectively removes smaller boxes when they are overlapped
  *          by any larger box by more than the input 'maxoverlap' fraction.
  *      (2) To avoid all pruning, use maxoverlap = 1.0.  To select only
@@ -1906,7 +1911,7 @@ ReadStream(lua_State *L)
  * Arg #5 is expected to be a l_float32 (factor).
  * Arg #6 is expected to be a l_int32 (start).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The basic idea is to reconcile differences in box height
  *          in the even and odd boxes, by moving the top and/or bottom
  *          edges in the even and odd boxes.  Choose the edge or edges
@@ -1962,7 +1967,7 @@ ReconcileEvenOddHeight(lua_State *L)
  * Arg #4 is expected to be a l_float32 (factor).
  * Arg #5 is expected to be a Numa* (na).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This reconciles differences in the width of adjacent boxes,
  *          by moving one side of one of the boxes in each pair.
  *          If the widths in the pair differ by more than some
@@ -2000,7 +2005,7 @@ ReconcilePairWidth(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_int32 (idx).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This removes box[index] and then shifts
  *          box[i] --> box[i - 1] for all i > index.
  *      (2) It should not be used repeatedly to remove boxes from
@@ -2025,7 +2030,7 @@ RemoveBox(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_int32 (idx).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This removes box[index] and then shifts
  *          box[i] --> box[i - 1] for all i > index.
  *      (2) It should not be used repeatedly to remove boxes from
@@ -2053,7 +2058,7 @@ RemoveBoxAndSave(lua_State *L)
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a Box*.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) In-place replacement of one box.
  *      (2) The previous box at that location, if any, is destroyed.
  * </pre>
@@ -2098,7 +2103,7 @@ Rotate(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See boxRotateOrth() for details.
  * </pre>
  * \param L pointer to the lua_State
@@ -2123,7 +2128,7 @@ RotateOrth(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is an optional string defining the storage flags (copy, clone).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This makes a copy/clone of each valid box.
  * </pre>
  * \param L pointer to the lua_State
@@ -2169,7 +2174,7 @@ Scale(lua_State *L)
  * Arg #4 is expected to be a string describing the type (type).
  * Arg #5 is expected to be a string describing the relation (relation).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The args specify constraints on the size of the
  *          components that are kept.
  *      (2) Uses box copies in the new boxa.
@@ -2206,7 +2211,7 @@ SelectBySize(lua_State *L)
  * Arg #2 is expected to be a l_float32 (ratio).
  * Arg #3 is expected to be a string describing the relation (relation).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Uses box copies in the new boxa.
  *      (2) To keep narrow components, use relation = L_SELECT_IF_LT or
  *          L_SELECT_IF_LTE.
@@ -2237,7 +2242,7 @@ SelectByWHRatio(lua_State *L)
  * Arg #2 is expected to be a l_float32 (areaslop).
  * Arg #3 is expected to be a l_int32 (yslop).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See usage notes in pixSelectLargeULComp().
  * </pre>
  * \param L pointer to the lua_State
@@ -2262,7 +2267,7 @@ SelectLargeULBox(lua_State *L)
  * Arg #3 is expected to be a l_int32 (last).
  * Arg #4 is an optional string defining the storage flags (copyflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The copyflag specifies what we do with each box from boxas.
  *          Specifically, L_CLONE inserts a clone into boxad of each
  *          selected box from boxas.
@@ -2288,7 +2293,7 @@ SelectRange(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a Numa* (na)
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Returns a copy of the boxa if no components are removed.
  *      (2) Uses box copies in the new boxa.
  *      (3) The indicator numa has values 0 (ignore) and 1 (accept).
@@ -2317,7 +2322,7 @@ SelectWithIndicator(lua_State *L)
  * Arg #3 is expected to be a l_int32 (val).
  * Arg #4 is expected to be a l_int32 (thresh).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Sets the given side of each box.  Use boxad == NULL for a new
  *          boxa, and boxad == boxas for in-place.
  *      (2) Use one of these:
@@ -2350,7 +2355,7 @@ SetSide(lua_State *L)
  * Arg #5 is expected to be a l_int32 (topdiff).
  * Arg #6 is expected to be a l_int32 (botdiff).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See boxSimilar() for parameter usage.
  *      (2) Corresponding boxes are taken in order in the two boxa.
  *      (3) %nasim is an indicator array with a (0/1) for each box pair.
@@ -2411,7 +2416,7 @@ SizeRange(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a string describing the select size (type).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This gives several measures of the smoothness of either the
  *          width or height of a sequence of boxes.
  *      (2) Statistics can be found separately for even and odd boxes.
@@ -2452,7 +2457,7 @@ SizeVariation(lua_State *L)
  * Arg #5 is expected to be a l_int32 (extrapixels).
  * Arg #5 is an optional boolean (debug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This returns a modified version of %boxas by constructing
  *          for each input box a box that has been linear least square fit
  *          (LSF) to the entire set.  The linear fitting is done to each of
@@ -2492,7 +2497,7 @@ SmoothSequenceLS(lua_State *L)
  * Arg #5 is expected to be a l_int32 (extrapixels).
  * Arg #5 is an optional boolean (debug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The target width of the sliding window is 2 * %halfwin + 1.
  *          If necessary, this will be reduced by boxaWindowedMedian().
  *      (2) This returns a modified version of %boxas by constructing
@@ -2538,7 +2543,7 @@ SmoothSequenceMedian(lua_State *L)
  * Arg #2 is expected to be a string defining the sort type (type).
  * Arg #3 is expected to be a string defining the sort order (order).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) An empty boxa returns a copy, with a warning.
  * </pre>
  * \param L pointer to the lua_State
@@ -2564,7 +2569,7 @@ Sort(lua_State *L)
  * Arg #3 is expected to be a l_int32 (delta2).
  * Arg #4 is expected to be a l_int32 (minh1).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The final result is a sort where the 'fast scan' direction is
  *          left to right, and the 'slow scan' direction is from top
  *          to bottom.  Each boxa in the baa represents a sorted set
@@ -2656,7 +2661,7 @@ SortByIndex(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is optional and, if gived, expected to be a l_int32 (fillflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If %fillflag == 1, boxae has copies of the even boxes
  *          in their original location, and nvalid boxes are placed
  *          in the odd array locations.  And v.v.
@@ -2726,7 +2731,7 @@ Translate(lua_State *L)
  * Arg #2 is expected to be a l_int32 (halfwin).
  * Arg #3 is an optional boolean (debug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This finds a set of boxes (boxad) where each edge of each box is
  *          a windowed median smoothed value to the edges of the
  *          input set of boxes (boxas).
@@ -2771,7 +2776,7 @@ Write(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Serializes a boxa in memory and puts the result in a buffer.
  * </pre>
  * \param L pointer to the lua_State

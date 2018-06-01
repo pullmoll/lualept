@@ -44,6 +44,13 @@
  * \brief Destroy a DoubleLinkedList*.
  * <pre>
  * Arg #1 is expected to be a DoubleLinkedList* (head)
+ *
+ * Leptonica's Notes:
+ *      (1) This only destroys the cons cells.  Before destroying
+ *          the list, it is necessary to remove all data and set the
+ *          data pointers in each cons cell to NULL.
+ *      (2) listDestroy() will give a warning message for each data
+ *          ptr that is not NULL.
  * </pre>
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack
@@ -76,22 +83,6 @@ GetCount(lua_State *L)
     DoubleLinkedList *head = ll_check_DoubleLinkedList(_fun, L, 1);
     ll_push_l_int32(_fun, L, listGetCount(head));
     return 1;
-}
-
-/**
- * \brief Create a new DoubleLinkedList*.
- * <pre>
- * Arg #1 is expected to be a string describing the key type (int,uint,float).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 DoubleLinkedList* on the Lua stack
- */
-static int
-Create(lua_State *L)
-{
-    LL_FUNC("Create");
-    DoubleLinkedList *head = ll_calloc<DoubleLinkedList>(_fun, L, 1);
-    return ll_push_DoubleLinkedList(_fun, L, head);
 }
 
 /**
@@ -131,6 +122,12 @@ toString(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DoubleLinkedList* (head).
  * Arg #2 is expected to be a pointer (data).
+ *
+ * Leptonica's Notes:
+ *      (1) This makes a new cell, attaches the data, and adds the
+ *          cell to the head of the list.
+ *      (2) When consing from NULL, be sure to initialize head to NULL
+ *          before calling this function.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -149,6 +146,19 @@ AddToHead(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DoubleLinkedList* (head).
  * Arg #2 is expected to be a pointer (data).
+ *
+ * Leptonica's Notes:
+ *      (1) This makes a new cell, attaches the data, and adds the
+ *          cell to the tail of the list.
+ *      (2) &head is input to allow the list to be "cons'd" up from NULL.
+ *      (3) &tail is input to allow the tail to be updated
+ *          for efficient sequential operation with this function.
+ *      (4) We assume that if *phead and/or *ptail are not NULL,
+ *          then they are valid addresses.  Therefore:
+ *           (a) when consing from NULL, be sure to initialize both
+ *               head and tail to NULL.
+ *           (b) when tail == NULL for an existing list, the tail
+ *               will be found and updated.
  * </pre>
  * \param L pointer to the lua_State
  * \return 2 for boolean and light userdata (tail) on the Lua stack
@@ -166,10 +176,35 @@ AddToTail(lua_State *L)
 }
 
 /**
+ * \brief Create a new DoubleLinkedList*.
+ * <pre>
+ * Arg #1 is expected to be a string describing the key type (int,uint,float).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 DoubleLinkedList* on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    LL_FUNC("Create");
+    DoubleLinkedList *head = ll_calloc<DoubleLinkedList>(_fun, L, 1);
+    return ll_push_DoubleLinkedList(_fun, L, head);
+}
+
+/**
  * \brief Find the element pointing to %data in an DoubleLinkedList* (%head).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DoubleLinkedList* (head).
  * Arg #2 is expected to be light userdata (data).
+ *
+ * Leptonica's Notes:
+ *      (1) This returns a ptr to the cell, which is still embedded in
+ *          the list.
+ *      (2) This handle and the attached data have not been copied or
+ *          reference counted, so they must not be destroyed.  This
+ *          violates our basic rule that every handle returned from a
+ *          function is owned by that function and must be destroyed,
+ *          but if rules aren't there to be broken, why have them?
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 light userdata (elem) on the Lua stack
@@ -209,6 +244,17 @@ FindTail(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a DoubleLinkedList* (head).
  * Arg #2 is expected to be a DoubleLinkedList* (elem).
  * Arg #3 is expected to be a pointer (data).
+ *
+ * Leptonica's Notes:
+ *      (1) This can be called on a null list, in which case both
+ *          head and elem must be null.  The head is included
+ *          in the call to allow "consing" up from NULL.
+ *      (2) If you are searching through a list, looking for a condition
+ *          to add an element, you can do something like this:
+ *            L_BEGIN_LIST_FORWARD(head, elem)
+ *                <identify an elem to insert after>
+ *                listInsertAfter(&head, elem, data);
+ *            L_END_LIST
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -229,6 +275,17 @@ InsertAfter(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a DoubleLinkedList* (head).
  * Arg #2 is expected to be a DoubleLinkedList* (elem).
  * Arg #3 is expected to be a pointer (data).
+ *
+ * Leptonica's Notes:
+ *      (1) This can be called on a null list, in which case both
+ *          head and elem must be null.
+ *      (2) If you are searching through a list, looking for a condition
+ *          to add an element, you can do something like this:
+ *            L_BEGIN_LIST_FORWARD(head, elem)
+ *                <identify an elem to insert before>
+ *                listInsertBefore(&head, elem, data);
+ *            L_END_LIST
+ *
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -248,6 +305,10 @@ InsertBefore(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DoubleLinkedList* (head).
  * Arg #2 is expected to be a nother DoubleLinkedList* (list).
+ *
+ * Leptonica's Notes:
+ *      (1) The concatenated list is returned with head1 as the new head.
+ *      (2) Both input ptrs must exist, though either can have the value NULL.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 light userdata (data) on the Lua stack
@@ -266,6 +327,12 @@ Join(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DoubleLinkedList* (head).
  * Arg #2 is expected to be a DoubleLinkedList* (elem).
+ *
+ * Leptonica's Notes:
+ *      (1) in ANSI C, it is not necessary to cast return to actual type; e.g.,
+ *             pix = listRemoveElement(&head, elem);
+ *          but in ANSI C++, it is necessary to do the cast:
+ *             pix = (Pix *)listRemoveElement(&head, elem);
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 light userdata (data) on the Lua stack
@@ -285,6 +352,12 @@ RemoveElement(lua_State *L)
  * \brief Remove an element from the head of a DoubleLinkedList* (%head).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DoubleLinkedList* (head).
+ *
+ * Leptonica's Notes:
+ *      (1) in ANSI C, it is not necessary to cast return to actual type; e.g.,
+ *            pix = listRemoveFromHead(&head);
+ *          but in ANSI C++, it is necessary to do the cast; e.g.,
+ *            pix = (Pix *)listRemoveFromHead(&head);
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 light userdata (data) on the Lua stack
@@ -303,6 +376,19 @@ RemoveFromHead(lua_State *L)
  * \brief Remove an element from the tail of a DoubleLinkedList* (%head).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DoubleLinkedList* (head).
+ *
+ * Leptonica's Notes:
+ *      (1) We include &head so that it can be set to NULL if
+ *          if the only element in the list is removed.
+ *      (2) The function is relying on the fact that if tail is
+ *          not NULL, then is is a valid address.  You can use
+ *          this function with tail == NULL for an existing list, in
+ *          which case  the tail is found and updated, and the
+ *          removed element is returned.
+ *      (3) In ANSI C, it is not necessary to cast return to actual type; e.g.,
+ *            pix = listRemoveFromTail(&head, &tail);
+ *          but in ANSI C++, it is necessary to do the cast; e.g.,
+ *            pix = (Pix *)listRemoveFromTail(&head, &tail);
  * </pre>
  * \param L pointer to the lua_State
  * \return 2 for light userdata (data, tail) on the Lua stack
@@ -323,6 +409,9 @@ RemoveFromTail(lua_State *L)
  * \brief Reverse a DoubleLinkedList* (%head).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DoubleLinkedList* (head).
+ *
+ * Leptonica's Notes:
+ *      (1) This reverses the list in-place.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 light userdata (data) on the Lua stack

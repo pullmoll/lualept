@@ -126,7 +126,7 @@ toString(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a CompData* (cid).
  * Arg #2 is expected to be a string (title).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Caller must not destroy the cid.  It is absorbed in the
  *          lpd and destroyed by this function.
  * </pre>
@@ -203,7 +203,7 @@ CreateForPdf(lua_State *L)
  * Arg #1 is expected to be a string (fname).
  * Arg #2 is expected to be a l_int32 (ascii85flag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The input image is converted to one of these 4 types:
  *           ~ 1 bpp
  *           ~ 8 bpp, no colormap
@@ -232,7 +232,7 @@ FlateData(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a string (fname).
  * Arg #2 is expected to be a Pix* (pixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If you hand this a png file, you are going to get
  *          png predictors embedded in the flate data. So it has
  *          come to this. http://xkcd.com/1022/
@@ -260,7 +260,7 @@ FlateDataPdf(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a string (fname).
  * Arg #2 is expected to be a l_int32 (ascii85flag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Set ascii85flag:
  *           ~ 0 for binary data (not permitted in PostScript)
  *           ~ 1 for ascii85 (5 for 4) encoded binary data
@@ -312,7 +312,7 @@ Generate(lua_State *L)
  * Arg #3 is expected to be a l_int32 (quality).
  * Arg #4 is expected to be a l_int32 (ascii85).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Set ascii85:
  *           ~ 0 for binary data (not permitted in PostScript)
  *           ~ 1 for ascii85 (5 for 4) encoded binary data
@@ -440,7 +440,7 @@ GenerateJpegPS(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a string (fname).
  * Arg #2 is expected to be a l_int32 (ascii85flag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Set ascii85flag:
  *           ~ 0 for binary data (not permitted in PostScript)
  *           ~ 1 for ascii85 (5 for 4) encoded binary data
@@ -467,7 +467,7 @@ JpegData(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a lstring (str).
  * Arg #2 is expected to be a boolean (ascii85flag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See l_generateJpegData().
  * </pre>
  * \param L pointer to the lua_State

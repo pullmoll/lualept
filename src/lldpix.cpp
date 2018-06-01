@@ -109,7 +109,7 @@ toString(lua_State* L)
  * Arg #2 is expected to be a l_float64 (addc).
  * Arg #3 is expected to be a l_float64 (multc).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is an in-place operation.
  *      (2) It can be used to multiply each pixel by a constant,
  *          and also to add a constant to each pixel.  Multiplication
@@ -151,7 +151,7 @@ ChangeRefcount(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DPix* (dpixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixClone() for definition and usage.
  * </pre>
  * \param L pointer to the lua_State
@@ -191,7 +191,7 @@ ConvertToFPix(lua_State *L)
  * Arg #3 is expected to be a l_int32 (negvals).
  * Arg #4 is expected to be a l_int32 (errorflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Use %outdepth = 0 to programmatically determine the
  *          output depth.  If no values are greater than 255,
  *          it will set outdepth = 8; otherwise to 16 or 32.
@@ -224,7 +224,7 @@ ConvertToPix(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a DPix* (dpixd).
  * Arg #2 is expected to be a DPix* (dpixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) There are three cases:
  *            (a) dpixd == null  (makes a new dpix; refcount = 1)
  *            (b) dpixd == dpixs  (no-op)
@@ -281,7 +281,7 @@ CopyResolution(lua_State *L)
  * Arg #1 is expected to be a l_int32 (width).
  * Arg #2 is expected to be a l_int32 (height).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Makes a DPix of specified size, with the data array
  *          allocated and initialized to 0.
  *      (2) The number of pixels must be less than 2^28.
@@ -304,7 +304,7 @@ Create(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DPix* (dpixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Makes a DPix of the same size as the input DPix, with the
  *          data array allocated and initialized to 0.
  *      (2) Copies the resolution.
@@ -327,7 +327,7 @@ CreateTemplate(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a DPix* (dpixd).
  * Arg #2 is expected to be a DPix* (dpixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) On big-endian hardware, this does byte-swapping on each of
  *          the 4-byte words in the dpix data.  On little-endians,
  *          the data is unchanged.  This is used for serialization
@@ -527,7 +527,7 @@ GetWpl(lua_State *L)
  * Arg #4 is expected to be a l_float32 (a).
  * Arg #5 is expected to be a l_float32 (b).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Computes pixelwise linear combination: a * src1 + b * src2
  *      (2) Alignment is to UL corner.
  *      (3) There are 3 cases.  The result can go to a new dest,
@@ -631,7 +631,7 @@ ResizeImageData(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a DPix* (dpixs).
  * Arg #2 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The width wd of dpixd is related to ws of dpixs by:
  *              wd = factor * (ws - 1) + 1   (and ditto for the height)
  *          We avoid special-casing boundary pixels in the interpolation
@@ -804,7 +804,7 @@ Write(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DPix* (dpix).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Serializes a dpix in memory and puts the result in a buffer.
  * </pre>
  * \param L pointer to the lua_State

@@ -45,7 +45,7 @@
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa*.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Decrements the ref count and, if 0, destroys the pixa.
  *      (2) Always nulls the input ptr.
  * </pre>
@@ -106,7 +106,7 @@ AddPix(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This destroys all pix in the pixa, as well as
  *          all boxes in the boxa.  The ptrs in the pix ptr array
  *          are all null'd.  The number of allocated pix, n, is set to 0.
@@ -146,7 +146,7 @@ Copy(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a l_int32 (n).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This creates an empty boxa.
  * </pre>
  * \param L pointer to the lua_State
@@ -169,7 +169,7 @@ Create(lua_State *L)
  * Arg #3 is expected to be a l_int32 (cellw).
  * Arg #4 is expected to be a l_int32 (cellh).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For bpp = 1, we truncate each retrieved pix to the ON
  *          pixels, which we assume for now start at (0,0)
  * </pre>
@@ -194,7 +194,7 @@ CreateFromPix(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a PixaComp* (pixac).
  * Arg #2 is expected to be a l_int32 (accesstype).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Because the pixa has no notion of offset, the offset must
  *          be set to 0 before the conversion, so that pixacompGetPix()
  *          fetches all the pixcomps.  It is reset at the end.
@@ -217,7 +217,7 @@ CreateFromPixacomp(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Each pixel in the returned pix represents an average
  *          (or median, or mode) over the corresponding pixels in each
  *          pix in the pixa.
@@ -275,7 +275,7 @@ GetBoxGeometry(lua_State *L)
  * Arg #3 is expected to be a Pix* (%pixs).
  * Arg #4 is an optional Box* (%boxs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This shifts pixa[i] --> pixa[i + 1] for all i >= index,
  *          and then inserts at pixa[index].
  *      (2) To insert at the beginning of the array, set index = 0.
@@ -307,7 +307,7 @@ InsertPix(lua_State *L)
  * Arg #2 is expected to be another Pixa* (pixa2).
  * Arg #3 is an optional string defining the storage flags (copy, clone, copy_clone).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) %copyflag determines if the pix are copied or cloned.
  *          The boxes, if they exist, are copied.
  *      (2) If the two pixa have different sizes, a warning is issued,
@@ -333,7 +333,7 @@ Interleave(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pixa* (pixad).
  * Arg #2 is expected to be another Pixa* (pixas).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This appends a clone of each indicated pix in pixas to pixad
  *      (2) istart < 0 is taken to mean 'read from the start' (istart = 0)
  *      (3) iend < 0 means 'read to the end'
@@ -358,7 +358,7 @@ Join(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string containing the filename.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The pix are stored in the file as png.
  *          If the png library is not linked, this will fail.
  * </pre>
@@ -380,7 +380,7 @@ Read(lua_State *L)
  * Arg #1 is expected to be a string containing the directory (dirname).
  * Arg #2 is expected to be a string (substr).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) %dirname is the full path for the directory.
  *      (2) %substr is the part of the file name (excluding
  *          the directory) that is to be matched.  All matching
@@ -423,7 +423,7 @@ ReadMem(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a luaL_Stream* (stream).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The pix are stored in the file as png.
  *          If the png library is not linked, this will fail.
  * </pre>
@@ -445,7 +445,7 @@ ReadStream(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
  * Arg #2 is expected to be a l_int32 (idx).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This shifts pixa[i] --> pixa[i - 1] for all i > index.
  *      (2) It should not be used repeatedly on large arrays,
  *          because the function is O(n).
@@ -469,7 +469,7 @@ RemovePix(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pixa*.
  * Arg #2 is expected to be a l_int32 (%idx).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This shifts pixa[i] --> pixa[i - 1] for all i > index.
  *      (2) It should not be used repeatedly on large arrays,
  *          because the function is O(n).
@@ -500,7 +500,7 @@ RemovePixAndSave(lua_State *L)
  * Arg #3 is expected to be a Pix* (pixs).
  * Arg #4 is an optional Box* (boxs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) In-place replacement of one pix.
  *      (2) The previous pix at that location is destroyed.
  * </pre>
@@ -547,7 +547,7 @@ TemplatesFromComposites(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pixa* user data.
  * Arg #2 is expected to be string containing the filename.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The pix are stored in the file as png.
  *          If the png library is not linked, this will fail.
  * </pre>
@@ -568,7 +568,7 @@ Write(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa* user data.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Serializes a pixa in memory and puts the result in a buffer.
  * </pre>
  * \param L pointer to the lua_State
@@ -594,7 +594,7 @@ WriteMem(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pixa* user data.
  * Arg #2 is expected to be a luaL_Stream* (stream).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The pix are stored in the file as png.
  *          If the png library is not linked, this will fail.
  * </pre>
@@ -617,7 +617,7 @@ WriteStream(lua_State *L)
  * Arg #2 is expected to be a l_int32 (w).
  * Arg #3 is expected to be a l_int32 (h).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This uses the boxes to place each pix in the rendered composite.
  *      (2) Set w = h = 0 to use the b.b. of the components to determine
  *          the size of the returned pix.

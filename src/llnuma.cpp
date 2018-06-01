@@ -45,7 +45,7 @@
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numa* (na).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Decrements the ref count and, if 0, destroys the numa.
  *      (2) Always nulls the input ptr.
  * </pre>
@@ -178,7 +178,7 @@ Clone(lua_State *L)
  * Arg #4 is expected to be a l_int32 (size2) for 'float'.
  * Arg #5 is expected to be a boolean (addzeroes) for 'integer'.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For integer conversion, size2 is ignored.
  *          For float conversion, addzeroes is ignored.
  * </pre>
@@ -257,7 +257,7 @@ Create(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numa*.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does not change the allocation of the array.
  *          It just clears the number of stored numbers, so that
  *          the array appears to be empty.
@@ -301,7 +301,7 @@ FromArray(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numa*.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If copyflag == L_COPY, it makes a copy which the caller
  *          is responsible for freeing.  Otherwise, it operates
  *          directly on the bare array of the numa.
@@ -334,7 +334,7 @@ GetFArray(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Numa* (na).
  * Arg #2 is expected to be a l_int32 (idx).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Caller may need to check the function return value to
  *          decide if a 0.0 in the returned ival is valid.
  * </pre>
@@ -359,7 +359,7 @@ GetFValue(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numa*.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) A copy of the array is always made, because we need to
  *          generate an integer array from the bare float array.
  *          The caller is responsible for freeing the array.
@@ -391,7 +391,7 @@ GetIArray(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Numa* (na).
  * Arg #2 is expected to be a l_int32 (idx).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Caller may need to check the function return value to
  *          decide if a 0 in the returned ival is valid.
  * </pre>
@@ -440,7 +440,7 @@ GetParameters(lua_State *L)
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a l_float32 (val).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This shifts na[i] --> na[i + 1] for all i >= index,
  *          and then inserts val as na[index].
  *      (2) It should not be used repeatedly on large arrays,
@@ -518,7 +518,7 @@ ReadStream(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Numa*.
  * Arg #2 is expected to be a l_int32 (idx).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This shifts na[i] --> na[i - 1] for all i > index.
  *      (2) It should not be used repeatedly on large arrays,
  *          because the function is O(n).
@@ -541,7 +541,7 @@ RemoveNumber(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Numa* (na).
  * Arg #2 is expected to be a l_int32 (n).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If newcount <= na->nalloc, this resets na->n.
  *          Using newcount = 0 is equivalent to numaEmpty().
  *      (2) If newcount > na->nalloc, this causes a realloc
@@ -643,7 +643,7 @@ Write(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Numa* user data.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Serializes a numa in memory and puts the result in a buffer.
  * </pre>
  * \param L pointer to the lua_State

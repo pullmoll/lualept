@@ -221,7 +221,7 @@ ReadStream(lua_State *L)
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a Pta* user data.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Any existing pta is destroyed, and the input one
  *          is inserted in its place.
  *      (2) If the index is invalid, return 1 (error)
@@ -244,7 +244,7 @@ ReplacePta(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This identifies the largest index containing a pta that
  *          has any points within it, destroys all pta above that index,
  *          and resets the count.
@@ -267,9 +267,6 @@ Truncate(lua_State *L)
  * Arg #2 is expected to be string containing the filename.
  * Arg #3 is an optional boolean (type)
  *
- * Note:
- *      type = true means the data is written as integers.
- *      type = false means the data is written as floats.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -290,9 +287,8 @@ Write(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
  * Arg #2 is an optional boolean (type)
  *
- * Note:
- *      type = true means the data is written as integers.
- *      type = false means the data is written as floats.
+ * Leptonica's Notes:
+ *      (1) Serializes a ptaa in memory and puts the result in a buffer.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -319,9 +315,6 @@ WriteMem(lua_State *L)
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * Arg #3 is an optional boolean (type)
  *
- * Note:
- *      type = true means the data is written as integers.
- *      type = false means the data is written as floats.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack

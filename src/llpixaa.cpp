@@ -66,7 +66,7 @@ Destroy(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If paa is empty, a returned na will also be empty.
  * </pre>
  * \param L pointer to the lua_State
@@ -90,7 +90,7 @@ GetCount(lua_State *L)
  * Arg #2 is expected to be a Box* user data (box).
  * Arg #3 is optionally a string defining the copyflag.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The box can be used, for example, to hold the support region
  *          of a pixa that is being added to the pixaa.
  * </pre>
@@ -156,7 +156,7 @@ AddPixa(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This destroys all pixa in the pixaa, and nulls the ptrs
  *          in the pixa ptr array.
  * </pre>
@@ -176,7 +176,7 @@ Clear(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a l_int32 (n).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) A pixaa provides a 2-level hierarchy of images.
  *          A common use is for segmentation masks, which are
  *          inexpensive to store in png format.
@@ -210,7 +210,7 @@ Create(lua_State *L)
  * Arg #3 is an optional string (type).
  * Arg #4 is an optional string (copyflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This subdivides a pixa into a set of smaller pixa that
  *          are accumulated into a pixaa.
  *      (2) If type == L_CHOOSE_CONSECUTIVE, the first 'n' pix are
@@ -256,7 +256,7 @@ ExtendArray(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * Arg #2 is optionally a string defining the access flag (copy, clone).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) L_COPY returns a copy; L_CLONE returns a new reference to the boxa.
  *      (2) In both cases, invoke boxaDestroy() on the returned boxa.
  * </pre>
@@ -280,7 +280,7 @@ GetBoxa(lua_State *L)
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is optionally a string defining the access flag (copy, clone).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) L_COPY makes a new pixa with a copy of every pix
  *      (2) L_CLONE just makes a new reference to the pixa,
  *          and bumps the counter.  You would use this, for example,
@@ -312,7 +312,7 @@ GetPixa(lua_State *L)
  * Arg #3 is optional and expected to be a l_int32 (istart).
  * Arg #4 is optional and expected to be a l_int32 (iend).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This appends a clone of each indicated pixa in paas to pixaad
  *      (2) istart < 0 is taken to mean 'read from the start' (istart = 0)
  *      (3) iend < 0 means 'read to the end'
@@ -336,7 +336,7 @@ Join(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string containing the filename.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The pix are stored in the file as png.
  *          If the png library is not linked, this will fail.
  * </pre>
@@ -360,8 +360,14 @@ Read(lua_State *L)
  * Arg #3 is expected to be a l_int32 (first)
  * Arg #4 is expected to be a l_int32 (nfiles)
  *
- * Note:
- * If %substr is ommited, %first and %nfiles are expected as #2 and #3.
+ * Leptonica's Notes:
+ *      (1) The files must be serialized pixa files (e.g., *.pa)
+ *          If some files cannot be read, warnings are issued.
+ *      (2) Use %substr to filter filenames in the directory.  If
+ *          %substr == NULL, this takes all files.
+ *      (3) After filtering, use %first and %nfiles to select
+ *          a contiguous set of files, that have been lexically
+ *          sorted in increasing order.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pixaa* on the Lua stack
@@ -410,7 +416,7 @@ ReadMem(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a luaL_Stream* (stream).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The pix are stored in the file as png.
  *          If the png library is not linked, this will fail.
  * </pre>
@@ -433,7 +439,7 @@ ReadStream(lua_State *L)
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a Pix* user data (pixa).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This allows random insertion of a pixa into a pixaa, with
  *          destruction of any existing pixa at that location.
  *          The input pixa is now owned by the pixaa.
@@ -458,7 +464,7 @@ ReplacePixa(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This identifies the largest index containing a pixa that
  *          has any pix within it, destroys all pixa above that index,
  *          and resets the count.
@@ -480,7 +486,7 @@ Truncate(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * Arg #2 is expected to be string containing the filename.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The pix are stored in the file as png.
  *          If the png library is not linked, this will fail.
  * </pre>
@@ -501,7 +507,7 @@ Write(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Serializes a pixaa in memory and puts the result in a buffer.
  * </pre>
  * \param L pointer to the lua_State
@@ -527,7 +533,7 @@ WriteMem(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * Arg #2 is expected to be a luaL_Stream* (stream).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The pix are stored in the file as png.
  *          If the png library is not linked, this will fail.
  * </pre>

@@ -92,7 +92,7 @@ GetCount(lua_State *L)
  * Arg #6 is expected to be a l_int32 (xoverlap).
  * Arg #7 is expected to be a l_int32 (yoverlap).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) We put a clone of pixs in the PixTiling.
  *      (2) The input to pixTilingCreate() for horizontal tiling can be
  *          either the number of tiles across the image or the approximate

@@ -45,7 +45,7 @@
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Decrements the ref count and, if 0, destroys the l_dna.
  *      (2) Always nulls the input ptr.
  * </pre>
@@ -184,7 +184,7 @@ Clone(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This removes unused ptrs above da->n.
  * </pre>
  * \param L pointer to the lua_State
@@ -239,7 +239,7 @@ Create(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does not change the allocation of the array.
  *          It just clears the number of stored numbers, so that
  *          the array appears to be empty.
@@ -283,7 +283,7 @@ FromArray(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If copyflag == L_COPY, it makes a copy which the caller
  *          is responsible for freeing.  Otherwise, it operates
  *          directly on the bare array of the l_dna.
@@ -316,7 +316,7 @@ GetDArray(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * Arg #2 is expected to be a l_int32 (idx).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Caller may need to check the function return value to
  *          decide if a 0.0 in the returned ival is valid.
  * </pre>
@@ -341,7 +341,7 @@ GetDValue(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) A copy of the array is made, because we need to
  *          generate an integer array from the bare double array.
  *          The caller is responsible for freeing the array.
@@ -373,7 +373,7 @@ GetIArray(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * Arg #2 is expected to be a l_int32 (idx).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Caller may need to check the function return value to
  *          decide if a 0 in the returned ival is valid.
  * </pre>
@@ -422,7 +422,7 @@ GetParameters(lua_State *L)
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a lua_Number to insert into the array.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This shifts da[i] --> da[i + 1] for all i >= index,
  *          and then inserts val as da[index].
  *      (2) It should not be used repeatedly on large arrays,
@@ -468,7 +468,7 @@ Read(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a luaL_Stream* (stream).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) fscanf takes %lf to read a double; fprintf takes %f to write it.
  * </pre>
  * \param L pointer to the lua_State
@@ -489,7 +489,7 @@ ReadStream(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * Arg #2 is expected to be a l_int32 (idx).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This shifts da[i] --> da[i - 1] for all i > index.
  *      (2) It should not be used repeatedly on large arrays,
  *          because the function is O(n).
@@ -512,7 +512,7 @@ RemoveNumber(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * Arg #2 is expected to be a l_int32 (n).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If newcount <= da->nalloc, this resets da->n.
  *          Using newcount = 0 is equivalent to l_dnaEmpty().
  *      (2) If newcount > da->nalloc, this causes a realloc

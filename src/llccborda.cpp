@@ -117,7 +117,7 @@ Create(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Uses global ptaa, which gives each border pixel in
  *          global coordinates, and must be computed in advance
  *          by calling ccbaGenerateGlobalLocs().
@@ -139,7 +139,7 @@ DisplayBorder(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Uses local ptaa, which gives each border pixel in
  *          local coordinates, so the actual pixel positions must
  *          be computed using all offsets.
@@ -204,7 +204,7 @@ DisplayImage1(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Uses local chain ptaa, which gives each border pixel in
  *          local coordinates, so the actual pixel positions must
  *          be computed using all offsets.
@@ -234,7 +234,7 @@ DisplayImage2(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Uses spglobal pta, which gives each border pixel in
  *          global coordinates, one path per c.c., and must
  *          be computed in advance by calling ccbaGenerateSPGlobalLocs().
@@ -273,7 +273,7 @@ GenerateGlobalLocs(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  * Arg #2 is expected to be a l_int32 (ptsflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This calculates the splocal rep if not yet made.
  *      (2) It uses the local pixel values in splocal, the single
  *          path pta, which are all relative to each c.c., to find
@@ -300,7 +300,7 @@ GenerateSPGlobalLocs(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Generates a single border in local pixel coordinates.
  *          For each c.c., if there is just an outer border, copy it.
  *          If there are also hole borders, for each hole border,
@@ -343,7 +343,7 @@ GenerateSinglePath(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This uses the pixel locs in the local ptaa,
  *          which are all relative to each c.c., to find
  *          the step directions for successive pixels in
@@ -374,7 +374,7 @@ GenerateStepChains(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  * Arg #2 is expected to be a l_int32 (index).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This returns a clone of the ccb; it must be destroyed
  * </pre>
  * \param L pointer to the lua_State
@@ -430,7 +430,7 @@ ReadStream(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  * Arg #2 is expected to be a l_int32 (coordtype).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This uses the step chain data in each ccb to determine
  *          the pixel locations, either global or local,
  *          and stores them in the appropriate ptaa,

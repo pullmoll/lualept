@@ -114,7 +114,7 @@ Copy(lua_State *L)
  * Arg #2 is expected to be a l_int32 (width).
  * Arg #3 is expected to be a string (name).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) selCreate() initializes all values to 0.
  *      (2) After this call, (cy,cx) and nonzero data values must be
  *          assigned.  If a text name is not assigned here, it will
@@ -138,7 +138,7 @@ Create(lua_State *L)
  * \brief Create a brick Sel* (%sel).
  * <pre>
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is a rectangular sel of all hits, misses or don't cares.
  * </pre>
  * \param L pointer to the lua_State
@@ -164,7 +164,7 @@ CreateBrick(lua_State *L)
  * Arg #2 is expected to be a l_int32 (factor2).
  * Arg #3 is expected to be a l_int32 (direction).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This generates a comb Sel of hits with the origin as
  *          near the center as possible.
  *      (2) In use, this is complemented by a brick sel of size %factor1,
@@ -213,7 +213,7 @@ CreateFromColorPix(lua_State *L)
  * Arg #3 is expected to be a l_int32 (cx).
  * Arg #4 is expected to be a string (name).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The origin must be positive.
  * </pre>
  * \param L pointer to the lua_State
@@ -239,7 +239,7 @@ CreateFromPix(lua_State *L)
  * Arg #3 is expected to be a l_int32 (cx).
  * Arg #4 is expected to be a string (name).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The origin and all points in the pta must be positive.
  * </pre>
  * \param L pointer to the lua_State
@@ -265,7 +265,7 @@ CreateFromPta(lua_State *L)
  * Arg #3 is expected to be a l_int32 (w).
  * Arg #4 is expected to be a string (name).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The text is an array of chars (in row-major order) where
  *          each char can be one of the following:
  *             'x': hit
@@ -306,7 +306,7 @@ CreateFromString(lua_State *L)
  * Arg #2 is expected to be a l_int32 (size).
  * Arg #3 is expected to be a l_int32 (gthick).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This gives a visual representation of a general (hit-miss) sel.
  *      (2) The empty sel is represented by a grid of intersecting lines.
  *      (3) Three different patterns are generated for the sel elements:
@@ -333,7 +333,7 @@ DisplayInPix(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sel* (sel).
  *
- * Notes:
+ * Leptonica's Notes:
           These are the maximum shifts for the erosion operation.
  *        For example, when j < cx, the shift of the image
  *        is +x to the cx.  This is a positive xp shift.
@@ -453,7 +453,7 @@ GetTypeAtOrigin(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sel* (sel).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is an inverse function of selCreateFromString.
  *          It prints a textual representation of the SEL to a malloc'd
  *          string.  The format is the same as selCreateFromString
@@ -602,7 +602,7 @@ SelectComposableSizes(lua_State *L)
  * Arg #3 is expected to be a l_int32 (col).
  * Arg #4 is expected to be a l_int32 (type).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Because we use row and column to index into an array,
  *          they are always non-negative.  The location of the origin
  *          (and the type of operation) determine the actual
@@ -628,7 +628,7 @@ SetElement(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Sel* (sel).
  * Arg #2 is expected to be a string (name).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Always frees the existing sel name, if defined.
  *      (2) If name is not defined, just clears any existing sel name.
  * </pre>

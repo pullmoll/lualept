@@ -110,7 +110,7 @@ toString(lua_State* L)
  * Arg #4 is expected to be a l_int32 (top).
  * Arg #5 is expected to be a l_int32 (bot).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Adds border of '0' 32-bit pixels
  * </pre>
  * \param L pointer to the lua_State
@@ -138,7 +138,7 @@ AddBorder(lua_State *L)
  * Arg #4 is expected to be a l_int32 (top).
  * Arg #5 is expected to be a l_int32 (bot).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This adds pixels on each side whose values are equal to
  *          the value on the closest boundary pixel.
  * </pre>
@@ -167,7 +167,7 @@ AddContinuedBorder(lua_State *L)
  * Arg #4 is expected to be a l_int32 (top).
  * Arg #5 is expected to be a l_int32 (bot).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixAddMirroredBorder() for situations of usage.
  * </pre>
  * \param L pointer to the lua_State
@@ -193,7 +193,7 @@ AddMirroredBorder(lua_State *L)
  * Arg #2 is expected to be a l_float32 (addc).
  * Arg #3 is expected to be a l_float32 (multc).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is an in-place operation.
  *      (2) It can be used to multiply each pixel by a constant,
  *          and also to add a constant to each pixel.  Multiplication
@@ -221,7 +221,7 @@ AddMultConstant(lua_State *L)
  * Arg #4 is expected to be a l_int32 (top).
  * Arg #5 is expected to be a l_int32 (bot).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This adds pixels on each side whose values have a normal
  *          derivative equal to the normal derivative at the boundary
  *          of fpixs.
@@ -273,7 +273,7 @@ Affine(lua_State *L)
  * Arg #4 is expected to be a l_int32 (border).
  * Arg #5 is expected to be a l_float32 (inval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If %border > 0, all four sides are extended by that distance,
  *          and removed after the transformation is finished.  Pixels
  *          that would be brought in to the trimmed result from outside
@@ -305,7 +305,7 @@ AffinePta(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a FPix* (fpix).
  * Arg #2 is expected to be a l_int32 (ncontours).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The increment is set to get approximately %ncontours.
  *      (2) The proximity to the target value for contour display
  *          is set to 0.15.
@@ -347,7 +347,7 @@ ChangeRefcount(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPix* (fpix).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) See pixClone() for definition and usage.
  * </pre>
  * \param L pointer to the lua_State
@@ -387,7 +387,7 @@ ConvertToDPix(lua_State *L)
  * Arg #3 is expected to be a string describing what to do with negative values (negvals).
  * Arg #4 is expected to be a boolean (errorflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Use %outdepth = 0 to programmatically determine the
  *          output depth.  If no values are greater than 255,
  *          it will set outdepth = 8; otherwise to 16 or 32.
@@ -421,7 +421,7 @@ ConvertToPix(lua_State *L)
  * Arg #2 is expected to be a Kernel* (kel).
  * Arg #3 is expected to be a boolean (normflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This gives a float convolution with an arbitrary kernel.
  *      (2) If normflag == 1, the result is normalized by scaling all
  *          kernel values for a unit sum.  If the sum of kernel values
@@ -458,7 +458,7 @@ Convolve(lua_State *L)
  * Arg #3 is expected to be a Kernel* (kely).
  * Arg #4 is expected to be a l_int32 (normflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does a convolution with a separable kernel that is
  *          is a sequence of convolutions in x and y.  The two
  *          one-dimensional kernel components must be input separately;
@@ -497,7 +497,7 @@ ConvolveSep(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a FPix* (fpixd).
  * Arg #2 is expected to be a FPix* (fpixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) There are three cases:
  *            (a) fpixd == null  (makes a new fpix; refcount = 1)
  *            (b) fpixd == fpixs  (no-op)
@@ -572,7 +572,7 @@ Create(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPix* (fpixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Makes a FPix of the same size as the input FPix, with the
  *          data array allocated and initialized to 0.
  *      (2) Copies the resolution.
@@ -612,7 +612,7 @@ DisplayMaxDynamicRange(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a FPix* (fpixd).
  * Arg #2 is expected to be a FPix* (fpixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) On big-endian hardware, this does byte-swapping on each of
  *          the 4-byte floats in the fpix data.  On little-endians,
  *          the data is unchanged.  This is used for serialization
@@ -660,7 +660,7 @@ FlipLR(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a FPix* (fpixd).
  * Arg #2 is expected to be a FPix* (fpixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does a top-bottom flip of the image, which is
  *          equivalent to a rotation out of the plane about a
  *          horizontal line through the image center.
@@ -867,7 +867,7 @@ GetWpl(lua_State *L)
  * Arg #4 is expected to be a l_float32 (a).
  * Arg #5 is expected to be a l_float32 (b).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Computes pixelwise linear combination: a * src1 + b * src2
  *      (2) Alignment is to UL corner.
  *      (3) There are 3 cases.  The result can go to a new dest,
@@ -900,7 +900,7 @@ LinearCombination(lua_State *L)
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * Arg #3 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Subsampled printout of fpix for debugging.
  * </pre>
  * \param L pointer to the lua_State
@@ -947,7 +947,7 @@ Projective(lua_State *L)
  * Arg #4 is expected to be a l_int32 (border).
  * Arg #5 is expected to be a l_float32 (inval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If %border > 0, all four sides are extended by that distance,
  *          and removed after the transformation is finished.  Pixels
  *          that would be brought in to the trimmed result from outside
@@ -985,7 +985,7 @@ ProjectivePta(lua_State *L)
  * Arg #7 is expected to be a l_int32 (sx).
  * Arg #8 is expected to be a l_int32 (sy).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is similar in structure to pixRasterop(), except
  *          it only allows copying from the source into the destination.
  *          For that reason, no op code is necessary.  Additionally,
@@ -1097,7 +1097,7 @@ RemoveBorder(lua_State *L)
  * Arg #2 is expected to be a l_float32 (incr).
  * Arg #3 is expected to be a l_float32 (proxim).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Values are displayed when val/incr is within +-proxim
  *          to an integer.  The default value is 0.15; smaller values
  *          result in thinner contour lines.
@@ -1123,7 +1123,7 @@ RenderContours(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a FPix* (fpixd).
  * Arg #2 is expected to be a FPix* (fpixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If the data sizes differ, this destroys the existing
  *          data in fpixd and allocates a new, uninitialized, data array
  *          of the same size as the data in fpixs.  Otherwise, this
@@ -1147,7 +1147,7 @@ ResizeImageData(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a FPix* (fpixd).
  * Arg #2 is expected to be a FPix* (fpixs).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does a 180 rotation of the image about the center,
  *          which is equivalent to a left-right flip about a vertical
  *          line through the image center, followed by a top-bottom
@@ -1180,7 +1180,7 @@ Rotate180(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a FPix* (fpixs).
  * Arg #2 is expected to be a l_int32 (direction).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This does a 90 degree rotation of the image about the center,
  *          either cw or ccw, returning a new pix.
  *      (2) The direction must be either 1 (cw) or -1 (ccw).
@@ -1223,7 +1223,7 @@ RotateOrth(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a FPix* (fpixs).
  * Arg #2 is expected to be a l_int32 (factor).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The width wd of fpixd is related to ws of fpixs by:
  *              wd = factor * (ws - 1) + 1   (and ditto for the height)
  *          We avoid special-casing boundary pixels in the interpolation
@@ -1377,7 +1377,7 @@ SetWpl(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a FPix* (fpix).
  * Arg #2 is expected to be a l_float32 (thresh).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For all values of fpix that are <= thresh, sets the pixel
  *          in pixd to 1.
  * </pre>
@@ -1417,7 +1417,7 @@ Write(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPix* (fpix).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Serializes a fpix in memory and puts the result in a buffer.
  * </pre>
  * \param L pointer to the lua_State

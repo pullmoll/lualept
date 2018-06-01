@@ -85,7 +85,7 @@ toString(lua_State* L)
 }
 
 /**
- * \brief Destroy a CCBord*.
+ * \brief Destroy a CCBord* (%ccbord).
  *
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack
@@ -104,7 +104,7 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Create a new CCBord*.
+ * \brief Create a new CCBord* (%ccbord).
  * <pre>
  * Arg #1 is expected to be a Pix* (pixs).
  * </pre>
@@ -147,6 +147,7 @@ ll_opt_CCBord(const char *_fun, lua_State *L, int arg)
         return nullptr;
     return ll_check_CCBord(_fun, L, arg);
 }
+
 /**
  * \brief Push CCBord* to the Lua stack and set its meta table.
  * \param _fun calling function's name
@@ -161,6 +162,7 @@ ll_push_CCBord(const char *_fun, lua_State *L, CCBord *cd)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, LL_CCBORD, cd);
 }
+
 /**
  * \brief Create and push a new CCBord*.
  * \param L pointer to the lua_State

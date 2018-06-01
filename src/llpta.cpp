@@ -45,7 +45,7 @@
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Decrements the ref count and, if 0, destroys the pta.
  *      (2) Always nulls the input ptr.
  * </pre>
@@ -180,7 +180,7 @@ Clone(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) For 2 corners, the order of the 2 points is UL, LR.
  *          For 4 corners, the order of points is UL, UR, LL, LR.
  * </pre>
@@ -239,7 +239,7 @@ CopyRange(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
  *
- * Notes:
+ * Leptonica's Notes:
  *      This only resets the Pta::n field, for reuse
  * </pre>
  * \param L pointer to the lua_State
@@ -258,7 +258,7 @@ Empty(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This copies the internal arrays into new Numas.
  * </pre>
  * \param L pointer to the lua_State
@@ -404,7 +404,7 @@ ReadStream(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
  * Arg #2 is expected to be a l_int32 (idx).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This shifts pta[i] --> pta[i - 1] for all i > index.
  *      (2) It should not be used repeatedly on large arrays,
  *          because the function is O(n).
@@ -450,9 +450,6 @@ SetPt(lua_State *L)
  * Arg #2 is expected to be string containing the filename.
  * Arg #3 is an optional boolean (type)
  *
- * Note:
- *      type = true means the data is written as integers.
- *      type = false means the data is written as floats.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -473,9 +470,8 @@ Write(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
  * Arg #2 is an optional boolean (type)
  *
- * Note:
- *      type = true means the data is written as integers.
- *      type = false means the data is written as floats.
+ * Leptonica's Notes:
+ *      (1) Serializes a pta in memory and puts the result in a buffer.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -502,9 +498,6 @@ WriteMem(lua_State *L)
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * Arg #3 is an optional boolean (type)
  *
- * Note:
- *      type = true means the data is written as integers.
- *      type = false means the data is written as floats.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack

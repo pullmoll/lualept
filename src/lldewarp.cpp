@@ -163,7 +163,7 @@ toString(lua_State *L)
  * Arg #2 is expected to be a l_int32 (opensize).
  * Arg #3 is expected to be a const (char *debugfile).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This builds the horizontal and vertical disparity arrays
  *          for an input of ruled lines, typically for calibration.
  *          In book scanning, you could lay the ruled paper over a page.
@@ -199,7 +199,7 @@ BuildLineModel(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a L_DEWARP* (dew).
  * Arg #2 is expected to be a const (char *debugfile).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This is the basic function that builds the horizontal and
  *          vertical disparity arrays, which allow determination of the
  *          src pixel in the input image corresponding to each
@@ -257,7 +257,7 @@ BuildPageModel(lua_State *L)
  * Arg #1 is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (pageno).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The input pixs is either full resolution or 2x reduced.
  *      (2) The page number is typically 0-based.  If scanned from a book,
  *          the even pages are usually on the left.  Disparity arrays
@@ -282,7 +282,7 @@ Create(lua_State *L)
  * Arg #1 is expected to be a l_int32 (pageno).
  * Arg #2 is expected to be a l_int32 (refpage).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This specifies which dewarp struct should be used for
  *          the given page.  It is placed in dewarpa for pages
  *          for which no model can be built.
@@ -309,7 +309,7 @@ CreateRef(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dewarp* (dew).
  * Arg #2 is expected to be a Ptaa* (ptaa).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This builds a horizontal disparity model (HDM), but
  *          does not check it against constraints for validity.
  *          Constraint checking is done at rendering time.
@@ -341,13 +341,13 @@ FindHorizDisparity(lua_State *L)
  * Arg #3 is expected to be a l_float32 (fractthresh).
  * Arg #4 is expected to be a l_int32 (parity).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) %fractthresh is a threshold on the fractional difference in stroke
  *          density between between left and right sides.  Process this
  *          disparity only if the absolute value of the fractional
  *          difference equals or exceeds this threshold.
  *      (2) %parity indicates where the binding is: on the left for
- *          %parity == 0 and on the right for %parity == 1.
+ *          %parity == 0 and on the right for @parity == 1.
  *      (3) This takes a 1 bpp %pixb where both vertical and horizontal
  *          disparity have been applied, so the text lines are straight and,
  *          more importantly, the line end points are vertically aligned.
@@ -389,7 +389,7 @@ FindHorizSlopeDisparity(lua_State *L)
  * Arg #2 is expected to be a Ptaa* (ptaa).
  * Arg #3 is expected to be a l_int32 (rotflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This starts with points along the centers of textlines.
  *          It does quadratic fitting (and smoothing), first along the
  *          lines and then in the vertical direction, to generate
@@ -426,7 +426,7 @@ FindVertDisparity(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a boolean (debugflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This in general does not have a point for each value
  *          of x, because there will be gaps between words.
  *          It doesn't matter because we will fit a quadratic to the
@@ -450,7 +450,7 @@ GetTextlineCenters(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dewarp* (dew).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This removes all data that is not needed for serialization.
  *          It keeps the subsampled disparity array(s), so the full
  *          resolution arrays can be reconstructed.
@@ -474,7 +474,7 @@ Minimize(lua_State *L)
  * Arg #3 is expected to be a l_int32 (x).
  * Arg #4 is expected to be a l_int32 (y).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If the full resolution vertical and horizontal disparity
  *          arrays do not exist, they are built from the subsampled ones.
  *      (2) If pixs is not given, the size of the arrays is determined
@@ -550,7 +550,7 @@ ReadMem(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FILE* (fp).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The dewarp struct is stored in minimized format, with only
  *          subsampled disparity arrays.
  *      (2) The sampling and extra horizontal disparity parameters are
@@ -617,7 +617,7 @@ Write(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dewarp* (dew).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Serializes a dewarp in memory and puts the result in a buffer.
  * </pre>
  * \param L pointer to the lua_State
@@ -643,7 +643,7 @@ WriteMem(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dewarp* (dew).
  * Arg #2 is expected to be a luaL_Stream* (stream).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This should not be written if there is no sampled
  *          vertical disparity array, which means that no model has
  *          been built for this page.

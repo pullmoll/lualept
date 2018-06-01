@@ -138,7 +138,7 @@ toString(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
  * Arg #2 is expected to be a l_int32 (color).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This only adds color if not already there.
  *      (2) The alpha component is 255 (opaque)
  *      (3) This sets index to the requested color.
@@ -169,7 +169,7 @@ AddBlackOrWhite(lua_State *L)
  * Arg #3 is expected to be a l_int32 (gval).
  * Arg #4 is expected to be a l_int32 (bval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This always adds the color if there is room.
  *      (2) The alpha component is 255 (opaque)
  * </pre>
@@ -195,7 +195,7 @@ AddColor(lua_State *L)
  * Arg #3 is expected to be a l_int32 (gval).
  * Arg #4 is expected to be a l_int32 (bval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This only adds color if not already there.
  *      (2) The alpha component is 255 (opaque)
  *      (3) If it's not in the colormap and there is no room to add
@@ -227,7 +227,7 @@ AddNearestColor(lua_State *L)
  * Arg #3 is expected to be a l_int32 (gval).
  * Arg #4 is expected to be a l_int32 (bval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This only adds color if not already there.
  *      (2) The alpha component is 255 (opaque)
  *      (3) This returns the index of the new (or existing) color.
@@ -261,7 +261,7 @@ AddNewColor(lua_State *L)
  * Arg #4 is expected to be a l_int32 (bval).
  * Arg #5 is expected to be a l_int32 (aval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This always adds the color if there is room.
  * </pre>
  * \param L pointer to the lua_State
@@ -284,7 +284,7 @@ AddRGBA(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This removes the colors by setting the count to 0.
  * </pre>
  * \param L pointer to the lua_State
@@ -304,7 +304,7 @@ Clear(lua_State *L)
  * Arg #1 is expected to be a string (data).
  * Arg #2 is expected to be a l_int32 (cpc; 0 < cpc <= 4).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The number of bytes in %data is 3 * ncolors.
  *      (2) Output is in form:
  *             < r0g0b0 r1g1b1 ... rngnbn >
@@ -353,7 +353,7 @@ Copy(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This counts the unique gray colors, including black and white.
  * </pre>
  * \param L pointer to the lua_State
@@ -377,7 +377,7 @@ CountGrayColors(lua_State *L)
  * Arg #1 is expected to be a l_int32 (depth).
  * Arg #2 is expected to be a l_int32 (levels).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Colormap has equally spaced gray color values
  *          from black (0, 0, 0) to white (255, 255, 255).
  * </pre>
@@ -401,7 +401,7 @@ CreateLinear(lua_State *L)
  * Arg #2 is an optional boolean (hasblack).
  * Arg #3 is an optional boolean (haswhite).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This sets up a colormap with random colors,
  *          where the first color is optionally black, the last color
  *          is optionally white, and the remaining colors are
@@ -488,7 +488,7 @@ GetColor(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
  * Arg #2 is expected to be a l_int32 (idx).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The returned alpha channel value is 255.
  * </pre>
  * \param L pointer to the lua_State
@@ -574,7 +574,7 @@ GetIndex(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) On error, &mindepth is returned as 0.
  * </pre>
  * \param L pointer to the lua_State
@@ -763,7 +763,7 @@ ReadStream(lua_State *L)
  * Arg #4 is expected to be a l_int32 (gval).
  * Arg #5 is expected to be a l_int32 (bval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This resets sets the color of an entry that has already
  *          been set and included in the count of colors.
  *      (2) The alpha component is 255 (opaque)
@@ -789,7 +789,7 @@ ResetColor(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
  * Arg #2 is expected to be a l_int32 (cpc; 0 < cpc <= 4).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) When serializing to store in a pdf, use %cpc = 3.
  * </pre>
  * \param L pointer to the lua_State
@@ -817,7 +817,7 @@ SerializeToMemory(lua_State *L)
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a l_int32 (aval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This modifies the transparency of one entry in a colormap.
  *          The alpha component by default is 255 (opaque).
  *          This is used when extracting the colormap from a PNG file
@@ -922,7 +922,7 @@ ToRGBTable(lua_State *L)
  * Arg #3 is expected to be a l_int32 (gval).
  * Arg #4 is expected to be a l_int32 (bval).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This checks if the color already exists or if there is
  *          room to add it.  It makes no change in the colormap.
  * </pre>
@@ -970,7 +970,7 @@ Write(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Serializes a pixcmap in memory and puts the result in a buffer.
  * </pre>
  * \param L pointer to the lua_State

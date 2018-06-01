@@ -163,7 +163,7 @@ Thin8cc(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sela* (sela).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Adds the following sels:
  *            ~ all linear (horiz, vert) brick sels that are
  *              necessary for decomposable sels up to size 63
@@ -191,7 +191,7 @@ AddBasic(lua_State *L)
  * Arg #4 is expected to be a l_int32 (norient).
  * Arg #5 is expected to be a l_int32 (debugflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Adds hitmiss Sels for the intersection of two lines.
  *          If the lines are very thin, they must be nearly orthogonal
  *          to register.
@@ -226,7 +226,7 @@ AddCrossJunctions(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sela* (selas).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Adds all comb (horizontal, vertical) Sels that are
  *          used in composite linear morphological operations
  *          up to 63 pixels in length, which are the sizes over
@@ -249,7 +249,7 @@ AddDwaCombs(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sela* (sela).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Adds all linear (horizontal, vertical) sels from
  *          2 to 63 pixels in length, which are the sizes over
  *          which dwa code can be generated.
@@ -292,7 +292,7 @@ AddHitMiss(lua_State *L)
  * Arg #4 is expected to be a l_int32 (norient).
  * Arg #5 is expected to be a l_int32 (debugflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Adds hitmiss Sels for the T-junction of two lines.
  *          If the lines are very thin, they must be nearly orthogonal
  *          to register.
@@ -325,7 +325,7 @@ AddTJunctions(lua_State *L)
  * Arg #3 is expected to be a string (selname).
  * Arg #4 is expected to be a l_int32 (copyflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This adds a sel, either inserting or making a copy.
  *      (2) Because every sel in a sela must have a name, it copies
  *          the input name if necessary.  You can input NULL for
@@ -367,7 +367,7 @@ Create(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a string (filename).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) The file contains a sequence of Sel descriptions.
  *      (2) Each Sel is formatted as follows:
  *           ~ Any number of comment lines starting with '#' are ignored
@@ -382,15 +382,13 @@ Create(lua_State *L)
  *          format for the Sel data.  As an example, here are the lines
  *          of is a valid file for a single Sel.  In the file, all lines
  *          are left-justified:
- * \code
- *          # diagonal sel
- *          sel_5diag
- *          "x    "
- *          " x   "
- *          "  X  "
- *          "   x "
- *          "    x"
- * \endcode
+ *                    # diagonal sel
+ *                    sel_5diag
+ *                    "x    "
+ *                    " x   "
+ *                    "  X  "
+ *                    "   x "
+ *                    "    x"
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Sela * on the Lua stack
@@ -413,7 +411,7 @@ CreateFromFile(lua_State *L)
  * Arg #4 is expected to be a l_int32 (spacing).
  * Arg #5 is expected to be a l_int32 (ncols).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This gives a visual representation of all the sels in a sela.
  *      (2) See notes in selDisplayInPix() for display params of each sel.
  *      (3) This gives the nicest results when all sels in the sela
@@ -465,7 +463,7 @@ FindSelByName(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Sela* (sela).
  * Arg #2 is expected to be a l_int32 (i).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This returns a ptr to the sel, not a copy, so the caller
  *          must not destroy it!
  * </pre>
@@ -599,7 +597,7 @@ GetBrickName(lua_State *L)
  * Arg #2 is expected to be a l_int32 (size).
  * Arg #3 is expected to be a l_int32 (direction).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Combs are by definition 1-dimensional, either horiz or vert.
  *      (2) Use this with comb Sels; e.g., from selaAddDwaCombs().
  * </pre>
@@ -624,7 +622,7 @@ GetCombName(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a l_int32 (index).
  * Arg #2 is expected to be a l_int32 (debug).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) These are specific sets of HMTs to be used in parallel for
  *          for thinning from each of four directions.
  *      (2) The sets are indexed as follows:

@@ -148,7 +148,7 @@ AddBoxa(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baas).
  * Arg #2 is an optional string defining the storage flags (copyflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) L_COPY makes a copy of each boxa in baas.
  *          L_CLONE makes a clone of each boxa in baas.
  * </pre>
@@ -204,7 +204,7 @@ ExtendArray(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
  * Arg #2 is expected to be a l_int32 (n).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) If necessary, reallocs the boxa ptr array to %size.
  * </pre>
  * \param L pointer to the lua_State
@@ -227,7 +227,7 @@ ExtendArrayToSize(lua_State *L)
  * Arg #3 is expected to be a string describing the copy flag (copyflag).
  * Arg #3 is an optional Box* (fillerbox).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This 'flattens' the baa to a boxa, taking the first %num
  *          boxes from each boxa.
  *      (2) In each boxa, if there are less than %num boxes, we preserve
@@ -256,7 +256,7 @@ FlattenAligned(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxaa* (boxaa).
  * Arg #2 is expected to be a string describing the copy flag (copyflag).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This 'flattens' the baa to a boxa, taking the boxes in
  *          order in the first boxa, then the second, etc.
  *      (2) If a boxa is empty, we generate an invalid, placeholder box
@@ -349,7 +349,7 @@ GetBoxa(lua_State *L)
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a Boxa* user data.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This shifts boxa[i] --> boxa[i + 1] for all i >= index,
  *          and then inserts boxa as boxa[index].
  *      (2) To insert at the beginning of the array, set index = 0.
@@ -379,7 +379,7 @@ InsertBoxa(lua_State *L)
  * Arg #3 is an optional l_int32 (istart).
  * Arg #4 is an optional l_int32 (iend).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This appends a clone of each indicated boxa in baas to baad
  *      (2) istart < 0 is taken to mean 'read from the start' (istart = 0)
  *      (3) iend < 0 means 'read to the end'
@@ -457,7 +457,7 @@ ReadStream(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
  * Arg #2 is expected to be a l_int32 (%idx).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) This removes boxa[index] and then shifts
  *          boxa[i] --> boxa[i - 1] for all i > index.
  *      (2) The removed boxaa is destroyed.
@@ -483,7 +483,7 @@ RemoveBoxa(lua_State *L)
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a Boxa* user data.
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Any existing boxa is destroyed, and the input one
  *          is inserted in its place.
  *      (2) If the index is invalid, return 1 (error)
@@ -524,7 +524,7 @@ Write(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box).
  *
- * Notes:
+ * Leptonica's Notes:
  *      (1) Serializes a boxaa in memory and puts the result in a buffer.
  * </pre>
  * \param L pointer to the lua_State
