@@ -44,6 +44,10 @@
  * \brief Destroy a Boxa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa*.
+ *
+ * Notes:
+ *      (1) Decrements the ref count and, if 0, destroys the boxa.
+ *      (2) Always nulls the input ptr.
  * </pre>
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack
@@ -59,23 +63,6 @@ Destroy(lua_State *L)
     boxaDestroy(&boxa);
     *pboxa = nullptr;
     return 0;
-}
-
-/**
- * \brief Create a new Boxa*.
- * <pre>
- * Arg #1 is expected to be a l_int32 (n).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Boxa* on the Lua stack
- */
-static int
-Create(lua_State *L)
-{
-    LL_FUNC("Create");
-    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
-    Boxa *boxa = boxaCreate(n);
-    return ll_push_Boxa(_fun, L, boxa);
 }
 
 /**
@@ -182,6 +169,12 @@ AdjustHeightToTarget(lua_State *L)
  * Arg #3 is expected to be a l_int32 (delright).
  * Arg #4 is expected to be a l_int32 (deltop).
  * Arg #5 is expected to be a l_int32 (delbot).
+ *
+ * Notes:
+ *      (1) New box dimensions are cropped at left and top to x >= 0 and y >= 0.
+ *      (2) If the width or height of a box goes to 0, we generate a box with
+ *          w == 1 and h == 1, as a placeholder.
+ *      (3) See boxAdjustSides().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* on the Lua stack
@@ -207,6 +200,15 @@ AdjustSides(lua_State *L)
  * Arg #2 is expected to be a string describing the side (sides).
  * Arg #3 is expected to be a l_int32 (target).
  * Arg #4 is expected to be a l_int32 (thresh).
+ *
+ * Notes:
+ *      (1) Conditionally adjusts the width of each box, by moving
+ *          the indicated edges (left and/or right) if the width differs
+ *          by %thresh or more from %target.
+ *      (2) Use boxad == NULL for a new boxa, and boxad == boxas for in-place.
+ *          Use one of these:
+ *               boxad = boxaAdjustWidthToTarget(NULL, boxas, ...);   // new
+ *               boxaAdjustWidthToTarget(boxas, boxas, ...);  // in-place
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* on the Lua stack
@@ -267,6 +269,13 @@ AffineTransform(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a string defining the sort type (type).
  * Arg #3 is expected to be a string defining the sort order (order).
+ *
+ * Notes:
+ *      (1) For a large number of boxes (say, greater than 1000), this
+ *          O(n) binsort is much faster than the O(nlogn) shellsort.
+ *          For 5000 components, this is over 20x faster than boxaSort().
+ *      (2) Consequently, boxaSort() calls this function if it will
+ *          likely go much faster.
  * </pre>
  * \param L pointer to the lua_State
  * \return 2 Boxa* (boxa) and Numa* (naindex) on the Lua stack
@@ -287,6 +296,10 @@ BinSort(lua_State *L)
  * \brief Clear the Boxa* (%boxa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ *
+ * Notes:
+ *      (1) This destroys all boxes in the boxa, setting the ptrs
+ *          to null.  The number of allocated boxes, n, is set to 0.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -304,6 +317,10 @@ Clear(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a Box* (box).
+ *
+ * Notes:
+ *      (1) All boxes in boxa not intersecting with box are removed, and
+ *          the remaining boxes are clipped to box.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -322,6 +339,23 @@ ClipToBox(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is an optional Pixa* (pixadb).
+ *
+ * Notes:
+ *      (1) If there are no overlapping boxes, it simply returns a copy
+ *          of %boxas.
+ *      (2) Input an empty %pixadb, using pixaCreate(0), for debug output.
+ *          The output gives 2 visualizations of the boxes per iteration;
+ *          boxes in red before, and added boxes in green after. Note that
+ *          all pixels in the red boxes are contained in the green ones.
+ *      (3) The alternative method of painting each rectangle and finding
+ *          the 4-connected components gives a different result in
+ *          general, because two non-overlapping (but touching)
+ *          rectangles, when rendered, are 4-connected and will be joined.
+ *      (4) A bad case computationally is to have n boxes, none of which
+ *          overlap.  Then you have one iteration with O(n^2) compares.
+ *          This is still faster than painting each rectangle and finding
+ *          the bounding boxes of the connected components, even for
+ *          thousands of rectangles.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* on the Lua stack
@@ -342,6 +376,20 @@ CombineOverlaps(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa1).
  * Arg #2 is expected to be a another Boxa* (boxa2).
  * Arg #3 is an optional Pixa* (pixadb).
+ *
+ * Notes:
+ *      (1) One of three things happens to each box in %boxa1 and %boxa2:
+ *           * it gets absorbed into a larger box that it overlaps with
+ *           * it absorbs a smaller (by area) box that it overlaps with
+ *             and gets larger, using the bounding region of the 2 boxes
+ *           * it is unchanged (including absorbing smaller boxes that
+ *             are contained within it).
+ *      (2) If all the boxes from one of the input boxa are absorbed, this
+ *          returns an empty boxa.
+ *      (3) Input an empty %pixadb, using pixaCreate(0), for debug output
+ *      (4) This is useful if different operations are to be carried out
+ *          on possibly overlapping rectangular regions, and it is desired
+ *          to have only one operation on any rectangular region.
  * </pre>
  * \param L pointer to the lua_State
  * \return 2 Boxa* on the Lua stack
@@ -367,6 +415,24 @@ CombineOverlapsInPair(lua_State *L)
  * Arg #2 is expected to be another Boxa* (boxa2).
  * Arg #3 is expected to be a l_int32 (areathresh).
  * Arg #3 is an optional Pix* (pixdb).
+ *
+ * Notes:
+ *      (1) This takes 2 boxa, removes all boxes smaller than a given area,
+ *          and compares the remaining boxes between the boxa.
+ *      (2) The area threshold is introduced to help remove noise from
+ *          small components.  Any box with a smaller value of w * h
+ *          will be removed from consideration.
+ *      (3) The xor difference is the most stringent test, requiring alignment
+ *          of the corresponding boxes.  It is also more computationally
+ *          intensive and is optionally returned.  Alignment is to the
+ *          UL corner of each region containing all boxes, as given by
+ *          boxaGetExtent().
+ *      (4) Both fractional differences are with respect to the total
+ *          area in the two boxa.  They range from 0.0 to 1.0.
+ *          A perfect match has value 0.0.  If both boxa are empty,
+ *          we return 0.0; if one is empty we return 1.0.
+ *      (5) An example input might be the rectangular regions of a
+ *          segmentation mask for text or images from two pages.
  * </pre>
  * \param L pointer to the lua_State
  * \return 3 one integer (%nsame) and two numbers (%diffarea, %diffxor) on the Lua stack
@@ -398,6 +464,18 @@ CompareRegions(lua_State *L)
  * Arg #3 is expected to be a string describing the adjust sides (widthflag).
  * Arg #4 is expected to be a l_int32 (height).
  * Arg #5 is expected to be a string describing the adjust sides (heightflag).
+ *
+ * Notes:
+ *      (1) Forces either width or height (or both) of every box in
+ *          the boxa to a specified size, by moving the indicated sides.
+ *      (2) Not all input boxes need to be valid.  Median values will be
+ *          used with invalid boxes.
+ *      (3) Typical input might be the output of boxaLinearFit(),
+ *          where each side has been fit.
+ *      (4) Unlike boxaAdjustWidthToTarget() and boxaAdjustHeightToTarget(),
+ *          this is not dependent on a difference threshold to change the size.
+ *      (5) On error, a message is issued and a copy of the input boxa
+ *          is returned.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* (%boxa) on the Lua stack
@@ -420,6 +498,9 @@ ConstrainSize(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a Box* (box).
+ *
+ * Notes:
+ *      (1) All boxes in boxa that are entirely outside box are removed.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* on the Lua stack
@@ -482,6 +563,10 @@ ContainedInBoxa(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_int32 (ncorners).
+ *
+ * Notes:
+ *      (1) If ncorners == 2, we select the UL and LR corners.
+ *          Otherwise we save all 4 corners in this order: UL, UR, LL, LR.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pta* (%pta) on the Lua stack
@@ -501,6 +586,10 @@ ConvertToPta(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa*.
  * Arg #2 is an optional string defining the storage flags (copyflag).
+ *
+ * Notes:
+ *      (1) See pix.h for description of the copyflag.
+ *      (2) The copy-clone makes a new boxa that holds clones of each box.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* on the Lua stack
@@ -516,11 +605,33 @@ Copy(lua_State *L)
 }
 
 /**
+ * \brief Create a new Boxa*.
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (n).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Boxa* on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    LL_FUNC("Create");
+    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
+    Boxa *boxa = boxaCreate(n);
+    return ll_push_Boxa(_fun, L, boxa);
+}
+
+/**
  * \brief Encapsulate Boxa* (%boxa) aligned into a Boxaa* (%boxaa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_int32 (num).
  * Arg #3 is an optional string defining the storage flags (copyflag).
+ *
+ * Notes:
+ *      (1) This puts %num boxes from the input %boxa into each of a
+ *          set of boxa within an output baa.
+ *      (2) This assumes that the boxes in %boxa are in sets of %num each.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxaa* (%boxaa) on the Lua stack
@@ -540,6 +651,9 @@ EncapsulateAligned(lua_State *L)
  * \brief Extend a Boxa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa*.
+ *
+ * Notes:
+ *      (1) Reallocs with doubled size of ptr array.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -557,6 +671,9 @@ ExtendArray(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa*.
  * Arg #2 is expected to be a l_int32 (n).
+ *
+ * Notes:
+ *      (1) If necessary, reallocs new boxa ptr array to %size.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -575,6 +692,14 @@ ExtendArrayToSize(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a boolean (keepinvalid).
+ *
+ * Notes:
+ *      (1) If you are counting or sorting values, such as determining
+ *          rank order, you must remove invalid boxes.
+ *      (2) If you are parametrizing the values, or doing an evaluation
+ *          where the position in the boxa sequence is important, you
+ *          must replace the invalid boxes with valid ones before
+ *          doing the extraction. This is easily done with boxaFillSequence().
  * </pre>
  * \param L pointer to the lua_State
  * \return 6 Numa* on the Lua stack (%nal, %nar, %nat, %nab, %naw, %nah)
@@ -603,6 +728,16 @@ ExtractAsNuma(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is an optional boolean (keepinvalid).
+ *
+ * Notes:
+ *      (1) For most applications, such as counting, sorting, fitting
+ *          to some parametrized form, plotting or filtering in general,
+ *          you should remove the invalid boxes.  Each pta saves the
+ *          box index in the x array, so replacing invalid boxes by
+ *          filling with boxaFillSequence(), which is required for
+ *          boxaExtractAsNuma(), is not necessary.
+ *      (2) If invalid boxes are retained, each one will result in
+ *          entries (typically 0) in all selected output pta.
  * </pre>
  * \param L pointer to the lua_State
  * \return 6 Pta* on the Lua stack (%ptal, %ptar, %ptat, %ptab, %ptaw, %ptah)
@@ -631,6 +766,13 @@ ExtractAsPta(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a Numa* (na).
+ *
+ * Notes:
+ *      (1) The input is expected to come from pixGetWordBoxesInTextlines().
+ *      (2) Each numa in the output consists of an average y coordinate
+ *          of the first box in the textline, followed by pairs of
+ *          x coordinates representing the left and right edges of each
+ *          of the boxes in the textline.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numaa* on the Lua stack (%naa)
@@ -651,6 +793,14 @@ ExtractSortedPattern(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a string describing the use flag (useflag).
  * Arg #3 is an optional boolean (debug).
+ *
+ * Notes:
+ *      (1) This simple function replaces invalid boxes with a copy of
+ *          the nearest valid box, selected from either the entire
+ *          sequence (L_USE_ALL_BOXES) or from the boxes with the
+ *          same parity (L_USE_SAME_PARITY_BOXES).  It returns a new boxa.
+ *      (2) This is useful if you expect boxes in the sequence to
+ *          vary slowly with index.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* (%boxa) on the Lua stack
@@ -715,6 +865,9 @@ FindNearestBoxes(lua_State *L)
  * \brief Get the area of boxes in a Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ *
+ * Notes:
+ *      (1) Measures the total area of the boxes, without regard to overlaps.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 integer on the Lua stack (%area)
@@ -806,6 +959,16 @@ GetBoxGeometry(lua_State *L)
  * Arg #2 is expected to be a l_int32 (wc)
  * Arg #3 is expected to be a l_int32 (hc)
  * Arg #4 is an optional boolean (exactflag)
+ *
+ * Notes:
+ *      (1) The boxes in boxa are clipped to the input rectangle.
+ *      (2) * When %exactflag == 1, we generate a 1 bpp pix of size
+ *            wc x hc, paint all the boxes black, and count the fg pixels.
+ *            This can take 1 msec on a large page with many boxes.
+ *          * When %exactflag == 0, we clip each box to the wc x hc region
+ *            and sum the resulting areas.  This is faster.
+ *          * The results are the same when none of the boxes overlap
+ *            within the wc x hc region.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 number on the Lua stack (%fract)
@@ -829,6 +992,14 @@ GetCoverage(lua_State *L)
  * \brief Get the extent of boxes in a Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ *
+ * Notes:
+ *      (1) The returned w and h are the minimum size image
+ *          that would contain all boxes untranslated.
+ *      (2) If there are no valid boxes, returned w and h are 0 and
+ *          all parameters in the returned box are 0.  This
+ *          is not an error, because an empty boxa is valid and
+ *          boxaGetExtent() is required for serialization.
  * </pre>
  * \param L pointer to the lua_State
  * \return 3 two integers (%w, %h) and a Box* (%box) on the Lua stack
@@ -853,6 +1024,9 @@ GetExtent(lua_State *L)
  * \brief Get median values for Boxa* (%boxa) as four integers (%x,%y,%w,%h).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ *
+ * Notes:
+ *      (1) See boxaGetRankVals()
  * </pre>
  * \param L pointer to the lua_State
  * \return 4 integers on the Lua stack (%x,%y,%w,%h)
@@ -883,6 +1057,15 @@ GetMedianVals(lua_State *L)
  * Arg #3 is expected to be a string describing the direction (dir).
  * Arg #4 is expected to be a string describing the value flag (dist_select).
  * Arg #5 is expected to be a l_int32 (range).
+ *
+ * Notes:
+ *      (1) For efficiency, use a LR/TD sorted %boxa, which can be
+ *          made by flattening a 2D sorted boxaa.  In that case,
+ *          %range can be some positive integer like 50.
+ *      (2) If boxes overlap, the distance will be < 0.  Use %dist_select
+ *          to determine if these should count or not.  If L_ALL, then
+ *          one box will match as the nearest to another in 2 or more
+ *          directions.
  * </pre>
  * \param L pointer to the lua_State
  * \return 2 integers on the Lua stack
@@ -936,6 +1119,9 @@ GetNearestToLine(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a l_int32 (x).
  * Arg #3 is expected to be a l_int32 (y).
+ *
+ * Notes:
+ *      (1) Uses euclidean distance between centroid and point.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* on the Lua stack
@@ -956,6 +1142,19 @@ GetNearestToPt(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_float32 (fract).
+ *
+ * Notes:
+ *      (1) This function does not assume that all boxes in the boxa are valid
+ *      (2) The four box parameters are sorted independently.
+ *          For rank order, the width and height are sorted in increasing
+ *          order.  But what does it mean to sort x and y in "rank order"?
+ *          If the boxes are of comparable size and somewhat
+ *          aligned (e.g., from multiple images), it makes some sense
+ *          to give a "rank order" for x and y by sorting them in
+ *          decreasing order.  But in general, the interpretation of a rank
+ *          order on x and y is highly application dependent.  In summary:
+ *             ~ x and y are sorted in decreasing order
+ *             ~ w and h are sorted in increasing order
  * </pre>
  * \param L pointer to the lua_State
  * \return 4 integers on the Lua stack (%x,%y,%w,%h)
@@ -1005,6 +1204,14 @@ GetSizes(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa*.
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is an optional string defining the storage flags (copy, clone)..
+ *
+ * Notes:
+ *      (1) This returns NULL for an invalid box in a boxa.
+ *          For a box to be valid, both the width and height must be > 0.
+ *      (2) We allow invalid boxes, with w = 0 or h = 0, as placeholders
+ *          in boxa for which the index of the box in the boxa is important.
+ *          This is an atypical situation; usually you want to put only
+ *          valid boxes in a boxa.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack
@@ -1163,6 +1370,24 @@ GetWhiteblocks(lua_State *L)
  * Arg #4 is expected to be a l_float32 (min_overlap).
  * Arg #5 is expected to be a l_float32 (max_ratio).
  * Arg #6 is an optional Numa* (namap).
+ *
+ * Notes:
+ *      (1) For all n(n-1)/2 box pairings, if two boxes overlap, either:
+ *          (a) op == L_COMBINE: get the bounding region for the two,
+ *              replace the larger with the bounding region, and remove
+ *              the smaller of the two, or
+ *          (b) op == L_REMOVE_SMALL: just remove the smaller.
+ *      (2) If boxas is 2D sorted, range can be small, but if it is
+ *          not spatially sorted, range should be large to allow all
+ *          pairwise comparisons to be made.
+ *      (3) The %min_overlap parameter allows ignoring small overlaps.
+ *          If %min_overlap == 1.0, only boxes fully contained in larger
+ *          boxes can be considered for removal; if %min_overlap == 0.0,
+ *          this constraint is ignored.
+ *      (4) The %max_ratio parameter allows ignoring overlaps between
+ *          boxes that are not too different in size.  If %max_ratio == 0.0,
+ *          no boxes can be removed; if %max_ratio == 1.0, this constraint
+ *          is ignored.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* on the Lua stack
@@ -1187,6 +1412,14 @@ HandleOverlaps(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a Box* (boxs).
+ *
+ * Notes:
+ *      (1) This shifts box[i] --> box[i + 1] for all i >= index,
+ *          and then inserts box as box[index].
+ *      (2) To insert at the beginning of the array, set index = 0.
+ *      (3) To append to the array, it's easier to use boxaAddBox().
+ *      (4) This should not be used repeatedly to insert into large arrays,
+ *          because the function is O(n).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -1207,6 +1440,10 @@ InsertBox(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a Box* (box).
+ *
+ * Notes:
+ *      (1) All boxes in boxa that intersect with box (i.e., are completely
+ *          or partially contained in box) are retained.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* on the Lua stack
@@ -1267,6 +1504,12 @@ IsFull(lua_State *L)
  * Arg #2 is expected to be another Boxa* (boxas).
  * Arg #3 is an optional l_int32 (istart).
  * Arg #4 is an optional l_int32 (iend).
+ *
+ * Notes:
+ *      (1) This appends a clone of each indicated box in boxas to boxad
+ *      (2) istart < 0 is taken to mean 'read from the start' (istart = 0)
+ *      (3) iend < 0 means 'read to the end'
+ *      (4) if boxas == NULL or has no boxes, this is a no-op.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -1288,6 +1531,27 @@ Join(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_int32 (factor).
  * Arg #3 is an optional boolean (debug).
+ *
+ * Notes:
+ *      (1) This finds a set of boxes (boxad) where each edge of each box is
+ *          a linear least square fit (LSF) to the edges of the
+ *          input set of boxes (boxas).  Before fitting, outliers in
+ *          the boxes in boxas are removed (see below).
+ *      (2) This is useful when each of the box edges in boxas are expected
+ *          to vary linearly with box index in the set.  These could
+ *          be, for example, noisy measurements of similar regions
+ *          on successive scanned pages.
+ *      (3) Method: there are 2 steps:
+ *          (a) Find and remove outliers, separately based on the deviation
+ *              from the median of the width and height of the box.
+ *              Use %factor to specify tolerance to outliers; use a very
+ *              large value of %factor to avoid rejecting any box sides
+ *              in the linear LSF.
+ *          (b) On the remaining boxes, do a linear LSF independently
+ *              for each of the four sides.
+ *      (4) Invalid input boxes are not used in computation of the LSF.
+ *      (5) The returned boxad can then be used in boxaModifyWithBoxa()
+ *          to selectively change the boxes in boxas.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* (%boxa) on the Lua stack
@@ -1337,6 +1601,16 @@ LocationRange(lua_State *L)
  * Arg #3 is expected to be a l_int32 (height).
  * Arg #4 is expected to be a string describing the type (type).
  * Arg #5 is expected to be a string describing the relation (relation).
+ *
+ * Notes:
+ *      (1) The args specify constraints on the size of the
+ *          components that are kept.
+ *      (2) If the selection type is L_SELECT_WIDTH, the input
+ *          height is ignored, and v.v.
+ *      (3) To keep small components, use relation = L_SELECT_IF_LT or
+ *          L_SELECT_IF_LTE.
+ *          To keep large components, use relation = L_SELECT_IF_GT or
+ *          L_SELECT_IF_GTE.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* (%na) on the Lua stack
@@ -1361,6 +1635,12 @@ MakeSizeIndicator(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_float32 (ratio).
  * Arg #3 is expected to be a string describing the relation (relation).
+ *
+ * Notes:
+ *      (1) To keep narrow components, use relation = L_SELECT_IF_LT or
+ *          L_SELECT_IF_LTE.
+ *          To keep wide components, use relation = L_SELECT_IF_GT or
+ *          L_SELECT_IF_GTE.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* (%na) on the Lua stack
@@ -1383,6 +1663,13 @@ MakeWHRatioIndicator(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxae).
  * Arg #2 is expected to be a Boxa* (boxao).
  * Arg #3 is optional and, if gived, expected to be a l_int32 (fillflag).
+ *
+ * Notes:
+ *      (1) This is essentially the inverse of boxaSplitEvenOdd().
+ *          Typically, boxae and boxao were generated by boxaSplitEvenOdd(),
+ *          and the value of %fillflag needs to be the same in both calls.
+ *      (2) If %fillflag == 1, both boxae and boxao are of the same size;
+ *          otherwise boxae may have one more box than boxao.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* on the Lua stack
@@ -1406,6 +1693,61 @@ MergeEvenOdd(lua_State *L)
  * Arg #3 is expected to be a string describing the sub flag (subflag).
  * Arg #4 is expected to be a l_int32 (maxdiff).
  * Arg #5 is expected to be a l_int32 (extrapixels).
+ *
+ * Notes:
+ *      (1) This takes two input boxa (boxas, boxam) and constructs boxad,
+ *          where each box in boxad is generated from the corresponding
+ *          boxes in boxas and boxam.  The rule for constructing each
+ *          output box depends on %subflag and %maxdiff.  Let boxs be
+ *          a box from %boxas and boxm be a box from %boxam.
+ *          * If %subflag == L_USE_MINSIZE: the output box is the intersection
+ *            of the two input boxes.
+ *          * If %subflag == L_USE_MAXSIZE: the output box is the union of the
+ *            two input boxes; i.e., the minimum bounding rectangle for the
+ *            two input boxes.
+ *          * If %subflag == L_SUB_ON_LOC_DIFF: each side of the output box
+ *            is found separately from the corresponding side of boxs and boxm.
+ *            Use the boxm side, expanded by %extrapixels, if greater than
+ *            %maxdiff pixels from the boxs side.
+ *          * If %subflag == L_SUB_ON_SIZE_DIFF: the sides of the output box
+ *            are determined in pairs from the width and height of boxs
+ *            and boxm.  If the boxm width differs by more than %maxdiff
+ *            pixels from boxs, use the boxm left and right sides,
+ *            expanded by %extrapixels.  Ditto for the height difference.
+ *          For the last two flags, each side of the output box is found
+ *          separately from the corresponding side of boxs and boxm,
+ *          according to these rules, where "smaller"("bigger") mean in a
+ *          direction that decreases(increases) the size of the output box:
+ *          * If %subflag == L_USE_CAPPED_MIN: use the Min of boxm
+ *            with the Max of (boxs, boxm +- %maxdiff), where the sign
+ *            is adjusted to make the box smaller (e.g., use "+" on left side).
+ *          * If %subflag == L_USE_CAPPED_MAX: use the Max of boxm
+ *            with the Min of (boxs, boxm +- %maxdiff), where the sign
+ *            is adjusted to make the box bigger (e.g., use "-" on left side).
+ *          Use of the last 2 flags is further explained in (3) and (4).
+ *      (2) boxas and boxam must be the same size.  If boxam == NULL,
+ *          this returns a copy of boxas with a warning.
+ *      (3) If %subflag == L_SUB_ON_LOC_DIFF, use boxm for each side
+ *          where the corresponding sides differ by more than %maxdiff.
+ *          Two extreme cases:
+ *          (a) set %maxdiff == 0 to use only values from boxam in boxad.
+ *          (b) set %maxdiff == 10000 to ignore all values from boxam;
+ *              then boxad will be the same as boxas.
+ *      (4) If %subflag == L_USE_CAPPED_MAX: use boxm if boxs is smaller;
+ *          use boxs if boxs is bigger than boxm by an amount up to %maxdiff;
+ *          and use boxm +- %maxdiff (the 'capped' value) if boxs is
+ *          bigger than boxm by an amount larger than %maxdiff.
+ *          Similarly, with interchange of Min/Max and sign of %maxdiff,
+ *          for %subflag == L_USE_CAPPED_MIN.
+ *      (5) If either of corresponding boxes in boxas and boxam is invalid,
+ *          an invalid box is copied to the result.
+ *      (6) Typical input for boxam may be the output of boxaLinearFit().
+ *          where outliers have been removed and each side is LS fit to a line.
+ *      (7) Unlike boxaAdjustWidthToTarget() and boxaAdjustHeightToTarget(),
+ *          this uses two boxes and does not specify target dimensions.
+ *          Additional constraints on the size of each box can be enforced
+ *          by following this operation with boxaConstrainSize(), taking
+ *          boxad as input.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* (%boxa) on the Lua stack
@@ -1427,6 +1769,12 @@ ModifyWithBoxa(lua_State *L)
  * \brief Permute boxes in Boxa* (%boxas) by a pseudo random algorithm.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ *
+ * Notes:
+ *      (1) This does a pseudorandom in-place permutation of the boxes.
+ *      (2) The result is guaranteed not to have any boxes in their
+ *          original position, but it is not very random.  If you
+ *          need randomness, use boxaPermuteRandom().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* (%boxa) on the Lua stack
@@ -1444,6 +1792,18 @@ PermutePseudorandom(lua_State *L)
  * \brief Permute boxes in Boxa* (%boxas) by a random algorithm.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ *
+ * Notes:
+ *      (1) If boxad is null, make a copy of boxas and permute the copy.
+ *          Otherwise, boxad must be equal to boxas, and the operation
+ *          is done in-place.
+ *      (2) If boxas is empty, return an empty boxad.
+ *      (3) This does a random in-place permutation of the boxes,
+ *          by swapping each box in turn with a random box.  The
+ *          result is almost guaranteed not to have any boxes in their
+ *          original position.
+ *      (4) MSVC rand() has MAX_RAND = 2^15 - 1, so it will not do
+ *          a proper permutation is the number of boxes exceeds this.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* (%boxad) on the Lua stack
@@ -1462,6 +1822,14 @@ PermuteRandom(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a l_int32 (maxoverlap).
+ *
+ * Notes:
+ *      (1) This selectively removes smaller boxes when they are overlapped
+ *          by any larger box by more than the input 'maxoverlap' fraction.
+ *      (2) To avoid all pruning, use maxoverlap = 1.0.  To select only
+ *          boxes that have no overlap with each other (maximal pruning),
+ *          set maxoverlap = 0.0.
+ *      (3) If there are no boxes in boxas, returns an empty boxa.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* on the Lua stack (%boxa)
@@ -1537,6 +1905,36 @@ ReadStream(lua_State *L)
  * Arg #4 is expected to be a string describing the adjust choice (op).
  * Arg #5 is expected to be a l_float32 (factor).
  * Arg #6 is expected to be a l_int32 (start).
+ *
+ * Notes:
+ *      (1) The basic idea is to reconcile differences in box height
+ *          in the even and odd boxes, by moving the top and/or bottom
+ *          edges in the even and odd boxes.  Choose the edge or edges
+ *          to be moved, whether to adjust the boxes with the min
+ *          or the max of the medians, and the threshold on the median
+ *          difference between even and odd box heights for the operations
+ *          to take place.  The same threshold is also used to
+ *          determine if each individual box edge is to be adjusted.
+ *      (2) Boxes are conditionally reset with either the same top (y)
+ *          value or the same bottom value, or both.  The value is
+ *          determined by the greater or lesser of the medians of the
+ *          even and odd boxes, with the choice depending on the value
+ *          of %op, which selects for either min or max median height.
+ *          If the median difference between even and odd boxes is
+ *          greater than %dely, then any individual box edge that differs
+ *          from the selected median by more than %dely is set to
+ *          the selected median times a factor typically near 1.0.
+ *      (3) Note that if selecting for minimum height, you will choose
+ *          the largest y-value for the top and the smallest y-value for
+ *          the bottom of the box.
+ *      (4) Typical input might be the output of boxaSmoothSequence(),
+ *          where even and odd boxa have been independently regulated.
+ *      (5) Require at least 3 valid even boxes and 3 valid odd boxes.
+ *          Median values will be used for invalid boxes.
+ *      (6) If the median height is not representative of the boxes
+ *          in %boxas, this can make things much worse.  In that case,
+ *          ignore the value of %op, and force pairwise equality of the
+ *          heights, with pairwise maximal vertical extension.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* (%boxa) on the Lua stack
@@ -1563,6 +1961,22 @@ ReconcileEvenOddHeight(lua_State *L)
  * Arg #3 is expected to be a string describing the adjust choice (op).
  * Arg #4 is expected to be a l_float32 (factor).
  * Arg #5 is expected to be a Numa* (na).
+ *
+ * Notes:
+ *      (1) This reconciles differences in the width of adjacent boxes,
+ *          by moving one side of one of the boxes in each pair.
+ *          If the widths in the pair differ by more than some
+ *          threshold, move either the left side for even boxes or
+ *          the right side for odd boxes, depending on if we're choosing
+ *          the min or max.  If choosing min, the width of the max is
+ *          set to factor * (width of min).  If choosing max, the width
+ *          of the min is set to factor * (width of max).
+ *      (2) If %na exists, it is an indicator array corresponding to the
+ *          boxes in %boxas.  If %na != NULL, only boxes with an
+ *          indicator value of 1 are allowed to adjust; otherwise,
+ *          all boxes can adjust.
+ *      (3) Typical input might be the output of boxaSmoothSequence(),
+ *          where even and odd boxa have been independently regulated.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* (%boxa) on the Lua stack
@@ -1585,6 +1999,12 @@ ReconcilePairWidth(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_int32 (idx).
+ *
+ * Notes:
+ *      (1) This removes box[index] and then shifts
+ *          box[i] --> box[i - 1] for all i > index.
+ *      (2) It should not be used repeatedly to remove boxes from
+ *          large arrays, because the function is O(n).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -1604,6 +2024,12 @@ RemoveBox(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_int32 (idx).
+ *
+ * Notes:
+ *      (1) This removes box[index] and then shifts
+ *          box[i] --> box[i - 1] for all i > index.
+ *      (2) It should not be used repeatedly to remove boxes from
+ *          large arrays, because the function is O(n).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box* on the Lua stack, or 0 in case of error
@@ -1626,6 +2052,10 @@ RemoveBoxAndSave(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa*.
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a Box*.
+ *
+ * Notes:
+ *      (1) In-place replacement of one box.
+ *      (2) The previous box at that location, if any, is destroyed.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -1667,6 +2097,9 @@ Rotate(lua_State *L)
  * \brief Rotate a Boxa* (%boxas) orthogonally.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ *
+ * Notes:
+ *      (1) See boxRotateOrth() for details.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* on the Lua stack
@@ -1689,6 +2122,9 @@ RotateOrth(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is an optional string defining the storage flags (copy, clone).
+ *
+ * Notes:
+ *      (1) This makes a copy/clone of each valid box.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* on the Lua stack; or nil on error
@@ -1732,6 +2168,17 @@ Scale(lua_State *L)
  * Arg #3 is expected to be a l_int32 (height).
  * Arg #4 is expected to be a string describing the type (type).
  * Arg #5 is expected to be a string describing the relation (relation).
+ *
+ * Notes:
+ *      (1) The args specify constraints on the size of the
+ *          components that are kept.
+ *      (2) Uses box copies in the new boxa.
+ *      (3) If the selection type is L_SELECT_WIDTH, the input
+ *          height is ignored, and v.v.
+ *      (4) To keep small components, use relation = L_SELECT_IF_LT or
+ *          L_SELECT_IF_LTE.
+ *          To keep large components, use relation = L_SELECT_IF_GT or
+ *          L_SELECT_IF_GTE.
  * </pre>
  * \param L pointer to the lua_State
  * \return 2 Boxa* (%boxa) and integer (%changed) on the Lua stack
@@ -1758,6 +2205,13 @@ SelectBySize(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_float32 (ratio).
  * Arg #3 is expected to be a string describing the relation (relation).
+ *
+ * Notes:
+ *      (1) Uses box copies in the new boxa.
+ *      (2) To keep narrow components, use relation = L_SELECT_IF_LT or
+ *          L_SELECT_IF_LTE.
+ *          To keep wide components, use relation = L_SELECT_IF_GT or
+ *          L_SELECT_IF_GTE.
  * </pre>
  * \param L pointer to the lua_State
  * \return 2 Boxa* (%boxa) and integer (%changed) on the Lua stack
@@ -1782,6 +2236,9 @@ SelectByWHRatio(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_float32 (areaslop).
  * Arg #3 is expected to be a l_int32 (yslop).
+ *
+ * Notes:
+ *      (1) See usage notes in pixSelectLargeULComp().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Box* (%box) on the Lua stack
@@ -1804,6 +2261,11 @@ SelectLargeULBox(lua_State *L)
  * Arg #2 is expected to be a l_int32 (first).
  * Arg #3 is expected to be a l_int32 (last).
  * Arg #4 is an optional string defining the storage flags (copyflag).
+ *
+ * Notes:
+ *      (1) The copyflag specifies what we do with each box from boxas.
+ *          Specifically, L_CLONE inserts a clone into boxad of each
+ *          selected box from boxas.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxaa* (%boxaa) on the Lua stack
@@ -1825,6 +2287,11 @@ SelectRange(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a Numa* (na)
+ *
+ * Notes:
+ *      (1) Returns a copy of the boxa if no components are removed.
+ *      (2) Uses box copies in the new boxa.
+ *      (3) The indicator numa has values 0 (ignore) and 1 (accept).
  * </pre>
  * \param L pointer to the lua_State
  * \return 2 Boxa* (%boxa) and integer (%changed) on the Lua stack
@@ -1849,6 +2316,13 @@ SelectWithIndicator(lua_State *L)
  * Arg #2 is expected to be a string describing the side (side).
  * Arg #3 is expected to be a l_int32 (val).
  * Arg #4 is expected to be a l_int32 (thresh).
+ *
+ * Notes:
+ *      (1) Sets the given side of each box.  Use boxad == NULL for a new
+ *          boxa, and boxad == boxas for in-place.
+ *      (2) Use one of these:
+ *               boxad = boxaSetSide(NULL, boxas, ...);   // new
+ *               boxaSetSide(boxas, boxas, ...);  // in-place
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* on the Lua stack
@@ -1875,6 +2349,13 @@ SetSide(lua_State *L)
  * Arg #4 is expected to be a l_int32 (rightdiff).
  * Arg #5 is expected to be a l_int32 (topdiff).
  * Arg #6 is expected to be a l_int32 (botdiff).
+ *
+ * Notes:
+ *      (1) See boxSimilar() for parameter usage.
+ *      (2) Corresponding boxes are taken in order in the two boxa.
+ *      (3) %nasim is an indicator array with a (0/1) for each box pair.
+ *      (4) With %nasim or debug == 1, boxes continue to be tested
+ *          after failure.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Numa* (nasim) on the Lua stack
@@ -1929,6 +2410,15 @@ SizeRange(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a string describing the select size (type).
+ *
+ * Notes:
+ *      (1) This gives several measures of the smoothness of either the
+ *          width or height of a sequence of boxes.
+ *      (2) Statistics can be found separately for even and odd boxes.
+ *          Additionally, the average pair-wise difference between
+ *          adjacent even and odd boxes can be returned.
+ *      (3) The use case is bounding boxes for scanned page images,
+ *          where ideally the sizes should have little variance.
  * </pre>
  * \param L pointer to the lua_State
  * \return 4 numbers on the Lua stack (%del_evenodd, %rms_even, %rms_odd, %rms_all)
@@ -1961,6 +2451,19 @@ SizeVariation(lua_State *L)
  * Arg #4 is expected to be a l_int32 (maxdiff).
  * Arg #5 is expected to be a l_int32 (extrapixels).
  * Arg #5 is an optional boolean (debug).
+ *
+ * Notes:
+ *      (1) This returns a modified version of %boxas by constructing
+ *          for each input box a box that has been linear least square fit
+ *          (LSF) to the entire set.  The linear fitting is done to each of
+ *          the box sides independently, after outliers are rejected,
+ *          and it is computed separately for sequences of even and
+ *          odd boxes.  Once the linear LSF box is found, the output box
+ *          (in %boxad) is constructed from the input box and the LSF
+ *          box, depending on %subflag.  See boxaModifyWithBoxa() for
+ *          details on the use of %subflag and %maxdiff.
+ *      (2) This is useful if, in both the even and odd sets, the box
+ *          edges vary roughly linearly with its index in the set.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* (%boxa) on the Lua stack
@@ -1988,6 +2491,28 @@ SmoothSequenceLS(lua_State *L)
  * Arg #4 is expected to be a l_int32 (maxdiff).
  * Arg #5 is expected to be a l_int32 (extrapixels).
  * Arg #5 is an optional boolean (debug).
+ *
+ * Notes:
+ *      (1) The target width of the sliding window is 2 * %halfwin + 1.
+ *          If necessary, this will be reduced by boxaWindowedMedian().
+ *      (2) This returns a modified version of %boxas by constructing
+ *          for each input box a box that has been smoothed with windowed
+ *          median filtering.  The filtering is done to each of the
+ *          box sides independently, and it is computed separately for
+ *          sequences of even and odd boxes.  The output %boxad is
+ *          constructed from the input boxa and the filtered boxa,
+ *          depending on %subflag.  See boxaModifyWithBoxa() for
+ *          details on the use of %subflag, %maxdiff and %extrapixels.
+ *      (3) This is useful for removing noise separately in the even
+ *          and odd sets, where the box edge locations can have
+ *          discontinuities but otherwise vary roughly linearly within
+ *          intervals of size %halfwin or larger.
+ *      (4) If you don't need to handle even and odd sets separately,
+ *          just do this:
+ *              boxam = boxaWindowedMedian(boxas, halfwin, debug);
+ *              boxad = boxaModifyWithBoxa(boxas, boxam, subflag, maxdiff,
+ *                                         extrapixels);
+ *              boxaDestroy(&boxam);
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* (%boxa) on the Lua stack
@@ -2012,6 +2537,9 @@ SmoothSequenceMedian(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
  * Arg #2 is expected to be a string defining the sort type (type).
  * Arg #3 is expected to be a string defining the sort order (order).
+ *
+ * Notes:
+ *      (1) An empty boxa returns a copy, with a warning.
  * </pre>
  * \param L pointer to the lua_State
  * \return 2 Boxa* (boxa) and Numa* (naindex) on the Lua stack
@@ -2035,6 +2563,36 @@ Sort(lua_State *L)
  * Arg #2 is expected to be a l_int32 (delta1).
  * Arg #3 is expected to be a l_int32 (delta2).
  * Arg #4 is expected to be a l_int32 (minh1).
+ *
+ * Notes:
+ *      (1) The final result is a sort where the 'fast scan' direction is
+ *          left to right, and the 'slow scan' direction is from top
+ *          to bottom.  Each boxa in the baa represents a sorted set
+ *          of boxes from left to right.
+ *      (2) Three passes are used to aggregate the boxas, which can correspond
+ *          to characters or words in a line of text.  In pass 1, only
+ *          taller components, which correspond to xheight or larger,
+ *          are permitted to start a new boxa.  In pass 2, the remaining
+ *          vertically-challenged components are allowed to join an
+ *          existing boxa or start a new one.  In pass 3, boxa whose extent
+ *          is overlapping are joined.  After that, the boxes in each
+ *          boxa are sorted horizontally, and finally the boxa are
+ *          sorted vertically.
+ *      (3) If delta1 < 0, the first pass allows aggregation when
+ *          boxes in the same boxa do not overlap vertically.
+ *          The distance by which they can miss and still be aggregated
+ *          is the absolute value |delta1|.   Similar for delta2 on
+ *          the second pass.
+ *      (4) On the first pass, any component of height less than minh1
+ *          cannot start a new boxa; it's put aside for later insertion.
+ *      (5) On the second pass, any small component that doesn't align
+ *          with an existing boxa can start a new one.
+ *      (6) This can be used to identify lines of text from
+ *          character or word bounding boxes.
+ *      (7) Typical values for the input parameters on 300 ppi text are:
+ *                 delta1 ~ 0
+ *                 delta2 ~ 0
+ *                 minh1 ~ 5
  * </pre>
  * \param L pointer to the lua_State
  * \return 2 Boxaa* (%boxaa) and Numaa* (%naad) on the Lua stack
@@ -2097,6 +2655,12 @@ SortByIndex(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is optional and, if gived, expected to be a l_int32 (fillflag).
+ *
+ * Notes:
+ *      (1) If %fillflag == 1, boxae has copies of the even boxes
+ *          in their original location, and nvalid boxes are placed
+ *          in the odd array locations.  And v.v.
+ *      (2) If %fillflag == 0, boxae has only copies of the even boxes.
  * </pre>
  * \param L pointer to the lua_State
  * \return 2 Boxa* on the Lua stack (boxae, boxao)
@@ -2161,6 +2725,14 @@ Translate(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_int32 (halfwin).
  * Arg #3 is an optional boolean (debug).
+ *
+ * Notes:
+ *      (1) This finds a set of boxes (boxad) where each edge of each box is
+ *          a windowed median smoothed value to the edges of the
+ *          input set of boxes (boxas).
+ *      (2) Invalid input boxes are filled from nearby ones.
+ *      (3) The returned boxad can then be used in boxaModifyWithBoxa()
+ *          to selectively change the boxes in the source boxa.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* (%boxa) on the Lua stack
@@ -2198,6 +2770,9 @@ Write(lua_State *L)
  * \brief Write a Boxa* (%boxa) to memory (%data).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box).
+ *
+ * Notes:
+ *      (1) Serializes a boxa in memory and puts the result in a buffer.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
