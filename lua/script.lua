@@ -518,6 +518,10 @@ function hex_dump(buf)
 	end
 end
 
+local res = io.popen("mkdir " .. tmpdir)
+print("mkdir " .. tmpdir, res:read("*a"))
+res.close()
+
 header("Main program")
 print("Hello, world!")
 header()
