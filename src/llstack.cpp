@@ -40,11 +40,20 @@
 /** Define a function's name (_fun) with prefix LL_STACK */
 #define LL_FUNC(x) FUNC(LL_STACK "." x)
 
-
 /**
  * \brief Destroy a Stack* (%lstack).
  * <pre>
- * Arg #1 is expected to be a l_int32 (freeflag).
+ * Arg #1 (i.e. self) is expected to be a Stack* (lstack).
+ *
+ * Notes:
+ *      (1) If freeflag is TRUE, frees each struct in the array.
+ *      (2) If freeflag is FALSE but there are elements on the array,
+ *          gives a warning and destroys the array.  This will
+ *          cause a memory leak of all the items that were on the lstack.
+ *          So if the items require their own destroy function, they
+ *          must be destroyed before the lstack.
+ *      (3) To destroy the lstack, we destroy the ptr array, then
+ *          the lstack, and then null the contents of the input ptr.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 void on the Lua stack
@@ -54,7 +63,7 @@ Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
     Stack **pstack = ll_check_udata<Stack>(_fun, L, 1, LL_STACK);
-    l_int32 freeflag = ll_check_l_int32(_fun, L, 1);
+    l_int32 freeflag = ll_opt_boolean(_fun, L, 2, FALSE);
     Stack *stack = *pstack;
     DBG(LOG_DESTROY, "%s: '%s' pstack=%p stack=%p\n",
         _fun, LL_SEL, pstack, stack);
@@ -166,6 +175,7 @@ ll_check_Stack(const char *_fun, lua_State *L, int arg)
 {
     return *ll_check_udata<Stack>(_fun, L, arg, LL_STACK);
 }
+
 /**
  * \brief Optionally expect a Stack* at index (%arg) on the Lua stack.
  * \param _fun calling function's name
@@ -180,6 +190,7 @@ ll_opt_Stack(const char *_fun, lua_State *L, int arg)
         return nullptr;
     return ll_check_Stack(_fun, L, arg);
 }
+
 /**
  * \brief Push Stack* to the Lua stack and set its meta table.
  * \param _fun calling function's name
@@ -194,6 +205,7 @@ ll_push_Stack(const char *_fun, lua_State *L, Stack *cd)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, LL_STACK, cd);
 }
+
 /**
  * \brief Create and push a new Stack*.
  *
@@ -208,6 +220,7 @@ ll_new_Stack(lua_State *L)
 {
     return Create(L);
 }
+
 /**
  * \brief Register the Stack methods and functions in the LL_STACK meta table.
  * \param L pointer to the lua_State

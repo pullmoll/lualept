@@ -44,6 +44,10 @@
  * \brief Destroy a Pta*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
+ *
+ * Notes:
+ *      (1) Decrements the ref count and, if 0, destroys the pta.
+ *      (2) Always nulls the input ptr.
  * </pre>
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack
@@ -175,6 +179,10 @@ Clone(lua_State *L)
  * \brief Convert the Pta* (%pta) to a Box* (%box).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
+ *
+ * Notes:
+ *      (1) For 2 corners, the order of the 2 points is UL, LR.
+ *          For 4 corners, the order of points is UL, UR, LL, LR.
  * </pre>
  * \param L pointer to the lua_State
  * \return 2 for two Numa* on the Lua stack, or 0 in case of error
@@ -230,6 +238,9 @@ CopyRange(lua_State *L)
  * \brief Set the number of stored numbes in the Pta* to zero.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
+ *
+ * Notes:
+ *      This only resets the Pta::n field, for reuse
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -246,6 +257,9 @@ Empty(lua_State *L)
  * \brief Get the Pta* (%pta) as an two Numa* (%ptax, %ptay) for X and Y.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
+ *
+ * Notes:
+ *      (1) This copies the internal arrays into new Numas.
  * </pre>
  * \param L pointer to the lua_State
  * \return 2 for two Numa* on the Lua stack, or 0 in case of error
@@ -389,6 +403,11 @@ ReadStream(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
  * Arg #2 is expected to be a l_int32 (idx).
+ *
+ * Notes:
+ *      (1) This shifts pta[i] --> pta[i - 1] for all i > index.
+ *      (2) It should not be used repeatedly on large arrays,
+ *          because the function is O(n).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack

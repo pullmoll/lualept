@@ -220,6 +220,11 @@ ReadStream(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a Pta* user data.
+ *
+ * Notes:
+ *      (1) Any existing pta is destroyed, and the input one
+ *          is inserted in its place.
+ *      (2) If the index is invalid, return 1 (error)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -238,6 +243,11 @@ ReplacePta(lua_State *L)
  * \brief Truncate the arrays stored in the Ptaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
+ *
+ * Notes:
+ *      (1) This identifies the largest index containing a pta that
+ *          has any points within it, destroys all pta above that index,
+ *          and resets the count.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack

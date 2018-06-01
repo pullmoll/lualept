@@ -43,35 +43,6 @@
 /**
  * \brief Brief comment goes here.
  * <pre>
- * Arg #1 is expected to be a Pix* (pixs).
- * Arg #2 is expected to be a l_int32 (nx).
- * Arg #3 is expected to be a l_int32 (ny).
- * Arg #4 is expected to be a l_int32 (w).
- * Arg #5 is expected to be a l_int32 (h).
- * Arg #6 is expected to be a l_int32 (xoverlap).
- * Arg #7 is expected to be a l_int32 (yoverlap).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 PixTiling * on the Lua stack
- */
-static int
-Create(lua_State *L)
-{
-    LL_FUNC("Create");
-    Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 nx = ll_check_l_int32(_fun, L, 2);
-    l_int32 ny = ll_check_l_int32(_fun, L, 3);
-    l_int32 w = ll_check_l_int32(_fun, L, 4);
-    l_int32 h = ll_check_l_int32(_fun, L, 5);
-    l_int32 xoverlap = ll_check_l_int32(_fun, L, 6);
-    l_int32 yoverlap = ll_check_l_int32(_fun, L, 7);
-    PixTiling *pixt = pixTilingCreate(pixs, nx, ny, w, h, xoverlap, yoverlap);
-    return ll_push_PixTiling (_fun, L, pixt);
-}
-
-/**
- * \brief Brief comment goes here.
- * <pre>
  * Arg #1 is expected to be a l_int32 (freeflag).
  * </pre>
  * \param L pointer to the lua_State
@@ -108,6 +79,50 @@ GetCount(lua_State *L)
     if (pixTilingGetCount(pt, &nx, &ny))
         return ll_push_nil(L);
     return ll_push_l_int32(_fun, L, nx) + ll_push_l_int32(_fun, L, ny);
+}
+
+/**
+ * \brief Brief comment goes here.
+ * <pre>
+ * Arg #1 is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a l_int32 (nx).
+ * Arg #3 is expected to be a l_int32 (ny).
+ * Arg #4 is expected to be a l_int32 (w).
+ * Arg #5 is expected to be a l_int32 (h).
+ * Arg #6 is expected to be a l_int32 (xoverlap).
+ * Arg #7 is expected to be a l_int32 (yoverlap).
+ *
+ * Notes:
+ *      (1) We put a clone of pixs in the PixTiling.
+ *      (2) The input to pixTilingCreate() for horizontal tiling can be
+ *          either the number of tiles across the image or the approximate
+ *          width of the tiles.  If the latter, the actual width will be
+ *          determined by making all tiles but the last of equal width, and
+ *          making the last as close to the others as possible.  The same
+ *          consideration is applied independently to the vertical tiling.
+ *          To specify tile width, set nx = 0; to specify the number of
+ *          tiles horizontally across the image, set w = 0.
+ *      (3) If pixs is to be tiled in one-dimensional strips, use ny = 1 for
+ *          vertical strips and nx = 1 for horizontal strips.
+ *      (4) The overlap must not be larger than the width or height of
+ *          the leftmost or topmost tile(s).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 PixTiling * on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    LL_FUNC("Create");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 nx = ll_check_l_int32(_fun, L, 2);
+    l_int32 ny = ll_check_l_int32(_fun, L, 3);
+    l_int32 w = ll_check_l_int32(_fun, L, 4);
+    l_int32 h = ll_check_l_int32(_fun, L, 5);
+    l_int32 xoverlap = ll_check_l_int32(_fun, L, 6);
+    l_int32 yoverlap = ll_check_l_int32(_fun, L, 7);
+    PixTiling *pixt = pixTilingCreate(pixs, nx, ny, w, h, xoverlap, yoverlap);
+    return ll_push_PixTiling (_fun, L, pixt);
 }
 
 /**
@@ -151,6 +166,7 @@ ll_push_PixTiling(const char *_fun, lua_State *L, PixTiling *cd)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, LL_PIXTILING, cd);
 }
+
 /**
  * \brief Create and push a new PixTiling*.
  *
@@ -163,8 +179,18 @@ ll_push_PixTiling(const char *_fun, lua_State *L, PixTiling *cd)
 int
 ll_new_PixTiling(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_PixTiling");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    l_int32 nx = ll_check_l_int32(_fun, L, 2);
+    l_int32 ny = ll_check_l_int32(_fun, L, 3);
+    l_int32 w = ll_check_l_int32(_fun, L, 4);
+    l_int32 h = ll_check_l_int32(_fun, L, 5);
+    l_int32 xoverlap = ll_check_l_int32(_fun, L, 6);
+    l_int32 yoverlap = ll_check_l_int32(_fun, L, 7);
+    PixTiling *pixt = pixTilingCreate(pixs, nx, ny, w, h, xoverlap, yoverlap);
+    return ll_push_PixTiling (_fun, L, pixt);
 }
+
 /**
  * \brief Register the PixTiling methods and functions in the LL_PIXTILING meta table.
  * \param L pointer to the lua_State
@@ -175,7 +201,7 @@ ll_register_PixTiling(lua_State *L)
 {
     static const luaL_Reg methods[] = {
         {"__gc",                Destroy},   /* garbage collector */
-        {"__new",               Create},
+        {"__new",               ll_new_PixTiling},
         {"__len",               GetCount},
         {"Create",              Create},
         {"Destroy",             Destroy},
@@ -186,7 +212,7 @@ ll_register_PixTiling(lua_State *L)
         LUA_SENTINEL
     };
 
-    lua_pushcfunction(L, Create);
+    lua_pushcfunction(L, ll_new_PixTiling);
     lua_setglobal(L, LL_PIXTILING);
     return ll_register_class(L, LL_PIXTILING, methods, functions);
 }

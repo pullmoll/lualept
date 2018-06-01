@@ -179,6 +179,13 @@ Thin8cc(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sela* (sela).
+ *
+ * Notes:
+ *      (1) Adds the following sels:
+ *            ~ all linear (horiz, vert) brick sels that are
+ *              necessary for decomposable sels up to size 63
+ *            ~ square brick sels up to size 10
+ *            ~ 4 diagonal sels
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Sela* on the Lua stack
@@ -200,6 +207,20 @@ AddBasic(lua_State *L)
  * Arg #3 is expected to be a l_float32 (mdist).
  * Arg #4 is expected to be a l_int32 (norient).
  * Arg #5 is expected to be a l_int32 (debugflag).
+ *
+ * Notes:
+ *      (1) Adds hitmiss Sels for the intersection of two lines.
+ *          If the lines are very thin, they must be nearly orthogonal
+ *          to register.
+ *      (2) The number of Sels generated is equal to %norient.
+ *      (3) If %norient == 2, this generates 2 Sels of crosses, each with
+ *          two perpendicular lines of hits.  One Sel has horizontal and
+ *          vertical hits; the other has hits along lines at +-45 degrees.
+ *          Likewise, if %norient == 3, this generates 3 Sels of crosses
+ *          oriented at 30 degrees with each other.
+ *      (4) It is suggested that %hlsize be chosen at least 1 greater
+ *          than %mdist.  Try values of (%hlsize, %mdist) such as
+ *          (6,5), (7,6), (8,7), (9,7), etc.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Sela* on the Lua stack
@@ -221,6 +242,12 @@ AddCrossJunctions(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sela* (selas).
+ *
+ * Notes:
+ *      (1) Adds all comb (horizontal, vertical) Sels that are
+ *          used in composite linear morphological operations
+ *          up to 63 pixels in length, which are the sizes over
+ *          which dwa code can be generated.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Sela * on the Lua stack
@@ -238,6 +265,11 @@ AddDwaCombs(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sela* (sela).
+ *
+ * Notes:
+ *      (1) Adds all linear (horizontal, vertical) sels from
+ *          2 to 63 pixels in length, which are the sizes over
+ *          which dwa code can be generated.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Sela * on the Lua stack
@@ -276,6 +308,15 @@ AddHitMiss(lua_State *L)
  * Arg #3 is expected to be a l_float32 (mdist).
  * Arg #4 is expected to be a l_int32 (norient).
  * Arg #5 is expected to be a l_int32 (debugflag).
+ *
+ * Notes:
+ *      (1) Adds hitmiss Sels for the T-junction of two lines.
+ *          If the lines are very thin, they must be nearly orthogonal
+ *          to register.
+ *      (2) The number of Sels generated is 4 * %norient.
+ *      (3) It is suggested that %hlsize be chosen at least 1 greater
+ *          than %mdist.  Try values of (%hlsize, %mdist) such as
+ *          (6,5), (7,6), (8,7), (9,7), etc.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Sela * on the Lua stack
@@ -300,6 +341,12 @@ AddTJunctions(lua_State *L)
  * Arg #2 is expected to be a Sel* (sel).
  * Arg #3 is expected to be a string (selname).
  * Arg #4 is expected to be a l_int32 (copyflag).
+ *
+ * Notes:
+ *      (1) This adds a sel, either inserting or making a copy.
+ *      (2) Because every sel in a sela must have a name, it copies
+ *          the input name if necessary.  You can input NULL for
+ *          selname if the sel already has a name.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -319,6 +366,29 @@ AddSel(lua_State *L)
  * \brief Create a new Sela* (%sela) from an external file (%filename)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a string (filename).
+ *
+ * Notes:
+ *      (1) The file contains a sequence of Sel descriptions.
+ *      (2) Each Sel is formatted as follows:
+ *           ~ Any number of comment lines starting with '#' are ignored
+ *           ~ The next line contains the selname
+ *           ~ The next lines contain the Sel data.  They must be
+ *             formatted similarly to the string format in
+ *             selCreateFromString(), with each line beginning and
+ *             ending with a double-quote, and showing the 2D layout.
+ *           ~ Each Sel ends when a blank line, a comment line, or
+ *             the end of file is reached.
+ *      (3) See selCreateFromString() for a description of the string
+ *          format for the Sel data.  As an example, here are the lines
+ *          of is a valid file for a single Sel.  In the file, all lines
+ *          are left-justified:
+ *                    # diagonal sel
+ *                    sel_5diag
+ *                    "x    "
+ *                    " x   "
+ *                    "  X  "
+ *                    "   x "
+ *                    "    x"
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Sela * on the Lua stack
@@ -340,6 +410,12 @@ CreateFromFile(lua_State *L)
  * Arg #3 is expected to be a l_int32 (gthick).
  * Arg #4 is expected to be a l_int32 (spacing).
  * Arg #5 is expected to be a l_int32 (ncols).
+ *
+ * Notes:
+ *      (1) This gives a visual representation of all the sels in a sela.
+ *      (2) See notes in selDisplayInPix() for display params of each sel.
+ *      (3) This gives the nicest results when all sels in the sela
+ *          are the same size.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -386,6 +462,10 @@ FindSelByName(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sela* (sela).
  * Arg #2 is expected to be a l_int32 (i).
+ *
+ * Notes:
+ *      (1) This returns a ptr to the sel, not a copy, so the caller
+ *          must not destroy it!
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Sel * on the Lua stack
@@ -516,6 +596,10 @@ GetBrickName(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Sela* (sela).
  * Arg #2 is expected to be a l_int32 (size).
  * Arg #3 is expected to be a l_int32 (direction).
+ *
+ * Notes:
+ *      (1) Combs are by definition 1-dimensional, either horiz or vert.
+ *      (2) Use this with comb Sels; e.g., from selaAddDwaCombs().
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
@@ -537,6 +621,26 @@ GetCombName(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a l_int32 (index).
  * Arg #2 is expected to be a l_int32 (debug).
+ *
+ * Notes:
+ *      (1) These are specific sets of HMTs to be used in parallel for
+ *          for thinning from each of four directions.
+ *      (2) The sets are indexed as follows:
+ *          For thinning (e.g., run to completion):
+ *              index = 1     sel_4_1, sel_4_2, sel_4_3
+ *              index = 2     sel_4_1, sel_4_5, sel_4_6
+ *              index = 3     sel_4_1, sel_4_7, sel_4_7_rot
+ *              index = 4     sel_48_1, sel_48_1_rot, sel_48_2
+ *              index = 5     sel_8_2, sel_8_3, sel_8_5, sel_8_6
+ *              index = 6     sel_8_2, sel_8_3, sel_48_2
+ *              index = 7     sel_8_1, sel_8_5, sel_8_6
+ *              index = 8     sel_8_2, sel_8_3, sel_8_8, sel_8_9
+ *              index = 9     sel_8_5, sel_8_6, sel_8_7, sel_8_7_rot
+ *          For thickening (e.g., just a few iterations):
+ *              index = 10    sel_4_2, sel_4_3
+ *              index = 11    sel_8_4
+ *      (3) For a very smooth skeleton, use set 1 for 4 connected and
+ *          set 5 for 8 connected thins.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Sela * on the Lua stack
