@@ -62,23 +62,6 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Create a new Sela*.
- * <pre>
- * Arg #1 is expected to be a l_int32 (n).
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Sela* on the Lua stack
- */
-static int
-Create(lua_State *L)
-{
-    LL_FUNC("Create");
-    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
-    Sela *pa = selaCreate(n);
-    return ll_push_Sela(_fun, L, pa);
-}
-
-/**
  * \brief Get then number Sel* in the Sela* (%sela).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sela* (sela).
@@ -363,6 +346,23 @@ AddSel(lua_State *L)
 }
 
 /**
+ * \brief Create a new Sela*.
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (n).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Sela* on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    LL_FUNC("Create");
+    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
+    Sela *pa = selaCreate(n);
+    return ll_push_Sela(_fun, L, pa);
+}
+
+/**
  * \brief Create a new Sela* (%sela) from an external file (%filename)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a string (filename).
@@ -382,13 +382,15 @@ AddSel(lua_State *L)
  *          format for the Sel data.  As an example, here are the lines
  *          of is a valid file for a single Sel.  In the file, all lines
  *          are left-justified:
- *                    # diagonal sel
- *                    sel_5diag
- *                    "x    "
- *                    " x   "
- *                    "  X  "
- *                    "   x "
- *                    "    x"
+ * \code
+ *          # diagonal sel
+ *          sel_5diag
+ *          "x    "
+ *          " x   "
+ *          "  X  "
+ *          "   x "
+ *          "    x"
+ * \endcode
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Sela * on the Lua stack
@@ -697,6 +699,7 @@ ll_push_Sela(const char *_fun, lua_State *L, Sela *sela)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, LL_SELA, sela);
 }
+
 /**
  * \brief Create and push a new Sela*.
  * \param L pointer to the lua_State
@@ -705,8 +708,50 @@ ll_push_Sela(const char *_fun, lua_State *L, Sela *sela)
 int
 ll_new_Sela(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_Sela");
+    Sela *sela = nullptr;
+
+    if (lua_isuserdata(L, 1)) {
+        luaL_Stream *stream = ll_opt_stream(_fun, L, 1);
+        if (stream) {
+            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+                "stream", stream);
+            sela = selaReadStream(stream->f);
+        }
+    }
+
+    if (lua_isinteger(L, 1)) {
+        l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
+        DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
+            "n", n);
+        sela = selaCreate(n);
+    }
+
+    if (!sela && lua_isstring(L, 1)) {
+        const char* fname = ll_check_string(_fun, L, 1);
+        DBG(LOG_NEW_CLASS, "%s: create for %s = '%s'\n", _fun,
+            "fname", fname);
+        sela = selaRead(fname);
+    }
+
+    if (!sela && lua_isstring(L, 1)) {
+        const char* filename = ll_check_string(_fun, L, 1);
+        DBG(LOG_NEW_CLASS, "%s: create for %s = '%s'\n", _fun,
+            "filename", filename);
+        sela = selaCreateFromFile(filename);
+    }
+
+    if (!sela) {
+        DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
+            "n", 1);
+        sela = selaCreate(1);
+    }
+
+    DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
+        LL_SELA, reinterpret_cast<void *>(sela));
+    return ll_push_Sela(_fun, L, sela);
 }
+
 /**
  * \brief Register the PTA methods and functions in the LL_SELA meta table.
  * \param L pointer to the lua_State
@@ -716,8 +761,8 @@ int
 ll_register_Sela(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},       /* garbage collector */
-        {"__new",               Create},        /* new Sela */
+        {"__gc",                Destroy},           /* garbage collector */
+        {"__new",               ll_new_Sela},       /* Sela() */
         {"__len",               GetCount},
         {"__tostring",          toString},
         {"Thin4and8cc",         Thin4and8cc},
@@ -749,7 +794,7 @@ ll_register_Sela(lua_State *L)
         LUA_SENTINEL
     };
 
-    lua_pushcfunction(L, Create);
+    lua_pushcfunction(L, ll_new_Sela);
     lua_setglobal(L, LL_SELA);
     return ll_register_class(L, LL_SELA, methods, functions);
 }

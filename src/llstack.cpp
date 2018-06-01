@@ -218,7 +218,25 @@ ll_push_Stack(const char *_fun, lua_State *L, Stack *cd)
 int
 ll_new_Stack(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_Stack");
+    Stack *lstack = nullptr;
+    l_int32 nalloc = ll_opt_l_int32(_fun, L, 1, 1);
+
+    if (lua_isinteger(L, 1)) {
+        DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
+            "nalloc", nalloc);
+        lstack = lstackCreate(nalloc);
+    }
+
+    if (!lstack) {
+        DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
+            "nalloc", 1);
+        lstack = lstackCreate(1);
+    }
+
+    DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
+        LL_STACK, reinterpret_cast<void *>(lstack));
+    return ll_push_Stack(_fun, L, lstack);
 }
 
 /**
@@ -231,7 +249,7 @@ ll_register_Stack(lua_State *L)
 {
     static const luaL_Reg methods[] = {
         {"__gc",                Destroy},   /* garbage collector */
-        {"__new",               Create},
+        {"__new",               ll_new_Stack},
         {"__len",               GetCount},
         {"Add",                 Add},
         {"Create",              Create},
@@ -248,7 +266,7 @@ ll_register_Stack(lua_State *L)
         LUA_SENTINEL
     };
 
-    lua_pushcfunction(L, Create);
+    lua_pushcfunction(L, ll_new_Stack);
     lua_setglobal(L, LL_STACK);
     return ll_register_class(L, LL_STACK, methods, functions);
 }

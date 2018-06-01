@@ -62,33 +62,6 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Create a new Sel*.
- * <pre>
- * Arg #1 is expected to be a l_int32 (height).
- * Arg #2 is expected to be a l_int32 (width).
- * Arg #3 is expected to be a string (name).
- *
- * Notes:
- *      (1) selCreate() initializes all values to 0.
- *      (2) After this call, (cy,cx) and nonzero data values must be
- *          assigned.  If a text name is not assigned here, it will
- *          be needed later when the sel is put into a sela.
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 Sel* on the Lua stack
- */
-static int
-Create(lua_State *L)
-{
-    LL_FUNC("Create");
-    l_int32 height = ll_opt_l_int32(_fun, L, 1, 1);
-    l_int32 width = ll_opt_l_int32(_fun, L, 2, 1);
-    const char *name = ll_check_string(_fun, L, 3);
-    Sel *pa = selCreate(height, width, name);
-    return ll_push_Sel(_fun, L, pa);
-}
-
-/**
  * \brief Printable string for a Sel* (%sel).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sel* (sel).
@@ -132,6 +105,33 @@ Copy(lua_State *L)
     Sel *sels = ll_check_Sel(_fun, L, 1);
     Sel *sel = selCopy(sels);
     return ll_push_Sel(_fun, L, sel);
+}
+
+/**
+ * \brief Create a new Sel*.
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (height).
+ * Arg #2 is expected to be a l_int32 (width).
+ * Arg #3 is expected to be a string (name).
+ *
+ * Notes:
+ *      (1) selCreate() initializes all values to 0.
+ *      (2) After this call, (cy,cx) and nonzero data values must be
+ *          assigned.  If a text name is not assigned here, it will
+ *          be needed later when the sel is put into a sela.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Sel* on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    LL_FUNC("Create");
+    l_int32 height = ll_opt_l_int32(_fun, L, 1, 1);
+    l_int32 width = ll_opt_l_int32(_fun, L, 2, 1);
+    const char *name = ll_check_string(_fun, L, 3);
+    Sel *pa = selCreate(height, width, name);
+    return ll_push_Sel(_fun, L, pa);
 }
 
 /**
@@ -748,7 +748,60 @@ ll_push_Sel(const char *_fun, lua_State *L, Sel *sel)
 int
 ll_new_Sel(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_Sel");
+    Sel *sel = nullptr;
+
+    if (lua_isuserdata(L, 1)) {
+        Sel *sels = ll_opt_Sel(_fun, L, 1);
+        if (sels) {
+            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+                LL_SEL, sels);
+            sel = selCopy(sels);
+        } else {
+            luaL_Stream *stream = ll_opt_stream(_fun, L, 1);
+            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+                "stream", stream);
+            sel = selReadStream(stream->f);
+        }
+    }
+
+    if (lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
+        l_int32 height = ll_check_l_int32(_fun, L, 1);
+        l_int32 width = ll_check_l_int32(_fun, L, 2);
+        const char *name = ll_check_string(_fun, L, 3);
+        DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d, %s = '%s'\n", _fun,
+            "height", height,
+            "width", width,
+            "name", name);
+        sel = selCreate(height, width, name);
+    }
+
+    if (!sel && lua_isstring(L, 1)) {
+        const char* fname = ll_check_string(_fun, L, 1);
+        DBG(LOG_NEW_CLASS, "%s: create for %s = '%s'\n", _fun,
+            "fname", fname);
+        sel = selRead(fname);
+    }
+
+    if (!sel && lua_isstring(L, 1)) {
+        const char* text = ll_check_string(_fun, L, 1);
+        l_int32 h = ll_check_l_int32(_fun, L, 2);
+        l_int32 w = ll_check_l_int32(_fun, L, 3);
+        const char *name = ll_check_string(_fun, L, 4);
+        DBG(LOG_NEW_CLASS, "%s: create for %s = '%s',  %s = %d, %s = %d, %s = '%s'\n", _fun,
+            "text", text, "h", h, "w", w, "name", name);
+        sel = selCreateFromString(text, h, w, name);
+    }
+
+    if (!sel) {
+        DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
+            "n", 1);
+        sel = selCreate(2, 2, "");
+    }
+
+    DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
+        LL_SELA, reinterpret_cast<void *>(sel));
+    return ll_push_Sel(_fun, L, sel);
 }
 /**
  * \brief Register the PTA methods and functions in the LL_SEL meta table.
@@ -760,7 +813,7 @@ ll_register_Sel(lua_State *L)
 {
     static const luaL_Reg methods[] = {
         {"__gc",                    Destroy},       /* garbage collector */
-        {"__new",                   Create},        /* new Sel */
+        {"__new",                   ll_new_Sel},    /* Sel() */
         {"__tostring",              toString},
         {"Copy",                    Copy},
         {"Create",                  Create},
@@ -796,7 +849,7 @@ ll_register_Sel(lua_State *L)
         LUA_SENTINEL
     };
 
-    lua_pushcfunction(L, Create);
+    lua_pushcfunction(L, ll_new_Sel);
     lua_setglobal(L, LL_SEL);
     return ll_register_class(L, LL_SEL, methods, functions);
 }
