@@ -64,7 +64,6 @@ end
 -- Extract pre-formatted comment sections from the file fs.
 -- Modifies the global heads table
 -- \param fs source file stream
-
 function pre_comments(fs)
 	local head = {}			-- currently collected heading
 	local fname = nil		-- current function/heading name (start with head before 1st function)
