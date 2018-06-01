@@ -1,0 +1,11 @@
+#!/bin/bash
+#
+# Sort lualept src/*.cpp files and update
+# Note(s): sections from ../leptonica/src/*.c files
+#
+for src in src/ll*.cpp; do
+	if [ "${src}" != "src/llua.cpp" ]; then
+		echo "Sorting $src ..."
+		/usr/bin/lua sort.lua $src ../leptonica/src/*.c
+	fi
+done

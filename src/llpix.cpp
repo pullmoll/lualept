@@ -271,7 +271,7 @@ Xor(lua_State *L)
 /**
  * \brief Printable string for a Pix*.
  * \param L pointer to the lua_State
- * @return 1 string on the Lua stack
+ * \return 1 string on the Lua stack
  */
 static int
 toString(lua_State* L)

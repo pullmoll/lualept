@@ -53,12 +53,18 @@ function list(fd, t)
 	end
 end
 
+function is_notes(str)
+	return str:match(" %*.*(Note):") or str:match(" %*.*(Notes):")
+end
+
 ---
 -- Add notes sections found Leptonica *.c source files to heads
 -- \param heads table of
 function add_notes(fname, head)
 	local res = {}
 	local note = nil
+	local skip_until_pre = false
+
 	if fname ~= nil then
 		note = lept_notes[fname]
 	end
@@ -72,20 +78,30 @@ function add_notes(fname, head)
 	end
 	for lno,l in ipairs(head) do
 		-- is there already a "Note(s):" line?
-		if l:match("Note[s]?:") then
-			return head
+		if is_notes(l) then
+			-- insert the note here
+			if #note > 0 then
+				for _,n in ipairs(note) do
+					res[#res+1] = n
+				end
+			end
+			skip_until_pre = true
 		end
 		-- end of pre-formatted section
 		if l == " * </pre>" then
-			-- insert the note here after an empty comment line
-			if #note > 0 then
+			-- insert the note here
+			if not skip_until_pre and #note > 0 then
+				-- after an empty comment line
 				res[#res+1] = " *"
 				for _,n in ipairs(note) do
 					res[#res+1] = n
 				end
 			end
+			skip_until_pre = false
 		end
-		res[#res+1] = l
+		if not skip_until_pre then
+			res[#res+1] = l
+		end
 	end
 	return res
 end
@@ -140,7 +156,8 @@ function pre_comments(fs)
 			if line:match('%s*(%\\brief)%s*') then
 				fname = line:match('%\\brief%s*([^(]+)')
 			end
-			if pre and line:match('Note[s]?:') then
+			if pre and is_notes(line) then
+				line = line:gsub(" %*%s+(Note.?:)", " * Leptonica's %1")
 				note = true
 			end
 			if line:match('<pre>') then

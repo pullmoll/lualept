@@ -217,11 +217,11 @@ PaintImagePix(SDL_Surface *image, Pix *pix, float scale)
     }
 }
 /**
- * @brief Display a Pix* using the SDL2 library
- * @param pix pointer to the Pix to display
- * @param x position on screen; <= 0 means undefinied
- * @param y position on screen; <= 0 means undefinied
- * @return
+ * \brief Display a Pix* using the SDL2 library
+ * \param pix pointer to the Pix to display
+ * \param x position on screen; <= 0 means undefinied
+ * \param y position on screen; <= 0 means undefinied
+ * \return TRUE on success, or FALSE on error
  */
 int
 DisplaySDL2(Pix* pix, int x0, int y0, const char* title)
