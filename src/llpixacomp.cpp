@@ -155,9 +155,7 @@ luaopen_PixaComp(lua_State *L)
         {"Destroy",             Destroy},
         LUA_SENTINEL
     };
-
-    FUNC("luaopen_" TNAME);
-
+    LO_FUNC(TNAME);
     ll_global_cfunct(_fun, L, TNAME, ll_new_PixaComp);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;

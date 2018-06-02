@@ -407,7 +407,7 @@ WriteMem(lua_State *L)
     if (numaaWriteMem(&data, &size, naa))
         return ll_push_nil(L);
     lua_pushlstring(L, reinterpret_cast<const char *>(data), size);
-    LEPT_FREE(data);
+    ll_free(data);
     return 1;
 }
 
@@ -563,9 +563,7 @@ luaopen_Numaa(lua_State *L) {
         {"WriteStream",     WriteStream},
         LUA_SENTINEL
     };
-
-    FUNC("luaopen_" TNAME);
-
+    LO_FUNC(TNAME);
     ll_global_cfunct(_fun, L, TNAME, ll_new_Numaa);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;

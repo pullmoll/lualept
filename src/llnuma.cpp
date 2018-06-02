@@ -329,10 +329,10 @@ GetFArray(lua_State *L)
 {
     LL_FUNC("GetFArray");
     Numa *na = ll_check_Numa(_fun, L, 1);
-    l_float32 *fa = numaGetFArray(na, L_COPY);
+    l_float32 *farray = numaGetFArray(na, L_COPY);
     l_int32 n = numaGetCount(na);
-    int res = ll_push_Farray(_fun, L, fa, n);
-    LEPT_FREE(fa);
+    int res = ll_push_Farray(_fun, L, farray, n);
+    ll_free(farray);
     return res;
 }
 
@@ -386,10 +386,10 @@ GetIArray(lua_State *L)
 {
     LL_FUNC("GetIArray");
     Numa *na = ll_check_Numa(_fun, L, 1);
-    l_int32 *ia = numaGetIArray(na);
+    l_int32 *iarray = numaGetIArray(na);
     l_int32 n = numaGetCount(na);
-    int res = ll_push_Iarray(_fun, L, ia, n);
-    LEPT_FREE(ia);
+    int res = ll_push_Iarray(_fun, L, iarray, n);
+    ll_free(iarray);
     return res;
 }
 
@@ -667,7 +667,7 @@ WriteMem(lua_State *L)
     if (numaWriteMem(&data, &size, na))
         return ll_push_nil(L);
     lua_pushlstring(L, reinterpret_cast<const char *>(data), size);
-    LEPT_FREE(data);
+    ll_free(data);
     return 1;
 }
 
@@ -836,9 +836,7 @@ luaopen_Numa(lua_State *L)
         {"WriteStream",         WriteStream},
         LUA_SENTINEL
     };
-
-    FUNC("luaopen_" TNAME);
-
+    LO_FUNC(TNAME);
     ll_global_cfunct(_fun, L, TNAME, ll_new_Numa);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;

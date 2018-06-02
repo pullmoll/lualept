@@ -43,7 +43,7 @@
  * @brief The log_enable_flags enum defines bit masks
  * to define which kind of debug output is to be printed.
  */
-enum log_enable_flags {
+enum dbg_enable_flags {
     LOG_REGISTER        = (1<< 0),  /*!< log Lua class registration */
     LOG_NEW_PARAM       = (1<< 1),  /*!< log ll_new_<ClassName> */
     LOG_NEW_CLASS       = (1<< 2),  /*!< log ll_new_<ClassName> */
@@ -59,7 +59,8 @@ enum log_enable_flags {
     LOG_PUSH_UDATA      = (1<<12),  /*!< log pushing user data */
     LOG_CHECK_UDATA     = (1<<13),  /*!< log pushing user data */
     LOG_PUSH_ARRAY      = (1<<14),  /*!< log pushing tables */
-    LOG_CHECK_ARRAY     = (1<<15)   /*!< log pushing tables */
+    LOG_CHECK_ARRAY     = (1<<15),  /*!< log pushing tables */
+    LOG_SDL2            = (1<<16)   /*!< log SDL2 display code */
 };
 
 #if defined(HAVE_CTYPE_H)
@@ -169,7 +170,6 @@ extern void die(const char *_fun, lua_State* L, const char *format, ...)
 extern void *ll_ludata(const char *_fun, lua_State* L, int arg);
 extern void **ll_udata(const char *_fun, lua_State* L, int arg, const char *tname);
 
-extern int DisplaySDL2(Pix* pix, int x0, int y0, const char* title);
 /**
  * \brief Cast the result of LEPT_MALLOC() to the given type.
  * T is the typename of the result pointer
@@ -289,24 +289,42 @@ extern "C" {
 /** Lua function table (luaL_Reg array[]) sentinel */
 #define LUA_SENTINEL    {nullptr,nullptr}
 
+/** Allocate a static string with a function's %name */
 #define FUNC(name) static const char _fun[] = name; (void)_fun
+
+/** Allocate a static string with a luaopen_%name */
+#define LO_FUNC(name) FUNC("luaopen_" name)
+
+typedef L_AMAP              Amap;           /*!< Local type name for L_AMAP */
+typedef L_AMAP_NODE         AmapNode;       /*!< Local type name for L_AMAP_NODE */
+typedef L_ASET              Aset;           /*!< Local type name for L_ASET */
+typedef L_ASET_NODE         AsetNode;       /*!< Local type name for L_ASET_NODE */
+typedef L_Bmf               Bmf;            /*!< Local type name for L_Bmf */
+typedef L_Dewarp            Dewarp;         /*!< Local type name for L_Dewarp */
+typedef L_Dewarpa           Dewarpa;        /*!< Local type name for L_Dewarpa */
+typedef L_Dna               Dna;            /*!< Local type name for L_Dna */
+typedef L_Dnaa              Dnaa;           /*!< Local type name for L_Dnaa */
+typedef L_Kernel            Kernel;         /*!< Local type name for L_Kernel */
+typedef L_Compressed_Data   CompData;       /*!< Local type name for L_Compressed_Data */
+typedef L_Pdf_Data          PdfData;        /*!< Local type name for L_Pdf_Data */
+typedef L_Stack             Stack;          /*!< Local type name for L_Stack */
 
 /*! Dummy structure for the top level Lua class LL_LUALEPT */
 typedef struct LuaLept {
-    char str_version[32];           /*!< Our own version number */
-    char str_version_lua[32];       /*!< Lua's version number */
-    char str_version_lept[32];      /*!< Leptonica's version number */
+    char str_version[32];                   /*!< Our own version number */
+    char str_version_lua[32];               /*!< Lua's version number */
+    char str_version_lept[32];              /*!< Leptonica's version number */
 } LuaLept;
 
 /**
- * The structure lept_enum_s is used to define key strings (key),
+ * The structure lept_enum is used to define key strings (key),
  * their Leptonica enum name (name), and their enumeration value (%value)
 */
-typedef struct lept_enum_s {
-    const char *key;                /*!< string for the enumeration value */
-    const char *name;               /*!< name of the enumeration value in Leptonica's header files */
-    l_int32     value;              /*!< l_int32 with enumeration value */
-}   lept_enum_t;
+typedef struct lept_enum {
+    const char *key;                        /*!< string for the enumeration value */
+    const char *name;                       /*!< name of the enumeration value in Leptonica's header files */
+    l_int32     value;                      /*!< l_int32 with enumeration value */
+}   lept_enum;
 
 /* llept.c */
 extern void             ll_free(void *ptr);
@@ -327,12 +345,13 @@ extern int              ll_push_l_float32(const char *_fun, lua_State *L, l_floa
 extern int              ll_push_l_float64(const char *_fun, lua_State *L, l_float64 val);
 extern int              ll_push_string(const char *_fun, lua_State *L, const char* str);
 extern int              ll_push_lstring(const char *_fun, lua_State *L, const char* str, size_t len);
+extern int              ll_push_bytes(const char *_fun, lua_State *L, l_uint8* data, size_t len);
 
-extern int              ll_push_Iarray(const char* _fun, lua_State *L, const l_int32* ia, l_int32 n);
-extern int              ll_push_Uarray(const char* _fun, lua_State *L, const l_uint32* ua, l_int32 n);
+extern int              ll_push_Iarray(const char* _fun, lua_State *L, const l_int32* iarray, l_int32 n);
+extern int              ll_push_Uarray(const char* _fun, lua_State *L, const l_uint32* uarray, l_int32 n);
 extern int              ll_push_Uarray_2d(const char* _fun, lua_State *L, const l_uint32* data, l_int32 wpl, l_int32 h);
-extern int              ll_push_Farray(const char* _fun, lua_State *L, const l_float32* fa, l_int32 n);
-extern int              ll_push_Farray_2d(const char* _fun, lua_State *L, const l_float32* fa, l_int32 wpl, l_int32 h);
+extern int              ll_push_Farray(const char* _fun, lua_State *L, const l_float32* farray, l_int32 n);
+extern int              ll_push_Farray_2d(const char* _fun, lua_State *L, const l_float32* data, l_int32 wpl, l_int32 h);
 extern int              ll_push_Darray(const char* _fun, lua_State *L, const l_float64* da, l_int32 n);
 extern int              ll_push_Darray_2d(const char* _fun, lua_State *L, const l_float64* da, l_int32 wpl, l_int32 h);
 extern int              ll_push_Sarray(const char* _fun, lua_State *L, Sarray *sa);
@@ -349,6 +368,7 @@ extern Sarray         * ll_unpack_Sarray(const char *_fun, lua_State *L, int arg
 extern l_int32          ll_check_index(const char *_fun, lua_State *L, int arg, l_int32 imax);
 extern char             ll_check_char(const char *_fun, lua_State *L, int arg);
 extern const char     * ll_check_string(const char *_fun, lua_State *L, int arg);
+extern const char     * ll_opt_string(const char *_fun, lua_State *L, int arg, const char* def = nullptr);
 extern const char     * ll_check_lstring(const char *_fun, lua_State *L, int arg, size_t *plen = nullptr);
 extern const l_uint8  * ll_check_lbytes(const char *_fun, lua_State *L, int arg, size_t *plen = nullptr);
 extern luaL_Stream    * ll_check_stream(const char *_fun, lua_State *L, int arg);
@@ -371,9 +391,14 @@ extern l_float32        ll_check_l_float32(const char *_fun, lua_State *L, int a
 extern l_float32        ll_opt_l_float32(const char *_fun, lua_State *L, int arg, l_float32 def = 0.0f);
 extern l_float64        ll_check_l_float64(const char *_fun, lua_State *L, int arg);
 extern l_float64        ll_opt_l_float64(const char *_fun, lua_State *L, int arg, l_float32 def = 0.0);
-extern int              ll_list_tbl_options(lua_State *L, const lept_enum_t *tbl, size_t len, const char *msg = nullptr);
-extern const char*      ll_string_tbl(l_int32 value, const lept_enum_t *tbl, size_t len);
-extern l_int32          ll_check_tbl(const char *_fun, lua_State *L, int arg, l_int32 def, const lept_enum_t *tbl, size_t len);
+
+/*
+ *  lualept string Leptonica enumeration value lookup functions
+ */
+
+extern int              ll_list_tbl_options(lua_State *L, const lept_enum *tbl, size_t len, const char *msg = nullptr);
+extern const char*      ll_string_tbl(l_int32 value, const lept_enum *tbl, size_t len);
+extern l_int32          ll_check_tbl(const char *_fun, lua_State *L, int arg, l_int32 def, const lept_enum *tbl, size_t len);
 
 extern l_int32          ll_check_debug(const char *_fun, lua_State *L, int arg, l_int32 def = 0);
 extern const char     * ll_string_debug(l_int32 flag);
@@ -491,20 +516,6 @@ extern const char     * ll_string_value_flags(l_int32 rotation);
 
 extern l_int32          ll_check_paint_flags(const char *_fun, lua_State *L, int arg, l_int32 def = L_PAINT_LIGHT);
 extern const char     * ll_string_paint_flags(l_int32 rotation);
-
-typedef L_AMAP              Amap;           /*!< Local type name for L_AMAP */
-typedef L_AMAP_NODE         AmapNode;       /*!< Local type name for L_AMAP_NODE */
-typedef L_ASET              Aset;           /*!< Local type name for L_ASET */
-typedef L_ASET_NODE         AsetNode;       /*!< Local type name for L_ASET_NODE */
-typedef L_Bmf               Bmf;            /*!< Local type name for L_Bmf */
-typedef L_Dewarp            Dewarp;         /*!< Local type name for L_Dewarp */
-typedef L_Dewarpa           Dewarpa;        /*!< Local type name for L_Dewarpa */
-typedef L_Dna               Dna;            /*!< Local type name for L_Dna */
-typedef L_Dnaa              Dnaa;           /*!< Local type name for L_Dnaa */
-typedef L_Kernel            Kernel;         /*!< Local type name for L_Kernel */
-typedef L_Compressed_Data   CompData;       /*!< Local type name for L_Compressed_Data */
-typedef L_Pdf_Data          PdfData;        /*!< Local type name for L_Pdf_Data */
-typedef L_Stack             Stack;          /*!< Local type name for L_Stack */
 
 /* lualept.cpp */
 extern LuaLept        * ll_check_lualept(const char *_fun, lua_State *L, int arg);
@@ -743,5 +754,8 @@ extern PdfData        * ll_opt_PdfData(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_PdfData(const char *_fun, lua_State *L, PdfData *pdfdata);
 extern int              ll_new_PdfData(lua_State *L);
 extern int              luaopen_PdfData(lua_State *L);
+
+/* lualept-sdl2.cpp */
+extern int ShowSDL2(Pix* pix, const char* title = nullptr, int x0 = 0, int y0 = 0, float dscale = 0.0f);
 
 #endif /* !defined(LUALEPT_EXPORTS_H) */

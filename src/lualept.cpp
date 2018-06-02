@@ -152,7 +152,7 @@ ll_strcasecmp(const char* dst, const char* src)
 /**
  * @brief Bit mask (flags) for enabled log output
  */
-static int dbg_enabled = 0;
+static int dbg_enabled = LOG_REGISTER | LOG_SDL2;
 
 /**
  * @brief Return a time stamp for the current date and time
@@ -285,21 +285,22 @@ ll_free(void *ptr)
 int
 ll_register_class(const char *_fun, lua_State *L, const char *tname, const luaL_Reg *methods)
 {
-    static const luaL_Reg nofunctions[1] = {
+    luaL_Reg functions[1] = {
         LUA_SENTINEL
     };
-    int nmethods;
+    int nm;
+    UNUSED(_fun);
 
-    for (nmethods = 0; methods[nmethods].name; nmethods++)
+    for (nm = 0; methods[nm].name; nm++)
         ;
     luaL_newmetatable(L, tname);
     lua_pushvalue(L, -1);
     lua_setfield(L, -2, "__index");
     luaL_setfuncs(L, methods, 0);
     lua_createtable(L, 0, 0);
-    luaL_setfuncs(L, nofunctions, 0);
+    luaL_setfuncs(L, functions, 0);
     DBG(LOG_REGISTER, "%s: registered '%s' with %d methods\n", _fun,
-        tname, nmethods);
+        tname, nm);
     return 1;
 }
 
@@ -568,8 +569,28 @@ ll_push_lstring(const char* _fun, lua_State *L, const char* str, size_t len)
     UNUSED(_fun);
     DBG(LOG_PUSH_STRING, "%s: push %s = %p %s = %" PRIu64 "\n", _fun,
         "str", reinterpret_cast<const void *>(str),
-        "len", static_cast<l_uintptr_t>(strlen(str)));
+        "len", static_cast<l_uintptr_t>(len));
     lua_pushlstring(L, str, len);
+    return 1;
+}
+
+/**
+ * \brief Push bytes (%data, %nbytes) as lstring to the Lua stack, free %data and return 1.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param data lstring value (array of bytes)
+ * \param len lstring length
+ * \return 1 boolean on the Lua stack
+ */
+int
+ll_push_bytes(const char* _fun, lua_State *L, l_uint8* data, size_t nbytes)
+{
+    UNUSED(_fun);
+    DBG(LOG_PUSH_STRING, "%s: push %s = %p %s = %" PRIu64 "\n", _fun,
+        "data", reinterpret_cast<const void *>(data),
+        "nbytes", static_cast<l_uintptr_t>(nbytes));
+    lua_pushlstring(L, reinterpret_cast<const char *>(data), nbytes);
+    ll_free(data);
     return 1;
 }
 
@@ -577,21 +598,22 @@ ll_push_lstring(const char* _fun, lua_State *L, const char* str, size_t len)
  * \brief Push a l_int32 array (%ia) to the Lua stack and return 1.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
- * \param ia pointer to the l_int32 array
+ * \param iarray pointer to the l_int32 array
  * \param n number of values in the array
  * \return 1 table on the stack
  */
 int
-ll_push_Iarray(const char* _fun, lua_State *L, const l_int32 *ia, l_int32 n)
+ll_push_Iarray(const char* _fun, lua_State *L, const l_int32 *iarray, l_int32 n)
 {
     l_int32 i;
     UNUSED(_fun);
-    if (!n || !ia)
+    if (!n || !iarray)
         return ll_push_nil(L);
     lua_newtable(L);
     for (i = 0; i < n; i++) {
-        DBG(LOG_PUSH_ARRAY, "%s: ia[%d] = 0x%08x\n", _fun, i, *ia);
-        lua_pushinteger(L, *ia++);
+        DBG(LOG_PUSH_ARRAY, "%s: %s[%d] = 0x%08x\n", _fun,
+            "iarray", i, iarray[i]);
+        lua_pushinteger(L, iarray[i]);
         lua_rawseti(L, -2, i+1);
     }
     return 1;
@@ -601,21 +623,22 @@ ll_push_Iarray(const char* _fun, lua_State *L, const l_int32 *ia, l_int32 n)
  * \brief Push a l_uint32 array (%ua) to the Lua stack and return 1.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
- * \param ua pointer to the l_uint32 array
+ * \param uarray pointer to the l_uint32 array
  * \param n number of values in the array
  * \return 1 table on the stack
  */
 int
-ll_push_Uarray(const char* _fun, lua_State *L, const l_uint32 *ua, l_int32 n)
+ll_push_Uarray(const char* _fun, lua_State *L, const l_uint32 *uarray, l_int32 n)
 {
     l_int32 i;
     UNUSED(_fun);
-    if (!n || !ua)
+    if (!n || !uarray)
         return ll_push_nil(L);
     lua_newtable(L);
     for (i = 0; i < n; i++) {
-        DBG(LOG_PUSH_ARRAY, "%s: ua[%d] = 0x%08x\n", _fun, i, *ua);
-        lua_pushinteger(L, *ua++);
+        DBG(LOG_PUSH_ARRAY, "%s: %s[%d] = 0x%08x\n", _fun,
+            "uarray", i, uarray[i]);
+        lua_pushinteger(L, uarray[i]);
         lua_rawseti(L, -2, i+1);
     }
     return 1;
@@ -637,7 +660,8 @@ ll_push_Uarray_2d(const char* _fun, lua_State *L, const l_uint32 *data, l_int32 
     lua_newtable(L);
     for (i = 0; i < h; i++) {
         DBG(LOG_PUSH_ARRAY, "%s: %s = %d, %s = %p\n", _fun,
-            "row", i, "data", reinterpret_cast<const void *>(data));
+            "row", i,
+            "data", reinterpret_cast<const void *>(data));
         ll_push_Uarray(_fun, L, data, wpl);
         data += wpl;
         lua_rawseti(L, -2, i+1);
@@ -649,21 +673,22 @@ ll_push_Uarray_2d(const char* _fun, lua_State *L, const l_uint32 *data, l_int32 
  * \brief Push a l_float32 array (%fa) to the Lua stack and return 1.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
- * \param fa pointer to the l_float32 array
+ * \param farray pointer to the l_float32 array
  * \param n number of values in the array
  * \return 1 table on the stack
  */
 int
-ll_push_Farray(const char* _fun, lua_State *L, const l_float32 *fa, l_int32 n)
+ll_push_Farray(const char* _fun, lua_State *L, const l_float32 *farray, l_int32 n)
 {
     l_int32 i;
     UNUSED(_fun);
-    if (!n || !fa)
+    if (!n || !farray)
         return ll_push_nil(L);
     lua_newtable(L);
     for (i = 0; i < n; i++) {
-        DBG(LOG_PUSH_ARRAY, "%s: fa[%d] = %.8g\n", _fun, i, static_cast<double>(*fa));
-        lua_pushnumber(L, static_cast<double>(*fa++));
+        DBG(LOG_PUSH_ARRAY, "%s: %s[%d] = %.8g\n", _fun,
+            "farray", i, static_cast<lua_Number>(farray[i]));
+        lua_pushnumber(L, static_cast<lua_Number>(farray[i]));
         lua_rawseti(L, -2, i+1);
     }
     return 1;
@@ -685,7 +710,8 @@ ll_push_Farray_2d(const char* _fun, lua_State *L, const l_float32 *data, l_int32
     lua_newtable(L);
     for (i = 0; i < h; i++) {
         DBG(LOG_PUSH_ARRAY, "%s: %s = %d, %s = %p\n", _fun,
-            "row", i, "data", reinterpret_cast<const void *>(data));
+            "row", i,
+            "data", reinterpret_cast<const void *>(data));
         ll_push_Farray(_fun, L, data, wpl);
         data += wpl;
         lua_rawseti(L, -2, i+1);
@@ -697,21 +723,22 @@ ll_push_Farray_2d(const char* _fun, lua_State *L, const l_float32 *data, l_int32
  * \brief Push a l_float64 array (%da) to the Lua stack and return 1.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
- * \param da pointer to the l_float32 array
+ * \param darray pointer to the l_float32 array
  * \param n number of values in the array
  * \return 1 table on the stack
  */
 int
-ll_push_Darray(const char* _fun, lua_State *L, const l_float64 *da, l_int32 n)
+ll_push_Darray(const char* _fun, lua_State *L, const l_float64 *darray, l_int32 n)
 {
     l_int32 i;
     UNUSED(_fun);
-    if (!n || !da)
+    if (!n || !darray)
         return ll_push_nil(L);
     lua_newtable(L);
     for (i = 0; i < n; i++) {
-        DBG(LOG_PUSH_ARRAY, "%s: da[%d] = %.16g\n", _fun, i, *da);
-        lua_pushnumber(L, *da++);
+        DBG(LOG_PUSH_ARRAY, "%s: %s[%d] = %.8g\n", _fun,
+            "darray", i, darray[i]);
+        lua_pushnumber(L, darray[i]);
         lua_rawseti(L, -2, i+1);
     }
     return 1;
@@ -733,7 +760,8 @@ ll_push_Darray_2d(const char* _fun, lua_State *L, const l_float64 *data, l_int32
     lua_newtable(L);
     for (i = 0; i < h; i++) {
         DBG(LOG_PUSH_ARRAY, "%s: %s = %d, %s = %p\n", _fun,
-            "row", i, "data", reinterpret_cast<const void *>(data));
+            "row", i,
+            "data", reinterpret_cast<const void *>(data));
         ll_push_Darray(_fun, L, data, wpl);
         data += wpl;
         lua_rawseti(L, -2, i+1);
@@ -759,7 +787,8 @@ ll_push_Sarray(const char* _fun, lua_State *L, Sarray *sa)
     lua_newtable(L);
     for (i = 0; i < n; i++) {
         const char* str = sarrayGetString(sa, i, L_NOCOPY);
-        DBG(LOG_PUSH_ARRAY, "%s: sa[%d] = '%s'\n", _fun, i, str);
+        DBG(LOG_PUSH_ARRAY, "%s: %s[%d] = %p\n", _fun,
+            "sarray", i, reinterpret_cast<const void *>(str));
         lua_pushstring(L, str);
         lua_rawseti(L, -2, i+1);
     }
@@ -777,8 +806,9 @@ ll_push_Sarray(const char* _fun, lua_State *L, Sarray *sa)
 l_int32 *
 ll_unpack_Iarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
 {
-    DBG(LOG_CHECK_ARRAY, "%s: arg = %d, plen = %p\n", _fun,
-        arg, reinterpret_cast<void *>(plen));
+    DBG(LOG_CHECK_ARRAY, "%s: %s = %d, %s = %p\n", _fun,
+        "arg", arg,
+        "plen", reinterpret_cast<void *>(plen));
     l_int32 len = static_cast<l_int32>(luaL_len(L, arg));
     l_int32 *ia = ll_calloc<l_int32>(_fun, L, len);
 
@@ -816,8 +846,9 @@ ll_unpack_Iarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
 l_uint32 *
 ll_unpack_Uarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
 {
-    DBG(LOG_CHECK_ARRAY, "%s: arg = %d, pn = %p\n", _fun,
-        arg, reinterpret_cast<void *>(plen));
+    DBG(LOG_CHECK_ARRAY, "%s: %s = %d, %s = %p\n", _fun,
+        "arg", arg,
+        "plen", reinterpret_cast<void *>(plen));
     l_int32 len = static_cast<l_int32>(luaL_len(L, arg));
     l_uint32 *ua = ll_calloc<l_uint32>(_fun, L, len);
 
@@ -860,7 +891,8 @@ ll_unpack_Uarray_2d(const char *_fun, lua_State *L, int arg, l_uint32* data, l_i
     DBG(LOG_CHECK_ARRAY, "%s: %s = %d, %s = %p, %s = %d, %s = %d\n", _fun,
         "arg", arg,
         "data", reinterpret_cast<void *>(data),
-        "wpl", wpl, "h", h);
+        "wpl", wpl,
+        "h", h);
     /* verify there is a table at 2 */
     luaL_checktype(L, arg, LUA_TTABLE);
     /* push a nil key */
@@ -900,8 +932,9 @@ ll_unpack_Uarray_2d(const char *_fun, lua_State *L, int arg, l_uint32* data, l_i
 l_float32 *
 ll_unpack_Farray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
 {
-    DBG(LOG_CHECK_ARRAY, "%s: arg = %d, pn = %p\n", _fun,
-        arg, reinterpret_cast<void *>(plen));
+    DBG(LOG_CHECK_ARRAY, "%s: %s = %d, %s = %p\n", _fun,
+        "arg", arg,
+        "plen", reinterpret_cast<void *>(plen));
     l_int32 len = static_cast<l_int32>(luaL_len(L, arg));
     l_float32 *fa = ll_calloc<l_float32>(_fun, L, len);
 
@@ -944,7 +977,8 @@ ll_unpack_Farray_2d(const char *_fun, lua_State *L, int arg, l_float32* data, l_
     DBG(LOG_CHECK_ARRAY, "%s: %s = %d, %s = %p, %s = %d, %s = %d\n", _fun,
         "arg", arg,
         "data", reinterpret_cast<void *>(data),
-        "wpl", wpl, "h", h);
+        "wpl", wpl,
+        "h", h);
     /* verify there is a table at 2 */
     luaL_checktype(L, arg, LUA_TTABLE);
     /* push a nil key */
@@ -984,6 +1018,9 @@ ll_unpack_Farray_2d(const char *_fun, lua_State *L, int arg, l_float32* data, l_
 l_float64 *
 ll_unpack_Darray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
 {
+    DBG(LOG_CHECK_ARRAY, "%s: %s = %d, %s = %p\n", _fun,
+        "arg", arg,
+        "plen", reinterpret_cast<void *>(plen));
     l_int32 len = static_cast<l_int32>(luaL_len(L, arg));
     l_float64 *da = ll_calloc<l_float64>(_fun, L, len);
 
@@ -1026,7 +1063,8 @@ ll_unpack_Darray_2d(const char *_fun, lua_State *L, int arg, l_float64* data, l_
     DBG(LOG_CHECK_ARRAY, "%s: %s = %d, %s = %p, %s = %d, %s = %d\n", _fun,
         "arg", arg,
         "data", reinterpret_cast<void *>(data),
-        "wpl", wpl, "h", h);
+        "wpl", wpl,
+        "h", h);
     /* verify there is a table at 2 */
     luaL_checktype(L, arg, LUA_TTABLE);
     /* push a nil key */
@@ -1066,6 +1104,9 @@ ll_unpack_Darray_2d(const char *_fun, lua_State *L, int arg, l_float64* data, l_
 Sarray *
 ll_unpack_Sarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
 {
+    DBG(LOG_CHECK_ARRAY, "%s: %s = %d, %s = %p\n", _fun,
+        "arg", arg,
+        "plen", reinterpret_cast<void *>(plen));
     l_int32 len = static_cast<l_int32>(luaL_len(L, arg));
     Sarray *sa = sarrayCreate(len);
 
@@ -1130,7 +1171,7 @@ ll_check_char(const char *_fun, lua_State *L, int arg)
 {
     lua_Integer val = luaL_checkinteger(L, arg);
 
-    if (val < 1 || val > 255) {
+    if (val < 0 || val > 255) {
         lua_pushfstring(L, "%s: char #%d out of bounds (%d)", _fun, arg, val);
         lua_error(L);
         return 0;    /* NOTREACHED */
@@ -1159,7 +1200,23 @@ ll_check_string(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Check if an argument is a string and return its length.
+ * \brief Return an argument string, if it is one.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \param def default string to return, if no argument;
+ * \return l_int32 for the integer; lua_error if out of bounds
+ */
+const char *
+ll_opt_string(const char *_fun, lua_State *L, int arg, const char *def)
+{
+    const char *str = lua_isstring(L, arg) ? lua_tostring(L, arg) : nullptr;
+    UNUSED(_fun);
+    return str ? str : def;
+}
+
+/**
+ * \brief Optional argument string
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the string
@@ -1604,7 +1661,7 @@ ll_opt_l_float64(const char *_fun, lua_State *L, int arg, l_float64 def)
  * \return string with enumeration value names and their keys
  */
 int
-ll_list_tbl_options(lua_State *L, const lept_enum_t *tbl, size_t len, const char *msg)
+ll_list_tbl_options(lua_State *L, const lept_enum *tbl, size_t len, const char *msg)
 {
     char str[256];
     luaL_Buffer B;
@@ -1619,7 +1676,7 @@ ll_list_tbl_options(lua_State *L, const lept_enum_t *tbl, size_t len, const char
 
     /* List the options */
     for (i = 0; i < len; i++) {
-        const lept_enum_t* p = &tbl[i];
+        const lept_enum* p = &tbl[i];
         if (p->value != value) {
             /* this is a new enumeration value */
             if (nullptr != msg || i > 0)
@@ -1647,12 +1704,12 @@ ll_list_tbl_options(lua_State *L, const lept_enum_t *tbl, size_t len, const char
  * \return pointer to string with the (first) key for that value
  */
 const char*
-ll_string_tbl(l_int32 value, const lept_enum_t *tbl, size_t len)
+ll_string_tbl(l_int32 value, const lept_enum *tbl, size_t len)
 {
     size_t i;
 
     for (i = 0; i < len; i++) {
-        const lept_enum_t* p = &tbl[i];
+        const lept_enum* p = &tbl[i];
         if (p->value == value)
             return p->key;
     }
@@ -1670,7 +1727,7 @@ ll_string_tbl(l_int32 value, const lept_enum_t *tbl, size_t len)
  * \return value or def
  */
 l_int32
-ll_check_tbl(const char *_fun, lua_State *L, int arg, l_int32 def, const lept_enum_t *tbl, size_t len)
+ll_check_tbl(const char *_fun, lua_State *L, int arg, l_int32 def, const lept_enum *tbl, size_t len)
 {
     char msg[256];
     size_t i;
@@ -1680,7 +1737,7 @@ ll_check_tbl(const char *_fun, lua_State *L, int arg, l_int32 def, const lept_en
         return def;
 
     for (i = 0; i < len; i++) {
-        const lept_enum_t* p = &tbl[i];
+        const lept_enum* p = &tbl[i];
         if (!ll_strcasecmp(str, p->key))
             return p->value;
     }
@@ -1699,30 +1756,31 @@ ll_check_tbl(const char *_fun, lua_State *L, int arg, l_int32 def, const lept_en
 /**
  * \brief Table of debug log flag names and enumeration values.
  */
-static const lept_enum_t tbl_debug[] = {
+static const lept_enum tbl_debug[] = {
     TBL_ENTRY("register",       LOG_REGISTER),
+    TBL_ENTRY("new",            LOG_NEW_PARAM | LOG_NEW_CLASS),
     TBL_ENTRY("new-param",      LOG_NEW_PARAM),
     TBL_ENTRY("new-class",      LOG_NEW_CLASS),
-    TBL_ENTRY("new",            LOG_NEW_PARAM | LOG_NEW_CLASS),
     TBL_ENTRY("destroy",        LOG_DESTROY),
+    TBL_ENTRY("boolean",        LOG_PUSH_BOOLEAN | LOG_CHECK_BOOLEAN),
     TBL_ENTRY("push-boolean",   LOG_PUSH_BOOLEAN),
     TBL_ENTRY("check-boolean",  LOG_CHECK_BOOLEAN),
-    TBL_ENTRY("boolean",        LOG_PUSH_BOOLEAN | LOG_CHECK_BOOLEAN),
+    TBL_ENTRY("integer",        LOG_PUSH_INTEGER | LOG_CHECK_INTEGER),
     TBL_ENTRY("push-integer",   LOG_PUSH_INTEGER),
     TBL_ENTRY("check-integer",  LOG_CHECK_INTEGER),
-    TBL_ENTRY("integer",        LOG_PUSH_INTEGER | LOG_CHECK_INTEGER),
+    TBL_ENTRY("number",         LOG_PUSH_NUMBER | LOG_CHECK_NUMBER),
     TBL_ENTRY("push-number",    LOG_PUSH_NUMBER),
     TBL_ENTRY("check-number",   LOG_CHECK_NUMBER),
-    TBL_ENTRY("number",         LOG_PUSH_NUMBER | LOG_CHECK_NUMBER),
+    TBL_ENTRY("string",         LOG_PUSH_STRING | LOG_CHECK_STRING),
     TBL_ENTRY("push-string",    LOG_PUSH_STRING),
     TBL_ENTRY("check-string",   LOG_CHECK_STRING),
-    TBL_ENTRY("string",         LOG_PUSH_STRING | LOG_CHECK_STRING),
+    TBL_ENTRY("udata",          LOG_PUSH_UDATA | LOG_CHECK_UDATA),
     TBL_ENTRY("push-udata",     LOG_PUSH_UDATA),
     TBL_ENTRY("check-udata",    LOG_CHECK_UDATA),
-    TBL_ENTRY("udata",          LOG_PUSH_UDATA | LOG_CHECK_UDATA),
+    TBL_ENTRY("array",          LOG_PUSH_ARRAY | LOG_CHECK_ARRAY),
     TBL_ENTRY("push-array",     LOG_PUSH_ARRAY),
     TBL_ENTRY("check-array",    LOG_CHECK_ARRAY),
-    TBL_ENTRY("array",          LOG_PUSH_ARRAY | LOG_CHECK_ARRAY)
+    TBL_ENTRY("sdl2",           LOG_SDL2)
 };
 
 /**
@@ -1740,42 +1798,27 @@ ll_check_debug(const char *_fun, lua_State *L, int arg, l_int32 def)
 }
 
 /**
- * \brief Return the name for an access/storage flag value.
- * \param flag access/storage flag
+ * \brief Return a string representing enabled debug flags.
+ * \param flag debug enable flags
  * \return pointer to const string
  */
 const char*
 ll_string_debug(l_int32 flag)
 {
-    static const dbg_enable_flags bits[] = {
-        LOG_REGISTER,
-        LOG_DESTROY,
-        LOG_PUSH_BOOLEAN,
-        LOG_PUSH_INTEGER,
-        LOG_PUSH_NUMBER,
-        LOG_PUSH_STRING,
-        LOG_PUSH_UDATA,
-        LOG_PUSH_ARRAY,
-        LOG_NEW_PARAM,
-        LOG_NEW_CLASS
-    };
     static char str[1024];
     char *dst = str;
-    size_t i, j;
+    size_t i;
 
-    for (i = 0; i < ARRAYSIZE(bits); i++) {
-        dng_enable_flags bit = bits[i];
-        if (0 == (bit & flag))
+    for (i = 0; i < ARRAYSIZE(tbl_debug); i++) {
+        const lept_enum *e = &tbl_debug[i];
+        l_int32 bit = e->value;
+        if (bit != (bit & flag))
             continue;
-        for (j = 0; j < ARRAYSIZE(tbl_debug); j++) {
-            const lept_enum_t *e = &tbl_debug[j];
-            if (e->value != bit)
-                continue;
-            if (dst > str) {
-                dst += snprintf(dst, sizeof(str) - (size_t(dst - str)), "|");
-            }
-            dst += snprintf(dst, sizeof(str) - (size_t(dst - str)), "%s", e->key);
+        flag &= ~bit;
+        if (dst > str) {
+            dst += snprintf(dst, sizeof(str) - (size_t(dst - str)), "|");
         }
+        dst += snprintf(dst, sizeof(str) - (size_t(dst - str)), "%s", e->key);
     }
     return str;
 }
@@ -1791,7 +1834,7 @@ ll_string_debug(l_int32 flag)
  * L_COPY_CLONE  : make a new array object (e.g., pixa) and fill the array with clones (e.g., pix)
  * </pre>
  */
-static const lept_enum_t tbl_access_storage[] = {
+static const lept_enum tbl_access_storage[] = {
     TBL_ENTRY("nocopy",         L_NOCOPY),      /* do not copy the object; do not delete the ptr */
     TBL_ENTRY("insert",         L_INSERT),      /* stuff it in; do not copy or clone */
     TBL_ENTRY("copy",           L_COPY),        /* make/use a copy of the object */
@@ -1830,7 +1873,7 @@ ll_string_access_storage(l_int32 flag)
  * 16-bit conversion flags.
  * </pre>
  */
-static const lept_enum_t tbl_more_less_clip[] = {
+static const lept_enum tbl_more_less_clip[] = {
     TBL_ENTRY("ls-byte",        L_LS_BYTE),
     TBL_ENTRY("lsb",            L_LS_BYTE),
     TBL_ENTRY("l",              L_LS_BYTE),
@@ -1887,7 +1930,7 @@ ll_string_more_less_clip(l_int32 flag)
  * Pdf formatted encoding types.
  * </pre>
  */
-static const lept_enum_t tbl_encoding[] = {
+static const lept_enum tbl_encoding[] = {
     TBL_ENTRY("default-encode", L_DEFAULT_ENCODE),
     TBL_ENTRY("default",        L_DEFAULT_ENCODE),
     TBL_ENTRY("jpeg-encode",    L_JPEG_ENCODE),
@@ -1942,7 +1985,7 @@ ll_string_encoding(l_int32 encoding)
  * file formats before IFF_DEFAULT will remain invariant.
  * </pre>
  */
-static const lept_enum_t tbl_input_format[] = {
+static const lept_enum tbl_input_format[] = {
     TBL_ENTRY("unknown",         IFF_UNKNOWN),
     TBL_ENTRY("bmp",             IFF_BMP),
     TBL_ENTRY("jpg",             IFF_JFIF_JPEG),
@@ -2008,7 +2051,7 @@ ll_string_input_format(int format)
  * The three valid key types for red-black trees, maps and sets.
  * </pre>
  */
-static const lept_enum_t tbl_keytype[] = {
+static const lept_enum tbl_keytype[] = {
     TBL_ENTRY("int",        L_INT_TYPE),
     TBL_ENTRY("uint",       L_UINT_TYPE),
     TBL_ENTRY("float",      L_FLOAT_TYPE)
@@ -2045,7 +2088,7 @@ ll_string_keytype(l_int32 type)
  * Set selection flags.
  * </pre>
  */
-static const lept_enum_t tbl_consecutive_skip_by[] = {
+static const lept_enum tbl_consecutive_skip_by[] = {
     TBL_ENTRY("choose-consecutive", L_CHOOSE_CONSECUTIVE),
     TBL_ENTRY("consecutive",        L_CHOOSE_CONSECUTIVE),
     TBL_ENTRY("cons",               L_CHOOSE_CONSECUTIVE),
@@ -2098,7 +2141,7 @@ ll_string_consecutive_skip_by(l_int32 choice)
  *          from a 32 bit pixel are defined here.
  * </pre>
  */
-static const lept_enum_t tbl_component[] = {
+static const lept_enum tbl_component[] = {
     TBL_ENTRY("red",             COLOR_RED),
     TBL_ENTRY("r",               COLOR_RED),
     TBL_ENTRY("green",           COLOR_GREEN),
@@ -2142,7 +2185,7 @@ ll_string_component(l_int32 component)
  * Compression to use for PDF.
  * </pre>
  */
-static const lept_enum_t tbl_compression[] = {
+static const lept_enum tbl_compression[] = {
     TBL_ENTRY("default",        IFF_DEFAULT),
     TBL_ENTRY("def",            IFF_DEFAULT),
     TBL_ENTRY("def",            IFF_DEFAULT),
@@ -2189,7 +2232,7 @@ ll_string_compression(l_int32 compression)
  * Min/max selection flags.
  * </pre>
  */
-static const lept_enum_t tbl_choose_min_max[] = {
+static const lept_enum tbl_choose_min_max[] = {
     TBL_ENTRY("choose-min",         L_CHOOSE_MIN),
     TBL_ENTRY("min",                L_CHOOSE_MIN),
     TBL_ENTRY("choose-max",         L_CHOOSE_MAX),
@@ -2235,7 +2278,7 @@ ll_string_choose_min_max(l_int32 choice)
  * Flags for 8 bit and 16 bit pixel sums.
  * </pre>
  */
-static const lept_enum_t tbl_what_is_max[] = {
+static const lept_enum tbl_what_is_max[] = {
     TBL_ENTRY("white-is-max",    L_WHITE_IS_MAX),
     TBL_ENTRY("white",           L_WHITE_IS_MAX),
     TBL_ENTRY("w",               L_WHITE_IS_MAX),
@@ -2275,7 +2318,7 @@ ll_string_what_is_max(l_int32 what)
  * Flags for getting white or black value.
  * </pre>
  */
-static const lept_enum_t tbl_getval[] = {
+static const lept_enum tbl_getval[] = {
     TBL_ENTRY("get-white-val",  L_GET_WHITE_VAL),
     TBL_ENTRY("white-val",      L_GET_WHITE_VAL),
     TBL_ENTRY("white",          L_GET_WHITE_VAL),
@@ -2317,7 +2360,7 @@ ll_string_getval(l_int32 val)
  * Line orientation flags.
  * </pre>
  */
-static const lept_enum_t tbl_direction[] = {
+static const lept_enum tbl_direction[] = {
     TBL_ENTRY("horizontal-line", L_HORIZONTAL_LINE),
     TBL_ENTRY("horizontal",      L_HORIZONTAL_LINE),
     TBL_ENTRY("horiz",           L_HORIZONTAL_LINE),
@@ -2359,7 +2402,7 @@ ll_string_direction(l_int32 dir)
  * Flags for setting to white or black.
  * </pre>
  */
-static const lept_enum_t tbl_set_black_white[] = {
+static const lept_enum tbl_set_black_white[] = {
     TBL_ENTRY("set-white",      L_SET_WHITE),
     TBL_ENTRY("white",          L_SET_WHITE),
     TBL_ENTRY("w",              L_SET_WHITE),
@@ -2458,7 +2501,7 @@ ll_string_set_black_white(l_int32 which)
  *
  * </pre>
  */
-static const lept_enum_t tbl_rasterop[] = {
+static const lept_enum tbl_rasterop[] = {
     TBL_ENTRY("clr",            PIX_CLR),
     TBL_ENTRY("set",            PIX_SET),
     TBL_ENTRY("src",            PIX_SRC),
@@ -2513,7 +2556,7 @@ ll_string_rasterop(l_int32 op)
  * Hinting bit flags in jpeg reader.
  * </pre>
  */
-static const lept_enum_t tbl_hint[] = {
+static const lept_enum tbl_hint[] = {
     TBL_ENTRY("none",               0),
     TBL_ENTRY("read-luminance",     L_JPEG_READ_LUMINANCE),
     TBL_ENTRY("luminance",          L_JPEG_READ_LUMINANCE),
@@ -2557,7 +2600,7 @@ ll_string_hint(l_int32 dir)
  * composable Sels, convolution, etc.
  * </pre>
  */
-static const lept_enum_t tbl_searchdir[] = {
+static const lept_enum tbl_searchdir[] = {
     TBL_ENTRY("horizontal",          L_HORIZ),
     TBL_ENTRY("horiz",               L_HORIZ),
     TBL_ENTRY("h",                   L_HORIZ),
@@ -2600,7 +2643,7 @@ ll_string_searchir(l_int32 dir)
  * Flags for data type converted from Numa.
  * </pre>
  */
-static const lept_enum_t tbl_number_value[] = {
+static const lept_enum tbl_number_value[] = {
     TBL_ENTRY("integer-value",      L_INTEGER_VALUE),
     TBL_ENTRY("integer",            L_INTEGER_VALUE),
     TBL_ENTRY("int",                L_INTEGER_VALUE),
@@ -2641,7 +2684,7 @@ ll_string_number_value(l_int32 type)
  * Pdf multi image flags.
  * </pre>
  */
-static const lept_enum_t tbl_position[] = {
+static const lept_enum tbl_position[] = {
     TBL_ENTRY("single-image",       0),
     TBL_ENTRY("single",             0),
     TBL_ENTRY("s",                  0),
@@ -2687,7 +2730,7 @@ ll_string_position(l_int32 type)
  * Statistical measures.
  * </pre>
  */
-static const lept_enum_t tbl_stats_type[] = {
+static const lept_enum tbl_stats_type[] = {
     TBL_ENTRY("mean-absval",        L_MEAN_ABSVAL),
     TBL_ENTRY("mean-abs",           L_MEAN_ABSVAL),
     TBL_ENTRY("mean",               L_MEAN_ABSVAL),
@@ -2738,7 +2781,7 @@ ll_string_stats_type(l_int32 type)
  * Color component selection flags.
  * </pre>
  */
-static const lept_enum_t tbl_select_color[] = {
+static const lept_enum tbl_select_color[] = {
     TBL_ENTRY("red",                 L_SELECT_RED),
     TBL_ENTRY("r",                   L_SELECT_RED),
     TBL_ENTRY("green",               L_SELECT_GREEN),
@@ -2787,7 +2830,7 @@ ll_string_select_color(l_int32 color)
  * Color component selection flags. Only "min" and "max" subset.
  * </pre>
  */
-static const lept_enum_t tbl_select_minmax[] = {
+static const lept_enum tbl_select_minmax[] = {
     TBL_ENTRY("min",                 L_SELECT_MIN),
     TBL_ENTRY("max",                 L_SELECT_MAX)
 };
@@ -2823,7 +2866,7 @@ ll_string_select_min_max(l_int32 which)
  * Structuring element types.
  * </pre>
  */
-static const lept_enum_t tbl_sel[] = {
+static const lept_enum tbl_sel[] = {
     TBL_ENTRY("dont-care",          SEL_DONT_CARE),
     TBL_ENTRY("hit",                SEL_HIT),
     TBL_ENTRY("h",                  SEL_HIT),
@@ -2863,7 +2906,7 @@ ll_string_sel(l_int32 which)
  * Location filter flags.
  * </pre>
  */
-static const lept_enum_t tbl_select_size[] = {
+static const lept_enum tbl_select_size[] = {
     TBL_ENTRY("width",              L_SELECT_WIDTH),
     TBL_ENTRY("w",                  L_SELECT_WIDTH),
     TBL_ENTRY("height",             L_SELECT_HEIGHT),
@@ -2911,7 +2954,7 @@ ll_string_select_size(l_int32 which)
  * Sort type flags.
  * </pre>
  */
-static const lept_enum_t tbl_sort_by[] = {
+static const lept_enum tbl_sort_by[] = {
     TBL_ENTRY("sort-by-x",              L_SORT_BY_X),
     TBL_ENTRY("x",                      L_SORT_BY_X),
     TBL_ENTRY("sort-by-y",              L_SORT_BY_Y),
@@ -2978,7 +3021,7 @@ ll_string_sort_by(l_int32 sort_by)
  * Box size adjustment and location flags. Only the "set-" subset.
  * </pre>
  */
-static const lept_enum_t tbl_set_side[] = {
+static const lept_enum tbl_set_side[] = {
     TBL_ENTRY("set-left",           L_SET_LEFT),
     TBL_ENTRY("left",               L_SET_LEFT),
     TBL_ENTRY("lft",                L_SET_LEFT),
@@ -3027,7 +3070,7 @@ ll_string_set_side(l_int32 which)
  * Scan direction flags. Only the "from-" subset.
  * </pre>
  */
-static const lept_enum_t tbl_from_side[] = {
+static const lept_enum tbl_from_side[] = {
     TBL_ENTRY("from-left",      L_FROM_LEFT),
     TBL_ENTRY("left",           L_FROM_LEFT),
     TBL_ENTRY("lft",            L_FROM_LEFT),
@@ -3076,7 +3119,7 @@ ll_string_from_side(l_int32 which)
  * Box size adjustment and location flags.
  * </pre>
  */
-static const lept_enum_t tbl_adjust_sides[] = {
+static const lept_enum tbl_adjust_sides[] = {
     TBL_ENTRY("adjust-skip",            L_ADJUST_SKIP),
     TBL_ENTRY("adj-skip",               L_ADJUST_SKIP),
     TBL_ENTRY("skip",                   L_ADJUST_SKIP),
@@ -3166,7 +3209,7 @@ ll_string_adjust_sides(l_int32 which)
  * Sort mode flags.
  * </pre>
  */
-static const lept_enum_t tbl_sort_mode[] = {
+static const lept_enum tbl_sort_mode[] = {
     TBL_ENTRY("shell-sort",             L_SHELL_SORT),
     TBL_ENTRY("shell",                  L_SHELL_SORT),
     TBL_ENTRY("s",                      L_SHELL_SORT),
@@ -3206,7 +3249,7 @@ ll_string_sort_mode(l_int32 sort_mode)
  * Sort order flags.
  * </pre>
  */
-static const lept_enum_t tbl_sort_order[] = {
+static const lept_enum tbl_sort_order[] = {
     TBL_ENTRY("increasing",             L_SORT_INCREASING),
     TBL_ENTRY("inc",                    L_SORT_INCREASING),
     TBL_ENTRY("i",                      L_SORT_INCREASING),
@@ -3243,7 +3286,7 @@ ll_string_sort_order(l_int32 order)
 /**
  * \brief Table of transform order by names and enumeration values.
  */
-static const lept_enum_t tbl_trans_order[] = {
+static const lept_enum tbl_trans_order[] = {
     TBL_ENTRY("translate,scale,rotate", L_TR_SC_RO),
     TBL_ENTRY("tr,sc,ro",               L_TR_SC_RO),
     TBL_ENTRY("scale,rotate,translate", L_SC_RO_TR),
@@ -3289,7 +3332,7 @@ ll_string_trans_order(l_int32 order)
  * Size filter flags.
  * </pre>
  */
-static const lept_enum_t tbl_relation[] = {
+static const lept_enum tbl_relation[] = {
     TBL_ENTRY("less-than",              L_SELECT_IF_LT),
     TBL_ENTRY("lt",                     L_SELECT_IF_LT),
     TBL_ENTRY("<",                      L_SELECT_IF_LT),
@@ -3335,7 +3378,7 @@ ll_string_relation(l_int32 relation)
  * Translates degrees to clockwise count.
  * </pre>
  */
-static const lept_enum_t tbl_rotation[] = {
+static const lept_enum tbl_rotation[] = {
     TBL_ENTRY("0",      0),
     TBL_ENTRY("90",     1),
     TBL_ENTRY("180",    2),
@@ -3375,7 +3418,7 @@ ll_string_rotation(l_int32 rotation)
  * Handling overlapping bounding boxes in Boxa.
  * </pre>
  */
-static const lept_enum_t tbl_overlap[] = {
+static const lept_enum tbl_overlap[] = {
     TBL_ENTRY("combine",        L_COMBINE),
     TBL_ENTRY("comb",           L_COMBINE),
     TBL_ENTRY("c",              L_COMBINE),
@@ -3415,7 +3458,7 @@ ll_string_overlap(l_int32 overlap)
  * Flags for modifying box boundaries using a second box.
  * </pre>
  */
-static const lept_enum_t tbl_subflag[] = {
+static const lept_enum tbl_subflag[] = {
     TBL_ENTRY("use-minsize",        L_USE_MINSIZE),
     TBL_ENTRY("minsize",            L_USE_MINSIZE),
     TBL_ENTRY("min",                L_USE_MINSIZE),
@@ -3471,7 +3514,7 @@ ll_string_subflag(l_int32 subflag)
  * Flags for replacing invalid boxes.
  * </pre>
  */
-static const lept_enum_t tbl_useflag[] = {
+static const lept_enum tbl_useflag[] = {
     TBL_ENTRY("use-all-boxes",          L_USE_ALL_BOXES),
     TBL_ENTRY("use-all",                L_USE_ALL_BOXES),
     TBL_ENTRY("all",                    L_USE_ALL_BOXES),
@@ -3515,7 +3558,7 @@ ll_string_useflag(l_int32 useflag)
  * Handling negative values in conversion to unsigned int.
  * </pre>
  */
-static const lept_enum_t tbl_negvals[] = {
+static const lept_enum tbl_negvals[] = {
     TBL_ENTRY("clip-to-zero",   L_CLIP_TO_ZERO),
     TBL_ENTRY("zero",           L_CLIP_TO_ZERO),
     TBL_ENTRY("z",              L_CLIP_TO_ZERO),
@@ -3556,7 +3599,7 @@ ll_string_negvals(l_int32 negvals)
  * Value flags.
  * </pre>
  */
-static const lept_enum_t tbl_value_flags[] = {
+static const lept_enum tbl_value_flags[] = {
     TBL_ENTRY("negative",       L_NEGATIVE),
     TBL_ENTRY("neg",            L_NEGATIVE),
     TBL_ENTRY("n",              L_NEGATIVE),
@@ -3606,7 +3649,7 @@ ll_string_value_flags(l_int32 value_flags)
  * Paint flags.
  * </pre>
  */
-static const lept_enum_t tbl_paint_flags[] = {
+static const lept_enum tbl_paint_flags[] = {
     TBL_ENTRY("paint-light",    L_PAINT_LIGHT),
     TBL_ENTRY("light",          L_PAINT_LIGHT),
     TBL_ENTRY("l",              L_PAINT_LIGHT),

@@ -503,9 +503,7 @@ luaopen_FPixa(lua_State *L)
         {"SetPixel",            SetPixel},
         LUA_SENTINEL
     };
-
-    FUNC("luaopen_" TNAME);
-
+    LO_FUNC(TNAME);
     ll_global_cfunct(_fun, L, TNAME, ll_new_Pixa);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;

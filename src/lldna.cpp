@@ -314,7 +314,7 @@ GetDArray(lua_State *L)
     l_float64 *darray = l_dnaGetDArray(da, L_COPY);
     l_int32 n = l_dnaGetCount(da);
     int res = ll_push_Darray(_fun, L, darray, n);
-    LEPT_FREE(darray);
+    ll_free(darray);
     return res;
 }
 
@@ -368,10 +368,10 @@ GetIArray(lua_State *L)
 {
     LL_FUNC("GetIArray");
     Dna *dna = ll_check_Dna(_fun, L, 1);
-    l_int32 *ia = l_dnaGetIArray(dna);
+    l_int32 *iarray = l_dnaGetIArray(dna);
     l_int32 size = l_dnaGetCount(dna);
-    int res = ll_push_Iarray(_fun, L, ia, size);
-    LEPT_FREE(ia);
+    int res = ll_push_Iarray(_fun, L, iarray, size);
+    ll_free(iarray);
     return res;
 }
 
@@ -768,9 +768,7 @@ luaopen_Dna(lua_State *L)
         {"WriteStream",             WriteStream},
         LUA_SENTINEL
     };
-
-    FUNC("luaopen_" TNAME);
-
+    LO_FUNC(TNAME);
     ll_global_cfunct(_fun, L, TNAME, ll_new_Dna);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;

@@ -333,8 +333,8 @@ ConvertToHex(lua_State *L)
         return 0;
     char *hex = pixcmapConvertToHex(data, ncolors);
     lua_pushstring(L, hex);
-    LEPT_FREE(hex);
-    LEPT_FREE(data);
+    ll_free(data);
+    ll_free(hex);
     return 1;
 }
 
@@ -813,7 +813,7 @@ SerializeToMemory(lua_State *L)
     if (pixcmapSerializeToMemory(cmap, cpc, &ncolors, &data))
         return ll_push_nil(L);
     lua_pushlstring(L, reinterpret_cast<const char *>(data), static_cast<size_t>(cpc) * ncolors);
-    LEPT_FREE(data);
+    ll_free(data);
     return 1;
 }
 
@@ -887,10 +887,10 @@ ToArrays(lua_State *L)
     ll_push_Iarray(_fun, L, gmap, ncolors);
     ll_push_Iarray(_fun, L, bmap, ncolors);
     ll_push_Iarray(_fun, L, amap, ncolors);
-    LEPT_FREE(rmap);
-    LEPT_FREE(gmap);
-    LEPT_FREE(bmap);
-    LEPT_FREE(amap);
+    ll_free(rmap);
+    ll_free(gmap);
+    ll_free(bmap);
+    ll_free(amap);
     return 4;
 }
 
@@ -913,11 +913,10 @@ ToRGBTable(lua_State *L)
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
     l_int32 ncolors = 0;
     l_uint32 *table = nullptr;
-    l_int32 i;
     if (pixcmapToRGBTable(cmap, &table, &ncolors))
         return ll_push_nil(L);
     ll_push_Uarray(_fun, L, table, ncolors);
-    LEPT_FREE(table);
+    ll_free(table);
     return 4;
 }
 
@@ -993,7 +992,7 @@ WriteMem(lua_State *L)
     if (pixcmapWriteMem(&data, &size, cmap))
         return ll_push_nil(L);
     lua_pushlstring(L, reinterpret_cast<const char *>(data), size);
-    LEPT_FREE(data);
+    ll_free(data);
     return 1;
 }
 
@@ -1197,8 +1196,7 @@ luaopen_PixColormap(lua_State *L)
         {"WriteStream",             WriteStream},
         LUA_SENTINEL
     };
-
-    FUNC("luaopen_" TNAME);
+    LO_FUNC(TNAME);
     ll_global_cfunct(_fun, L, TNAME, ll_new_PixColormap);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;

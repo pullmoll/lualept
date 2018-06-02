@@ -1444,7 +1444,8 @@ WriteMem(lua_State *L)
     size_t size = 0;
     if (fpixWriteMem(&data, &size, fpix))
         return ll_push_nil(L);
-    return ll_push_lstring(_fun, L, reinterpret_cast<const char *>(data), size);
+    ll_push_bytes(_fun, L, data, size);
+    return 1;
 }
 
 /**
@@ -1645,9 +1646,7 @@ luaopen_FPix(lua_State *L)
         {"WriteStream",             WriteStream},
         LUA_SENTINEL
     };
-
-    FUNC("luaopen_" TNAME);
-
+    LO_FUNC(TNAME);
     ll_global_cfunct(_fun, L, TNAME, ll_new_FPix);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;

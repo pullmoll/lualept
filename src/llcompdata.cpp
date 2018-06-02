@@ -149,8 +149,7 @@ ConvertToPdfData(lua_State *L)
     size_t nbytes = 0;
     if (cidConvertToPdfData(cid, title, &data, &nbytes))
         return ll_push_nil(L);
-    ll_push_lstring(_fun, L, reinterpret_cast<const char *>(data), nbytes);
-    ll_free(data);
+    ll_push_bytes(_fun, L, data, nbytes);
     return 1;
 }
 
@@ -597,9 +596,7 @@ luaopen_CompData(lua_State *L)
         {"JpegDataMem",         JpegDataMem},
         LUA_SENTINEL
     };
-
-    FUNC("luaopen_" TNAME);
-
+    LO_FUNC(TNAME);
     ll_global_cfunct(_fun, L, TNAME, ll_new_CompData);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;

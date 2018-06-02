@@ -561,9 +561,7 @@ luaopen_Dnaa(lua_State *L) {
         {"WriteStream",         WriteStream},
         LUA_SENTINEL
     };
-
-    FUNC("luaopen_" TNAME);
-
+    LO_FUNC(TNAME);
     ll_global_cfunct(_fun, L, TNAME, ll_new_Dnaa);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;

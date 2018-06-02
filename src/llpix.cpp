@@ -8048,8 +8048,7 @@ ConvertToPdfData(lua_State *L)
     PdfData *lpd = nullptr;
     if (pixConvertToPdfData(pix, type, quality, &data, &nbytes, x, y, res, title, position ? &lpd : nullptr, position))
         return ll_push_nil(L);
-    ll_push_lstring(_fun, L, reinterpret_cast<const char *>(data), nbytes);
-    ll_free(data);
+    ll_push_bytes(_fun, L, data, nbytes);
     ll_push_PdfData(_fun, L, lpd);
     return 2;
 }
@@ -8088,8 +8087,8 @@ ConvertToPdfDataSegmented(lua_State *L)
     size_t nbytes = 0;
     if (pixConvertToPdfDataSegmented(pixs, res, type, thresh, boxa, quality, scalefactor, title, &data, &nbytes))
         return ll_push_nil(L);
-    ll_push_lstring(_fun, L, reinterpret_cast<const char *>(data), nbytes);
-    return 2;
+    ll_push_bytes(_fun, L, data, nbytes);
+    return 1;
 }
 
 /**
@@ -9822,7 +9821,6 @@ DeskewLocal(lua_State *L)
  * \brief Destroy the colormap of a Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
- * Arg #2 is expected to be a PixColormap* (colormap).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 PixColormap* on the Lua stack
@@ -9832,8 +9830,6 @@ DestroyColormap(lua_State *L)
 {
     LL_FUNC("DestroyColormap");
     Pix *pix = ll_check_Pix(_fun, L, 1);
-    PixColormap* colormap = ll_take_PixColormap(_fun, L, 2);
-    (void)colormap;
     return ll_push_boolean(_fun, L, 0 == pixDestroyColormap(pix));
 }
 
@@ -10219,11 +10215,7 @@ Display(lua_State *L)
     l_int32 x = ll_check_l_int32(_fun, L, 2);
     l_int32 y = ll_check_l_int32(_fun, L, 3);
     snprintf(title, sizeof(title), TNAME "*: %p", reinterpret_cast<void *>(pixs));
-#if defined(HAVE_SDL2)
-    return ll_push_boolean(_fun, L, DisplaySDL2(pixs, x, y, title));
-#else
     return ll_push_boolean(_fun, L, 0 == pixDisplay(pixs, x, y));
-#endif
 }
 
 /**
@@ -10247,7 +10239,7 @@ DisplayColorArray(lua_State *L)
     l_int32 ncolors = 0;
     l_uint32 *carray = ll_unpack_Uarray(_fun, L, 4, &ncolors);
     Pix *pixd = pixDisplayColorArray(carray, ncolors, side, ncols, fontsize);
-    LEPT_FREE(carray);
+    ll_free(carray);
     return ll_push_Pix(_fun, L, pixd);
 }
 
@@ -10534,12 +10526,7 @@ DisplayWithTitle(lua_State *L)
     l_int32 y = ll_check_l_int32(_fun, L, 3);
     const char *title = ll_check_string(_fun, L, 4);
     l_int32 dispflag = ll_check_boolean(_fun, L, 5);
-#if defined(HAVE_SDL2)
-    UNUSED(dispflag);
-    return ll_push_boolean(_fun, L, DisplaySDL2(pixs, x, y, title));
-#else
     return ll_push_boolean(_fun, L, 0 == pixDisplayWithTitle(pixs, x, y, title, dispflag));
-#endif
 }
 
 /**
@@ -15004,7 +14991,7 @@ GetBinnedColor(lua_State *L)
     if (pixGetBinnedColor(pixs, pixg, factor, nbins, alut, &carray, 0))
         return ll_push_nil(L);
     res = ll_push_Uarray(_fun, L, carray, nbins);
-    LEPT_FREE(carray);
+    ll_free(carray);
     return res;
 }
 
@@ -15044,7 +15031,7 @@ GetBinnedComponentRange(lua_State *L)
     ll_push_l_int32(_fun, L, minval);
     ll_push_l_int32(_fun, L, maxval);
     res = ll_push_Uarray(_fun, L, carray, nbins);
-    LEPT_FREE(carray);
+    ll_free(carray);
     return 2 + res;
 }
 
@@ -15372,19 +15359,13 @@ GetColumnStats(lua_State *L)
     l_int32 type = ll_check_select_color(_fun, L, 2, L_SELECT_RED);
     l_int32 nbins = ll_check_l_int32(_fun, L, 3);
     l_int32 thresh = ll_opt_l_int32(_fun, L, 4, 0);
-    l_float32 *rowvect = reinterpret_cast<l_float32 *>(LEPT_CALLOC(nbins, sizeof(l_float32)));
-    if (!rowvect) {
-        lua_pushfstring(L, "%s: could not allocate rowvect (%d)",
-                        _fun, static_cast<size_t>(nbins) * sizeof(*rowvect));
-        lua_error(L);
-        return 0;
-    }
+    l_float32 *rowvect = ll_calloc<l_float32>(_fun, L, nbins);
     if (pixGetColumnStats(pixs, type, nbins, thresh, rowvect)) {
-        LEPT_FREE(rowvect);
+        ll_free(rowvect);
         return ll_push_nil(L);
     }
     ll_push_Farray(_fun, L, rowvect, nbins);
-    LEPT_FREE(rowvect);
+    ll_free(rowvect);
     return 1;
 }
 
@@ -16629,7 +16610,7 @@ GetRankColorArray(lua_State *L)
     if (pixGetRankColorArray(pixs, nbins, type, factor, &carray, 0, 0))
         return ll_push_nil(L);
     res = ll_push_Uarray(_fun, L, carray, nbins);
-    LEPT_FREE(carray);
+    ll_free(carray);
     return res;
 }
 
@@ -16775,7 +16756,8 @@ GetRasterData(lua_State *L)
     size_t nbytes = 0;
     if (pixGetRasterData(pixs, &data, &nbytes))
         return ll_push_nil(L);
-    return ll_push_lstring(_fun, L, reinterpret_cast<const char *>(data), nbytes);
+    ll_push_bytes(_fun, L, data, nbytes);
+    return 1;
 }
 
 /**
@@ -16883,11 +16865,11 @@ GetRowStats(lua_State *L)
     l_int32 thresh = ll_opt_l_int32(_fun, L, 4, 0);
     l_float32 *colvect = ll_calloc<l_float32>(_fun, L, nbins);
     if (pixGetRowStats(pixs, type, nbins, thresh, colvect)) {
-        LEPT_FREE(colvect);
+        ll_free(colvect);
         return ll_push_nil(L);
     }
     ll_push_Farray(_fun, L, colvect, nbins);
-    LEPT_FREE(colvect);
+    ll_free(colvect);
     return 1;
 }
 
@@ -18474,15 +18456,24 @@ MakeMaskFromLUT(lua_State *L)
 {
     LL_FUNC("MakeMaskFromLUT");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    size_t len = 0;
-    const char* lut = ll_check_lstring(_fun, L, 2, &len);
-    l_int32* tab = ll_calloc<l_int32>(_fun, L, 256);
-    size_t i;
-    /* expand lookup-table (lut) to array of l_int32 (tab) */
-    for (i = 0; i < 256 && i < len; i++)
-        tab[i] = lut[i];
+    l_int32* tab = nullptr;
+    tab = ll_calloc<l_int32>(_fun, L, 256);
+    if (lua_isstring(L, 2)) {
+        size_t len, i;
+        const char* lut = ll_check_lstring(_fun, L, 2, &len);
+        /* expand lookup-table (lut) to array of l_int32 (tab) */
+        for (i = 0; i < 256 && i < len; i++)
+            tab[i] = lut[i];
+    } else {
+        l_int32 len, i;
+        l_int32 *iarray = ll_unpack_Iarray(_fun, L, 2, &len);
+        /* copy integer array (iarray) to array of l_int32 (tab) */
+        for (i = 0; i < 256 && i < len; i++)
+            tab[i] = iarray[i];
+        ll_free(iarray);
+    }
     ll_push_Pix(_fun, L, pixMakeMaskFromLUT(pixs, tab));
-    LEPT_FREE(tab);
+    ll_free(tab);
     return 1;
 }
 
@@ -29147,20 +29138,14 @@ SetPixelColumn(lua_State *L)
     l_int32 rows = pixGetHeight(pixd);
     l_int32 n;
     l_float32 *tblvect = ll_unpack_Farray(_fun, L, 3, &n);
-    l_float32 *colvect = reinterpret_cast<l_float32 *>(LEPT_CALLOC(rows, sizeof(l_float32)));
+    l_float32 *colvect = ll_calloc<l_float32>(_fun, L, rows);
     l_int32 i;
     l_int32 result = FALSE;
-    if (!colvect) {
-        lua_pushfstring(L, "%s: could not allocate colvect (%d)",
-                        _fun, static_cast<size_t>(rows) * sizeof(*colvect));
-        lua_error(L);
-        return 0;
-    }
     for (i = 0; i < rows && i < n; i++)
         colvect[i] = tblvect[i];
-    LEPT_FREE(tblvect);
+    ll_free(tblvect);
     result = pixSetPixelColumn(pixd, col, colvect);
-    LEPT_FREE(colvect);
+    ll_free(colvect);
     return ll_push_boolean(_fun, L, 0 == result);
 }
 
@@ -32307,6 +32292,35 @@ VarianceInRectangle(lua_State *L)
 }
 
 /**
+ * @brief View a Pix* using the ViewSDL2 function, if availble
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is an optional string (title)
+ * Arg #3 is an optional l_int32 (x)
+ * Arg #4 is an optional l_int32 (y)
+ * Arg #5 is an optional l_float32 (dscale)
+ *
+ * Notes:
+ *         (1) %dscale == 0, scale to 75% of the desktop
+ *         (2) %dscale < 0, scale to abs(dscale) * 100%
+ *         (3) otherwise scale to dscale
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+int
+View(lua_State *L)
+{
+    LL_FUNC("View");
+    Pix* pixs = ll_check_Pix(_fun, L, 1);
+    const char *title = ll_opt_string(_fun, L, 2);
+    l_int32 x = ll_opt_l_int32(_fun, L, 3, 0);
+    l_int32 y = ll_opt_l_int32(_fun, L, 4, 0);
+    l_float32 dscale = ll_opt_l_float32(_fun, L, 5, 0.0f);
+    return ll_push_boolean(_fun, L, ShowSDL2(pixs, title, x, y, dscale));
+}
+
+/**
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
@@ -32891,7 +32905,7 @@ WriteMem(lua_State *L)
     if (pixWriteMem(&data, &size, pix, format))
         return ll_push_nil(L);
     lua_pushlstring(L, reinterpret_cast<const char *>(data), size);
-    LEPT_FREE(data);
+    ll_free(data);
     return 1;
 }
 
@@ -32923,8 +32937,7 @@ WriteMemBmp(lua_State *L)
     size_t fsize = 0;
     if (pixWriteMemBmp(&fdata, &fsize, pixs))
         return ll_push_nil(L);
-    ll_push_lstring(_fun, L, reinterpret_cast<const char *>(fdata), fsize);
-    ll_free(fdata);
+    ll_push_bytes(_fun, L, fdata, fsize);
     return 1;
 }
 
@@ -32948,8 +32961,7 @@ WriteMemGif(lua_State *L)
     size_t size = 0;
     if (pixWriteMemGif(&data, &size, pix))
         return ll_push_nil(L);
-    ll_push_lstring(_fun, L, reinterpret_cast<const char *>(data), size);
-    ll_free(data);
+    ll_push_bytes(_fun, L, data, size);
     return 1;
 }
 
@@ -32982,8 +32994,7 @@ WriteMemJp2k(lua_State *L)
     size_t size = 0;
     if (pixWriteMemJp2k(&data, &size, pix, quality, nlevels, hint, debug))
         return ll_push_nil(L);
-    ll_push_lstring(_fun, L, reinterpret_cast<const char *>(data), size);
-    ll_free(data);
+    ll_push_bytes(_fun, L, data, size);
     return 1;
 }
 
@@ -33012,8 +33023,7 @@ WriteMemJpeg(lua_State *L)
     size_t size = 0;
     if (pixWriteMemJpeg(&data, &size, pix, quality, progressive))
         return ll_push_nil(L);
-    ll_push_lstring(_fun, L, reinterpret_cast<const char *>(data), size);
-    ll_free(data);
+    ll_push_bytes(_fun, L, data, size);
     return 1;
 }
 
@@ -33045,8 +33055,7 @@ WriteMemPS(lua_State *L)
     size_t size = 0;
     if (pixWriteMemPS(&data, &size, pix, box, res, scale))
         return ll_push_nil(L);
-    ll_push_lstring(_fun, L, reinterpret_cast<const char *>(data), size);
-    ll_free(data);
+    ll_push_bytes(_fun, L, data, size);
     return 1;
 }
 
@@ -33071,8 +33080,7 @@ WriteMemPam(lua_State *L)
     size_t size = 0;
     if (pixWriteMemPam(&data, &size, pix))
         return ll_push_nil(L);
-    ll_push_lstring(_fun, L, reinterpret_cast<const char *>(data), size);
-    ll_free(data);
+    ll_push_bytes(_fun, L, data, size);
     return 1;
 }
 
@@ -33103,8 +33111,7 @@ WriteMemPdf(lua_State *L)
     size_t nbytes = 0;
     if (pixWriteMemPdf(&data, &nbytes, pix, res, title))
         return ll_push_nil(L);
-    ll_push_lstring(_fun, L, reinterpret_cast<const char *>(data), nbytes);
-    ll_free(data);
+    ll_push_bytes(_fun, L, data, nbytes);
     return 1;
 }
 
@@ -33130,8 +33137,7 @@ WriteMemPng(lua_State *L)
     size_t filesize = 0;
     if (pixWriteMemPng(&filedata, &filesize, pix, gamma))
         return ll_push_nil(L);
-    ll_push_lstring(_fun, L, reinterpret_cast<const char *>(filedata), filesize);
-    ll_free(filedata);
+    ll_push_bytes(_fun, L, filedata, filesize);
     return 1;
 }
 
@@ -33156,8 +33162,7 @@ WriteMemPnm(lua_State *L)
     size_t size = 0;
     if (pixWriteMemPnm(&data, &size, pix))
         return ll_push_nil(L);
-    ll_push_lstring(_fun, L, reinterpret_cast<const char *>(data), size);
-    ll_free(data);
+    ll_push_bytes(_fun, L, data, size);
     return 1;
 }
 
@@ -33178,8 +33183,7 @@ WriteMemSpix(lua_State *L)
     size_t size = 0;
     if (pixWriteMemSpix(&data, &size, pix))
         return ll_push_nil(L);
-    ll_push_lstring(_fun, L, reinterpret_cast<const char *>(data), size);
-    ll_free(data);
+    ll_push_bytes(_fun, L, data, size);
     return 1;
 }
 
@@ -33202,8 +33206,7 @@ WriteMemTiff(lua_State *L)
     size_t size = 0;
     if (pixWriteMemTiff(&data, &size, pix, comptype))
         return ll_push_nil(L);
-    ll_push_lstring(_fun, L, reinterpret_cast<const char *>(data), size);
-    ll_free(data);
+    ll_push_bytes(_fun, L, data, size);
     return 1;
 }
 
@@ -33234,8 +33237,7 @@ WriteMemTiffCustom(lua_State *L)
     size_t size = 0;
     if (pixWriteMemTiffCustom(&data, &size, pix, comptype, natags, savals, satypes, nasizes))
         return ll_push_nil(L);
-    ll_push_lstring(_fun, L, reinterpret_cast<const char *>(data), size);
-    ll_free(data);
+    ll_push_bytes(_fun, L, data, size);
     return 1;
 }
 
@@ -33268,8 +33270,7 @@ WriteMemWebP(lua_State *L)
     size_t encsize = 0;
     if (pixWriteMemWebP(&encdata, &encsize, pixs, quality, lossless))
         return ll_push_nil(L);
-    ll_push_lstring(_fun, L, reinterpret_cast<const char *>(encdata), encsize);
-    ll_free(encdata);
+    ll_push_bytes(_fun, L, encdata, encsize);
     return 2;
 }
 
@@ -35057,6 +35058,7 @@ luaopen_Pix(lua_State *L)
         {"VarianceByRow",                   VarianceByRow},
         {"VarianceInRect",                  VarianceInRect},
         {"VarianceInRectangle",             VarianceInRectangle},
+        {"View",                            View},
         {"WarpStereoscopic",                WarpStereoscopic},
         {"WindowedMean",                    WindowedMean},
         {"WindowedMeanSquare",              WindowedMeanSquare},
@@ -35123,9 +35125,7 @@ luaopen_Pix(lua_State *L)
                   ((i >> 1) & 1) +
                   ((i >> 0) & 1);
     }
-
-    FUNC("luaopen_" TNAME);
-
+    LO_FUNC(TNAME);
     ll_global_cfunct(_fun, L, TNAME, ll_new_Pix);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;

@@ -71,6 +71,7 @@ function amap_test()
 	print(pad("amap #"..#amap), amap)
 	print(pad("amap:Find(5)"), amap:Find(5))
 	print(pad("amap:Find(99)"), amap:Find(99))
+	print(pad("amap[4]"), amap[4])
 	print(pad("amap:Find(17)"), amap:Find(17))
 	print(pad("amap:Delete(17)"), amap:Delete(17))
 	print(pad("amap:Find(17)"), amap:Find(17))
@@ -317,30 +318,38 @@ function pix_test()
 	for dist = 4,13 do pix:SetBorderRingVal(dist, bluish-1) end
 
 	-- Draw some horizontal lines around the vertical center
-	for y = height/2-2,height/2+2 do
-		for x = 4, width-4 do pix:SetPixel(x, y, black) end
+	for y = height/2-3,height/2+3 do
+		for x = 5, width-6 do pix:SetPixel(x, y, black) end
 	end
-
 	pix:SetSpecial(10+9)	-- maximum compression
+
 	local ok = pix:Write(filename, "png")
 	print(pad("pix:Write('" .. filename .."')"), ok)
 
 	local cmap = pix:GetColormap()
 	print(pad("cmap"), cmap)
+
 	local r,g,b,a = cmap:ToArrays()
 	print(pad("r,g,b,a = cmap:ToArrays()"), r, g, b, a)
 	print(pad("r"), tbl(r))
 	print(pad("g"), tbl(g))
 	print(pad("b"), tbl(b))
 	print(pad("a"), tbl(a))
+
 	local rgb = cmap:ToRGBTable()
 	print(pad("rgb = cmap:ToRGBTable()"), rgb, #rgb, tbl(rgb))
+
 	local data = cmap:SerializeToMemory(4)
 	print(pad("data = cmap:SerializeToMemory(4)"), data)
 	hex_dump(data)
 
+	local ok = pix:DestroyColormap()
+	print(pad("ok = pix:DestroyColormap()"), ok);
+	pix:View()
+
 	local pix2 = Pix(filename)
 	print(pad("pix2 = Pix('" .. filename .. "')"), pix2);
+	pix2:View()
 
 	-- get the pixel data of pix2 as two dimensional array of integers
 	local data = pix2:GetData();
@@ -384,6 +393,7 @@ function pix_test()
 	local pix3 = pix3:AddBorder(20, LuaLept.RGB(255,255,255))
 	print(pad("pix3 = pix3:AddBorder(20, LuaLept.RGB(255,255,255))"), pix3)
 
+	pix3:View()
 	print(pad("pix3"), pix3)
 	local ok = pix3:Write(tmpdir .. "/carray.tiff", "lzw")
 
@@ -486,10 +496,11 @@ function dpix_test()
 	print(pad("data = dpix2:GetData()"), data)
 
 	local negvals = "clip-to-zero"
-	local pix = dpix2:ConvertToPix(16, negvals, true)
-	print(pad("pix = dpix2:ConvertToPix(16,'" .. negvals .. "', true)"), ok)
+	local pix = dpix2:ConvertToPix(0, negvals, true)
+	print(pad("pix = dpix2:ConvertToPix(0,'" .. negvals .. "', true)"), ok)
 	pix:Write(filename2)
 	print(pad("pix:Write('" .. filename2 .."')"), ok)
+
 	local data, pdf = pix:ConvertToPdf("png", 75, filename3, 0, 0, 150, "A DPix converted to Pix, then to PDF")
 	print(pad("pix:ConvertToPdf(...)"), data)
 end

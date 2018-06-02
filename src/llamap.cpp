@@ -36,6 +36,23 @@
  * \class Amap
  *
  * A map of keys and values of type l_int64, l_uint64 or l_float64.
+ *
+ * It is comparable with a Lua table array and is used for
+ * situations where there may be holes in the key space.
+ *
+ * Lua example code:
+ *
+ * local amap = Amap("int")
+ * amap:Insert(3, 100) -- is equivalent to amap[3] = 100
+ * amap[2] = 128
+ * amap[5] = 222
+ * print("amap", amap)
+ * if amap:Find(3) then
+ *     print("key 3 is in amap")
+ * else
+ *     print("key 3 is not in amap")
+ * end
+ *
  */
 
 /** Set TNAME to the class name used in this source file */
@@ -476,8 +493,7 @@ luaopen_Amap(lua_State *L)
         {"Insert",              Insert},
         LUA_SENTINEL
     };
-    FUNC("luaopen_" TNAME);
-
+    LO_FUNC(TNAME);
     ll_global_cfunct(_fun, L, TNAME, ll_new_Amap);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;

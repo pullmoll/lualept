@@ -270,9 +270,7 @@ luaopen_Stack(lua_State *L)
         {"Remove",              Remove},
         LUA_SENTINEL
     };
-
-    FUNC("luaopen_" TNAME);
-
+    LO_FUNC(TNAME);
     ll_global_cfunct(_fun, L, TNAME, ll_new_Stack);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;

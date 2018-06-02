@@ -97,7 +97,12 @@ toString(lua_State *L)
         if (boxGetGeometry(box, &x, &y, &w, &h)) {
             snprintf(str, sizeof(str), "invalid");
         } else {
-            snprintf(str, sizeof(str), "    x = %d, y = %d, w = %d, h = %d", x, y, w, h);
+            snprintf(str, sizeof(str), "    %s = %d, %s = %d, %s = %d, %s = %d, %s = %d",
+                     "x", x,
+                     "y", y,
+                     "w", w,
+                     "h", h,
+                     "area", w * h);
         }
         luaL_addstring(&B, str);
     }
@@ -1129,9 +1134,7 @@ luaopen_Box(lua_State *L)
         {"TransformOrdered",        TransformOrdered},
         LUA_SENTINEL
     };
-
-    FUNC("luaopen_" TNAME);
-
+    LO_FUNC(TNAME);
     ll_global_cfunct(_fun, L, TNAME, ll_new_Box);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;

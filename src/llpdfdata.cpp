@@ -213,8 +213,7 @@ ConvertToPdfData(lua_State *L)
     l_int32 position = ll_check_l_int32(_fun, L, 8);
     if (convertToPdfData(filein, type, quality, &data, &nbytes, x, y, res, title, &lpd, position))
         return ll_push_nil(L);
-    ll_push_lstring(_fun, L, reinterpret_cast<const char *>(data), nbytes);
-    ll_free(data);
+    ll_push_bytes(_fun, L, data, nbytes);
     ll_push_PdfData(_fun, L, lpd);
     return 2;
 }
@@ -250,8 +249,7 @@ ConvertToPdfDataSegmented(lua_State *L)
     size_t nbytes = 0;
     if (convertToPdfDataSegmented(filein, res, type, thresh, boxa, quality, scalefactor, title, &data, &nbytes))
         return ll_push_nil(L);
-    ll_push_lstring(_fun, L, reinterpret_cast<const char *>(data), nbytes);
-    ll_free(data);
+    ll_push_bytes(_fun, L, data, nbytes);
     return 1;
 }
 
@@ -296,7 +294,7 @@ ConvertUnscaledToPdfData(lua_State *L)
     size_t nbytes = 0;
     if (convertUnscaledToPdfData(fname, title, &data, &nbytes))
         return ll_push_nil(L);
-    ll_push_lstring(_fun, L, reinterpret_cast<const char *>(data), nbytes);
+    ll_push_bytes(_fun, L, data, nbytes);
     ll_free(data);
     return 1;
 }
@@ -380,9 +378,7 @@ luaopen_PdfData(lua_State *L)
         {"ConvertUnscaledToPdfData",    ConvertUnscaledToPdfData},
         LUA_SENTINEL
     };
-
-    FUNC("luaopen_" TNAME);
-
+    LO_FUNC(TNAME);
     ll_global_cfunct(_fun, L, TNAME, ll_new_PdfData);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;
