@@ -313,6 +313,7 @@ function pix_test()
 
 	-- Set all pixels (to 2^depth - 1)
 	pix:SetAllArbitrary(3)
+	pix:View()
 
 	-- Draw some border rings
 	for dist = 4,13 do pix:SetBorderRingVal(dist, bluish-1) end
@@ -325,6 +326,7 @@ function pix_test()
 
 	local ok = pix:Write(filename, "png")
 	print(pad("pix:Write('" .. filename .."')"), ok)
+	pix:View()
 
 	local cmap = pix:GetColormap()
 	print(pad("cmap"), cmap)
@@ -345,7 +347,6 @@ function pix_test()
 
 	local ok = pix:DestroyColormap()
 	print(pad("ok = pix:DestroyColormap()"), ok);
-	pix:View()
 
 	local pix2 = Pix(filename)
 	print(pad("pix2 = Pix('" .. filename .. "')"), pix2);
@@ -392,8 +393,8 @@ function pix_test()
 	print(pad("pix3 = pix3.DisplayColorArray(240, 4, 6, carray)"), pix3)
 	local pix3 = pix3:AddBorder(20, LuaLept.RGB(255,255,255))
 	print(pad("pix3 = pix3:AddBorder(20, LuaLept.RGB(255,255,255))"), pix3)
-
 	pix3:View()
+
 	print(pad("pix3"), pix3)
 	local ok = pix3:Write(tmpdir .. "/carray.tiff", "lzw")
 
@@ -406,9 +407,11 @@ function pix2_test()
 	local filename2 = tmpdir .. "/lualept-mask.tif"
 	local filename3 = tmpdir .. "/lualept-masked.png"
 	local image1 = images .. '/lualept.jpg'
+	local image2 = images .. '/lobbyismus.jpg'
 	header("Pix2")
 	local pix = Pix(image1)
 	print (pad("pix"), pix)
+	pix:View()
 
 	local ok = pix:Write(filename, 'png')
 	print (pad("pix:Write('" .. filename .. "', 'png')"), ok)
@@ -421,6 +424,7 @@ function pix2_test()
 	print (pad("color histogram"), hist)
 
 	local pixm = pix:MakeArbMaskFromRGB(-0.5, -0.5, 0.75, 0.05)
+	pixm:View()
 	-- pixm:SetInputFormat('tiff-g4')
 	print (pad("pixm"), pixm)
 	print (pad("dimensions"), pixm:GetDimensions())
@@ -433,9 +437,17 @@ function pix2_test()
 
 	local ok = pixm:Write(filename2,'g4')
 	print (pad("pixm:Write('" .. filename2 .. "','g4')"), ok)
-	pix:PaintThroughMask(pixm, 0, 0, LuaLept.RGB(255,48,48))
+	pix:PaintThroughMask(pixm, 0, 0, LuaLept.RGB(20,192,96))
+	pix:View()
+
 	local ok = pix:Write(filename3,'png')
 	print (pad("pix:Write('" .. filename3 .. "','png')"), ok)
+
+	pix = Pix(image2)
+	pix:View()
+
+	local pixm = pix:MakeArbMaskFromRGB(-0.3, -0.3, 1.25, 0.15)
+	pixm:View()
 end
 
 function fpix_test()
