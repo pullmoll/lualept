@@ -38,8 +38,11 @@
  * A 2-D pixels array of doubles (l_float64).
  */
 
-/** Define a function's name (_fun) with prefix LL_DPIX */
-#define LL_FUNC(x) FUNC(LL_DPIX "." x)
+/** Set TNAME to the class name used in this source file */
+#define TNAME LL_DPIX
+
+/** Define a function's name (_fun) with prefix DPix */
+#define LL_FUNC(x) FUNC(TNAME "." x)
 
 
 /**
@@ -52,10 +55,13 @@ static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    DPix **pdpix = ll_check_udata<DPix>(_fun, L, 1, LL_DPIX);
+    DPix **pdpix = ll_check_udata<DPix>(_fun, L, 1, TNAME);
     DPix *dpix = *pdpix;
-    DBG(LOG_DESTROY, "%s: '%s' pdpix=%p dpix=%p refcount=%d\n",
-        _fun, LL_DPIX, pdpix, dpix, dpixGetRefcount(dpix));
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d\n", _fun,
+        TNAME,
+        "pboxa", reinterpret_cast<void *>(pdpix),
+        "boxa", reinterpret_cast<void *>(dpix),
+        "refcount", dpixGetRefcount(dpix));
     dpixDestroy(&dpix);
     *pdpix = nullptr;
     return 0;
@@ -90,7 +96,7 @@ toString(lua_State* L)
             refcnt = dpixGetRefcount(pix);
             dpixGetResolution(pix, &xres, &yres);
             snprintf(str, sizeof(str),
-                     LL_DPIX ": %p\n"
+                     TNAME ": %p\n"
                      "    width = %d, height = %d, wpl = %d\n"
                      "    data = %p, size = %#" PRIx64 "\n"
                      "    xres = %d, yres = %d, refcount = %d",
@@ -844,7 +850,7 @@ WriteStream(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index (%arg) for udata of class LL_DPIX.
+ * \brief Check Lua stack at index (%arg) for udata of class DPix*.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -853,7 +859,7 @@ WriteStream(lua_State *L)
 DPix *
 ll_check_DPix(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<DPix>(_fun, L, arg, LL_DPIX);
+    return *ll_check_udata<DPix>(_fun, L, arg, TNAME);
 }
 
 /**
@@ -883,7 +889,7 @@ ll_push_DPix(const char *_fun, lua_State *L, DPix *cd)
 {
     if (!cd)
         return ll_push_nil(L);
-    return ll_push_udata(_fun, L, LL_DPIX, cd);
+    return ll_push_udata(_fun, L, TNAME, cd);
 }
 
 /**
@@ -900,32 +906,34 @@ ll_new_DPix(lua_State *L)
 {
     FUNC("ll_new_DPix");
     DPix *dpix = nullptr;
+    l_int32 width = 1;
+    l_int32 height = 1;
 
     if (lua_isuserdata(L, 1)) {
         DPix *dpixs = ll_opt_DPix(_fun, L, 1);
         if (dpixs) {
-            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
-                LL_DPIX, reinterpret_cast<void *>(dpixs));
+            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+                TNAME, reinterpret_cast<void *>(dpixs));
             dpix = dpixCreateTemplate(dpixs);
         } else {
             luaL_Stream *stream = ll_check_stream(_fun, L, 1);
-            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
                 LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
             dpix = dpixReadStream(stream->f);
         }
     }
 
     if (!dpix && lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
-        l_int32 width = ll_opt_l_int32(_fun, L, 1, 1);
-        l_int32 height = ll_opt_l_int32(_fun, L, 2, 1);
-        DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d\n", _fun,
+        width = ll_opt_l_int32(_fun, L, 1, width);
+        height = ll_opt_l_int32(_fun, L, 2, height);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d, %s = %d\n", _fun,
             "width", width, "height", height);
         dpix = dpixCreate(width, height);
     }
 
     if (!dpix && lua_isstring(L, 1)) {
         const char* filename = ll_check_string(_fun, L, 1);
-        DBG(LOG_NEW_CLASS, "%s: create for %s = '%s'\n", _fun,
+        DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
             "filename", filename);
         dpix = dpixRead(filename);
     }
@@ -933,34 +941,34 @@ ll_new_DPix(lua_State *L)
     if (!dpix && lua_isstring(L, 1)) {
         size_t size = 0;
         const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &size);
-        DBG(LOG_NEW_CLASS, "%s: create for %s* = %p, %s = %llu\n", _fun,
-            "string", reinterpret_cast<const void *>(data),
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %llu\n", _fun,
+            "data", reinterpret_cast<const void *>(data),
             "size", static_cast<l_uint64>(size));
         dpix = dpixReadMem(data, size);
     }
 
     if (!dpix) {
-        DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d\n", _fun,
-            "width", 1, "height", 1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d, %s = %d\n", _fun,
+            "width", width, "height", height);
         dpix = dpixCreate(1,1);
     }
 
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
-        LL_DPIX, reinterpret_cast<void *>(dpix));
+        TNAME, reinterpret_cast<void *>(dpix));
     return ll_push_DPix(_fun, L, dpix);
 }
 
 /**
- * \brief Register the DPix methods and functions in the LL_DPIX meta table.
+ * \brief Register the DPix methods and functions in the DPix meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
 int
-ll_register_DPix(lua_State *L)
+luaopen_DPix(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                    Destroy},               /* garbage collector */
-        {"__new",                   ll_new_DPix},           /* DPix() */
+        {"__gc",                    Destroy},
+        {"__new",                   ll_new_DPix},
         {"__tostring",              toString},
         {"AddMultConstant",         AddMultConstant},
         {"ChangeRefcount",          ChangeRefcount},
@@ -1001,11 +1009,9 @@ ll_register_DPix(lua_State *L)
         LUA_SENTINEL
     };
 
-    static const luaL_Reg functions[] = {
-        LUA_SENTINEL
-    };
+    FUNC("luaopen_" TNAME);
 
-    lua_pushcfunction(L, ll_new_DPix);
-    lua_setglobal(L, LL_DPIX);
-    return ll_register_class(L, LL_DPIX, methods, functions);
+    ll_global_cfunct(_fun, L, TNAME, ll_new_DPix);
+    ll_register_class(_fun, L, TNAME, methods);
+    return 1;
 }

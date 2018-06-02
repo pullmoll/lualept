@@ -38,8 +38,11 @@
  * A class handling SEL.
  */
 
-/** Define a function's name (_fun) with prefix LL_SEL */
-#define LL_FUNC(x) FUNC(LL_SEL "." x)
+/** Set TNAME to the class name used in this source file */
+#define TNAME LL_SEL
+
+/** Define a function's name (_fun) with prefix Sel */
+#define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
  * \brief Destroy a Sel*.
@@ -53,10 +56,12 @@ static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    Sel **psel = ll_check_udata<Sel>(_fun, L, 1, LL_SEL);
+    Sel **psel = ll_check_udata<Sel>(_fun, L, 1, TNAME);
     Sel *sel = *psel;
-    DBG(LOG_DESTROY, "%s: '%s' psel=%p sel=%p\n",
-        _fun, LL_SEL, psel, sel);
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "psel", reinterpret_cast<void *>(psel),
+        "sel", reinterpret_cast<void *>(sel));
     selDestroy(&sel);
     *psel = nullptr;
     return 0;
@@ -83,7 +88,7 @@ toString(lua_State *L)
         luaL_addstring(&B, "nil");
     } else {
         snprintf(str, sizeof(str),
-                 LL_SEL ": %p\n",
+                 TNAME ": %p\n",
                  reinterpret_cast<void *>(sel));
         luaL_addstring(&B, str);
     }
@@ -702,7 +707,7 @@ WriteStream(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class LL_SEL.
+ * \brief Check Lua stack at index %arg for udata of class Sel*.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -711,10 +716,10 @@ WriteStream(lua_State *L)
 Sel *
 ll_check_Sel(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<Sel>(_fun, L, arg, LL_SEL);
+    return *ll_check_udata<Sel>(_fun, L, arg, TNAME);
 }
 /**
- * \brief Optionally expect a LL_SEL at index %arg on the Lua stack.
+ * \brief Optionally expect a Sel* at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -739,7 +744,7 @@ ll_push_Sel(const char *_fun, lua_State *L, Sel *sel)
 {
     if (!sel)
         return ll_push_nil(L);
-    return ll_push_udata(_fun, L, LL_SEL, sel);
+    return ll_push_udata(_fun, L, TNAME, sel);
 }
 /**
  * \brief Create and push a new Sel*.
@@ -751,26 +756,31 @@ ll_new_Sel(lua_State *L)
 {
     FUNC("ll_new_Sel");
     Sel *sel = nullptr;
+    Sel *sels = nullptr;
+    luaL_Stream *stream = nullptr;
+    const char* name = "sel";
+    l_int32 height = 3;
+    l_int32 width = 3;
 
     if (lua_isuserdata(L, 1)) {
-        Sel *sels = ll_opt_Sel(_fun, L, 1);
+        sels = ll_opt_Sel(_fun, L, 1);
         if (sels) {
-            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
-                LL_SEL, sels);
+            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+                TNAME, reinterpret_cast<void *>(sels));
             sel = selCopy(sels);
         } else {
-            luaL_Stream *stream = ll_opt_stream(_fun, L, 1);
-            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
-                "stream", stream);
+            stream = ll_opt_stream(_fun, L, 1);
+            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+                "stream", reinterpret_cast<void *>(stream));
             sel = selReadStream(stream->f);
         }
     }
 
     if (lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
-        l_int32 height = ll_check_l_int32(_fun, L, 1);
-        l_int32 width = ll_check_l_int32(_fun, L, 2);
-        const char *name = ll_check_string(_fun, L, 3);
-        DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d, %s = '%s'\n", _fun,
+        height = ll_opt_l_int32(_fun, L, 1, height);
+        width = ll_opt_l_int32(_fun, L, 2, width);
+        name = ll_check_string(_fun, L, 3);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d, %s = %d, %s = '%s'\n", _fun,
             "height", height,
             "width", width,
             "name", name);
@@ -779,41 +789,46 @@ ll_new_Sel(lua_State *L)
 
     if (!sel && lua_isstring(L, 1)) {
         const char* fname = ll_check_string(_fun, L, 1);
-        DBG(LOG_NEW_CLASS, "%s: create for %s = '%s'\n", _fun,
+        DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
             "fname", fname);
         sel = selRead(fname);
     }
 
     if (!sel && lua_isstring(L, 1)) {
         const char* text = ll_check_string(_fun, L, 1);
-        l_int32 h = ll_check_l_int32(_fun, L, 2);
-        l_int32 w = ll_check_l_int32(_fun, L, 3);
-        const char *name = ll_check_string(_fun, L, 4);
-        DBG(LOG_NEW_CLASS, "%s: create for %s = '%s',  %s = %d, %s = %d, %s = '%s'\n", _fun,
-            "text", text, "h", h, "w", w, "name", name);
-        sel = selCreateFromString(text, h, w, name);
+        height = ll_opt_l_int32(_fun, L, 2, height);
+        width = ll_opt_l_int32(_fun, L, 3, width);
+        name = ll_check_string(_fun, L, 4);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = '%s',  %s = %d, %s = %d, %s = '%s'\n", _fun,
+            "text", text,
+            "height", height,
+            "width", width,
+            "name", name);
+        sel = selCreateFromString(text, height, width, name);
     }
 
     if (!sel) {
-        DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
-            "n", 1);
-        sel = selCreate(2, 2, "");
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d, %s = %d, %s = '%s'\n", _fun,
+            "height", height,
+            "width", width,
+            "name", name);
+        sel = selCreate(height, width, name);
     }
 
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
-        LL_SELA, reinterpret_cast<void *>(sel));
+        TNAME, reinterpret_cast<void *>(sel));
     return ll_push_Sel(_fun, L, sel);
 }
 /**
- * \brief Register the PTA methods and functions in the LL_SEL meta table.
+ * \brief Register the PTA methods and functions in the Sel* meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
 int
-ll_register_Sel(lua_State *L)
+luaopen_Sel(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                    Destroy},       /* garbage collector */
+        {"__gc",                    Destroy},
         {"__new",                   ll_new_Sel},    /* Sel() */
         {"__tostring",              toString},
         {"Copy",                    Copy},
@@ -846,11 +861,9 @@ ll_register_Sel(lua_State *L)
         LUA_SENTINEL
     };
 
-    static const luaL_Reg functions[] = {
-        LUA_SENTINEL
-    };
+    FUNC("luaopen_" TNAME);
 
-    lua_pushcfunction(L, ll_new_Sel);
-    lua_setglobal(L, LL_SEL);
-    return ll_register_class(L, LL_SEL, methods, functions);
+    ll_global_cfunct(_fun, L, TNAME, ll_new_Sel);
+    ll_register_class(_fun, L, TNAME, methods);
+    return 1;
 }

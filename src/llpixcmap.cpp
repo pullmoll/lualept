@@ -38,8 +38,11 @@
  * A class to handle a Pix color map ("palette").
  */
 
-/** Define a function's name (_fun) with prefix LL_PIXCMAP */
-#define LL_FUNC(x) FUNC(LL_PIXCMAP "." x)
+/** Set TNAME to the class name used in this source file */
+#define TNAME LL_PIXCMAP
+
+/** Define a function's name (_fun) with prefix PixColormap */
+#define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
  * \brief Destroy a PixColormap*.
@@ -53,10 +56,13 @@ static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    PixColormap **pcmap = ll_check_udata<PixColormap>(_fun, L, 1, LL_PIXCMAP);
+    PixColormap **pcmap = ll_check_udata<PixColormap>(_fun, L, 1, TNAME);
     PixColormap *cmap = *pcmap;
-    DBG(LOG_DESTROY, "%s: '%s' pcmap=%p cmap=%p count=%d\n",
-        _fun, LL_PIXCMAP, pcmap, cmap, pixcmapGetCount(cmap));
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d\n", _fun,
+        TNAME,
+        "pcmap", reinterpret_cast<void *>(pcmap),
+        "cmap", reinterpret_cast<void *>(cmap),
+        "count", pixcmapGetCount(cmap));
     pixcmapDestroy(&cmap);
     *pcmap = nullptr;
     return 0;
@@ -119,7 +125,7 @@ toString(lua_State *L)
         luaL_addstring(&B, "nil");
     } else {
         snprintf(str, sizeof(str),
-                 LL_PIXCMAP ": %p",
+                 TNAME ": %p",
                  reinterpret_cast<void *>(cmap));
         luaL_addstring(&B, str);
         for (i = 0; i < pixcmapGetCount(cmap); i++) {
@@ -1059,7 +1065,7 @@ AddColorizedGrayToCmap(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class LL_PIXCMAP.
+ * \brief Check Lua stack at index %arg for udata of class PixColormap*.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -1068,11 +1074,11 @@ AddColorizedGrayToCmap(lua_State *L)
 PixColormap *
 ll_check_PixColormap(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<PixColormap>(_fun, L, arg, LL_PIXCMAP);
+    return *ll_check_udata<PixColormap>(_fun, L, arg, TNAME);
 }
 
 /**
- * \brief Optionally expect a LL_PIXCMAP at index %arg on the Lua stack.
+ * \brief Optionally expect a PixColormap* at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -1087,9 +1093,9 @@ ll_opt_PixColormap(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class LL_PIXCMAP.
+ * \brief Check Lua stack at index %arg for udata of class PixColorMap*.
  *
- * This version removes the PixColormap* from the object PIX;
+ * This version removes the PixColormap* from the object PixColormap*;
  * It is used when the PixColormap* is e.g. attached to a Pix*.
  * The reason is that a PixColormap* does not have a reference
  * count and thus can be used exactly once in Pix:SetColormap().
@@ -1102,7 +1108,7 @@ ll_opt_PixColormap(const char *_fun, lua_State *L, int arg)
 PixColormap *
 ll_take_PixColormap(const char *_fun, lua_State *L, int arg)
 {
-    PixColormap **pcmap = ll_check_udata<PixColormap>(_fun, L, arg, LL_PIXCMAP);
+    PixColormap **pcmap = ll_check_udata<PixColormap>(_fun, L, arg, TNAME);
     PixColormap *cmap = *pcmap;
     *pcmap = nullptr;
     return cmap;
@@ -1120,8 +1126,9 @@ ll_push_PixColormap(const char *_fun, lua_State *L, PixColormap *cmap)
 {
     if (!cmap)
         return ll_push_nil(L);
-    return ll_push_udata(_fun, L, LL_PIXCMAP, cmap);
+    return ll_push_udata(_fun, L, TNAME, cmap);
 }
+
 /**
  * \brief Create a new PixColormap*.
  * \param L pointer to the lua_State
@@ -1130,20 +1137,24 @@ ll_push_PixColormap(const char *_fun, lua_State *L, PixColormap *cmap)
 int
 ll_new_PixColormap(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_PixColormap");
+    l_int32 depth = ll_opt_l_int32(_fun, L, 1, 1);
+    PixColormap *cmap = pixcmapCreate(depth);
+    return ll_push_PixColormap(_fun, L, cmap);
 }
+
 /**
  * \brief Register the PIXCMAP methods and functions in the LL_PIX meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
 int
-ll_register_PixColormap(lua_State *L)
+luaopen_PixColormap(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                    Destroy},   /* garbage collector */
-        {"__new",                   Create},    /* new PixColormap */
-        {"__len",                   GetCount},  /* #cmap */
+        {"__gc",                    Destroy},
+        {"__new",                   ll_new_PixColormap},    /* new PixColormap */
+        {"__len",                   GetCount},              /* #cmap */
         {"__tostring",              toString},
         {"AddBlackOrWhite",         AddBlackOrWhite},
         {"AddColor",                AddColor},
@@ -1187,11 +1198,8 @@ ll_register_PixColormap(lua_State *L)
         LUA_SENTINEL
     };
 
-    static const luaL_Reg functions[] = {
-        LUA_SENTINEL
-    };
-
-    lua_pushcfunction(L, Create);
-    lua_setglobal(L, LL_PIXCMAP);
-    return ll_register_class(L, LL_PIXCMAP, methods, functions);
+    FUNC("luaopen_" TNAME);
+    ll_global_cfunct(_fun, L, TNAME, ll_new_PixColormap);
+    ll_register_class(_fun, L, TNAME, methods);
+    return 1;
 }

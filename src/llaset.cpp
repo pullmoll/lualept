@@ -36,14 +36,19 @@
  * \class Aset
  *
  * A set of keys of type l_int64, l_uint64 or l_float64.
+ * If a key is contained in the set (%Find), it's value is boolean true.
  */
 
-/** Define a function's name (_fun) with prefix LL_ASET */
-#define LL_FUNC(x) FUNC(LL_ASET "." x)
+/** Set TNAME to the class name used in this source file */
+#define TNAME LL_ASET
+
+/** Define a function's name (_fun) with prefix Aset */
+#define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
  * \brief Destroy an Aset*.
  * <pre>
+ * Arg #1 (i.e. self) is expected to be a Aset* (aset).
  * </pre>
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack
@@ -52,10 +57,13 @@ static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    L_Rbtree **paset = ll_check_udata<L_Rbtree>(_fun, L, 1, LL_ASET);
+    L_Rbtree **paset = ll_check_udata<L_Rbtree>(_fun, L, 1, TNAME);
     L_Rbtree *aset = *paset;
-    DBG(LOG_DESTROY, "%s: '%s' paset=%p aset=%p size=%d\n", _fun,
-        LL_ASET, paset, aset, l_asetSize(aset));
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d\n", _fun,
+        TNAME,
+        "paset", reinterpret_cast<void *>(paset),
+        "aset", reinterpret_cast<void *>(aset),
+        "size", l_asetSize(aset));
     l_asetDestroy(&aset);
     *paset = nullptr;
     return 0;
@@ -85,7 +93,7 @@ Size(lua_State *L)
  * Arg #2 is expected to be a key (int, uint or float).
  * Arg #3 is an optional boolean (value).
  *
- * Note: if Arg #3 is false, the node is deleted instead of inserted.
+ * Note: if Arg #3 is false or nil, the node is deleted instead of inserted.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -345,7 +353,7 @@ GetPrev(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class LL_ASET.
+ * \brief Check Lua stack at index %arg for udata of class Aset.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -354,11 +362,11 @@ GetPrev(lua_State *L)
 Aset *
 ll_check_Aset(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<Aset>(_fun, L, arg, LL_ASET);
+    return *ll_check_udata<Aset>(_fun, L, arg, TNAME);
 }
 
 /**
- * \brief Optionally expect a LL_ASET at index %arg on the Lua stack.
+ * \brief Optionally expect a Aset* at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -383,7 +391,7 @@ ll_push_Aset(const char *_fun, lua_State *L, Aset *aset)
 {
     if (!aset)
         return ll_push_nil(L);
-    return ll_push_udata(_fun, L, LL_ASET, aset);
+    return ll_push_udata(_fun, L, TNAME, aset);
 }
 /**
  * \brief Create and push a new Aset*.
@@ -397,26 +405,38 @@ int
 ll_new_Aset(lua_State *L)
 {
     FUNC("ll_new_Aset");
-    l_int32 keytype = ll_check_keytype(_fun, L, 1, L_INT_TYPE);
-    DBG(LOG_NEW_CLASS, "%s: create for %s = %s\n", _fun,
-        "keytype", ll_string_keytype(keytype));
-    Aset *aset = l_asetCreate(keytype);
+    Aset *aset = nullptr;
+    l_int32 keytype = L_INT_TYPE;
+
+    if (lua_isstring(L, 1)) {
+        keytype = ll_check_keytype(_fun, L, 1, keytype);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %s\n", _fun,
+            "keytype", ll_string_keytype(keytype));
+        aset = l_asetCreate(keytype);
+    }
+
+    if (!aset) {
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %s\n", _fun,
+            "keytype", ll_string_keytype(keytype));
+        aset = l_asetCreate(keytype);
+    }
+
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
-        LL_ASET, reinterpret_cast<void *>(aset));
+        TNAME, reinterpret_cast<void *>(aset));
     return ll_push_Aset(_fun, L, aset);
 }
 /**
- * \brief Register the ASET methods and functions in the LL_ASET meta table.
+ * \brief Register the ASET methods and functions in the Aset meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
 int
-ll_register_Aset(lua_State *L)
+luaopen_Aset(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},       /* garbage collector */
+        {"__gc",                Destroy},
         {"__len",               Size},
-        {"__new",               ll_new_Aset},   /* Aset(n) */
+        {"__new",               ll_new_Aset},
         {"__newindex",          Insert},
         {"__tostring",          toString},
         {"Create",              Create},
@@ -431,13 +451,9 @@ ll_register_Aset(lua_State *L)
         {"Size",                Size},
         LUA_SENTINEL
     };
+    FUNC("luaopen_" TNAME);
 
-    static const luaL_Reg functions[] = {
-        {"__index",             Find},
-        LUA_SENTINEL
-    };
-
-    lua_pushcfunction(L, ll_new_Aset);
-    lua_setglobal(L, LL_ASET);
-    return ll_register_class(L, LL_ASET, methods, functions);
+    ll_global_cfunct(_fun, L, TNAME, ll_new_Aset);
+    ll_register_class(_fun, L, TNAME, methods);
+    return 1;
 }

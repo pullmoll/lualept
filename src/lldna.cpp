@@ -38,8 +38,11 @@
  * An array of double (l_float64) numbers.
  */
 
-/** Define a function's name (_fun) with prefix LL_DNA */
-#define LL_FUNC(x) FUNC(LL_DNA "." x)
+/** Set TNAME to the class name used in this source file */
+#define TNAME LL_DNA
+
+/** Define a function's name (_fun) with prefix Dna */
+#define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
  * \brief Destroy a Dna*.
@@ -57,10 +60,14 @@ static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    Dna **pda = ll_check_udata<Dna>(_fun, L, 1, LL_DNA);
+    Dna **pda = ll_check_udata<Dna>(_fun, L, 1, TNAME);
     Dna *da = *pda;
-    DBG(LOG_DESTROY, "%s: '%s' pda=%p da=%p count=%d refcount=%d\n",
-         _fun, LL_DNA, pda, da, l_dnaGetCount(da), l_dnaGetRefcount(da));
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d, %s = %d\n", _fun,
+        TNAME,
+        "pboxa", reinterpret_cast<void *>(pda),
+        "boxa", reinterpret_cast<void *>(da),
+        "count", l_dnaGetCount(da),
+        "refcount", l_dnaGetRefcount(da));
     l_dnaDestroy(&da);
     *pda = nullptr;
     return 0;
@@ -129,7 +136,7 @@ toString(lua_State *L)
         luaL_addstring(&B, "nil");
     } else {
         snprintf(str, sizeof(str),
-                 LL_DNA ": %p",
+                 TNAME ": %p",
                  reinterpret_cast<void *>(da));
         luaL_addstring(&B, str);
         for (i = 0; i < l_dnaGetCount(da); i++) {
@@ -629,7 +636,7 @@ WriteStream(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class LL_DNA.
+ * \brief Check Lua stack at index %arg for udata of class Dna*.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -638,11 +645,11 @@ WriteStream(lua_State *L)
 Dna *
 ll_check_Dna(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<Dna>(_fun, L, arg, LL_DNA);
+    return *ll_check_udata<Dna>(_fun, L, arg, TNAME);
 }
 
 /**
- * \brief Optionally expect a LL_DNA at index %arg on the Lua stack.
+ * \brief Optionally expect a Dna* at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -668,7 +675,7 @@ ll_push_Dna(const char *_fun, lua_State *L, Dna *da)
 {
     if (!da)
         return ll_push_nil(L);
-    return ll_push_udata(_fun, L, LL_DNA, da);
+    return ll_push_udata(_fun, L, TNAME, da);
 }
 
 /**
@@ -681,43 +688,44 @@ ll_new_Dna(lua_State *L)
 {
     FUNC("ll_new_Dna");
     Dna *da = nullptr;
+    l_int32 n = 1;
 
     if (lua_isuserdata(L, 1)) {
         Dna *das = ll_opt_Dna(_fun, L, 1);
         if (das) {
-            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
-                LL_DNA, reinterpret_cast<void *>(das));
+            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+                TNAME, reinterpret_cast<void *>(das));
             da = l_dnaCopy(das);
         } else {
             luaL_Stream* stream = ll_check_stream(_fun, L, 1);
-            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
                 LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
             da = l_dnaReadStream(stream->f);
         }
     }
 
     if (lua_isinteger(L, 1)) {
-        l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
-        DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
+        l_int32 n = ll_opt_l_int32(_fun, L, 1, n);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d\n", _fun,
             "n", n);
         da = l_dnaCreate(n);
     }
 
     if (!da && lua_isstring(L, 1)) {
         const char *filename = ll_check_string(_fun, L, 1);
-        DBG(LOG_NEW_CLASS, "%s: create for %s = '%s'\n", _fun,
+        DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
             "filename", filename);
         da = l_dnaRead(filename);
     }
 
     if (!da) {
-        DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
-            "n", 1);
-        da = l_dnaCreate(1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d\n", _fun,
+            "n", n);
+        da = l_dnaCreate(n);
     }
 
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
-        LL_DNA, reinterpret_cast<void *>(da));
+        TNAME, reinterpret_cast<void *>(da));
     return ll_push_Dna(_fun, L, da);
 }
 
@@ -727,13 +735,13 @@ ll_new_Dna(lua_State *L)
  * \return 1 table on the Lua stack
  */
 int
-ll_register_Dna(lua_State *L)
+luaopen_Dna(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                    Destroy},           /* garbage collector */
-        {"__new",                   ll_new_Dna},        /* Dna() */
-        {"__len",                   GetCount},          /* #dna */
-        {"__newitem",               ReplaceNumber},     /* dna[index] = number */
+        {"__gc",                    Destroy},
+        {"__new",                   ll_new_Dna},
+        {"__len",                   GetCount},
+        {"__newitem",               ReplaceNumber},
         {"__tostring",              toString},
         {"AddNumber",               AddNumber},
         {"Clone",                   Clone},
@@ -761,11 +769,9 @@ ll_register_Dna(lua_State *L)
         LUA_SENTINEL
     };
 
-    static const luaL_Reg functions[] = {
-        LUA_SENTINEL
-    };
+    FUNC("luaopen_" TNAME);
 
-    lua_pushcfunction(L, ll_new_Dna);
-    lua_setglobal(L, LL_DNA);
-    return ll_register_class(L, LL_DNA, methods, functions);
+    ll_global_cfunct(_fun, L, TNAME, ll_new_Dna);
+    ll_register_class(_fun, L, TNAME, methods);
+    return 1;
 }

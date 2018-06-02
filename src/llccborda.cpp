@@ -38,8 +38,11 @@
  * An array of CCBord.
  */
 
-/** Define a function's name (_fun) with prefix LL_CCBORDA */
-#define LL_FUNC(x) FUNC(LL_CCBORDA "." x)
+/** Set TNAME to the class name used in this source file */
+#define TNAME LL_CCBORDA
+
+/** Define a function's name (_fun) with prefix CCBorda */
+#define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
  * \brief Destroy a CCBorda*.
@@ -51,10 +54,13 @@ static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    CCBorda **pccba = ll_check_udata<CCBorda>(_fun, L, 1, LL_CCBORDA);
+    CCBorda **pccba = ll_check_udata<CCBorda>(_fun, L, 1, TNAME);
     CCBorda *ccba = *pccba;
-    DBG(LOG_DESTROY, "%s: '%s' pccba=%p ccba=%p\n",
-        _fun, LL_CCBORDA, pccba, ccba);
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d\n", _fun,
+        TNAME,
+        "pboxa", reinterpret_cast<void *>(pccba),
+        "boxa", reinterpret_cast<void *>(ccba),
+        "count", ccbaGetCount(ccba));
     ccbaDestroy(&ccba);
     *pccba = nullptr;
     return 0;
@@ -525,7 +531,7 @@ WriteStream(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index (%arg) for udata of class LL_CCBORDA.
+ * \brief Check Lua stack at index (%arg) for udata of class CCBorda.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -534,7 +540,7 @@ WriteStream(lua_State *L)
 CCBorda *
 ll_check_CCBorda(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<CCBorda>(_fun, L, arg, LL_CCBORDA);
+    return *ll_check_udata<CCBorda>(_fun, L, arg, TNAME);
 }
 
 /**
@@ -564,7 +570,7 @@ ll_push_CCBorda(const char *_fun, lua_State *L, CCBorda *cd)
 {
     if (!cd)
         return ll_push_nil(L);
-    return ll_push_udata(_fun, L, LL_CCBORDA, cd);
+    return ll_push_udata(_fun, L, TNAME, cd);
 }
 
 /**
@@ -582,12 +588,13 @@ ll_new_CCBorda(lua_State *L)
         Pix* pixs = ll_opt_Pix(_fun, L, 1);
         if (pixs) {
             l_int32 n = ll_opt_l_int32(_fun, L, 2, 1);
-            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p, %s = %n\n", _fun,
-                LL_PIX, reinterpret_cast<void *>(pixs), "n", n);
+            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %d\n", _fun,
+                LL_PIX, reinterpret_cast<void *>(pixs),
+                "n", n);
             ccba = ccbaCreate(pixs, n);
         } else {
             luaL_Stream *stream = ll_check_stream(_fun, L, 1);
-            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
                 LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
             ccba = ccbaReadStream(stream->f);
         }
@@ -595,34 +602,37 @@ ll_new_CCBorda(lua_State *L)
 
     if (!ccba && lua_isstring(L, 1)) {
         const char* filename = ll_check_string(_fun, L, 1);
-        DBG(LOG_NEW_CLASS, "%s: create for %s = '%s'\n", _fun,
+        DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
             "filename", filename);
         ccba = ccbaRead(filename);
     }
 
     if (!ccba) {
         /* FIXME: create data for no pix? */
-        DBG(LOG_NEW_CLASS, "%s: create for %s* = %p, %s = %d\n", _fun,
-            LL_PIX, nullptr, "n", 1);
-        ccba = ccbaCreate(nullptr, 1);
+        Pix* pix = nullptr;
+        l_int32 n = 1;
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %d\n", _fun,
+            LL_PIX, reinterpret_cast<void *>(pix),
+            "n", n);
+        ccba = ccbaCreate(nullptr, n);
     }
 
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
-        LL_CCBORDA, reinterpret_cast<void *>(ccba));
+        TNAME, reinterpret_cast<void *>(ccba));
     return ll_push_CCBorda(_fun, L, ccba);
 }
 
 /**
- * \brief Register the CCBorda methods and functions in the LL_CCBORDA meta table.
+ * \brief Register the CCBorda methods and functions in the CCBorda meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
 int
-ll_register_CCBorda(lua_State *L)
+luaopen_CCBorda(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                    Destroy},           /* garbage collector */
-        {"__new",                   ll_new_CCBorda},    /* CCBorda(pix,n) */
+        {"__gc",                    Destroy},
+        {"__new",                   ll_new_CCBorda},
         {"__len",                   GetCount},
         {"AddCcb",                  AddCcb},
         {"Create",                  Create},
@@ -647,11 +657,9 @@ ll_register_CCBorda(lua_State *L)
         LUA_SENTINEL
     };
 
-    static const luaL_Reg functions[] = {
-        LUA_SENTINEL
-    };
+    FUNC("luaopen_" TNAME);
 
-    lua_pushcfunction(L, ll_new_CCBorda);
-    lua_setglobal(L, LL_CCBORDA);
-    return ll_register_class(L, LL_CCBORDA, methods, functions);
+    ll_global_cfunct(_fun, L, TNAME, ll_new_CCBorda);
+    ll_register_class(_fun, L, TNAME, methods);
+    return 1;
 }

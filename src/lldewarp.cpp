@@ -38,8 +38,11 @@
  * A class to handle dewarping Pix.
  */
 
+/** Set TNAME to the class name used in this source file */
+#define TNAME LL_DEWARP
+
 /** Define a function's name (_fun) with prefix LL_DEWARP */
-#define LL_FUNC(x) FUNC(LL_DEWARP "." x)
+#define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
  * \brief Destroy a Dewarp*.
@@ -53,10 +56,12 @@ static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    Dewarp **pdew = ll_check_udata<Dewarp>(_fun, L, 1, LL_DEWARP);
+    Dewarp **pdew = ll_check_udata<Dewarp>(_fun, L, 1, TNAME);
     Dewarp *dew = *pdew;
-    DBG(LOG_DESTROY, "%s: '%s' pdew=%p dew=%p\n", _fun,
-        LL_DEWARP, pdew, dew);
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "pdew", reinterpret_cast<void *>(pdew),
+        "dew", reinterpret_cast<void *>(dew));
     dewarpDestroy(&dew);
     *pdew = nullptr;
     return 0;
@@ -80,7 +85,7 @@ toString(lua_State *L)
         luaL_addstring(&B, "nil");
     } else {
         snprintf(str, sizeof(str),
-                 LL_DEWARP ": %p\n",
+                 TNAME ": %p\n",
                  reinterpret_cast<void *>(dew));
         luaL_addstring(&B, str);
         /* TODO: more info */
@@ -671,7 +676,7 @@ WriteStream(lua_State *L)
 Dewarp *
 ll_check_Dewarp(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<Dewarp>(_fun, L, arg, LL_DEWARP);
+    return *ll_check_udata<Dewarp>(_fun, L, arg, TNAME);
 }
 
 /**
@@ -701,7 +706,7 @@ ll_push_Dewarp(const char *_fun, lua_State *L, Dewarp *dew)
 {
     if (!dew)
         return ll_push_nil(L);
-    return ll_push_udata(_fun, L, LL_DEWARP, dew);
+    return ll_push_udata(_fun, L, TNAME, dew);
 }
 
 /**
@@ -719,12 +724,12 @@ ll_new_Dewarp(lua_State *L)
         Pix *pixs = ll_opt_Pix(_fun, L, 1);
         if (pixs) {
             l_int32 pageno = ll_opt_l_int32(_fun, L, 2, 1);
-            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
                 LL_PIX, reinterpret_cast<void *>(pixs));
             dew = dewarpCreate(pixs, pageno);
         } else {
             luaL_Stream *stream = ll_check_stream(_fun, L, 1);
-            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
                 LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
             dew = dewarpReadStream(stream->f);
         }
@@ -733,14 +738,14 @@ ll_new_Dewarp(lua_State *L)
     if (!dew && lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
         l_int32 pageno = ll_check_l_int32(_fun, L, 1);
         l_int32 refpage = ll_check_l_int32(_fun, L, 2);
-        DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d\n", _fun,
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d, %s = %d\n", _fun,
             "pageno", pageno, "repage", refpage);
         dew = dewarpCreateRef(pageno, refpage);
     }
 
     if (!dew && lua_isstring(L, 1)) {
         const char *filename = ll_check_string(_fun, L, 1);
-        DBG(LOG_NEW_CLASS, "%s: create for %s = '%s'\n", _fun,
+        DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
             "filename", filename);
         dew = dewarpRead(filename);
     }
@@ -748,7 +753,7 @@ ll_new_Dewarp(lua_State *L)
     if (!dew && lua_isstring(L, 1)) {
         size_t size = 0;
         const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &size);
-        DBG(LOG_NEW_CLASS, "%s: create for %s* = %p, %s = %llu\n", _fun,
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %llu\n", _fun,
             "data", reinterpret_cast<const void *>(data),
             "size", static_cast<l_uint64>(size));
         dew = dewarpReadMem(data, size);
@@ -756,13 +761,14 @@ ll_new_Dewarp(lua_State *L)
 
     if (!dew) {
         /* FIXME: creat from null Pix* ? */
-        DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
-            LL_PIX, nullptr, "n", 1);
-        dew = dewarpCreate(nullptr, 1);
+        Pix *pixs = nullptr;
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+            LL_PIX, reinterpret_cast<void *>(pixs));
+        dew = dewarpCreate(pixs, 1);
     }
 
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
-        LL_DEWARP, reinterpret_cast<void *>(dew));
+        TNAME, reinterpret_cast<void *>(dew));
     return ll_push_Dewarp(_fun, L, dew);
 }
 
@@ -772,11 +778,11 @@ ll_new_Dewarp(lua_State *L)
  * \return 1 table on the Lua stack
  */
 int
-ll_register_Dewarp(lua_State *L)
+luaopen_Dewarp(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                    Destroy},               /* garbage collector */
-        {"__new",                   ll_new_Dewarp},         /* Dewarp(pix, pageno) or Dewarp(pageno, refpage) */
+        {"__gc",                    Destroy},
+        {"__new",                   ll_new_Dewarp},
         {"__tostring",              toString},
         {"BuildLineModel",          BuildLineModel},
         {"BuildPageModel",          BuildPageModel},
@@ -799,11 +805,9 @@ ll_register_Dewarp(lua_State *L)
         LUA_SENTINEL
     };
 
-    static const luaL_Reg functions[] = {
-        LUA_SENTINEL
-    };
+    FUNC("luaopen_" TNAME);
 
-    lua_pushcfunction(L, ll_new_Dewarp);
-    lua_setglobal(L, LL_DEWARP);
-    return ll_register_class(L, LL_DEWARP, methods, functions);
+    ll_global_cfunct(_fun, L, TNAME, ll_new_Dewarp);
+    ll_register_class(_fun, L, TNAME, methods);
+    return 1;
 }

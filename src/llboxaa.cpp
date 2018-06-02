@@ -38,8 +38,11 @@
  * An array of Boxa.
  */
 
-/** Define a function's name (_fun) with prefix LL_BOXAA */
-#define LL_FUNC(x) FUNC(LL_BOXAA "." x)
+/** Set TNAME to the class name used in this source file */
+#define TNAME LL_BOXAA
+
+/** Define a function's name (_fun) with prefix Boxaa */
+#define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
  * \brief Destroy a Boxaa*.
@@ -53,10 +56,13 @@ static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    Boxaa **pbaa = ll_check_udata<Boxaa>(_fun, L, 1, LL_BOXAA);
+    Boxaa **pbaa = ll_check_udata<Boxaa>(_fun, L, 1, TNAME);
     Boxaa *baa = *pbaa;
-    DBG(LOG_DESTROY, "%s: '%s' pbaa=%p baa=%p count=%d\n",
-        _fun, LL_BOXAA, pbaa, baa, boxaaGetCount(baa));
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d\n", _fun,
+        TNAME,
+        "pbaa", reinterpret_cast<void *>(pbaa),
+        "baa", reinterpret_cast<void *>(baa),
+        "count", boxaaGetCount(baa));
     boxaaDestroy(&baa);
     *pbaa = nullptr;
     return 0;
@@ -101,7 +107,7 @@ toString(lua_State *L)
         luaL_addstring(&B, "nil");
     } else {
         snprintf(str, sizeof(str),
-                 LL_BOXAA ": %p",
+                 TNAME ": %p",
                  reinterpret_cast<void *>(boxaa));
         luaL_addstring(&B, str);
         for (i = 0; i < boxaaGetCount(boxaa); i++) {
@@ -564,7 +570,7 @@ WriteStream(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class LL_BOXAA.
+ * \brief Check Lua stack at index %arg for udata of class Boxaa.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -573,11 +579,11 @@ WriteStream(lua_State *L)
 Boxaa *
 ll_check_Boxaa(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<Boxaa>(_fun, L, arg, LL_BOXAA);
+    return *ll_check_udata<Boxaa>(_fun, L, arg, TNAME);
 }
 
 /**
- * \brief Optionally expect a LL_BOXAA at index %arg on the Lua stack.
+ * \brief Optionally expect a Boxaa* at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -603,7 +609,7 @@ ll_push_Boxaa(const char *_fun, lua_State *L, Boxaa *boxaa)
 {
     if (!boxaa)
         return ll_push_nil(L);
-    return ll_push_udata(_fun, L, LL_BOXAA, boxaa);
+    return ll_push_udata(_fun, L, TNAME, boxaa);
 }
 /**
  * \brief Create and push a new Boxaa*.
@@ -619,26 +625,26 @@ ll_new_Boxaa(lua_State *L)
     if (lua_isuserdata(L, 1)) {
         Boxaa *boxaas = ll_opt_Boxaa(_fun, L, 1);
         if (boxaas) {
-            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
                 LL_BOXAA, reinterpret_cast<void *>(boxaas));
             boxaa = boxaaCopy(boxaas, L_COPY);
         } else {
             luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
                 LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
             boxaa = boxaaReadStream(stream->f);
         }
     }
     if (!boxaa && lua_isinteger(L, 1)) {
         l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
-        DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d\n", _fun,
             "n", n);
         boxaa = boxaaCreate(n);
     }
 
     if (!boxaa && lua_isstring(L, 1)) {
         const char* filename = ll_check_string(_fun, L, 1);
-        DBG(LOG_NEW_CLASS, "%s: create for %s = '%s'\n", _fun,
+        DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
             "filename", filename);
         boxaa = boxaaRead(filename);
     }
@@ -646,20 +652,21 @@ ll_new_Boxaa(lua_State *L)
     if (!boxaa && lua_isstring(L, 1)) {
         size_t size = 0;
         const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &size);
-        DBG(LOG_NEW_CLASS, "%s: create for %s* = %p, %s = %llu\n", _fun,
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %llu\n", _fun,
             "data", reinterpret_cast<const void *>(data),
             "size", static_cast<l_uint64>(size));
         boxaa = boxaaReadMem(data, size);
     }
 
     if (!boxaa) {
-        DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
-            "n", 1);
-        boxaa = boxaaCreate(1);
+        l_int32 n = 1;
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d\n", _fun,
+            "n", n);
+        boxaa = boxaaCreate(n);
     }
 
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
-        LL_BOXAA, reinterpret_cast<void *>(boxaa));
+        TNAME, reinterpret_cast<void *>(boxaa));
     return ll_push_Boxaa(_fun, L, boxaa);
 }
 /**
@@ -668,12 +675,12 @@ ll_new_Boxaa(lua_State *L)
  * \return 1 table on the Lua stack
  */
 int
-ll_register_Boxaa(lua_State *L)
+luaopen_Boxaa(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                    Destroy},               /* garbage collect */
-        {"__new",                   ll_new_Boxaa},          /* Boxaa(n) */
-        {"__len",                   GetCount},              /* #boxa */
+        {"__gc",                    Destroy},
+        {"__new",                   ll_new_Boxaa},
+        {"__len",                   GetCount},
         {"__tostring",              toString},
         {"AddBoxa",                 AddBoxa},
         {"Copy",                    Copy},
@@ -700,11 +707,9 @@ ll_register_Boxaa(lua_State *L)
         LUA_SENTINEL
     };
 
-    static const luaL_Reg functions[] = {
-        LUA_SENTINEL
-    };
+    FUNC("luaopen_" TNAME);
 
-    lua_pushcfunction(L, ll_new_Boxaa);
-    lua_setglobal(L, LL_BOXAA);
-    return ll_register_class(L, LL_BOXAA, methods, functions);
+    ll_global_cfunct(_fun, L, TNAME, ll_new_Boxaa);
+    ll_register_class(_fun, L, TNAME, methods);
+    return 1;
 }

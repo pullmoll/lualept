@@ -38,8 +38,11 @@
  * An array of FPix.
  */
 
-/** Define a function's name (_fun) with prefix LL_FPIXA */
-#define LL_FUNC(x) FUNC(LL_FPIXA "." x)
+/** Set TNAME to the class name used in this source file */
+#define TNAME LL_FPIXA
+
+/** Define a function's name (_fun) with prefix FPixa */
+#define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
  * \brief Destroy a FPixa*.
@@ -57,10 +60,13 @@ static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    FPixa **pfpixa = ll_check_udata<FPixa>(_fun, L, 1, LL_FPIXA);
+    FPixa **pfpixa = ll_check_udata<FPixa>(_fun, L, 1, TNAME);
     FPixa *fpixa = *pfpixa;
-    DBG(LOG_DESTROY, "%s: '%s' pfpixa=%p fpixa=%p count=%d\n",
-        _fun, LL_FPIXA, pfpixa, fpixa, fpixaGetCount(fpixa));
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d\n", _fun,
+        TNAME,
+        "pfpixa", reinterpret_cast<void *>(pfpixa),
+        "fpixa", reinterpret_cast<void *>(fpixa),
+        "count", fpixaGetCount(fpixa));
     fpixaDestroy(&fpixa);
     *pfpixa = nullptr;
     return 0;
@@ -402,7 +408,7 @@ SetPixel(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index (%arg) for udata of class LL_FPIXA.
+ * \brief Check Lua stack at index (%arg) for udata of class FPixa*.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -411,7 +417,7 @@ SetPixel(lua_State *L)
 FPixa *
 ll_check_FPixa(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<FPixa>(_fun, L, arg, LL_FPIXA);
+    return *ll_check_udata<FPixa>(_fun, L, arg, TNAME);
 }
 /**
  * \brief Optionally expect a FPixa* at index (%arg) on the Lua stack.
@@ -439,7 +445,7 @@ ll_push_FPixa(const char *_fun, lua_State *L, FPixa *cd)
 {
     if (!cd)
         return ll_push_nil(L);
-    return ll_push_udata(_fun, L, LL_FPIXA, cd);
+    return ll_push_udata(_fun, L, TNAME, cd);
 }
 /**
  * \brief Create and push a new FPixa*.
@@ -468,16 +474,16 @@ ll_new_FPixa(lua_State *L)
 }
 
 /**
- * \brief Register the FPixa methods and functions in the LL_FPIXA meta table.
+ * \brief Register the FPixa methods and functions in the FPixa meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
 int
-ll_register_FPixa(lua_State *L)
+luaopen_FPixa(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},           /* garbage collector */
-        {"__new",               ll_new_FPixa},      /* FPixa() */
+        {"__gc",                Destroy},
+        {"__new",               ll_new_FPixa},
         {"__len",               GetCount},
         {"AddFPix",             AddFPix},
         {"ChangeRefcount",      ChangeRefcount},
@@ -498,11 +504,9 @@ ll_register_FPixa(lua_State *L)
         LUA_SENTINEL
     };
 
-    static const luaL_Reg functions[] = {
-        LUA_SENTINEL
-    };
+    FUNC("luaopen_" TNAME);
 
-    lua_pushcfunction(L, ll_new_Pixa);
-    lua_setglobal(L, LL_FPIXA);
-    return ll_register_class(L, LL_FPIXA, methods, functions);
+    ll_global_cfunct(_fun, L, TNAME, ll_new_Pixa);
+    ll_register_class(_fun, L, TNAME, methods);
+    return 1;
 }

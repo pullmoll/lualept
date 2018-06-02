@@ -38,8 +38,11 @@
  * A bitmap font.
  */
 
-/** Define a function's name (_fun) with prefix LL_BMF */
-#define LL_FUNC(x) FUNC(LL_BMF "." x)
+/** Set TNAME to the class name used in this source file */
+#define TNAME LL_BMF
+
+/** Define a function's name (_fun) with prefix Bmf */
+#define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
  * \brief Destroy a Bmf*.
@@ -51,10 +54,12 @@ static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    L_Bmf **pbmf = ll_check_udata<L_Bmf>(_fun, L, 1, LL_BMF);
+    L_Bmf **pbmf = ll_check_udata<L_Bmf>(_fun, L, 1, TNAME);
     L_Bmf *bmf = *pbmf;
-    DBG(LOG_DESTROY, "%s: '%s' pbmf=%p bmf=%p\n",
-        _fun, LL_BMF, pbmf, bmf);
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "pbmf", reinterpret_cast<void *>(pbmf),
+        "bmf", reinterpret_cast<void *>(bmf));
     bmfDestroy(&bmf);
     *pbmf = nullptr;
     return 0;
@@ -192,7 +197,7 @@ GetWidth(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class LL_BMF.
+ * \brief Check Lua stack at index %arg for udata of class Bmf*.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -201,7 +206,7 @@ GetWidth(lua_State *L)
 L_Bmf *
 ll_check_Bmf(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<L_Bmf>(_fun, L, arg, LL_BMF);
+    return *ll_check_udata<L_Bmf>(_fun, L, arg, TNAME);
 }
 
 /**
@@ -230,7 +235,7 @@ ll_push_Bmf(const char *_fun, lua_State *L, L_Bmf *bmf)
 {
     if (!bmf)
         return ll_push_nil(L);
-    return ll_push_udata(_fun, L, LL_BMF, bmf);
+    return ll_push_udata(_fun, L, TNAME, bmf);
 }
 /**
  * \brief Create and push a new Bmf*.
@@ -247,24 +252,27 @@ ll_new_Bmf(lua_State *L)
     FUNC("ll_new_Bmf");
     const char* dir = lua_isstring(L, 1) ? ll_check_string(_fun, L, 1) : ".";
     l_int32 fontsize = ll_opt_l_int32(_fun, L, 2, 6);
-    DBG(LOG_NEW_CLASS, "%s: create for %s = '%s', %s = %d\n", _fun,
-        "dir", dir, "fontsize", fontsize);
-    L_Bmf *bmf = bmfCreate(dir, fontsize);
+    L_Bmf *bmf = nullptr;
+
+    DBG(LOG_NEW_PARAM, "%s: create for %s = '%s', %s = %d\n", _fun,
+        "dir", dir,
+        "fontsize", fontsize);
+    bmf = bmfCreate(dir, fontsize);
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
-        LL_BMF, reinterpret_cast<void *>(bmf));
+        TNAME, reinterpret_cast<void *>(bmf));
     return ll_push_Bmf(_fun, L, bmf);
 }
 /**
- * \brief Register the BMF methods and functions in the LL_BMF meta table.
+ * \brief Register the BMF methods and functions in the TNAME meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
 int
-ll_register_Bmf(lua_State *L)
+luaopen_Bmf(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},       /* garbage collector */
-        {"__new",               ll_new_Bmf},    /* Bmf("dir", fontsize) */
+        {"__gc",                Destroy},
+        {"__new",               ll_new_Bmf},
         {"Create",              Create},
         {"Destroy",             Destroy},
         {"GetBaseline",         GetBaseline},
@@ -274,12 +282,9 @@ ll_register_Bmf(lua_State *L)
         {"GetWidth",            GetWidth},
         LUA_SENTINEL
     };
+    FUNC("luaopen_" TNAME);
 
-    static const luaL_Reg functions[] = {
-        LUA_SENTINEL
-    };
-
-    lua_pushcfunction(L, ll_new_Bmf);
-    lua_setglobal(L, LL_BMF);
-    return ll_register_class(L, LL_BMF, methods, functions);
+    ll_global_cfunct(_fun, L, TNAME, ll_new_Bmf);
+    ll_register_class(_fun, L, TNAME, methods);
+    return 1;
 }

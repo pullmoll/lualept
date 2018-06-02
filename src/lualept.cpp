@@ -148,10 +148,18 @@ ll_strcasecmp(const char* dst, const char* src)
 #endif
 
 #if defined(LLUA_DEBUG) && (LLUA_DEBUG>0)
-static int enabled = LOG_NEW_CLASS;
 
+/**
+ * @brief Bit mask (flags) for enabled log output
+ */
+static int dbg_enabled = 0;
+
+/**
+ * @brief Return a time stamp for the current date and time
+ * @return Temporary string with date and time
+ */
 static const char*
-timestr(void)
+timestamp(void)
 {
     static char str[128];
     const char* tz = "";
@@ -183,13 +191,18 @@ timestr(void)
     return str;
 }
 
+/**
+ * @brief Print debug output to stdout
+ * @param enable bit mask (flag) which defines the type of log output
+ * @param format format string followed by optional varargs
+ */
 void
 dbg(int enable, const char* format, ...)
 {
     va_list ap;
-    if (0 == (enable & enabled))
+    if (0 == (enable & dbg_enabled))
         return;
-    fprintf(stdout, "%s", timestr());
+    fprintf(stdout, "%s", timestamp());
     va_start(ap, format);
     vfprintf(stdout, format, ap);
     va_end(ap);
@@ -203,7 +216,8 @@ dbg(int enable, const char* format, ...)
  * \param L pointer to the lua_State
  * \param format format string followed by parameters
  */
-void die(const char* _fun, lua_State *L, const char *format, ...)
+void
+die(const char* _fun, lua_State *L, const char *format, ...)
 {
     char str[256];
     va_list ap;
@@ -221,7 +235,8 @@ void die(const char* _fun, lua_State *L, const char *format, ...)
  * \param arg argument index
  * \return pointer to the udata
  */
-void* ll_ludata(const char *_fun, lua_State *L, int arg)
+void *
+ll_ludata(const char *_fun, lua_State *L, int arg)
 {
     const void *cptr = lua_islightuserdata(L, arg) ? lua_topointer(L, arg) : nullptr;
     /* XXX: deconstify */
@@ -254,38 +269,73 @@ ll_udata(const char *_fun, lua_State *L, int arg, const char* tname)
  * \brief Free memory allocated by LEPT_MALLOC/LEPT_CALLOC.
  * \param ptr pointer to memory
  */
-void ll_free(void *ptr)
+void
+ll_free(void *ptr)
 {
     LEPT_FREE(ptr);
 }
 
 /**
- * \brief Register a class for Lua.
+ * Register a luaL_Reg table of methods using a metatable
+ * \param _fun calling function's name
  * \param L pointer to the lua_State
- * \param name tname of the table to register
- * \param methods array of methods to register
- * \param functions array of functions to register
- * \return 1 table on the Lua stack
+ * \param tname table name for the udata
+ * \param methods pointer to an array of luaL_Reg
  */
 int
-ll_register_class(lua_State *L, const char *name, const luaL_Reg *methods, const luaL_Reg *functions)
+ll_register_class(const char *_fun, lua_State *L, const char *tname, const luaL_Reg *methods)
 {
-    int nfunctions = 0, nmethods = 0;
+    static const luaL_Reg nofunctions[1] = {
+        LUA_SENTINEL
+    };
+    int nmethods;
 
-    while (methods[nmethods].name)
-        nmethods++;
-    while (functions[nfunctions].name)
-        nfunctions++;
-
-    luaL_newmetatable(L, name);
+    for (nmethods = 0; methods[nmethods].name; nmethods++)
+        ;
+    luaL_newmetatable(L, tname);
     lua_pushvalue(L, -1);
     lua_setfield(L, -2, "__index");
     luaL_setfuncs(L, methods, 0);
-    lua_createtable(L, 0, nfunctions);
-    luaL_setfuncs(L, functions, 0);
-    DBG(LOG_REGISTER, "'%s' registered with %d methods and %d functions\n",
-         name, nmethods, nfunctions);
+    lua_createtable(L, 0, 0);
+    luaL_setfuncs(L, nofunctions, 0);
+    DBG(LOG_REGISTER, "%s: registered '%s' with %d methods\n", _fun,
+        tname, nmethods);
     return 1;
+}
+
+/**
+ * @brief Create a global lua_CFunction (%cfunct) with name (%tname)
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param tname table name for the udata
+ * \param cfunct lua_Cfunction to register
+ * @return 0 for nothing on the Lua stack
+ */
+int
+ll_global_cfunct(const char *_fun, lua_State *L, const char* tname, lua_CFunction cfunct)
+{
+    lua_pushcfunction(L, cfunct);
+    lua_setglobal(L, tname);
+    DBG(LOG_REGISTER, "%s: set global '%s' for lua_CFunction (%p)\n", _fun,
+        tname, reinterpret_cast<void *>(cfunct));
+    return 0;
+}
+
+/**
+ * @brief Create a global table with name (%tname)
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param tname table name for the udata
+ * @return 0 for nothing on the Lua stack
+ */
+int
+ll_global_table(const char *_fun, lua_State *L, const char* tname, lua_CFunction cfunct)
+{
+    (*cfunct)(L);
+    lua_setglobal(L, tname);
+    DBG(LOG_REGISTER, "%s: set global '%s' for lua_CFunction (%p) result\n", _fun,
+        tname, reinterpret_cast<void *>(cfunct));
+    return 0;
 }
 
 /**
@@ -305,7 +355,9 @@ ll_push_udata(const char *_fun, lua_State *L, const char* name, void *udata)
     lua_getfield(L, LUA_REGISTRYINDEX, name);
     lua_setmetatable(L, -2);
     DBG(LOG_PUSH_UDATA, "%s: pushed '%s' ppvoid=%p udata=%p\n",
-         _fun, name ? name : "<nil>", ppvoid, udata);
+         _fun, name ? name : "<nil>",
+        reinterpret_cast<void *>(ppvoid),
+        reinterpret_cast<void *>(udata));
     return 1;
 }
 
@@ -428,7 +480,8 @@ int
 ll_push_l_uint64(const char* _fun, lua_State *L, l_uint64 val)
 {
     UNUSED(_fun);
-    DBG(LOG_PUSH_INTEGER, "%s: push %" PRIu64 "\n", _fun, val);
+    DBG(LOG_PUSH_INTEGER, "%s: push %" PRIu64 "\n", _fun,
+        static_cast<l_uintptr_t>(val));
     lua_pushinteger(L, static_cast<lua_Integer>(val));
     return 1;
 }
@@ -444,7 +497,8 @@ int
 ll_push_size_t(const char* _fun, lua_State *L, size_t size)
 {
     UNUSED(_fun);
-    DBG(LOG_PUSH_INTEGER, "%s: push %" PRIu64 "\n", _fun, size);
+    DBG(LOG_PUSH_INTEGER, "%s: push %" PRIu64 "\n", _fun,
+        static_cast<l_uintptr_t>(size));
     lua_pushinteger(L, static_cast<lua_Integer>(size));
     return 1;
 }
@@ -460,7 +514,8 @@ int
 ll_push_l_float32(const char* _fun, lua_State *L, l_float32 val)
 {
     UNUSED(_fun);
-    DBG(LOG_PUSH_INTEGER, "%s: push %u\n", _fun, val);
+    DBG(LOG_PUSH_INTEGER, "%s: push %g\n", _fun,
+        static_cast<double>(val));
     lua_pushnumber(L, static_cast<lua_Number>(val));
     return 1;
 }
@@ -476,7 +531,7 @@ int
 ll_push_l_float64(const char* _fun, lua_State *L, l_float64 val)
 {
     UNUSED(_fun);
-    DBG(LOG_PUSH_INTEGER, "%s: push %u\n", _fun, val);
+    DBG(LOG_PUSH_INTEGER, "%s: push %g\n", _fun, val);
     lua_pushnumber(L, static_cast<lua_Number>(val));
     return 1;
 }
@@ -492,7 +547,9 @@ int
 ll_push_string(const char* _fun, lua_State *L, const char* str)
 {
     UNUSED(_fun);
-    DBG(LOG_PUSH_STRING, "%s: push str=%p len=%" PRIu64 "\n", _fun, str, static_cast<l_intptr_t>(strlen(str)));
+    DBG(LOG_PUSH_STRING, "%s: push %s = %p %s = %" PRIu64 "\n", _fun,
+        "str", reinterpret_cast<const void *>(str),
+        "len", static_cast<l_uintptr_t>(strlen(str)));
     lua_pushstring(L, str);
     return 1;
 }
@@ -509,7 +566,9 @@ int
 ll_push_lstring(const char* _fun, lua_State *L, const char* str, size_t len)
 {
     UNUSED(_fun);
-    DBG(LOG_PUSH_STRING, "%s: push str=%p len=%" PRIu64 "\n", _fun, str, static_cast<l_uint64>(len));
+    DBG(LOG_PUSH_STRING, "%s: push %s = %p %s = %" PRIu64 "\n", _fun,
+        "str", reinterpret_cast<const void *>(str),
+        "len", static_cast<l_uintptr_t>(strlen(str)));
     lua_pushlstring(L, str, len);
     return 1;
 }
@@ -531,7 +590,7 @@ ll_push_Iarray(const char* _fun, lua_State *L, const l_int32 *ia, l_int32 n)
         return ll_push_nil(L);
     lua_newtable(L);
     for (i = 0; i < n; i++) {
-        DBG(LOG_PUSH_TABLE, "%s: ia[%d] = 0x%08x\n", _fun, i, *ia);
+        DBG(LOG_PUSH_ARRAY, "%s: ia[%d] = 0x%08x\n", _fun, i, *ia);
         lua_pushinteger(L, *ia++);
         lua_rawseti(L, -2, i+1);
     }
@@ -555,7 +614,7 @@ ll_push_Uarray(const char* _fun, lua_State *L, const l_uint32 *ua, l_int32 n)
         return ll_push_nil(L);
     lua_newtable(L);
     for (i = 0; i < n; i++) {
-        DBG(LOG_PUSH_TABLE, "%s: ua[%d] = 0x%08x\n", _fun, i, *ua);
+        DBG(LOG_PUSH_ARRAY, "%s: ua[%d] = 0x%08x\n", _fun, i, *ua);
         lua_pushinteger(L, *ua++);
         lua_rawseti(L, -2, i+1);
     }
@@ -577,6 +636,8 @@ ll_push_Uarray_2d(const char* _fun, lua_State *L, const l_uint32 *data, l_int32 
     l_int32 i;
     lua_newtable(L);
     for (i = 0; i < h; i++) {
+        DBG(LOG_PUSH_ARRAY, "%s: %s = %d, %s = %p\n", _fun,
+            "row", i, "data", reinterpret_cast<const void *>(data));
         ll_push_Uarray(_fun, L, data, wpl);
         data += wpl;
         lua_rawseti(L, -2, i+1);
@@ -601,7 +662,7 @@ ll_push_Farray(const char* _fun, lua_State *L, const l_float32 *fa, l_int32 n)
         return ll_push_nil(L);
     lua_newtable(L);
     for (i = 0; i < n; i++) {
-        DBG(LOG_PUSH_TABLE, "%s: fa[%d] = %.8g\n", _fun, i, static_cast<double>(*fa));
+        DBG(LOG_PUSH_ARRAY, "%s: fa[%d] = %.8g\n", _fun, i, static_cast<double>(*fa));
         lua_pushnumber(L, static_cast<double>(*fa++));
         lua_rawseti(L, -2, i+1);
     }
@@ -623,6 +684,8 @@ ll_push_Farray_2d(const char* _fun, lua_State *L, const l_float32 *data, l_int32
     l_int32 i;
     lua_newtable(L);
     for (i = 0; i < h; i++) {
+        DBG(LOG_PUSH_ARRAY, "%s: %s = %d, %s = %p\n", _fun,
+            "row", i, "data", reinterpret_cast<const void *>(data));
         ll_push_Farray(_fun, L, data, wpl);
         data += wpl;
         lua_rawseti(L, -2, i+1);
@@ -647,7 +710,7 @@ ll_push_Darray(const char* _fun, lua_State *L, const l_float64 *da, l_int32 n)
         return ll_push_nil(L);
     lua_newtable(L);
     for (i = 0; i < n; i++) {
-        DBG(LOG_PUSH_TABLE, "%s: da[%d] = %.16g\n", _fun, i, *da);
+        DBG(LOG_PUSH_ARRAY, "%s: da[%d] = %.16g\n", _fun, i, *da);
         lua_pushnumber(L, *da++);
         lua_rawseti(L, -2, i+1);
     }
@@ -669,6 +732,8 @@ ll_push_Darray_2d(const char* _fun, lua_State *L, const l_float64 *data, l_int32
     l_int32 i;
     lua_newtable(L);
     for (i = 0; i < h; i++) {
+        DBG(LOG_PUSH_ARRAY, "%s: %s = %d, %s = %p\n", _fun,
+            "row", i, "data", reinterpret_cast<const void *>(data));
         ll_push_Darray(_fun, L, data, wpl);
         data += wpl;
         lua_rawseti(L, -2, i+1);
@@ -694,7 +759,7 @@ ll_push_Sarray(const char* _fun, lua_State *L, Sarray *sa)
     lua_newtable(L);
     for (i = 0; i < n; i++) {
         const char* str = sarrayGetString(sa, i, L_NOCOPY);
-        DBG(LOG_PUSH_TABLE, "%s: sa[%d] = '%s'\n", _fun, i, str);
+        DBG(LOG_PUSH_ARRAY, "%s: sa[%d] = '%s'\n", _fun, i, str);
         lua_pushstring(L, str);
         lua_rawseti(L, -2, i+1);
     }
@@ -712,8 +777,10 @@ ll_push_Sarray(const char* _fun, lua_State *L, Sarray *sa)
 l_int32 *
 ll_unpack_Iarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
 {
+    DBG(LOG_CHECK_ARRAY, "%s: arg = %d, plen = %p\n", _fun,
+        arg, reinterpret_cast<void *>(plen));
     l_int32 len = static_cast<l_int32>(luaL_len(L, arg));
-    l_int32 *ia = reinterpret_cast<l_int32 *>(LEPT_CALLOC(len, sizeof(*ia)));
+    l_int32 *ia = ll_calloc<l_int32>(_fun, L, len);
 
     /* verify there is a table at %arg */
     luaL_checktype(L, arg, LUA_TTABLE);
@@ -747,10 +814,12 @@ ll_unpack_Iarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
  * \return allocated array l_uint32* with *pn entries
  */
 l_uint32 *
-ll_unpack_Uarray(const char *_fun, lua_State *L, int arg, l_int32 *pn)
+ll_unpack_Uarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
 {
+    DBG(LOG_CHECK_ARRAY, "%s: arg = %d, pn = %p\n", _fun,
+        arg, reinterpret_cast<void *>(plen));
     l_int32 len = static_cast<l_int32>(luaL_len(L, arg));
-    l_uint32 *ua = reinterpret_cast<l_uint32 *>(LEPT_CALLOC(len, sizeof(*ua)));
+    l_uint32 *ua = ll_calloc<l_uint32>(_fun, L, len);
 
     /* verify there is a table at %arg */
     luaL_checktype(L, arg, LUA_TTABLE);
@@ -770,8 +839,8 @@ ll_unpack_Uarray(const char *_fun, lua_State *L, int arg, l_int32 *pn)
         /* remove value; keep 'key' for next iteration */
         lua_pop(L, 1);
     }
-    if (pn)
-        *pn = len;
+    if (plen)
+        *plen = len;
     return ua;
 }
 
@@ -788,6 +857,10 @@ ll_unpack_Uarray(const char *_fun, lua_State *L, int arg, l_int32 *pn)
 l_uint32 *
 ll_unpack_Uarray_2d(const char *_fun, lua_State *L, int arg, l_uint32* data, l_int32 wpl, l_int32 h)
 {
+    DBG(LOG_CHECK_ARRAY, "%s: %s = %d, %s = %p, %s = %d, %s = %d\n", _fun,
+        "arg", arg,
+        "data", reinterpret_cast<void *>(data),
+        "wpl", wpl, "h", h);
     /* verify there is a table at 2 */
     luaL_checktype(L, arg, LUA_TTABLE);
     /* push a nil key */
@@ -827,8 +900,10 @@ ll_unpack_Uarray_2d(const char *_fun, lua_State *L, int arg, l_uint32* data, l_i
 l_float32 *
 ll_unpack_Farray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
 {
+    DBG(LOG_CHECK_ARRAY, "%s: arg = %d, pn = %p\n", _fun,
+        arg, reinterpret_cast<void *>(plen));
     l_int32 len = static_cast<l_int32>(luaL_len(L, arg));
-    l_float32 *fa = reinterpret_cast<l_float32 *>(LEPT_CALLOC(len, sizeof(*fa)));
+    l_float32 *fa = ll_calloc<l_float32>(_fun, L, len);
 
     /* verify there is a table at %arg */
     luaL_checktype(L, arg, LUA_TTABLE);
@@ -866,6 +941,10 @@ ll_unpack_Farray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
 l_float32 *
 ll_unpack_Farray_2d(const char *_fun, lua_State *L, int arg, l_float32* data, l_int32 wpl, l_int32 h)
 {
+    DBG(LOG_CHECK_ARRAY, "%s: %s = %d, %s = %p, %s = %d, %s = %d\n", _fun,
+        "arg", arg,
+        "data", reinterpret_cast<void *>(data),
+        "wpl", wpl, "h", h);
     /* verify there is a table at 2 */
     luaL_checktype(L, arg, LUA_TTABLE);
     /* push a nil key */
@@ -906,7 +985,7 @@ l_float64 *
 ll_unpack_Darray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
 {
     l_int32 len = static_cast<l_int32>(luaL_len(L, arg));
-    l_float64 *da = reinterpret_cast<l_float64 *>(LEPT_CALLOC(len, sizeof(*da)));
+    l_float64 *da = ll_calloc<l_float64>(_fun, L, len);
 
     /* verify there is a table at %arg */
     luaL_checktype(L, arg, LUA_TTABLE);
@@ -944,6 +1023,10 @@ ll_unpack_Darray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
 l_float64 *
 ll_unpack_Darray_2d(const char *_fun, lua_State *L, int arg, l_float64* data, l_int32 wpl, l_int32 h)
 {
+    DBG(LOG_CHECK_ARRAY, "%s: %s = %d, %s = %p, %s = %d, %s = %d\n", _fun,
+        "arg", arg,
+        "data", reinterpret_cast<void *>(data),
+        "wpl", wpl, "h", h);
     /* verify there is a table at 2 */
     luaL_checktype(L, arg, LUA_TTABLE);
     /* push a nil key */
@@ -999,10 +1082,10 @@ ll_unpack_Sarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
         if (0 < key && key <= len) {
             size_t slen = strlen(value);
             /* XXX: sarrayReplaceString() needs a non-const str */
-            char *str = reinterpret_cast<char *>(LEPT_CALLOC(1, slen+1));
+            char *str = ll_calloc<char>(_fun, L, slen + 1);
             memcpy(str, value, slen);
             sarrayReplaceString(sa, key-1, str, L_CLONE);
-            LEPT_FREE(str);
+            ll_free(str);
         } else {
             /* FIXME: error? */
         }
@@ -1603,7 +1686,7 @@ ll_check_tbl(const char *_fun, lua_State *L, int arg, l_int32 def, const lept_en
     }
 
     snprintf(msg, sizeof(msg), "%s: Invalid option #%d '%s'\n"
-             "List of upported options:",
+             "Enumeration options:",
              _fun, arg, str);
     ll_list_tbl_options(L, tbl, len, msg);
     lua_error(L);
@@ -1612,6 +1695,90 @@ ll_check_tbl(const char *_fun, lua_State *L, int arg, l_int32 def, const lept_en
 }
 
 #define TBL_ENTRY(key,ENUMVALUE) { key, #ENUMVALUE, ENUMVALUE }
+
+/**
+ * \brief Table of debug log flag names and enumeration values.
+ */
+static const lept_enum_t tbl_debug[] = {
+    TBL_ENTRY("register",       LOG_REGISTER),
+    TBL_ENTRY("new-param",      LOG_NEW_PARAM),
+    TBL_ENTRY("new-class",      LOG_NEW_CLASS),
+    TBL_ENTRY("new",            LOG_NEW_PARAM | LOG_NEW_CLASS),
+    TBL_ENTRY("destroy",        LOG_DESTROY),
+    TBL_ENTRY("push-boolean",   LOG_PUSH_BOOLEAN),
+    TBL_ENTRY("check-boolean",  LOG_CHECK_BOOLEAN),
+    TBL_ENTRY("boolean",        LOG_PUSH_BOOLEAN | LOG_CHECK_BOOLEAN),
+    TBL_ENTRY("push-integer",   LOG_PUSH_INTEGER),
+    TBL_ENTRY("check-integer",  LOG_CHECK_INTEGER),
+    TBL_ENTRY("integer",        LOG_PUSH_INTEGER | LOG_CHECK_INTEGER),
+    TBL_ENTRY("push-number",    LOG_PUSH_NUMBER),
+    TBL_ENTRY("check-number",   LOG_CHECK_NUMBER),
+    TBL_ENTRY("number",         LOG_PUSH_NUMBER | LOG_CHECK_NUMBER),
+    TBL_ENTRY("push-string",    LOG_PUSH_STRING),
+    TBL_ENTRY("check-string",   LOG_CHECK_STRING),
+    TBL_ENTRY("string",         LOG_PUSH_STRING | LOG_CHECK_STRING),
+    TBL_ENTRY("push-udata",     LOG_PUSH_UDATA),
+    TBL_ENTRY("check-udata",    LOG_CHECK_UDATA),
+    TBL_ENTRY("udata",          LOG_PUSH_UDATA | LOG_CHECK_UDATA),
+    TBL_ENTRY("push-array",     LOG_PUSH_ARRAY),
+    TBL_ENTRY("check-array",    LOG_CHECK_ARRAY),
+    TBL_ENTRY("array",          LOG_PUSH_ARRAY | LOG_CHECK_ARRAY)
+};
+
+/**
+ * \brief Check for a debug flag as string.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \param def default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_debug(const char *_fun, lua_State *L, int arg, l_int32 def)
+{
+    return ll_check_tbl(_fun, L, arg, def, tbl_debug, ARRAYSIZE(tbl_debug));
+}
+
+/**
+ * \brief Return the name for an access/storage flag value.
+ * \param flag access/storage flag
+ * \return pointer to const string
+ */
+const char*
+ll_string_debug(l_int32 flag)
+{
+    static const dbg_enable_flags bits[] = {
+        LOG_REGISTER,
+        LOG_DESTROY,
+        LOG_PUSH_BOOLEAN,
+        LOG_PUSH_INTEGER,
+        LOG_PUSH_NUMBER,
+        LOG_PUSH_STRING,
+        LOG_PUSH_UDATA,
+        LOG_PUSH_ARRAY,
+        LOG_NEW_PARAM,
+        LOG_NEW_CLASS
+    };
+    static char str[1024];
+    char *dst = str;
+    size_t i, j;
+
+    for (i = 0; i < ARRAYSIZE(bits); i++) {
+        dng_enable_flags bit = bits[i];
+        if (0 == (bit & flag))
+            continue;
+        for (j = 0; j < ARRAYSIZE(tbl_debug); j++) {
+            const lept_enum_t *e = &tbl_debug[j];
+            if (e->value != bit)
+                continue;
+            if (dst > str) {
+                dst += snprintf(dst, sizeof(str) - (size_t(dst - str)), "|");
+            }
+            dst += snprintf(dst, sizeof(str) - (size_t(dst - str)), "%s", e->key);
+        }
+    }
+    return str;
+}
 
 /**
  * \brief Table of access/storage flag names and enumeration values.
@@ -1977,7 +2144,7 @@ ll_string_component(l_int32 component)
  */
 static const lept_enum_t tbl_compression[] = {
     TBL_ENTRY("default",        IFF_DEFAULT),
-    TBL_ENTRY("def",           IFF_DEFAULT),
+    TBL_ENTRY("def",            IFF_DEFAULT),
     TBL_ENTRY("def",            IFF_DEFAULT),
     TBL_ENTRY("d",              IFF_DEFAULT),
     TBL_ENTRY("tiff-g4",        IFF_TIFF_G4),
@@ -3478,27 +3645,97 @@ ll_string_paint_flags(l_int32 paint_type)
  * The main class.
  */
 
+/** Set TNAME to the class name used in this source file */
+#define TNAME LL_LUALEPT
+
+/** Define a function's name (_fun) with prefix lualept */
+#define LL_FUNC(x) FUNC(TNAME "." x)
+
+/**
+ * \brief Enable a debug flag
+ *
+ * \param L pointer to the lua_State
+ * \return 0 for nothing on the Lua stack
+ */
 static int
-Create(lua_State *L)
+DebugOn(lua_State *L)
 {
-    FUNC(LL_LEPT ".Create");
-    static const char lept_prefix[] = "leptonica-";
-    LuaLept *lept = reinterpret_cast<LuaLept *>(LEPT_CALLOC(1, sizeof(LuaLept)));
-    const char* lept_ver = getLeptonicaVersion();
-    const lua_Number *lua_ver = lua_version(L);
+    LL_FUNC("DebugOn");
+    LuaLept *ll = ll_check_lualept(_fun, L, 1);
+    int i;
 
-    snprintf(lept->str_version, sizeof(lept->str_version), "%s", PACKAGE_VERSION);
-    snprintf(lept->str_version_lua, sizeof(lept->str_version_lua), "%d.%d",
-             static_cast<int>(lua_ver[0])/100, static_cast<int>(lua_ver[0])%100);
-    if (!strncmp(lept_ver, lept_prefix, strlen(lept_prefix)))
-        lept_ver += strlen(lept_prefix);
-    snprintf(lept->str_version_lept, sizeof(lept->str_version_lept), "%s", lept_ver);
-
-    return ll_push_udata(_fun, L, LL_LEPT, lept);
+    UNUSED(ll);
+    for (i = 2; i <= lua_gettop(L); i++) {
+        l_int32 mask = ll_check_debug(_fun, L, i);
+        if (!mask)
+            return 1;
+#if defined(LLUA_DEBUG) && (LLUA_DEBUG > 0)
+        dbg_enabled |= mask;
+#endif
+    }
+    return 0;
 }
 
 /**
- * \brief Destroy a LEPT*.
+ * \brief Disable a debug flag
+ *
+ * \param L pointer to the lua_State
+ * \return 0 for nothing on the Lua stack
+ */
+static int
+DebugOff(lua_State *L)
+{
+    LL_FUNC("DebugOff");
+    LuaLept *ll = ll_check_lualept(_fun, L, 1);
+    int i;
+
+    UNUSED(ll);
+    for (i = 2; i <= lua_gettop(L); i++) {
+        l_int32 mask = ll_check_debug(_fun, L, i);
+        if (!mask)
+            return 1;
+#if defined(LLUA_DEBUG) && (LLUA_DEBUG > 0)
+        dbg_enabled &= ~mask;
+#endif
+    }
+    return 0;
+}
+
+/**
+ * \brief Disable a debug flag
+ *
+ * \param L pointer to the lua_State
+ * \return 0 for nothing on the Lua stack
+ */
+static int
+Debug(lua_State *L)
+{
+    LL_FUNC("Debug");
+    luaL_Buffer B;
+
+    luaL_buffinit(L, &B);
+#if defined(LLUA_DEBUG) && (LLUA_DEBUG > 0)
+    luaL_addstring(&B, ll_string_debug(dbg_enabled));
+#endif
+    luaL_pushresult(&B);
+    return 1;
+}
+
+/**
+ * \brief Create a a LuaLept*.
+ *
+ * \param L pointer to the lua_State
+ * \return 0 for nothing on the Lua stack
+ */
+static int
+Create(lua_State *L)
+{
+    LL_FUNC("Create");
+    return ll_new_lualept(L);
+}
+
+/**
+ * \brief Destroy a LuaLept*.
  *
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack
@@ -3506,41 +3743,43 @@ Create(lua_State *L)
 static int
 Destroy(lua_State *L)
 {
-    FUNC(LL_LEPT ".Destroy");
-    LuaLept **plept = ll_check_udata<LuaLept>(_fun, L, 1, LL_LEPT);
-    LuaLept *lept = *plept;
-    DBG(LOG_DESTROY, "%s: '%s' plept=%p lept=%p\n",
-         _fun, LL_LEPT, plept, lept);
-    LEPT_FREE(lept);
+    LL_FUNC("Destroy");
+    LuaLept **plept = ll_check_udata<LuaLept>(_fun, L, 1, TNAME);
+    LuaLept *ll = *plept;
+    DBG(LOG_DESTROY, "%s: '%s' plept=%p ll=%p\n",
+         _fun, TNAME,
+        reinterpret_cast<void *>(plept),
+        reinterpret_cast<void *>(ll));
+    ll_free(ll);
     *plept = nullptr;
     return 0;
 }
 
 /**
- * \brief Return the Leptonica version number.
+ * \brief Return the lualept version number.
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
  */
 static int
 Version(lua_State *L)
 {
-    FUNC(LL_LEPT ".Version");
-    LuaLept *lept = ll_check_LuaLept(_fun, L, 1);
-    lua_pushstring(L, lept->str_version);
+    LL_FUNC("Version");
+    LuaLept *ll = ll_check_lualept(_fun, L, 1);
+    lua_pushstring(L, ll->str_version);
     return 1;
 }
 
 /**
- * \brief Return the Leptonica version number.
+ * \brief Return the Lua version number.
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
  */
 static int
 LuaVersion(lua_State *L)
 {
-    FUNC(LL_LEPT ".LuaVersion");
-    LuaLept *lept = ll_check_LuaLept(_fun, L, 1);
-    lua_pushstring(L, lept->str_version_lua);
+    LL_FUNC("LuaVersion");
+    LuaLept *ll = ll_check_lualept(_fun, L, 1);
+    lua_pushstring(L, ll->str_version_lua);
     return 1;
 }
 
@@ -3552,9 +3791,9 @@ LuaVersion(lua_State *L)
 static int
 LeptVersion(lua_State *L)
 {
-    FUNC(LL_LEPT ".LeptVersion");
-    LuaLept *lept = ll_check_LuaLept(_fun, L, 1);
-    lua_pushstring(L, lept->str_version_lept);
+    LL_FUNC("LeptVersion");
+    LuaLept *ll = ll_check_lualept(_fun, L, 1);
+    lua_pushstring(L, ll->str_version_lept);
     return 1;
 }
 
@@ -3569,9 +3808,9 @@ LeptVersion(lua_State *L)
  * \return 1 Pix* on the Lua stack
  */
 static int
-RGB(lua_State *L)
+ComposeRGB(lua_State *L)
 {
-    FUNC(LL_LEPT ".RGB");
+    LL_FUNC("ComposeRGB");
     l_int32 rval = ll_check_l_int32(_fun, L, 1);
     l_int32 gval = ll_check_l_int32(_fun, L, 2);
     l_int32 bval = ll_check_l_int32(_fun, L, 3);
@@ -3594,9 +3833,9 @@ RGB(lua_State *L)
  * \return 1 Pix* on the Lua stack
  */
 static int
-RGBA(lua_State *L)
+ComposeRGBA(lua_State *L)
 {
-    FUNC(LL_LEPT ".RGBA");
+    LL_FUNC("ComposeRGBA");
     l_int32 rval = ll_check_l_int32(_fun, L, 1);
     l_int32 gval = ll_check_l_int32(_fun, L, 2);
     l_int32 bval = ll_check_l_int32(_fun, L, 3);
@@ -3619,7 +3858,7 @@ RGBA(lua_State *L)
 static int
 ToRGB(lua_State *L)
 {
-    FUNC(LL_LEPT ".ToRGB");
+    LL_FUNC("ToRGB");
     l_uint32 pixel = ll_check_l_uint32(_fun, L, 1);
     l_int32 rval = 0;
     l_int32 gval = 0;
@@ -3642,7 +3881,7 @@ ToRGB(lua_State *L)
 static int
 ToRGBA(lua_State *L)
 {
-    FUNC(LL_LEPT ".ToRGBA");
+    LL_FUNC("ToRGBA");
     l_uint32 pixel = ll_check_l_uint32(_fun, L, 1);
     l_int32 rval = 0;
     l_int32 gval = 0;
@@ -3668,7 +3907,7 @@ ToRGBA(lua_State *L)
 static int
 MinMaxComponent(lua_State *L)
 {
-    FUNC(LL_LEPT ".MinMaxComponent");
+    LL_FUNC("MinMaxComponent");
     l_uint32 pixel = ll_check_l_uint32(_fun, L, 1);
     l_int32 type = ll_check_choose_min_max(_fun, L, 2, 0);
     ll_push_l_int32(_fun, L, extractMinMaxComponent(pixel, type));
@@ -3687,7 +3926,7 @@ MinMaxComponent(lua_State *L)
 static int
 MinComponent(lua_State *L)
 {
-    FUNC(LL_LEPT ".MinComponent");
+    LL_FUNC("MinComponent");
     l_uint32 pixel = ll_check_l_uint32(_fun, L, 1);
     ll_push_l_int32(_fun, L, extractMinMaxComponent(pixel, L_CHOOSE_MIN));
     return 1;
@@ -3705,48 +3944,63 @@ MinComponent(lua_State *L)
 static int
 MaxComponent(lua_State *L)
 {
-    FUNC(LL_LEPT ".MaxComponent");
+    LL_FUNC("MaxComponent");
     l_uint32 pixel = ll_check_l_uint32(_fun, L, 1);
     ll_push_l_int32(_fun, L, extractMinMaxComponent(pixel, L_CHOOSE_MAX));
     return 1;
 }
 /**
- * \brief Check Lua stack at index %arg for udata of class LL_LEPT.
+ * \brief Check Lua stack at index %arg for udata of class lualept.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the LEPT contained in the user data
  */
 LuaLept *
-ll_check_LuaLept(const char *_fun, lua_State *L, int arg)
+ll_check_lualept(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<LuaLept>(_fun, L, arg, LL_LEPT);
+    return *ll_check_udata<LuaLept>(_fun, L, arg, TNAME);
 }
 
 /**
  * \brief Push LEPT* to the Lua stack and set its meta table.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
- * \param lept pointer to the LEPT
+ * \param ll pointer to the LEPT
  * \return 1 LEPT* on the Lua stack
  */
 int
-ll_push_LuaLept(const char *_fun, lua_State *L, LuaLept *lept)
+ll_push_lualept(const char *_fun, lua_State *L, LuaLept *ll)
 {
-    if (!lept)
+    if (!ll)
         return ll_push_nil(L);
-    return ll_push_udata(_fun, L, LL_LEPT, lept);
+    return ll_push_udata(_fun, L, TNAME, ll);
 }
 
 /**
- * \brief Create a new LEPT*.
+ * \brief Create a new LuaLept*.
  * \param L pointer to the lua_State
  * \return 1 LEPT* on the Lua stack
  */
 int
-ll_new_LuaLept(lua_State *L)
+ll_new_lualept(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_LuaLept");
+    static const char lept_prefix[] = "leptonica-";
+    LuaLept *lept = ll_calloc<LuaLept>(_fun, L, 1);
+    const char* lept_ver = getLeptonicaVersion();
+    const lua_Number *lua_ver = lua_version(L);
+
+    snprintf(lept->str_version, sizeof(lept->str_version), "%s", PACKAGE_VERSION);
+
+    snprintf(lept->str_version_lua, sizeof(lept->str_version_lua), "%d.%d",
+             static_cast<int>(lua_ver[0])/100, static_cast<int>(lua_ver[0])%100);
+
+    if (!strncmp(lept_ver, lept_prefix, strlen(lept_prefix)))
+        lept_ver += strlen(lept_prefix);
+    snprintf(lept->str_version_lept, sizeof(lept->str_version_lept), "%s", lept_ver);
+
+    return ll_push_udata(_fun, L, TNAME, lept);
 }
 
 /**
@@ -3755,29 +4009,67 @@ ll_new_LuaLept(lua_State *L)
  * \return 1 table on the Lua stack
  */
 int
-ll_register_LuaLept(lua_State *L)
+luaopen_lualept(lua_State *L)
 {
     static const luaL_Reg methods[] = {
         {"__gc",                    Destroy},
-        {"__new",                   Create},
+        {"__new",                   ll_new_lualept},
+        {"DebugOn",                 DebugOn},
+        {"DebugOff",                DebugOff},
+        {"Debug",                   Debug},
+        {"Create",                  Create},
         {"Version",                 Version},
         {"LuaVersion",              LuaVersion},
         {"LeptVersion",             LeptVersion},
-        {"RGB",                     RGB},
-        {"RGBA",                    RGBA},
+        {"ComposeRGB",              ComposeRGB},
+        {"ComposeRGBA",             ComposeRGBA},
+        {"RGB",                     ComposeRGB},
+        {"RGBA",                    ComposeRGBA},
         {"ToRGB",                   ToRGB},
         {"ToRGBA",                  ToRGBA},
+        {"MinMaxComponent",         MinMaxComponent},
         {"MinComponent",            MinComponent},   /* alias without 2nd parameter */
         {"MaxComponent",            MaxComponent},   /* alias without 2nd parameter */
-        {"MinMaxComponent",         MinMaxComponent},
         LUA_SENTINEL
     };
+    FUNC("luaopen_lualept");
 
-    static const luaL_Reg functions[] = {
-        LUA_SENTINEL
-    };
-
-    return ll_register_class(L, LL_LEPT, methods, functions);
+    ll_register_class(_fun, L, TNAME, methods);
+    luaopen_Amap(L);
+    luaopen_Aset(L);
+    luaopen_Bmf(L);
+    luaopen_Box(L);
+    luaopen_Boxa(L);
+    luaopen_Boxaa(L);
+    luaopen_CCBord(L);
+    luaopen_CCBorda(L);
+    luaopen_CompData(L);
+    luaopen_DPix(L);
+    luaopen_Dewarp(L);
+    luaopen_Dewarpa(L);
+    luaopen_Dna(L);
+    luaopen_Dnaa(L);
+    luaopen_DoubleLinkedList(L);
+    luaopen_FPix(L);
+    luaopen_FPixa(L);
+    luaopen_Kernel(L);
+    luaopen_Numa(L);
+    luaopen_Numaa(L);
+    luaopen_PdfData(L);
+    luaopen_Pix(L);
+    luaopen_PixColormap(L);
+    luaopen_PixComp(L);
+    luaopen_PixTiling(L);
+    luaopen_Pixa(L);
+    luaopen_PixaComp(L);
+    luaopen_Pixaa(L);
+    luaopen_Pta(L);
+    luaopen_Ptaa(L);
+    luaopen_Sel(L);
+    luaopen_Sela(L);
+    luaopen_Stack(L);
+    ll_global_table(_fun, L, TNAME, ll_new_lualept);
+    return 1;
 }
 
 int
@@ -3797,40 +4089,7 @@ ll_RunScript(const char *script)
     luaL_openlibs(L);
 
     /* Register our libraries */
-    ll_register_Amap(L);
-    ll_register_Aset(L);
-    ll_register_Bmf(L);
-    ll_register_DoubleLinkedList(L);
-    ll_register_Numa(L);
-    ll_register_Numaa(L);
-    ll_register_Dewarp(L);
-    ll_register_Dewarpa(L);
-    ll_register_Dna(L);
-    ll_register_Dnaa(L);
-    ll_register_Pta(L);
-    ll_register_Ptaa(L);
-    ll_register_Box(L);
-    ll_register_Boxa(L);
-    ll_register_Boxaa(L);
-    ll_register_CCBord(L);
-    ll_register_CCBorda(L);
-    ll_register_PixColormap(L);
-    ll_register_PixComp(L);
-    ll_register_PixaComp(L);
-    ll_register_Pix(L);
-    ll_register_Pixa(L);
-    ll_register_Pixaa(L);
-    ll_register_FPix(L);
-    ll_register_FPixa(L);
-    ll_register_DPix(L);
-    ll_register_PixTiling(L);
-    ll_register_Sel(L);
-    ll_register_Sela(L);
-    ll_register_Stack(L);
-    ll_register_Kernel(L);
-    ll_register_CompData(L);
-    ll_register_PdfData(L);
-    ll_register_LuaLept(L);
+    luaopen_lualept(L);
 
     res = luaL_loadfile(L, script);
     if (LUA_OK != res) {
@@ -3838,10 +4097,6 @@ ll_RunScript(const char *script)
         lua_close(L);
         return ERROR_INT(msg, _fun, 1);
     }
-
-    /* Create a global instance of the LL_LEPT */
-    ll_new_LuaLept(L);
-    lua_setglobal(L, LL_LEPT);
 
     /* Ask Lua to run our script */
     res = lua_pcall(L, 0, LUA_MULTRET, 0);

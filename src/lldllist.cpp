@@ -38,8 +38,11 @@
  * A double linked list of pointers.
  */
 
-/** Define a function's name (_fun) with prefix LL_DLLIST */
-#define LL_FUNC(x) FUNC(LL_DLLIST "." x)
+/** Set TNAME to the class name used in this source file */
+#define TNAME LL_DLLIST
+
+/** Define a function's name (_fun) with prefix DoubleLinkedList */
+#define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
  * \brief Destroy a DoubleLinkedList*.
@@ -60,10 +63,13 @@ static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    DoubleLinkedList **plist = ll_check_udata<DoubleLinkedList>(_fun, L, 1, LL_DLLIST);
+    DoubleLinkedList **plist = ll_check_udata<DoubleLinkedList>(_fun, L, 1, TNAME);
     DoubleLinkedList *list = *plist;
-    DBG(LOG_DESTROY, "%s: '%s' plist=%p head=%p size=%d\n",
-        _fun, LL_DLLIST, plist, list, listGetCount(list));
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d\n", _fun,
+        TNAME,
+        "plist", reinterpret_cast<void *>(plist),
+        "list", reinterpret_cast<void *>(list),
+        "size", listGetCount(list));
     listDestroy(&list);
     *plist = nullptr;
     return 0;
@@ -104,7 +110,7 @@ toString(lua_State *L)
     if (!head) {
         luaL_addstring(&B, "nil");
     } else {
-        snprintf(str, sizeof(str), LL_DLLIST ": %p", reinterpret_cast<void *>(head));
+        snprintf(str, sizeof(str), TNAME ": %p", reinterpret_cast<void *>(head));
         luaL_addstring(&B, str);
         L_BEGIN_LIST_FORWARD(head, elem)
             snprintf(str, sizeof(str),
@@ -426,7 +432,7 @@ Reverse(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class LL_DLLIST.
+ * \brief Check Lua stack at index %arg for udata of class DoubleLinkedList.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -435,11 +441,11 @@ Reverse(lua_State *L)
 DoubleLinkedList *
 ll_check_DoubleLinkedList(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<DoubleLinkedList>(_fun, L, arg, LL_DLLIST);
+    return *ll_check_udata<DoubleLinkedList>(_fun, L, arg, TNAME);
 }
 
 /**
- * \brief Optionally expect a LL_DLLIST at index %arg on the Lua stack.
+ * \brief Optionally expect a DoubleLinkedList* at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -465,7 +471,7 @@ ll_push_DoubleLinkedList(const char *_fun, lua_State *L, DoubleLinkedList *head)
 {
     if (!head)
         return ll_push_nil(L);
-    return ll_push_udata(_fun, L, LL_DLLIST, head);
+    return ll_push_udata(_fun, L, TNAME, head);
 }
 /**
  * \brief Create and push a new DoubleLinkedList*.
@@ -479,22 +485,22 @@ ll_new_DoubleLinkedList(lua_State *L)
     DoubleLinkedList *head = ll_calloc<DoubleLinkedList>(_fun, L, 1);
 
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
-        LL_DLLIST, reinterpret_cast<void *>(head));
+        TNAME, reinterpret_cast<void *>(head));
     return ll_push_DoubleLinkedList(_fun, L, head);
 }
 
 /**
- * \brief Register the DLLIST methods and functions in the LL_DLLIST meta table.
+ * \brief Register the DLLIST methods and functions in the DoubleLinkedList meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
 int
-ll_register_DoubleLinkedList(lua_State *L)
+luaopen_DoubleLinkedList(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},                   /* garbage collector */
-        {"__len",               GetCount},                  /* #list */
-        {"__new",               ll_new_DoubleLinkedList},   /* DoubleLinkedList(data) */
+        {"__gc",                Destroy},
+        {"__new",               ll_new_DoubleLinkedList},
+        {"__len",               GetCount},
         {"__tostring",          toString},
         {"AddToHead",           AddToHead},
         {"AddToTail",           AddToTail},
@@ -513,11 +519,9 @@ ll_register_DoubleLinkedList(lua_State *L)
         LUA_SENTINEL
     };
 
-    static const luaL_Reg functions[] = {
-        LUA_SENTINEL
-    };
+    FUNC("luaopen_" TNAME);
 
-    lua_pushcfunction(L, ll_new_DoubleLinkedList);
-    lua_setglobal(L, LL_DLLIST);
-    return ll_register_class(L, LL_DLLIST, methods, functions);
+    ll_global_cfunct(_fun, L, TNAME, ll_new_DoubleLinkedList);
+    ll_register_class(_fun, L, TNAME, methods);
+    return 1;
 }

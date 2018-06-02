@@ -38,8 +38,11 @@
  * A map of keys and values of type l_int64, l_uint64 or l_float64.
  */
 
-/** Define a function's name (_fun) with prefix LL_AMAP */
-#define LL_FUNC(x) FUNC(LL_AMAP "." x)
+/** Set TNAME to the class name used in this source file */
+#define TNAME LL_AMAP
+
+/** Define a function's name (_fun) with prefix TNAME */
+#define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
  * \brief Destroy a Amap*.
@@ -53,11 +56,13 @@ static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    static const char params[] = "Amap* amap";
-    Amap **pamap = ll_check_udata<Amap>(_fun, L, 1, LL_AMAP);
+    Amap **pamap = ll_check_udata<Amap>(_fun, L, 1, TNAME);
     Amap *amap = *pamap;
-    DBG(LOG_DESTROY, "%s: '%s' pamap=%p amap=%p size=%d\n", _fun,
-        LL_AMAP, pamap, amap, l_amapSize(amap));
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d\n", _fun,
+        TNAME,
+        "pamap", reinterpret_cast<void *>(pamap),
+        "amap", reinterpret_cast<void *>(amap),
+        "size", l_asetSize(amap));
     l_amapDestroy(&amap);
     *pamap = nullptr;
     return 0;
@@ -156,7 +161,7 @@ toString(lua_State *L)
     if (!amap) {
         luaL_addstring(&B, "nil");
     } else {
-        snprintf(str, sizeof(str), LL_AMAP ": %p [%d: %s]",
+        snprintf(str, sizeof(str), TNAME ": %p [%d: %s]",
                  reinterpret_cast<void *>(amap),
                  amap->keytype,
                  ll_string_keytype(amap->keytype));
@@ -373,7 +378,7 @@ GetPrev(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class LL_AMAP.
+ * \brief Check Lua stack at index %arg for udata of class Amap*.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -382,11 +387,11 @@ GetPrev(lua_State *L)
 Amap *
 ll_check_Amap(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<Amap>(_fun, L, arg, LL_AMAP);
+    return *ll_check_udata<Amap>(_fun, L, arg, TNAME);
 }
 
 /**
- * \brief Optionally expect a LL_AMAP at index %arg on the Lua stack.
+ * \brief Optionally expect a Amap* at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -411,13 +416,13 @@ ll_push_Amap(const char *_fun, lua_State *L, Amap *amap)
 {
     if (!amap)
         return ll_push_nil(L);
-    return ll_push_udata(_fun, L, LL_AMAP, amap);
+    return ll_push_udata(_fun, L, TNAME, amap);
 }
 /**
  * \brief Create and push a new Amap*.
- *
+ * <pre>
  * Arg #1 is expected to be a key type name (int, uint, or float).
- *
+ * <pre>
  * \param L pointer to the lua_State
  * \return 1 Amap* on the Lua stack
  */
@@ -425,29 +430,41 @@ int
 ll_new_Amap(lua_State *L)
 {
     FUNC("ll_new_Amap");
-    l_int32 keytype = ll_check_keytype(_fun, L, 1, L_INT_TYPE);
-    DBG(LOG_NEW_CLASS, "%s: create for %s = %s\n", _fun,
-        "keytype", ll_string_keytype(keytype));
-    Amap *amap = l_amapCreate(keytype);
+    Amap *amap = nullptr;
+    l_int32 keytype = L_INT_TYPE;
+
+    if (lua_isstring(L, 1)) {
+        keytype = ll_check_keytype(_fun, L, 1, keytype);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %s\n", _fun,
+            "keytype", ll_string_keytype(keytype));
+        amap = l_amapCreate(keytype);
+    }
+
+    if (!amap) {
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %s\n", _fun,
+            "keytype", ll_string_keytype(keytype));
+        amap = l_amapCreate(keytype);
+    }
+
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
-        LL_AMAP, reinterpret_cast<void *>(amap));
+        TNAME, reinterpret_cast<void *>(amap));
     return ll_push_Amap(_fun, L, amap);
 }
 
 /**
- * \brief Register the Amap methods and functions in the LL_AMAP meta table.
+ * \brief Register the Amap methods and functions in the Amap* meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
 int
-ll_register_Amap(lua_State *L)
+luaopen_Amap(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},       /* garbage collector */
-        {"__len",               Size},          /* #amap */
+        {"__gc",                Destroy},
+        {"__len",               Size},
         {"__new",               ll_new_Amap},
-        {"__newindex",          Insert},        /* amap[n] = value */
-        {"__tostring",          toString},      /* print(amap) */
+        {"__newindex",          Insert},
+        {"__tostring",          toString},
         {"Create",              Create},
         {"Delete",              Delete},
         {"Destroy",             Destroy},
@@ -459,13 +476,9 @@ ll_register_Amap(lua_State *L)
         {"Insert",              Insert},
         LUA_SENTINEL
     };
+    FUNC("luaopen_" TNAME);
 
-    static const luaL_Reg functions[] = {
-        {"__index",             Find},
-        LUA_SENTINEL
-    };
-
-    lua_pushcfunction(L, ll_new_Amap);
-    lua_setglobal(L, LL_AMAP);
-    return ll_register_class(L, LL_AMAP, methods, functions);
+    ll_global_cfunct(_fun, L, TNAME, ll_new_Amap);
+    ll_register_class(_fun, L, TNAME, methods);
+    return 1;
 }

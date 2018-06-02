@@ -38,8 +38,11 @@
  * A box: a quad of l_int32 (x, y, w, h).
  */
 
-/** Define a function's name (_fun) with prefix LL_BOX */
-#define LL_FUNC(x) FUNC(LL_BOX "." x)
+/** Set TNAME to the class name used in this source file */
+#define TNAME LL_BOX
+
+/** Define a function's name (_fun) with prefix Box */
+#define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
  * \brief Destroy a Box*.
@@ -57,10 +60,13 @@ static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    Box **pbox = ll_check_udata<Box>(_fun, L, 1, LL_BOX);
+    Box **pbox = ll_check_udata<Box>(_fun, L, 1, TNAME);
     Box *box = *pbox;
-    DBG(LOG_DESTROY, "%s: '%s' pbox=%p box=%p refcount=%d\n", _fun,
-        LL_BOX, pbox, box, boxGetRefcount(box));
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d\n", _fun,
+        TNAME,
+        "pbox", reinterpret_cast<void *>(pbox),
+        "box", reinterpret_cast<void *>(box),
+        "refcount", boxGetRefcount(box));
     boxDestroy(&box);
     *pbox = nullptr;
     return 0;
@@ -85,7 +91,7 @@ toString(lua_State *L)
         luaL_addstring(&B, "nil");
     } else {
         snprintf(str, sizeof(str),
-                 LL_BOX ": %p\n",
+                 TNAME ": %p\n",
                  reinterpret_cast<void *>(box));
         luaL_addstring(&B, str);
         if (boxGetGeometry(box, &x, &y, &w, &h)) {
@@ -991,7 +997,7 @@ TransformOrdered(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class LL_BOX.
+ * \brief Check Lua stack at index %arg for udata of class Box*.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -1000,11 +1006,11 @@ TransformOrdered(lua_State *L)
 Box *
 ll_check_Box(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<Box>(_fun, L, arg, LL_BOX);
+    return *ll_check_udata<Box>(_fun, L, arg, TNAME);
 }
 
 /**
- * \brief Optionally expect a LL_BOX at index %arg on the Lua stack.
+ * \brief Optionally expect a Box* at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -1030,7 +1036,7 @@ ll_push_Box(const char *_fun, lua_State *L, Box *box)
 {
     if (!box)
         return ll_push_nil(L);
-    return ll_push_udata(_fun, L, LL_BOX, box);
+    return ll_push_udata(_fun, L, TNAME, box);
 }
 /**
  * \brief Create and push a new Box*.
@@ -1046,8 +1052,8 @@ ll_new_Box(lua_State *L)
     if (lua_isuserdata(L, 1)) {
         Box *boxs = ll_opt_Box(_fun, L, 1);
         if (boxs) {
-            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
-                LL_BOX, reinterpret_cast<void *>(boxs));
+            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+                TNAME, reinterpret_cast<void *>(boxs));
             box = boxCopy(boxs);
         }
     }
@@ -1057,33 +1063,34 @@ ll_new_Box(lua_State *L)
         l_int32 y = ll_opt_l_int32(_fun, L, 2, 0);
         l_int32 w = ll_opt_l_int32(_fun, L, 3, 1);
         l_int32 h = ll_opt_l_int32(_fun, L, 4, 1);
-        DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d, %s = %d, %s = %d\n", _fun,
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d, %s = %d, %s = %d, %s = %d\n", _fun,
             "x", x, "y", y, "w", w, "h", h);
         box = boxCreate(x,y,w,h);
     }
 
     if (!box) {
-        DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d, %s = %d, %s = %d\n", _fun,
-            "x", 0, "y", 0, "w", 0, "h", 0);
-        box = boxCreate(0,0,0,0);
+        l_int32 x = 0, y = 0, w = 0, h = 0;
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d, %s = %d, %s = %d, %s = %d\n", _fun,
+            "x", x, "y", y, "w", w, "h", h);
+        box = boxCreate(x, y, w, h);
     }
 
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
-        LL_BOX, reinterpret_cast<void *>(box));
+        TNAME, reinterpret_cast<void *>(box));
     return ll_push_Box(_fun, L, box);
 }
 
 /**
- * \brief Register the Box* methods and functions in the LL_BOX meta table.
+ * \brief Register the Box* methods and functions in the Box meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
 int
-ll_register_Box(lua_State *L)
+luaopen_Box(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                    Destroy},           /* garbage collector */
-        {"__new",                   ll_new_Box},        /* Box(x,y,w,h) with optional parameters */
+        {"__gc",                    Destroy},
+        {"__new",                   ll_new_Box},
         {"__tostring",              toString},
         {"__eq",                    Equal},
         {"AdjustSides",             AdjustSides},
@@ -1123,11 +1130,9 @@ ll_register_Box(lua_State *L)
         LUA_SENTINEL
     };
 
-    static const luaL_Reg functions[] = {
-        LUA_SENTINEL
-    };
+    FUNC("luaopen_" TNAME);
 
-    lua_pushcfunction(L, ll_new_Box);
-    lua_setglobal(L, LL_BOX);
-    return ll_register_class(L, LL_BOX, methods, functions);
+    ll_global_cfunct(_fun, L, TNAME, ll_new_Box);
+    ll_register_class(_fun, L, TNAME, methods);
+    return 1;
 }

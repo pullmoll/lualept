@@ -38,8 +38,11 @@
  * A class for handling c.c. borders.
  */
 
-/** Define a function's name (_fun) with prefix LL_CCBORD */
-#define LL_FUNC(x) FUNC(LL_CCBORD "." x)
+/** Set TNAME to the class name used in this source file */
+#define TNAME LL_CCBORD
+
+/** Define a function's name (_fun) with prefix CCBord */
+#define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
  * \brief toString.
@@ -59,7 +62,7 @@ toString(lua_State* L)
         luaL_addstring(&B, "nil");
     } else {
         snprintf(str, sizeof(str),
-                LL_CCBORD ": %p\n",
+                TNAME ": %p\n",
                 reinterpret_cast<void *>(ccb));
         luaL_addstring(&B, str);
         snprintf(str, sizeof(str), "    pix           : " LL_PIX "* %p\n", reinterpret_cast<void *>(ccb->pix));
@@ -95,12 +98,14 @@ static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    CCBord **pccbord = ll_check_udata<CCBord>(_fun, L, 1, LL_CCBORD);
-    CCBord *ccbord = *pccbord;
-    DBG(LOG_DESTROY, "%s: '%s' pccbord=%p ccbord=%p\n",
-        _fun, LL_CCBORD, pccbord, ccbord);
-    ccbDestroy(&ccbord);
-    *pccbord = nullptr;
+    CCBord **pccb = ll_check_udata<CCBord>(_fun, L, 1, TNAME);
+    CCBord *ccb = *pccb;
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "pccb", reinterpret_cast<void *>(pccb),
+        "ccb", reinterpret_cast<void *>(ccb));
+    ccbDestroy(&ccb);
+    *pccb = nullptr;
     return 0;
 }
 
@@ -122,7 +127,7 @@ Create(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index (%arg) for udata of class LL_CCBORD.
+ * \brief Check Lua stack at index (%arg) for udata of class CCBord*.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -131,7 +136,7 @@ Create(lua_State *L)
 CCBord *
 ll_check_CCBord(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<CCBord>(_fun, L, arg, LL_CCBORD);
+    return *ll_check_udata<CCBord>(_fun, L, arg, TNAME);
 }
 
 /**
@@ -161,7 +166,7 @@ ll_push_CCBord(const char *_fun, lua_State *L, CCBord *cd)
 {
     if (!cd)
         return ll_push_nil(L);
-    return ll_push_udata(_fun, L, LL_CCBORD, cd);
+    return ll_push_udata(_fun, L, TNAME, cd);
 }
 
 /**
@@ -178,7 +183,7 @@ ll_new_CCBord(lua_State *L)
     if (lua_isuserdata(L, 1)) {
         Pix* pixs = ll_opt_Pix(_fun, L, 1);
         if (pixs) {
-            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
                 LL_PIX, reinterpret_cast<void *>(pixs));
             ccb = ccbCreate(pixs);
         }
@@ -186,38 +191,37 @@ ll_new_CCBord(lua_State *L)
 
     if (!ccb) {
         /* FIXME: create data for no pix? */
-        DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
-            LL_PIX, nullptr);
-        ccb = ccbCreate(nullptr);
+        Pix *pixs = nullptr;
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+            LL_PIX, reinterpret_cast<void *>(pixs));
+        ccb = ccbCreate(pixs);
     }
 
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
-        LL_CCBORD, reinterpret_cast<void *>(ccb));
+        TNAME, reinterpret_cast<void *>(ccb));
     return ll_push_CCBord(_fun, L, ccb);
 }
 
 /**
- * \brief Register the CCBord methods and functions in the LL_CCBORD meta table.
+ * \brief Register the CCBord methods and functions in the CCBord meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
 int
-ll_register_CCBord(lua_State *L)
+luaopen_CCBord(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},       /* garbage collector */
-        {"__new",               ll_new_CCBord}, /* CCBord(pix) */
+        {"__gc",                Destroy},
+        {"__new",               ll_new_CCBord},
         {"__tostring",          toString},
         {"Create",              Create},
         {"Destroy",             Destroy},
         LUA_SENTINEL
     };
 
-    static const luaL_Reg functions[] = {
-        LUA_SENTINEL
-    };
+    FUNC("luaopen_" TNAME);
 
-    lua_pushcfunction(L, ll_new_CCBord);
-    lua_setglobal(L, LL_CCBORD);
-    return ll_register_class(L, LL_CCBORD, methods, functions);
+    ll_global_cfunct(_fun, L, TNAME, ll_new_CCBord);
+    ll_register_class(_fun, L, TNAME, methods);
+    return 1;
 }

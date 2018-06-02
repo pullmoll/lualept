@@ -38,8 +38,11 @@
  * A class to handle PDF data.
  */
 
-/** Define a function's name (_fun) with prefix LL_PDFDATA */
-#define LL_FUNC(x) FUNC(LL_PDFDATA "." x)
+/** Set TNAME to the class name used in this source file */
+#define TNAME LL_PDFDATA
+
+/** Define a function's name (_fun) with prefix PdfData */
+#define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
  * \brief Destroy a PdfData*.
@@ -51,10 +54,12 @@ static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    PdfData **ppd = ll_check_udata<PdfData>(_fun, L, 1, LL_PDFDATA);
+    PdfData **ppd = ll_check_udata<PdfData>(_fun, L, 1, TNAME);
     PdfData *pd = *ppd;
-    DBG(LOG_DESTROY, "%s: '%s' pcd=%p pd=%p\n",
-        _fun, LL_PDFDATA, ppd, pd);
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "ppd", reinterpret_cast<void *>(ppd),
+        "pd", reinterpret_cast<void *>(pd));
     ll_free(pd);
     *ppd = nullptr;
     return 0;
@@ -93,7 +98,7 @@ toString(lua_State *L)
     if (!pdd) {
         luaL_addstring(&B, "nil");
     } else {
-        snprintf(str, sizeof(str), LL_PDFDATA ": %p\n", reinterpret_cast<void *>(pdd));
+        snprintf(str, sizeof(str), TNAME ": %p\n", reinterpret_cast<void *>(pdd));
         luaL_addstring(&B, str);
         snprintf(str, sizeof(str), "    title             : %s\n", pdd->title ? pdd->title : "<none>");
         luaL_addstring(&B, str);
@@ -297,7 +302,7 @@ ConvertUnscaledToPdfData(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class LL_PDFDATA.
+ * \brief Check Lua stack at index %arg for udata of class PdfData.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -306,7 +311,7 @@ ConvertUnscaledToPdfData(lua_State *L)
 PdfData *
 ll_check_PdfData(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<PdfData>(_fun, L, arg, LL_PDFDATA);
+    return *ll_check_udata<PdfData>(_fun, L, arg, TNAME);
 }
 
 /**
@@ -335,7 +340,7 @@ ll_push_PdfData(const char *_fun, lua_State *L, PdfData *cd)
 {
     if (!cd)
         return ll_push_nil(L);
-    return ll_push_udata(_fun, L, LL_PDFDATA, cd);
+    return ll_push_udata(_fun, L, TNAME, cd);
 }
 /**
  * \brief Create and push a new PdfData*.
@@ -349,19 +354,22 @@ ll_push_PdfData(const char *_fun, lua_State *L, PdfData *cd)
 int
 ll_new_PdfData(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_PdfData");
+    PdfData *pd = ll_calloc<PdfData>(_fun, L, 1);
+    return ll_push_PdfData(_fun, L, pd);
 }
+
 /**
- * \brief Register the BMF methods and functions in the LL_PDFDATA meta table.
+ * \brief Register the PdfData methods and functions in the PdfData meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
 int
-ll_register_PdfData(lua_State *L)
+luaopen_PdfData(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                        Destroy},   /* garbage collector */
-        {"__new",                       Create},
+        {"__gc",                        Destroy},
+        {"__new",                       ll_new_PdfData},
         {"__tostring",                  toString},
         {"Create",                      Create},
         {"Destroy",                     Destroy},
@@ -373,11 +381,9 @@ ll_register_PdfData(lua_State *L)
         LUA_SENTINEL
     };
 
-    static const luaL_Reg functions[] = {
-        LUA_SENTINEL
-    };
+    FUNC("luaopen_" TNAME);
 
-    lua_pushcfunction(L, Create);
-    lua_setglobal(L, LL_PDFDATA);
-    return ll_register_class(L, LL_PDFDATA, methods, functions);
+    ll_global_cfunct(_fun, L, TNAME, ll_new_PdfData);
+    ll_register_class(_fun, L, TNAME, methods);
+    return 1;
 }

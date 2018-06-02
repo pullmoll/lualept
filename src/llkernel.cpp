@@ -38,8 +38,11 @@
  * A kernel.
  */
 
-/** Define a function's name (_fun) with prefix LL_KERNEL */
-#define LL_FUNC(x) FUNC(LL_KERNEL "." x)
+/** Set TNAME to the class name used in this source file */
+#define TNAME LL_KERNEL
+
+/** Define a function's name (_fun) with prefix Kernel */
+#define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
  * \brief Destroy a Kernel* (%kel).
@@ -53,10 +56,12 @@ static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    Kernel **pkel = ll_check_udata<Kernel>(_fun, L, 1, LL_KERNEL);
+    Kernel **pkel = ll_check_udata<Kernel>(_fun, L, 1, TNAME);
     Kernel *kel = *pkel;
-    DBG(LOG_DESTROY, "%s: '%s' pkel=%p kel=%p\n",
-        _fun, LL_SEL, pkel, kel);
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "pkel", reinterpret_cast<void *>(pkel),
+        "kel", reinterpret_cast<void *>(kel));
     kernelDestroy(&kel);
     *pkel = nullptr;
     return 0;
@@ -88,7 +93,7 @@ toString(lua_State* L)
         } else {
             kernelGetSum(kel, &sum);
             snprintf(str, sizeof(str),
-                     LL_KERNEL ": %p\n"
+                     TNAME ": %p\n"
                      "    sy = %d, sx = %d, cy = %d, cx = %d, sum = %g\n",
                      reinterpret_cast<void *>(kel),
                      sy, sx, cy, cx, static_cast<double>(sum));
@@ -545,7 +550,7 @@ WriteStream(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index (%arg) for udata of class LL_KERNEL.
+ * \brief Check Lua stack at index (%arg) for udata of class Kernel*.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -554,7 +559,7 @@ WriteStream(lua_State *L)
 Kernel *
 ll_check_Kernel(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<Kernel>(_fun, L, arg, LL_KERNEL);
+    return *ll_check_udata<Kernel>(_fun, L, arg, TNAME);
 }
 
 /**
@@ -584,7 +589,7 @@ ll_push_Kernel(const char *_fun, lua_State *L, Kernel *cd)
 {
     if (!cd)
         return ll_push_nil(L);
-    return ll_push_udata(_fun, L, LL_KERNEL, cd);
+    return ll_push_udata(_fun, L, TNAME, cd);
 }
 
 /**
@@ -597,71 +602,81 @@ ll_new_Kernel(lua_State *L)
 {
     FUNC("ll_new_Kernel");
     Kernel* kel = nullptr;
+    Pix *pixs = nullptr;
+    luaL_Stream *stream = nullptr;
+    l_int32 width = 2;
+    l_int32 height = 2;
+    l_int32 cy = 0;
+    l_int32 cx = 0;
 
     if (lua_isuserdata(L, 1)) {
-        Pix *pix = ll_opt_Pix(_fun, L, 1);
-        if (pix) {
-            l_int32 cy = ll_opt_l_int32(_fun, L, 2, 0);
-            l_int32 cx = ll_opt_l_int32(_fun, L, 2, 0);
-            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
-                LL_PIX, reinterpret_cast<void *>(pix));
-            kel = kernelCreateFromPix(pix, cy, cx);
+        pixs = ll_opt_Pix(_fun, L, 1);
+        if (pixs) {
+            cy = ll_opt_l_int32(_fun, L, 2, cy);
+            cx = ll_opt_l_int32(_fun, L, 2, cx);
+            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+                LL_PIX, reinterpret_cast<void *>(pixs));
+            kel = kernelCreateFromPix(pixs, cy, cx);
         } else {
-            luaL_Stream *stream = ll_check_stream(_fun, L, 1);
-            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+            stream = ll_check_stream(_fun, L, 1);
+            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
                 LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
             kel = kernelReadStream(stream->f);
         }
     }
 
     if (lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
-        l_int32 height = ll_opt_l_int32(_fun, L, 1, 1);
-        l_int32 width = ll_opt_l_int32(_fun, L, 2, 1);
-        DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d\n", _fun,
+        height = ll_opt_l_int32(_fun, L, 1, width);
+        width = ll_opt_l_int32(_fun, L, 2, height);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d, %s = %d\n", _fun,
             "height", height, "width", width);
         kel = kernelCreate(height, width);
     }
 
     if (!kel && lua_isstring(L, 1)) {
         const char* filename = ll_check_string(_fun, L, 1);
-        DBG(LOG_NEW_CLASS, "%s: create for %s = '%s'\n", _fun,
+        DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
             "filename", filename);
         kel = kernelRead(filename);
     }
 
     if (!kel && lua_isstring(L, 1)) {
-        l_int32 h = ll_opt_l_int32(_fun, L, 1, 3);
-        l_int32 w = ll_opt_l_int32(_fun, L, 2, 3);
-        l_int32 cy = ll_opt_l_int32(_fun, L, 3, 0);
-        l_int32 cx = ll_opt_l_int32(_fun, L, 4, 0);
+        height = ll_opt_l_int32(_fun, L, 1, height);
+        width = ll_opt_l_int32(_fun, L, 2, width);
+        cy = ll_opt_l_int32(_fun, L, 3, cy);
+        cx = ll_opt_l_int32(_fun, L, 4, cx);
         const char* kdata = ll_check_string(_fun, L, 5);
-        DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d, %s = %d, %s = %d, %s = %s\n", _fun,
-            "h", h, "w", w, "cy", cy, "cx", cx, "kdata", kdata);
-        kel = kernelCreateFromString(h, w, cy, cx, kdata);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d, %s = %d, %s = %d, %s = %d, %s = %s\n", _fun,
+            "height", height,
+            "width", width,
+            "cy", cy,
+            "cx", cx,
+            "kdata", kdata);
+        kel = kernelCreateFromString(height, width, cy, cx, kdata);
     }
 
     if (!kel) {
-        DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d\n", _fun,
-            "height", 1, "width", 1);
-        kel = kernelCreate(1, 1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d, %s = %d\n", _fun,
+            "height", height, "width", width);
+        kel = kernelCreate(height, width);
     }
 
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
-        LL_KERNEL, reinterpret_cast<void *>(kel));
+        TNAME, reinterpret_cast<void *>(kel));
     return ll_push_Kernel(_fun, L, kel);
 }
 
 /**
- * \brief Register the Kernel methods and functions in the LL_KERNEL meta table.
+ * \brief Register the Kernel methods and functions in the Kernel meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
 int
-ll_register_Kernel(lua_State *L)
+luaopen_Kernel(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},           /* garbage collector */
-        {"__new",               ll_new_Kernel},     /* Kernel() */
+        {"__gc",                Destroy},
+        {"__new",               ll_new_Kernel},
         {"__tostring",          toString},
         {"Copy",                Copy},
         {"Create",              Create},
@@ -685,11 +700,9 @@ ll_register_Kernel(lua_State *L)
         LUA_SENTINEL
     };
 
-    static const luaL_Reg functions[] = {
-        LUA_SENTINEL
-    };
+    FUNC("luaopen_" TNAME);
 
-    lua_pushcfunction(L, ll_new_Kernel);
-    lua_setglobal(L, LL_KERNEL);
-    return ll_register_class(L, LL_KERNEL, methods, functions);
+    ll_global_cfunct(_fun, L, TNAME, ll_new_Kernel);
+    ll_register_class(_fun, L, TNAME, methods);
+    return 1;
 }

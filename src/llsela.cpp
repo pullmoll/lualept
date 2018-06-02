@@ -38,8 +38,11 @@
  * An array of Sel.
  */
 
-/** Define a function's name (_fun) with prefix LL_SELA */
-#define LL_FUNC(x) FUNC(LL_SELA "." x)
+/** Set TNAME to the class name used in this source file */
+#define TNAME LL_SELA
+
+/** Define a function's name (_fun) with prefix Sela */
+#define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
  * \brief Destroy a Sela*.
@@ -53,10 +56,13 @@ static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    Sela **psela = ll_check_udata<Sela>(_fun, L, 1, LL_SELA);
+    Sela **psela = ll_check_udata<Sela>(_fun, L, 1, TNAME);
     Sela *sela = *psela;
-    DBG(LOG_DESTROY, "%s: '%s' psela=%p sela=%p count=%d\n",
-        _fun, LL_SELA, psela, sela, selaGetCount(sela));
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d\n", _fun,
+        TNAME,
+        "psel", reinterpret_cast<void *>(psela),
+        "sel", reinterpret_cast<void *>(sela),
+        "count", selaGetCount(sela));
     selaDestroy(&sela);
     *psela = nullptr;
     return 0;
@@ -100,7 +106,7 @@ toString(lua_State *L)
         luaL_addstring(&B, "nil");
     } else {
         snprintf(str, sizeof(str),
-                 LL_SELA ": %p\n",
+                 TNAME ": %p\n",
                  reinterpret_cast<void *>(sela));
         luaL_addstring(&B, str);
     }
@@ -657,7 +663,7 @@ MakeThinSets(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class LL_SELA.
+ * \brief Check Lua stack at index %arg for udata of class Sela*.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -666,11 +672,11 @@ MakeThinSets(lua_State *L)
 Sela *
 ll_check_Sela(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<Sela>(_fun, L, arg, LL_SELA);
+    return *ll_check_udata<Sela>(_fun, L, arg, TNAME);
 }
 
 /**
- * \brief Optionally expect a LL_SELA at index %arg on the Lua stack.
+ * \brief Optionally expect a Sela* at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -696,7 +702,7 @@ ll_push_Sela(const char *_fun, lua_State *L, Sela *sela)
 {
     if (!sela)
         return ll_push_nil(L);
-    return ll_push_udata(_fun, L, LL_SELA, sela);
+    return ll_push_udata(_fun, L, TNAME, sela);
 }
 
 /**
@@ -709,59 +715,63 @@ ll_new_Sela(lua_State *L)
 {
     FUNC("ll_new_Sela");
     Sela *sela = nullptr;
+    luaL_Stream *stream = nullptr;
+    const char* fname = nullptr;
+    const char* filename = nullptr;
+    l_int32 n = 1;
 
     if (lua_isuserdata(L, 1)) {
-        luaL_Stream *stream = ll_opt_stream(_fun, L, 1);
+        stream = ll_opt_stream(_fun, L, 1);
         if (stream) {
-            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
-                "stream", stream);
+            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+                "stream", reinterpret_cast<void *>(stream));
             sela = selaReadStream(stream->f);
         }
     }
 
     if (lua_isinteger(L, 1)) {
-        l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
-        DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
+        n = ll_opt_l_int32(_fun, L, 1, 1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d\n", _fun,
             "n", n);
         sela = selaCreate(n);
     }
 
     if (!sela && lua_isstring(L, 1)) {
-        const char* fname = ll_check_string(_fun, L, 1);
-        DBG(LOG_NEW_CLASS, "%s: create for %s = '%s'\n", _fun,
+        fname = ll_check_string(_fun, L, 1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
             "fname", fname);
         sela = selaRead(fname);
     }
 
     if (!sela && lua_isstring(L, 1)) {
-        const char* filename = ll_check_string(_fun, L, 1);
-        DBG(LOG_NEW_CLASS, "%s: create for %s = '%s'\n", _fun,
+        filename = ll_check_string(_fun, L, 1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
             "filename", filename);
         sela = selaCreateFromFile(filename);
     }
 
     if (!sela) {
-        DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
-            "n", 1);
-        sela = selaCreate(1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d\n", _fun,
+            "n", n);
+        sela = selaCreate(n);
     }
 
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
-        LL_SELA, reinterpret_cast<void *>(sela));
+        TNAME, reinterpret_cast<void *>(sela));
     return ll_push_Sela(_fun, L, sela);
 }
 
 /**
- * \brief Register the PTA methods and functions in the LL_SELA meta table.
+ * \brief Register the PTA methods and functions in the Sela meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
 int
-ll_register_Sela(lua_State *L)
+luaopen_Sela(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},           /* garbage collector */
-        {"__new",               ll_new_Sela},       /* Sela() */
+        {"__gc",                Destroy},
+        {"__new",               ll_new_Sela},
         {"__len",               GetCount},
         {"__tostring",          toString},
         {"Thin4and8cc",         Thin4and8cc},
@@ -789,11 +799,9 @@ ll_register_Sela(lua_State *L)
         LUA_SENTINEL
     };
 
-    static const luaL_Reg functions[] = {
-        LUA_SENTINEL
-    };
+    FUNC("luaopen_" TNAME);
 
-    lua_pushcfunction(L, ll_new_Sela);
-    lua_setglobal(L, LL_SELA);
-    return ll_register_class(L, LL_SELA, methods, functions);
+    ll_global_cfunct(_fun, L, TNAME, ll_new_Sela);
+    ll_register_class(_fun, L, TNAME, methods);
+    return 1;
 }

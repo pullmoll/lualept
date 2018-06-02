@@ -38,8 +38,11 @@
  * An array of Dewarp.
  */
 
+/** Set TNAME to the class name used in this source file */
+#define TNAME LL_DEWARPA
+
 /** Define a function's name (_fun) with prefix LL_DEWARPA */
-#define LL_FUNC(x) FUNC(LL_DEWARPA "." x)
+#define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
  * \brief Destroy a Dewarpa* (%dewa).
@@ -53,10 +56,13 @@ static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    Dewarpa **pdewa = ll_check_udata<Dewarpa>(_fun, L, 1, LL_DEWARPA);
+    Dewarpa **pdewa = ll_check_udata<Dewarpa>(_fun, L, 1, TNAME);
     Dewarpa *dewa = *pdewa;
-    DBG(LOG_DESTROY, "%s: '%s' pdewa=%p dewa=%p\n", _fun,
-        LL_DEWARP, pdewa, dewa);
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d\n", _fun,
+        TNAME,
+        "pdewa", reinterpret_cast<void *>(pdewa),
+        "dewa", reinterpret_cast<void *>(dewa),
+        "pages", dewarpaListPages(dewa));
     dewarpaDestroy(&dewa);
     *pdewa = nullptr;
     return 0;
@@ -80,7 +86,7 @@ toString(lua_State *L)
         luaL_addstring(&B, "nil");
     } else {
         snprintf(str, sizeof(str),
-                 LL_DEWARPA ": %p\n",
+                 TNAME ": %p\n",
                  reinterpret_cast<void *>(dewa));
         /* TODO: more info */
         luaL_addstring(&B, str);
@@ -889,7 +895,7 @@ WriteStream(lua_State *L)
 Dewarpa *
 ll_check_Dewarpa(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<Dewarpa>(_fun, L, arg, LL_DEWARPA);
+    return *ll_check_udata<Dewarpa>(_fun, L, arg, TNAME);
 }
 
 /**
@@ -918,7 +924,7 @@ ll_push_Dewarpa(const char *_fun, lua_State *L, Dewarpa *dew)
 {
     if (!dew)
         return ll_push_nil(L);
-    return ll_push_udata(_fun, L, LL_DEWARPA, dew);
+    return ll_push_udata(_fun, L, TNAME, dew);
 }
 
 /**
@@ -930,16 +936,22 @@ int
 ll_new_Dewarpa(lua_State *L)
 {
     FUNC("ll_new_Dewarpa");
+    l_int32 nptrs = 1;
+    l_int32 useboth = TRUE;
+    l_int32 sampling = 1;
+    l_int32 redfactor = 1;
+    l_int32 minlines = 5;
+    l_int32 maxdist = 20;
     Dewarpa *dewa = nullptr;
 
     if (lua_isuserdata(L, 1)) {
         PixaComp *pixac = ll_opt_PixaComp(_fun, L, 1);
         if (pixac) {
-            l_int32 useboth = ll_opt_boolean(_fun, L, 2, FALSE);
-            l_int32 sampling = ll_opt_l_int32(_fun, L, 3, 1);
-            l_int32 minlines = ll_opt_l_int32(_fun, L, 4, 1);
-            l_int32 maxdist = ll_opt_l_int32(_fun, L, 5, 50);
-            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p, %s = %s, %s = %d, %s = %d, %s = %d\n", _fun,
+            useboth = ll_opt_boolean(_fun, L, 2, useboth);
+            sampling = ll_opt_l_int32(_fun, L, 3, sampling);
+            minlines = ll_opt_l_int32(_fun, L, 4, minlines);
+            maxdist = ll_opt_l_int32(_fun, L, 5, maxdist);
+            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %s, %s = %d, %s = %d, %s = %d\n", _fun,
                 LL_PIXACOMP, reinterpret_cast<void *>(pixac),
                 "useboth", useboth ? "true" : "false",
                 "sampling", sampling,
@@ -953,12 +965,12 @@ ll_new_Dewarpa(lua_State *L)
     }
 
     if (!dewa && lua_isinteger(L, 1)) {
-        l_int32 nptrs = ll_opt_l_int32(_fun, L, 1, 1);
-        l_int32 sampling = ll_opt_l_int32(_fun, L, 2, 1);
-        l_int32 redfactor = ll_opt_l_int32(_fun, L, 3, 1);
-        l_int32 minlines = ll_opt_l_int32(_fun, L, 4, 1);
-        l_int32 maxdist = ll_opt_l_int32(_fun, L, 5, 50);
-        DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d, %s = %d, %s = %d, %s = %d\n", _fun,
+        nptrs = ll_opt_l_int32(_fun, L, 1, nptrs);
+        sampling = ll_opt_l_int32(_fun, L, 2, sampling);
+        redfactor = ll_opt_l_int32(_fun, L, 3, redfactor);
+        minlines = ll_opt_l_int32(_fun, L, 4, minlines);
+        maxdist = ll_opt_l_int32(_fun, L, 5, maxdist);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d, %s = %d, %s = %d, %s = %d, %s = %d\n", _fun,
             "nptrs", nptrs,
             "sampling", sampling,
             "redfactor", redfactor,
@@ -969,17 +981,17 @@ ll_new_Dewarpa(lua_State *L)
 
     if (!dewa) {
         /* FIXME: default parameters? */
-        DBG(LOG_NEW_CLASS, "%s: create for %s = %d, %s = %d, %s = %d, %s = %d, %s = %d\n", _fun,
-            "nptrs", 1,
-            "sampling", 1,
-            "redfactor", 1,
-            "minlines", 5,
-            "maxdist", 20);
-        dewa = dewarpaCreate(1, 1, 1, 5, 20);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d, %s = %d, %s = %d, %s = %d, %s = %d\n", _fun,
+            "nptrs", nptrs,
+            "sampling", sampling,
+            "redfactor", redfactor,
+            "minlines", minlines,
+            "maxdist", maxdist);
+        dewa = dewarpaCreate(nptrs, sampling, redfactor, minlines, maxdist);
     }
 
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
-        LL_DEWARPA, reinterpret_cast<void *>(dewa));
+        TNAME, reinterpret_cast<void *>(dewa));
     return ll_push_Dewarpa(_fun, L, dewa);
 }
 
@@ -989,11 +1001,11 @@ ll_new_Dewarpa(lua_State *L)
  * \return 1 table on the Lua stack
  */
 int
-ll_register_Dewarpa(lua_State *L)
+luaopen_Dewarpa(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                    Destroy},               /* garbage collector */
-        {"__new",                   ll_new_Dewarpa},        /* Dewarpa(nptrs, sampling, redfactor, minlines, maxdist) */
+        {"__gc",                    Destroy},
+        {"__new",                   ll_new_Dewarpa},
         {"__tostring",              toString},
         {"ApplyDisparity",          ApplyDisparity},
         {"ApplyDisparityBoxa",      ApplyDisparityBoxa},
@@ -1025,11 +1037,9 @@ ll_register_Dewarpa(lua_State *L)
         LUA_SENTINEL
     };
 
-    static const luaL_Reg functions[] = {
-        LUA_SENTINEL
-    };
+    FUNC("luaopen_" TNAME);
 
-    lua_pushcfunction(L, ll_new_Dewarpa);
-    lua_setglobal(L, LL_DEWARPA);
-    return ll_register_class(L, LL_DEWARPA, methods, functions);
+    ll_global_cfunct(_fun, L, TNAME, ll_new_Dewarpa);
+    ll_register_class(_fun, L, TNAME, methods);
+    return 1;
 }

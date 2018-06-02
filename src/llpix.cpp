@@ -49,8 +49,11 @@
 /** Table of bit counts in a byte */
 static l_int32 tab8[256];
 
-/** Define a function's name (_fun) with prefix LL_PIX */
-#define LL_FUNC(x) FUNC(LL_PIX "." x)
+/** Set TNAME to the class name used in this source file */
+#define TNAME LL_PIX
+
+/** Define a function's name (_fun) with prefix Pix */
+#define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
  * \brief Destroy a Pix*.
@@ -68,10 +71,13 @@ static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    Pix **ppix = ll_check_udata<Pix>(_fun, L, 1, LL_PIX);
+    Pix **ppix = ll_check_udata<Pix>(_fun, L, 1, TNAME);
     Pix *pix = *ppix;
-    DBG(LOG_DESTROY, "%s: '%s' ppix=%p pix=%p refcount=%d\n",
-        _fun, LL_PIX, ppix, pix, pixGetRefcount(pix));
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d, %s = %d\n", _fun,
+        TNAME,
+        "ppix", reinterpret_cast<void *>(ppix),
+        "pix", reinterpret_cast<void *>(pix),
+        "refcount", pixGetRefcount(pix));
     pixDestroy(&pix);
     *ppix = nullptr;
     return 0;
@@ -10212,7 +10218,7 @@ Display(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 x = ll_check_l_int32(_fun, L, 2);
     l_int32 y = ll_check_l_int32(_fun, L, 3);
-    snprintf(title, sizeof(title), LL_PIX "*: %p", reinterpret_cast<void *>(pixs));
+    snprintf(title, sizeof(title), TNAME "*: %p", reinterpret_cast<void *>(pixs));
 #if defined(HAVE_SDL2)
     return ll_push_boolean(_fun, L, DisplaySDL2(pixs, x, y, title));
 #else
@@ -33977,7 +33983,7 @@ Zero(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class LL_PIX.
+ * \brief Check Lua stack at index %arg for udata of class Pix*.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -33986,11 +33992,11 @@ Zero(lua_State *L)
 Pix *
 ll_check_Pix(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<Pix>(_fun, L, arg, LL_PIX);
+    return *ll_check_udata<Pix>(_fun, L, arg, TNAME);
 }
 
 /**
- * \brief Optionally expect a LL_PIX at index %arg on the Lua stack.
+ * \brief Optionally expect a Pix* at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -34015,7 +34021,7 @@ ll_push_Pix(const char *_fun, lua_State *L, Pix *pix)
 {
     if (!pix)
         return ll_push_nil(L);
-    return ll_push_udata(_fun, L, LL_PIX, pix);
+    return ll_push_udata(_fun, L, TNAME, pix);
 }
 /**
  * \brief Create and push a new Pix*.
@@ -34027,17 +34033,23 @@ ll_new_Pix(lua_State *L)
 {
     FUNC("ll_new_Pix");
     Pix *pix = nullptr;
+    Pix *pixs = nullptr;
+    luaL_Stream* stream = nullptr;
+    l_int32 hint = 0;
+    l_int32 width = 1;
+    l_int32 height = 1;
+    l_int32 depth = 1;
 
     if (lua_isuserdata(L, 1)) {
-        Pix *pixs = ll_opt_Pix(_fun, L, 1);
+        pixs = ll_opt_Pix(_fun, L, 1);
         if (pixs) {
-            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
-                LL_PIX, reinterpret_cast<void *>(pixs));
+            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+                TNAME, reinterpret_cast<void *>(pixs));
             pix = pixCreateTemplate(pixs);
         } else {
-            luaL_Stream* stream = ll_check_stream(_fun, L, 1);
-            l_int32 hint = ll_check_hint(_fun, L, 2, 0);
-            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p, %s = %s\n", _fun,
+            stream = ll_check_stream(_fun, L, 1);
+            hint = ll_check_hint(_fun, L, 2, hint);
+            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %s\n", _fun,
                 LUA_FILEHANDLE, reinterpret_cast<void *>(stream),
                 "hint", ll_string_hint(hint));
             pix = pixReadStream(stream->f, hint);
@@ -34045,10 +34057,10 @@ ll_new_Pix(lua_State *L)
     }
 
     if (!pix && lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
-        l_int32 width = ll_opt_l_int32(_fun, L, 1, 1);
-        l_int32 height = ll_opt_l_int32(_fun, L, 2, 1);
-        l_int32 depth = ll_opt_l_int32(_fun, L, 3, 1);
-        DBG(LOG_NEW_CLASS, "%s: create for %s = %d,  %s = %d,  %s = %d\n", _fun,
+        width = ll_opt_l_int32(_fun, L, 1, width);
+        height = ll_opt_l_int32(_fun, L, 2, height);
+        depth = ll_opt_l_int32(_fun, L, 3, depth);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d,  %s = %d,  %s = %d\n", _fun,
             "width", width,
             "height", height,
             "depth", depth);
@@ -34057,48 +34069,48 @@ ll_new_Pix(lua_State *L)
 
     if (!pix && lua_isstring(L, 1)) {
         const char* filename = ll_check_string(_fun, L, 1);
-            DBG(LOG_NEW_CLASS, "%s: create for %s = '%s'\n", _fun,
-                "filename", filename);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
+            "filename", filename);
         pix = pixRead(filename);
     }
 
     if (!pix && lua_isstring(L, 1)) {
         size_t size = 0;
         const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &size);
-        DBG(LOG_NEW_CLASS, "%s: create for %s* = %p, %s = %llu\n", _fun,
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %llu\n", _fun,
             "data", reinterpret_cast<const void *>(data),
             "size", static_cast<l_uint64>(size));
         pix = pixReadMem(data, size);
     }
 
     if (!pix) {
-        DBG(LOG_NEW_CLASS, "%s: create for %s = %d,  %s = %d,  %s = %d\n", _fun,
-            "width", 1,
-            "height", 1,
-            "depth", 1);
-        pix = pixCreate(1, 1, 1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d,  %s = %d,  %s = %d\n", _fun,
+            "width", width,
+            "height", height,
+            "depth", depth);
+        pix = pixCreate(width, height, depth);
     }
 
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
-        LL_PIX, reinterpret_cast<void *>(pix));
+        TNAME, reinterpret_cast<void *>(pix));
     return ll_push_Pix(_fun, L, pix);
 }
 /**
- * \brief Register the PIX methods and functions in the LL_PIX meta table.
+ * \brief Register the Pix methods and functions in the Pix meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
 int
-ll_register_Pix(lua_State *L)
+luaopen_Pix(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                            Destroy},           /* garbage collector */
-        {"__new",                           ll_new_Pix},        /* Pix() */
-        {"__sub",                           Subtract},          /* Pix* = Pix* - Pix* */
-        {"__bnot",                          Invert},            /* Pix* = not Pix* */
-        {"__band",                          And},               /* Pix* = Pix* and Pix */
-        {"__bor",                           Or},                /* Pix* = Pix* or Pix */
-        {"__bxor",                          Xor},               /* Pix* = Pix* xor Pix */
+        {"__gc",                            Destroy},
+        {"__new",                           ll_new_Pix},
+        {"__sub",                           Subtract},
+        {"__bnot",                          Invert},
+        {"__band",                          And},
+        {"__bor",                           Or},
+        {"__bxor",                          Xor},
         {"__tostring",                      toString},
         {"AbsDiffByColumn",                 AbsDiffByColumn},
         {"AbsDiffByRow",                    AbsDiffByRow},
@@ -35101,10 +35113,6 @@ ll_register_Pix(lua_State *L)
         LUA_SENTINEL
     };
 
-    static const luaL_Reg functions[] = {
-        LUA_SENTINEL
-    };
-
     for (int i = 0; i < 256; i++) {
         tab8[i] = ((i >> 7) & 1) +
                   ((i >> 6) & 1) +
@@ -35116,7 +35124,9 @@ ll_register_Pix(lua_State *L)
                   ((i >> 0) & 1);
     }
 
-    lua_pushcfunction(L, ll_new_Pix);
-    lua_setglobal(L, LL_PIX);
-    return ll_register_class(L, LL_PIX, methods, functions);
+    FUNC("luaopen_" TNAME);
+
+    ll_global_cfunct(_fun, L, TNAME, ll_new_Pix);
+    ll_register_class(_fun, L, TNAME, methods);
+    return 1;
 }

@@ -38,8 +38,11 @@
  * An array of points (l_float32 x and y).
  */
 
-/** Define a function's name (_fun) with prefix LL_PTA */
-#define LL_FUNC(x) FUNC(LL_PTA "." x)
+/** Set TNAME to the class name used in this source file */
+#define TNAME LL_PTA
+
+/** Define a function's name (_fun) with prefix Pta */
+#define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
  * \brief Destroy a Pta*.
@@ -57,10 +60,14 @@ static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    Pta **ppta = ll_check_udata<Pta>(_fun, L, 1, LL_PTA);
+    Pta **ppta = ll_check_udata<Pta>(_fun, L, 1, TNAME);
     Pta *pta = *ppta;
-    DBG(LOG_DESTROY, "%s: '%s' ppta=%p pta=%p count=%d refcount=%d\n",
-        _fun, LL_PTA, ppta, pta, ptaGetCount(pta), ptaGetRefcount(pta));
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d, %s = %d\n", _fun,
+        TNAME,
+        "ppta", reinterpret_cast<void *>(ppta),
+        "pta", reinterpret_cast<void *>(pta),
+        "count", ptaGetCount(pta),
+        "refcount", ptaGetRefcount(pta));
     ptaDestroy(&pta);
     *ppta = nullptr;
     return 0;
@@ -514,7 +521,7 @@ WriteStream(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class LL_PTA.
+ * \brief Check Lua stack at index %arg for udata of class Pta*.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -523,11 +530,11 @@ WriteStream(lua_State *L)
 Pta *
 ll_check_Pta(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<Pta>(_fun, L, arg, LL_PTA);
+    return *ll_check_udata<Pta>(_fun, L, arg, TNAME);
 }
 
 /**
- * \brief Optionally expect a LL_PTA at index %arg on the Lua stack.
+ * \brief Optionally expect a Pta* at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -553,8 +560,9 @@ ll_push_Pta(const char *_fun, lua_State *L, Pta *pta)
 {
     if (!pta)
         return ll_push_nil(L);
-    return ll_push_udata(_fun, L, LL_PTA, pta);
+    return ll_push_udata(_fun, L, TNAME, pta);
 }
+
 /**
  * \brief Create and push a new Pta*.
  * \param L pointer to the lua_State
@@ -563,20 +571,24 @@ ll_push_Pta(const char *_fun, lua_State *L, Pta *pta)
 int
 ll_new_Pta(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_Pta");
+    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
+    Pta *pa = ptaCreate(n);
+    return ll_push_Pta(_fun, L, pa);
 }
+
 /**
- * \brief Register the PTA methods and functions in the LL_PTA meta table.
+ * \brief Register the Pta methods and functions in the Pta meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
 int
-ll_register_Pta(lua_State *L)
+luaopen_Pta(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",            Destroy},       /* garbage collector */
-        {"__new",           Create},        /* new Pta */
-        {"__len",           GetCount},      /* #pta */
+        {"__gc",            Destroy},
+        {"__new",           ll_new_Pta},
+        {"__len",           GetCount},
         {"__tostring",      toString},
         {"AddPt",           AddPt},
         {"Clone",           Clone},
@@ -601,11 +613,9 @@ ll_register_Pta(lua_State *L)
         LUA_SENTINEL
     };
 
-    static const luaL_Reg functions[] = {
-        LUA_SENTINEL
-    };
+    FUNC("luaopen_" TNAME);
 
-    lua_pushcfunction(L, Create);
-    lua_setglobal(L, LL_PTA);
-    return ll_register_class(L, LL_PTA, methods, functions);
+    ll_global_cfunct(_fun, L, TNAME, ll_new_Pta);
+    ll_register_class(_fun, L, TNAME, methods);
+    return 1;
 }

@@ -38,8 +38,11 @@
  * A stack of pointers.
  */
 
-/** Define a function's name (_fun) with prefix LL_STACK */
-#define LL_FUNC(x) FUNC(LL_STACK "." x)
+/** Set TNAME to the class name used in this source file */
+#define TNAME LL_STACK
+
+/** Define a function's name (_fun) with prefix Stack */
+#define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
  * \brief Destroy a Stack* (%lstack).
@@ -63,11 +66,15 @@ static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    Stack **pstack = ll_check_udata<Stack>(_fun, L, 1, LL_STACK);
+    Stack **pstack = ll_check_udata<Stack>(_fun, L, 1, TNAME);
     l_int32 freeflag = ll_opt_boolean(_fun, L, 2, FALSE);
     Stack *stack = *pstack;
-    DBG(LOG_DESTROY, "%s: '%s' pstack=%p stack=%p\n",
-        _fun, LL_SEL, pstack, stack);
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d, %s = %s\n", _fun,
+        TNAME,
+        "pstack", reinterpret_cast<void *>(pstack),
+        "stack", reinterpret_cast<void *>(stack),
+        "count", lstackGetCount(stack),
+        "freeflag", freeflag ? "TRUE" : "FALSE");
     lstackDestroy(&stack, freeflag);
     *pstack = nullptr;
     return 0;
@@ -165,7 +172,7 @@ Print(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index (%arg) for udata of class LL_STACK.
+ * \brief Check Lua stack at index (%arg) for udata of class Stack*.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -174,7 +181,7 @@ Print(lua_State *L)
 Stack *
 ll_check_Stack(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<Stack>(_fun, L, arg, LL_STACK);
+    return *ll_check_udata<Stack>(_fun, L, arg, TNAME);
 }
 
 /**
@@ -204,7 +211,7 @@ ll_push_Stack(const char *_fun, lua_State *L, Stack *cd)
 {
     if (!cd)
         return ll_push_nil(L);
-    return ll_push_udata(_fun, L, LL_STACK, cd);
+    return ll_push_udata(_fun, L, TNAME, cd);
 }
 
 /**
@@ -221,35 +228,36 @@ ll_new_Stack(lua_State *L)
 {
     FUNC("ll_new_Stack");
     Stack *lstack = nullptr;
-    l_int32 nalloc = ll_opt_l_int32(_fun, L, 1, 1);
+    l_int32 nalloc = 1;
 
     if (lua_isinteger(L, 1)) {
-        DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
+        nalloc = ll_opt_l_int32(_fun, L, 1, nalloc);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d\n", _fun,
             "nalloc", nalloc);
         lstack = lstackCreate(nalloc);
     }
 
     if (!lstack) {
-        DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
-            "nalloc", 1);
-        lstack = lstackCreate(1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d\n", _fun,
+            "nalloc", nalloc);
+        lstack = lstackCreate(nalloc);
     }
 
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
-        LL_STACK, reinterpret_cast<void *>(lstack));
+        TNAME, reinterpret_cast<void *>(lstack));
     return ll_push_Stack(_fun, L, lstack);
 }
 
 /**
- * \brief Register the Stack methods and functions in the LL_STACK meta table.
+ * \brief Register the Stack methods and functions in the Stack meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
 int
-ll_register_Stack(lua_State *L)
+luaopen_Stack(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},   /* garbage collector */
+        {"__gc",                Destroy},
         {"__new",               ll_new_Stack},
         {"__len",               GetCount},
         {"Add",                 Add},
@@ -263,11 +271,9 @@ ll_register_Stack(lua_State *L)
         LUA_SENTINEL
     };
 
-    static const luaL_Reg functions[] = {
-        LUA_SENTINEL
-    };
+    FUNC("luaopen_" TNAME);
 
-    lua_pushcfunction(L, ll_new_Stack);
-    lua_setglobal(L, LL_STACK);
-    return ll_register_class(L, LL_STACK, methods, functions);
+    ll_global_cfunct(_fun, L, TNAME, ll_new_Stack);
+    ll_register_class(_fun, L, TNAME, methods);
+    return 1;
 }

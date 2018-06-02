@@ -38,8 +38,11 @@
  * A class to handle compressed Pix.
  */
 
-/** Define a function's name (_fun) with prefix LL_PIXCOMP */
-#define LL_FUNC(x) FUNC(LL_PIXCOMP "." x)
+/** Set TNAME to the class name used in this source file */
+#define TNAME LL_PIXCOMP
+
+/** Define a function's name (_fun) with prefix PixComp */
+#define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
  * \brief Destroy a PixComp*.
@@ -51,12 +54,14 @@ static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    PixComp **ppixcomp = ll_check_udata<PixComp>(_fun, L, 1, LL_PIXCOMP);
-    PixComp *pixcomp = *ppixcomp;
-    DBG(LOG_DESTROY, "%s: '%s' ppixcomp=%p pixcomp=%p\n",
-        _fun, LL_PIXCOMP, ppixcomp, pixcomp);
-    pixcompDestroy(&pixcomp);
-    *ppixcomp = nullptr;
+    PixComp **ppixc = ll_check_udata<PixComp>(_fun, L, 1, TNAME);
+    PixComp *pixc = *ppixc;
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "ppixc", reinterpret_cast<void *>(ppixc),
+        "pixc", reinterpret_cast<void *>(pixc));
+    pixcompDestroy(&pixc);
+    *ppixc = nullptr;
     return 0;
 }
 
@@ -70,9 +75,9 @@ Destroy(lua_State *L)
  * \return 1 PixComp* on the Lua stack
  */
 static int
-Create(lua_State *L)
+CreateFromPix(lua_State *L)
 {
-    LL_FUNC("Create");
+    LL_FUNC("CreateFromPix");
     Pix* pix = ll_check_Pix(_fun, L, 1);
     l_int32 comptype = ll_check_compression(_fun, L, 2, 1);
     PixComp *pixcomp = pixcompCreateFromPix(pix, comptype);
@@ -80,7 +85,7 @@ Create(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index (%arg) for udata of class LL_PIXCOMP.
+ * \brief Check Lua stack at index (%arg) for udata of class PixComp*.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -89,7 +94,7 @@ Create(lua_State *L)
 PixComp *
 ll_check_PixComp(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<PixComp>(_fun, L, arg, LL_PIXCOMP);
+    return *ll_check_udata<PixComp>(_fun, L, arg, TNAME);
 }
 
 /**
@@ -106,6 +111,7 @@ ll_opt_PixComp(const char *_fun, lua_State *L, int arg)
         return nullptr;
     return ll_check_PixComp(_fun, L, arg);
 }
+
 /**
  * \brief Push PixComp* to the Lua stack and set its meta table.
  * \param _fun calling function's name
@@ -118,8 +124,9 @@ ll_push_PixComp(const char *_fun, lua_State *L, PixComp *pixcomp)
 {
     if (!pixcomp)
         return ll_push_nil(L);
-    return ll_push_udata(_fun, L, LL_PIXCOMP, pixcomp);
+    return ll_push_udata(_fun, L, TNAME, pixcomp);
 }
+
 /**
  * \brief Create and push a new PixComp*.
  *
@@ -132,29 +139,32 @@ ll_push_PixComp(const char *_fun, lua_State *L, PixComp *pixcomp)
 int
 ll_new_PixComp(lua_State *L)
 {
-    return Create(L);
+    FUNC("ll_new_PixComp");
+    Pix* pix = ll_opt_Pix(_fun, L, 1);
+    l_int32 comptype = IFF_DEFAULT;
+    PixComp *pixcomp = pixcompCreateFromPix(pix, comptype);
+    return ll_push_PixComp(_fun, L, pixcomp);
 }
+
 /**
- * \brief Register the PixComp methods and functions in the LL_PIXCOMP meta table.
+ * \brief Register the PixComp methods and functions in the PixComp meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
 int
-ll_register_PixComp(lua_State *L)
+luaopen_PixComp(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},   /* garbage collector */
-        {"__new",               Create},
-        {"Create",              Create},
+        {"__gc",                Destroy},
+        {"__new",               ll_new_PixComp},    /* PixComp() */
+        {"CreateFromPix",       CreateFromPix},
         {"Destroy",             Destroy},
         LUA_SENTINEL
     };
 
-    static const luaL_Reg functions[] = {
-        LUA_SENTINEL
-    };
+    FUNC("luaopen_" TNAME);
 
-    lua_pushcfunction(L, Create);
-    lua_setglobal(L, LL_PIXCOMP);
-    return ll_register_class(L, LL_PIXCOMP, methods, functions);
+    ll_global_cfunct(_fun, L, TNAME, ll_new_PixComp);
+    ll_register_class(_fun, L, TNAME, methods);
+    return 1;
 }

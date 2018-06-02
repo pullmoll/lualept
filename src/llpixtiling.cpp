@@ -38,8 +38,11 @@
  * A class to handle a Pix tiling.
  */
 
-/** Define a function's name (_fun) with prefix LL_PIXTILING */
-#define LL_FUNC(x) FUNC(LL_PIXTILING "." x)
+/** Set TNAME to the class name used in this source file */
+#define TNAME LL_PIXTILING
+
+/** Define a function's name (_fun) with prefix PixTiling */
+#define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
  * \brief Brief comment goes here.
@@ -53,10 +56,16 @@ static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    PixTiling **ppt = ll_check_udata<PixTiling>(_fun, L, 1, LL_PIXTILING);
+    PixTiling **ppt = ll_check_udata<PixTiling>(_fun, L, 1, TNAME);
     PixTiling *pt = *ppt;
-    DBG(LOG_DESTROY, "%s: '%s' ppt=%p pt=%p\n",
-        _fun, LL_SEL, ppt, pt);
+    l_int32 nx, ny;
+    pixTilingGetCount(pt, &nx, &ny);
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d, %s = %d\n", _fun,
+        TNAME,
+        "ppt", reinterpret_cast<void *>(ppt),
+        "pt", reinterpret_cast<void *>(pt),
+        "nx", nx,
+        "ny", ny);
     pixTilingDestroy(&pt);
     *ppt = nullptr;
     return 0;
@@ -127,7 +136,7 @@ Create(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index (%arg) for udata of class LL_PIXTILING.
+ * \brief Check Lua stack at index (%arg) for udata of class PixTiling*.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -136,7 +145,7 @@ Create(lua_State *L)
 PixTiling *
 ll_check_PixTiling(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<PixTiling>(_fun, L, arg, LL_PIXTILING);
+    return *ll_check_udata<PixTiling>(_fun, L, arg, TNAME);
 }
 
 /**
@@ -165,7 +174,7 @@ ll_push_PixTiling(const char *_fun, lua_State *L, PixTiling *cd)
 {
     if (!cd)
         return ll_push_nil(L);
-    return ll_push_udata(_fun, L, LL_PIXTILING, cd);
+    return ll_push_udata(_fun, L, TNAME, cd);
 }
 
 /**
@@ -181,27 +190,30 @@ int
 ll_new_PixTiling(lua_State *L)
 {
     FUNC("ll_new_PixTiling");
-    Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 nx = ll_check_l_int32(_fun, L, 2);
-    l_int32 ny = ll_check_l_int32(_fun, L, 3);
-    l_int32 w = ll_check_l_int32(_fun, L, 4);
-    l_int32 h = ll_check_l_int32(_fun, L, 5);
-    l_int32 xoverlap = ll_check_l_int32(_fun, L, 6);
-    l_int32 yoverlap = ll_check_l_int32(_fun, L, 7);
-    PixTiling *pixt = pixTilingCreate(pixs, nx, ny, w, h, xoverlap, yoverlap);
+    PixTiling *pixt = nullptr;
+    Pix *pixs = ll_opt_Pix(_fun, L, 1);
+    if (pixs) {
+        l_int32 nx = ll_opt_l_int32(_fun, L, 2, 2);
+        l_int32 ny = ll_opt_l_int32(_fun, L, 3, 2);
+        l_int32 w = ll_opt_l_int32(_fun, L, 4);
+        l_int32 h = ll_opt_l_int32(_fun, L, 5);
+        l_int32 xoverlap = ll_opt_l_int32(_fun, L, 6);
+        l_int32 yoverlap = ll_opt_l_int32(_fun, L, 7);
+        pixt = pixTilingCreate(pixs, nx, ny, w, h, xoverlap, yoverlap);
+    }
     return ll_push_PixTiling (_fun, L, pixt);
 }
 
 /**
- * \brief Register the PixTiling methods and functions in the LL_PIXTILING meta table.
+ * \brief Register the PixTiling methods and functions in the PixTiling meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
 int
-ll_register_PixTiling(lua_State *L)
+luaopen_PixTiling(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},   /* garbage collector */
+        {"__gc",                Destroy},
         {"__new",               ll_new_PixTiling},
         {"__len",               GetCount},
         {"Create",              Create},
@@ -209,11 +221,9 @@ ll_register_PixTiling(lua_State *L)
         LUA_SENTINEL
     };
 
-    static const luaL_Reg functions[] = {
-        LUA_SENTINEL
-    };
+    FUNC("luaopen_" TNAME);
 
-    lua_pushcfunction(L, ll_new_PixTiling);
-    lua_setglobal(L, LL_PIXTILING);
-    return ll_register_class(L, LL_PIXTILING, methods, functions);
+    ll_global_cfunct(_fun, L, TNAME, ll_new_PixTiling);
+    ll_register_class(_fun, L, TNAME, methods);
+    return 1;
 }

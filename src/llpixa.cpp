@@ -38,8 +38,11 @@
  * An array of Pix.
  */
 
-/** Define a function's name (_fun) with prefix LL_PIXA */
-#define LL_FUNC(x) FUNC(LL_PIXA "." x)
+/** Set TNAME to the class name used in this source file */
+#define TNAME LL_PIXA
+
+/** Define a function's name (_fun) with prefix Pixa */
+#define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
  * \brief Destroy a Pixa*.
@@ -57,10 +60,13 @@ static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    Pixa **ppixa = ll_check_udata<Pixa>(_fun, L, 1, LL_PIXA);
+    Pixa **ppixa = ll_check_udata<Pixa>(_fun, L, 1, TNAME);
     Pixa *pixa = *ppixa;
-    DBG(LOG_DESTROY, "%s: '%s' ppa=%p pa=%p count=%d\n", _fun,
-        LL_PIXA, ppixa, pixa, pixaGetCount(pixa));
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d, %s = %d\n", _fun,
+        TNAME,
+        "ppixa", reinterpret_cast<void *>(ppixa),
+        "pixa", reinterpret_cast<void *>(pixa),
+        "count", pixaGetCount(pixa));
     pixaDestroy(&pixa);
     *ppixa = nullptr;
     return 0;
@@ -643,7 +649,7 @@ Display(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class LL_PIXA.
+ * \brief Check Lua stack at index %arg for udata of class Pixa*.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -652,11 +658,11 @@ Display(lua_State *L)
 Pixa *
 ll_check_Pixa(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<Pixa>(_fun, L, arg, LL_PIXA);
+    return *ll_check_udata<Pixa>(_fun, L, arg, TNAME);
 }
 
 /**
- * \brief Optionally expect a LL_PIXA at index %arg on the Lua stack.
+ * \brief Optionally expect a Pixa* at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -682,7 +688,7 @@ ll_push_Pixa(const char *_fun, lua_State *L, Pixa *pixa)
 {
     if (!pixa)
         return ll_push_nil(L);
-    return ll_push_udata(_fun, L, LL_PIXA, pixa);
+    return ll_push_udata(_fun, L, TNAME, pixa);
 }
 
 /**
@@ -695,27 +701,37 @@ ll_new_Pixa(lua_State *L)
 {
     FUNC("ll_new_Pixa");
     Pixa *pixa = nullptr;
+    luaL_Stream* stream = nullptr;
+    l_int32 n = 1;
+    l_int32 cellw = 32;
+    l_int32 cellh = 32;
 
     if (lua_isuserdata(L, 1)) {
         Pix *pixs = ll_opt_Pix(_fun, L, 1);
         if (pixs) {
-            l_int32 n = ll_opt_l_int32(_fun, L, 2, 1);
-            l_int32 cellw = ll_opt_l_int32(_fun, L, 3, pixGetWidth(pixs));
-            l_int32 cellh = ll_opt_l_int32(_fun, L, 4, pixGetHeight(pixs));
-            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+            n = ll_opt_l_int32(_fun, L, 2, 1);
+            cellw = ll_opt_l_int32(_fun, L, 3, cellw);
+            cellh = ll_opt_l_int32(_fun, L, 4, cellh);
+            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
                 LL_PIX, reinterpret_cast<void *>(pixs));
             pixa = pixaCreateFromPix(pixs, n, cellw, cellh);
         } else  {
-            luaL_Stream* stream = ll_check_stream(_fun, L, 1);
-            DBG(LOG_NEW_CLASS, "%s: create for %s* = %p\n", _fun,
+            stream = ll_check_stream(_fun, L, 1);
+            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
                 LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
             pixa = pixaReadStream(stream->f);
         }
     }
 
+    if (!pixa && lua_isinteger(L, 1)) {
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d\n", _fun,
+            "n", n);
+        pixa = pixaCreate(n);
+    }
+
     if (!pixa && lua_isstring(L, 1)) {
         const char* filename = ll_check_string(_fun, L, 1);
-            DBG(LOG_NEW_CLASS, "%s: create for %s = '%s'\n", _fun,
+            DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
                 "filename", filename);
         pixa = pixaRead(filename);
     }
@@ -723,20 +739,20 @@ ll_new_Pixa(lua_State *L)
     if (!pixa && lua_isstring(L, 1)) {
         size_t size = 0;
         const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &size);
-        DBG(LOG_NEW_CLASS, "%s: create for %s* = %p, %s = %llu\n", _fun,
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %llu\n", _fun,
             "data", reinterpret_cast<const void *>(data),
             "size", static_cast<l_uint64>(size));
         pixa = pixaReadMem(data, size);
     }
 
     if (!pixa) {
-        DBG(LOG_NEW_CLASS, "%s: create for %s = %d\n", _fun,
-            "n", 1);
-        pixa = pixaCreate(1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d\n", _fun,
+            "n", n);
+        pixa = pixaCreate(n);
     }
 
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
-        LL_PIXA, reinterpret_cast<void *>(pixa));
+        TNAME, reinterpret_cast<void *>(pixa));
     return ll_push_Pixa(_fun, L, pixa);
 }
 
@@ -746,12 +762,12 @@ ll_new_Pixa(lua_State *L)
  * \return 1 table on the Lua stack
  */
 int
-ll_register_Pixa(lua_State *L)
+luaopen_Pixa(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                    Destroy},           /* garbage collector */
-        {"__new",                   ll_new_Pixa},       /* Pixa() */
-        {"__len",                   GetCount},          /* #pa */
+        {"__gc",                    Destroy},
+        {"__new",                   ll_new_Pixa},
+        {"__len",                   GetCount},
         {"AddPix",                  AddPix},
         {"Clear",                   Clear},
         {"Copy",                    Copy},
@@ -780,11 +796,9 @@ ll_register_Pixa(lua_State *L)
         LUA_SENTINEL
     };
 
-    static const luaL_Reg functions[] = {
-        LUA_SENTINEL
-    };
+    FUNC("luaopen_" TNAME);
 
-    lua_pushcfunction(L, ll_new_Pixa);
-    lua_setglobal(L, LL_PIXA);
-    return ll_register_class(L, LL_PIXA, methods, functions);
+    ll_global_cfunct(_fun, L, TNAME, ll_new_Pixa);
+    ll_register_class(_fun, L, TNAME, methods);
+    return 1;
 }

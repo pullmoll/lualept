@@ -38,15 +38,29 @@
 #if !defined(LLUA_DEBUG)
 #define LLUA_DEBUG          1           /*!< set to 1 to enable debugging */
 #endif
-#define LOG_REGISTER        (1<<0)      /*!< set to 1 to log Lua class registration */
-#define LOG_DESTROY         (1<<1)      /*!< set to 1 to log object destruction */
-#define LOG_PUSH_BOOLEAN    (1<<2)      /*!< set to 1 to log pushing booleans */
-#define LOG_PUSH_INTEGER    (1<<3)      /*!< set to 1 to log pushing integers */
-#define LOG_PUSH_NUMBER     (1<<4)      /*!< set to 1 to log pushing numbers */
-#define LOG_PUSH_STRING     (1<<5)      /*!< set to 1 to log pushing strings */
-#define LOG_PUSH_UDATA      (1<<6)      /*!< set to 1 to log pushing user data */
-#define LOG_PUSH_TABLE      (1<<7)      /*!< set to 1 to log pushing tables */
-#define LOG_NEW_CLASS       (1<<8)      /*!< set to 1 to log ll_new_<ClassName> */
+
+/**
+ * @brief The log_enable_flags enum defines bit masks
+ * to define which kind of debug output is to be printed.
+ */
+enum log_enable_flags {
+    LOG_REGISTER        = (1<< 0),  /*!< log Lua class registration */
+    LOG_NEW_PARAM       = (1<< 1),  /*!< log ll_new_<ClassName> */
+    LOG_NEW_CLASS       = (1<< 2),  /*!< log ll_new_<ClassName> */
+    LOG_DESTROY         = (1<< 3),  /*!< log object destruction */
+    LOG_PUSH_BOOLEAN    = (1<< 4),  /*!< log pushing booleans */
+    LOG_CHECK_BOOLEAN   = (1<< 5),  /*!< log checking for booleans */
+    LOG_PUSH_INTEGER    = (1<< 6),  /*!< log pushing integers */
+    LOG_CHECK_INTEGER   = (1<< 7),  /*!< log pushing integers */
+    LOG_PUSH_NUMBER     = (1<< 8),  /*!< log pushing numbers */
+    LOG_CHECK_NUMBER    = (1<< 9),  /*!< log pushing numbers */
+    LOG_PUSH_STRING     = (1<<10),  /*!< log pushing strings */
+    LOG_CHECK_STRING    = (1<<11),  /*!< log pushing strings */
+    LOG_PUSH_UDATA      = (1<<12),  /*!< log pushing user data */
+    LOG_CHECK_UDATA     = (1<<13),  /*!< log pushing user data */
+    LOG_PUSH_ARRAY      = (1<<14),  /*!< log pushing tables */
+    LOG_CHECK_ARRAY     = (1<<15)   /*!< log pushing tables */
+};
 
 #if defined(HAVE_CTYPE_H)
 #include <ctype.h>
@@ -94,6 +108,7 @@
 #include <SDL.h>
 #endif
 
+#define	LL_LUALEPT      "LuaLept"       /*!< Lua class: LuaLept (top level) */
 #define	LL_AMAP		"Amap"          /*!< Lua class: Amap (key / value pairs) */
 #define	LL_ASET		"Aset"          /*!< Lua class: Aset (key set) */
 #define	LL_BMF		"Bmf"           /*!< Lua class: Bmf (Bitmap font) */
@@ -130,10 +145,13 @@
 #define	LL_SELA		"Sela"          /*!< Lua class: array of Sel */
 #define	LL_STACK        "Stack"         /*!< Lua class: Stack */
 
-#define	LL_LEPT		"LuaLept"       /*!< Lua class: LuaLept top level */
-
 #if defined(LLUA_DEBUG) && (LLUA_DEBUG > 0)
-extern void dbg(int enable, const char* format, ...);
+extern void dbg(int enable, const char* format, ...)
+#if defined(__GNUC__)
+    __attribute__((__format__(printf, 2, 3)))
+#endif
+;
+
 #define DBG(enable, format, ...) dbg(enable, format, __VA_ARGS__)
 #else
 #define DBG(enable, format, ...)
@@ -142,7 +160,12 @@ extern void dbg(int enable, const char* format, ...);
 #define UNUSED(x) (void)x
 
 typedef struct lua_State lua_State;
-extern void die(const char *_fun, lua_State* L, const char *format, ...);
+
+extern void die(const char *_fun, lua_State* L, const char *format, ...)
+#if defined(__GNUC__)
+    __attribute__((__format__(printf, 3, 4)))
+#endif
+;
 extern void *ll_ludata(const char *_fun, lua_State* L, int arg);
 extern void **ll_udata(const char *_fun, lua_State* L, int arg, const char *tname);
 
@@ -268,7 +291,7 @@ extern "C" {
 
 #define FUNC(name) static const char _fun[] = name; (void)_fun
 
-/*! Dummy structure for the top level Lua class LL_LEPT */
+/*! Dummy structure for the top level Lua class LL_LUALEPT */
 typedef struct LuaLept {
     char str_version[32];           /*!< Our own version number */
     char str_version_lua[32];       /*!< Lua's version number */
@@ -287,8 +310,9 @@ typedef struct lept_enum_s {
 
 /* llept.c */
 extern void             ll_free(void *ptr);
-extern int              ll_register_class(lua_State *L, const char *name, const luaL_Reg *methods, const luaL_Reg *functions);
-
+extern int              ll_register_class(const char *_fun, lua_State *L, const char* name, const luaL_Reg* methods);
+extern int              ll_global_cfunct(const char *_fun, lua_State *L, const char* tname, lua_CFunction cfunct);
+extern int              ll_global_table(const char *_fun, lua_State *L, const char* tname);
 extern int              ll_push_udata(const char *_fun, lua_State *L, const char* name, void *udata);
 extern int              ll_push_nil(lua_State *L);
 extern int              ll_push_boolean(const char* _fun, lua_State *L, bool b);
@@ -350,6 +374,9 @@ extern l_float64        ll_opt_l_float64(const char *_fun, lua_State *L, int arg
 extern int              ll_list_tbl_options(lua_State *L, const lept_enum_t *tbl, size_t len, const char *msg = nullptr);
 extern const char*      ll_string_tbl(l_int32 value, const lept_enum_t *tbl, size_t len);
 extern l_int32          ll_check_tbl(const char *_fun, lua_State *L, int arg, l_int32 def, const lept_enum_t *tbl, size_t len);
+
+extern l_int32          ll_check_debug(const char *_fun, lua_State *L, int arg, l_int32 def = 0);
+extern const char     * ll_string_debug(l_int32 flag);
 
 extern l_int32          ll_check_access_storage(const char *_fun, lua_State *L, int arg, l_int32 def = L_CLONE);
 extern const char     * ll_string_access_storage(l_int32 flag);
@@ -480,129 +507,129 @@ typedef L_Pdf_Data          PdfData;        /*!< Local type name for L_Pdf_Data 
 typedef L_Stack             Stack;          /*!< Local type name for L_Stack */
 
 /* lualept.cpp */
-extern LuaLept        * ll_check_LuaLept(const char *_fun, lua_State *L, int arg);
-extern int              ll_push_LuaLept(const char *_fun, lua_State *L, LuaLept *lept);
-extern int              ll_new_LuaLept(lua_State *L);
-extern int              ll_register_LuaLept(lua_State *L);
+extern LuaLept        * ll_check_lualept(const char *_fun, lua_State *L, int arg);
+extern int              ll_push_lualept(const char *_fun, lua_State *L, LuaLept *lept);
+extern int              ll_new_lualept(lua_State *L);
+extern int              luaopen_lualept(lua_State *L);
 
 /* llamap.cpp */
 extern Amap           * ll_check_Amap(const char *_fun, lua_State *L, int arg);
 extern Amap           * ll_opt_Amap(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_Amap(const char *_fun, lua_State *L, Amap *amap);
 extern int              ll_new_Amap(lua_State *L);
-extern int              ll_register_Amap(lua_State *L);
+extern int              luaopen_Amap(lua_State *L);
 
 /* llaset.cpp */
 extern Aset           * ll_check_Aset(const char *_fun, lua_State *L, int arg);
 extern Aset           * ll_opt_Aset(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_Aset(const char *_fun, lua_State *L, Aset *aset);
 extern int              ll_new_Aset(lua_State *L);
-extern int              ll_register_Aset(lua_State *L);
+extern int              luaopen_Aset(lua_State *L);
 
 /* llbmf.cpp */
 extern Bmf            * ll_check_Bmf(const char *_fun, lua_State *L, int arg);
 extern Bmf            * ll_opt_Bmf(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_Bmf(const char *_fun, lua_State *L, Bmf *bmf);
 extern int              ll_new_Bmf(lua_State *L);
-extern int              ll_register_Bmf(lua_State *L);
+extern int              luaopen_Bmf(lua_State *L);
 
 /* lllist.cpp */
 extern DoubleLinkedList* ll_check_DoubleLinkedList(const char *_fun, lua_State *L, int arg);
 extern DoubleLinkedList* ll_opt_DoubleLinkedList(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_DoubleLinkedList(const char *_fun, lua_State *L, DoubleLinkedList *list);
 extern int              ll_new_DoubleLinkedList(lua_State *L);
-extern int              ll_register_DoubleLinkedList(lua_State *L);
+extern int              luaopen_DoubleLinkedList(lua_State *L);
 
 /* llnuma.cpp */
 extern Numa           * ll_check_Numa(const char *_fun, lua_State *L, int arg);
 extern Numa           * ll_opt_Numa(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_Numa(const char *_fun, lua_State *L, Numa *na);
 extern int              ll_new_Numa(lua_State *L);
-extern int              ll_register_Numa(lua_State *L);
+extern int              luaopen_Numa(lua_State *L);
 
 /* llnumaa.cpp */
 extern Numaa          * ll_check_Numaa(const char *_fun, lua_State *L, int arg);
 extern Numaa          * ll_opt_Numaa(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_Numaa(const char *_fun, lua_State *L, Numaa *naa);
 extern int              ll_new_Numaa(lua_State *L);
-extern int              ll_register_Numaa(lua_State *L);
+extern int              luaopen_Numaa(lua_State *L);
 
 /* lldewarp.cpp */
 extern Dewarp         * ll_check_Dewarp(const char *_fun, lua_State *L, int arg);
 extern Dewarp         * ll_opt_Dewarp(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_Dewarp(const char *_fun, lua_State *L, Dewarp *dew);
 extern int              ll_new_Dewarp(lua_State *L);
-extern int              ll_register_Dewarp(lua_State *L);
+extern int              luaopen_Dewarp(lua_State *L);
 
 /* lldewarpa.cpp */
 extern Dewarpa        * ll_check_Dewarpa(const char *_fun, lua_State *L, int arg);
 extern Dewarpa        * ll_opt_Dewarpa(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_Dewarpa(const char *_fun, lua_State *L, Dewarpa *dew);
 extern int              ll_new_Dewarpa(lua_State *L);
-extern int              ll_register_Dewarpa(lua_State *L);
+extern int              luaopen_Dewarpa(lua_State *L);
 
 /* lldna.cpp */
 extern Dna            * ll_check_Dna(const char *_fun, lua_State *L, int arg);
 extern Dna            * ll_opt_Dna(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_Dna(const char *_fun, lua_State *L, Dna *da);
 extern int              ll_new_Dna(lua_State *L);
-extern int              ll_register_Dna(lua_State *L);
+extern int              luaopen_Dna(lua_State *L);
 
 /* lldnaa.cpp */
 extern Dnaa           * ll_check_Dnaa(const char *_fun, lua_State *L, int arg);
 extern Dnaa           * ll_opt_Dnaa(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_Dnaa(const char *_fun, lua_State *L, Dnaa *naa);
 extern int              ll_new_Dnaa(lua_State *L);
-extern int              ll_register_Dnaa(lua_State *L);
+extern int              luaopen_Dnaa(lua_State *L);
 
 /* llpta.cpp */
 extern Pta            * ll_check_Pta(const char *_fun, lua_State *L, int arg);
 extern Pta            * ll_opt_Pta(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_Pta(const char *_fun, lua_State *L, Pta *pta);
 extern int              ll_new_Pta(lua_State *L);
-extern int              ll_register_Pta(lua_State *L);
+extern int              luaopen_Pta(lua_State *L);
 
 /* llptaa.cpp */
 extern Ptaa           * ll_check_Ptaa(const char *_fun, lua_State *L, int arg);
 extern Ptaa           * ll_opt_Ptaa(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_Ptaa(const char *_fun, lua_State *L, Ptaa *ptaa);
 extern int              ll_new_Ptaa(lua_State *L);
-extern int              ll_register_Ptaa(lua_State *L);
+extern int              luaopen_Ptaa(lua_State *L);
 
 /* llbox.cpp */
 extern Box            * ll_check_Box(const char *_fun, lua_State *L, int arg);
 extern Box            * ll_opt_Box(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_Box(const char *_fun, lua_State *L, Box *box);
 extern int              ll_new_Box(lua_State *L);
-extern int              ll_register_Box(lua_State *L);
+extern int              luaopen_Box(lua_State *L);
 
 /* llboxa.cpp */
 extern Boxa           * ll_check_Boxa(const char *_fun, lua_State *L, int arg);
 extern Boxa           * ll_opt_Boxa(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_Boxa(const char *_fun, lua_State *L, Boxa *boxa);
 extern int              ll_new_Boxa(lua_State *L);
-extern int              ll_register_Boxa(lua_State *L);
+extern int              luaopen_Boxa(lua_State *L);
 
 /* llboxaa.cpp */
 extern Boxaa          * ll_check_Boxaa(const char *_fun, lua_State *L, int arg);
 extern Boxaa          * ll_opt_Boxaa(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_Boxaa(const char *_fun, lua_State *L, Boxaa *boxaa);
 extern int              ll_new_Boxaa(lua_State *L);
-extern int              ll_register_Boxaa(lua_State *L);
+extern int              luaopen_Boxaa(lua_State *L);
 
 /* llccbord.cpp */
 extern CCBord         * ll_check_CCBord(const char *_fun, lua_State *L, int arg);
 extern CCBord         * ll_opt_CCBord(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_CCBord(const char *_fun, lua_State *L, CCBord *ccb);
 extern int              ll_new_CCBord(lua_State *L);
-extern int              ll_register_CCBord(lua_State *L);
+extern int              luaopen_CCBord(lua_State *L);
 
 /* llccborda.cpp */
 extern CCBorda        * ll_check_CCBorda(const char *_fun, lua_State *L, int arg);
 extern CCBorda        * ll_opt_CCBorda(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_CCBorda(const char *_fun, lua_State *L, CCBorda *ccba);
 extern int              ll_new_CCBorda(lua_State *L);
-extern int              ll_register_CCBorda(lua_State *L);
+extern int              luaopen_CCBorda(lua_State *L);
 
 /* llpixcmap.cpp */
 extern PixColormap    * ll_check_PixColormap(const char *_fun, lua_State *L, int arg);
@@ -610,111 +637,111 @@ extern PixColormap    * ll_opt_PixColormap(const char *_fun, lua_State *L, int a
 extern PixColormap    * ll_take_PixColormap(const char* _fun, lua_State *L, int arg);
 extern int              ll_push_PixColormap(const char *_fun, lua_State *L, PixColormap *cmap);
 extern int              ll_new_PixColormap(lua_State *L);
-extern int              ll_register_PixColormap(lua_State *L);
+extern int              luaopen_PixColormap(lua_State *L);
 
 /* llpixcomp.cpp */
 extern PixComp        * ll_check_PixComp(const char *_fun, lua_State *L, int arg);
 extern PixComp        * ll_opt_PixComp(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_PixComp(const char *_fun, lua_State *L, PixComp *pixcomp);
 extern int              ll_new_PixComp(lua_State *L);
-extern int              ll_register_PixComp(lua_State *L);
+extern int              luaopen_PixComp(lua_State *L);
 
 /* llpixacomp.cpp */
 extern PixaComp       * ll_check_PixaComp(const char *_fun, lua_State *L, int arg);
 extern PixaComp       * ll_opt_PixaComp(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_PixaComp(const char *_fun, lua_State *L, PixaComp *pixacomp);
 extern int              ll_new_PixaComp(lua_State *L);
-extern int              ll_register_PixaComp(lua_State *L);
+extern int              luaopen_PixaComp(lua_State *L);
 
 /* llpix.cpp */
 extern Pix            * ll_check_Pix(const char *_fun, lua_State *L, int arg);
 extern Pix            * ll_opt_Pix(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_Pix(const char *_fun, lua_State *L, Pix *pix);
 extern int              ll_new_Pix(lua_State *L);
-extern int              ll_register_Pix(lua_State *L);
+extern int              luaopen_Pix(lua_State *L);
 
 /* llpixa.cpp */
 extern Pixa           * ll_check_Pixa(const char *_fun, lua_State *L, int arg);
 extern Pixa           * ll_opt_Pixa(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_Pixa(const char *_fun, lua_State *L, Pixa *pixa);
 extern int              ll_new_Pixa(lua_State *L);
-extern int              ll_register_Pixa(lua_State *L);
+extern int              luaopen_Pixa(lua_State *L);
 
 /* llpixaa.cpp */
 extern Pixaa          * ll_check_Pixaa(const char *_fun, lua_State *L, int arg);
 extern Pixaa          * ll_opt_Pixaa(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_Pixaa(const char *_fun, lua_State *L, Pixaa *pixaa);
 extern int              ll_new_Pixaa(lua_State *L);
-extern int              ll_register_Pixaa(lua_State *L);
+extern int              luaopen_Pixaa(lua_State *L);
 
 /* llfpix.cpp */
 extern FPix           * ll_check_FPix(const char *_fun, lua_State *L, int arg);
 extern FPix           * ll_opt_FPix(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_FPix(const char *_fun, lua_State *L, FPix *fpix);
 extern int              ll_new_FPix(lua_State *L);
-extern int              ll_register_FPix(lua_State *L);
+extern int              luaopen_FPix(lua_State *L);
 
 /* llfpixa.cpp */
 extern FPixa          * ll_check_FPixa(const char *_fun, lua_State *L, int arg);
 extern FPixa          * ll_opt_FPixa(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_FPixa(const char *_fun, lua_State *L, FPixa *fpixa);
 extern int              ll_new_FPixa(lua_State *L);
-extern int              ll_register_FPixa(lua_State *L);
+extern int              luaopen_FPixa(lua_State *L);
 
 /* lldpix.cpp */
 extern DPix           * ll_check_DPix(const char *_fun, lua_State *L, int arg);
 extern DPix           * ll_opt_DPix(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_DPix(const char *_fun, lua_State *L, DPix *fpix);
 extern int              ll_new_DPix(lua_State *L);
-extern int              ll_register_DPix(lua_State *L);
+extern int              luaopen_DPix(lua_State *L);
 
 /* llpixtiling.cpp */
 extern PixTiling      * ll_check_PixTiling(const char *_fun, lua_State *L, int arg);
 extern PixTiling      * ll_opt_PixTiling(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_PixTiling(const char *_fun, lua_State *L, PixTiling *pt);
 extern int              ll_new_PixTiling(lua_State *L);
-extern int              ll_register_PixTiling(lua_State *L);
+extern int              luaopen_PixTiling(lua_State *L);
 
 /* llsel.cpp */
 extern Sel            * ll_check_Sel(const char *_fun, lua_State *L, int arg);
 extern Sel            * ll_opt_Sel(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_Sel(const char *_fun, lua_State *L, Sel *sel);
 extern int              ll_new_Sel(lua_State *L);
-extern int              ll_register_Sel(lua_State *L);
+extern int              luaopen_Sel(lua_State *L);
 
 /* llsela.cpp */
 extern Sela           * ll_check_Sela(const char *_fun, lua_State *L, int arg);
 extern Sela           * ll_opt_Sela(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_Sela(const char *_fun, lua_State *L, Sela *sela);
 extern int              ll_new_Sela(lua_State *L);
-extern int              ll_register_Sela(lua_State *L);
+extern int              luaopen_Sela(lua_State *L);
 
 /* llstack.cpp */
 extern Stack          * ll_check_Stack(const char *_fun, lua_State *L, int arg);
 extern Stack          * ll_opt_Stack(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_Stack(const char *_fun, lua_State *L, Stack *stack);
 extern int              ll_new_Stack(lua_State *L);
-extern int              ll_register_Stack(lua_State *L);
+extern int              luaopen_Stack(lua_State *L);
 
 /* llkernel.cpp */
 extern Kernel         * ll_check_Kernel(const char *_fun, lua_State *L, int arg);
 extern Kernel         * ll_opt_Kernel(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_Kernel(const char *_fun, lua_State *L, Kernel *sel);
 extern int              ll_new_Kernel(lua_State *L);
-extern int              ll_register_Kernel(lua_State *L);
+extern int              luaopen_Kernel(lua_State *L);
 
 /* llcompdata.cpp */
 extern CompData       * ll_check_CompData(const char *_fun, lua_State *L, int arg);
 extern CompData       * ll_opt_CompData(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_CompData(const char *_fun, lua_State *L, CompData *compdata);
 extern int              ll_new_CompData(lua_State *L);
-extern int              ll_register_CompData(lua_State *L);
+extern int              luaopen_CompData(lua_State *L);
 
 /* llpdfdata.cpp */
 extern PdfData        * ll_check_PdfData(const char *_fun, lua_State *L, int arg);
 extern PdfData        * ll_opt_PdfData(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_PdfData(const char *_fun, lua_State *L, PdfData *pdfdata);
 extern int              ll_new_PdfData(lua_State *L);
-extern int              ll_register_PdfData(lua_State *L);
+extern int              luaopen_PdfData(lua_State *L);
 
 #endif /* !defined(LUALEPT_EXPORTS_H) */

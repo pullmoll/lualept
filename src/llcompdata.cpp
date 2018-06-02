@@ -38,8 +38,11 @@
  * A class to handle compressed data.
  */
 
-/** Define a function's name (_fun) with prefix LL_COMPDATA */
-#define LL_FUNC(x) FUNC(LL_COMPDATA "." x)
+/** Set TNAME to the class name used in this source file */
+#define TNAME LL_COMPDATA
+
+/** Define a function's name (_fun) with prefix CompData */
+#define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
  * \brief Destroy a CompData*.
@@ -53,10 +56,12 @@ static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    CompData **pcid = ll_check_udata<CompData>(_fun, L, 1, LL_COMPDATA);
+    CompData **pcid = ll_check_udata<CompData>(_fun, L, 1, TNAME);
     CompData *cid = *pcid;
-    DBG(LOG_DESTROY, "%s: '%s' pcid=%p cid=%p\n",
-        _fun, LL_COMPDATA, pcid, cid);
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "pcid", reinterpret_cast<void *>(pcid),
+        "cid", reinterpret_cast<void *>(cid));
     l_CIDataDestroy(&cid);
     *pcid = nullptr;
     return 0;
@@ -82,7 +87,7 @@ toString(lua_State *L)
     if (!cid) {
         luaL_addstring(&B, "nil");
     } else {
-        snprintf(str, sizeof(str), LL_COMPDATA ": %p\n", reinterpret_cast<void *>(cid));
+        snprintf(str, sizeof(str), TNAME ": %p\n", reinterpret_cast<void *>(cid));
         luaL_addstring(&B, str);
         snprintf(str, sizeof(str), "    type          : %s\n", ll_string_encoding(cid->type));
         luaL_addstring(&B, str);
@@ -488,7 +493,7 @@ JpegDataMem(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class LL_COMPDATA.
+ * \brief Check Lua stack at index %arg for udata of class CompData.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the user data (usually 1)
@@ -497,7 +502,7 @@ JpegDataMem(lua_State *L)
 CompData *
 ll_check_CompData(const char *_fun, lua_State *L, int arg)
 {
-    return *ll_check_udata<CompData>(_fun, L, arg, LL_COMPDATA);
+    return *ll_check_udata<CompData>(_fun, L, arg, TNAME);
 }
 /**
  * \brief Optionally expect a LL_DLLIST at index %arg on the Lua stack.
@@ -525,7 +530,7 @@ ll_push_CompData(const char *_fun, lua_State *L, CompData *cdata)
 {
     if (!cdata)
         return ll_push_nil(L);
-    return ll_push_udata(_fun, L, LL_COMPDATA, cdata);
+    return ll_push_udata(_fun, L, TNAME, cdata);
 }
 
 /**
@@ -547,34 +552,34 @@ ll_new_CompData(lua_State *L)
     l_int32 ascii85 = ll_opt_boolean(_fun, L, 4, FALSE);
     CompData *cid = nullptr;
 
-    DBG(LOG_NEW_CLASS, "%s: create for %s = '%s', %s = %s, %s = %d, %s = %s\n", _fun,
+    DBG(LOG_NEW_PARAM, "%s: create for %s = '%s', %s = %s, %s = %d, %s = %s\n", _fun,
         "fname", fname,
         "type", ll_string_compression(type),
         "quality", quality,
         "ascii85", ascii85 ? "true" : "false");
     if (l_generateCIData(fname, type, quality, ascii85, &cid)) {
-        DBG(LOG_NEW_CLASS, "%s: failed to create %s*\n", _fun,
-            LL_COMPDATA);
+        DBG(LOG_NEW_PARAM, "%s: failed to create %s*\n", _fun,
+            TNAME);
         return ll_push_nil(L);
     }
 
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
-        LL_COMPDATA, reinterpret_cast<void *>(cid));
+        TNAME, reinterpret_cast<void *>(cid));
     ll_push_CompData(_fun, L, cid);
     return 1;
 }
 
 /**
- * \brief Register the BMF methods and functions in the LL_COMPDATA meta table.
+ * \brief Register the CompData methods and functions in the CompData meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */
 int
-ll_register_CompData(lua_State *L)
+luaopen_CompData(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},           /* garbage collector */
-        {"__new",               ll_new_CompData},   /* CompData("filename", type, quality, ascii895) */
+        {"__gc",                Destroy},
+        {"__new",               ll_new_CompData},
         {"__tostring",          toString},
         {"ConvertToPdfData",    ConvertToPdfData},
         {"Create",              Create},
@@ -593,11 +598,9 @@ ll_register_CompData(lua_State *L)
         LUA_SENTINEL
     };
 
-    static const luaL_Reg functions[] = {
-        LUA_SENTINEL
-    };
+    FUNC("luaopen_" TNAME);
 
-    lua_pushcfunction(L, ll_new_CompData);
-    lua_setglobal(L, LL_COMPDATA);
-    return ll_register_class(L, LL_COMPDATA, methods, functions);
+    ll_global_cfunct(_fun, L, TNAME, ll_new_CompData);
+    ll_register_class(_fun, L, TNAME, methods);
+    return 1;
 }
