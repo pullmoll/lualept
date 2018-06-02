@@ -48,6 +48,10 @@
  * \brief Destroy a FPix* (%fpix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPix* (fpixs).
+ *
+ * Leptonica's Notes:
+ *      (1) Decrements the ref count and, if 0, destroys the fpix.
+ *      (2) Always nulls the input ptr.
  * </pre>
  * \param L pointer to the lua_State
  * \return 0 for nothing on the Lua stack

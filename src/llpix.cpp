@@ -9911,29 +9911,6 @@ DilateBrick(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
  *
- *          dwamorph2_reg.c.  (Note: because this was a regression test,
- *          dwamorph1_reg also builds and runs the application program.)
- * Leptonica's Notes:
- *      (1) These implement 2D brick Sels, using linear Sels generated
- *          with selaAddBasic().
- *      (2) A brick Sel has hits for all elements.
- *      (3) The origin of the Sel is at (x, y) = (hsize/2, vsize/2)
- *      (4) Do separably if both hsize and vsize are > 1.
- *      (5) It is necessary that both horizontal and vertical Sels
- *          of the input size are defined in the basic sela.
- *      (6) There are three cases:
- *          (a) pixd == null   (result into new pixd)
- *          (b) pixd == pixs   (in-place; writes result back to pixs)
- *          (c) pixd != pixs   (puts result into existing pixd)
- *      (7) For clarity, if the case is known, use these patterns:
- *          (a) pixd = pixDilateBrickDwa(NULL, pixs, ...);
- *          (b) pixDilateBrickDwa(pixs, pixs, ...);
- *          (c) pixDilateBrickDwa(pixd, pixs, ...);
- *      (8) The size of pixd is determined by pixs.
- *      (9) If either linear Sel is not found, this calls
- *          the appropriate decomposible function.
- *          dwamorph2_reg.c.  (Note: because this was a regression test,
- *          dwamorph1_reg also builds and runs the application program.)
  * Leptonica's Notes:
  *      (1) These implement 2D brick Sels, using linear Sels generated
  *          with selaAddBasic().
@@ -14688,9 +14665,7 @@ GetAutoFormat(lua_State *L)
  *          L_VARIANCE to get the average squared difference from the
  *          expected value.  The variance is the square of the stdev.
  *          For the standard deviation, we use
- * \code
- *              sqrt(<(<x> - x)>^2) = sqrt(<x^2> - <x>^2)
- * \endcode
+ *              sqrt([([x] - x)]^2) = sqrt([x^2] - [x]^2)
  *      (3) Set the subsampling %factor > 1 to reduce the amount of
  *          computation.
  *      (4) Clipping of pixm (if it exists) to pixs is done in the inner loop.
@@ -21012,97 +20987,6 @@ OrientDetectDwa(lua_State *L)
  *          components at different thresholding to determine if a
  *          global threshold can be used (for text or line-art) and the
  *          value it should have.
- * Leptonica's Notes:
- *      (1) The Otsu method finds a single global threshold for an image.
- *          This function allows a locally adapted threshold to be
- *          found for each tile into which the image is broken up.
- *      (2) The array of threshold values, one for each tile, constitutes
- *          a highly downscaled image.  This array is optionally
- *          smoothed using a convolution.  The full width and height of the
- *          convolution kernel are (2 * %smoothx + 1) and (2 * %smoothy + 1).
- *      (3) The minimum tile dimension allowed is 16.  If such small
- *          tiles are used, it is recommended to use smoothing, because
- *          without smoothing, each small tile determines the splitting
- *          threshold independently.  A tile that is entirely in the
- *          image bg will then hallucinate fg, resulting in a very noisy
- *          binarization.  The smoothing should be large enough that no
- *          tile is only influenced by one type (fg or bg) of pixels,
- *          because it will force a split of its pixels.
- *      (4) To get a single global threshold for the entire image, use
- *          input values of %sx and %sy that are larger than the image.
- *          For this situation, the smoothing parameters are ignored.
- *      (5) The threshold values partition the image pixels into two classes:
- *          one whose values are less than the threshold and another
- *          whose values are greater than or equal to the threshold.
- *          This is the same use of 'threshold' as in pixThresholdToBinary().
- *      (6) The scorefract is the fraction of the maximum Otsu score, which
- *          is used to determine the range over which the histogram minimum
- *          is searched.  See numaSplitDistribution() for details on the
- *          underlying method of choosing a threshold.
- *      (7) This uses enables a modified version of the Otsu criterion for
- *          splitting the distribution of pixels in each tile into a
- *          fg and bg part.  The modification consists of searching for
- *          a minimum in the histogram over a range of pixel values where
- *          the Otsu score is within a defined fraction, %scorefract,
- *          of the max score.  To get the original Otsu algorithm, set
- *          %scorefract == 0.
- *      (8) N.B. This method is NOT recommended for images with weak text
- *          and significant background noise, such as bleedthrough, because
- *          of the problem noted in (3) above for tiling.  Use Sauvola.
- * Leptonica's Notes:
- *      (1) pixOtsuAdaptiveThreshold() computes a global threshold over each
- *          tile and performs the threshold operation, resulting in a
- *          binary image for each tile.  These are stitched into the
- *          final result.
- *      (2) pixOtsuThreshOnBackgroundNorm() and
- *          pixMaskedThreshOnBackgroundNorm() are binarization functions
- *          that use background normalization with other techniques.
- *      (3) Sauvola binarization computes a local threshold based on
- *          the local average and square average.  It takes two constants:
- *          the window size for the measurment at each pixel and a
- *          parameter that determines the amount of normalized local
- *          standard deviation to subtract from the local average value.
- *      (4) pixThresholdByCC() uses the numbers of 4 and 8 connected
- *          components at different thresholding to determine if a
- *          global threshold can be used (for text or line-art) and the
- *          value it should have.
- * Leptonica's Notes:
- *      (1) The Otsu method finds a single global threshold for an image.
- *          This function allows a locally adapted threshold to be
- *          found for each tile into which the image is broken up.
- *      (2) The array of threshold values, one for each tile, constitutes
- *          a highly downscaled image.  This array is optionally
- *          smoothed using a convolution.  The full width and height of the
- *          convolution kernel are (2 * %smoothx + 1) and (2 * %smoothy + 1).
- *      (3) The minimum tile dimension allowed is 16.  If such small
- *          tiles are used, it is recommended to use smoothing, because
- *          without smoothing, each small tile determines the splitting
- *          threshold independently.  A tile that is entirely in the
- *          image bg will then hallucinate fg, resulting in a very noisy
- *          binarization.  The smoothing should be large enough that no
- *          tile is only influenced by one type (fg or bg) of pixels,
- *          because it will force a split of its pixels.
- *      (4) To get a single global threshold for the entire image, use
- *          input values of %sx and %sy that are larger than the image.
- *          For this situation, the smoothing parameters are ignored.
- *      (5) The threshold values partition the image pixels into two classes:
- *          one whose values are less than the threshold and another
- *          whose values are greater than or equal to the threshold.
- *          This is the same use of 'threshold' as in pixThresholdToBinary().
- *      (6) The scorefract is the fraction of the maximum Otsu score, which
- *          is used to determine the range over which the histogram minimum
- *          is searched.  See numaSplitDistribution() for details on the
- *          underlying method of choosing a threshold.
- *      (7) This uses enables a modified version of the Otsu criterion for
- *          splitting the distribution of pixels in each tile into a
- *          fg and bg part.  The modification consists of searching for
- *          a minimum in the histogram over a range of pixel values where
- *          the Otsu score is within a defined fraction, %scorefract,
- *          of the max score.  To get the original Otsu algorithm, set
- *          %scorefract == 0.
- *      (8) N.B. This method is NOT recommended for images with weak text
- *          and significant background noise, such as bleedthrough, because
- *          of the problem noted in (3) above for tiling.  Use Sauvola.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -21436,6 +21320,10 @@ PlotAlongPta(lua_State *L)
  * Arg #2 is expected to be a Box* (box).
  * Arg #3 is expected to be a l_float32 (cropfract).
  * Arg #4 is expected to be a l_int32 (outres).
+ *
+ * Leptonica's Notes:
+ *      (1) This handles some common pre-processing operations,
+ *          where the page segmentation algorithm takes a 1 bpp image.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -23367,15 +23255,6 @@ ReadStreamJpeg(lua_State *L)
  *          allocated before reading the image, works for single images,
  *          but I could not get it to work properly for the successive
  *          png reads that are required by pixaReadStream().
- *          Note: results can be non-deterministic if used with
- *                multi-threaded applications.
- *
- *    Thanks to a memory buffering utility contributed by T. D. Hintz,
- *    encoding png directly into memory (and decoding from memory)
- *    is now enabled without the use of any temp files.  Unlike with webp,
- *    it is necessary to preserve the stream interface to enable writing
- *    pixa to memory.  So there are two independent but very similar
- *    implementations of png reading and writing.
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack

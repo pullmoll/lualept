@@ -54,7 +54,18 @@ function list(fd, t)
 end
 
 function is_notes(str)
-	return str:match(" %*.*(Note):") or str:match(" %*.*(Notes):")
+	local m = str:match('^ %*.*(Note[s]?:)$')
+	return m ~= nil
+end
+
+function is_doxy_start(str)
+	local m = str:match('^/%*%*$') or str:match('^/%*%!$')
+	return m ~= nil
+end
+
+function is_doxy_end(str)
+	local m = str:match('^ %*/$')
+	return m ~= nil
 end
 
 ---
@@ -124,7 +135,7 @@ function pre_comments(fs)
 			break
 		end
 
-		if line == '/**' or line == '/*!' then
+		if is_doxy_start(line) then
 			-- start of Doxygen comment
 			-- introduces a new function
 			-- go to state 1 (parsing doxygen comment)
@@ -145,16 +156,18 @@ function pre_comments(fs)
 			state = 3
 		end
 
-		if line == ' */' then
+		if is_doxy_end(line) then
 			-- end of Doxygen comment
-			-- go to state 2 (1st line after a comment)
-			state = 2
+			if state == 1 then
+				-- go to state 2 (1st line after a comment)
+				state = 2
+			end
 		end
 
 		if state == 1 then
 			-- inside doxygen comment
-			if line:match('%s*(%\\brief)%s*') then
-				fname = line:match('%\\brief%s*([^(]+)')
+			if line:match('%s+(%\\brief)%s+') then
+				fname = line:match('%\\brief%s+([^(]+)')
 			end
 			if pre and is_notes(line) then
 				line = line:gsub(" %*%s+(Note.?:)", " * Leptonica's %1")
@@ -207,6 +220,7 @@ function sortfile(fs, fd)
 	local func = {}			-- currently collected function body
 	local head = {}			-- currently collected heading
 	local state = 0			-- parser state
+	local seen = {}
 	local f
 
 	while true do
@@ -218,7 +232,7 @@ function sortfile(fs, fd)
 
 		-- print(string.format("[%d,#head=%3d,#func=%3d] %s", state, #head, #func, line))
 
-		if line == '/**' or line == '/*!' then
+		if is_doxy_start(line) then
 			-- start of Doxygen comment
 			-- introduces a new function
 			state = 1
@@ -237,9 +251,18 @@ function sortfile(fs, fd)
 			state = 3
 		end
 
-		if line == ' */' then
-			-- end of Doxygen comment
-			state = 2
+		if state == 1 then
+			if line:match([[ * \class]]) then
+				-- back to state 0
+				state = 0
+			end
+		end
+
+		if is_doxy_end(line) then
+			if state == 1 then
+				-- end of Doxygen comment
+				state = 2
+			end
 		end
 
 		if state <= 2 then
@@ -249,7 +272,7 @@ function sortfile(fs, fd)
 		end
 
 		if state == 4 then
-			if fname == nil then
+			if fname == nil and name ~= nil then
 				-- find the Leptonica function call in the function's body
 				fname = line:match("[%a%d_]+" .. name)
 			end

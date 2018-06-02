@@ -258,10 +258,12 @@ FindTail(lua_State *L)
  *          in the call to allow "consing" up from NULL.
  *      (2) If you are searching through a list, looking for a condition
  *          to add an element, you can do something like this:
+ * \code
  *            L_BEGIN_LIST_FORWARD(head, elem)
- *                // identify an elem to insert after
+ *                <identify an elem to insert after>
  *                listInsertAfter(&head, elem, data);
  *            L_END_LIST
+ * \endcode
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
@@ -288,11 +290,12 @@ InsertAfter(lua_State *L)
  *          head and elem must be null.
  *      (2) If you are searching through a list, looking for a condition
  *          to add an element, you can do something like this:
+ * \code
  *            L_BEGIN_LIST_FORWARD(head, elem)
- *                // identify an elem to insert before
+ *                <identify an elem to insert before>
  *                listInsertBefore(&head, elem, data);
  *            L_END_LIST
- *
+ * \endcode
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 boolean on the Lua stack
