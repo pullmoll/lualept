@@ -712,7 +712,7 @@ ll_check_Numa(const char *_fun, lua_State *L, int arg)
 Numa *
 ll_opt_Numa(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_Numa(_fun, L, arg);
 }
@@ -743,40 +743,42 @@ ll_new_Numa(lua_State *L)
     FUNC("ll_new_Numa");
     Numa *na = nullptr;
     Numa *das = nullptr;
+    const char *filename = nullptr;
     luaL_Stream* stream = nullptr;
+    const l_uint8 *data = nullptr;
+    size_t size = 0;
     l_int32 n = 1;
 
-    if (lua_isuserdata(L, 1)) {
+    if (ll_isudata(_fun, L, 1, LL_NUMA)) {
         das = ll_opt_Numa(_fun, L, 1);
-        if (das) {
-            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
-                TNAME, reinterpret_cast<void *>(das));
-            na = numaCopy(das);
-        } else {
-            stream = ll_check_stream(_fun, L, 1);
-            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
-                LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
-            na = numaReadStream(stream->f);
-        }
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+            TNAME, reinterpret_cast<void *>(das));
+        na = numaCopy(das);
     }
 
-    if (lua_isinteger(L, 1)) {
+    if (!na && ll_isudata(_fun, L, 1, LUA_FILEHANDLE)) {
+        stream = ll_check_stream(_fun, L, 1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+            LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
+        na = numaReadStream(stream->f);
+    }
+
+    if (!na && ll_isinteger(_fun, L, 1)) {
         n = ll_opt_l_int32(_fun, L, 1, n);
         DBG(LOG_NEW_PARAM, "%s: create for %s = %d\n", _fun,
             "n", n);
         na = numaCreate(n);
     }
 
-    if (!na && lua_isstring(L, 1)) {
-        const char *filename = ll_check_string(_fun, L, 1);
+    if (!na && ll_isstring(_fun, L, 1)) {
+        filename = ll_check_string(_fun, L, 1);
         DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
             "filename", filename);
         na = numaRead(filename);
     }
 
-    if (!na && lua_isstring(L, 1)) {
-        size_t size = 0;
-        const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &size);
+    if (!na && ll_isstring(_fun, L, 1)) {
+        data = ll_check_lbytes(_fun, L, 1, &size);
         DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %llu\n", _fun,
             "data", reinterpret_cast<const void *>(data),
             "size", static_cast<l_uint64>(size));

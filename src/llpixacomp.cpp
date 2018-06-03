@@ -106,7 +106,7 @@ ll_check_PixaComp(const char *_fun, lua_State *L, int arg)
 PixaComp *
 ll_opt_PixaComp(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_PixaComp(_fun, L, arg);
 }
@@ -135,8 +135,22 @@ int
 ll_new_PixaComp(lua_State *L)
 {
     FUNC("ll_new_PixaComp");
-    l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
-    PixaComp *pixacomp = pixacompCreate(n);
+    PixaComp *pixacomp = nullptr;
+    l_int32 n = 1;
+
+    if (ll_isinteger(_fun, L, 1)) {
+        n = ll_opt_l_int32(_fun, L, 1, 1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d\n", _fun,
+            "n", n);
+        pixacomp = pixacompCreate(n);
+    }
+
+    if (!pixacomp) {
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d\n", _fun,
+            "n", n);
+        pixacomp = pixacompCreate(n);
+    }
+
     return ll_push_PixaComp(_fun, L, pixacomp);
 }
 

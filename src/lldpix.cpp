@@ -871,7 +871,7 @@ ll_check_DPix(const char *_fun, lua_State *L, int arg)
 DPix *
 ll_opt_DPix(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_DPix(_fun, L, arg);
 }
@@ -893,10 +893,6 @@ ll_push_DPix(const char *_fun, lua_State *L, DPix *cd)
 
 /**
  * \brief Create and push a new DPix*.
- *
- * Arg #1 is expected to be a string (dir).
- * Arg #2 is expected to be a l_int32 (fontsize).
- *
  * \param L pointer to the lua_State
  * \return 1 DPix* on the Lua stack
  */
@@ -908,21 +904,21 @@ ll_new_DPix(lua_State *L)
     l_int32 width = 1;
     l_int32 height = 1;
 
-    if (lua_isuserdata(L, 1)) {
+    if (ll_isudata(_fun, L, 1, LL_DPIX)) {
         DPix *dpixs = ll_opt_DPix(_fun, L, 1);
-        if (dpixs) {
-            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
-                TNAME, reinterpret_cast<void *>(dpixs));
-            dpix = dpixCreateTemplate(dpixs);
-        } else {
-            luaL_Stream *stream = ll_check_stream(_fun, L, 1);
-            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
-                LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
-            dpix = dpixReadStream(stream->f);
-        }
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+            TNAME, reinterpret_cast<void *>(dpixs));
+        dpix = dpixCreateTemplate(dpixs);
     }
 
-    if (!dpix && lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
+    if (!dpix && ll_isudata(_fun, L, 1, LUA_FILEHANDLE)) {
+        luaL_Stream *stream = ll_check_stream(_fun, L, 1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+            LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
+        dpix = dpixReadStream(stream->f);
+    }
+
+    if (!dpix && ll_isinteger(_fun, L, 1) && ll_isinteger(_fun, L, 2)) {
         width = ll_opt_l_int32(_fun, L, 1, width);
         height = ll_opt_l_int32(_fun, L, 2, height);
         DBG(LOG_NEW_PARAM, "%s: create for %s = %d, %s = %d\n", _fun,
@@ -930,14 +926,14 @@ ll_new_DPix(lua_State *L)
         dpix = dpixCreate(width, height);
     }
 
-    if (!dpix && lua_isstring(L, 1)) {
+    if (!dpix && ll_isstring(_fun, L, 1)) {
         const char* filename = ll_check_string(_fun, L, 1);
         DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
             "filename", filename);
         dpix = dpixRead(filename);
     }
 
-    if (!dpix && lua_isstring(L, 1)) {
+    if (!dpix && ll_isstring(_fun, L, 1)) {
         size_t size = 0;
         const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &size);
         DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %llu\n", _fun,

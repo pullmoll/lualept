@@ -452,7 +452,7 @@ ll_check_Numaa(const char *_fun, lua_State *L, int arg)
 Numaa *
 ll_opt_Numaa(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_Numaa(_fun, L, arg);
 }
@@ -482,18 +482,21 @@ ll_new_Numaa(lua_State *L)
     FUNC("ll_new_Numaa");
     Numaa *naa = nullptr;
     luaL_Stream* stream = nullptr;
+    const char *filename = nullptr;
+    const l_uint8 *data = nullptr;
+    size_t size = 0;
     l_int32 nptr = 1;
     l_int32 n = 1;
 
-    if (lua_isuserdata(L, 1)) {
+    if (ll_isudata(_fun, L, 1, LUA_FILEHANDLE)) {
         stream = ll_check_stream(_fun, L, 1);
         DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
             LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
         naa = numaaReadStream(stream->f);
     }
 
-    if (!naa && lua_isinteger(L, 1)) {
-        if (lua_isinteger(L, 2)) {
+    if (!naa && ll_isinteger(_fun, L, 1)) {
+        if (ll_isinteger(_fun, L, 2)) {
             nptr = ll_opt_l_int32(_fun, L, 1, nptr);
             n = ll_opt_l_int32(_fun, L, 2, n);
             DBG(LOG_NEW_PARAM, "%s: create for %s = %d, %s = %d\n", _fun,
@@ -507,16 +510,15 @@ ll_new_Numaa(lua_State *L)
         }
     }
 
-    if (!naa && lua_isstring(L, 1)) {
-        const char *filename = ll_check_string(_fun, L, 1);
+    if (!naa && ll_isstring(_fun, L, 1)) {
+        filename = ll_check_string(_fun, L, 1);
         DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
             "filename", filename);
         naa = numaaRead(filename);
     }
 
-    if (!naa && lua_isstring(L, 1)) {
-        size_t size = 0;
-        const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &size);
+    if (!naa && ll_isstring(_fun, L, 1)) {
+        data = ll_check_lbytes(_fun, L, 1, &size);
         DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %llu\n", _fun,
             "data", reinterpret_cast<const void *>(data),
             "size", static_cast<l_uint64>(size));

@@ -322,7 +322,7 @@ ll_check_PdfData(const char *_fun, lua_State *L, int arg)
 PdfData *
 ll_opt_PdfData(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_PdfData(_fun, L, arg);
 }
@@ -342,10 +342,6 @@ ll_push_PdfData(const char *_fun, lua_State *L, PdfData *cd)
 }
 /**
  * \brief Create and push a new PdfData*.
- *
- * Arg #1 is expected to be a string (dir).
- * Arg #2 is expected to be a l_int32 (fontsize).
- *
  * \param L pointer to the lua_State
  * \return 1 PdfData* on the Lua stack
  */

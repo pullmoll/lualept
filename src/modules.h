@@ -328,6 +328,13 @@ typedef struct lept_enum {
 
 /* llept.c */
 extern void             ll_free(void *ptr);
+
+extern int              ll_isnumber(const char *_fun, lua_State *L, int arg);
+extern int              ll_isstring(const char *_fun, lua_State *L, int arg);
+extern int              ll_iscfuntion(const char *_fun, lua_State *L, int arg);
+extern int              ll_isinteger(const char *_fun, lua_State *L, int arg);
+extern int              ll_isudata(const char *_fun, lua_State* L, int arg, const char *tname);
+
 extern int              ll_register_class(const char *_fun, lua_State *L, const char* name, const luaL_Reg* methods);
 extern int              ll_global_cfunct(const char *_fun, lua_State *L, const char* tname, lua_CFunction cfunct);
 extern int              ll_global_table(const char *_fun, lua_State *L, const char* tname);

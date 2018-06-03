@@ -592,7 +592,7 @@ ll_check_Boxaa(const char *_fun, lua_State *L, int arg)
 Boxaa *
 ll_opt_Boxaa(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_Boxaa(_fun, L, arg);
 }
@@ -622,34 +622,35 @@ ll_new_Boxaa(lua_State *L)
     FUNC("ll_new_Boxaa");
     Boxaa *boxaa = nullptr;
 
-    if (lua_isuserdata(L, 1)) {
+    if (ll_isudata(_fun, L, 1, LL_BOXAA)) {
         Boxaa *boxaas = ll_opt_Boxaa(_fun, L, 1);
-        if (boxaas) {
-            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
-                LL_BOXAA, reinterpret_cast<void *>(boxaas));
-            boxaa = boxaaCopy(boxaas, L_COPY);
-        } else {
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+            LL_BOXAA, reinterpret_cast<void *>(boxaas));
+        boxaa = boxaaCopy(boxaas, L_COPY);
+    }
+
+    if (!boxaa && ll_isudata(_fun, L, 1, LUA_FILEHANDLE)) {
             luaL_Stream *stream = ll_check_stream(_fun, L, 2);
             DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
                 LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
             boxaa = boxaaReadStream(stream->f);
-        }
     }
-    if (!boxaa && lua_isinteger(L, 1)) {
+
+    if (!boxaa && ll_isinteger(_fun, L, 1)) {
         l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
         DBG(LOG_NEW_PARAM, "%s: create for %s = %d\n", _fun,
             "n", n);
         boxaa = boxaaCreate(n);
     }
 
-    if (!boxaa && lua_isstring(L, 1)) {
+    if (!boxaa && ll_isstring(_fun, L, 1)) {
         const char* filename = ll_check_string(_fun, L, 1);
         DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
             "filename", filename);
         boxaa = boxaaRead(filename);
     }
 
-    if (!boxaa && lua_isstring(L, 1)) {
+    if (!boxaa && ll_isstring(_fun, L, 1)) {
         size_t size = 0;
         const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &size);
         DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %llu\n", _fun,

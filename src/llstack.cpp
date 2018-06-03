@@ -194,7 +194,7 @@ ll_check_Stack(const char *_fun, lua_State *L, int arg)
 Stack *
 ll_opt_Stack(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_Stack(_fun, L, arg);
 }
@@ -230,7 +230,7 @@ ll_new_Stack(lua_State *L)
     Stack *lstack = nullptr;
     l_int32 nalloc = 1;
 
-    if (lua_isinteger(L, 1)) {
+    if (ll_isinteger(_fun, L, 1)) {
         nalloc = ll_opt_l_int32(_fun, L, 1, nalloc);
         DBG(LOG_NEW_PARAM, "%s: create for %s = %d\n", _fun,
             "nalloc", nalloc);

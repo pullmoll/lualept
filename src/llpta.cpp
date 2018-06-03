@@ -543,7 +543,7 @@ ll_check_Pta(const char *_fun, lua_State *L, int arg)
 Pta *
 ll_opt_Pta(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_Pta(_fun, L, arg);
 }

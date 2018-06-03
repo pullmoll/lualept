@@ -158,7 +158,7 @@ ll_check_PixTiling(const char *_fun, lua_State *L, int arg)
 PixTiling *
 ll_opt_PixTiling(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_PixTiling(_fun, L, arg);
 }

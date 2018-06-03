@@ -359,7 +359,7 @@ ll_check_Ptaa(const char *_fun, lua_State *L, int arg)
 Ptaa *
 ll_opt_Ptaa(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_Ptaa(_fun, L, arg);
 }

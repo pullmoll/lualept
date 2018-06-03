@@ -417,7 +417,7 @@ ll_check_Amap(const char *_fun, lua_State *L, int arg)
 Amap *
 ll_opt_Amap(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_Amap(_fun, L, arg);
 }
@@ -450,7 +450,7 @@ ll_new_Amap(lua_State *L)
     Amap *amap = nullptr;
     l_int32 keytype = L_INT_TYPE;
 
-    if (lua_isstring(L, 1)) {
+    if (ll_isstring(_fun, L, 1)) {
         keytype = ll_check_keytype(_fun, L, 1, keytype);
         DBG(LOG_NEW_PARAM, "%s: create for %s = %s\n", _fun,
             "keytype", ll_string_keytype(keytype));

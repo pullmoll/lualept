@@ -671,7 +671,7 @@ ll_check_Pixa(const char *_fun, lua_State *L, int arg)
 Pixa *
 ll_opt_Pixa(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_Pixa(_fun, L, arg);
 }
@@ -701,42 +701,53 @@ ll_new_Pixa(lua_State *L)
 {
     FUNC("ll_new_Pixa");
     Pixa *pixa = nullptr;
+    Pixa *pixas = nullptr;
+    Pix *pixs = nullptr;
     luaL_Stream* stream = nullptr;
+    l_int32 copyflag = L_COPY;
     l_int32 n = 1;
     l_int32 cellw = 32;
     l_int32 cellh = 32;
 
-    if (lua_isuserdata(L, 1)) {
-        Pix *pixs = ll_opt_Pix(_fun, L, 1);
-        if (pixs) {
-            n = ll_opt_l_int32(_fun, L, 2, 1);
-            cellw = ll_opt_l_int32(_fun, L, 3, cellw);
-            cellh = ll_opt_l_int32(_fun, L, 4, cellh);
-            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
-                LL_PIX, reinterpret_cast<void *>(pixs));
-            pixa = pixaCreateFromPix(pixs, n, cellw, cellh);
-        } else  {
-            stream = ll_check_stream(_fun, L, 1);
-            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
-                LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
-            pixa = pixaReadStream(stream->f);
-        }
+    if (ll_isudata(_fun, L, 1, LL_PIX)) {
+        pixs = ll_opt_Pix(_fun, L, 1);
+        n = ll_opt_l_int32(_fun, L, 2, 1);
+        cellw = ll_opt_l_int32(_fun, L, 3, cellw);
+        cellh = ll_opt_l_int32(_fun, L, 4, cellh);
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+            LL_PIX, reinterpret_cast<void *>(pixs));
+        pixa = pixaCreateFromPix(pixs, n, cellw, cellh);
     }
 
-    if (!pixa && lua_isinteger(L, 1)) {
+    if (!pixa && ll_isudata(_fun, L, 1, LL_PIXA)) {
+        pixas = ll_opt_Pixa(_fun, L, 1);
+        copyflag = ll_check_access_storage(_fun, L, 2, copyflag);
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+            LL_PIXA, reinterpret_cast<void *>(pixs));
+        pixa = pixaCopy(pixas, copyflag);
+    }
+
+    if (!pixa && ll_isudata(_fun, L, 1, LUA_FILEHANDLE)) {
+        stream = ll_check_stream(_fun, L, 1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+            LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
+        pixa = pixaReadStream(stream->f);
+    }
+
+    if (!pixa && ll_isinteger(_fun, L, 1)) {
         DBG(LOG_NEW_PARAM, "%s: create for %s = %d\n", _fun,
             "n", n);
         pixa = pixaCreate(n);
     }
 
-    if (!pixa && lua_isstring(L, 1)) {
+    if (!pixa && ll_isstring(_fun, L, 1)) {
         const char* filename = ll_check_string(_fun, L, 1);
             DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
                 "filename", filename);
         pixa = pixaRead(filename);
     }
 
-    if (!pixa && lua_isstring(L, 1)) {
+    if (!pixa && ll_isstring(_fun, L, 1)) {
         size_t size = 0;
         const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &size);
         DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %llu\n", _fun,

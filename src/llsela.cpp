@@ -685,7 +685,7 @@ ll_check_Sela(const char *_fun, lua_State *L, int arg)
 Sela *
 ll_opt_Sela(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_Sela(_fun, L, arg);
 }
@@ -729,21 +729,21 @@ ll_new_Sela(lua_State *L)
         }
     }
 
-    if (lua_isinteger(L, 1)) {
+    if (ll_isinteger(_fun, L, 1)) {
         n = ll_opt_l_int32(_fun, L, 1, 1);
         DBG(LOG_NEW_PARAM, "%s: create for %s = %d\n", _fun,
             "n", n);
         sela = selaCreate(n);
     }
 
-    if (!sela && lua_isstring(L, 1)) {
+    if (!sela && ll_isstring(_fun, L, 1)) {
         fname = ll_check_string(_fun, L, 1);
         DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
             "fname", fname);
         sela = selaRead(fname);
     }
 
-    if (!sela && lua_isstring(L, 1)) {
+    if (!sela && ll_isstring(_fun, L, 1)) {
         filename = ll_check_string(_fun, L, 1);
         DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
             "filename", filename);

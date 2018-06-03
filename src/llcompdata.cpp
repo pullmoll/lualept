@@ -513,7 +513,7 @@ ll_check_CompData(const char *_fun, lua_State *L, int arg)
 CompData *
 ll_opt_CompData(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_CompData(_fun, L, arg);
 }
@@ -534,10 +534,6 @@ ll_push_CompData(const char *_fun, lua_State *L, CompData *cdata)
 
 /**
  * \brief Generate and push a new CompData*.
- *
- * Arg #1 is expected to be a string (dir).
- * Arg #2 is expected to be a l_int32 (fontsize).
- *
  * \param L pointer to the lua_State
  * \return 1 CompData* on the Lua stack
  */

@@ -429,7 +429,7 @@ ll_check_FPixa(const char *_fun, lua_State *L, int arg)
 FPixa *
 ll_opt_FPixa(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_FPixa(_fun, L, arg);
 }
@@ -449,10 +449,6 @@ ll_push_FPixa(const char *_fun, lua_State *L, FPixa *cd)
 }
 /**
  * \brief Create and push a new FPixa*.
- *
- * Arg #1 is expected to be a string (dir).
- * Arg #2 is expected to be a l_int32 (fontsize).
- *
  * \param L pointer to the lua_State
  * \return 1 FPixa* on the Lua stack
  */
@@ -465,7 +461,7 @@ ll_new_FPixa(lua_State *L)
         FPixa *fpixa = fpixaCopy(fpixas, L_COPY);
         return ll_push_FPixa(_fun, L, fpixa);
     }
-    if (lua_isinteger(L, 1)) {
+    if (ll_isinteger(_fun, L, 1)) {
         l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
         FPixa *fpixa = fpixaCreate(n);
         return ll_push_FPixa(_fun, L, fpixa);

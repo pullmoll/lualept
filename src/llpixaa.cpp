@@ -388,7 +388,7 @@ ReadFromFiles(lua_State *L)
     l_int32 first = 0;
     l_int32 nfiles = 0;
     Pixaa *pixaa = nullptr;
-    if (lua_isinteger(L, 2) && lua_isinteger(L, 3)) {
+    if (ll_isinteger(_fun, L, 2) && ll_isinteger(_fun, L, 3)) {
         first = ll_opt_l_int32(_fun, L, 2, 0);
         nfiles = ll_opt_l_int32(_fun, L, 3, 0);
     } else {
@@ -579,7 +579,7 @@ ll_check_Pixaa(const char *_fun, lua_State *L, int arg)
 Pixaa *
 ll_opt_Pixaa(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_Pixaa(_fun, L, arg);
 }
@@ -618,34 +618,34 @@ ll_new_Pixaa(lua_State *L)
     l_int32 type = L_CHOOSE_CONSECUTIVE;
     l_int32 copyflag = L_COPY;
 
-    if (lua_isuserdata(L, 1)) {
+    if (ll_isudata(_fun, L, 1, LL_PIXA)) {
         pixa = ll_opt_Pixa(_fun, L, 1);
-        if (pixa) {
-            n = ll_opt_l_int32(_fun, L, 2, 1);
-            type = ll_check_consecutive_skip_by(_fun, L, 3, type);
-            copyflag = ll_check_access_storage(_fun, L, 4, copyflag);
-            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %d, %s = %s, %s = %s\n", _fun,
-                LL_PIXA, reinterpret_cast<void *>(pixa),
-                "n", n,
-                "type", ll_string_consecutive_skip_by(type),
-                "copyflag", ll_string_access_storage(copyflag));
-            pixaa = pixaaCreateFromPixa(pixa, n, type, copyflag);
-        } else  {
-            stream = ll_check_stream(_fun, L, 1);
-            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
-                LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
-            pixaa = pixaaReadStream(stream->f);
-        }
+        n = ll_opt_l_int32(_fun, L, 2, 1);
+        type = ll_check_consecutive_skip_by(_fun, L, 3, type);
+        copyflag = ll_check_access_storage(_fun, L, 4, copyflag);
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %d, %s = %s, %s = %s\n", _fun,
+            LL_PIXA, reinterpret_cast<void *>(pixa),
+            "n", n,
+            "type", ll_string_consecutive_skip_by(type),
+            "copyflag", ll_string_access_storage(copyflag));
+        pixaa = pixaaCreateFromPixa(pixa, n, type, copyflag);
     }
 
-    if (!pixaa && lua_isstring(L, 1)) {
+    if (!pixaa && ll_isudata(_fun, L, 1, LUA_FILEHANDLE)) {
+        stream = ll_check_stream(_fun, L, 1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+            LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
+        pixaa = pixaaReadStream(stream->f);
+    }
+
+    if (!pixaa && ll_isstring(_fun, L, 1)) {
         filename = ll_check_string(_fun, L, 1);
             DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
                 "filename", filename);
         pixaa = pixaaRead(filename);
     }
 
-    if (!pixaa && lua_isstring(L, 1)) {
+    if (!pixaa && ll_isstring(_fun, L, 1)) {
         data = ll_check_lbytes(_fun, L, 1, &size);
         DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %llu\n", _fun,
             "data", reinterpret_cast<const void *>(data),

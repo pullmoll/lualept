@@ -457,7 +457,7 @@ ll_check_DoubleLinkedList(const char *_fun, lua_State *L, int arg)
 DoubleLinkedList *
 ll_opt_DoubleLinkedList(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_DoubleLinkedList(_fun, L, arg);
 }

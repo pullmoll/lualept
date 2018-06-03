@@ -658,7 +658,7 @@ ll_check_Dna(const char *_fun, lua_State *L, int arg)
 Dna *
 ll_opt_Dna(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_Dna(_fun, L, arg);
 }
@@ -690,28 +690,28 @@ ll_new_Dna(lua_State *L)
     Dna *da = nullptr;
     l_int32 n = 1;
 
-    if (lua_isuserdata(L, 1)) {
+    if (ll_isudata(_fun, L, 1, LL_DNA)) {
         Dna *das = ll_opt_Dna(_fun, L, 1);
-        if (das) {
-            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
-                TNAME, reinterpret_cast<void *>(das));
-            da = l_dnaCopy(das);
-        } else {
-            luaL_Stream* stream = ll_check_stream(_fun, L, 1);
-            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
-                LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
-            da = l_dnaReadStream(stream->f);
-        }
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+            TNAME, reinterpret_cast<void *>(das));
+        da = l_dnaCopy(das);
     }
 
-    if (lua_isinteger(L, 1)) {
+    if (ll_isudata(_fun, L, 1, LUA_FILEHANDLE)) {
+        luaL_Stream* stream = ll_check_stream(_fun, L, 1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+            LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
+        da = l_dnaReadStream(stream->f);
+    }
+
+    if (ll_isinteger(_fun, L, 1)) {
         l_int32 n = ll_opt_l_int32(_fun, L, 1, n);
         DBG(LOG_NEW_PARAM, "%s: create for %s = %d\n", _fun,
             "n", n);
         da = l_dnaCreate(n);
     }
 
-    if (!da && lua_isstring(L, 1)) {
+    if (!da && ll_isstring(_fun, L, 1)) {
         const char *filename = ll_check_string(_fun, L, 1);
         DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
             "filename", filename);

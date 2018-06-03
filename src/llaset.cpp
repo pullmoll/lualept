@@ -375,7 +375,7 @@ ll_check_Aset(const char *_fun, lua_State *L, int arg)
 Aset *
 ll_opt_Aset(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_Aset(_fun, L, arg);
 }
@@ -393,11 +393,9 @@ ll_push_Aset(const char *_fun, lua_State *L, Aset *aset)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, TNAME, aset);
 }
+
 /**
  * \brief Create and push a new Aset*.
- *
- * Arg #1 is expected to be a key type name (int, uint, or float).
- *
  * \param L pointer to the lua_State
  * \return 1 Aset* on the Lua stack
  */
@@ -408,7 +406,7 @@ ll_new_Aset(lua_State *L)
     Aset *aset = nullptr;
     l_int32 keytype = L_INT_TYPE;
 
-    if (lua_isstring(L, 1)) {
+    if (ll_isstring(_fun, L, 1)) {
         keytype = ll_check_keytype(_fun, L, 1, keytype);
         DBG(LOG_NEW_PARAM, "%s: create for %s = %s\n", _fun,
             "keytype", ll_string_keytype(keytype));

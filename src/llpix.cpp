@@ -9258,7 +9258,7 @@ CreateNoInit(lua_State *L)
     Pix *pix = nullptr;
     if (pixs) {
         pix = pixCreateTemplateNoInit(pixs);
-    } else if (lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
+    } else if (ll_isinteger(_fun, L, 1) && ll_isinteger(_fun, L, 2)) {
         l_int32 width = ll_check_l_int32(_fun, L, 1);
         l_int32 height = ll_check_l_int32(_fun, L, 2);
         l_int32 depth = ll_opt_l_int32(_fun, L, 3, 1);
@@ -18433,7 +18433,7 @@ MakeMaskFromLUT(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32* tab = nullptr;
     tab = ll_calloc<l_int32>(_fun, L, 256);
-    if (lua_isstring(L, 2)) {
+    if (ll_isstring(_fun, L, 2)) {
         size_t len, i;
         const char* lut = ll_check_lstring(_fun, L, 2, &len);
         /* expand lookup-table (lut) to array of l_int32 (tab) */
@@ -33885,7 +33885,7 @@ ll_check_Pix(const char *_fun, lua_State *L, int arg)
 Pix *
 ll_opt_Pix(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_Pix(_fun, L, arg);
 }
@@ -33920,23 +33920,23 @@ ll_new_Pix(lua_State *L)
     l_int32 height = 1;
     l_int32 depth = 1;
 
-    if (lua_isuserdata(L, 1)) {
+    if (ll_isudata(_fun, L, 1, LL_PIX)) {
         pixs = ll_opt_Pix(_fun, L, 1);
-        if (pixs) {
-            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
-                TNAME, reinterpret_cast<void *>(pixs));
-            pix = pixCreateTemplate(pixs);
-        } else {
-            stream = ll_check_stream(_fun, L, 1);
-            hint = ll_check_hint(_fun, L, 2, hint);
-            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %s\n", _fun,
-                LUA_FILEHANDLE, reinterpret_cast<void *>(stream),
-                "hint", ll_string_hint(hint));
-            pix = pixReadStream(stream->f, hint);
-        }
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+            TNAME, reinterpret_cast<void *>(pixs));
+        pix = pixCreateTemplate(pixs);
     }
 
-    if (!pix && lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
+    if (!pix && ll_isudata(_fun, L, 1, LUA_FILEHANDLE)) {
+        stream = ll_check_stream(_fun, L, 1);
+        hint = ll_check_hint(_fun, L, 2, hint);
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %s\n", _fun,
+            LUA_FILEHANDLE, reinterpret_cast<void *>(stream),
+            "hint", ll_string_hint(hint));
+        pix = pixReadStream(stream->f, hint);
+    }
+
+    if (!pix && ll_isinteger(_fun, L, 1)) {
         width = ll_opt_l_int32(_fun, L, 1, width);
         height = ll_opt_l_int32(_fun, L, 2, height);
         depth = ll_opt_l_int32(_fun, L, 3, depth);
@@ -33947,14 +33947,14 @@ ll_new_Pix(lua_State *L)
         pix = pixCreate(width, height, depth);
     }
 
-    if (!pix && lua_isstring(L, 1)) {
+    if (!pix && ll_isstring(_fun, L, 1)) {
         const char* filename = ll_check_string(_fun, L, 1);
         DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
             "filename", filename);
         pix = pixRead(filename);
     }
 
-    if (!pix && lua_isstring(L, 1)) {
+    if (!pix && ll_isstring(_fun, L, 1)) {
         size_t size = 0;
         const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &size);
         DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %llu\n", _fun,

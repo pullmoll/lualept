@@ -572,7 +572,7 @@ ll_check_Kernel(const char *_fun, lua_State *L, int arg)
 Kernel *
 ll_opt_Kernel(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_Kernel(_fun, L, arg);
 }
@@ -609,23 +609,23 @@ ll_new_Kernel(lua_State *L)
     l_int32 cy = 0;
     l_int32 cx = 0;
 
-    if (lua_isuserdata(L, 1)) {
+    if (ll_isudata(_fun, L, 1, LL_PIX)) {
         pixs = ll_opt_Pix(_fun, L, 1);
-        if (pixs) {
-            cy = ll_opt_l_int32(_fun, L, 2, cy);
-            cx = ll_opt_l_int32(_fun, L, 2, cx);
-            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
-                LL_PIX, reinterpret_cast<void *>(pixs));
-            kel = kernelCreateFromPix(pixs, cy, cx);
-        } else {
-            stream = ll_check_stream(_fun, L, 1);
-            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
-                LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
-            kel = kernelReadStream(stream->f);
-        }
+        cy = ll_opt_l_int32(_fun, L, 2, cy);
+        cx = ll_opt_l_int32(_fun, L, 2, cx);
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+            LL_PIX, reinterpret_cast<void *>(pixs));
+        kel = kernelCreateFromPix(pixs, cy, cx);
     }
 
-    if (lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
+    if (!kel && ll_isudata(_fun, L, 1, LUA_FILEHANDLE)) {
+        stream = ll_check_stream(_fun, L, 1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+            LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
+        kel = kernelReadStream(stream->f);
+    }
+
+    if (!kel && ll_isinteger(_fun, L, 1) && ll_isinteger(_fun, L, 2)) {
         height = ll_opt_l_int32(_fun, L, 1, width);
         width = ll_opt_l_int32(_fun, L, 2, height);
         DBG(LOG_NEW_PARAM, "%s: create for %s = %d, %s = %d\n", _fun,
@@ -633,14 +633,14 @@ ll_new_Kernel(lua_State *L)
         kel = kernelCreate(height, width);
     }
 
-    if (!kel && lua_isstring(L, 1)) {
+    if (!kel && ll_isstring(_fun, L, 1)) {
         const char* filename = ll_check_string(_fun, L, 1);
         DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
             "filename", filename);
         kel = kernelRead(filename);
     }
 
-    if (!kel && lua_isstring(L, 1)) {
+    if (!kel && ll_isstring(_fun, L, 1)) {
         height = ll_opt_l_int32(_fun, L, 1, height);
         width = ll_opt_l_int32(_fun, L, 2, width);
         cy = ll_opt_l_int32(_fun, L, 3, cy);

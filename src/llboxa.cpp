@@ -2844,7 +2844,7 @@ ll_check_Boxa(const char *_fun, lua_State *L, int arg)
 Boxa *
 ll_opt_Boxa(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_Boxa(_fun, L, arg);
 }
@@ -2875,35 +2875,35 @@ ll_new_Boxa(lua_State *L)
     FUNC("ll_new_Boxa");
     Boxa* boxa = nullptr;
 
-    if (lua_isuserdata(L, 1)) {
+    if (ll_isudata(_fun, L, 1, LL_BOXA)) {
         Boxa *boxas = ll_opt_Boxa(_fun, L, 1);
-        if (boxas) {
-            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
-                TNAME, reinterpret_cast<void *>(boxas));
-            boxa = boxaCopy(boxas, L_COPY);
-        } else {
-            luaL_Stream *stream = ll_check_stream(_fun, L, 1);
-            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
-                LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
-            boxa = boxaReadStream(stream->f);
-        }
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+            TNAME, reinterpret_cast<void *>(boxas));
+        boxa = boxaCopy(boxas, L_COPY);
     }
 
-    if (!boxa && lua_isinteger(L, 1)) {
+    if (!boxa && ll_isudata(_fun, L, 1, LUA_FILEHANDLE)) {
+        luaL_Stream *stream = ll_check_stream(_fun, L, 1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+            LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
+        boxa = boxaReadStream(stream->f);
+    }
+
+    if (!boxa && ll_isinteger(_fun, L, 1)) {
         l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
         DBG(LOG_NEW_PARAM, "%s: create for %s = %d\n", _fun,
             "n", n);
         boxa = boxaCreate(n);
     }
 
-    if (!boxa && lua_isstring(L, 1)) {
+    if (!boxa && ll_isstring(_fun, L, 1)) {
         const char* filename = ll_check_string(_fun, L, 1);
         DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
             "filename", filename);
         boxa = boxaRead(filename);
     }
 
-    if (!boxa && lua_isstring(L, 1)) {
+    if (!boxa && ll_isstring(_fun, L, 1)) {
         size_t size = 0;
         const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &size);
         DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %llu\n", _fun,

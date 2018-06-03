@@ -1086,7 +1086,7 @@ ll_check_PixColormap(const char *_fun, lua_State *L, int arg)
 PixColormap *
 ll_opt_PixColormap(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_PixColormap(_fun, L, arg);
 }
@@ -1137,8 +1137,56 @@ int
 ll_new_PixColormap(lua_State *L)
 {
     FUNC("ll_new_PixColormap");
-    l_int32 depth = ll_opt_l_int32(_fun, L, 1, 1);
-    PixColormap *cmap = pixcmapCreate(depth);
+    PixColormap *cmap = nullptr;
+    PixColormap *cmaps = nullptr;
+    luaL_Stream* stream = nullptr;
+    const char *filename = nullptr;
+    const l_uint8 *data = nullptr;
+    size_t size = 0;
+    l_int32 depth = 1;
+
+    if (ll_isudata(_fun, L, 1, LL_PIXCMAP)) {
+        cmaps = ll_opt_PixColormap(_fun, L, 1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+            LL_PIXCMAP, reinterpret_cast<void *>(cmaps));
+        cmap = pixcmapCopy(cmaps);
+    }
+
+    if (!cmap && ll_isudata(_fun, L, 1, LUA_FILEHANDLE)) {
+        stream = ll_check_stream(_fun, L, 1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+            LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
+        cmap = pixcmapReadStream(stream->f);
+    }
+
+    if (!cmap && ll_isinteger(_fun, L, 1)) {
+        depth = ll_opt_l_int32(_fun, L, 1, 1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d\n", _fun,
+            "depth", depth);
+        cmap = pixcmapCreate(depth);
+    }
+
+    if (!cmap && ll_isstring(_fun, L, 1)) {
+        filename = ll_check_string(_fun, L, 1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
+            "filename", filename);
+        cmap = pixcmapRead(filename);
+    }
+
+    if (!cmap && ll_isstring(_fun, L, 1)) {
+        data = ll_check_lbytes(_fun, L, 1, &size);
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %llu\n", _fun,
+            "data", reinterpret_cast<const void *>(data),
+            "size", static_cast<l_uint64>(size));
+        cmap = pixcmapReadMem(data, size);
+    }
+
+    if (!cmap) {
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d\n", _fun,
+            "depth", depth);
+        cmap = pixcmapCreate(depth);
+    }
+
     return ll_push_PixColormap(_fun, L, cmap);
 }
 

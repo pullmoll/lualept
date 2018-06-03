@@ -107,7 +107,7 @@ ll_check_PixComp(const char *_fun, lua_State *L, int arg)
 PixComp *
 ll_opt_PixComp(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_PixComp(_fun, L, arg);
 }
@@ -129,10 +129,6 @@ ll_push_PixComp(const char *_fun, lua_State *L, PixComp *pixcomp)
 
 /**
  * \brief Create and push a new PixComp*.
- *
- * Arg #1 is expected to be a string (dir).
- * Arg #2 is expected to be a l_int32 (fontsize).
- *
  * \param L pointer to the lua_State
  * \return 1 PixComp* on the Lua stack
  */
@@ -140,9 +136,34 @@ int
 ll_new_PixComp(lua_State *L)
 {
     FUNC("ll_new_PixComp");
-    Pix* pix = ll_opt_Pix(_fun, L, 1);
+    PixComp *pixcomp = nullptr;
+    Pix* pix = nullptr;
+    const char *filename = nullptr;
+    const l_uint8 *data = nullptr;
+    size_t size = 0;
     l_int32 comptype = IFF_DEFAULT;
-    PixComp *pixcomp = pixcompCreateFromPix(pix, comptype);
+    l_int32 copyflag = L_COPY;
+
+    if (ll_isudata(_fun, L, 1, LL_PIX)) {
+        pix = ll_opt_Pix(_fun, L, 1);
+        comptype = ll_check_compression(_fun, L, 2);
+        pixcomp = pixcompCreateFromPix(pix, comptype);
+    }
+
+    if (!pixcomp && ll_isstring(_fun, L, 1)) {
+        filename = ll_opt_string(_fun, L, 1);
+        comptype = ll_check_compression(_fun, L, 2);
+        pixcomp = pixcompCreateFromFile(filename, comptype);
+    }
+
+    if (!pixcomp && ll_isstring(_fun, L, 1)) {
+        data = ll_check_lbytes(_fun, L, 1, &size);
+        /* XXX: deconstify */
+        l_uint8 *data2 = reinterpret_cast<l_uint8 *>(reinterpret_cast<l_intptr_t>(data));
+        copyflag = ll_check_access_storage(_fun, L, 2, copyflag);
+        pixcomp = pixcompCreateFromString(data2, size, copyflag);
+    }
+
     return ll_push_PixComp(_fun, L, pixcomp);
 }
 

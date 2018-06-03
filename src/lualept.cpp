@@ -246,7 +246,7 @@ ll_ludata(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata with %name.
+ * \brief Check Lua stack at index %arg for udata with %tname.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg argument index
@@ -263,6 +263,87 @@ ll_udata(const char *_fun, lua_State *L, int arg, const char* tname)
     }
     luaL_argcheck(L, pptr != nullptr, arg, msg);
     return pptr;
+}
+
+/**
+ * \brief Test if Lua stack at index %arg is a number.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg argument index
+ * \param tname tname to check for
+ * \return TRUE if there is a number at %arg, FALSE otherwise
+ */
+int
+ll_isnumber(const char *_fun, lua_State *L, int arg)
+{
+    int res = lua_isnumber(L, arg);
+    DBG(LOG_CHECK_INTEGER, "%s: res=%s\n", _fun, res ? "TRUE" : "FALSE");
+    return res;
+}
+
+/**
+ * \brief Test if Lua stack at index %arg is a string.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg argument index
+ * \param tname tname to check for
+ * \return TRUE if there is a string at %arg, FALSE otherwise
+ */
+int
+ll_isstring(const char *_fun, lua_State *L, int arg)
+{
+    int res = lua_isstring(L, arg);
+    DBG(LOG_CHECK_STRING, "%s: res=%s\n", _fun, res ? "TRUE" : "FALSE");
+    return res;
+}
+
+/**
+ * \brief Test if Lua stack at index %arg is a C function.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg argument index
+ * \param tname tname to check for
+ * \return TRUE if there is a C function at %arg, FALSE otherwise
+ */
+int
+ll_iscfunction(const char *_fun, lua_State *L, int arg)
+{
+    int res = lua_isstring(L, arg);
+    DBG(LOG_CHECK_STRING, "%s: res=%s\n", _fun, res ? "TRUE" : "FALSE");
+    return res;
+}
+
+/**
+ * \brief Test if Lua stack at index %arg is an integer.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg argument index
+ * \param tname tname to check for
+ * \return TRUE if there is an integer at %arg, FALSE otherwise
+ */
+int
+ll_isinteger(const char *_fun, lua_State *L, int arg)
+{
+    int res = lua_isinteger(L, arg);
+    DBG(LOG_CHECK_INTEGER, "%s: res=%s\n", _fun, res ? "TRUE" : "FALSE");
+    return res;
+}
+
+/**
+ * \brief Test if Lua stack at index %arg is udata of type %tname.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg argument index
+ * \param tname tname to check for
+ * \return TRUE if there is udata of type tname at %arg, FALSE otherwise
+ */
+int
+ll_isudata(const char *_fun, lua_State *L, int arg, const char* tname)
+{
+    void **pptr = reinterpret_cast<void **>(luaL_testudata(L, arg, tname));
+    int res = nullptr != pptr;
+    DBG(LOG_CHECK_UDATA, "%s: res=%s\n", _fun, res ? "TRUE" : "FALSE");
+    return res;
 }
 
 /**

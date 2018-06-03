@@ -1024,7 +1024,7 @@ ll_check_Box(const char *_fun, lua_State *L, int arg)
 Box *
 ll_opt_Box(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_Box(_fun, L, arg);
 }
@@ -1043,6 +1043,7 @@ ll_push_Box(const char *_fun, lua_State *L, Box *box)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, TNAME, box);
 }
+
 /**
  * \brief Create and push a new Box*.
  * \param L pointer to the lua_State
@@ -1054,7 +1055,7 @@ ll_new_Box(lua_State *L)
     FUNC("ll_new_Box");
     Box *box = nullptr;
 
-    if (lua_isuserdata(L, 1)) {
+    if (ll_isudata(_fun, L, 1, LL_BOX)) {
         Box *boxs = ll_opt_Box(_fun, L, 1);
         if (boxs) {
             DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
@@ -1063,7 +1064,7 @@ ll_new_Box(lua_State *L)
         }
     }
 
-    if (!box && lua_isinteger(L, 1)) {
+    if (!box && ll_isinteger(_fun, L, 1)) {
         l_int32 x = ll_opt_l_int32(_fun, L, 1, 0);
         l_int32 y = ll_opt_l_int32(_fun, L, 2, 0);
         l_int32 w = ll_opt_l_int32(_fun, L, 3, 1);

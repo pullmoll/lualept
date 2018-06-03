@@ -689,7 +689,7 @@ ll_check_Dewarp(const char *_fun, lua_State *L, int arg)
 Dewarp *
 ll_opt_Dewarp(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_Dewarp(_fun, L, arg);
 }
@@ -720,22 +720,22 @@ ll_new_Dewarp(lua_State *L)
     FUNC("ll_new_Dewarp");
     Dewarp *dew = nullptr;
 
-    if (lua_isuserdata(L, 1)) {
+    if (ll_isudata(_fun, L, 1, LL_PIX)) {
         Pix *pixs = ll_opt_Pix(_fun, L, 1);
-        if (pixs) {
-            l_int32 pageno = ll_opt_l_int32(_fun, L, 2, 1);
-            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
-                LL_PIX, reinterpret_cast<void *>(pixs));
-            dew = dewarpCreate(pixs, pageno);
-        } else {
-            luaL_Stream *stream = ll_check_stream(_fun, L, 1);
-            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
-                LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
-            dew = dewarpReadStream(stream->f);
-        }
+        l_int32 pageno = ll_opt_l_int32(_fun, L, 2, 1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+            LL_PIX, reinterpret_cast<void *>(pixs));
+        dew = dewarpCreate(pixs, pageno);
     }
 
-    if (!dew && lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
+    if (!dew && ll_isudata(_fun, L, 1, LUA_FILEHANDLE)) {
+        luaL_Stream *stream = ll_check_stream(_fun, L, 1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+            LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
+        dew = dewarpReadStream(stream->f);
+    }
+
+    if (!dew && ll_isinteger(_fun, L, 1) && ll_isinteger(_fun, L, 2)) {
         l_int32 pageno = ll_check_l_int32(_fun, L, 1);
         l_int32 refpage = ll_check_l_int32(_fun, L, 2);
         DBG(LOG_NEW_PARAM, "%s: create for %s = %d, %s = %d\n", _fun,
@@ -743,14 +743,14 @@ ll_new_Dewarp(lua_State *L)
         dew = dewarpCreateRef(pageno, refpage);
     }
 
-    if (!dew && lua_isstring(L, 1)) {
+    if (!dew && ll_isstring(_fun, L, 1)) {
         const char *filename = ll_check_string(_fun, L, 1);
         DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
             "filename", filename);
         dew = dewarpRead(filename);
     }
 
-    if (!dew && lua_isstring(L, 1)) {
+    if (!dew && ll_isstring(_fun, L, 1)) {
         size_t size = 0;
         const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &size);
         DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %llu\n", _fun,

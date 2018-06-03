@@ -35,7 +35,7 @@
  * \file llsel.cpp
  * \class Sel
  *
- * A class handling SEL.
+ * A class handling SEL (structuring elements).
  */
 
 /** Set TNAME to the class name used in this source file */
@@ -728,7 +728,7 @@ ll_check_Sel(const char *_fun, lua_State *L, int arg)
 Sel *
 ll_opt_Sel(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_Sel(_fun, L, arg);
 }
@@ -776,7 +776,7 @@ ll_new_Sel(lua_State *L)
         }
     }
 
-    if (lua_isinteger(L, 1) && lua_isinteger(L, 2)) {
+    if (ll_isinteger(_fun, L, 1) && ll_isinteger(_fun, L, 2)) {
         height = ll_opt_l_int32(_fun, L, 1, height);
         width = ll_opt_l_int32(_fun, L, 2, width);
         name = ll_check_string(_fun, L, 3);
@@ -787,14 +787,14 @@ ll_new_Sel(lua_State *L)
         sel = selCreate(height, width, name);
     }
 
-    if (!sel && lua_isstring(L, 1)) {
+    if (!sel && ll_isstring(_fun, L, 1)) {
         const char* fname = ll_check_string(_fun, L, 1);
         DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
             "fname", fname);
         sel = selRead(fname);
     }
 
-    if (!sel && lua_isstring(L, 1)) {
+    if (!sel && ll_isstring(_fun, L, 1)) {
         const char* text = ll_check_string(_fun, L, 1);
         height = ll_opt_l_int32(_fun, L, 2, height);
         width = ll_opt_l_int32(_fun, L, 3, width);

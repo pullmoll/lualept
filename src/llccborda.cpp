@@ -553,7 +553,7 @@ ll_check_CCBorda(const char *_fun, lua_State *L, int arg)
 CCBorda *
 ll_opt_CCBorda(const char *_fun, lua_State *L, int arg)
 {
-    if (!lua_isuserdata(L, arg))
+    if (!ll_isudata(_fun, L, arg, TNAME))
         return nullptr;
     return ll_check_CCBorda(_fun, L, arg);
 }
@@ -584,23 +584,23 @@ ll_new_CCBorda(lua_State *L)
     FUNC("ll_new_CCBorda");
     CCBorda *ccba = nullptr;
 
-    if (lua_isuserdata(L, 1)) {
+    if (ll_isudata(_fun, L, 1, LL_PIX)) {
         Pix* pixs = ll_opt_Pix(_fun, L, 1);
-        if (pixs) {
-            l_int32 n = ll_opt_l_int32(_fun, L, 2, 1);
-            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %d\n", _fun,
-                LL_PIX, reinterpret_cast<void *>(pixs),
-                "n", n);
-            ccba = ccbaCreate(pixs, n);
-        } else {
-            luaL_Stream *stream = ll_check_stream(_fun, L, 1);
-            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
-                LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
-            ccba = ccbaReadStream(stream->f);
-        }
+        l_int32 n = ll_opt_l_int32(_fun, L, 2, 1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %d\n", _fun,
+            LL_PIX, reinterpret_cast<void *>(pixs),
+            "n", n);
+        ccba = ccbaCreate(pixs, n);
     }
 
-    if (!ccba && lua_isstring(L, 1)) {
+    if (ll_isudata(_fun, L, 1, LUA_FILEHANDLE)) {
+        luaL_Stream *stream = ll_check_stream(_fun, L, 1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+            LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
+        ccba = ccbaReadStream(stream->f);
+    }
+
+    if (!ccba && ll_isstring(_fun, L, 1)) {
         const char* filename = ll_check_string(_fun, L, 1);
         DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
             "filename", filename);
