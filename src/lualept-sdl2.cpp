@@ -352,12 +352,14 @@ FillGrays(SDL_Palette* palette, int ncolors, int firstcolor = 0)
 static void
 FillColors(SDL_Palette* palette, PixColormap *cmap, int ncolors, int firstcolor = 0)
 {
-    if (!cmap)
-        return FillGrays(palette, ncolors, firstcolor);
-
     FUNC("FillColors");
     size_t size = static_cast<size_t>(ncolors) * sizeof(SDL_Color);
     SDL_Color *colors = reinterpret_cast<SDL_Color *>(malloc(size));
+
+    if (!cmap) {
+        DBG(LOG_SDL2, "%s: cmap is NULL\n", _fun);
+        return;
+    }
     if (!colors) {
         DBG(LOG_SDL2, "%s: failed to allocate %d colors\n", _fun,
             ncolors);
@@ -367,7 +369,7 @@ FillColors(SDL_Palette* palette, PixColormap *cmap, int ncolors, int firstcolor 
         "SDL_Palette", reinterpret_cast<void *>(palette),
         ncolors,
         firstcolor,
-        "PixColormap", reinterpret_cast<void *>(cmap));
+        LL_PIXCMAP, reinterpret_cast<void *>(cmap));
 
     for (int i = 0; i < ncolors; i++) {
         l_int32 r, g, b, a;
@@ -447,49 +449,60 @@ ShowSDL2(Pix* pix, const char* title, int x0, int y0, float dscale)
     swidth = static_cast<int>(width * scale);
     sheight = static_cast<int>(height * scale);
 
-    snprintf(info, sizeof(info), "Pix*: %s%dx%dx%d, %s=%d, %s=%d, %s=%.3g",
-             cmap ? "cmap, " : "",
-             width, height, depth,
-             "bpl", 4 * wpl,
-             "bits", bits,
-             "scale", static_cast<double>(scale)
-             );
-    DBG(LOG_SDL2, "%s: %s\n", _fun, info);
-
     switch (depth) {
     case 1:
-        bits = 32;
-        format = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA32);
+        bits = 8;
+        format = SDL_AllocFormat(SDL_PIXELFORMAT_INDEX8);
         palette = format->palette ? format->palette : SDL_AllocPalette(2);
-        FillColors(palette, cmap, 2);
+        if (cmap) {
+            FillColors(palette, cmap, 2);
+        } else {
+            FillGrays(palette, 2);
+        }
         break;
 
     case 2:
-        bits = 32;
-        format = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA32);
+        bits = 8;
+        format = SDL_AllocFormat(SDL_PIXELFORMAT_INDEX8);
         palette = format->palette ? format->palette : SDL_AllocPalette(16);
-        FillColors(palette, cmap, 4);
+        if (cmap) {
+            FillColors(palette, cmap, 4);
+        } else {
+            FillGrays(palette, 4);
+        }
         break;
 
     case 4:
-        bits = 4;
-        format = SDL_AllocFormat(SDL_PIXELFORMAT_INDEX4LSB);
+        bits = 8;
+        format = SDL_AllocFormat(SDL_PIXELFORMAT_INDEX8);
         palette = SDL_AllocPalette(16);
-        FillColors(palette, cmap, 16);
+        if (cmap) {
+            FillColors(palette, cmap, 16);
+        } else {
+            FillGrays(palette, 16);
+        }
         break;
 
     case 8:
         bits = 8;
         format = SDL_AllocFormat(SDL_PIXELFORMAT_INDEX8);
         palette = SDL_AllocPalette(256);
-        FillColors(palette, cmap, 256);
+        if (cmap) {
+            FillColors(palette, cmap, 256);
+        } else {
+            FillGrays(palette, 256);
+        }
         break;
 
     case 16:
         bits = 8;
         format = SDL_AllocFormat(SDL_PIXELFORMAT_INDEX8);
         palette = format->palette ? format->palette : SDL_AllocPalette(256);
-        FillGrays(palette, 256);
+        if (cmap) {
+            FillColors(palette, cmap, 256);
+        } else {
+            FillGrays(palette, 256);
+        }
         break;
 
     case 24:
@@ -511,12 +524,23 @@ ShowSDL2(Pix* pix, const char* title, int x0, int y0, float dscale)
         break;
     }
 
+    snprintf(info, sizeof(info), "Pix*: %s%dx%dx%d, %s=%d, %s=%d, %s=%.3g",
+             cmap ? "cmap, " : "",
+             width, height, depth,
+             "bpl", 4 * wpl,
+             "bits", bits,
+             "scale", static_cast<double>(scale)
+             );
+    DBG(LOG_SDL2, "%s: %s\n", _fun, info);
+
     if (!format) {
         result = FALSE;
         goto failure;
     }
 
-    SDL_SetPixelFormatPalette(format, palette);
+    if (palette) {
+        SDL_SetPixelFormatPalette(format, palette);
+    }
     surface = SDL_CreateRGBSurfaceWithFormat(0, width, height, 32, format->format);
     if (!surface) {
         DBG(LOG_SDL2, "%s: could not create surface\n", _fun);

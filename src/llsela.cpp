@@ -720,16 +720,14 @@ ll_new_Sela(lua_State *L)
     const char* filename = nullptr;
     l_int32 n = 1;
 
-    if (lua_isuserdata(L, 1)) {
+    if (ll_isudata(_fun, L, 1, LUA_FILEHANDLE)) {
         stream = ll_opt_stream(_fun, L, 1);
-        if (stream) {
-            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
-                "stream", reinterpret_cast<void *>(stream));
-            sela = selaReadStream(stream->f);
-        }
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+            "stream", reinterpret_cast<void *>(stream));
+        sela = selaReadStream(stream->f);
     }
 
-    if (ll_isinteger(_fun, L, 1)) {
+    if (!sela && ll_isinteger(_fun, L, 1)) {
         n = ll_opt_l_int32(_fun, L, 1, 1);
         DBG(LOG_NEW_PARAM, "%s: create for %s = %d\n", _fun,
             "n", n);

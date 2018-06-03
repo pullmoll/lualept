@@ -36,6 +36,9 @@
  * \class Sel
  *
  * A class handling SEL (structuring elements).
+ *
+ * The Sel is a 2-dimensional pattern of hits, all relative to an origin
+ * that is often referred to as the center of the Sel.
  */
 
 /** Set TNAME to the class name used in this source file */
@@ -158,7 +161,7 @@ CreateBrick(lua_State *L)
     l_int32 w = ll_check_l_int32(_fun, L, 2);
     l_int32 cy = ll_check_l_int32(_fun, L, 3);
     l_int32 cx = ll_check_l_int32(_fun, L, 4);
-    l_int32 type = ll_check_sel(_fun, L, 5, SEL_DONT_CARE);
+    l_int32 type = ll_check_sel(_fun, L, 5, SEL_HIT);
     Sel *sel = selCreateBrick(h, w, cy, cx, type);
     return ll_push_Sel(_fun, L, sel);
 }
@@ -787,14 +790,7 @@ ll_new_Sel(lua_State *L)
         sel = selCreate(height, width, name);
     }
 
-    if (!sel && ll_isstring(_fun, L, 1)) {
-        const char* fname = ll_check_string(_fun, L, 1);
-        DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
-            "fname", fname);
-        sel = selRead(fname);
-    }
-
-    if (!sel && ll_isstring(_fun, L, 1)) {
+    if (!sel && ll_isstring(_fun, L, 1) && ll_isinteger(_fun, L, 2)) {
         const char* text = ll_check_string(_fun, L, 1);
         height = ll_opt_l_int32(_fun, L, 2, height);
         width = ll_opt_l_int32(_fun, L, 3, width);
@@ -805,6 +801,13 @@ ll_new_Sel(lua_State *L)
             "width", width,
             "name", name);
         sel = selCreateFromString(text, height, width, name);
+    }
+
+    if (!sel && ll_isstring(_fun, L, 1)) {
+        const char* fname = ll_check_string(_fun, L, 1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
+            "fname", fname);
+        sel = selRead(fname);
     }
 
     if (!sel) {
