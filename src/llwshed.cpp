@@ -68,7 +68,7 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Printable string for a DPix*.
+ * \brief Printable string for a WShed*.
  * \param L pointer to the lua_State
  * \return 1 string on the Lua stack
  */
@@ -272,7 +272,7 @@ ll_opt_WShed(const char *_fun, lua_State *L, int arg)
  * \brief Push BMF user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
- * \param wshed pointer to the WShed
+ * \param ws pointer to the WShed
  * \return 1 WShed* on the Lua stack
  */
 int
@@ -308,7 +308,7 @@ ll_new_WShed(lua_State *L)
     return ll_push_WShed(_fun, L, wshed);
 }
 /**
- * \brief Register the BMF methods and functions in the TNAME meta table.
+ * \brief Register the WShed methods and functions in the TNAME meta table.
  * \param L pointer to the lua_State
  * \return 1 table on the Lua stack
  */

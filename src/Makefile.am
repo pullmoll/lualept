@@ -13,6 +13,7 @@ liblualept_la_SOURCES = \
 	modules.h \
 	llamap.cpp \
 	llaset.cpp \
+	llbbuffer.cpp \
 	llbmf.cpp \
 	llbox.cpp \
 	llboxa.cpp \
@@ -44,7 +45,7 @@ liblualept_la_SOURCES = \
 	llsel.cpp \
 	llsela.cpp \
 	llstack.cpp \
-	llwsched.cpp
+	llwshed.cpp
 
 pkginclude_HEADERS = lualept.h
 

@@ -17,6 +17,7 @@ heads = {}
 -- Sort a table by its keys
 -- \param t table
 -- \param order optional function to sort table entries
+--
 function spairs(t, order)
 	-- collect the keys
 	local keys = {}
@@ -42,6 +43,7 @@ end
 -- Return the size of a (non-array) table
 -- \param t table
 -- \return number of items in table
+--
 function tsize(t)
 	local n = 0
 	for k in pairs(t) do n = n + 1 end
@@ -52,6 +54,7 @@ end
 -- List the array table (t) contents to fd.
 -- \param fd io file descriptor
 -- \param t array table to list
+--
 function list(fd, t)
 	if t ~= nil then
 		for _,l in ipairs(t) do
@@ -60,25 +63,53 @@ function list(fd, t)
 	end
 end
 
+---
+-- Return true, if %str has the format " * Note:" or " * Notes:"
+-- \param str string to test
+--
 function is_notes(str)
 	local m = str:match('^ %*.*(Note[s]?:)$')
 	return m ~= nil
 end
 
+---
+-- Return true, if %str starts with "/**" or "/*!"
+-- \param str string to test
+--
 function is_doxy_start(str)
 	local m = str:match('^/%*%*$') or str:match('^/%*%!$')
 	return m ~= nil
 end
 
+---
+-- Return true, if %str is " */"
+-- \param str string to test
+--
 function is_doxy_end(str)
 	local m = str:match('^ %*/$')
 	return m ~= nil
 end
 
 ---
+-- Return true, if the table array t contains v
+-- \param t table array to scan
+-- \param val value to find
+--
+function contains(t,val)
+	for i,v in ipairs(t) do
+		if v == val then
+			return true
+		end
+	end
+	return false
+end
+
+
+---
 -- Extract pre-formatted comment sections from the file fs.
 -- Modifies the global heads table
 -- \param fs source file stream
+--
 function pre_comments(fs)
 	local head = {}			-- currently collected heading
 	local fname = nil		-- current function/heading name (start with head before 1st function)
@@ -161,7 +192,9 @@ end
 
 ---
 -- Strip known type prefixes from a Leptonica function name
--- param str Leptonica function name
+-- \param str Leptonica function name
+-- \return string with prefix stripped
+--
 function strip_ftype(str)
 	local p, s = str:match("^([%l_]+)(.*)")
 	local prefixes = {
@@ -240,70 +273,95 @@ end
 -- Return the lualapt getter for parameter type
 -- \param vtype type name of the variable
 -- \param arg argument #
-function getter(vtype, arg)
-	if vtype == "const char *" or vtype == "char *" then
+-- \return string with call to function to retrieve vtype
+--
+function getter(vtype, arg, name)
+	if vtype == "const char*" then
 		return "ll_check_string(_fun, L, " .. arg .. ")"
-	elseif vtype == "luaL_Stream *" then
-		return "ll_check_stream(_fun, L, " .. arg .. ")"
-	elseif vtype:match("l_uint8 %*") then
-		return "ll_check_lstring(_fun, L, " .. arg .. ", &size)"
-	elseif vtype:match("l_int32 %*") then
-		-- l_int32 *array;
-		return "ll_unpack_Iarray(_fun, L, " .. arg .. ", &size)"
-	elseif vtype:match("l_uint32 %*") then
-		-- l_uint32 *array;
-		return "ll_unpack_Uarray(_fun, L, " .. arg .. ", &size)"
-	elseif vtype:match("l_float32 %*") then
-		-- l_float32 *array;
-		return "ll_unpack_Farray(_fun, L, " .. arg .. ", &size)"
-	elseif vtype:match("l_float64 %*") then
-		-- l_float64 *array;
-		return "ll_unpack_Darray(_fun, L, " .. arg .. ", &size)"
-	elseif vtype:match("Sarray %*") then
-		-- Sarray *sa;
-		return "ll_unpack_Sarray(_fun, L, " .. arg .. ")"
-	else
-		local vtype_nostars = vtype:gsub("%*", "")
-		local vtype_noblank = vtype_nostars:gsub("%s", "")
-		return "ll_check_" .. vtype_noblank .. "(_fun, L, " .. arg .. ")"
 	end
+	if vtype == "const l_uint8*" then
+		return "ll_check_lbytes(_fun, L, " .. arg .. ", &size)"
+	end
+	if vtype:match("FILE%s*%*") then
+		return "ll_check_stream(_fun, L, " .. arg .. ")"
+	end
+	if vtype:match("luaL_Stream%s*%*") then
+		return "ll_check_stream(_fun, L, " .. arg .. ")"
+	end
+	if vtype == "l_int32*" then
+		return "ll_unpack_Iarray(_fun, L, " .. arg .. ", &size)"
+	end
+	if vtype == "l_uint32*" then
+		return "ll_unpack_Uarray(_fun, L, " .. arg .. ", &size)"
+	end
+	if vtype == "l_float32*" then
+		return "ll_unpack_Farray(_fun, L, " .. arg .. ", &size)"
+	end
+	if vtype == "l_float64*" then
+		return "ll_unpack_Darray(_fun, L, " .. arg .. ", &size)"
+	end
+	if vtype == "Sarray*" then
+		return "ll_unpack_Sarray(_fun, L, " .. arg .. ", nullptr)"
+	end
+	if name == "accessflag" or name == "copyflag" then
+		return "ll_check_access_storage(_fun, L, " .. arg .. ")"
+	end
+	if name == "index" then
+		return "ll_check_index(_fun, L, " .. arg .. ")"
+	end
+	vtype = vtype:gsub("%*", "")
+	vtype = vtype:gsub("%s", "")
+	return "ll_check_" .. vtype .. "(_fun, L, " .. arg .. ")"
 end
+
+---
+-- Return the initializer for parameter type
+-- \param vtype type name of the variable
+-- \param arg argument #
+-- \return string with call to function to retrieve vtype
+--
+function initer(vtype, arg, name)
+	if vtype:match("%*$") then
+		return "nullptr"
+	end
+	return "0"
+end
+
 ---
 -- Return the lualapt pusher for return type
 -- \param vtype type name of the variable
 -- \param var name of the local variable to push
 -- \param isref true, if the variable is a reference
+--
 function pusher(vtype, var, isref)
 	if vtype:match("l_ok") then
 		return "ll_push_boolean(_fun, L, 0 == " .. var .. ")"
 	end
 	if isref then
-		if vtype:match("l_uint8 %*") then
-			-- l_uint8 *data;
-			return "ll_push_lstring(_fun, L, reinterpret_cast<const char *>(" .. var .."), size)"
-		elseif vtype:match("char %*") then
-			-- char *string;
+		if vtype:match("l_uint8%*") then
+			return "ll_push_lbytes(_fun, L, " .. var ..", size)"
+		end
+		if vtype:match("char%*") then
 			return "ll_push_string(_fun, L, " .. var ..")"
-		elseif vtype:match("l_int32 %*") then
-			-- l_int32 *array;
+		end
+		if vtype:match("l_int32%*") then
 			return "ll_push_Iarray(_fun, L, " .. var .. ", size)"
-		elseif vtype:match("l_uint32 %*") then
-			-- l_uint32 *array;
+		end
+		if vtype:match("l_uint32%*") then
 			return "ll_push_Uarray(_fun, L, " .. var .. ", size)"
-		elseif vtype:match("l_float32 %*") then
-			-- l_float32 *array;
+		end
+		if vtype:match("l_float32%*") then
 			return "ll_push_Farray(_fun, L, " .. var .. ", size)"
-		elseif vtype:match("l_float64 %*") then
-			-- l_float64 *array;
+		end
+		if vtype:match("l_float64%*") then
 			return "ll_push_Darray(_fun, L, " .. var .. ", size)"
-		elseif vtype:match("Sarray %*") then
-			-- Sarray *sa;
+		end
+		if vtype:match("Sarray%*") then
 			return "ll_push_Sarray(_fun, L, " .. var .. ")"
 		end
 	end
-	local vtype_nostart = vtype:gsub("%*", "")
-	local vtype_noblank = vtype_nostart:gsub("%s", "")
-	return "ll_push_" .. vtype_noblank .. "(_fun, L, " .. var ..")"
+	vtype = vtype:gsub("%*$", "")
+	return "ll_push_" .. vtype .. "(_fun, L, " .. var ..")"
 end
 
 ---
@@ -319,7 +377,7 @@ function result_name(rtype, names)
 				Aset		= "aset",
 				AsetNode	= "node",
 				Bmf		= "bmf",
-				Bbuffer		= "bbuf",
+				Byterbuffer	= "bbuf",
 				Box		= "box",
 				Boxa		= "boxa",
 				Boxaa		= "boxaa",
@@ -353,23 +411,34 @@ function result_name(rtype, names)
 			}
 			return varname[s] or "result"
 		end)
-	if names[str] ~= nil then
-		str = "r" .. str
+	-- already have a variable str in the names?
+	if contains(names,str) then
+		if contains(names,str .. "d") then
+			str = "r" .. str
+		else
+			str = str .. "d"
+		end
 	end
 	return str
 end
 
 ---
--- Return the type name for a variable type
+-- Return the type name description for a variable type
 -- \param vtype type name of the variable
+--
 function typedescr(vtype)
-	if vtype == "const char *" or vtype == "char *" then
+	if vtype:match("((const )?char$s*%*)") then
 		return "string"
-	elseif vtype == "FILE *" then
-		return "luaL_Stream*"
-	else
-		return vtype:gsub("%s","")
 	end
+	if vtype:match("((const )?l_uint8$s*%*)") then
+		return "lstring"
+	end
+	if vtype:match("FILE%s*%*") then
+		return "luaL_Stream*"
+	end
+	vtype = vtype:gsub("%s+%*", "*")
+	vtype = vtype:gsub("%s+$", "")
+	return vtype
 end
 
 ---
@@ -377,6 +446,7 @@ end
 -- \param types table array of types
 -- \param names table array of names
 -- \param refs table of names that are non-parameters
+--
 function params(types, names, refs)
 	local str = ""
 	for i=1,#types do
@@ -395,8 +465,10 @@ function params(types, names, refs)
 end
 
 ---
+-- Parse the string str and write the lualept function body
 -- \param fd destination file stream
 -- \param str Leptonica function template from allheaders.h
+--
 function parse(fd, str)
 	if str == nil then
 		return
@@ -409,7 +481,6 @@ function parse(fd, str)
 				L_ASET		= "Aset",
 				L_ASET_NODE	= "AsetNode",
 				L_BMF		= "Bmf",
-				BBUFFER		= "Bbuffer",
 				BOX		= "Box",
 				BOXA		= "Boxa",
 				BOXAA		= "Boxaa",
@@ -418,7 +489,7 @@ function parse(fd, str)
 				DPIX		= "DPix",
 				FPIX		= "FPix",
 				FPIXA		= "FPixa",
-				L_BBUFFER	= "Bbuffer",
+				L_BBUFFER	= "ByteBuffer",
 				L_COMP_DATA	= "CompData",
 				L_DEWARP	= "Dewarp",
 				L_DEWARPA	= "Dewarpa",
@@ -427,6 +498,8 @@ function parse(fd, str)
 				L_KERNEL	= "Kernel",
 				L_PDF_DATA	= "PdfData",
 				L_STACK		= "Stack",
+				L_STRCODE	= "StrCode",
+				L_WALLTIMER	= "WallTimer",
 				L_WSHED		= "WShed",
 				NUMA		= "Numa",
 				NUMAA		= "Numaa",
@@ -445,7 +518,9 @@ function parse(fd, str)
 			}
 			return rename[s]
 		end)
-	print("====> " .. str)
+	if debug then
+		print("====> " .. str)
+	end
 
 	-- extract the return value, the function's name and
 	-- the position where the function's arguments start
@@ -456,17 +531,17 @@ function parse(fd, str)
 	-- remove leading and trailing parenthesis
 	local args = args:match("%(%s*([^)]-)%s*%)")
 	-- turn parameters into a comma separated string without blanks between
-	local argl = args:gsub("%s*([^,]+),?%s*", function (s)
+	local args = args:gsub("%s*([^,]+),?%s*", function (s)
 			return s..","
 		end)
 	-- strip last comma (,)
-	argl = argl:sub(1, -2)
+	args = args:sub(1, -2)
 
 	if debug then
 		print("rtype   : '" .. rtype .. "'")
 		print("fname   : '" .. fname .. "'")
 		print("argspos : '" .. argspos .. "'")
-		print("argl    : '" .. argl .. "'")
+		print("args    : '" .. args .. "'")
 	end
 
 	local vars = {}		-- table array of variables
@@ -478,44 +553,57 @@ function parse(fd, str)
 	local retn = 0
 
 	-- fill the arrays
-	for p in argl:gmatch("([^,]+),?") do
+	for p in args:gmatch("([^,]+),?") do
 		local vtype, name, get
 		if p == "..." then
 			vtype, name = "va_list", "ap"
-		elseif p:match("^FILE *") then
-			-- replace "FILE * fp" with "luaL_Strea * stream"
-			vtype = "luaL_Stream *"
+		elseif p == "FILE *" then
+			-- replace "FILE* fp" with "luaL_Stream* stream"
+			vtype = "luaL_Stream*"
 			name = "stream"
+		elseif p:match("^const ") then
+			vtype, name = p:match("^(const [%w_]+%s*%**)%s*(.*)")
 		else
-			if p:match("^const ") then
-				vtype, name = p:match("^(const [%w_]+%s*%**)%s*(.*)")
-			else
-				vtype, name = p:match("([%w_]+%s*%**)%s*(.*)")
-			end
+			vtype, name = p:match("([%w_]+%s*%**)%s*(.*)")
 		end
-		if vtype:match("%*%*$")				-- vtype ends with "**"
-			or vtype:match("^l_u?int.*%*")		-- or starts with "l_int" or "l_uint"
-			or vtype:match("^l_float.*%*")		-- or starts with "l_float"
-			or vtype:match("^size_t%s*%*") then	-- or is a "size_t *"
+		-- remove blanks before an asterisk
+		vtype = vtype:gsub("%s+%*", "*")
+
+		if debug then
+			print("vtype   : '" .. vtype .. "'")
+			print("name    : '" .. name .. "'")
+		end
+
+		if vtype:match("%*%*$") and			-- vtype ends with "**" and
+			name:match("^p") and (			-- name starts with a "p" and
+				vtype:match("^l_int.*%*")	-- vtype is a "l_int*"
+				or vtype:match("^l_uint.*%*")	-- or is a "l_uint*"
+				or vtype:match("^l_float.*%*")	-- or is a "l_float*"
+				or vtype:match("^size_t%s*%*")	-- or is a "size_t*"
+				or vtype:match("^[A-Z]") )	-- or starts with an uppercase letter
+			then
 			-- this is (most probably) a pointer to a variable
 			vtype = vtype:sub(1,-2)			-- strip 2nd asterisk
-			name = name:gsub("p?(.*)","%1")		-- strip leading "p" from the name
+			name = name:sub(2,-1)			-- strip leading "p" from the name
 			refs[name] = true
-			if vtype:match("^l_.*[^*]") or vtype:match("^size_t.*[^*]") then
-				get = "0"
-			else
-				get = "nullptr"
-			end
-		elseif vtype:match("%*$") and (			-- starts ends with "*"
-			vtype:match("^l_u?int") or		-- and starts with "l_int" or "l_uint"
-			vtype:match("^l_float") ) then		-- or starts with "l_float"
-			name = name:gsub("p?(.*)","%1")		-- strip leading "p" from the name
+			get = initer(vtype)
+		elseif vtype:match("%*$") and			-- vtype ends with "*" and
+			name:match("^p") and (			-- name starts with a "p" and
+			vtype:match("^l_int.*%*")		-- vtype is a "l_int*"
+			or vtype:match("^l_uint.*%*")		-- or is a "l_uint*"
+			or vtype:match("^l_float.*%*")		-- or is a "l_float*"
+			or vtype:match("^size_t%s*%*") )	-- or is a "size_t*"
+			then
+			-- this is (most probably) a pointer to a variable
+			vtype = vtype:sub(1,-2)	.. " "		-- strip asterisk and append a space
+			name = name:sub(2,-1)			-- strip leading "p" from the name
 			refs[name] = true
-			get = "nullptr"
+			get = initer(vtype)
 		else
-			get = getter(vtype, argi)
+			get = getter(vtype, argi, name)
 			argi = argi + 1
 		end
+		vtype = vtype:gsub("%*", " *")
 		types[argc] = vtype
 		names[argc] = name
 		vars[argc] = '    ' .. vtype .. name .. ' = ' .. get .. ';'
@@ -577,7 +665,16 @@ function parse(fd, str)
 	func[#func+1] = '{'
 	func[#func+1] = '    LL_FUNC("' .. strip_ftype(fname) .. '");'
 	for i = 1, #vars do
-		func[#func+1] = vars[i]
+		local name = names[i]
+		if refs[name] == nil then
+			func[#func+1] = vars[i]
+		end
+	end
+	for i = 1, #vars do
+		local name = names[i]
+		if refs[name] ~= nil then
+			func[#func+1] = vars[i]
+		end
 	end
 
 	if tsize(refs) > 0 then
@@ -587,7 +684,7 @@ function parse(fd, str)
 			-- The Leptonica function returns 0 on success
 			func[#func+1] = '    if (' .. fname .. '(' .. params(types, names, refs) .. '))'
 			func[#func+1] = '        return ll_push_nil(L);'
-		elseif rypte == nil or rytpe == "void " then
+		elseif rypte == nil or rytpe == "void" then
 			-- the function returns nothing
 			func[#func+1] = '    ' .. fname .. '(' .. params(types, names, refs) .. ');'
 		else

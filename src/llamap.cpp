@@ -439,7 +439,7 @@ ll_push_Amap(const char *_fun, lua_State *L, Amap *amap)
  * \brief Create and push a new Amap*.
  * <pre>
  * Arg #1 is expected to be a key type name (int, uint, or float).
- * <pre>
+ * </pre>
  * \param L pointer to the lua_State
  * \return 1 Amap* on the Lua stack
  */

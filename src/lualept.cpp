@@ -53,6 +53,7 @@
  * - LuaLept the main class
  * - Amap
  * - Aset
+ * - ByteBuffer
  * - Bmf
  * - Box
  * - Boxa
@@ -86,6 +87,7 @@
  * - Sel
  * - Sela
  * - Stack
+ * - WShed
  *
  * Jürgen Buchmüller <pullmoll@t-online.de>
  */
@@ -270,7 +272,6 @@ ll_udata(const char *_fun, lua_State *L, int arg, const char* tname)
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg argument index
- * \param tname tname to check for
  * \return TRUE if there is a number at %arg, FALSE otherwise
  */
 int
@@ -286,7 +287,6 @@ ll_isnumber(const char *_fun, lua_State *L, int arg)
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg argument index
- * \param tname tname to check for
  * \return TRUE if there is a string at %arg, FALSE otherwise
  */
 int
@@ -302,7 +302,6 @@ ll_isstring(const char *_fun, lua_State *L, int arg)
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg argument index
- * \param tname tname to check for
  * \return TRUE if there is a C function at %arg, FALSE otherwise
  */
 int
@@ -318,7 +317,6 @@ ll_iscfunction(const char *_fun, lua_State *L, int arg)
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg argument index
- * \param tname tname to check for
  * \return TRUE if there is an integer at %arg, FALSE otherwise
  */
 int
@@ -408,6 +406,7 @@ ll_global_cfunct(const char *_fun, lua_State *L, const char* tname, lua_CFunctio
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param tname table name for the udata
+ * \param cfunct C function which creates a table on the Lua stack
  * @return 0 for nothing on the Lua stack
  */
 int
@@ -660,7 +659,7 @@ ll_push_lstring(const char* _fun, lua_State *L, const char* str, size_t len)
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param data lstring value (array of bytes)
- * \param len lstring length
+ * \param nbytes lstring length
  * \return 1 boolean on the Lua stack
  */
 int
@@ -921,7 +920,7 @@ ll_unpack_Iarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the table
- * \param pn pointer to a l_int32 receiving the size of the array
+ * \param plen pointer to a l_int32 receiving the size of the array
  * \return allocated array l_uint32* with *pn entries
  */
 l_uint32 *

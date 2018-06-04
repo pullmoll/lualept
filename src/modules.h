@@ -112,6 +112,7 @@ enum dbg_enable_flags {
 #define	LL_LUALEPT      "LuaLept"       /*!< Lua class: LuaLept (top level) */
 #define	LL_AMAP		"Amap"          /*!< Lua class: Amap (key / value pairs) */
 #define	LL_ASET		"Aset"          /*!< Lua class: Aset (key set) */
+#define	LL_BBUFFER	"Bbuffer"       /*!< Lua class: Bbuffer (byte buffer) */
 #define	LL_BMF		"Bmf"           /*!< Lua class: Bmf (Bitmap font) */
 #define	LL_BOX		"Box"           /*!< Lua class: Box (quad l_int32 for x,y,w,h) */
 #define	LL_BOXA		"Boxa"          /*!< Lua class: Boxa (array of Box) */
@@ -196,16 +197,17 @@ typedef L_AMAP              Amap;           /*!< Local type name for L_AMAP */
 typedef L_AMAP_NODE         AmapNode;       /*!< Local type name for L_AMAP_NODE */
 typedef L_ASET              Aset;           /*!< Local type name for L_ASET */
 typedef L_ASET_NODE         AsetNode;       /*!< Local type name for L_ASET_NODE */
-typedef L_Bmf               Bmf;            /*!< Local type name for L_Bmf */
-typedef L_Dewarp            Dewarp;         /*!< Local type name for L_Dewarp */
-typedef L_Dewarpa           Dewarpa;        /*!< Local type name for L_Dewarpa */
-typedef L_Dna               Dna;            /*!< Local type name for L_Dna */
-typedef L_Dnaa              Dnaa;           /*!< Local type name for L_Dnaa */
-typedef L_Kernel            Kernel;         /*!< Local type name for L_Kernel */
-typedef L_Compressed_Data   CompData;       /*!< Local type name for L_Compressed_Data */
-typedef L_Pdf_Data          PdfData;        /*!< Local type name for L_Pdf_Data */
-typedef L_Stack             Stack;          /*!< Local type name for L_Stack */
-typedef L_WShed             WShed;          /*!< Local type name for L_WSched */
+typedef L_BBUFFER           ByteBuffer;     /*!< Local type name for L_BBUFFER */
+typedef L_BMF               Bmf;            /*!< Local type name for L_BMF */
+typedef L_DEWARP            Dewarp;         /*!< Local type name for L_DEWAP */
+typedef L_DEWARPA           Dewarpa;        /*!< Local type name for L_DEWARPA */
+typedef L_DNA               Dna;            /*!< Local type name for L_DNA */
+typedef L_DNAA              Dnaa;           /*!< Local type name for L_DNAA */
+typedef L_KERNEL            Kernel;         /*!< Local type name for L_KERNEL */
+typedef L_COMP_DATA         CompData;       /*!< Local type name for L_COMP_DATA */
+typedef L_PDF_DATA          PdfData;        /*!< Local type name for L_PDF_DATA */
+typedef L_STACK             Stack;          /*!< Local type name for L_STACK */
+typedef L_WSHED             WShed;          /*!< Local type name for L_WSched */
 
 /*! Dummy structure for the top level Lua class LL_LUALEPT */
 typedef struct LuaLept {
@@ -375,7 +377,7 @@ extern l_float64      * ll_unpack_Darray(const char *_fun, lua_State *L, int arg
 extern l_float64      * ll_unpack_Darray_2d(const char *_fun, lua_State *L, int arg, l_float64 *data, l_int32 wpl, l_int32 h);
 extern Sarray         * ll_unpack_Sarray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
 
-extern l_int32          ll_check_index(const char *_fun, lua_State *L, int arg, l_int32 imax);
+extern l_int32          ll_check_index(const char *_fun, lua_State *L, int arg, l_int32 imax = INT32_MAX);
 extern char             ll_check_char(const char *_fun, lua_State *L, int arg);
 extern const char     * ll_check_string(const char *_fun, lua_State *L, int arg);
 extern const char     * ll_opt_string(const char *_fun, lua_State *L, int arg, const char* def = nullptr);
@@ -546,6 +548,13 @@ extern Aset           * ll_opt_Aset(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_Aset(const char *_fun, lua_State *L, Aset *aset);
 extern int              ll_new_Aset(lua_State *L);
 extern int              luaopen_Aset(lua_State *L);
+
+/* llbbuffer.cpp */
+extern ByteBuffer     * ll_check_ByteBuffer(const char *_fun, lua_State *L, int arg);
+extern ByteBuffer     * ll_opt_ByteBuffer(const char *_fun, lua_State *L, int arg);
+extern int              ll_push_ByteBuffer(const char *_fun, lua_State *L, ByteBuffer *bb);
+extern int              ll_new_ByteBuffer(lua_State *L);
+extern int              luaopen_ByteBuffer(lua_State *L);
 
 /* llbmf.cpp */
 extern Bmf            * ll_check_Bmf(const char *_fun, lua_State *L, int arg);
