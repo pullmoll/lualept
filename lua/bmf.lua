@@ -9,4 +9,5 @@ print(pad("bmf:GetWidth("..chr..")"), bmf:GetWidth(chr))
 local l = {}
 local h, t = bmf:GetLineStrings("This is just a simple test to see how bmf:GetLineStrings() works out.", 240, 0)
 print(pad("bmf:GetLineStrings(...)"), h, #t, t, tbl(t))
+
 header()

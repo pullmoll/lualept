@@ -1,6 +1,7 @@
 require "lua/tools"
 
 header("Aset")
+
 local aset = Aset("int")
 print(pad("aset"), '#'..#aset, aset)
 aset:Insert(2)
@@ -17,4 +18,5 @@ print(pad("aset:Find(17)"), aset:Find(17))
 print(pad("aset:Delete(17)"), aset:Delete(17))
 print(pad("aset:Find(17)"), aset:Find(17))
 print(pad("aset"), '#'..#aset, aset)
+
 header()

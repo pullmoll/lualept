@@ -1,31 +1,6 @@
-function header(str)
-	local len = str ~= nil and #str or 0
-	local nstar = (78 - len) // 2
-	io.write(string.rep('*',nstar))
-	if (len > 0) then
-		io.write('[' .. str .. ']')
-	end
-	io.write(string.rep('*',nstar))
-	io.write("\n")
-end
+require "lua/tools"
 
-function pad(str)
-	local len = #str
-	local nblank = 38 - len
-	return str .. string.rep(' ', nblank)
-end
-
-function tbl(t)
-	local str = "\n"
-	for i,v in pairs(t) do
-		str = str .. '    ' .. i .. ' = ' .. v .. '\n'
-	end
-	return str
-end
-
-
-header("Main program")
-header()
+header("Kernel")
 
 local kel = Kernel(5,5)
 print(pad("kel = Kernel(5,5)"), kel)
@@ -47,4 +22,3 @@ print(pad("pix = kel:DisplayInPix(4, 2)"), pix)
 pix:View()
 
 header()
-print("That's all, folks!")

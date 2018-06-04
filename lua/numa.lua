@@ -60,3 +60,5 @@ print("na:GetIArray():", tbl(na:GetIArray()))
 local na = na.FromArray({1.1, 2.22, 3.333, 4.4444, 5.55555, 6.66666})
 print(pad("#na"), #na)
 print(pad("na"), na)
+
+header()
