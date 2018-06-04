@@ -62,11 +62,14 @@ enum dbg_enable_flags {
     LOG_CHECK_UDATA     = (1<<15),  /*!< log pushing user data */
     LOG_PUSH_ARRAY      = (1<<16),  /*!< log pushing tables */
     LOG_CHECK_ARRAY     = (1<<17),  /*!< log pushing tables */
-    LOG_SDL2            = (1<<31)   /*!< log SDL2 display code */
+    LOG_SDL2            = (1<<30)   /*!< log SDL2 display code */
 };
 
 #if defined(HAVE_CTYPE_H)
 #include <ctype.h>
+#endif
+#if defined(HAVE_ERRNO_H)
+#include <errno.h>
 #endif
 #if defined(HAVE_FLOAT_H)
 #include <float.h>
@@ -109,6 +112,11 @@ enum dbg_enable_flags {
 #endif
 #if defined(HAVE_SDL2)
 #include <SDL.h>
+#endif
+
+#if !defined(ARRAYSIZE)
+/** Return the number of elements in array %t */
+#define ARRAYSIZE(t) (sizeof(t)/sizeof(t[0]))
 #endif
 
 #define	LL_LUALEPT      "LuaLept"       /*!< Lua class: LuaLept (top level) */
@@ -173,8 +181,6 @@ extern void die(const char *_fun, lua_State* L, const char *format, ...)
     __attribute__((__format__(printf, 3, 4)))
 #endif
 ;
-extern void *ll_ludata(const char *_fun, lua_State* L, int arg);
-extern void **ll_udata(const char *_fun, lua_State* L, int arg, const char *tname);
 
 #ifdef __cplusplus
 extern "C" {
@@ -230,7 +236,10 @@ typedef struct lept_enum {
     l_int32     value;                      /*!< l_int32 with enumeration value */
 }   lept_enum;
 
-/* llept.c */
+/* llept.cpp */
+extern void *ll_ludata(const char *_fun, lua_State* L, int arg);
+extern void **ll_udata(const char *_fun, lua_State* L, int arg, const char *tname);
+
 /**
  * \brief Cast the result of LEPT_MALLOC() to the given type.
  * T is the typename of the result pointer

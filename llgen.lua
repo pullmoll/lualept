@@ -338,25 +338,25 @@ function pusher(vtype, var, isref)
 		return "ll_push_boolean(_fun, L, 0 == " .. var .. ")"
 	end
 	if isref then
-		if vtype:match("l_uint8%*") then
+		if vtype:match("l_uint8%s*%*") then
 			return "ll_push_lbytes(_fun, L, " .. var ..", size)"
 		end
-		if vtype:match("char%*") then
+		if vtype:match("char%s*%*") then
 			return "ll_push_string(_fun, L, " .. var ..")"
 		end
-		if vtype:match("l_int32%*") then
+		if vtype:match("l_int32%s*%*") then
 			return "ll_push_Iarray(_fun, L, " .. var .. ", size)"
 		end
-		if vtype:match("l_uint32%*") then
+		if vtype:match("l_uint32%s*%*") then
 			return "ll_push_Uarray(_fun, L, " .. var .. ", size)"
 		end
-		if vtype:match("l_float32%*") then
+		if vtype:match("l_float32%s*%*") then
 			return "ll_push_Farray(_fun, L, " .. var .. ", size)"
 		end
-		if vtype:match("l_float64%*") then
+		if vtype:match("l_float64%s*%*") then
 			return "ll_push_Darray(_fun, L, " .. var .. ", size)"
 		end
-		if vtype:match("Sarray%*") then
+		if vtype:match("Sarray%s*%*") then
 			return "ll_push_Sarray(_fun, L, " .. var .. ")"
 		end
 	end

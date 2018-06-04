@@ -44,7 +44,7 @@ print(pad("kel = kel:Normalize(2.0)"), kel)
 
 local pix = kel:DisplayInPix(4, 2)
 print(pad("pix = kel:DisplayInPix(4, 2)"), pix)
-pix:Display(0,0)
+pix:View()
 
 header()
 print("That's all, folks!")

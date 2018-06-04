@@ -92,10 +92,6 @@
  * Jürgen Buchmüller <pullmoll@t-online.de>
  */
 
-#if !defined(ARRAYSIZE)
-#define ARRAYSIZE(t) (sizeof(t)/sizeof(t[0]))
-#endif
-
 #if !defined(HAVE_FLOAT_H)
 /* FIXME: how are these values really defined? */
 static const unsigned long _flt_min = 0xfeffffffUL;
@@ -451,7 +447,7 @@ ll_push_udata(const char *_fun, lua_State *L, const char* name, void *udata)
     lua_getfield(L, LUA_REGISTRYINDEX, name);
     lua_setmetatable(L, -2);
     DBG(LOG_PUSH_UDATA, "%s: pushed '%s' ppvoid=%p udata=%p\n",
-         _fun, name ? name : "<nil>",
+        _fun, name ? name : "<nil>",
         reinterpret_cast<void *>(ppvoid),
         reinterpret_cast<void *>(udata));
     return 1;
@@ -1838,7 +1834,7 @@ ll_check_tbl(const char *_fun, lua_State *L, int arg, l_int32 def, const lept_en
     }
 
     snprintf(msg, sizeof(msg), "%s: Invalid option #%d '%s'\n"
-             "Enumeration options:",
+                               "Enumeration options:",
              _fun, arg, str);
     ll_list_tbl_options(L, tbl, len, msg);
     lua_error(L);
@@ -3885,7 +3881,7 @@ Destroy(lua_State *L)
     LuaLept **plept = ll_check_udata<LuaLept>(_fun, L, 1, TNAME);
     LuaLept *ll = *plept;
     DBG(LOG_DESTROY, "%s: '%s' plept=%p ll=%p\n",
-         _fun, TNAME,
+        _fun, TNAME,
         reinterpret_cast<void *>(plept),
         reinterpret_cast<void *>(ll));
     ll_free(ll);
@@ -4217,9 +4213,12 @@ luaopen_lualept(lua_State *L)
     FUNC("luaopen_lualept");
 
     ll_register_class(_fun, L, TNAME, methods);
+    ll_global_table(_fun, L, TNAME, ll_new_lualept);
+
     luaopen_Amap(L);
     luaopen_Aset(L);
     luaopen_Bmf(L);
+    luaopen_ByteBuffer(L);
     luaopen_Box(L);
     luaopen_Boxa(L);
     luaopen_Boxaa(L);
@@ -4231,6 +4230,7 @@ luaopen_lualept(lua_State *L)
     luaopen_Dewarpa(L);
     luaopen_Dna(L);
     luaopen_Dnaa(L);
+    luaopen_DnaHash(L);
     luaopen_DoubleLinkedList(L);
     luaopen_FPix(L);
     luaopen_FPixa(L);
@@ -4247,20 +4247,46 @@ luaopen_lualept(lua_State *L)
     luaopen_Pixaa(L);
     luaopen_Pta(L);
     luaopen_Ptaa(L);
+    luaopen_Sarray(L);
     luaopen_Sel(L);
     luaopen_Sela(L);
     luaopen_Stack(L);
     luaopen_WShed(L);
-    ll_global_table(_fun, L, TNAME, ll_new_lualept);
     return 1;
 }
+
+#define	DO_CHDIR	0
 
 int
 ll_RunScript(const char *script)
 {
     FUNC("ll_RunScript");
+#if DO_CHDIR
+    char cwd[4096];
+    char path[4096];
+    char *slash;
+#endif
     lua_State *L;
     int res;
+
+#if DO_CHDIR
+    /* Save current working directory */
+    getcwd(cwd, sizeof(cwd));
+
+    snprintf(path, sizeof(path), "%s", script);
+    slash = strrchr(path, '/');
+    if (!slash)
+        slash = strrchr(path, '\\');
+    if (slash) {
+        *slash++ = '\0';
+        script = slash;
+    }
+    if (chdir(path)) {
+        DBG(1, "%s: chdir(\"%s\") failed (%s)\n", _fun,
+            path, strerror(errno));
+        return 1;
+    }
+#endif
 
     /* Disable Leptonica debugging (pixDisplay ...) */
     setLeptDebugOK(FALSE);
@@ -4278,6 +4304,9 @@ ll_RunScript(const char *script)
     if (LUA_OK != res) {
         const char* msg = lua_tostring(L, -1);
         lua_close(L);
+#if DO_CHDIR
+        chdir(cwd);
+#endif
         return ERROR_INT(msg, _fun, 1);
     }
 
@@ -4286,9 +4315,15 @@ ll_RunScript(const char *script)
     if (LUA_OK != res) {
         const char* msg = lua_tostring(L, -1);
         lua_close(L);
+#if DO_CHDIR
+        chdir(cwd);
+#endif
         return ERROR_INT(msg, _fun, 1);
     }
 
     lua_close(L);
+#if DO_CHDIR
+    chdir(cwd);
+#endif
     return 0;
 }
