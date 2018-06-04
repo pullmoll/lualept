@@ -203,7 +203,7 @@ ConvertToSarray(lua_State *L)
     l_int32 size2 = L_FLOAT_VALUE == type ? ll_opt_l_int32(_fun, L, 4, 0) : 0;
     l_int32 addzeroes = ll_opt_boolean(_fun, L, 5, FALSE);
     Sarray *sa = numaConvertToSarray(na, size1, size2, addzeroes, type);
-    ll_push_Sarray(_fun, L, sa);
+    ll_pack_Sarray(_fun, L, sa);
     sarrayDestroy(&sa);
     return 1;
 }
@@ -331,7 +331,7 @@ GetFArray(lua_State *L)
     Numa *na = ll_check_Numa(_fun, L, 1);
     l_float32 *farray = numaGetFArray(na, L_COPY);
     l_int32 n = numaGetCount(na);
-    int res = ll_push_Farray(_fun, L, farray, n);
+    int res = ll_pack_Farray(_fun, L, farray, n);
     ll_free(farray);
     return res;
 }
@@ -388,7 +388,7 @@ GetIArray(lua_State *L)
     Numa *na = ll_check_Numa(_fun, L, 1);
     l_int32 *iarray = numaGetIArray(na);
     l_int32 n = numaGetCount(na);
-    int res = ll_push_Iarray(_fun, L, iarray, n);
+    int res = ll_pack_Iarray(_fun, L, iarray, n);
     ll_free(iarray);
     return res;
 }

@@ -128,7 +128,7 @@ GetLineStrings(lua_State *L)
     l_int32 h = 0;
     Sarray *sa = bmfGetLineStrings(bmf, str, maxw, firstident, &h);
     ll_push_l_int32(_fun, L, h);
-    ll_push_Sarray(_fun, L, sa);
+    ll_pack_Sarray(_fun, L, sa);
     sarrayDestroy(&sa);
     return 2;
 }

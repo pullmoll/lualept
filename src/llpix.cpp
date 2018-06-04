@@ -11651,7 +11651,7 @@ ExtractData(lua_State *L)
     l_uint32 *data = pixExtractData(pixs);
     l_int32 wpl = pixGetWpl(pixs);
     l_int32 h = pixGetHeight(pixs);
-    return ll_push_Uarray_2d(_fun, L, data, wpl, h);
+    return ll_pack_Uarray_2d(_fun, L, data, wpl, h);
 }
 
 /**
@@ -14965,7 +14965,7 @@ GetBinnedColor(lua_State *L)
 
     if (pixGetBinnedColor(pixs, pixg, factor, nbins, alut, &carray, 0))
         return ll_push_nil(L);
-    res = ll_push_Uarray(_fun, L, carray, nbins);
+    res = ll_pack_Uarray(_fun, L, carray, nbins);
     ll_free(carray);
     return res;
 }
@@ -15005,7 +15005,7 @@ GetBinnedComponentRange(lua_State *L)
         return ll_push_nil(L);
     ll_push_l_int32(_fun, L, minval);
     ll_push_l_int32(_fun, L, maxval);
-    res = ll_push_Uarray(_fun, L, carray, nbins);
+    res = ll_pack_Uarray(_fun, L, carray, nbins);
     ll_free(carray);
     return 2 + res;
 }
@@ -15339,7 +15339,7 @@ GetColumnStats(lua_State *L)
         ll_free(rowvect);
         return ll_push_nil(L);
     }
-    ll_push_Farray(_fun, L, rowvect, nbins);
+    ll_pack_Farray(_fun, L, rowvect, nbins);
     ll_free(rowvect);
     return 1;
 }
@@ -15360,7 +15360,7 @@ GetData(lua_State *L)
     l_uint32 *data = pixGetData(pix);
     l_int32 wpl = pixGetWpl(pix);
     l_int32 h = pixGetHeight(pix);
-    return ll_push_Uarray_2d(_fun, L, data, wpl, h);
+    return ll_pack_Uarray_2d(_fun, L, data, wpl, h);
 }
 
 /**
@@ -16053,7 +16053,7 @@ GetMostPopulatedColors(lua_State *L)
     PixColormap *cmap = nullptr;
     if (pixGetMostPopulatedColors(pixs, sigbits, factor, ncolors, &array, &cmap))
         return ll_push_nil(L);
-    ll_push_Uarray(_fun, L, array, ncolors);
+    ll_pack_Uarray(_fun, L, array, ncolors);
     ll_push_PixColormap(_fun, L, cmap);
     return 2;
 }
@@ -16584,7 +16584,7 @@ GetRankColorArray(lua_State *L)
 
     if (pixGetRankColorArray(pixs, nbins, type, factor, &carray, 0, 0))
         return ll_push_nil(L);
-    res = ll_push_Uarray(_fun, L, carray, nbins);
+    res = ll_pack_Uarray(_fun, L, carray, nbins);
     ll_free(carray);
     return res;
 }
@@ -16843,7 +16843,7 @@ GetRowStats(lua_State *L)
         ll_free(colvect);
         return ll_push_nil(L);
     }
-    ll_push_Farray(_fun, L, colvect, nbins);
+    ll_pack_Farray(_fun, L, colvect, nbins);
     ll_free(colvect);
     return 1;
 }
@@ -16956,7 +16956,7 @@ GetSortedNeighborValues(lua_State *L)
     l_int32 nvals = 0;
     if (pixGetSortedNeighborValues(pixs, x, y, conn, &neigh, &nvals))
         return ll_push_nil(L);
-    ll_push_Iarray(_fun, L, neigh, nvals);
+    ll_pack_Iarray(_fun, L, neigh, nvals);
     ll_free(neigh);
     return 1;
 }
@@ -18979,7 +18979,7 @@ MedianCutHisto(lua_State *L)
     l_int32 subsample = ll_check_l_int32(_fun, L, 3);
     l_int32 size = 1 << (3 * sigbits);
     l_int32 *result = pixMedianCutHisto(pixs, sigbits, subsample);
-    return ll_push_Iarray(_fun, L, result, size);
+    return ll_pack_Iarray(_fun, L, result, size);
 }
 
 /**
@@ -21382,7 +21382,7 @@ ProcessBarcodes(lua_State *L)
     l_int32 debugflag = ll_check_l_int32(_fun, L, 5);
     if (pixProcessBarcodes(pixs, format, method, &saw, debugflag))
         return ll_push_nil(L);
-    ll_push_Sarray(_fun, L, saw);
+    ll_pack_Sarray(_fun, L, saw);
     return 1;
 }
 
@@ -22546,7 +22546,7 @@ ReadBarcodes(lua_State *L)
     l_int32 debugflag = ll_check_l_int32(_fun, L, 5);
     if (pixReadBarcodes(pixa, format, method, &saw, debugflag))
         return ll_push_nil(L);
-    ll_push_Sarray(_fun, L, saw);
+    ll_pack_Sarray(_fun, L, saw);
     return 1;
 }
 
@@ -28231,7 +28231,7 @@ SerializeToMemory(lua_State *L)
     size_t nbytes = 0;
     if (pixSerializeToMemory(pixs, &data, &nbytes))
         return ll_push_nil(L);
-    return ll_push_Uarray(_fun, L, data, static_cast<l_int32>(nbytes / sizeof(l_uint32)));
+    return ll_pack_Uarray(_fun, L, data, static_cast<l_int32>(nbytes / sizeof(l_uint32)));
 }
 
 /**

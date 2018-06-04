@@ -500,7 +500,7 @@ GetSelnames(lua_State *L)
     LL_FUNC("GetSelnames");
     Sela *sela = ll_check_Sela(_fun, L, 1);
     Sarray *sa = selaGetSelnames(sela);
-    ll_push_Sarray(_fun, L, sa);
+    ll_pack_Sarray(_fun, L, sa);
     sarrayDestroy(&sa);
     return 1;
 }

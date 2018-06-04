@@ -723,7 +723,7 @@ GetData(lua_State *L)
     if (fpixGetDimensions(fpix, &w, &h))
         return ll_push_nil(L);
     l_float32 *farray = fpixGetData(fpix);
-    return ll_push_Farray_2d(_fun, L, farray, wpl, h);
+    return ll_pack_Farray_2d(_fun, L, farray, wpl, h);
 }
 
 /**

@@ -883,10 +883,10 @@ ToArrays(lua_State *L)
     l_int32 *amap = nullptr;
     if (pixcmapToArrays(cmap, &rmap, &gmap, &bmap, &amap))
         return ll_push_nil(L);
-    ll_push_Iarray(_fun, L, rmap, ncolors);
-    ll_push_Iarray(_fun, L, gmap, ncolors);
-    ll_push_Iarray(_fun, L, bmap, ncolors);
-    ll_push_Iarray(_fun, L, amap, ncolors);
+    ll_pack_Iarray(_fun, L, rmap, ncolors);
+    ll_pack_Iarray(_fun, L, gmap, ncolors);
+    ll_pack_Iarray(_fun, L, bmap, ncolors);
+    ll_pack_Iarray(_fun, L, amap, ncolors);
     ll_free(rmap);
     ll_free(gmap);
     ll_free(bmap);
@@ -915,7 +915,7 @@ ToRGBTable(lua_State *L)
     l_uint32 *table = nullptr;
     if (pixcmapToRGBTable(cmap, &table, &ncolors))
         return ll_push_nil(L);
-    ll_push_Uarray(_fun, L, table, ncolors);
+    ll_pack_Uarray(_fun, L, table, ncolors);
     ll_free(table);
     return 4;
 }

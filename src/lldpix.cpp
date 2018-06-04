@@ -374,7 +374,7 @@ GetData(lua_State *L)
     l_int32 wpl = dpixGetWpl(dpix);
     l_int32 w = 0;
     l_int32 h = 0;
-    return ll_push_Darray_2d(_fun, L, data, wpl, h);
+    return ll_pack_Darray_2d(_fun, L, data, wpl, h);
 }
 
 /**
@@ -703,7 +703,7 @@ SetData(lua_State *L)
         return ll_push_nil(L);
     if (dpixSetData(dpix, data))
         return ll_push_nil(L);
-    ll_push_Darray_2d(_fun, L, data, wpl, h);
+    ll_pack_Darray_2d(_fun, L, data, wpl, h);
     ll_free(data);
     return 1;
 }

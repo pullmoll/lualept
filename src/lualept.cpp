@@ -328,6 +328,21 @@ ll_isinteger(const char *_fun, lua_State *L, int arg)
 }
 
 /**
+ * \brief Test if Lua stack at index %arg is a table.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg argument index
+ * \return TRUE if there is udata of type tname at %arg, FALSE otherwise
+ */
+int
+ll_istable(const char *_fun, lua_State *L, int arg)
+{
+    int res = lua_istable(L, arg);
+    DBG(LOG_CHECK_TABLE, "%s: res=%s\n", _fun, res ? "TRUE" : "FALSE");
+    return res;
+}
+
+/**
  * \brief Test if Lua stack at index %arg is udata of type %tname.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
@@ -683,7 +698,7 @@ ll_push_bytes(const char* _fun, lua_State *L, l_uint8* data, size_t nbytes)
  * \return 1 table on the stack
  */
 int
-ll_push_Iarray(const char* _fun, lua_State *L, const l_int32 *iarray, l_int32 n)
+ll_pack_Iarray(const char* _fun, lua_State *L, const l_int32 *iarray, l_int32 n)
 {
     l_int32 i;
     UNUSED(_fun);
@@ -708,7 +723,7 @@ ll_push_Iarray(const char* _fun, lua_State *L, const l_int32 *iarray, l_int32 n)
  * \return 1 table on the stack
  */
 int
-ll_push_Uarray(const char* _fun, lua_State *L, const l_uint32 *uarray, l_int32 n)
+ll_pack_Uarray(const char* _fun, lua_State *L, const l_uint32 *uarray, l_int32 n)
 {
     l_int32 i;
     UNUSED(_fun);
@@ -734,7 +749,7 @@ ll_push_Uarray(const char* _fun, lua_State *L, const l_uint32 *uarray, l_int32 n
  * \return 1 table containing (h) tables of (wpl) words on the stack
  */
 int
-ll_push_Uarray_2d(const char* _fun, lua_State *L, const l_uint32 *data, l_int32 wpl, l_int32 h)
+ll_pack_Uarray_2d(const char* _fun, lua_State *L, const l_uint32 *data, l_int32 wpl, l_int32 h)
 {
     l_int32 i;
     lua_newtable(L);
@@ -742,7 +757,7 @@ ll_push_Uarray_2d(const char* _fun, lua_State *L, const l_uint32 *data, l_int32 
         DBG(LOG_PUSH_ARRAY, "%s: %s = %d, %s = %p\n", _fun,
             "row", i,
             "data", reinterpret_cast<const void *>(data));
-        ll_push_Uarray(_fun, L, data, wpl);
+        ll_pack_Uarray(_fun, L, data, wpl);
         data += wpl;
         lua_rawseti(L, -2, i+1);
     }
@@ -758,7 +773,7 @@ ll_push_Uarray_2d(const char* _fun, lua_State *L, const l_uint32 *data, l_int32 
  * \return 1 table on the stack
  */
 int
-ll_push_Farray(const char* _fun, lua_State *L, const l_float32 *farray, l_int32 n)
+ll_pack_Farray(const char* _fun, lua_State *L, const l_float32 *farray, l_int32 n)
 {
     l_int32 i;
     UNUSED(_fun);
@@ -784,7 +799,7 @@ ll_push_Farray(const char* _fun, lua_State *L, const l_float32 *farray, l_int32 
  * \return 1 table containing (h) tables of (wpl) numbers on the stack
  */
 int
-ll_push_Farray_2d(const char* _fun, lua_State *L, const l_float32 *data, l_int32 wpl, l_int32 h)
+ll_pack_Farray_2d(const char* _fun, lua_State *L, const l_float32 *data, l_int32 wpl, l_int32 h)
 {
     l_int32 i;
     lua_newtable(L);
@@ -792,7 +807,7 @@ ll_push_Farray_2d(const char* _fun, lua_State *L, const l_float32 *data, l_int32
         DBG(LOG_PUSH_ARRAY, "%s: %s = %d, %s = %p\n", _fun,
             "row", i,
             "data", reinterpret_cast<const void *>(data));
-        ll_push_Farray(_fun, L, data, wpl);
+        ll_pack_Farray(_fun, L, data, wpl);
         data += wpl;
         lua_rawseti(L, -2, i+1);
     }
@@ -808,7 +823,7 @@ ll_push_Farray_2d(const char* _fun, lua_State *L, const l_float32 *data, l_int32
  * \return 1 table on the stack
  */
 int
-ll_push_Darray(const char* _fun, lua_State *L, const l_float64 *darray, l_int32 n)
+ll_pack_Darray(const char* _fun, lua_State *L, const l_float64 *darray, l_int32 n)
 {
     l_int32 i;
     UNUSED(_fun);
@@ -834,7 +849,7 @@ ll_push_Darray(const char* _fun, lua_State *L, const l_float64 *darray, l_int32 
  * \return 1 table containing (h) tables of (wpl) numbers on the stack
  */
 int
-ll_push_Darray_2d(const char* _fun, lua_State *L, const l_float64 *data, l_int32 wpl, l_int32 h)
+ll_pack_Darray_2d(const char* _fun, lua_State *L, const l_float64 *data, l_int32 wpl, l_int32 h)
 {
     l_int32 i;
     lua_newtable(L);
@@ -842,7 +857,7 @@ ll_push_Darray_2d(const char* _fun, lua_State *L, const l_float64 *data, l_int32
         DBG(LOG_PUSH_ARRAY, "%s: %s = %d, %s = %p\n", _fun,
             "row", i,
             "data", reinterpret_cast<const void *>(data));
-        ll_push_Darray(_fun, L, data, wpl);
+        ll_pack_Darray(_fun, L, data, wpl);
         data += wpl;
         lua_rawseti(L, -2, i+1);
     }
@@ -857,7 +872,7 @@ ll_push_Darray_2d(const char* _fun, lua_State *L, const l_float64 *data, l_int32
  * \return 1 table on the stack
  */
 int
-ll_push_Sarray(const char* _fun, lua_State *L, Sarray *sa)
+ll_pack_Sarray(const char* _fun, lua_State *L, Sarray *sa)
 {
     l_int32 n = sarrayGetCount(sa);
     l_int32 i;

@@ -56,11 +56,13 @@ enum dbg_enable_flags {
     LOG_CHECK_NUMBER    = (1<< 9),  /*!< log pushing numbers */
     LOG_PUSH_STRING     = (1<<10),  /*!< log pushing strings */
     LOG_CHECK_STRING    = (1<<11),  /*!< log pushing strings */
-    LOG_PUSH_UDATA      = (1<<12),  /*!< log pushing user data */
-    LOG_CHECK_UDATA     = (1<<13),  /*!< log pushing user data */
-    LOG_PUSH_ARRAY      = (1<<14),  /*!< log pushing tables */
-    LOG_CHECK_ARRAY     = (1<<15),  /*!< log pushing tables */
-    LOG_SDL2            = (1<<16)   /*!< log SDL2 display code */
+    LOG_PUSH_TABLE      = (1<<12),  /*!< log pushing strings */
+    LOG_CHECK_TABLE     = (1<<13),  /*!< log pushing strings */
+    LOG_PUSH_UDATA      = (1<<14),  /*!< log pushing user data */
+    LOG_CHECK_UDATA     = (1<<15),  /*!< log pushing user data */
+    LOG_PUSH_ARRAY      = (1<<16),  /*!< log pushing tables */
+    LOG_CHECK_ARRAY     = (1<<17),  /*!< log pushing tables */
+    LOG_SDL2            = (1<<31)   /*!< log SDL2 display code */
 };
 
 #if defined(HAVE_CTYPE_H)
@@ -125,6 +127,7 @@ enum dbg_enable_flags {
 #define	LL_DLLIST	"Dllist"        /*!< Lua class: DoubleLinkedList */
 #define	LL_DNA		"Dna"           /*!< Lua class: array of doubles (l_float64, equiv. to lua_Number) */
 #define	LL_DNAA		"Dnaa"          /*!< Lua class: Dnaa (array of Dna) */
+#define LL_DNAHASH      "DnaHash"       /*!< Lua class: DnaHash */
 #define	LL_DPIX		"DPix"          /*!< Lua class: DPix */
 #define	LL_FPIX		"FPix"          /*!< Lua class: FPix */
 #define	LL_FPIXA	"FPixa"         /*!< Lua class: FPixa (array of FPix) */
@@ -203,6 +206,7 @@ typedef L_DEWARP            Dewarp;         /*!< Local type name for L_DEWAP */
 typedef L_DEWARPA           Dewarpa;        /*!< Local type name for L_DEWARPA */
 typedef L_DNA               Dna;            /*!< Local type name for L_DNA */
 typedef L_DNAA              Dnaa;           /*!< Local type name for L_DNAA */
+typedef L_DNAHASH           DnaHash;        /*!< Local type name for L_DNAHASH */
 typedef L_KERNEL            Kernel;         /*!< Local type name for L_KERNEL */
 typedef L_COMP_DATA         CompData;       /*!< Local type name for L_COMP_DATA */
 typedef L_PDF_DATA          PdfData;        /*!< Local type name for L_PDF_DATA */
@@ -338,6 +342,7 @@ extern int              ll_isnumber(const char *_fun, lua_State *L, int arg);
 extern int              ll_isstring(const char *_fun, lua_State *L, int arg);
 extern int              ll_iscfuntion(const char *_fun, lua_State *L, int arg);
 extern int              ll_isinteger(const char *_fun, lua_State *L, int arg);
+extern int              ll_istable(const char *_fun, lua_State* L, int arg);
 extern int              ll_isudata(const char *_fun, lua_State* L, int arg, const char *tname);
 
 extern int              ll_register_class(const char *_fun, lua_State *L, const char* name, const luaL_Reg* methods);
@@ -359,14 +364,14 @@ extern int              ll_push_string(const char *_fun, lua_State *L, const cha
 extern int              ll_push_lstring(const char *_fun, lua_State *L, const char* str, size_t len);
 extern int              ll_push_bytes(const char *_fun, lua_State *L, l_uint8* data, size_t len);
 
-extern int              ll_push_Iarray(const char* _fun, lua_State *L, const l_int32* iarray, l_int32 n);
-extern int              ll_push_Uarray(const char* _fun, lua_State *L, const l_uint32* uarray, l_int32 n);
-extern int              ll_push_Uarray_2d(const char* _fun, lua_State *L, const l_uint32* data, l_int32 wpl, l_int32 h);
-extern int              ll_push_Farray(const char* _fun, lua_State *L, const l_float32* farray, l_int32 n);
-extern int              ll_push_Farray_2d(const char* _fun, lua_State *L, const l_float32* data, l_int32 wpl, l_int32 h);
-extern int              ll_push_Darray(const char* _fun, lua_State *L, const l_float64* da, l_int32 n);
-extern int              ll_push_Darray_2d(const char* _fun, lua_State *L, const l_float64* da, l_int32 wpl, l_int32 h);
-extern int              ll_push_Sarray(const char* _fun, lua_State *L, Sarray *sa);
+extern int              ll_pack_Iarray(const char* _fun, lua_State *L, const l_int32* iarray, l_int32 n);
+extern int              ll_pack_Uarray(const char* _fun, lua_State *L, const l_uint32* uarray, l_int32 n);
+extern int              ll_pack_Uarray_2d(const char* _fun, lua_State *L, const l_uint32* data, l_int32 wpl, l_int32 h);
+extern int              ll_pack_Farray(const char* _fun, lua_State *L, const l_float32* farray, l_int32 n);
+extern int              ll_pack_Farray_2d(const char* _fun, lua_State *L, const l_float32* data, l_int32 wpl, l_int32 h);
+extern int              ll_pack_Darray(const char* _fun, lua_State *L, const l_float64* da, l_int32 n);
+extern int              ll_pack_Darray_2d(const char* _fun, lua_State *L, const l_float64* da, l_int32 wpl, l_int32 h);
+extern int              ll_pack_Sarray(const char* _fun, lua_State *L, Sarray *sa);
 
 extern l_int32        * ll_unpack_Iarray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
 extern l_uint32       * ll_unpack_Uarray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
@@ -612,6 +617,13 @@ extern int              ll_push_Dnaa(const char *_fun, lua_State *L, Dnaa *naa);
 extern int              ll_new_Dnaa(lua_State *L);
 extern int              luaopen_Dnaa(lua_State *L);
 
+/* lldnahash.cpp */
+extern DnaHash        * ll_check_DnaHash(const char *_fun, lua_State *L, int arg);
+extern DnaHash        * ll_opt_DnaHash(const char *_fun, lua_State *L, int arg);
+extern int              ll_push_DnaHash(const char *_fun, lua_State *L, DnaHash *dh);
+extern int              ll_new_DnaHash(lua_State *L);
+extern int              luaopen_DnaHash(lua_State *L);
+
 /* llpta.cpp */
 extern Pta            * ll_check_Pta(const char *_fun, lua_State *L, int arg);
 extern Pta            * ll_opt_Pta(const char *_fun, lua_State *L, int arg);
@@ -766,6 +778,13 @@ extern PdfData        * ll_opt_PdfData(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_PdfData(const char *_fun, lua_State *L, PdfData *pdfdata);
 extern int              ll_new_PdfData(lua_State *L);
 extern int              luaopen_PdfData(lua_State *L);
+
+/* llsarray.cpp */
+extern Sarray         * ll_check_Sarray(const char *_fun, lua_State *L, int arg);
+extern Sarray         * ll_opt_Sarray(const char *_fun, lua_State *L, int arg);
+extern int              ll_push_Sarray(const char *_fun, lua_State *L, Sarray *sa);
+extern int              ll_new_Sarray(lua_State *L);
+extern int              luaopen_Sarray(lua_State *L);
 
 /* llstack.cpp */
 extern Stack          * ll_check_Stack(const char *_fun, lua_State *L, int arg);

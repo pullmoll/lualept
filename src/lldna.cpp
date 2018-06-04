@@ -313,7 +313,7 @@ GetDArray(lua_State *L)
     Dna *da = ll_check_Dna(_fun, L, 1);
     l_float64 *darray = l_dnaGetDArray(da, L_COPY);
     l_int32 n = l_dnaGetCount(da);
-    int res = ll_push_Darray(_fun, L, darray, n);
+    int res = ll_pack_Darray(_fun, L, darray, n);
     ll_free(darray);
     return res;
 }
@@ -370,7 +370,7 @@ GetIArray(lua_State *L)
     Dna *dna = ll_check_Dna(_fun, L, 1);
     l_int32 *iarray = l_dnaGetIArray(dna);
     l_int32 size = l_dnaGetCount(dna);
-    int res = ll_push_Iarray(_fun, L, iarray, size);
+    int res = ll_pack_Iarray(_fun, L, iarray, size);
     ll_free(iarray);
     return res;
 }

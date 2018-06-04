@@ -26,6 +26,7 @@ liblualept_la_SOURCES = \
 	lldllist.cpp \
 	lldna.cpp \
 	lldnaa.cpp \
+	lldnahash.cpp \
 	lldpix.cpp \
 	llfpix.cpp \
 	llfpixa.cpp \
@@ -42,6 +43,7 @@ liblualept_la_SOURCES = \
 	llpixtiling.cpp \
 	llpta.cpp \
 	llptaa.cpp \
+	llsarray.cpp \
 	llsel.cpp \
 	llsela.cpp \
 	llstack.cpp \

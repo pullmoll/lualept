@@ -41,7 +41,7 @@
  * situations where there may be holes in the key space.
  *
  * Lua example code:
- *
+ * \code
  * local amap = Amap("int")
  * amap:Insert(3, 100) -- is equivalent to amap[3] = 100
  * amap[2] = 128
@@ -52,7 +52,7 @@
  * else
  *     print("key 3 is not in amap")
  * end
- *
+ * \endcode
  */
 
 /** Set TNAME to the class name used in this source file */
