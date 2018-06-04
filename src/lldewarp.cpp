@@ -336,7 +336,7 @@ FindHorizDisparity(lua_State *L)
     LL_FUNC("FindHorizDisparity");
     Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
     Ptaa *ptaa = ll_check_Ptaa(_fun, L, 2);
-    return ll_push_boolean(_fun, L, dewarpFindHorizDisparity(dew, ptaa));
+    return ll_push_boolean(_fun, L, 0 == dewarpFindHorizDisparity(dew, ptaa));
 }
 
 /**
@@ -607,7 +607,7 @@ RemoveShortLines(lua_State *L)
  * Arg #2 is expected to be a string (filename).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 Write(lua_State *L)
@@ -655,7 +655,7 @@ WriteMem(lua_State *L)
  *          been built for this page.
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WriteStream(lua_State *L)
@@ -695,7 +695,7 @@ ll_opt_Dewarp(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Push BOX user data to the Lua stack and set its meta table.
+ * \brief Push Dewarp* user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param dew pointer to the Dewarp

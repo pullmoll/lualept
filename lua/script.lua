@@ -402,12 +402,11 @@ function pix_test()
 	print(pad("pix3:ConvertToPdf(...)"), pdf)
 end
 
-function pix2_test()
+function pix_test2()
 	local filename = tmpdir .. "/lualept.png"
 	local filename2 = tmpdir .. "/lualept-mask.tif"
 	local filename3 = tmpdir .. "/lualept-masked.png"
 	local image1 = images .. '/lualept.jpg'
-	local image2 = images .. '/lobbyismus.jpg'
 	header("Pix2")
 	local pix = Pix(image1)
 	print (pad("pix"), pix)
@@ -442,12 +441,28 @@ function pix2_test()
 
 	local ok = pix:Write(filename3,'png')
 	print (pad("pix:Write('" .. filename3 .. "','png')"), ok)
+end
 
-	pix = Pix(image2)
+function pix_test3()
+	local image1 = images .. '/lobbyismus.jpg'
+
+	local pix = Pix(image1)
+	local pixm = pix:MakeArbMaskFromRGB(0.8, 0.8, -1.2, 0.05)
+	pixm:View()
+	local pixs = pix:ConvertTo8()
+	pixs:View()
+
+	local ws = WShed(pixs, pixm)
+	print(pad("ws = WShed(pixs, pixm)"), ws)
+
+	local ok = ws:Apply()
+	print(pad("ws:Apply()"), ok)
+
+	local pix = ws:RenderFill()
 	pix:View()
 
-	local pixm = pix:MakeArbMaskFromRGB(-0.3, -0.3, 1.25, 0.15)
-	pixm:View()
+	local pix = ws:RenderColors()
+	pix:View()
 end
 
 function fpix_test()
@@ -554,17 +569,18 @@ print(pad("LuaLept:Version()"), LuaLept:Version())
 print(pad("LuaLept:LuaVersion()"), LuaLept:LuaVersion())
 print(pad("LuaLept:LeptVersion()"), LuaLept:LeptVersion())
 
-bmf_test()
-aset_test()
-amap_test()
-pta_test()
-box_test()
-numa_test()
-dna_test()
-pix_test()
-pix2_test()
-fpix_test()
-dpix_test()
+-- bmf_test()
+-- aset_test()
+-- amap_test()
+-- pta_test()
+-- box_test()
+-- numa_test()
+-- dna_test()
+-- pix_test()
+-- pix_test2()
+-- fpix_test()
+-- dpix_test()
+pix_test3()
 
 header()
 print("That's all, folks!")

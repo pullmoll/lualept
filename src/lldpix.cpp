@@ -669,7 +669,7 @@ ScaleByInteger(lua_State *L)
  * Arg #2 is expected to be a l_float64 (inval).
  * </pre>
  * \param L pointer to the lua_State
- * \return 0 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 SetAllArbitrary(lua_State *L)
@@ -795,7 +795,7 @@ SetWpl(lua_State *L)
  * Arg #2 is expected to be a string (filename).
  * </pre>
  * \param L pointer to the lua_State
- * \return 0 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 Write(lua_State *L)
@@ -837,7 +837,7 @@ WriteMem(lua_State *L)
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * </pre>
  * \param L pointer to the lua_State
- * \return 0 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WriteStream(lua_State *L)

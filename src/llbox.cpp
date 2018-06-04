@@ -198,7 +198,7 @@ BoundingRegion(lua_State *L)
  * Arg #2 (i.e. self) is expected to be a l_int32 (delta).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 integers (or nil on error) on the stack
+ * \return 1 boolean on the stack
  */
 static int
 ChangeRefcount(lua_State *L)
@@ -336,10 +336,10 @@ Contains(lua_State *L)
     LL_FUNC("Contains");
     Box *box1 = ll_check_Box(_fun, L, 1);
     Box *box2 = ll_check_Box(_fun, L, 2);
-    l_int32 result = 0;
-    if (boxContains(box1, box2, &result))
+    l_int32 contains = 0;
+    if (boxContains(box1, box2, &contains))
         return ll_push_nil(L);
-    return ll_push_boolean(_fun, L, result);
+    return ll_push_boolean(_fun, L, contains);
 }
 
 /**
@@ -613,10 +613,10 @@ Intersects(lua_State *L)
     LL_FUNC("Intersects");
     Box *box1 = ll_check_Box(_fun, L, 1);
     Box *box2 = ll_check_Box(_fun, L, 2);
-    l_int32 result = 0;
-    if (boxIntersects(box1, box2, &result))
+    l_int32 intersects = 0;
+    if (boxIntersects(box1, box2, &intersects))
         return ll_push_nil(L);
-    return ll_push_boolean(_fun, L, result);
+    return ll_push_boolean(_fun, L, intersects);
 }
 
 /**
@@ -719,7 +719,7 @@ OverlapRegion(lua_State *L)
  *          write to file if you want to read the data back.
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 Box* on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 PrintStreamInfo(lua_State *L)
@@ -826,7 +826,7 @@ SeparationDistance(lua_State *L)
  * Arg #5 is expected to be a lua_Integer (h).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 boolean result true or false
+ * \return 1 boolean on the Lua stack
  */
 static int
 SetGeometry(lua_State *L)
@@ -850,7 +850,7 @@ SetGeometry(lua_State *L)
  * Arg #5 is expected to be a lua_Integer (b).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 boolean result true or false
+ * \return 1 boolean on the Lua stack
  */
 static int
 SetSideLocations(lua_State *L)
@@ -1030,7 +1030,7 @@ ll_opt_Box(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Push BOX user data to the Lua stack and set its meta table.
+ * \brief Push Box* user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param box pointer to the BOX

@@ -262,7 +262,7 @@ ConvertToPdfDataSegmented(lua_State *L)
  * Arg #4 is expected to be a string (fileout).
  * </pre>
  * \param L pointer to the lua_State
- * \return 0 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 ConvertUnscaledFilesToPdf(lua_State *L)

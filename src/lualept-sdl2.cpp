@@ -402,7 +402,7 @@ FillColors(SDL_Palette* palette, PixColormap *cmap, int ncolors, int firstcolor 
  * \return TRUE on success, or FALSE on error
  */
 int
-ShowSDL2(Pix* pix, const char* title, int x0, int y0, float dscale)
+ViewSDL2(Pix* pix, const char* title, int x0, int y0, float dscale)
 {
     FUNC("ShowSDL2");
     static l_float32 d_scales[8] = {1.0f, 0.75f, 0.66f, 0.50f, 0.33f, 0.25f, 0.10f, 0.05f};

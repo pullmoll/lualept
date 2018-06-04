@@ -135,7 +135,7 @@ toString(lua_State *L)
  * Arg #3 is an optional string defining the storage flags (copyflag).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 integer on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 AddNuma(lua_State *L)

@@ -815,7 +815,7 @@ AddBorderGeneral(lua_State *L)
  *      (4) For 8 and 16 bpp, if val < 0 the result is clipped to 0.
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 AddConstantGray(lua_State *L)
@@ -7831,7 +7831,7 @@ ConvertTo8(lua_State *L)
 {
     LL_FUNC("ConvertTo8");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 cmapflag = ll_check_boolean(_fun, L, 2);
+    l_int32 cmapflag = ll_opt_boolean(_fun, L, 2, FALSE);
     return ll_push_Pix(_fun, L, pixConvertTo8(pixs, cmapflag));
 }
 
@@ -9823,7 +9823,7 @@ DeskewLocal(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 PixColormap* on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 DestroyColormap(lua_State *L)
@@ -10181,7 +10181,7 @@ DilateGray3(lua_State *L)
  *          a white background.
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 Display(lua_State *L)
@@ -10492,7 +10492,7 @@ DisplayPtaaPattern(lua_State *L)
  *      (2) This displays the image if dispflag == 1; otherwise it punts.
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 DisplayWithTitle(lua_State *L)
@@ -21347,7 +21347,7 @@ Prepare1bpp(lua_State *L)
  * Arg #2 is expected to be a luaL_Stream io handle (stream).
  *
  * \param L pointer to the lua_State
- * \return 1 Box* on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 PrintStreamInfo(lua_State *L)
@@ -28247,7 +28247,7 @@ SerializeToMemory(lua_State *L)
  *          color may not be defined, because the colormap may not be full.
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 boolane on the Lua stack
+ * \return 1 boolan on the Lua stack
  */
 static int
 SetAll(lua_State *L)
@@ -28264,7 +28264,7 @@ SetAll(lua_State *L)
  * Arg #2 is expected to be a l_uint32 (val).
  *
  * \param L pointer to the lua_State
- * \return 1 integer on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 SetAllArbitrary(lua_State *L)
@@ -28338,7 +28338,7 @@ SetAlphaOverWhite(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 integer on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 SetBlack(lua_State *L)
@@ -28363,7 +28363,7 @@ SetBlack(lua_State *L)
  *          This index is written to all pixels.
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 integer on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 SetBlackOrWhite(lua_State *L)
@@ -28491,7 +28491,7 @@ SetChromaSampling(lua_State *L)
  *          the new colormap does not belong to any other pix.
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 PixColormap* on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 SetColormap(lua_State *L)
@@ -28514,7 +28514,7 @@ SetColormap(lua_State *L)
  *              pixSetComponentArbitrary(pix, L_ALPHA_CHANNEL, 255)
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 integer on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 SetComponentArbitrary(lua_State *L)
@@ -29019,11 +29019,11 @@ SetPixelColumn(lua_State *L)
     l_float32 *tblvect = ll_unpack_Farray(_fun, L, 3, &n);
     l_float32 *colvect = ll_calloc<l_float32>(_fun, L, rows);
     l_int32 i;
-    l_int32 result = FALSE;
+    l_int32 result = 0;
     for (i = 0; i < rows && i < n; i++)
         colvect[i] = tblvect[i];
-    ll_free(tblvect);
     result = pixSetPixelColumn(pixd, col, colvect);
+    ll_free(tblvect);
     ll_free(colvect);
     return ll_push_boolean(_fun, L, 0 == result);
 }
@@ -32196,7 +32196,7 @@ View(lua_State *L)
     l_int32 x = ll_opt_l_int32(_fun, L, 3, 0);
     l_int32 y = ll_opt_l_int32(_fun, L, 4, 0);
     l_float32 dscale = ll_opt_l_float32(_fun, L, 5, 0.0f);
-    return ll_push_boolean(_fun, L, ShowSDL2(pixs, title, x, y, dscale));
+    return ll_push_boolean(_fun, L, ViewSDL2(pixs, title, x, y, dscale));
 }
 
 /**
@@ -32282,12 +32282,12 @@ WarpStereoscopic(lua_State *L)
 {
     LL_FUNC("WarpStereoscopic");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 zbend = ll_check_l_int32(_fun, L, 2);
-    l_int32 zshiftt = ll_check_l_int32(_fun, L, 3);
-    l_int32 zshiftb = ll_check_l_int32(_fun, L, 4);
-    l_int32 ybendt = ll_check_l_int32(_fun, L, 5);
-    l_int32 ybendb = ll_check_l_int32(_fun, L, 6);
-    l_int32 redleft = ll_check_l_int32(_fun, L, 7);
+    l_int32 zbend = ll_opt_l_int32(_fun, L, 2, 20);
+    l_int32 zshiftt = ll_opt_l_int32(_fun, L, 3, 15);
+    l_int32 zshiftb = ll_opt_l_int32(_fun, L, 4, -15);
+    l_int32 ybendt = ll_opt_l_int32(_fun, L, 5, 30);
+    l_int32 ybendb = ll_opt_l_int32(_fun, L, 6, 0);
+    l_int32 redleft = ll_opt_l_int32(_fun, L, 7, 5);
     Pix *pix = pixWarpStereoscopic(pixs, zbend, zshiftt, zshiftb, ybendt, ybendb, redleft);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -32298,8 +32298,8 @@ WarpStereoscopic(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (wc).
  * Arg #3 is expected to be a l_int32 (hc).
- * Arg #4 is expected to be a l_int32 (hasborder).
- * Arg #5 is expected to be a l_int32 (normflag).
+ * Arg #4 is expected to be a boolean (hasborder).
+ * Arg #5 is expected to be a boolean (normflag).
  *
  * Leptonica's Notes:
  *      (1) The input and output depths are the same.
@@ -32326,10 +32326,10 @@ WindowedMean(lua_State *L)
 {
     LL_FUNC("WindowedMean");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 wc = ll_check_l_int32(_fun, L, 2);
-    l_int32 hc = ll_check_l_int32(_fun, L, 3);
-    l_int32 hasborder = ll_check_l_int32(_fun, L, 4);
-    l_int32 normflag = ll_check_l_int32(_fun, L, 5);
+    l_int32 wc = ll_opt_l_int32(_fun, L, 2, 0);
+    l_int32 hc = ll_opt_l_int32(_fun, L, 3, 0);
+    l_int32 hasborder = ll_opt_boolean(_fun, L, 4, FALSE);
+    l_int32 normflag = ll_opt_boolean(_fun, L, 5, TRUE);
     Pix *pix = pixWindowedMean(pixs, wc, hc, hasborder, normflag);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -32394,11 +32394,11 @@ WindowedMeanSquare(lua_State *L)
  *          added and the border pixels are removed from the output images.
  *      (3) These statistical measures over the pixels in the
  *          rectangular window are:
- *            ~ average value: <p>  (pixm)
- *            ~ average squared value: <p*p> (pixms)
- *            ~ variance: <(p - <p>)*(p - <p>)> = <p*p> - <p>*<p>  (pixv)
- *            ~ square-root of variance: (pixrv)
- *          where the brackets < .. > indicate that the average value is
+ *            ~ average value: [p]  (%pixm)
+ *            ~ average squared value: <p*p> (%pixms)
+ *            ~ variance: [(p - [p])*(p - [p])] = [p*p] - [p]*[p]  (%fpixv)
+ *            ~ square-root of variance: (%fpixrv)
+ *          where the brackets [ .. ] indicate that the average value is
  *          to be taken over the window.
  *      (4) Note that the variance is just the mean square difference from
  *          the mean value; and the square root of the variance is the
@@ -32410,7 +32410,7 @@ WindowedMeanSquare(lua_State *L)
  *          of the size of the convolution kernel.
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 4 2 Pix* and 2 FPix* on the Lua stack
  */
 static int
 WindowedStats(lua_State *L)
@@ -32419,7 +32419,7 @@ WindowedStats(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 wc = ll_check_l_int32(_fun, L, 2);
     l_int32 hc = ll_check_l_int32(_fun, L, 3);
-    l_int32 hasborder = ll_check_l_int32(_fun, L, 4);
+    l_int32 hasborder = ll_opt_boolean(_fun, L, 4, FALSE);
     Pix *pixm = nullptr;
     Pix *pixms = nullptr;
     FPix *fpixv = nullptr;
@@ -32446,13 +32446,13 @@ WindowedStats(lua_State *L)
  *          are returned as an fpix, where the variance is the
  *          average over the window of the mean square difference of
  *          the pixel value from the mean:
- *                <(p - <p>)*(p - <p>)> = <p*p> - <p>*<p>
+ *                [(p - [p])*(p - [p])] = [p*p] - [p]*[p]
  *      (3) To visualize the results:
  *            ~ for both, use fpixDisplayMaxDynamicRange().
  *            ~ for rms deviation, simply convert the output fpix to pix,
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 2 FPix* on the Lua stack
  */
 static int
 WindowedVariance(lua_State *L)

@@ -347,7 +347,7 @@ AutoRenderContours(lua_State *L)
  * Arg #2 is expected to be a l_int32 (delta).
  * </pre>
  * \param L pointer to the lua_State
- * \return 0 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 ChangeRefcount(lua_State *L)
@@ -553,7 +553,7 @@ Copy(lua_State *L)
  * Arg #2 is expected to be a FPix* (fpixs).
  * </pre>
  * \param L pointer to the lua_State
- * \return 0 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 CopyResolution(lua_State *L)
@@ -1417,7 +1417,7 @@ ThresholdToPix(lua_State *L)
  * Arg #2 is expected to be a string (filename).
  * </pre>
  * \param L pointer to the lua_State
- * \return 0 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 Write(lua_State *L)

@@ -145,6 +145,7 @@ enum dbg_enable_flags {
 #define	LL_SEL		"Sel"           /*!< Lua class: Sel */
 #define	LL_SELA		"Sela"          /*!< Lua class: array of Sel */
 #define	LL_STACK        "Stack"         /*!< Lua class: Stack */
+#define	LL_WSHED        "WShed"         /*!< Lua class: Stack */
 
 #if defined(LLUA_DEBUG) && (LLUA_DEBUG > 0)
 extern void dbg(int enable, const char* format, ...)
@@ -161,6 +162,7 @@ extern void dbg(int enable, const char* format, ...)
 #define UNUSED(x) (void)x
 
 typedef struct lua_State lua_State;
+typedef int l_ok;
 
 extern void die(const char *_fun, lua_State* L, const char *format, ...)
 #if defined(__GNUC__)
@@ -170,6 +172,59 @@ extern void die(const char *_fun, lua_State* L, const char *format, ...)
 extern void *ll_ludata(const char *_fun, lua_State* L, int arg);
 extern void **ll_udata(const char *_fun, lua_State* L, int arg, const char *tname);
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <lauxlib.h>
+#include <lualib.h>
+
+#ifdef __cplusplus
+}
+#endif
+
+/** Lua function table (luaL_Reg array[]) sentinel */
+#define LUA_SENTINEL    {nullptr,nullptr}
+
+/** Allocate a static string with a function's %name */
+#define FUNC(name) static const char _fun[] = name; (void)_fun
+
+/** Allocate a static string with a luaopen_%name */
+#define LO_FUNC(name) FUNC("luaopen_" name)
+
+typedef L_AMAP              Amap;           /*!< Local type name for L_AMAP */
+typedef L_AMAP_NODE         AmapNode;       /*!< Local type name for L_AMAP_NODE */
+typedef L_ASET              Aset;           /*!< Local type name for L_ASET */
+typedef L_ASET_NODE         AsetNode;       /*!< Local type name for L_ASET_NODE */
+typedef L_Bmf               Bmf;            /*!< Local type name for L_Bmf */
+typedef L_Dewarp            Dewarp;         /*!< Local type name for L_Dewarp */
+typedef L_Dewarpa           Dewarpa;        /*!< Local type name for L_Dewarpa */
+typedef L_Dna               Dna;            /*!< Local type name for L_Dna */
+typedef L_Dnaa              Dnaa;           /*!< Local type name for L_Dnaa */
+typedef L_Kernel            Kernel;         /*!< Local type name for L_Kernel */
+typedef L_Compressed_Data   CompData;       /*!< Local type name for L_Compressed_Data */
+typedef L_Pdf_Data          PdfData;        /*!< Local type name for L_Pdf_Data */
+typedef L_Stack             Stack;          /*!< Local type name for L_Stack */
+typedef L_WShed             WShed;          /*!< Local type name for L_WSched */
+
+/*! Dummy structure for the top level Lua class LL_LUALEPT */
+typedef struct LuaLept {
+    char str_version[32];                   /*!< Our own version number */
+    char str_version_lua[32];               /*!< Lua's version number */
+    char str_version_lept[32];              /*!< Leptonica's version number */
+} LuaLept;
+
+/**
+ * The structure lept_enum is used to define key strings (key),
+ * their Leptonica enum name (name), and their enumeration value (%value)
+*/
+typedef struct lept_enum {
+    const char *key;                        /*!< string for the enumeration value */
+    const char *name;                       /*!< name of the enumeration value in Leptonica's header files */
+    l_int32     value;                      /*!< l_int32 with enumeration value */
+}   lept_enum;
+
+/* llept.c */
 /**
  * \brief Cast the result of LEPT_MALLOC() to the given type.
  * T is the typename of the result pointer
@@ -275,58 +330,6 @@ ll_check_ludata(const char *_fun, lua_State *L, int arg)
     return reinterpret_cast<T *>(ll_ludata(_fun, L, arg));
 }
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include <lauxlib.h>
-#include <lualib.h>
-
-#ifdef __cplusplus
-}
-#endif
-
-/** Lua function table (luaL_Reg array[]) sentinel */
-#define LUA_SENTINEL    {nullptr,nullptr}
-
-/** Allocate a static string with a function's %name */
-#define FUNC(name) static const char _fun[] = name; (void)_fun
-
-/** Allocate a static string with a luaopen_%name */
-#define LO_FUNC(name) FUNC("luaopen_" name)
-
-typedef L_AMAP              Amap;           /*!< Local type name for L_AMAP */
-typedef L_AMAP_NODE         AmapNode;       /*!< Local type name for L_AMAP_NODE */
-typedef L_ASET              Aset;           /*!< Local type name for L_ASET */
-typedef L_ASET_NODE         AsetNode;       /*!< Local type name for L_ASET_NODE */
-typedef L_Bmf               Bmf;            /*!< Local type name for L_Bmf */
-typedef L_Dewarp            Dewarp;         /*!< Local type name for L_Dewarp */
-typedef L_Dewarpa           Dewarpa;        /*!< Local type name for L_Dewarpa */
-typedef L_Dna               Dna;            /*!< Local type name for L_Dna */
-typedef L_Dnaa              Dnaa;           /*!< Local type name for L_Dnaa */
-typedef L_Kernel            Kernel;         /*!< Local type name for L_Kernel */
-typedef L_Compressed_Data   CompData;       /*!< Local type name for L_Compressed_Data */
-typedef L_Pdf_Data          PdfData;        /*!< Local type name for L_Pdf_Data */
-typedef L_Stack             Stack;          /*!< Local type name for L_Stack */
-
-/*! Dummy structure for the top level Lua class LL_LUALEPT */
-typedef struct LuaLept {
-    char str_version[32];                   /*!< Our own version number */
-    char str_version_lua[32];               /*!< Lua's version number */
-    char str_version_lept[32];              /*!< Leptonica's version number */
-} LuaLept;
-
-/**
- * The structure lept_enum is used to define key strings (key),
- * their Leptonica enum name (name), and their enumeration value (%value)
-*/
-typedef struct lept_enum {
-    const char *key;                        /*!< string for the enumeration value */
-    const char *name;                       /*!< name of the enumeration value in Leptonica's header files */
-    l_int32     value;                      /*!< l_int32 with enumeration value */
-}   lept_enum;
-
-/* llept.c */
 extern void             ll_free(void *ptr);
 
 extern int              ll_isnumber(const char *_fun, lua_State *L, int arg);
@@ -734,13 +737,6 @@ extern int              ll_push_Sela(const char *_fun, lua_State *L, Sela *sela)
 extern int              ll_new_Sela(lua_State *L);
 extern int              luaopen_Sela(lua_State *L);
 
-/* llstack.cpp */
-extern Stack          * ll_check_Stack(const char *_fun, lua_State *L, int arg);
-extern Stack          * ll_opt_Stack(const char *_fun, lua_State *L, int arg);
-extern int              ll_push_Stack(const char *_fun, lua_State *L, Stack *stack);
-extern int              ll_new_Stack(lua_State *L);
-extern int              luaopen_Stack(lua_State *L);
-
 /* llkernel.cpp */
 extern Kernel         * ll_check_Kernel(const char *_fun, lua_State *L, int arg);
 extern Kernel         * ll_opt_Kernel(const char *_fun, lua_State *L, int arg);
@@ -762,7 +758,21 @@ extern int              ll_push_PdfData(const char *_fun, lua_State *L, PdfData 
 extern int              ll_new_PdfData(lua_State *L);
 extern int              luaopen_PdfData(lua_State *L);
 
+/* llstack.cpp */
+extern Stack          * ll_check_Stack(const char *_fun, lua_State *L, int arg);
+extern Stack          * ll_opt_Stack(const char *_fun, lua_State *L, int arg);
+extern int              ll_push_Stack(const char *_fun, lua_State *L, Stack *stack);
+extern int              ll_new_Stack(lua_State *L);
+extern int              luaopen_Stack(lua_State *L);
+
+/* llstack.cpp */
+extern WShed          * ll_check_WShed(const char *_fun, lua_State *L, int arg);
+extern WShed          * ll_opt_WShed(const char *_fun, lua_State *L, int arg);
+extern int              ll_push_WShed(const char *_fun, lua_State *L, WShed *ws);
+extern int              ll_new_WShed(lua_State *L);
+extern int              luaopen_WShed(lua_State *L);
+
 /* lualept-sdl2.cpp */
-extern int ShowSDL2(Pix* pix, const char* title = nullptr, int x0 = 0, int y0 = 0, float dscale = 0.0f);
+extern int ViewSDL2(Pix* pix, const char* title = nullptr, int x0 = 0, int y0 = 0, float dscale = 0.0f);
 
 #endif /* !defined(LUALEPT_EXPORTS_H) */

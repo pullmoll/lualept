@@ -170,7 +170,7 @@ function pre_comments(fs)
 				fname = line:match('%\\brief%s+([^(]+)')
 			end
 			if pre and is_notes(line) then
-				line = line:gsub(" %*%s+(Note.?:)", " * Leptonica's %1")
+				line = line:gsub(" %*%s+(Note.*)", " * Leptonica's %1")
 				note = true
 			end
 			if line:match('<pre>') then

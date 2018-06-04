@@ -557,7 +557,7 @@ RemoveNumber(lua_State *L)
  *      (3) All the previously unused values in na are set to 0.0.
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 integer on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 SetCount(lua_State *L)

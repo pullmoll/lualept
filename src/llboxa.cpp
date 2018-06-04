@@ -1444,7 +1444,7 @@ InsertBox(lua_State *L)
     l_int32 idx = ll_check_index(_fun, L, 2, boxaGetCount(boxa));
     Box *boxs = ll_check_Box(_fun, L, 3);
     Box *box = boxClone(boxs);
-    return ll_push_boolean(_fun, L, box && 0 == boxaInsertBox(boxa, idx, box));
+    return ll_push_boolean(_fun, L, 0 == boxaInsertBox(boxa, idx, box));
 }
 
 /**
@@ -2079,7 +2079,7 @@ ReplaceBox(lua_State *L)
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, boxaGetCount(boxa));
     Box *box = ll_check_Box(_fun, L, 3);
-    return ll_push_boolean(_fun, L, box && 0 == boxaReplaceBox(boxa, idx, box));
+    return ll_push_boolean(_fun, L, 0 == boxaReplaceBox(boxa, idx, box));
 }
 
 /**

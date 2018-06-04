@@ -152,7 +152,7 @@ ll_strcasecmp(const char* dst, const char* src)
 /**
  * @brief Bit mask (flags) for enabled log output
  */
-static int dbg_enabled = LOG_REGISTER | LOG_SDL2;
+static int dbg_enabled = LOG_REGISTER | LOG_SDL2 | LOG_NEW_CLASS | LOG_NEW_PARAM;
 
 /**
  * @brief Return a time stamp for the current date and time
@@ -4073,6 +4073,48 @@ MaxComponent(lua_State *L)
     ll_push_l_int32(_fun, L, extractMinMaxComponent(pixel, L_CHOOSE_MAX));
     return 1;
 }
+
+/**
+ * \brief Compress() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a lstring (%data, %nin).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 lstring on the Lua stack
+ */
+static int
+Compress(lua_State *L)
+{
+    LL_FUNC("Compress");
+    size_t nin = 0;
+    const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &nin);
+    l_uint8 *datain = reinterpret_cast<l_uint8 *>(reinterpret_cast<l_intptr_t>(data));
+    size_t nout = 0;
+    l_uint8 *dataout = zlibCompress(datain, nin, &nout);
+    return ll_push_bytes(_fun, L, dataout, nout);
+}
+
+/**
+ * \brief Uncompress() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a lstring (%data, %nin).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 lstring on the Lua stack
+ */
+static int
+Uncompress(lua_State *L)
+{
+    LL_FUNC("Uncompress");
+    size_t nin = 0;
+    const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &nin);
+    l_uint8 *datain = reinterpret_cast<l_uint8 *>(reinterpret_cast<l_intptr_t>(data));
+    size_t nout = 0;
+    l_uint8 *dataout = zlibUncompress(datain, nin, &nout);
+    return ll_push_bytes(_fun, L, dataout, nout);
+}
+
+
 /**
  * \brief Check Lua stack at index %arg for udata of class lualept.
  * \param _fun calling function's name
@@ -4154,6 +4196,8 @@ luaopen_lualept(lua_State *L)
         {"MinMaxComponent",         MinMaxComponent},
         {"MinComponent",            MinComponent},   /* alias without 2nd parameter */
         {"MaxComponent",            MaxComponent},   /* alias without 2nd parameter */
+        {"Compress",                Compress},
+        {"Uncompress",              Uncompress},
         LUA_SENTINEL
     };
     FUNC("luaopen_lualept");
@@ -4192,6 +4236,7 @@ luaopen_lualept(lua_State *L)
     luaopen_Sel(L);
     luaopen_Sela(L);
     luaopen_Stack(L);
+    luaopen_WShed(L);
     ll_global_table(_fun, L, TNAME, ll_new_lualept);
     return 1;
 }

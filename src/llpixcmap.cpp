@@ -295,7 +295,7 @@ AddRGBA(lua_State *L)
  *      (1) This removes the colors by setting the count to 0.
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 integer on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 Clear(lua_State *L)

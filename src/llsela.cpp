@@ -339,7 +339,7 @@ AddTJunctions(lua_State *L)
  *          selname if the sel already has a name.
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 l_int32 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 AddSel(lua_State *L)

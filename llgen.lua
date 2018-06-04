@@ -5,7 +5,7 @@
 --]]
 
 -- set to true to debug parsing
-debug = false
+debug = true
 
 -- array of functions
 funcs = {}
@@ -60,6 +60,21 @@ function list(fd, t)
 	end
 end
 
+function is_notes(str)
+	local m = str:match('^ %*.*(Note[s]?:)$')
+	return m ~= nil
+end
+
+function is_doxy_start(str)
+	local m = str:match('^/%*%*$') or str:match('^/%*%!$')
+	return m ~= nil
+end
+
+function is_doxy_end(str)
+	local m = str:match('^ %*/$')
+	return m ~= nil
+end
+
 ---
 -- Extract pre-formatted comment sections from the file fs.
 -- Modifies the global heads table
@@ -78,7 +93,7 @@ function pre_comments(fs)
 			break
 		end
 
-		if line == '/**' or line == '/*!' then
+		if is_doxy_start(line) then
 			-- start of Doxygen comment
 			-- introduces a new function
 			-- go to state 1 (parsing doxygen comment)
@@ -99,18 +114,21 @@ function pre_comments(fs)
 			state = 3
 		end
 
-		if line == ' */' then
+		if is_doxy_end(line) then
 			-- end of Doxygen comment
-			-- go to state 2 (1st line after a comment)
-			state = 2
+			if state == 1 then
+				-- go to state 2 (1st line after a comment)
+				state = 2
+			end
 		end
 
 		if state == 1 then
 			-- inside doxygen comment
-			if line:match('%s*(%\\brief)%s*') then
-				fname = line:match('%\\brief%s*([^(]+)')
+			if line:match('%s+(%\\brief)%s+') then
+				fname = line:match('%\\brief%s+([^(]+)')
 			end
-			if pre and line:match('Note[s]?:') then
+			if pre and is_notes(line) then
+				line = line:gsub(" %*%s+(Note.*)", " * Leptonica's %1")
 				note = true
 			end
 			if line:match('<pre>') then
@@ -331,6 +349,7 @@ function result_name(rtype, names)
 				Sarray		= "sa",
 				Sel		= "sel",
 				Sela		= "sela",
+				WShed		= "ws",
 			}
 			return varname[s] or "result"
 		end)
@@ -408,6 +427,7 @@ function parse(fd, str)
 				L_KERNEL	= "Kernel",
 				L_PDF_DATA	= "PdfData",
 				L_STACK		= "Stack",
+				L_WSHED		= "WShed",
 				NUMA		= "Numa",
 				NUMAA		= "Numaa",
 				PIX		= "Pix",

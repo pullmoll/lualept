@@ -43,7 +43,8 @@ liblualept_la_SOURCES = \
 	llptaa.cpp \
 	llsel.cpp \
 	llsela.cpp \
-	llstack.cpp
+	llstack.cpp \
+	llwsched.cpp
 
 pkginclude_HEADERS = lualept.h
 

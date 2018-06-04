@@ -375,7 +375,7 @@ InsertBoxa(lua_State *L)
     l_int32 idx = ll_check_index(_fun, L, 2, boxaaGetCount(boxaa));
     Boxa *boxas = ll_check_Boxa(_fun, L, 3);
     Boxa *boxa = boxaCopy(boxas, L_CLONE);
-    return ll_push_boolean(_fun, L, boxa && 0 == boxaaInsertBoxa(boxaa, idx, boxa));
+    return ll_push_boolean(_fun, L, 0 == boxaaInsertBoxa(boxaa, idx, boxa));
 }
 
 /**
@@ -393,7 +393,7 @@ InsertBoxa(lua_State *L)
  *      (4) if baas == NULL, this is a no-op.
  * </pre>
  * \param L pointer to the lua_State
- * \return 2 boolean and Numa* on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 Join(lua_State *L)
@@ -505,7 +505,7 @@ ReplaceBoxa(lua_State *L)
     Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, boxaaGetCount(boxaa));
     Boxa *boxa = ll_check_Boxa(_fun, L, 3);
-    return ll_push_boolean(_fun, L, boxa && 0 == boxaaReplaceBoxa(boxaa, idx, boxa));
+    return ll_push_boolean(_fun, L, 0 == boxaaReplaceBoxa(boxaa, idx, boxa));
 }
 
 /**

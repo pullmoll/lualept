@@ -321,7 +321,7 @@ InsertBefore(lua_State *L)
  *      (2) Both input ptrs must exist, though either can have the value NULL.
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 light userdata (data) on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 Join(lua_State *L)
@@ -424,7 +424,7 @@ RemoveFromTail(lua_State *L)
  *      (1) This reverses the list in-place.
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 light userdata (data) on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 Reverse(lua_State *L)
