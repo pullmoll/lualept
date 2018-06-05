@@ -394,6 +394,7 @@ extern l_uint32       * ll_unpack_Uarray(const char *_fun, lua_State *L, int arg
 extern l_uint32       * ll_unpack_Uarray_2d(const char *_fun, lua_State *L, int arg, l_uint32 *data, l_int32 wpl, l_int32 h);
 extern l_float32      * ll_unpack_Farray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
 extern l_float32      * ll_unpack_Farray_2d(const char *_fun, lua_State *L, int arg, l_float32 *data, l_int32 wpl, l_int32 h);
+extern l_float32      * ll_unpack_Matrix(const char *_fun, lua_State *L, int arg, int w, int h);
 extern l_float64      * ll_unpack_Darray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
 extern l_float64      * ll_unpack_Darray_2d(const char *_fun, lua_State *L, int arg, l_float64 *data, l_int32 wpl, l_int32 h);
 extern Sarray         * ll_unpack_Sarray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
@@ -549,6 +550,9 @@ extern const char     * ll_string_value_flags(l_int32 rotation);
 
 extern l_int32          ll_check_paint_flags(const char *_fun, lua_State *L, int arg, l_int32 def = L_PAINT_LIGHT);
 extern const char     * ll_string_paint_flags(l_int32 rotation);
+
+extern l_int32          ll_check_color_name(const char *_fun, lua_State *L, int arg, l_int32 def = L_PAINT_LIGHT);
+extern const char     * ll_string_color_name(l_uint32 rotation);
 
 /* lualept.cpp */
 extern LuaLept        * ll_check_lualept(const char *_fun, lua_State *L, int arg);

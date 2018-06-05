@@ -1099,7 +1099,75 @@ ll_unpack_Farray_2d(const char *_fun, lua_State *L, int arg, l_float32* data, l_
 }
 
 /**
- * \brief Unpack an array of lua_Integer from the Lua stack as l_float64*.
+ * \brief Unpack an array of of arrays from the Lua stack as l_float32* data.
+ *
+ * Alternatively support a flattened array, i.e. a %w * %h one-dimensional array.
+ * And finally also support a %w * %h number of float parameters following %arg.
+ *
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the table
+ * \param data pointer to a array of %wpl * %h * l_float32
+ * \param w width of the matrix (inner array)
+ * \param h height of the matrix (outer array)
+ * \return pointer %data, which must be free()d by the caller
+ */
+l_float32 *
+ll_unpack_Matrix(const char *_fun, lua_State *L, int arg, l_int32 w, l_int32 h)
+{
+    l_float32 *data = ll_calloc<l_float32>(_fun, L, w * h);
+    l_int32 x, y, i;
+    l_float32 value;
+    DBG(LOG_CHECK_ARRAY, "%s: %s = %d, %s = %d, %s = %d\n", _fun,
+        "arg", arg,
+        "w", w,
+        "h", h);
+
+    if (LUA_TTABLE == lua_type(L, arg)) {
+        /* verify there is a table at 2 */
+        luaL_checktype(L, arg, LUA_TTABLE);
+        /* push a nil key */
+        lua_pushnil(L);
+
+        /* iterate over the table of tables */
+        while (lua_next(L, arg)) {
+            y = ll_check_l_int32(_fun, L, -2);                      /* key is at index -2 */
+            if (LUA_TTABLE == lua_type(L, -1)) {
+                luaL_checktype(L, -1, LUA_TTABLE);                  /* value is at index -1 */
+                /* push another nil key */
+                lua_pushnil(L);
+                /* iterate over the table of integers (table now at index -2) */
+                while (lua_next(L, -2)) {
+                    x = ll_check_l_int32(_fun, L, -2);          /* key is at index -2 */
+                    value = ll_check_l_float32(_fun, L, -1);  /* value is at index -1 */
+                    /* if x,y are in bounds */
+                    if (y > 0 && y <= h && x > 0 && x <= w) {
+                        data[(y - 1) * w + x - 1] = value;
+                    }
+                    /* remove value; keep 'key' for next iteration */
+                    lua_pop(L, 1);
+                }
+            } else {
+                i = y;
+                value = ll_check_l_float32(_fun, L, -1);  /* value is at index -1 */
+                if (i > 0 && i <= w * h) {
+                    data[i - 1] = value;
+                }
+            }
+            /* remove table; keep 'key' for next iteration */
+            lua_pop(L, 1);
+        }
+    } else {
+        for (i = 0; i < w * h; i++) {
+            value = ll_check_l_float32(_fun, L, arg + i);
+            data[i] = value;
+        }
+    }
+    return data;
+}
+
+/**
+ * \brief Unpack an array of lua_Number from the Lua stack as l_float64*.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the table
@@ -3772,6 +3840,322 @@ const char*
 ll_string_paint_flags(l_int32 paint_type)
 {
     return ll_string_tbl(paint_type, tbl_paint_flags, ARRAYSIZE(tbl_paint_flags));
+}
+
+static const lept_enum tbl_color_name[] = {
+    TBL_ENTRY("Alice Blue",             0xF0F8FF),
+    TBL_ENTRY("Antique White",          0xFAEBD7),
+    TBL_ENTRY("Aqua",                   0x00FFFF),
+    TBL_ENTRY("Aquamarine",             0x7FFFD4),
+    TBL_ENTRY("Azure",                  0xF0FFFF),
+    TBL_ENTRY("Beige",                  0xF5F5DC),
+    TBL_ENTRY("Bisque",                 0xFFE4C4),
+    TBL_ENTRY("Black",                  0x000000),
+    TBL_ENTRY("Blanched Almond",        0xFFEBCD),
+    TBL_ENTRY("Blue Violet",            0x8A2BE2),
+    TBL_ENTRY("Blue",                   0x0000FF),
+    TBL_ENTRY("Brown",                  0xA52A2A),
+    TBL_ENTRY("Burly Wood",             0xDEB887),
+    TBL_ENTRY("Cadet Blue",             0x5F9EA0),
+    TBL_ENTRY("Chartreuse",             0x7FFF00),
+    TBL_ENTRY("Chocolate",              0xD2691E),
+    TBL_ENTRY("Coral",                  0xFF7F50),
+    TBL_ENTRY("Cornflower Blue",        0x6495ED),
+    TBL_ENTRY("Cornsilk",               0xFFF8DC),
+    TBL_ENTRY("Crimson",                0xDC143C),
+    TBL_ENTRY("Cyan",                   0x00FFFF),
+    TBL_ENTRY("Dark Blue",              0x00008B),
+    TBL_ENTRY("Dark Cyan",              0x008B8B),
+    TBL_ENTRY("Dark Goldenrod",         0xB8860B),
+    TBL_ENTRY("Dark Gray",              0xA9A9A9),
+    TBL_ENTRY("Dark Green",             0x006400),
+    TBL_ENTRY("Dark Khaki",             0xBDB76B),
+    TBL_ENTRY("Dark Magenta",           0x8B008B),
+    TBL_ENTRY("Dark Olive Green",       0x556B2F),
+    TBL_ENTRY("Dark Orange",            0xFF8C00),
+    TBL_ENTRY("Dark Orchid",            0x9932CC),
+    TBL_ENTRY("Dark Red",               0x8B0000),
+    TBL_ENTRY("Dark Salmon",            0xE9967A),
+    TBL_ENTRY("Dark Sea Green",         0x8FBC8F),
+    TBL_ENTRY("Dark Slate Blue",        0x483D8B),
+    TBL_ENTRY("Dark Slate Gray",        0x2F4F4F),
+    TBL_ENTRY("Dark Turquoise",         0x00CED1),
+    TBL_ENTRY("Dark Violet",            0x9400D3),
+    TBL_ENTRY("Deep Pink",              0xFF1493),
+    TBL_ENTRY("Deep Sky Blue",          0x00BFFF),
+    TBL_ENTRY("Dim Gray",               0x696969),
+    TBL_ENTRY("Dodger Blue",            0x1E90FF),
+    TBL_ENTRY("Fire Brick",             0xB22222),
+    TBL_ENTRY("Floral White",           0xFFFAF0),
+    TBL_ENTRY("Forest Green",           0x228B22),
+    TBL_ENTRY("Fuchsia",                0xFF00FF),
+    TBL_ENTRY("Gainsboro",              0xDCDCDC),
+    TBL_ENTRY("Ghost White",            0xF8F8FF),
+    TBL_ENTRY("Gold",                   0xFFD700),
+    TBL_ENTRY("Goldenrod",              0xDAA520),
+    TBL_ENTRY("Gray",                   0x808080),
+    TBL_ENTRY("Green Yellow",           0xADFF2F),
+    TBL_ENTRY("Green",                  0x008000),
+    TBL_ENTRY("Honeydew",               0xF0FFF0),
+    TBL_ENTRY("Hot Pink",               0xFF69B4),
+    TBL_ENTRY("Indian Red",             0xCD5C5C),
+    TBL_ENTRY("Indigo",                 0x4B0082),
+    TBL_ENTRY("Ivory",                  0xFFFFF0),
+    TBL_ENTRY("Khaki",                  0xF0E68C),
+    TBL_ENTRY("Lavender Blush",         0xFFF0F5),
+    TBL_ENTRY("Lavender",               0xE6E6FA),
+    TBL_ENTRY("Lawn Green",             0x7CFC00),
+    TBL_ENTRY("Lemon Chiffon",          0xFFFACD),
+    TBL_ENTRY("Light Blue",             0xADD8E6),
+    TBL_ENTRY("Light Coral",            0xF08080),
+    TBL_ENTRY("Light Cyan",             0xE0FFFF),
+    TBL_ENTRY("Light Goldenrod Yellow", 0xFAFAD2),
+    TBL_ENTRY("Light Green",            0x90EE90),
+    TBL_ENTRY("Light Grey",             0xD3D3D3),
+    TBL_ENTRY("Light Pink",             0xFFB6C1),
+    TBL_ENTRY("Light Salmon",           0xFFA07A),
+    TBL_ENTRY("Light Sea Green",        0x20B2AA),
+    TBL_ENTRY("Light Sky Blue",         0x87CEFA),
+    TBL_ENTRY("Light Slate Gray",       0x778899),
+    TBL_ENTRY("Light Steel Blue",       0xB0C4DE),
+    TBL_ENTRY("Light Yellow",           0xFFFFE0),
+    TBL_ENTRY("Lime Green",             0x32CD32),
+    TBL_ENTRY("Lime",                   0x00FF00),
+    TBL_ENTRY("Linen",                  0xFAF0E6),
+    TBL_ENTRY("Magenta",                0xFF00FF),
+    TBL_ENTRY("Maroon",                 0x800000),
+    TBL_ENTRY("Medium Aquamarine",      0x66CDAA),
+    TBL_ENTRY("Medium Blue",            0x0000CD),
+    TBL_ENTRY("Medium Orchid",          0xBA55D3),
+    TBL_ENTRY("Medium Purple",          0x9370DB),
+    TBL_ENTRY("Medium Sea Green",       0x3CB371),
+    TBL_ENTRY("Medium Slate Blue",      0x7B68EE),
+    TBL_ENTRY("Medium Spring Green",    0x00FA9A),
+    TBL_ENTRY("Medium Turquoise",       0x48D1CC),
+    TBL_ENTRY("Medium Violet Red",      0xC71585),
+    TBL_ENTRY("Midnight Blue",          0x191970),
+    TBL_ENTRY("Mint Cream",             0xF5FFFA),
+    TBL_ENTRY("Misty Rose",             0xFFE4E1),
+    TBL_ENTRY("Moccasin",               0xFFE4B5),
+    TBL_ENTRY("Navajo White",           0xFFDEAD),
+    TBL_ENTRY("Navy",                   0x000080),
+    TBL_ENTRY("Old Lace",               0xFDF5E6),
+    TBL_ENTRY("Olive Drab",             0x6B8E23),
+    TBL_ENTRY("Olive",                  0x808000),
+    TBL_ENTRY("Orange Red",             0xFF4500),
+    TBL_ENTRY("Orange",                 0xFFA500),
+    TBL_ENTRY("Orchid",                 0xDA70D6),
+    TBL_ENTRY("Pale Goldenrod",         0xEEE8AA),
+    TBL_ENTRY("Pale Green",             0x98FB98),
+    TBL_ENTRY("Pale Turquoise",         0xAFEEEE),
+    TBL_ENTRY("Pale Violet Red",        0xDB7093),
+    TBL_ENTRY("Papaya Whip",            0xFFEFD5),
+    TBL_ENTRY("Peach Puff",             0xFFDAB9),
+    TBL_ENTRY("Peru",                   0xCD853F),
+    TBL_ENTRY("Pink",                   0xFFC0CB),
+    TBL_ENTRY("Plum",                   0xDDA0DD),
+    TBL_ENTRY("Powder Blue",            0xB0E0E6),
+    TBL_ENTRY("Purple",                 0x800080),
+    TBL_ENTRY("Red",                    0xFF0000),
+    TBL_ENTRY("Rosy Brown",             0xBC8F8F),
+    TBL_ENTRY("Royal Blue",             0x4169E1),
+    TBL_ENTRY("Saddle Brown",           0x8B4513),
+    TBL_ENTRY("Salmon",                 0xFA8072),
+    TBL_ENTRY("Sandy Brown",            0xF4A460),
+    TBL_ENTRY("Sea Green",              0x2E8B57),
+    TBL_ENTRY("Seashell",               0xFFF5EE),
+    TBL_ENTRY("Sienna",                 0xA0522D),
+    TBL_ENTRY("Silver",                 0xC0C0C0),
+    TBL_ENTRY("Silver",                 0xC0C0C0),
+    TBL_ENTRY("Sky Blue",               0x87CEEB),
+    TBL_ENTRY("Slate Blue",             0x6A5ACD),
+    TBL_ENTRY("Slate Gray",             0x708090),
+    TBL_ENTRY("Snow",                   0xFFFAFA),
+    TBL_ENTRY("Spring Green",           0x00FF7F),
+    TBL_ENTRY("Steel Blue",             0x4682B4),
+    TBL_ENTRY("Tan",                    0xD2B48C),
+    TBL_ENTRY("Teal",                   0x008080),
+    TBL_ENTRY("Thistle",                0xD8BFD8),
+    TBL_ENTRY("Tomato",                 0xFF6347),
+    TBL_ENTRY("Turquoise",              0x40E0D0),
+    TBL_ENTRY("Violet",                 0xEE82EE),
+    TBL_ENTRY("Wheat",                  0xF5DEB3),
+    TBL_ENTRY("White Smoke",            0xF5F5F5),
+    TBL_ENTRY("White",                  0xFFFFFF),
+    TBL_ENTRY("Yellow Green",           0x9ACD32),
+    TBL_ENTRY("Yellow",                 0xFFFF00),
+    TBL_ENTRY("aliceblue",              0xF0F8FF),
+    TBL_ENTRY("antiquewhite",           0xFAEBD7),
+    TBL_ENTRY("aqua",                   0x00FFFF),
+    TBL_ENTRY("aquamarine",             0x7FFFD4),
+    TBL_ENTRY("azure",                  0xF0FFFF),
+    TBL_ENTRY("beige",                  0xF5F5DC),
+    TBL_ENTRY("bisque",                 0xFFE4C4),
+    TBL_ENTRY("black",                  0x000000),
+    TBL_ENTRY("blanchedalmond",         0xFFEBCD),
+    TBL_ENTRY("blue",                   0x0000FF),
+    TBL_ENTRY("blueviolet",             0x8A2BE2),
+    TBL_ENTRY("brown",                  0xA52A2A),
+    TBL_ENTRY("burlywood",              0xDEB887),
+    TBL_ENTRY("cadetblue",              0x5F9EA0),
+    TBL_ENTRY("chartreuse",             0x7FFF00),
+    TBL_ENTRY("chocolate",              0xD2691E),
+    TBL_ENTRY("coral",                  0xFF7F50),
+    TBL_ENTRY("cornflowerblue",         0x6495ED),
+    TBL_ENTRY("cornsilk",               0xFFF8DC),
+    TBL_ENTRY("crimson",                0xDC143C),
+    TBL_ENTRY("cyan",                   0x00FFFF),
+    TBL_ENTRY("darkblue",               0x00008B),
+    TBL_ENTRY("darkcyan",               0x008B8B),
+    TBL_ENTRY("darkgoldenrod",          0xB8860B),
+    TBL_ENTRY("darkgray",               0xA9A9A9),
+    TBL_ENTRY("darkgreen",              0x006400),
+    TBL_ENTRY("darkkhaki",              0xBDB76B),
+    TBL_ENTRY("darkmagenta",            0x8B008B),
+    TBL_ENTRY("darkolivegreen",         0x556B2F),
+    TBL_ENTRY("darkorange",             0xFF8C00),
+    TBL_ENTRY("darkorchid",             0x9932CC),
+    TBL_ENTRY("darkred",                0x8B0000),
+    TBL_ENTRY("darksalmon",             0xE9967A),
+    TBL_ENTRY("darkseagreen",           0x8FBC8F),
+    TBL_ENTRY("darkslateblue",          0x483D8B),
+    TBL_ENTRY("darkslategray",          0x2F4F4F),
+    TBL_ENTRY("darkturquoise",          0x00CED1),
+    TBL_ENTRY("darkviolet",             0x9400D3),
+    TBL_ENTRY("deeppink",               0xFF1493),
+    TBL_ENTRY("deepskyblue",            0x00BFFF),
+    TBL_ENTRY("dimgray",                0x696969),
+    TBL_ENTRY("dodgerblue",             0x1E90FF),
+    TBL_ENTRY("firebrick",              0xB22222),
+    TBL_ENTRY("floralwhite",            0xFFFAF0),
+    TBL_ENTRY("forestgreen",            0x228B22),
+    TBL_ENTRY("fuchsia",                0xFF00FF),
+    TBL_ENTRY("gainsboro",              0xDCDCDC),
+    TBL_ENTRY("ghostwhite",             0xF8F8FF),
+    TBL_ENTRY("gold",                   0xFFD700),
+    TBL_ENTRY("goldenrod",              0xDAA520),
+    TBL_ENTRY("gray",                   0x808080),
+    TBL_ENTRY("green",                  0x008000),
+    TBL_ENTRY("greenyellow",            0xADFF2F),
+    TBL_ENTRY("honeydew",               0xF0FFF0),
+    TBL_ENTRY("hotpink",                0xFF69B4),
+    TBL_ENTRY("indianred",              0xCD5C5C),
+    TBL_ENTRY("indigo",                 0x4B0082),
+    TBL_ENTRY("ivory",                  0xFFFFF0),
+    TBL_ENTRY("khaki",                  0xF0E68C),
+    TBL_ENTRY("lavender",               0xE6E6FA),
+    TBL_ENTRY("lavenderblush",          0xFFF0F5),
+    TBL_ENTRY("lawngreen",              0x7CFC00),
+    TBL_ENTRY("lemonchiffon",           0xFFFACD),
+    TBL_ENTRY("lightblue",              0xADD8E6),
+    TBL_ENTRY("lightcoral",             0xF08080),
+    TBL_ENTRY("lightcyan",              0xE0FFFF),
+    TBL_ENTRY("lightgoldenrodyellow",   0xFAFAD2),
+    TBL_ENTRY("lightgreen",             0x90EE90),
+    TBL_ENTRY("lightgrey",              0xD3D3D3),
+    TBL_ENTRY("lightpink",              0xFFB6C1),
+    TBL_ENTRY("lightsalmon",            0xFFA07A),
+    TBL_ENTRY("lightseagreen",          0x20B2AA),
+    TBL_ENTRY("lightskyblue",           0x87CEFA),
+    TBL_ENTRY("lightslategray",         0x778899),
+    TBL_ENTRY("lightsteelblue",         0xB0C4DE),
+    TBL_ENTRY("lightyellow",            0xFFFFE0),
+    TBL_ENTRY("lime",                   0x00FF00),
+    TBL_ENTRY("limegreen",              0x32CD32),
+    TBL_ENTRY("linen",                  0xFAF0E6),
+    TBL_ENTRY("magenta",                0xFF00FF),
+    TBL_ENTRY("maroon",                 0x800000),
+    TBL_ENTRY("mediumaquamarine",       0x66CDAA),
+    TBL_ENTRY("mediumblue",             0x0000CD),
+    TBL_ENTRY("mediumorchid",           0xBA55D3),
+    TBL_ENTRY("mediumpurple",           0x9370DB),
+    TBL_ENTRY("mediumseagreen",         0x3CB371),
+    TBL_ENTRY("mediumslateblue",        0x7B68EE),
+    TBL_ENTRY("mediumspringgreen",      0x00FA9A),
+    TBL_ENTRY("mediumturquoise",        0x48D1CC),
+    TBL_ENTRY("mediumvioletred",        0xC71585),
+    TBL_ENTRY("midnightblue",           0x191970),
+    TBL_ENTRY("mintcream",              0xF5FFFA),
+    TBL_ENTRY("mistyrose",              0xFFE4E1),
+    TBL_ENTRY("moccasin",               0xFFE4B5),
+    TBL_ENTRY("navajowhite",            0xFFDEAD),
+    TBL_ENTRY("navy",                   0x000080),
+    TBL_ENTRY("oldlace",                0xFDF5E6),
+    TBL_ENTRY("olive",                  0x808000),
+    TBL_ENTRY("olivedrab",              0x6B8E23),
+    TBL_ENTRY("orange",                 0xFFA500),
+    TBL_ENTRY("orangered",              0xFF4500),
+    TBL_ENTRY("orchid",                 0xDA70D6),
+    TBL_ENTRY("palegoldenrod",          0xEEE8AA),
+    TBL_ENTRY("palegreen",              0x98FB98),
+    TBL_ENTRY("paleturquoise",          0xAFEEEE),
+    TBL_ENTRY("palevioletred",          0xDB7093),
+    TBL_ENTRY("papayawhip",             0xFFEFD5),
+    TBL_ENTRY("peachpuff",              0xFFDAB9),
+    TBL_ENTRY("peru",                   0xCD853F),
+    TBL_ENTRY("pink",                   0xFFC0CB),
+    TBL_ENTRY("plum",                   0xDDA0DD),
+    TBL_ENTRY("powderblue",             0xB0E0E6),
+    TBL_ENTRY("purple",                 0x800080),
+    TBL_ENTRY("red",                    0xFF0000),
+    TBL_ENTRY("rosybrown",              0xBC8F8F),
+    TBL_ENTRY("royalblue",              0x4169E1),
+    TBL_ENTRY("saddlebrown",            0x8B4513),
+    TBL_ENTRY("salmon",                 0xFA8072),
+    TBL_ENTRY("sandybrown",             0xF4A460),
+    TBL_ENTRY("seagreen",               0x2E8B57),
+    TBL_ENTRY("seashell",               0xFFF5EE),
+    TBL_ENTRY("sienna",                 0xA0522D),
+    TBL_ENTRY("skyblue",                0x87CEEB),
+    TBL_ENTRY("slateblue",              0x6A5ACD),
+    TBL_ENTRY("slategray",              0x708090),
+    TBL_ENTRY("snow",                   0xFFFAFA),
+    TBL_ENTRY("springgreen",            0x00FF7F),
+    TBL_ENTRY("steelblue",              0x4682B4),
+    TBL_ENTRY("tan",                    0xD2B48C),
+    TBL_ENTRY("teal",                   0x008080),
+    TBL_ENTRY("thistle",                0xD8BFD8),
+    TBL_ENTRY("tomato",                 0xFF6347),
+    TBL_ENTRY("turquoise",              0x40E0D0),
+    TBL_ENTRY("violet",                 0xEE82EE),
+    TBL_ENTRY("wheat",                  0xF5DEB3),
+    TBL_ENTRY("white",                  0xFFFFFF),
+    TBL_ENTRY("whitesmoke",             0xF5F5F5),
+    TBL_ENTRY("yellow",                 0xFFFF00),
+    TBL_ENTRY("yellowgreen",            0x9ACD32),
+};
+
+/**
+ * \brief Check for a color name.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the string
+ * \param def default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_color_name(const char *_fun, lua_State* L, int arg, l_int32 def)
+{
+    return ll_check_tbl(_fun, L, arg, def, tbl_color_name, ARRAYSIZE(tbl_color_name));
+}
+
+/**
+ * \brief Return a string for color RGB value.
+ * \param color color value
+ * \return const string with the name
+ */
+const char*
+ll_string_color_name(l_uint32 color)
+{
+    static char buff[64];
+    l_int32 r, g, b;
+    extractRGBValues(color, &r, &g, &b);
+    l_uint32 value = static_cast<l_uint32>((r << 16) | (g << 8) | (b << 0));
+    const char* name = ll_string_tbl(static_cast<l_int32>(value), tbl_color_name, ARRAYSIZE(tbl_color_name));
+    if (strcmp(name, "<undefined>"))
+        return name;
+    snprintf(buff, sizeof(buff), "#%02X%02x%02X", r, g, b);
+    return buff;
 }
 
 /**

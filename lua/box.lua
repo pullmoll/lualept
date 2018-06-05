@@ -53,4 +53,23 @@ print(pad("baa:GetBoxCount()"), baa:GetBoxCount())
 local ba2 = baa:FlattenToBoxa()
 print(pad("baa::FlattenToBoxa()"), ba2)
 
+local mat1d = { 0.2, 0.0, 0.3,
+		0.1, 0.8, 0.3,
+		0.0, 0.5, 1.0
+	}
+
+local mat2d = { { 0.2, 0.0, 0.3 },
+		{ 0.1, 0.8, 0.3 },
+		{ 0.0, 0.5, 1.0 }
+	}
+
+local at1 = ba:AffineTransform(0.2, 0.0, 0.3, 0.1, 0.8, 0.3, 0.0, 0.5, 1.0)
+print(pad("ba:AffineTransform(9 x float)"), at1)
+
+local at2 = ba:AffineTransform(mat1d)
+print(pad("ba:AffineTransform(mat1d)"), at2)
+
+local at3 = ba:AffineTransform(mat2d)
+print(pad("ba:AffineTransform(mat2d)"), at3)
+
 header()

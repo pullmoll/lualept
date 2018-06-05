@@ -243,6 +243,48 @@ Create(lua_State *L)
 }
 
 /**
+ * \brief Display() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
+ * Arg #2 is expected to be a Pix* (pixs).
+ * Arg #3 is expected to be a l_int32 (linewba).
+ * Arg #4 is expected to be a l_int32 (linewb).
+ * Arg #5 is expected to be a l_uint32 (colorba).
+ * Arg #6 is expected to be a l_uint32 (colorb).
+ * Arg #7 is expected to be a l_int32 (w).
+ * Arg #8 is expected to be a l_int32 (h).
+ *
+ * Leptonica's Notes:
+ *      (1) If %pixs exists, this renders the boxes over an 8 bpp version
+ *          of it.  Otherwise, it renders the boxes over an empty image
+ *          with a white background.
+ *      (2) If %pixs exists, the dimensions of %pixd are the same,
+ *          and input values of %w and %h are ignored.
+ *          If %pixs is NULL, the dimensions of %pixd are determined by
+ *            - %w and %h if both are > 0, or
+ *            - the minimum size required using all boxes in %baa.
+ *
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+Display(lua_State *L)
+{
+    LL_FUNC("Display");
+    Boxaa *baa = ll_check_Boxaa(_fun, L, 1);
+    Pix *pixs = ll_opt_Pix(_fun, L, 2);
+    l_int32 linewba = ll_check_l_int32(_fun, L, 3);
+    l_int32 linewb = ll_check_l_int32(_fun, L, 4);
+    l_uint32 colorba = ll_check_l_uint32(_fun, L, 5);
+    l_uint32 colorb = ll_check_l_uint32(_fun, L, 6);
+    l_int32 w = ll_check_l_int32(_fun, L, 7);
+    l_int32 h = ll_check_l_int32(_fun, L, 8);
+    Pix *pix = boxaaDisplay(pixs, baa, linewba, linewb, colorba, colorb, w, h);
+    return ll_push_Pix (_fun, L, pix);
+}
+
+/**
  * \brief Extend a Boxaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
@@ -778,6 +820,26 @@ SizeRange(lua_State *L)
 }
 
 /**
+ * \brief Sort2dByIndex() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
+ * Arg #2 is expected to be a Numaa* (naa).
+ *
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+Sort2dByIndex(lua_State *L)
+{
+    LL_FUNC("Sort2dByIndex");
+    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
+    Numaa *naa = ll_check_Numaa(_fun, L, 2);
+    Boxaa *boxaa = boxaSort2dByIndex(boxas, naa);
+    return ll_push_Boxaa (_fun, L, boxaa);
+}
+
+/**
  * \brief Transpose() brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baas).
@@ -986,6 +1048,7 @@ luaopen_Boxaa(lua_State *L)
         {"Copy",                    Copy},
         {"Create",                  Create},
         {"Destroy",                 Destroy},
+        {"Display",                 Display},
         {"ExtendArray",             ExtendArray},
         {"ExtendArrayToSize",       ExtendArrayToSize},
         {"ExtendWithInit",          ExtendWithInit},
@@ -1008,6 +1071,7 @@ luaopen_Boxaa(lua_State *L)
         {"ReplaceBoxa",             ReplaceBoxa},
         {"SelectRange",             SelectRange},
         {"SizeRange",               SizeRange},
+        {"Sort2dByIndex",           Sort2dByIndex},
         {"Transpose",               Transpose},
         {"Write",                   Write},
         {"WriteMem",                WriteMem},

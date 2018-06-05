@@ -237,9 +237,7 @@ AdjustWidthToTarget(lua_State *L)
  * \brief Affine transformation of the boxes in the Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
- * Arg #2 is expected to be a table of 3x3 l_float32 (mat).
- * or
- * Arg #2 .. 10 is expected to be l_float32 (mat[0..8]).
+ * Arg #2 is expected to be a matrix of 3x3 l_float32 (mat).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Boxa* on the Lua stack (%boxa)
@@ -249,23 +247,7 @@ AffineTransform(lua_State *L)
 {
     LL_FUNC("AffineTransform");
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
-    l_int32 i, n;
-    l_float32 *mat = nullptr;
-    if (lua_istable(L, 2)) {
-        /* expect a table of 9 numbers */
-        mat = ll_unpack_Farray(_fun, L, 2, &n);
-    } else {
-        /* expect 9 numbers */
-        n = 9;
-        mat = ll_calloc<l_float32>(_fun, L, n);
-        for (i = 0; i < n; i++)
-            mat[i] = ll_check_l_float32(_fun, L, 2+i);
-    }
-    if (n < 9) {
-        lua_pushfstring(L, "%s: wrong matrix size (%d), expected 3x3", _fun, n);
-        lua_error(L);
-        return 0;
-    }
+    l_float32 *mat = ll_unpack_Matrix(_fun, L, 2, 3, 3);
     Boxa *boxa = boxaAffineTransform(boxas, mat);
     return ll_push_Boxa(_fun, L, boxa);
 }
