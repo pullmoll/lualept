@@ -34,6 +34,8 @@
 
 /* MS VC++ does not provide stdint.h, so define the missing types here */
 #ifdef _MSC_VER
+#include "winconf.h"
+
 /* Note that _WIN32 is defined for both 32 and 64 bit applications,
    whereas _WIN64 is defined only for the latter */
 

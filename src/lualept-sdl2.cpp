@@ -643,8 +643,8 @@ DisplaySDL2(Pix* pix, const char* title, int x0, int y0, float dscale)
 {
     UNUSED(pix);
     UNUSED(title);
-    UNUSED(x);
-    UNUSED(y);
+    UNUSED(x0);
+    UNUSED(y0);
     UNUSED(dscale);
     return FALSE;
 }

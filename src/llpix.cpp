@@ -15668,7 +15668,7 @@ GetHeight(lua_State *L)
     LL_FUNC("GetHeight");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 height = pixGetHeight(pix);
-    ll_push_l_int32(_fun, L, height);
+    return ll_push_l_int32(_fun, L, height);
 }
 
 /**

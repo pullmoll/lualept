@@ -160,8 +160,8 @@ static const char*
 timestamp(void)
 {
     static char str[128];
-    const char* tz = "";
 #if defined(HAVE_GETTIMEOFDAY)
+    const char* tz = "";
     struct timeval tv;
     if (0 == gettimeofday(&tv, nullptr)) {
         time_t tval = static_cast<time_t>(tv.tv_sec);
