@@ -649,6 +649,37 @@ ll_check_Dna(const char *_fun, lua_State *L, int arg)
 }
 
 /**
+ * \brief Check Lua stack at index %arg for udata of class Dna* and take it.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the Dna* contained in the user data
+ */
+Dna *
+ll_take_Dna(const char *_fun, lua_State *L, int arg)
+{
+    Dna **pda = ll_check_udata<Dna>(_fun, L, arg, TNAME);
+    Dna *da = *pda;
+    *pda = nullptr;
+    return da;
+}
+
+/**
+ * \brief Take a Dna* from a global variable %name.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param name of the global variable
+ * \return pointer to the Amap* contained in the user data
+ */
+Dna *
+ll_global_Dna(const char *_fun, lua_State *L, const char *name)
+{
+    if (LUA_TUSERDATA != lua_getglobal(L, name))
+        return nullptr;
+    return ll_take_Dna(_fun, L, 1);
+}
+
+/**
  * \brief Optionally expect a Dna* at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State

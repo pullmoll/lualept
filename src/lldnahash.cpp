@@ -139,6 +139,37 @@ ll_check_DnaHash(const char *_fun, lua_State *L, int arg)
 }
 
 /**
+ * \brief Check Lua stack at index %arg for udata of class DnaHash* and take it.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the DnaHash* contained in the user data
+ */
+DnaHash *
+ll_take_DnaHash(const char *_fun, lua_State *L, int arg)
+{
+    DnaHash **pdah = ll_check_udata<DnaHash>(_fun, L, arg, TNAME);
+    DnaHash *dah = *pdah;
+    *pdah = nullptr;
+    return dah;
+}
+
+/**
+ * \brief Take a DnaHash* from a global variable %name.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param name of the global variable
+ * \return pointer to the Amap* contained in the user data
+ */
+DnaHash *
+ll_global_DnaHash(const char *_fun, lua_State *L, const char *name)
+{
+    if (LUA_TUSERDATA != lua_getglobal(L, name))
+        return nullptr;
+    return ll_take_DnaHash(_fun, L, 1);
+}
+
+/**
  * \brief Optionally expect a LL_DLLIST at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State

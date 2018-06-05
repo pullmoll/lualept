@@ -703,6 +703,37 @@ ll_check_Numa(const char *_fun, lua_State *L, int arg)
 }
 
 /**
+ * \brief Check Lua stack at index %arg for udata of class Numa* and take it.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the Numa* contained in the user data
+ */
+Numa *
+ll_take_Numa(const char *_fun, lua_State *L, int arg)
+{
+    Numa **pna = ll_check_udata<Numa>(_fun, L, arg, TNAME);
+    Numa *na = *pna;
+    *pna = nullptr;
+    return na;
+}
+
+/**
+ * \brief Take a Numa* from a global variable %name.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param name of the global variable
+ * \return pointer to the Amap* contained in the user data
+ */
+Numa *
+ll_global_Numa(const char *_fun, lua_State *L, const char *name)
+{
+    if (LUA_TUSERDATA != lua_getglobal(L, name))
+        return nullptr;
+    return ll_take_Numa(_fun, L, 1);
+}
+
+/**
  * \brief Optionally expect a Numa* at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State

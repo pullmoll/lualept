@@ -382,6 +382,37 @@ ll_check_Aset(const char *_fun, lua_State *L, int arg)
 }
 
 /**
+ * \brief Check Lua stack at index %arg for udata of class Aset* and take it.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the Aset* contained in the user data
+ */
+Aset *
+ll_take_Aset(const char *_fun, lua_State *L, int arg)
+{
+    Aset **paset = ll_check_udata<Aset>(_fun, L, arg, TNAME);
+    Aset *aset = *paset;
+    *paset = nullptr;
+    return aset;
+}
+
+/**
+ * \brief Take a Aset* from a global variable %name.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param name of the global variable
+ * \return pointer to the Amap* contained in the user data
+ */
+Aset *
+ll_global_Aset(const char *_fun, lua_State *L, const char *name)
+{
+    if (LUA_TUSERDATA != lua_getglobal(L, name))
+        return nullptr;
+    return ll_take_Aset(_fun, L, 1);
+}
+
+/**
  * \brief Optionally expect a Aset* at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State

@@ -1077,24 +1077,9 @@ ll_check_PixColormap(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Optionally expect a PixColormap* at index %arg on the Lua stack.
- * \param _fun calling function's name
- * \param L pointer to the lua_State
- * \param arg index where to find the user data (usually 1)
- * \return pointer to the PixColormap* contained in the user data
- */
-PixColormap *
-ll_opt_PixColormap(const char *_fun, lua_State *L, int arg)
-{
-    if (!ll_isudata(_fun, L, arg, TNAME))
-        return nullptr;
-    return ll_check_PixColormap(_fun, L, arg);
-}
-
-/**
  * \brief Check Lua stack at index %arg for udata of class PixColorMap*.
  *
- * This version removes the PixColormap* from the object PixColormap*;
+ * This version removes the PixColormap* from the object PixColormap.
  * It is used when the PixColormap* is e.g. attached to a Pix*.
  * The reason is that a PixColormap* does not have a reference
  * count and thus can be used exactly once in Pix:SetColormap().
@@ -1111,6 +1096,36 @@ ll_take_PixColormap(const char *_fun, lua_State *L, int arg)
     PixColormap *cmap = *pcmap;
     *pcmap = nullptr;
     return cmap;
+}
+
+/**
+ * \brief Take a PixColormap* from a global variable %name.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param name of the global variable
+ * \return pointer to the Amap* contained in the user data
+ */
+PixColormap *
+ll_global_PixColormap(const char *_fun, lua_State *L, const char *name)
+{
+    if (LUA_TUSERDATA != lua_getglobal(L, name))
+        return nullptr;
+    return ll_take_PixColormap(_fun, L, 1);
+}
+
+/**
+ * \brief Optionally expect a PixColormap* at index %arg on the Lua stack.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the PixColormap* contained in the user data
+ */
+PixColormap *
+ll_opt_PixColormap(const char *_fun, lua_State *L, int arg)
+{
+    if (!ll_isudata(_fun, L, arg, TNAME))
+        return nullptr;
+    return ll_check_PixColormap(_fun, L, arg);
 }
 
 /**

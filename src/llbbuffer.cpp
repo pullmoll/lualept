@@ -287,6 +287,37 @@ ll_check_ByteBuffer(const char *_fun, lua_State *L, int arg)
 }
 
 /**
+ * \brief Check Lua stack at index %arg for udata of class ByteBuffer* and take it.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the ByteBuffer* contained in the user data
+ */
+ByteBuffer *
+ll_take_ByteBuffer(const char *_fun, lua_State *L, int arg)
+{
+    ByteBuffer **pbb = ll_check_udata<ByteBuffer>(_fun, L, arg, TNAME);
+    ByteBuffer *bb = *pbb;
+    *pbb = nullptr;
+    return bb;
+}
+
+/**
+ * \brief Take a ByteBuffer* from a global variable %name.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param name of the global variable
+ * \return pointer to the Amap* contained in the user data
+ */
+ByteBuffer *
+ll_global_ByteBuffer(const char *_fun, lua_State *L, const char *name)
+{
+    if (LUA_TUSERDATA != lua_getglobal(L, name))
+        return nullptr;
+    return ll_take_ByteBuffer(_fun, L, 1);
+}
+
+/**
  * \brief Optionally expect a LL_DLLIST at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State

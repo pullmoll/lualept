@@ -448,6 +448,37 @@ ll_check_DoubleLinkedList(const char *_fun, lua_State *L, int arg)
 }
 
 /**
+ * \brief Check Lua stack at index %arg for udata of class DoubleLinkedList* and take it.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the DoubleLinkedList* contained in the user data
+ */
+DoubleLinkedList *
+ll_take_DoubleLinkedList(const char *_fun, lua_State *L, int arg)
+{
+    DoubleLinkedList **plist = ll_check_udata<DoubleLinkedList>(_fun, L, arg, TNAME);
+    DoubleLinkedList *list = *plist;
+    *plist = nullptr;
+    return list;
+}
+
+/**
+ * \brief Take a DoubleLinkedList* from a global variable %name.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param name of the global variable
+ * \return pointer to the Amap* contained in the user data
+ */
+DoubleLinkedList *
+ll_global_DoubleLinkedList(const char *_fun, lua_State *L, const char *name)
+{
+    if (LUA_TUSERDATA != lua_getglobal(L, name))
+        return nullptr;
+    return ll_take_DoubleLinkedList(_fun, L, 1);
+}
+
+/**
  * \brief Optionally expect a DoubleLinkedList* at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State

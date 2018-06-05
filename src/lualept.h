@@ -47,6 +47,59 @@ extern "C" {
 /** Local type definition of lua_State to avoid including lua.h here */
 typedef struct lua_State lua_State;
 
+#define LL_BOOLEAN      "l_ok"          /*!< Lua variable of type boolean */
+#define LL_INT8         "l_int8"        /*!< Lua variable of type integer; range l_int8 */
+#define LL_UINT8        "l_uint8"       /*!< Lua variable of type integer; range l_uint8 */
+#define LL_INT16        "l_int16"       /*!< Lua variable of type integer; range l_int16 */
+#define LL_UINT16       "l_uint16"      /*!< Lua variable of type integer; range l_uint16 */
+#define LL_INT32        "l_int32"       /*!< Lua variable of type integer; range l_int32 */
+#define LL_UINT32       "l_uint32"      /*!< Lua variable of type integer; range l_uint32 */
+#define LL_INT64        "l_int64"       /*!< Lua variable of type integer; range l_int64 */
+#define LL_UINT64       "l_uint64"      /*!< Lua variable of type integer; range l_uint64 */
+#define LL_FLOAT32      "l_int64"       /*!< Lua variable of type number; range l_float32 */
+#define LL_FLOAT64      "l_uint64"      /*!< Lua variable of type number; range l_float64 */
+#define	LL_AMAP		"Amap"          /*!< Lua class: Amap (key / value pairs) */
+#define	LL_ASET		"Aset"          /*!< Lua class: Aset (key set) */
+#define	LL_BBUFFER	"Bbuffer"       /*!< Lua class: Bbuffer (byte buffer) */
+#define	LL_BMF		"Bmf"           /*!< Lua class: Bmf (Bitmap font) */
+#define	LL_BOX		"Box"           /*!< Lua class: Box (quad l_int32 for x,y,w,h) */
+#define	LL_BOXA		"Boxa"          /*!< Lua class: Boxa (array of Box) */
+#define	LL_BOXAA	"Boxaa"         /*!< Lua class: Boxaa (array of Boxa) */
+#define	LL_COMPDATA     "CompData"      /*!< Lua class: CompData */
+#define	LL_CCBORD       "CCBord"        /*!< Lua class: CCBord */
+#define	LL_CCBORDA      "CCBorda"       /*!< Lua class: CCBorda (array of CCBord) */
+#define	LL_DEWARP       "Dewarp"        /*!< Lua class: Dewarp */
+#define	LL_DEWARPA      "Dewarpa"       /*!< Lua class: Dewarpa (array of Dewarp) */
+#define	LL_DLLIST	"Dllist"        /*!< Lua class: DoubleLinkedList */
+#define	LL_DNA		"Dna"           /*!< Lua class: array of doubles (l_float64, equiv. to lua_Number) */
+#define	LL_DNAA		"Dnaa"          /*!< Lua class: Dnaa (array of Dna) */
+#define LL_DNAHASH      "DnaHash"       /*!< Lua class: DnaHash */
+#define	LL_DPIX		"DPix"          /*!< Lua class: DPix */
+#define	LL_FPIX		"FPix"          /*!< Lua class: FPix */
+#define	LL_FPIXA	"FPixa"         /*!< Lua class: FPixa (array of FPix) */
+#define	LL_KERNEL       "Kernel"        /*!< Lua class: Kernel */
+#define	LL_NUMA		"Numa"          /*!< Lua class: Numa array of floats (l_float32) */
+#define	LL_NUMAA	"Numaa"         /*!< Lua class: Numaa (array of Numa) */
+#define	LL_PDFDATA      "PdfData"       /*!< Lua class: PdfData */
+#define	LL_PIX		"Pix"           /*!< Lua class: Pix (pixels and meta data) */
+#define	LL_PIXA		"Pixa"          /*!< Lua class: Pixa (array of Pix) */
+#define	LL_PIXAA        "Pixaa"         /*!< Lua class: Pixaa (array of Pixa) */
+#define	LL_PIXCMAP	"PixColormap"   /*!< Lua class: PixColormap (color map) */
+#define	LL_PIXTILING	"PixTiling"     /*!< Lua class: PixTiling */
+#define	LL_PIXCOMP      "PixComp"       /*!< Lua class: PixComp (compressed Pix) */
+#define	LL_PIXACOMP     "PixaComp"      /*!< Lua class: PixaComp (array of PixComp) */
+#define	LL_PTA		"Pta"           /*!< Lua class: Pta (array of points, i.e. pair of l_float32) */
+#define	LL_PTAA		"Ptaa"          /*!< Lua class: Ptaa (array of Pta) */
+#define	LL_RBTNODE      "RbtreeNode"    /*!< Lua class: RbtreeNode (Amap and Aset nodes) */
+#define	LL_SARRAY	"Sarray"        /*!< Lua class: Sarray (array of strings) */
+#define	LL_SEL		"Sel"           /*!< Lua class: Sel */
+#define	LL_SELA		"Sela"          /*!< Lua class: array of Sel */
+#define	LL_STACK        "Stack"         /*!< Lua class: Stack */
+#define	LL_WSHED        "WShed"         /*!< Lua class: Stack */
+
+LUALEPT_DLL extern int ll_set_global(const char *type, const char *name, void *data);
+LUALEPT_DLL extern int ll_get_global(const char *type, const char *name, void **pdata);
+
 LUALEPT_DLL extern int ll_open_Amap(lua_State *L);
 LUALEPT_DLL extern int ll_open_Aset(lua_State *L);
 LUALEPT_DLL extern int ll_open_ByteBuffer(lua_State *L);

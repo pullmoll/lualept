@@ -140,6 +140,37 @@ ll_check_CCBord(const char *_fun, lua_State *L, int arg)
 }
 
 /**
+ * \brief Check Lua stack at index %arg for udata of class CCBord* and take it.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the CCBord* contained in the user data
+ */
+CCBord *
+ll_take_CCBord(const char *_fun, lua_State *L, int arg)
+{
+    CCBord **pccb = ll_check_udata<CCBord>(_fun, L, arg, TNAME);
+    CCBord *ccb = *pccb;
+    *pccb = nullptr;
+    return ccb;
+}
+
+/**
+ * \brief Take a CCBord* from a global variable %name.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param name of the global variable
+ * \return pointer to the Amap* contained in the user data
+ */
+CCBord *
+ll_global_CCBord(const char *_fun, lua_State *L, const char *name)
+{
+    if (LUA_TUSERDATA != lua_getglobal(L, name))
+        return nullptr;
+    return ll_take_CCBord(_fun, L, 1);
+}
+
+/**
  * \brief Optionally expect a CCBord* at index (%arg) on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State

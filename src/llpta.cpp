@@ -534,6 +534,37 @@ ll_check_Pta(const char *_fun, lua_State *L, int arg)
 }
 
 /**
+ * \brief Check Lua stack at index %arg for udata of class Pta* and take it.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the Pta* contained in the user data
+ */
+Pta *
+ll_take_Pta(const char *_fun, lua_State *L, int arg)
+{
+    Pta **ppta = ll_check_udata<Pta>(_fun, L, arg, TNAME);
+    Pta *pta = *ppta;
+    *ppta = nullptr;
+    return pta;
+}
+
+/**
+ * \brief Take a Pta* from a global variable %name.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param name of the global variable
+ * \return pointer to the Amap* contained in the user data
+ */
+Pta *
+ll_global_Pta(const char *_fun, lua_State *L, const char *name)
+{
+    if (LUA_TUSERDATA != lua_getglobal(L, name))
+        return nullptr;
+    return ll_take_Pta(_fun, L, 1);
+}
+
+/**
  * \brief Optionally expect a Pta* at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State

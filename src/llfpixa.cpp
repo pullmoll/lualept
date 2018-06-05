@@ -419,6 +419,38 @@ ll_check_FPixa(const char *_fun, lua_State *L, int arg)
 {
     return *ll_check_udata<FPixa>(_fun, L, arg, TNAME);
 }
+
+/**
+ * \brief Check Lua stack at index %arg for udata of class FPixa* and take it.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the FPixa* contained in the user data
+ */
+FPixa *
+ll_take_FPixa(const char *_fun, lua_State *L, int arg)
+{
+    FPixa **pfpixa = ll_check_udata<FPixa>(_fun, L, arg, TNAME);
+    FPixa *fpixa = *pfpixa;
+    *pfpixa = nullptr;
+    return fpixa;
+}
+
+/**
+ * \brief Take a FPixa* from a global variable %name.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param name of the global variable
+ * \return pointer to the Amap* contained in the user data
+ */
+FPixa *
+ll_global_FPixa(const char *_fun, lua_State *L, const char *name)
+{
+    if (LUA_TUSERDATA != lua_getglobal(L, name))
+        return nullptr;
+    return ll_take_FPixa(_fun, L, 1);
+}
+
 /**
  * \brief Optionally expect a FPixa* at index (%arg) on the Lua stack.
  * \param _fun calling function's name
@@ -433,6 +465,7 @@ ll_opt_FPixa(const char *_fun, lua_State *L, int arg)
         return nullptr;
     return ll_check_FPixa(_fun, L, arg);
 }
+
 /**
  * \brief Push FPixa* to the Lua stack and set its meta table.
  * \param _fun calling function's name
@@ -447,6 +480,7 @@ ll_push_FPixa(const char *_fun, lua_State *L, FPixa *cd)
         return ll_push_nil(L);
     return ll_push_udata(_fun, L, TNAME, cd);
 }
+
 /**
  * \brief Create and push a new FPixa*.
  * \param L pointer to the lua_State

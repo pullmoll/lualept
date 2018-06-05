@@ -503,6 +503,38 @@ ll_check_CompData(const char *_fun, lua_State *L, int arg)
 {
     return *ll_check_udata<CompData>(_fun, L, arg, TNAME);
 }
+
+/**
+ * \brief Check Lua stack at index %arg for udata of class CompData* and take it.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the CompData* contained in the user data
+ */
+CompData *
+ll_take_CompData(const char *_fun, lua_State *L, int arg)
+{
+    CompData **pcid = ll_check_udata<CompData>(_fun, L, arg, TNAME);
+    CompData *cid = *pcid;
+    *pcid = nullptr;
+    return cid;
+}
+
+/**
+ * \brief Take a CompData* from a global variable %name.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param name of the global variable
+ * \return pointer to the Amap* contained in the user data
+ */
+CompData *
+ll_global_CompData(const char *_fun, lua_State *L, const char *name)
+{
+    if (LUA_TUSERDATA != lua_getglobal(L, name))
+        return nullptr;
+    return ll_take_CompData(_fun, L, 1);
+}
+
 /**
  * \brief Optionally expect a LL_DLLIST at index %arg on the Lua stack.
  * \param _fun calling function's name
@@ -517,6 +549,7 @@ ll_opt_CompData(const char *_fun, lua_State *L, int arg)
         return nullptr;
     return ll_check_CompData(_fun, L, arg);
 }
+
 /**
  * \brief Push BMF user data to the Lua stack and set its meta table.
  * \param _fun calling function's name

@@ -408,6 +408,22 @@ ll_check_Amap(const char *_fun, lua_State *L, int arg)
 }
 
 /**
+ * \brief Check Lua stack at index %arg for udata of class Amap* and take it.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the user data (usually 1)
+ * \return pointer to the Amap* contained in the user data
+ */
+Amap *
+ll_take_Amap(const char *_fun, lua_State *L, int arg)
+{
+    Amap **pamap = ll_check_udata<Amap>(_fun, L, arg, TNAME);
+    Amap *amap = *pamap;
+    *pamap = nullptr;
+    return amap;
+}
+
+/**
  * \brief Optionally expect a Amap* at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
@@ -421,6 +437,22 @@ ll_opt_Amap(const char *_fun, lua_State *L, int arg)
         return nullptr;
     return ll_check_Amap(_fun, L, arg);
 }
+
+/**
+ * \brief Take a Amap* from a global variable %name.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param name of the global variable
+ * \return pointer to the Amap* contained in the user data
+ */
+Amap *
+ll_global_Amap(const char *_fun, lua_State *L, const char *name)
+{
+    if (LUA_TUSERDATA != lua_getglobal(L, name))
+        return nullptr;
+    return ll_take_Amap(_fun, L, 1);
+}
+
 /**
  * \brief Push Amap user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
