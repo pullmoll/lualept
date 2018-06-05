@@ -1237,7 +1237,7 @@ ll_new_Sarray(lua_State *L)
  * \return 1 table on the Lua stack
  */
 int
-luaopen_Sarray(lua_State *L)
+ll_open_Sarray(lua_State *L)
 {
     static const luaL_Reg methods[] = {
         {"__gc",                    Destroy},

@@ -541,7 +541,7 @@ ll_new_Numaa(lua_State *L)
  * \return 1 table on the Lua stack
  */
 int
-luaopen_Numaa(lua_State *L) {
+ll_open_Numaa(lua_State *L) {
     static const luaL_Reg methods[] = {
         {"__gc",            Destroy},
         {"__new",           ll_new_Numaa},

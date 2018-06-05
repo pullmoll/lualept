@@ -828,7 +828,7 @@ ll_new_Sel(lua_State *L)
  * \return 1 table on the Lua stack
  */
 int
-luaopen_Sel(lua_State *L)
+ll_open_Sel(lua_State *L)
 {
     static const luaL_Reg methods[] = {
         {"__gc",                    Destroy},

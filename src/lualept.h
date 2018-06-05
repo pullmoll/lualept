@@ -44,6 +44,48 @@
 extern "C" {
 #endif
 
+/** Local type definition of lua_State to avoid including lua.h here */
+typedef struct lua_State lua_State;
+
+LUALEPT_DLL extern int ll_open_Amap(lua_State *L);
+LUALEPT_DLL extern int ll_open_Aset(lua_State *L);
+LUALEPT_DLL extern int ll_open_ByteBuffer(lua_State *L);
+LUALEPT_DLL extern int ll_open_Bmf(lua_State *L);
+LUALEPT_DLL extern int ll_open_DoubleLinkedList(lua_State *L);
+LUALEPT_DLL extern int ll_open_Numa(lua_State *L);
+LUALEPT_DLL extern int ll_open_Numaa(lua_State *L);
+LUALEPT_DLL extern int ll_open_Dewarp(lua_State *L);
+LUALEPT_DLL extern int ll_open_Dewarpa(lua_State *L);
+LUALEPT_DLL extern int ll_open_Dna(lua_State *L);
+LUALEPT_DLL extern int ll_open_Dnaa(lua_State *L);
+LUALEPT_DLL extern int ll_open_DnaHash(lua_State *L);
+LUALEPT_DLL extern int ll_open_Pta(lua_State *L);
+LUALEPT_DLL extern int ll_open_Ptaa(lua_State *L);
+LUALEPT_DLL extern int ll_open_Box(lua_State *L);
+LUALEPT_DLL extern int ll_open_Boxa(lua_State *L);
+LUALEPT_DLL extern int ll_open_Boxaa(lua_State *L);
+LUALEPT_DLL extern int ll_open_CCBord(lua_State *L);
+LUALEPT_DLL extern int ll_open_CCBorda(lua_State *L);
+LUALEPT_DLL extern int ll_open_PixColormap(lua_State *L);
+LUALEPT_DLL extern int ll_open_PixComp(lua_State *L);
+LUALEPT_DLL extern int ll_open_PixaComp(lua_State *L);
+LUALEPT_DLL extern int ll_open_Pix(lua_State *L);
+LUALEPT_DLL extern int ll_open_Pixa(lua_State *L);
+LUALEPT_DLL extern int ll_open_Pixaa(lua_State *L);
+LUALEPT_DLL extern int ll_open_FPix(lua_State *L);
+LUALEPT_DLL extern int ll_open_FPixa(lua_State *L);
+LUALEPT_DLL extern int ll_open_DPix(lua_State *L);
+LUALEPT_DLL extern int ll_open_PixTiling(lua_State *L);
+LUALEPT_DLL extern int ll_open_Sel(lua_State *L);
+LUALEPT_DLL extern int ll_open_Sela(lua_State *L);
+LUALEPT_DLL extern int ll_open_Kernel(lua_State *L);
+LUALEPT_DLL extern int ll_open_CompData(lua_State *L);
+LUALEPT_DLL extern int ll_open_PdfData(lua_State *L);
+LUALEPT_DLL extern int ll_open_Sarray(lua_State *L);
+LUALEPT_DLL extern int ll_open_Stack(lua_State *L);
+LUALEPT_DLL extern int ll_open_WShed(lua_State *L);
+
+LUALEPT_DLL extern int luaopen_lualept(lua_State *L);
 LUALEPT_DLL extern int ll_RunScript(const char* script);
 
 #ifdef __cplusplus

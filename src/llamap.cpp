@@ -474,7 +474,7 @@ ll_new_Amap(lua_State *L)
  * \return 1 table on the Lua stack
  */
 int
-luaopen_Amap(lua_State *L)
+ll_open_Amap(lua_State *L)
 {
     static const luaL_Reg methods[] = {
         {"__gc",                Destroy},
