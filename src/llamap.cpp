@@ -37,7 +37,7 @@
  *
  * A map of keys and values of type l_int64, l_uint64 or l_float64.
  *
- * It is comparable with a Lua table array and is used for
+ * It is comparable with a Lua table array and is used in Leptonica for
  * situations where there may be holes in the key space.
  *
  * Lua example code:
@@ -47,7 +47,7 @@
  * amap[2] = 128
  * amap[5] = 222
  * print("amap", amap)
- * if amap:Find(3) then
+ * if amap:Find(3) ~= nil then
  *     print("key 3 is in amap")
  * else
  *     print("key 3 is not in amap")

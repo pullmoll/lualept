@@ -22358,7 +22358,7 @@ Rasterop(lua_State *L)
     l_int32 dy = ll_check_l_int32(_fun, L, 3);
     l_int32 dw = ll_check_l_int32(_fun, L, 4);
     l_int32 dh = ll_check_l_int32(_fun, L, 5);
-    l_int32 op = ll_check_l_int32(_fun, L, 6);
+    l_int32 op = ll_check_rasterop(_fun, L, 6);
     Pix *pixs = ll_check_Pix(_fun, L, 7);
     l_int32 sx = ll_check_l_int32(_fun, L, 8);
     l_int32 sy = ll_check_l_int32(_fun, L, 9);

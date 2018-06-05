@@ -15,16 +15,18 @@ print(pad("LuaLept:LuaVersion()"), LuaLept:LuaVersion())
 print(pad("LuaLept:LeptVersion()"), LuaLept:LeptVersion())
 
 
-require "lua/aset"
-require "lua/amap"
-require "lua/box"
-require "lua/pta"
-require "lua/numa"
-require "lua/dna"
-require "lua/pix"
-require "lua/pix2"
-require "lua/pix3"
-require "lua/fpix"
-require "lua/dpix"
+-- require "lua/aset"
+-- require "lua/amap"
+-- require "lua/bbuffer"
+require "lua/bmf"
+-- require "lua/box"
+-- require "lua/pta"
+-- require "lua/numa"
+-- require "lua/dna"
+-- require "lua/pix"
+-- require "lua/pix2"
+-- require "lua/pix3"
+-- require "lua/fpix"
+-- require "lua/dpix"
 
 print("That's all, folks!")

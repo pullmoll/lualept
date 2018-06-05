@@ -1048,7 +1048,7 @@ ToStringRange(lua_State *L)
     Sarray *sa = ll_check_Sarray(_fun, L, 1);
     l_int32 first = ll_check_l_int32(_fun, L, 2);
     l_int32 nstrings = ll_check_l_int32(_fun, L, 3);
-    l_int32 addnlflag = ll_check_l_int32(_fun, L, 4);
+    l_int32 addnlflag = ll_opt_boolean(_fun, L, 4, FALSE);
     char *str = sarrayToStringRange(sa, first, nstrings, addnlflag);
     ll_push_string(_fun, L, str);
     ll_free(str);
@@ -1284,6 +1284,8 @@ luaopen_Sarray(lua_State *L)
         {"SplitString",             SplitString},
         {"TableArray",              TableArray},
         {"ToString",                ToString},
+        {"ToStringRange",           ToStringRange},
+        {"UnionByAset",             UnionByAset},
         {"Write",                   Write},
         {"WriteMem",                WriteMem},
         {"WriteStream",             WriteStream},

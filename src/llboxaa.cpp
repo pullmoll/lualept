@@ -131,6 +131,31 @@ toString(lua_State *L)
 }
 
 /**
+ * \brief AddBox() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
+ * Arg #2 is expected to be a l_int32 (index).
+ * Arg #3 is expected to be a Box* (box).
+ * Arg #4 is expected to be a l_int32 (accessflag).
+ *
+ * Leptonica's Notes:
+ *      (1) Adds to an existing boxa only.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+AddBox(lua_State *L)
+{
+    LL_FUNC("AddBox");
+    Boxaa *baa = ll_check_Boxaa(_fun, L, 1);
+    l_int32 index = ll_check_index(_fun, L, 2);
+    Box *box = ll_check_Box(_fun, L, 3);
+    l_int32 accessflag = ll_check_access_storage(_fun, L, 4);
+    return ll_push_boolean(_fun, L, 0 == boxaaAddBox(baa, index, box, accessflag));
+}
+
+/**
  * \brief Add a Box* to a Boxaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
@@ -147,6 +172,34 @@ AddBoxa(lua_State *L)
     Boxa *boxa = ll_check_Boxa(_fun, L, 2);
     l_int32 flag = ll_check_access_storage(_fun, L, 3, L_COPY);
     return ll_push_boolean(_fun, L, 0 == boxaaAddBoxa(boxaa, boxa, flag));
+}
+
+/**
+ * \brief AlignBox() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
+ * Arg #2 is expected to be a Box* (box).
+ * Arg #3 is expected to be a l_int32 (delta).
+ *
+ * Leptonica's Notes:
+ *      (1) This is not greedy.  It finds the boxa whose vertical
+ *          extent has the closest overlap with the input box.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 integer on the Lua stack
+ */
+static int
+AlignBox(lua_State *L)
+{
+    LL_FUNC("AlignBox");
+    Boxaa *baa = ll_check_Boxaa(_fun, L, 1);
+    Box *box = ll_check_Box(_fun, L, 2);
+    l_int32 delta = ll_check_l_int32(_fun, L, 3);
+    l_int32 index = 0;
+    if (boxaaAlignBox(baa, box, delta, &index))
+        return ll_push_nil(L);
+    ll_push_l_int32 (_fun, L, index);
+    return 1;
 }
 
 /**
@@ -167,7 +220,7 @@ Copy(lua_State *L)
 {
     LL_FUNC("Copy");
     Boxaa *baas = ll_check_Boxaa(_fun, L, 1);
-    l_int32 copyflag = ll_check_access_storage(_fun, L, 2, L_COPY);
+    l_int32 copyflag = ll_check_access_storage(_fun, L, 2);
     Boxaa *baa = boxaaCopy(baas, copyflag);
     return ll_push_Boxaa(_fun, L, baa);
 }
@@ -224,6 +277,32 @@ ExtendArrayToSize(lua_State *L)
     Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
     l_int32 size = ll_check_l_int32(_fun, L, 2);
     return ll_push_boolean(_fun, L, 0 == boxaaExtendArrayToSize(boxaa, size));
+}
+
+/**
+ * \brief ExtendWithInit() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
+ * Arg #2 is expected to be a index (maxindex).
+ * Arg #3 is expected to be a Boxa* (boxa).
+ *
+ * Leptonica's Notes:
+ *      (1) This should be used on an existing boxaa that has been
+ *          fully loaded with boxa.  It then extends the boxaa,
+ *          loading all the additional ptrs with copies of boxa.
+ *          Typically, boxa will be empty.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+ExtendWithInit(lua_State *L)
+{
+    LL_FUNC("ExtendWithInit");
+    Boxaa *baa = ll_check_Boxaa(_fun, L, 1);
+    l_int32 maxindex = ll_check_index(_fun, L, 2);
+    Boxa *boxa = ll_check_Boxa(_fun, L, 3);
+    return ll_push_boolean(_fun, L, 0 == boxaaExtendWithInit(baa, maxindex, boxa));
 }
 
 /**
@@ -350,6 +429,79 @@ GetBoxa(lua_State *L)
 }
 
 /**
+ * \brief GetExtent() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
+ *
+ * Leptonica's Notes:
+ *      (1) The returned w and h are the minimum size image
+ *          that would contain all boxes untranslated.
+ *      (2) Each box in the returned boxa is the minimum box required to
+ *          hold all the boxes in the respective boxa of baa.
+ *      (3) If there are no valid boxes in a boxa, the box corresponding
+ *          to its extent has all fields set to 0 (an invalid box).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 4 on the Lua stack (w, h, Box*, Boxa*)
+ */
+static int
+GetExtent(lua_State *L)
+{
+    LL_FUNC("GetExtent");
+    Boxaa *baa = ll_check_Boxaa(_fun, L, 1);
+    l_int32 w = 0;
+    l_int32 h = 0;
+    Box *box = nullptr;
+    Boxa *boxa = nullptr;
+    if (boxaaGetExtent(baa, &w, &h, &box, &boxa))
+        return ll_push_nil(L);
+    ll_push_l_int32 (_fun, L, w);
+    ll_push_l_int32 (_fun, L, h);
+    ll_push_Box (_fun, L, box);
+    ll_push_Boxa (_fun, L, boxa);
+    return 4;
+}
+
+/**
+ * \brief InitFull() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
+ * Arg #2 is expected to be a Boxa* (boxa).
+ *
+ * Leptonica's Notes:
+ *      (1) This initializes a boxaa by filling up the entire boxa ptr array
+ *          with copies of %boxa.  Any existing boxa are destroyed.
+ *          After this operation, the number of boxa is equal to
+ *          the number of allocated ptrs.
+ *      (2) Note that we use boxaaReplaceBox() instead of boxaInsertBox().
+ *          They both have the same effect when inserting into a NULL ptr
+ *          in the boxa ptr array
+ *      (3) Example usage.  This function is useful to prepare for a
+ *          random insertion (or replacement) of boxa into a boxaa.
+ *          To randomly insert boxa into a boxaa, up to some index "max":
+ *             Boxaa *baa = boxaaCreate(max);
+ *               // initialize the boxa
+ *             Boxa *boxa = boxaCreate(...);
+ *             ...  [optionally fix with boxes]
+ *             boxaaInitFull(baa, boxa);
+ *          A typical use is to initialize the array with empty boxa,
+ *          and to replace only a subset that must be aligned with
+ *          something else, such as a pixa.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 0 on the Lua stack
+ */
+static int
+InitFull(lua_State *L)
+{
+    LL_FUNC("InitFull");
+    Boxaa *baa = ll_check_Boxaa(_fun, L, 1);
+    Boxa *boxa = ll_check_Boxa(_fun, L, 2);
+    l_ok result = boxaaInitFull(baa, boxa);
+    return ll_push_boolean(_fun, L, 0 == result);
+}
+
+/**
  * \brief Insert the Boxa* in a Boxaa* at index %idx.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
@@ -407,6 +559,36 @@ Join(lua_State *L)
 }
 
 /**
+ * \brief Create a quad tree of regions for width (%w) height (%h) for %nlevels levels.
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (w).
+ * Arg #2 is expected to be a l_int32 (h).
+ * Arg #3 is expected to be a l_int32 (nlevels).
+ *
+ * Leptonica's Notes:
+ *      (1) The returned boxaa has %nlevels of boxa, each containing
+ *          the set of rectangles at that level.  The rectangle at
+ *          level 0 is the entire region; at level 1 the region is
+ *          divided into 4 rectangles, and at level n there are n^4
+ *          rectangles.
+ *      (2) At each level, the rectangles in the boxa are in "raster"
+ *          order, with LR (fast scan) and TB (slow scan).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+QuadtreeRegions(lua_State *L)
+{
+    LL_FUNC("QuadtreeRegions");
+    l_int32 w = ll_check_l_int32(_fun, L, 1);
+    l_int32 h = ll_check_l_int32(_fun, L, 2);
+    l_int32 nlevels = ll_check_l_int32(_fun, L, 3);
+    Boxaa *boxaa = boxaaQuadtreeRegions(w, h, nlevels);
+    return ll_push_Boxaa (_fun, L, boxaa);
+}
+
+/**
  * \brief Read a Boxaa* (%boxaa) from a file (%filename).
  * <pre>
  * Arg #1 is expected to be a string (filename).
@@ -421,6 +603,38 @@ Read(lua_State *L)
     const char *filename = ll_check_string(_fun, L, 1);
     Boxaa *boxaa = boxaaRead(filename);
     return ll_push_Boxaa(_fun, L, boxaa);
+}
+
+/**
+ * \brief ReadFromFiles() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a const char* (dirname).
+ * Arg #2 is expected to be a const char* (substr).
+ * Arg #3 is expected to be a l_int32 (first).
+ * Arg #4 is expected to be a l_int32 (nfiles).
+ *
+ * Leptonica's Notes:
+ *      (1) The files must be serialized boxa files (e.g., *.ba).
+ *          If some files cannot be read, warnings are issued.
+ *      (2) Use %substr to filter filenames in the directory.  If
+ *          %substr == NULL, this takes all files.
+ *      (3) After filtering, use %first and %nfiles to select
+ *          a contiguous set of files, that have been lexically
+ *          sorted in increasing order.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+ReadFromFiles(lua_State *L)
+{
+    LL_FUNC("ReadFromFiles");
+    const char *dirname = ll_check_string(_fun, L, 1);
+    const char *substr = ll_opt_string(_fun, L, 2);
+    l_int32 first = ll_opt_l_int32(_fun, L, 3, 0);
+    l_int32 nfiles = ll_opt_l_int32(_fun, L, 4, -1);
+    Boxaa *boxaa = boxaaReadFromFiles(dirname, substr, first, nfiles);
+    return ll_push_Boxaa (_fun, L, boxaa);
 }
 
 /**
@@ -506,6 +720,89 @@ ReplaceBoxa(lua_State *L)
     l_int32 idx = ll_check_index(_fun, L, 2, boxaaGetCount(boxaa));
     Boxa *boxa = ll_check_Boxa(_fun, L, 3);
     return ll_push_boolean(_fun, L, 0 == boxaaReplaceBoxa(boxaa, idx, boxa));
+}
+
+/**
+ * \brief Select a range of boxa (%first, %last) from Boxaa* (%baas)
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxaa* (baas).
+ * Arg #2 is expected to be a l_int32 (first).
+ * Arg #3 is expected to be a l_int32 (last).
+ * Arg #4 is expected to be a l_int32 (copyflag).
+ *
+ * Leptonica's Notes:
+ *      (1) The copyflag specifies what we do with each boxa from baas.
+ *          Specifically, L_CLONE inserts a clone into baad of each
+ *          selected boxa from baas.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Boxaa* on the Lua stack
+ */
+static int
+SelectRange(lua_State *L)
+{
+    LL_FUNC("SelectRange");
+    Boxaa *baas = ll_check_Boxaa(_fun, L, 1);
+    l_int32 first = ll_check_index(_fun, L, 2, boxaaGetCount(baas));
+    l_int32 last = ll_check_index(_fun, L, 3, boxaaGetCount(baas));
+    l_int32 copyflag = ll_check_access_storage(_fun, L, 4);
+    Boxaa *boxaa = boxaaSelectRange(baas, first, last, copyflag);
+    return ll_push_Boxaa (_fun, L, boxaa);
+}
+
+/**
+ * \brief Determin the size range of boxes in the Boxaa* (%baa).
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
+ *
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 4 l_int32 on the Lua stack (%minw, %minh, %maxw, %maxh)
+ */
+static int
+SizeRange(lua_State *L)
+{
+    LL_FUNC("SizeRange");
+    Boxaa *baa = ll_check_Boxaa(_fun, L, 1);
+    l_int32 minw = 0;
+    l_int32 minh = 0;
+    l_int32 maxw = 0;
+    l_int32 maxh = 0;
+    if (boxaaSizeRange(baa, &minw, &minh, &maxw, &maxh))
+        return ll_push_nil(L);
+    ll_push_l_int32 (_fun, L, minw);
+    ll_push_l_int32 (_fun, L, minh);
+    ll_push_l_int32 (_fun, L, maxw);
+    ll_push_l_int32 (_fun, L, maxh);
+    return 4;
+}
+
+/**
+ * \brief Transpose() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Boxaa* (baas).
+ *
+ * Leptonica's Notes:
+ *      (1) If you think of a boxaa as a 2D array of boxes that is accessed
+ *          row major, then each row is represented by one of the boxa.
+ *          This function creates a new boxaa related to the input boxaa
+ *          as a column major traversal of the input boxaa.
+ *      (2) For example, if %baas has 2 boxa, each with 10 boxes, then
+ *          %baad will have 10 boxa, each with 2 boxes.
+ *      (3) Require for this transpose operation that each boxa in
+ *          %baas has the same number of boxes.  This operation is useful
+ *          when the i-th boxes in each boxa are meaningfully related.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+Transpose(lua_State *L)
+{
+    LL_FUNC("Transpose");
+    Boxaa *baas = ll_check_Boxaa(_fun, L, 1);
+    Boxaa *baa = boxaaTranspose(baas);
+    return ll_push_Boxaa (_fun, L, baa);
 }
 
 /**
@@ -683,25 +980,35 @@ luaopen_Boxaa(lua_State *L)
         {"__new",                   ll_new_Boxaa},
         {"__len",                   GetCount},
         {"__tostring",              toString},
+        {"AddBox",                  AddBox},
         {"AddBoxa",                 AddBoxa},
+        {"AlignBox",                AlignBox},
         {"Copy",                    Copy},
         {"Create",                  Create},
         {"Destroy",                 Destroy},
         {"ExtendArray",             ExtendArray},
         {"ExtendArrayToSize",       ExtendArrayToSize},
+        {"ExtendWithInit",          ExtendWithInit},
         {"FlattenAligned",          FlattenAligned},
         {"FlattenToBoxa",           FlattenToBoxa},
         {"GetBox",                  GetBox},
         {"GetBoxCount",             GetBoxCount},
         {"GetBoxa",                 GetBoxa},
         {"GetCount",                GetCount},
+        {"GetExtent",               GetExtent},
+        {"InitFull",                InitFull},
         {"InsertBoxa",              InsertBoxa},
         {"Join",                    Join},
+        {"QuadtreeRegions",         QuadtreeRegions},
         {"Read",                    Read},
+        {"ReadFromFiles",           ReadFromFiles},
         {"ReadMem",                 ReadMem},
         {"ReadStream",              ReadStream},
         {"RemoveBoxa",              RemoveBoxa},
         {"ReplaceBoxa",             ReplaceBoxa},
+        {"SelectRange",             SelectRange},
+        {"SizeRange",               SizeRange},
+        {"Transpose",               Transpose},
         {"Write",                   Write},
         {"WriteMem",                WriteMem},
         {"WriteStream",             WriteStream},

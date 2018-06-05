@@ -1,5 +1,5 @@
 AC_PREREQ([2.50])
-AC_INIT([lualept], [0.1.0])
+AC_INIT([lualept], [0.2.0])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_HEADERS([src/config.h:config/config.h.in])
 AC_CONFIG_SRCDIR([src/lualept.cpp])
@@ -52,5 +52,5 @@ AC_C_BIGENDIAN
 # Checks for library functions.
 AC_CHECK_FUNCS([strcasecmp stricmp gettimeofday localtime_r localtime gmtime_r gmtime])
 
-AC_CONFIG_FILES([Makefile src/Makefile lualept.pc])
+AC_CONFIG_FILES([Makefile src/Makefile lualept.pc Doxyfile])
 AC_OUTPUT

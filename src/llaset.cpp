@@ -36,7 +36,23 @@
  * \class Aset
  *
  * A set of keys of type l_int64, l_uint64 or l_float64.
+ *
  * If a key is contained in the set (%Find), it's value is boolean true.
+ *
+ * Lua example code:
+ * \code
+ * local aset = Aset("uint")
+ * aset[2] = true
+ * aset[7] = true
+ * aset[100] = true
+ * aset[7] = nil    -- equivalent to aset:Delete(7)
+ * print("aset", aset)
+ * if aset:Find(7) then
+ *     print("key 7 is in aset")
+ * else
+ *     print("key 7 is not in aset")
+ * end
+ * \endcode
  */
 
 /** Set TNAME to the class name used in this source file */

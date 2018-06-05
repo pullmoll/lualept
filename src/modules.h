@@ -173,7 +173,10 @@ extern void dbg(int enable, const char* format, ...)
 
 #define UNUSED(x) (void)x
 
+/** Local type definition of lua_State to avoid including lua.h here */
 typedef struct lua_State lua_State;
+
+/** Local type definition of Leptonica's new l_ok for pre 1.77.0 allheaders.h */
 typedef int l_ok;
 
 extern void die(const char *_fun, lua_State* L, const char *format, ...)
@@ -224,11 +227,15 @@ typedef struct LuaLept {
     char str_version[32];                   /*!< Our own version number */
     char str_version_lua[32];               /*!< Lua's version number */
     char str_version_lept[32];              /*!< Leptonica's version number */
-} LuaLept;
+}   LuaLept;
 
 /**
- * The structure lept_enum is used to define key strings (key),
- * their Leptonica enum name (name), and their enumeration value (%value)
+ * The structure lept_enum is used to define key strings (%key),
+ * their Leptonica enum name (%name), and their enumeration value (%value)
+ * Tables are sorted so that the longest form of a key comes first.
+ * Most tables have abbreviations for keys. The will be listed, if you
+ * specify an unknown string as a parameter to a function using
+ * such enumerations.
 */
 typedef struct lept_enum {
     const char *key;                        /*!< string for the enumeration value */
@@ -280,7 +287,7 @@ ll_calloc(const char* _fun, lua_State *L, size_t nmemb, size_t size)
 }
 
 /**
- * \brief Alias with l_int32 nmemb and size.
+ * \brief Alias for ll_calloc() with l_int32 nmemb and size.
  */
 template <typename T> T*
 ll_calloc(const char* _fun, lua_State *L, l_int32 nmemb, l_int32 size)
@@ -308,7 +315,7 @@ ll_calloc(const char* _fun, lua_State *L, size_t nmemb)
 }
 
 /**
- * \brief Alias ll_calloc() with l_int32 nmemb.
+ * \brief Alias for ll_calloc() with l_int32 nmemb.
  */
 template <typename T> T*
 ll_calloc(const char* _fun, lua_State *L, l_int32 nmemb)
@@ -318,7 +325,7 @@ ll_calloc(const char* _fun, lua_State *L, l_int32 nmemb)
 
 /**
  * \brief Check Lua stack at index %arg for user data with type name %tname.
- * T is the typename of the expected return value
+ * T is the typename of the expected return value.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg argument index
@@ -333,7 +340,7 @@ ll_check_udata(const char *_fun, lua_State *L, int arg, const char* tname)
 
 /**
  * \brief Check Lua stack at index %arg for light user data.
- * T is the typename of the return value
+ * T is the typename of the return value.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg argument index

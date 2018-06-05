@@ -275,6 +275,26 @@ GetBoxGeometry(lua_State *L)
 }
 
 /**
+ * \brief Get box geometry for a Pix* from a Pixa* (%pixa) at index (%idx).
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa*.
+ * Arg #2 is expected to be a l_int32 (idx).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 4 integers on the Lua stack: x, y, w, h
+ */
+static int
+GetPix(lua_State *L)
+{
+    LL_FUNC("GetPix");
+    Pixa *pixa = ll_check_Pixa(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, pixaGetCount(pixa));
+    l_int32 copyflag = ll_check_access_storage(_fun, L, 3, L_CLONE);
+    Pix *pix = pixaGetPix(pixa, idx, copyflag);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
  * \brief Insert the Pix* (%pixs) in a Pixa* (%pixa) at index (%idx).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa*.
@@ -735,6 +755,7 @@ ll_new_Pixa(lua_State *L)
     }
 
     if (!pixa && ll_isinteger(_fun, L, 1)) {
+        n = ll_check_l_int32(_fun, L, 1);
         DBG(LOG_NEW_PARAM, "%s: create for %s = %d\n", _fun,
             "n", n);
         pixa = pixaCreate(n);
@@ -786,9 +807,11 @@ luaopen_Pixa(lua_State *L)
         {"CreateFromPix",           CreateFromPix},
         {"CreateFromPixacomp",      CreateFromPixacomp},
         {"Destroy",                 Destroy},
+        {"Display",                 Display},
         {"GetAlignedStats",         GetAlignedStats},
         {"GetBoxGeometry",          GetBoxGeometry},
         {"GetCount",                GetCount},
+        {"GetPix",                  GetPix},
         {"InsertPix",               InsertPix},
         {"Interleave",              Interleave},
         {"Join",                    Join},
