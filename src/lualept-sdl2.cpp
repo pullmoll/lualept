@@ -639,7 +639,7 @@ failure:
 }
 #else
 int
-DisplaySDL2(Pix* pix, const char* title, int x0, int y0, float dscale)
+ViewSDL2(Pix* pix, const char* title, int x0, int y0, float dscale)
 {
     UNUSED(pix);
     UNUSED(title);

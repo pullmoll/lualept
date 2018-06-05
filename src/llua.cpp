@@ -33,6 +33,11 @@
 #include <allheaders.h>
 #include "lualept.h"
 
+#if defined(_MSC_VER)
+/* Something goes wrong with importing this */
+int LeptMsgSeverity = 0;
+#endif
+
 int main(int argc, char **argv)
 {
     const char* progname = nullptr;
@@ -44,7 +49,8 @@ int main(int argc, char **argv)
         progname = argv[0];
 
     if (argc < 2) {
-        return ERROR_INT("Usage: llua <script.lua>\n", progname, 1);
+        fprintf(stderr, "Usage: %s <script.lua>\n", progname);
+        return 1;
     }
     script = argv[1];
 
