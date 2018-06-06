@@ -52,5 +52,5 @@ AC_C_BIGENDIAN
 # Checks for library functions.
 AC_CHECK_FUNCS([strcasecmp stricmp gettimeofday localtime_r localtime gmtime_r gmtime])
 
-AC_CONFIG_FILES([Makefile src/Makefile lualept.pc Doxyfile])
+AC_CONFIG_FILES([Makefile src/Makefile prog/Makefile lualept.pc Doxyfile])
 AC_OUTPUT

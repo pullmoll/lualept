@@ -36,7 +36,7 @@
 #include "lualept.h"
 
 #if !defined(LLUA_DEBUG)
-#define LLUA_DEBUG          1           /*!< set to 1 to enable debugging */
+#define LLUA_DEBUG 0    /*!< set to 1 to enable debugging */
 #endif
 
 /**
@@ -45,23 +45,23 @@
  */
 enum dbg_enable_flags {
     LOG_REGISTER        = (1<< 0),  /*!< log Lua class registration */
-    LOG_NEW_PARAM       = (1<< 1),  /*!< log ll_new_<ClassName> */
-    LOG_NEW_CLASS       = (1<< 2),  /*!< log ll_new_<ClassName> */
-    LOG_DESTROY         = (1<< 3),  /*!< log object destruction */
+    LOG_NEW_PARAM       = (1<< 1),  /*!< log ll_new_<ClassName> input parameters */
+    LOG_NEW_CLASS       = (1<< 2),  /*!< log ll_new_<ClassName> class creation */
+    LOG_DESTROY         = (1<< 3),  /*!< log class destruction */
     LOG_PUSH_BOOLEAN    = (1<< 4),  /*!< log pushing booleans */
     LOG_CHECK_BOOLEAN   = (1<< 5),  /*!< log checking for booleans */
     LOG_PUSH_INTEGER    = (1<< 6),  /*!< log pushing integers */
-    LOG_CHECK_INTEGER   = (1<< 7),  /*!< log pushing integers */
+    LOG_CHECK_INTEGER   = (1<< 7),  /*!< log checking for integers */
     LOG_PUSH_NUMBER     = (1<< 8),  /*!< log pushing numbers */
-    LOG_CHECK_NUMBER    = (1<< 9),  /*!< log pushing numbers */
+    LOG_CHECK_NUMBER    = (1<< 9),  /*!< log checking for numbers */
     LOG_PUSH_STRING     = (1<<10),  /*!< log pushing strings */
-    LOG_CHECK_STRING    = (1<<11),  /*!< log pushing strings */
-    LOG_PUSH_TABLE      = (1<<12),  /*!< log pushing strings */
-    LOG_CHECK_TABLE     = (1<<13),  /*!< log pushing strings */
+    LOG_CHECK_STRING    = (1<<11),  /*!< log checking for strings */
+    LOG_PUSH_TABLE      = (1<<12),  /*!< log pushing tables */
+    LOG_CHECK_TABLE     = (1<<13),  /*!< log checking for tables */
     LOG_PUSH_UDATA      = (1<<14),  /*!< log pushing user data */
-    LOG_CHECK_UDATA     = (1<<15),  /*!< log pushing user data */
-    LOG_PUSH_ARRAY      = (1<<16),  /*!< log pushing tables */
-    LOG_CHECK_ARRAY     = (1<<17),  /*!< log pushing tables */
+    LOG_CHECK_UDATA     = (1<<15),  /*!< log checking for use data */
+    LOG_PUSH_ARRAY      = (1<<16),  /*!< log pushing table arrays */
+    LOG_CHECK_ARRAY     = (1<<17),  /*!< log checking for table arrays */
     LOG_SDL2            = (1<<30)   /*!< log SDL2 display code */
 };
 
@@ -222,56 +222,56 @@ typedef struct global_var_s {
     const char *type;                       /*!< type name of this variable */
     const char *name;                       /*!< global name of this variable */
     union {
-        void *ptr;                          /*!< generic input pointer to variable */
-        bool *b;                            /*!< input pointer to a bool */
-        l_int8 *i8;                         /*!< input pointer to a l_int8 */
-        l_uint8 *u8;                        /*!< input pointer to a l_uint8 */
-        l_int16 *i16;                       /*!< input pointer to a l_int16 */
-        l_uint16 *u16;                      /*!< input pointer to a l_uint16 */
-        l_int32 *i32;                       /*!< input pointer to a l_int32 */
-        l_uint32 *u32;                      /*!< input pointer to a l_uint32 */
-        l_int64 *i64;                       /*!< input pointer to a l_int64 */
-        l_uint64 *u64;                      /*!< input pointer to a l_uint64 */
-        l_float32 *f32;                     /*!< input pointer to a l_float32 */
-        l_float64 *f64;                     /*!< input pointer to a l_float64 */
-        Amap *amap;                         /*!< input pointer to a Amap */
-        Aset *aset;                         /*!< input pointer to a Aset */
-        ByteBuffer *bb;                     /*!< input pointer to a ByteBuffer */
-        Bmf *bmf;                           /*!< input pointer to a Bmf */
-        Box *box;                           /*!< input pointer to a Box */
-        Boxa *boxa;                         /*!< input pointer to a Boxa */
-        Boxaa *boxaa;                       /*!< input pointer to a Boxaa */
-        CompData *cid;                      /*!< input pointer to a CompData */
-        CCBord *ccb;                        /*!< input pointer to a CCBord */
-        CCBorda *ccba;                      /*!< input pointer to a CCBorda */
-        Dewarp *dew;                        /*!< input pointer to a Dewarp */
-        Dewarpa *dewa;                      /*!< input pointer to a Dewarpa */
-        DoubleLinkedList *list;             /*!< input pointer to a DoubleLinkedList */
-        Dna *da;                            /*!< input pointer to a Dna */
-        Dnaa *daa;                          /*!< input pointer to a Dnaa */
-        DnaHash *dah;                       /*!< input pointer to a DnaHash */
-        DPix *dpix;                         /*!< input pointer to a DPix */
-        FPix *fpix;                         /*!< input pointer to a FPix */
-        FPixa *fpixa;                       /*!< input pointer to a FPixa */
-        Kernel *kel;                        /*!< input pointer to a Kernel */
-        Numa *na;                           /*!< input pointer to a Numa */
-        Numaa *naa;                         /*!< input pointer to a Numaa */
-        PdfData *pdd;                       /*!< input pointer to a PdfData */
-        Pix *pix;                           /*!< input pointer to a Pix */
-        Pixa *pixa;                         /*!< input pointer to a Pixa */
-        Pixaa *pixaa;                       /*!< input pointer to a Pixaa */
-        PixColormap *cmap;                  /*!< input pointer to a PixColormap */
-        PixTiling *pixt;                    /*!< input pointer to a PixTiling */
-        PixComp *pixc;                      /*!< input pointer to a PixComp */
-        PixaComp *pixac;                    /*!< input pointer to a PixaComp */
-        Pta *pta;                           /*!< input pointer to a Pta */
-        Ptaa *ptaa;                         /*!< input pointer to a Ptaa */
-        RbtreeNode *node;                   /*!< input pointer to a RbtreeNode */
-        Sarray *sa;                         /*!< input pointer to a Sarray */
-        Sel *sel;                           /*!< input pointer to a Sel */
-        Sela *sela;                         /*!< input pointer to a Sela */
-        Stack *stack;                       /*!< input pointer to a Stack */
-        WShed *wshed;                       /*!< input pointer to a WShed */
+        void **pptr;                        /*!< generic input pointer to variable */
+        bool *pb;                           /*!< input pointer to a bool */
+        l_int8 *pi8;                        /*!< input pointer to a l_int8 */
+        l_uint8 *pu8;                       /*!< input pointer to a l_uint8 */
+        l_int16 *pi16;                      /*!< input pointer to a l_int16 */
+        l_uint16 *pu16;                     /*!< input pointer to a l_uint16 */
+        l_int32 *pi32;                      /*!< input pointer to a l_int32 */
+        l_uint32 *pu32;                     /*!< input pointer to a l_uint32 */
+        l_int64 *pi64;                      /*!< input pointer to a l_int64 */
+        l_uint64 *pu64;                     /*!< input pointer to a l_uint64 */
+        l_float32 *pf32;                    /*!< input pointer to a l_float32 */
+        l_float64 *pf64;                    /*!< input pointer to a l_float64 */
+        Amap **pamap;                       /*!< input pointer to a Amap */
+        Aset **paset;                       /*!< input pointer to a Aset */
+        ByteBuffer **pbb;                   /*!< input pointer to a ByteBuffer */
+        Bmf **pbmf;                         /*!< input pointer to a Bmf */
+        Box **pbox;                         /*!< input pointer to a Box */
+        Boxa **pboxa;                       /*!< input pointer to a Boxa */
+        Boxaa **pboxaa;                     /*!< input pointer to a Boxaa */
+        CompData **pcid;                    /*!< input pointer to a CompData */
+        CCBord **pccb;                      /*!< input pointer to a CCBord */
+        CCBorda **pccba;                    /*!< input pointer to a CCBorda */
+        Dewarp **pdew;                      /*!< input pointer to a Dewarp */
+        Dewarpa **pdewa;                    /*!< input pointer to a Dewarpa */
+        DoubleLinkedList **plist;           /*!< input pointer to a DoubleLinkedList */
+        Dna **pda;                          /*!< input pointer to a Dna */
+        Dnaa **pdaa;                        /*!< input pointer to a Dnaa */
+        DnaHash **pdah;                     /*!< input pointer to a DnaHash */
+        DPix **pdpix;                       /*!< input pointer to a DPix */
+        FPix **pfpix;                       /*!< input pointer to a FPix */
+        FPixa **pfpixa;                     /*!< input pointer to a FPixa */
+        Kernel **pkel;                      /*!< input pointer to a Kernel */
+        Numa **pna;                         /*!< input pointer to a Numa */
+        Numaa **pnaa;                       /*!< input pointer to a Numaa */
+        PdfData **ppdd;                     /*!< input pointer to a PdfData */
+        Pix **ppix;                         /*!< input pointer to a Pix */
+        Pixa **ppixa;                       /*!< input pointer to a Pixa */
+        Pixaa **ppixaa;                     /*!< input pointer to a Pixaa */
+        PixColormap **pcmap;                /*!< input pointer to a PixColormap */
+        PixTiling **ppixt;                  /*!< input pointer to a PixTiling */
+        PixComp **ppixc;                    /*!< input pointer to a PixComp */
+        PixaComp **ppixac;                  /*!< input pointer to a PixaComp */
+        Pta **ppta;                         /*!< input pointer to a Pta */
+        Ptaa **pptaa;                       /*!< input pointer to a Ptaa */
+        RbtreeNode **pnode;                 /*!< input pointer to a RbtreeNode */
+        Sarray **psa;                       /*!< input pointer to a Sarray */
+        Sel **psel;                         /*!< input pointer to a Sel */
+        Sela **psela;                       /*!< input pointer to a Sela */
+        Stack **pstack;                     /*!< input pointer to a Stack */
+        WShed **pwshed;                     /*!< input pointer to a WShed */
     }   i;
     union {
         void **pptr;                        /*!< generic output pointer to a pointer to a variable */

@@ -51,4 +51,4 @@ missing
 /*.cpp
 
 # programs
-src/llua
+prog/llua

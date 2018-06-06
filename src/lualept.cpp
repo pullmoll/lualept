@@ -1131,15 +1131,20 @@ ll_unpack_Farray_2d(const char *_fun, lua_State *L, int arg, l_float32* data, l_
 }
 
 /**
- * \brief Unpack an array of of arrays from the Lua stack as l_float32* data.
+ * \brief Unpack a matrix from the Lua stack as l_float32* data.
+ * Usually you would specify a matrix as a table array of table
+ * arrays of Lua numbers, i.e. a 2D array of width (%w) times
+ * height (%h) elements.
  *
- * Alternatively support a flattened array, i.e. a %w * %h one-dimensional array.
- * And finally also support a %w * %h number of float parameters following %arg.
+ * Alternatively support a flattened array, i.e. a %w * %h
+ * one-dimensional array of l_float32.
+ *
+ * And finally also support a %w * %h number of l_float32 arguments
+ * starting at %arg.
  *
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the table
- * \param data pointer to a array of %wpl * %h * l_float32
  * \param w width of the matrix (inner array)
  * \param h height of the matrix (outer array)
  * \return pointer %data, which must be free()d by the caller
@@ -4262,7 +4267,7 @@ ll_check_type(const char *type)
  * @return 0 on success, or 1 on error
  */
 int
-ll_set_global(const char *type, const char* name, void* in_ptr)
+ll_set_global(const char *type, const char* name, void **in_ptr)
 {
     FUNC("ll_set_global");
     char msg[256];
@@ -4280,12 +4285,27 @@ ll_set_global(const char *type, const char* name, void* in_ptr)
     }
     var->type = type;
     var->name = name;
-    var->i.ptr = in_ptr;
+    var->i.pptr = in_ptr;
     var->next = global_vars;
     global_vars = var;
     return 0;
 }
 
+/**
+ * @brief Add global variables to put into L when running the script.
+ * The %vars array must be terminated with a {NULL, NULL, NULL} sentinel e.g. LL_SENTINEL.
+ * @param vars pointer to an array of lualept_global_var_t
+ * @return 0 on success, or 1 on error
+ */
+int
+ll_set_globals(const lualept_global_var_t *vars)
+{
+    FUNC("ll_set_globals");
+    const lualept_global_var_t *var;
+    for (var = vars; var->type; var++)
+        ll_set_global(var->type, var->name, reinterpret_cast<void **>(var->ptr));
+    return 0;
+}
 
 /**
  * @brief Add a pointer to a global variable to get from L after running the script.
@@ -4320,6 +4340,22 @@ ll_get_global(const char *type, const char *name, void **out_ptr)
 }
 
 /**
+ * @brief Add global variables to get from L after running the script.
+ * The %vars array must be terminated with a {NULL, NULL, NULL} sentinel e.g. LL_SENTINEL.
+ * @param vars pointer to an array of lualept_global_var_t
+ * @return 0 on success, or 1 on error
+ */
+int
+ll_get_globals(const lualept_global_var_t *vars)
+{
+    FUNC("ll_get_globals");
+    const lualept_global_var_t *var;
+    for (var = vars; var->type; var++)
+        ll_get_global(var->type, var->name, reinterpret_cast<void **>(var->ptr));
+    return 0;
+}
+
+/**
  * @brief Set all global variables defined in %vars.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
@@ -4332,299 +4368,299 @@ ll_set_all_globals(const char *_fun, lua_State *L, global_var_t *vars)
     global_var_t *var;
 
     for (var = vars; var; var = var->next) {
-        if (!var->i.ptr)
+        if (!var->i.pptr)
             continue;
 
         if (!strcmp(LL_BOOLEAN, var->type)) {
-            ll_push_boolean(_fun, L, *var->i.b);
+            ll_push_boolean(_fun, L, *var->i.pb);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_INT8, var->type)) {
-            ll_push_l_int8(_fun, L, *var->i.i8);
+            ll_push_l_int8(_fun, L, *var->i.pi8);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_UINT8, var->type)) {
-            ll_push_l_uint8(_fun, L, *var->i.u8);
+            ll_push_l_uint8(_fun, L, *var->i.pu8);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_INT16, var->type)) {
-            ll_push_l_int16(_fun, L, *var->i.i16);
+            ll_push_l_int16(_fun, L, *var->i.pi16);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_UINT16, var->type)) {
-            ll_push_l_uint16(_fun, L, *var->i.u16);
+            ll_push_l_uint16(_fun, L, *var->i.pu16);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_INT32, var->type)) {
-            ll_push_l_int32(_fun, L, *var->i.i32);
+            ll_push_l_int32(_fun, L, *var->i.pi32);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_UINT32, var->type)) {
-            ll_push_l_uint32(_fun, L, *var->i.u32);
+            ll_push_l_uint32(_fun, L, *var->i.pu32);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_INT64, var->type)) {
-            ll_push_l_int64(_fun, L, *var->i.i64);
+            ll_push_l_int64(_fun, L, *var->i.pi64);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_UINT64, var->type)) {
-            ll_push_l_uint64(_fun, L, *var->i.u64);
+            ll_push_l_uint64(_fun, L, *var->i.pu64);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_FLOAT32, var->type)) {
-            ll_push_l_float32(_fun, L, *var->i.f32);
+            ll_push_l_float32(_fun, L, *var->i.pf32);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_FLOAT64, var->type)) {
-            ll_push_l_float64(_fun, L, *var->i.f64);
+            ll_push_l_float64(_fun, L, *var->i.pf64);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_AMAP, var->type)) {
-            ll_push_Amap(_fun, L, var->i.amap);
+            ll_push_Amap(_fun, L, *var->i.pamap);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_ASET, var->type)) {
-            ll_push_Aset(_fun, L, var->i.aset);
+            ll_push_Aset(_fun, L, *var->i.paset);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_BBUFFER, var->type)) {
-            ll_push_ByteBuffer(_fun, L, var->i.bb);
+            ll_push_ByteBuffer(_fun, L, *var->i.pbb);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_BMF, var->type)) {
-            ll_push_Bmf(_fun, L, var->i.bmf);
+            ll_push_Bmf(_fun, L, *var->i.pbmf);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_BOX, var->type)) {
-            ll_push_Box(_fun, L, var->i.box);
+            ll_push_Box(_fun, L, *var->i.pbox);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_BOXA, var->type)) {
-            ll_push_Boxa(_fun, L, var->i.boxa);
+            ll_push_Boxa(_fun, L, *var->i.pboxa);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_BOXAA, var->type)) {
-            ll_push_Boxaa(_fun, L, var->i.boxaa);
+            ll_push_Boxaa(_fun, L, *var->i.pboxaa);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_COMPDATA, var->type)) {
-            ll_push_CompData(_fun, L, var->i.cid);
+            ll_push_CompData(_fun, L, *var->i.pcid);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_CCBORD, var->type)) {
-            ll_push_CCBord(_fun, L, var->i.ccb);
+            ll_push_CCBord(_fun, L, *var->i.pccb);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_CCBORDA, var->type)) {
-            ll_push_CCBorda(_fun, L, var->i.ccba);
+            ll_push_CCBorda(_fun, L, *var->i.pccba);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_DEWARP, var->type)) {
-            ll_push_Dewarp(_fun, L, var->i.dew);
+            ll_push_Dewarp(_fun, L, *var->i.pdew);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_DEWARPA, var->type)) {
-            ll_push_Dewarpa(_fun, L, var->i.dewa);
+            ll_push_Dewarpa(_fun, L, *var->i.pdewa);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_DLLIST, var->type)) {
-            ll_push_DoubleLinkedList(_fun, L, var->i.list);
+            ll_push_DoubleLinkedList(_fun, L, *var->i.plist);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_DNA, var->type)) {
-            ll_push_Dna(_fun, L, var->i.da);
+            ll_push_Dna(_fun, L, *var->i.pda);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_DNAA, var->type)) {
-            ll_push_Dnaa(_fun, L, var->i.daa);
+            ll_push_Dnaa(_fun, L, *var->i.pdaa);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_DNAHASH, var->type)) {
-            ll_push_DnaHash(_fun, L, var->i.dah);
+            ll_push_DnaHash(_fun, L, *var->i.pdah);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_DPIX, var->type)) {
-            ll_push_DPix(_fun, L, var->i.dpix);
+            ll_push_DPix(_fun, L, *var->i.pdpix);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_FPIX, var->type)) {
-            ll_push_FPix(_fun, L, var->i.fpix);
+            ll_push_FPix(_fun, L, *var->i.pfpix);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_FPIXA, var->type)) {
-            ll_push_FPixa(_fun, L, var->i.fpixa);
+            ll_push_FPixa(_fun, L, *var->i.pfpixa);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_KERNEL, var->type)) {
-            ll_push_Kernel(_fun, L, var->i.kel);
+            ll_push_Kernel(_fun, L, *var->i.pkel);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_NUMA, var->type)) {
-            ll_push_Numa(_fun, L, var->i.na);
+            ll_push_Numa(_fun, L, *var->i.pna);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_NUMAA, var->type)) {
-            ll_push_Numaa(_fun, L, var->i.naa);
+            ll_push_Numaa(_fun, L, *var->i.pnaa);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_PDFDATA, var->type)) {
-            ll_push_PdfData(_fun, L, var->i.pdd);
+            ll_push_PdfData(_fun, L, *var->i.ppdd);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_PIX, var->type)) {
-            ll_push_Pix(_fun, L, var->i.pix);
+            ll_push_Pix(_fun, L, *var->i.ppix);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_PIXA, var->type)) {
-            ll_push_Pixa(_fun, L, var->i.pixa);
+            ll_push_Pixa(_fun, L, *var->i.ppixa);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_PIXAA, var->type)) {
-            ll_push_Pixaa(_fun, L, var->i.pixaa);
+            ll_push_Pixaa(_fun, L, *var->i.ppixaa);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_PIXCMAP, var->type)) {
-            ll_push_PixColormap(_fun, L, var->i.cmap);
+            ll_push_PixColormap(_fun, L, *var->i.pcmap);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_PIXTILING, var->type)) {
-            ll_push_PixTiling(_fun, L, var->i.pixt);
+            ll_push_PixTiling(_fun, L, *var->i.ppixt);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_PIXCOMP, var->type)) {
-            ll_push_PixComp(_fun, L, var->i.pixc);
+            ll_push_PixComp(_fun, L, *var->i.ppixc);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_PIXACOMP, var->type)) {
-            ll_push_PixaComp(_fun, L, var->i.pixac);
+            ll_push_PixaComp(_fun, L, *var->i.ppixac);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_PTA, var->type)) {
-            ll_push_Pta(_fun, L, var->i.pta);
+            ll_push_Pta(_fun, L, *var->i.ppta);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_PTAA, var->type)) {
-            ll_push_Ptaa(_fun, L, var->i.ptaa);
+            ll_push_Ptaa(_fun, L, *var->i.pptaa);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_RBTNODE, var->type)) {
-            lua_pushlightuserdata(L, var->i.node);
+            lua_pushlightuserdata(L, *var->i.pnode);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_SARRAY, var->type)) {
-            ll_push_Sarray(_fun, L, var->i.sa);
+            ll_push_Sarray(_fun, L, *var->i.psa);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_SEL, var->type)) {
-            ll_push_Sel(_fun, L, var->i.sel);
+            ll_push_Sel(_fun, L, *var->i.psel);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_SELA, var->type)) {
-            ll_push_Sela(_fun, L, var->i.sela);
+            ll_push_Sela(_fun, L, *var->i.psela);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_STACK, var->type)) {
-            ll_push_Stack(_fun, L, var->i.stack);
+            ll_push_Stack(_fun, L, *var->i.pstack);
             lua_setglobal(L, var->name);
             continue;
         }
 
         if (!strcmp(LL_WSHED, var->type)) {
-            ll_push_WShed(_fun, L, var->i.wshed);
+            ll_push_WShed(_fun, L, *var->i.pwshed);
             lua_setglobal(L, var->name);
             continue;
         }

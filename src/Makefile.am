@@ -50,7 +50,3 @@ liblualept_la_SOURCES = \
 	llwshed.cpp
 
 pkginclude_HEADERS = lualept.h
-
-bin_PROGRAMS = llua
-llua_SOURCES = llua.cpp
-llua_LDADD = liblualept.la
