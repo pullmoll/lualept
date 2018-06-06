@@ -154,6 +154,10 @@ LUALEPT_DLL extern int ll_open_WShed(lua_State *L);
 LUALEPT_DLL extern int luaopen_lualept(lua_State *L);
 LUALEPT_DLL extern int ll_RunScript(const char* script);
 
+#if defined(_MSC_VER)
+LEPT_DLL extern int LeptMsgSeverity;
+#endif
+
 #ifdef __cplusplus
 }
 #endif

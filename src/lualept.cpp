@@ -100,6 +100,11 @@ static const unsigned long _flt_max = 0x7effffffUL;
 #define FLT_MAX (*(const float*)&_flt_max)
 #endif
 
+#if defined(_MSC_VER)
+/** This symbol is expected when linking agains Leptonica? */
+int LeptMsgSeverity = 0;
+#endif
+
 #if !defined(HAVE_CTYPE_H)
 /**
  * \brief Poor man's toupper(3).
