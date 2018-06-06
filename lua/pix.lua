@@ -12,12 +12,15 @@ print(pad("cmap = PixColormap(2)"), cmap)
 print(pad("#cmap"), #cmap)
 
 print(pad("cmap:GetFreeCount()"), cmap:GetFreeCount())
-local black = cmap:AddNearestColor(0x00,0x00,0x00)
-local bluish = cmap:AddNewColor(0x40,0xe0,0xf0)
-cmap:AddColor(0x7f,0x7f,0x7f)
+
+local black = cmap:AddNearestColor('brown')
+print(pad("cmap:AddNearestColor('brown')"), black)
+
+local cyan = cmap:AddNewColor('cyan')
+print(pad("cmap:AddNewColor('cyan')"), cyan)
+
+cmap:AddColor(0x7f,0x7f,0x7f,0xcc)
 cmap:AddRGBA(0xff,0xff,0xff,0xff)
-print(pad("cmap:AddNearestColor(0x00,0x00,0x00)"), black)
-print(pad("cmap:AddNewColor(0x40,0xe0,0xf0)"), bluish)
 
 print(pad("cmap:GetFreeCount()"), cmap:GetFreeCount())
 
@@ -32,7 +35,7 @@ pix:SetAllArbitrary(3)
 pix:View()
 
 -- Draw some border rings
-for dist = 4,13 do pix:SetBorderRingVal(dist, bluish-1) end
+for dist = 4,13 do pix:SetBorderRingVal(dist, cyan) end
 
 -- Draw some horizontal lines around the vertical center
 for y = height/2-3,height/2+3 do
@@ -81,6 +84,12 @@ end
 
 local ok = pix2:SetData(data)
 print(pad("pix2:SetData(data)"), ok)
+
+local pixm = pix2:ConvertTo1()
+pixm:View()
+local stack = Stack(8)
+local ok = pixm:Seedfill8(stack, 3, 3)
+pixm:View()
 
 local w, h, d = pix2:GetDimensions()
 print(pad("width"), w)

@@ -393,6 +393,149 @@ GetSum(lua_State *L)
 }
 
 /**
+ * \brief MakeDoGKernel() brief comment goes here.
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (halfheight).
+ * Arg #2 is expected to be a l_int32 (halfwidth).
+ * Arg #3 is expected to be a l_float32 (stdev).
+ * Arg #4 is expected to be a l_float32 (ratio).
+ *
+ * Leptonica's Notes:
+ *      (1) The DoG (difference of gaussians) is a wavelet mother
+ *          function with null total sum.  By subtracting two blurred
+ *          versions of the image, it acts as a bandpass filter for
+ *          frequencies passed by the narrow gaussian but stopped
+ *          by the wide one.See:
+ *               http://en.wikipedia.org/wiki/Difference_of_Gaussians
+ *      (2) The kernel size (sx, sy) = (2 * halfwidth + 1, 2 * halfheight + 1).
+ *      (3) The kernel center (cx, cy) = (halfwidth, halfheight).
+ *      (4) The halfwidth and halfheight are typically equal, and
+ *          are typically several times larger than the standard deviation.
+ *      (5) The ratio is the ratio of standard deviations of the wide
+ *          to narrow gaussian.  It must be >= 1.0; 1.0 is a no-op.
+ *      (6) Because the kernel is a null sum, it must be invoked without
+ *          normalization in pixConvolve().
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+MakeDoGKernel(lua_State *L)
+{
+    LL_FUNC("MakeDoGKernel");
+    l_int32 halfheight = ll_check_l_int32(_fun, L, 1);
+    l_int32 halfwidth = ll_check_l_int32(_fun, L, 2);
+    l_float32 stdev = ll_check_l_float32(_fun, L, 3);
+    l_float32 ratio = ll_check_l_float32(_fun, L, 4);
+    Kernel *kel = makeDoGKernel(halfheight, halfwidth, stdev, ratio);
+    return ll_push_Kernel (_fun, L, kel);
+}
+
+/**
+ * \brief MakeFlatKernel() brief comment goes here.
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (height).
+ * Arg #2 is expected to be a l_int32 (width).
+ * Arg #3 is expected to be a l_int32 (cy).
+ * Arg #4 is expected to be a l_int32 (cx).
+ *
+ * Leptonica's Notes:
+ *      (1) This is the same low-pass filtering kernel that is used
+ *          in the block convolution functions.
+ *      (2) The kernel origin (%cy, %cx) is typically placed as near
+ *          the center of the kernel as possible.  If height and
+ *          width are odd, then using cy = height / 2 and
+ *          cx = width / 2 places the origin at the exact center.
+ *      (3) This returns a normalized kernel.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+MakeFlatKernel(lua_State *L)
+{
+    LL_FUNC("MakeFlatKernel");
+    l_int32 height = ll_check_l_int32(_fun, L, 1);
+    l_int32 width = ll_check_l_int32(_fun, L, 2);
+    l_int32 cy = ll_check_l_int32(_fun, L, 3);
+    l_int32 cx = ll_check_l_int32(_fun, L, 4);
+    Kernel *kel = makeFlatKernel(height, width, cy, cx);
+    return ll_push_Kernel (_fun, L, kel);
+}
+
+/**
+ * \brief MakeGaussianKernel() brief comment goes here.
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (halfheight).
+ * Arg #2 is expected to be a l_int32 (halfwidth).
+ * Arg #3 is expected to be a l_float32 (stdev).
+ * Arg #4 is expected to be a l_float32 (max).
+ *
+ * Leptonica's Notes:
+ *      (1) The kernel size (sx, sy) = (2 * halfwidth + 1, 2 * halfheight + 1).
+ *      (2) The kernel center (cx, cy) = (halfwidth, halfheight).
+ *      (3) The halfwidth and halfheight are typically equal, and
+ *          are typically several times larger than the standard deviation.
+ *      (4) If pixConvolve() is invoked with normalization (the sum of
+ *          kernel elements = 1.0), use 1.0 for max (or any number that's
+ *          not too small or too large).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+MakeGaussianKernel(lua_State *L)
+{
+    LL_FUNC("MakeGaussianKernel");
+    l_int32 halfheight = ll_check_l_int32(_fun, L, 1);
+    l_int32 halfwidth = ll_check_l_int32(_fun, L, 2);
+    l_float32 stdev = ll_check_l_float32(_fun, L, 3);
+    l_float32 max = ll_check_l_float32(_fun, L, 4);
+    Kernel *kel = makeGaussianKernel(halfheight, halfwidth, stdev, max);
+    return ll_push_Kernel (_fun, L, kel);
+}
+
+/**
+ * \brief MakeGaussianKernelSep() brief comment goes here.
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (halfheight).
+ * Arg #2 is expected to be a l_int32 (halfwidth).
+ * Arg #3 is expected to be a l_float32 (stdev).
+ * Arg #4 is expected to be a l_float32 (max).
+ *
+ * Leptonica's Notes:
+ *      (1) See makeGaussianKernel() for description of input parameters.
+ *      (2) These kernels are constructed so that the result of both
+ *          normalized and un-normalized convolution will be the same
+ *          as when convolving with pixConvolve() using the full kernel.
+ *      (3) The trick for the un-normalized convolution is to have the
+ *          product of the two kernel elemets at (cx,cy) be equal to max,
+ *          not max**2.  That's why the max for kely is 1.0.  If instead
+ *          we use sqrt(max) for both, the results are slightly less
+ *          accurate, when compared to using the full kernel in
+ *          makeGaussianKernel().
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 2 on the Lua stack
+ */
+static int
+MakeGaussianKernelSep(lua_State *L)
+{
+    LL_FUNC("MakeGaussianKernelSep");
+    l_int32 halfheight = ll_check_l_int32(_fun, L, 1);
+    l_int32 halfwidth = ll_check_l_int32(_fun, L, 2);
+    l_float32 stdev = ll_check_l_float32(_fun, L, 3);
+    l_float32 max = ll_check_l_float32(_fun, L, 4);
+    Kernel *kelx = nullptr;
+    Kernel *kely = nullptr;
+    if (makeGaussianKernelSep(halfheight, halfwidth, stdev, max, &kelx, &kely))
+        return ll_push_nil(L);
+    ll_push_Kernel (_fun, L, kelx);
+    ll_push_Kernel (_fun, L, kely);
+    return 2;
+}
+
+/**
  * \brief Invert a Kernel* (%kels).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Kernel* (kels).
@@ -710,28 +853,32 @@ int
 ll_open_Kernel(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},
-        {"__new",               ll_new_Kernel},
-        {"__tostring",          toString},
-        {"Copy",                Copy},
-        {"Create",              Create},
-        {"CreateFromFile",      CreateFromFile},
-        {"CreateFromPix",       CreateFromPix},
-        {"CreateFromString",    CreateFromString},
-        {"Destroy",             Destroy},
-        {"DisplayInPix",        DisplayInPix},
-        {"GetElement",          GetElement},
-        {"GetMinMax",           GetMinMax},
-        {"GetParameters",       GetParameters},
-        {"GetSum",              GetSum},
-        {"Invert",              Invert},
-        {"Normalize",           Normalize},
-        {"Read",                Read},
-        {"ReadStream",          ReadStream},
-        {"SetElement",          SetElement},
-        {"SetOrigin",           SetOrigin},
-        {"Write",               Write},
-        {"WriteStream",         WriteStream},
+        {"__gc",                    Destroy},
+        {"__new",                   ll_new_Kernel},
+        {"__tostring",              toString},
+        {"Copy",                    Copy},
+        {"Create",                  Create},
+        {"CreateFromFile",          CreateFromFile},
+        {"CreateFromPix",           CreateFromPix},
+        {"CreateFromString",        CreateFromString},
+        {"Destroy",                 Destroy},
+        {"DisplayInPix",            DisplayInPix},
+        {"GetElement",              GetElement},
+        {"GetMinMax",               GetMinMax},
+        {"GetParameters",           GetParameters},
+        {"GetSum",                  GetSum},
+        {"Invert",                  Invert},
+        {"MakeDoGKernel",           MakeDoGKernel},
+        {"MakeFlatKernel",          MakeFlatKernel},
+        {"MakeGaussianKernel",      MakeGaussianKernel},
+        {"MakeGaussianKernelSep",   MakeGaussianKernelSep},
+        {"Normalize",               Normalize},
+        {"Read",                    Read},
+        {"ReadStream",              ReadStream},
+        {"SetElement",              SetElement},
+        {"SetOrigin",               SetOrigin},
+        {"Write",                   Write},
+        {"WriteStream",             WriteStream},
         LUA_SENTINEL
     };
     LO_FUNC(TNAME);

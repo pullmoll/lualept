@@ -345,19 +345,19 @@ function pusher(vtype, var, isref)
 			return "ll_push_string(_fun, L, " .. var ..")"
 		end
 		if vtype:match("l_int32%s*%*") then
-			return "ll_push_Iarray(_fun, L, " .. var .. ", size)"
+			return "ll_pack_Iarray(_fun, L, " .. var .. ", size)"
 		end
 		if vtype:match("l_uint32%s*%*") then
-			return "ll_push_Uarray(_fun, L, " .. var .. ", size)"
+			return "ll_pack_Uarray(_fun, L, " .. var .. ", size)"
 		end
 		if vtype:match("l_float32%s*%*") then
-			return "ll_push_Farray(_fun, L, " .. var .. ", size)"
+			return "ll_pack_Farray(_fun, L, " .. var .. ", size)"
 		end
 		if vtype:match("l_float64%s*%*") then
-			return "ll_push_Darray(_fun, L, " .. var .. ", size)"
+			return "ll_pack_Darray(_fun, L, " .. var .. ", size)"
 		end
 		if vtype:match("Sarray%s*%*") then
-			return "ll_push_Sarray(_fun, L, " .. var .. ")"
+			return "ll_pack_Sarray(_fun, L, " .. var .. ")"
 		end
 	end
 	vtype = vtype:gsub("%*$", "")

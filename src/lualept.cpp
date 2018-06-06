@@ -4200,6 +4200,95 @@ ll_string_color_name(l_uint32 color)
     return buff;
 }
 
+/**
+ * @brief Let's try our best to convert argument(s) to RGBA values
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index of the first parameter
+ * @param pr [optional] pointer to red value to return
+ * @param pg [optional] pointer to green value to return
+ * @param pb [optional] pointer to blue value to return
+ * @param pa [optional] pointer to alpah value to return
+ * @return
+ */
+int
+ll_check_color(const char *_fun, lua_State *L, int arg, l_int32 *pr, l_int32 *pg, l_int32 *pb, l_int32 *pa)
+{
+    l_int32 color = 1 << 24;
+    l_int32 r = 0;
+    l_int32 g = 0;
+    l_int32 b = 0;
+    l_int32 a = 0;
+
+    if (pr)
+        *pr = 0;
+    if (pg)
+        *pg = 0;
+    if (pb)
+        *pb = 0;
+    if (pa)
+        *pa = 0;
+
+    if (ll_istable(_fun, L, arg)) {
+           /* expect a table with up to 4 integer values */
+           l_int32 len = 0;
+           l_int32 *tbl = ll_unpack_Iarray(_fun, L, arg, &len);
+           if (len > 0)
+               r = tbl[0];
+           if (len > 1)
+               g = tbl[1];
+           if (len > 2)
+               b = tbl[2];
+           if (len > 3)
+               b = tbl[3];
+           ll_free(tbl);
+    } else if (ll_isinteger(_fun, L, arg)) {
+           /*
+            * Expect up to 4 integer values, where g defaults to r
+            * and b defaults to g, so that color(60) => 60, 60, 60
+            * Alpha defaults to 255.
+            */
+           r = ll_check_l_int32(_fun, L, arg);
+           g = ll_opt_l_int32(_fun, L, arg + 1, r);
+           b = ll_opt_l_int32(_fun, L, arg + 2, g);
+           a = ll_opt_l_int32(_fun, L, arg + 3, 255);
+    } else if (ll_isstring(_fun, L, arg)) {
+        color = ll_check_color_name(_fun, L, arg);
+        if (color >= 1 << 24) {
+            /* not a color name */
+            const char *str = ll_check_string(_fun, L, arg);
+            if (*str == '#')
+                str++;
+            /* expect hexadecimal digits for 0xRRGGBB */
+            color = static_cast<l_int32>(strtol(str, nullptr, 16));
+        }
+        if (color >= 1 << 24) {
+            /* >= 24 bits: 0xRRGGBBAA */
+            r = (color >> 24) & 0xff;
+            g = (color >> 16) & 0xff;
+            b = (color >>  8) & 0xff;
+            a = (color >>  0) & 0xff;
+        } else {
+            /* < 24 bits: 0x00RRGGBB */
+            r = (color >> 16) & 0xff;
+            g = (color >>  8) & 0xff;
+            b = (color >>  0) & 0xff;
+            a = 0xff;
+        }
+    }
+
+    if (pr)
+        *pr = r;
+    if (pg)
+        *pg = g;
+    if (pb)
+        *pb = b;
+    if (pa)
+        *pa = a;
+
+    return 0;
+}
+
 static global_var_t *global_vars = nullptr;
 
 static int
@@ -5213,6 +5302,52 @@ ComposeRGBA(lua_State *L)
 }
 
 /**
+ * \brief Compose a RGBA pixel value.
+ *
+ * Arg #1 is expected to be a l_int32 (rval).
+ * Arg #2 is expected to be a l_int32 (gval).
+ * Arg #3 is expected to be a l_int32 (bval).
+ * Arg #4 is expected to be a l_int32 (aval).
+ *
+ * \param L pointer to the lua_State
+ * \return 1 Pix* on the Lua stack
+ */
+static int
+Color(lua_State *L)
+{
+    LL_FUNC("Color");
+    l_int32 color = ll_check_color_name(_fun, L, 1);
+    l_uint32 pixel = 0;
+    l_int32 r = 0;
+    l_int32 g = 0;
+    l_int32 b = 0;
+    l_int32 a = 0;
+    if (color >= 1 << 24) {
+        const char *str = ll_check_string(_fun, L, 1);
+        if (*str == '#')
+            str++;
+        /* expect hexadecimal digits for 0xRRGGBB */
+        color = static_cast<l_int32>(strtol(str, nullptr, 16));
+    }
+    if (color >= 1 << 24) {
+        /* 0xRRGGBBAA */
+        r = (color >> 24) & 0xff;
+        g = (color >> 16) & 0xff;
+        b = (color >>  8) & 0xff;
+        a = (color >>  0) & 0xff;
+    } else {
+        /* 0x00RRGGBB */
+        r = (color >> 16) & 0xff;
+        g = (color >>  8) & 0xff;
+        b = (color >>  0) & 0xff;
+        a = 0xff;
+    }
+    if (composeRGBPixel(r, g, b, &pixel))
+        return ll_push_nil(L);
+    return ll_push_l_uint32(_fun, L, pixel);
+}
+
+/**
  * \brief Extract a RGB pixel values.
  *
  * Arg #1 is expected to be a string (filename).
@@ -5258,6 +5393,67 @@ ToRGBA(lua_State *L)
     ll_push_l_int32(_fun, L, bval);
     ll_push_l_int32(_fun, L, aval);
     return 4;
+}
+
+/**
+ * \brief MakeGrayQuantIndexTable() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a l_int32 (nlevels).
+ *
+ * Leptonica's Notes:
+ *      (1) 'nlevels' is some number between 2 and 256 (typically 8 or less).
+ *      (2) The table is typically used for quantizing 2, 4 and 8 bpp
+ *          grayscale src pix, and generating a colormapped dest pix.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+MakeGrayQuantIndexTable(lua_State *L)
+{
+    LL_FUNC("MakeGrayQuantIndexTable");
+    l_int32 nlevels = ll_check_l_int32(_fun, L, 1);
+    l_int32 *result = makeGrayQuantIndexTable(nlevels);
+    ll_pack_Iarray(_fun, L, result, nlevels);
+    ll_free(result);
+    return 1;
+}
+
+/**
+ * \brief MakeGrayQuantTableArb() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Numa* (na).
+ * Arg #2 is expected to be a l_int32 (outdepth).
+ *
+ * Leptonica's Notes:
+ *      (1) The number of bins is the count of %na + 1.
+ *      (2) The bin boundaries in na must be sorted in increasing order.
+ *      (3) The table is an inverse colormap: it maps input gray level
+ *          to colormap index (the bin number).
+ *      (4) The colormap generated here has quantized values at the
+ *          center of each bin.  If you want to use the average gray
+ *          value of pixels within the bin, discard the colormap and
+ *          compute it using makeGrayQuantColormapArb().
+ *      (5) Returns an error if there are not enough levels in the
+ *          output colormap for the number of bins.  The number
+ *          of bins must not exceed 2^outdepth.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 2 on the Lua stack
+ */
+static int
+MakeGrayQuantTableArb(lua_State *L)
+{
+    LL_FUNC("MakeGrayQuantTableArb");
+    Numa *na = ll_check_Numa(_fun, L, 1);
+    l_int32 outdepth = ll_check_l_int32(_fun, L, 2);
+    l_int32 *tab = nullptr;
+    PixColormap *cmap = nullptr;
+    if (makeGrayQuantTableArb(na, outdepth, &tab, &cmap))
+        return ll_push_nil(L);
+    ll_pack_Iarray(_fun, L, tab, 1 << outdepth);
+    ll_push_PixColormap(_fun, L, cmap);
+    return 2;
 }
 
 /**
@@ -5432,8 +5628,11 @@ luaopen_lualept(lua_State *L)
         {"ComposeRGBA",             ComposeRGBA},
         {"RGB",                     ComposeRGB},
         {"RGBA",                    ComposeRGBA},
+        {"Color",                   Color},
         {"ToRGB",                   ToRGB},
         {"ToRGBA",                  ToRGBA},
+        {"MakeGrayQuantIndexTable", MakeGrayQuantIndexTable},
+        {"MakeGrayQuantTableArb",   MakeGrayQuantTableArb},
         {"MinMaxComponent",         MinMaxComponent},
         {"MinComponent",            MinComponent},   /* alias without 2nd parameter */
         {"MaxComponent",            MaxComponent},   /* alias without 2nd parameter */

@@ -134,7 +134,7 @@ toString(lua_State* L)
 }
 
 /**
- * \brief Apply() brief comment goes here.
+ * \brief Apply the WShed* (%wsched).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a WShed* (wshed).
  * </pre>
@@ -150,12 +150,12 @@ Apply(lua_State *L)
 }
 
 /**
- * \brief Basins() brief comment goes here.
+ * \brief Get the basins() for the WShed (%wshed).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a WShed* (wshed).
  * </pre>
  * \param L pointer to the lua_State
- * \return 2 Pixa* and Numa* on the Lua stack
+ * \return 2 Pixa* (%pixa) and Numa* (%nalevels) on the Lua stack
  */
 static int
 Basins(lua_State *L)
@@ -207,7 +207,7 @@ Create(lua_State *L)
 }
 
 /**
- * \brief RenderColors() brief comment goes here.
+ * \brief Render colors for a WShed* (%wshed) and return the Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a WShed* (wshed).
  * </pre>
@@ -224,7 +224,7 @@ RenderColors(lua_State *L)
 }
 
 /**
- * \brief RenderFill() brief comment goes here.
+ * \brief Render fill a WShed* (%wshed) and return the Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a WShed* (wshed).
  *
@@ -342,6 +342,7 @@ ll_new_WShed(lua_State *L)
         TNAME, reinterpret_cast<void *>(wshed));
     return ll_push_WShed(_fun, L, wshed);
 }
+
 /**
  * \brief Register the WShed methods and functions in the TNAME meta table.
  * \param L pointer to the lua_State

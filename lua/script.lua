@@ -25,7 +25,7 @@ print(pad("global box"), box)
 -- require "lua/pta"
 -- require "lua/numa"
 -- require "lua/dna"
--- require "lua/pix"
+require "lua/pix"
 -- require "lua/pix2"
 -- require "lua/pix3"
 -- require "lua/fpix"

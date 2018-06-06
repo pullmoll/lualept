@@ -747,6 +747,11 @@ AddBorder(lua_State *L)
     l_int32 npix = ll_check_l_int32(_fun, L, 2);
     l_uint32 val = ll_check_l_uint32(_fun, L, 3);
     Pix* pixd = pixAddBorder(pixs, npix, val);
+    if (32 != pixGetDepth(pixs)) {
+        /* it's a color index */
+        if (val > 0)
+            val = val - 1;
+    }
     ll_push_Pix(_fun, L, pixd);
     return 1;
 }
@@ -796,6 +801,11 @@ AddBorderGeneral(lua_State *L)
     l_int32 top = ll_check_l_int32(_fun, L, 4);
     l_int32 bottom = ll_check_l_int32(_fun, L, 5);
     l_uint32 val = ll_check_l_uint32(_fun, L, 6);
+    if (32 != pixGetDepth(pixs)) {
+        /* it's a color index */
+        if (val > 0)
+            val = val - 1;
+    }
     Pix* pixd = pixAddBorderGeneral(pixs, left, right, top, bottom, val);
     ll_push_Pix(_fun, L, pixd);
     return 1;
@@ -1133,6 +1143,11 @@ AddSingleTextblock(lua_State *L)
     l_uint32 val = ll_check_l_uint32(_fun, L, 4);
     l_int32 location = ll_check_l_int32(_fun, L, 5);
     l_int32 overflow = 0;
+    if (32 != pixGetDepth(pixs)) {
+        /* it's a color index */
+        if (val > 0)
+            val = val - 1;
+    }
     if (pixAddSingleTextblock(pixs, bmf, textstr, val, location, &overflow))
         return ll_push_nil(L);
     ll_push_l_int32(_fun, L, overflow);
@@ -1202,6 +1217,11 @@ AddTextlines(lua_State *L)
     const char *textstr = ll_check_string(_fun, L, 3);
     l_uint32 val = ll_check_l_uint32(_fun, L, 4);
     l_int32 location = ll_check_l_int32(_fun, L, 5);
+    if (32 != pixGetDepth(pixs)) {
+        /* it's a color index */
+        if (val > 0)
+            val = val - 1;
+    }
     Pix *pix = pixAddTextlines(pixs, bmf, textstr, val, location);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -3194,6 +3214,11 @@ BlendInRect(lua_State *L)
     Box *box = ll_check_Box(_fun, L, 2);
     l_uint32 val = ll_check_l_uint32(_fun, L, 3);
     l_float32 fract = ll_check_l_float32(_fun, L, 4);
+    if (32 != pixGetDepth(pix)) {
+        /* it's a color index */
+        if (val > 0)
+            val = val - 1;
+    }
     return ll_push_boolean(_fun, L, 0 == pixBlendInRect(pix, box, val, fract));
 }
 
@@ -10715,6 +10740,11 @@ DrawBoxa(lua_State *L)
     Boxa *boxa = ll_check_Boxa(_fun, L, 2);
     l_int32 width = ll_check_l_int32(_fun, L, 3);
     l_uint32 val = ll_check_l_uint32(_fun, L, 4);
+    if (32 != pixGetDepth(pixs)) {
+        /* it's a color index */
+        if (val > 0)
+            val = val - 1;
+    }
     Pix *pix = pixDrawBoxa(pixs, boxa, width, val);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -21122,6 +21152,11 @@ PaintBoxa(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Boxa *boxa = ll_check_Boxa(_fun, L, 2);
     l_uint32 val = ll_check_l_uint32(_fun, L, 3);
+    if (32 != pixGetDepth(pixs)) {
+        /* it's a color index */
+        if (val > 0)
+            val = val - 1;
+    }
     Pix *pix = pixPaintBoxa(pixs, boxa, val);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -21282,6 +21317,11 @@ PaintThroughMask(lua_State *L)
     l_int32 x = ll_check_l_int32(_fun, L, 3);
     l_int32 y = ll_check_l_int32(_fun, L, 4);
     l_uint32 val = ll_check_l_uint32(_fun, L, 5);
+    if (32 != pixGetDepth(pixd)) {
+        /* it's a color index */
+        if (val > 0)
+            val = val - 1;
+    }
     return ll_push_boolean(_fun, L, 0 == pixPaintThroughMask(pixd, pixm, x, y, val));
 }
 
@@ -25803,6 +25843,11 @@ SaveTiledWithText(lua_State *L)
     const char *textstr = ll_check_string(_fun, L, 8);
     l_uint32 val = ll_check_l_uint32(_fun, L, 9);
     l_int32 location = ll_check_l_int32(_fun, L, 10);
+    if (32 != pixGetDepth(pixs)) {
+        /* it's a color index */
+        if (val > 0)
+            val = val - 1;
+    }
     l_int32 result = pixSaveTiledWithText(pixs, pixa, outwidth, newrow, space, linewidth, bmf, textstr, val, location);
     return ll_push_l_int32(_fun, L, result);
 }
@@ -28272,6 +28317,11 @@ SetAllArbitrary(lua_State *L)
     LL_FUNC("SetAllArbitrary");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_uint32 val = ll_check_l_uint32(_fun, L, 2);
+    if (32 != pixGetDepth(pix)) {
+        /* it's a color index */
+        if (val > 0)
+            val = val - 1;
+    }
     return ll_push_boolean(_fun, L, 0 == pixSetAllArbitrary(pix, val));
 }
 
@@ -28412,6 +28462,11 @@ SetBorderRingVal(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 dist = ll_check_l_int32(_fun, L, 2);
     l_uint32 val = ll_check_l_uint32(_fun, L, 3);
+    if (32 != pixGetDepth(pix)) {
+        /* it's a color index */
+        if (val > 0)
+            val = val - 1;
+    }
     return ll_push_boolean(_fun, L, 0 == pixSetBorderRingVal(pix, dist, val));
 }
 
@@ -28450,6 +28505,11 @@ SetBorderVal(lua_State *L)
     l_int32 top = ll_check_l_int32(_fun, L, 4);
     l_int32 bottom = ll_check_l_int32(_fun, L, 5);
     l_uint32 val = ll_check_l_uint32(_fun, L, 6);
+    if (32 != pixGetDepth(pix)) {
+        /* it's a color index */
+        if (val > 0)
+            val = val - 1;
+    }
     return ll_push_boolean(_fun, L, 0 == pixSetBorderVal(pix, left, right, top, bottom, val));
 }
 
@@ -28656,6 +28716,11 @@ SetInRectArbitrary(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
     l_uint32 val = ll_check_l_uint32(_fun, L, 3);
+    if (32 != pixGetDepth(pix)) {
+        /* it's a color index */
+        if (val > 0)
+            val = val - 1;
+    }
     return ll_push_boolean(_fun, L, 0 == pixSetInRectArbitrary(pix, box, val));
 }
 
@@ -28746,6 +28811,11 @@ SetMasked(lua_State *L)
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixm = ll_check_Pix(_fun, L, 2);
     l_uint32 val = ll_check_l_uint32(_fun, L, 3);
+    if (32 != pixGetDepth(pixd)) {
+        /* it's a color index */
+        if (val > 0)
+            val = val - 1;
+    }
     return ll_push_boolean(_fun, L, 0 == pixSetMasked(pixd, pixm, val));
 }
 
@@ -28828,6 +28898,11 @@ SetMaskedGeneral(lua_State *L)
     l_uint32 val = ll_check_l_uint32(_fun, L, 3);
     l_int32 x = ll_check_l_int32(_fun, L, 4);
     l_int32 y = ll_check_l_int32(_fun, L, 5);
+    if (32 != pixGetDepth(pixd)) {
+        /* it's a color index */
+        if (val > 0)
+            val = val - 1;
+    }
     return ll_push_boolean(_fun, L, 0 == pixSetMaskedGeneral(pixd, pixm, val, x, y));
 }
 
@@ -28995,6 +29070,11 @@ SetPixel(lua_State *L)
     l_int32 x = ll_check_l_int32(_fun, L, 2);
     l_int32 y = ll_check_l_int32(_fun, L, 3);
     l_uint32 val = ll_check_l_uint32(_fun, L, 4) - 1;
+    if (32 != pixGetDepth(pix)) {
+        /* it's a color index */
+        if (val > 0)
+            val = val - 1;
+    }
     return ll_push_boolean(_fun, L, 0 == pixSetPixel(pix, x, y, val));
 }
 
@@ -29314,6 +29394,11 @@ SetTextblock(lua_State *L)
     l_int32 wtext = ll_check_l_int32(_fun, L, 7);
     l_int32 firstindent = ll_check_l_int32(_fun, L, 8);
     l_int32 overflow = 0;
+    if (32 != pixGetDepth(pixs)) {
+        /* it's a color index */
+        if (val > 0)
+            val = val - 1;
+    }
     if (pixSetTextblock(pixs, bmf, textstr, val, x0, y0, wtext, firstindent, &overflow))
         return ll_push_nil(L);
     ll_push_l_int32(_fun, L, overflow);
@@ -29359,6 +29444,11 @@ SetTextline(lua_State *L)
     l_int32 y0 = ll_check_l_int32(_fun, L, 6);
     l_int32 width = 0;
     l_int32 overflow = 0;
+    if (32 != pixGetDepth(pixs)) {
+        /* it's a color index */
+        if (val > 0)
+            val = val - 1;
+    }
     if (pixSetTextline(pixs, bmf, textstr, val, x0, y0, &width, &overflow))
         return ll_push_nil(L);
     ll_push_l_int32(_fun, L, width);
@@ -29424,6 +29514,11 @@ SetUnderTransparency(lua_State *L)
     LL_FUNC("SetUnderTransparency");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_uint32 val = ll_check_l_uint32(_fun, L, 2);
+    if (32 != pixGetDepth(pixs)) {
+        /* it's a color index */
+        if (val > 0)
+            val = val - 1;
+    }
     ll_push_Pix(_fun, L, pixSetUnderTransparency(pixs, val, 0));
     return 1;
 }

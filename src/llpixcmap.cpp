@@ -216,10 +216,11 @@ AddNearestColor(lua_State *L)
 {
     LL_FUNC("AddNearestColor");
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
-    l_int32 rval = ll_check_l_int32(_fun, L, 2);
-    l_int32 gval = ll_check_l_int32(_fun, L, 3);
-    l_int32 bval = ll_check_l_int32(_fun, L, 4);
+    l_int32 rval = 0;
+    l_int32 gval = 0;
+    l_int32 bval = 0;
     l_int32 idx = 0;
+    ll_check_color(_fun, L, 2, &rval, &gval, &bval);
     if (pixcmapAddNearestColor(cmap, rval, gval, bval, &idx))
         return ll_push_nil(L);
     ll_push_l_int32(_fun, L, idx + 1);  /* Lua index is 1-based */
@@ -249,10 +250,11 @@ AddNewColor(lua_State *L)
 {
     LL_FUNC("AddNewColor");
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
-    l_int32 rval = ll_check_l_int32(_fun, L, 2);
-    l_int32 gval = ll_check_l_int32(_fun, L, 3);
-    l_int32 bval = ll_check_l_int32(_fun, L, 4);
+    l_int32 rval = 0;
+    l_int32 gval = 0;
+    l_int32 bval = 0;
     l_int32 idx = 0;
+    ll_check_color(_fun, L, 2, &rval, &gval, &bval);
     if (pixcmapAddNewColor(cmap, rval, gval, bval, &idx))
         return ll_push_nil(L);
     ll_push_l_int32(_fun, L, idx + 1);  /* Lua index is 1-based */
@@ -279,10 +281,11 @@ AddRGBA(lua_State *L)
 {
     LL_FUNC("RGBA");
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
-    l_int32 rval = ll_check_l_int32(_fun, L, 2);
-    l_int32 gval = ll_check_l_int32(_fun, L, 3);
-    l_int32 bval = ll_check_l_int32(_fun, L, 4);
-    l_int32 aval = ll_check_l_int32(_fun, L, 5);
+    l_int32 rval = 0;
+    l_int32 gval = 0;
+    l_int32 bval = 0;
+    l_int32 aval = 0;
+    ll_check_color(_fun, L, 2, &rval, &gval, &bval, &aval);
     return ll_push_boolean(_fun, L, 0 == pixcmapAddRGBA(cmap, rval, gval, bval, aval));
 }
 
@@ -566,10 +569,11 @@ GetIndex(lua_State *L)
 {
     LL_FUNC("GetIndex");
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
-    l_int32 rval = ll_check_l_int32(_fun, L, 2);
-    l_int32 gval = ll_check_l_int32(_fun, L, 3);
-    l_int32 bval = ll_check_l_int32(_fun, L, 4);
+    l_int32 rval = 0;
+    l_int32 gval = 0;
+    l_int32 bval = 0;
     l_int32 idx = 0;
+    ll_check_color(_fun, L, 2, &rval, &gval, &bval);
     if (pixcmapGetIndex(cmap, rval, gval, bval, &idx))
         return ll_push_nil(L);
     ll_push_l_int32(_fun, L, idx + 1);  /* Lua index is 1-based */
@@ -940,10 +944,11 @@ UsableColor(lua_State *L)
 {
     LL_FUNC("UsableColor");
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
-    l_int32 rval = ll_check_l_int32(_fun, L, 2);
-    l_int32 gval = ll_check_l_int32(_fun, L, 3);
-    l_int32 bval = ll_check_l_int32(_fun, L, 4);
+    l_int32 rval = 0;
+    l_int32 gval = 0;
+    l_int32 bval = 0;
     l_int32 idx = 0;
+    ll_check_color(_fun, L, 2, &rval, &gval, &bval);
     if (pixcmapUsableColor(cmap, rval, gval, bval, &idx))
         return ll_push_nil(L);
     ll_push_l_int32(_fun, L, idx + 1);  /* Lua index is 1-based */
@@ -1053,10 +1058,11 @@ AddColorizedGrayToCmap(lua_State *L)
     LL_FUNC("AddColorizedGrayToCmap");
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
     l_int32 type = ll_check_paint_flags(_fun, L, 2, L_PAINT_LIGHT);
-    l_int32 rval = ll_opt_l_int32(_fun, L, 3, 128);
-    l_int32 gval = ll_opt_l_int32(_fun, L, 4, 128);
-    l_int32 bval = ll_opt_l_int32(_fun, L, 5, 128);
+    l_int32 rval = 0;
+    l_int32 gval = 0;
+    l_int32 bval = 0;
     Numa *na = nullptr;
+    ll_check_color(_fun, L, 3, &rval, &gval, &bval);
     if (addColorizedGrayToCmap(cmap, type, rval, gval, bval, &na))
         return ll_push_nil(L);
     ll_push_Numa(_fun, L, na);
@@ -1224,6 +1230,7 @@ ll_open_PixColormap(lua_State *L)
         {"__tostring",              toString},
         {"AddBlackOrWhite",         AddBlackOrWhite},
         {"AddColor",                AddColor},
+        {"AddColorizedGrayToCmap",  AddColorizedGrayToCmap},
         {"AddNearestColor",         AddNearestColor},
         {"AddNewColor",             AddNewColor},
         {"AddRGBA",                 AddRGBA},
@@ -1238,7 +1245,7 @@ ll_open_PixColormap(lua_State *L)
         {"Destroy",                 Destroy},
         {"GetColor",                GetColor},
         {"GetColor32",              GetColor32},
-        {"GetCount",                GetCount},  /* same as #cmap */
+        {"GetCount",                GetCount},
         {"GetDepth",                GetDepth},
         {"GetFreeCount",            GetFreeCount},
         {"GetIndex",                GetIndex},

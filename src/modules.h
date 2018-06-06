@@ -638,8 +638,14 @@ extern const char     * ll_string_value_flags(l_int32 rotation);
 extern l_int32          ll_check_paint_flags(const char *_fun, lua_State *L, int arg, l_int32 def = L_PAINT_LIGHT);
 extern const char     * ll_string_paint_flags(l_int32 rotation);
 
-extern l_int32          ll_check_color_name(const char *_fun, lua_State *L, int arg, l_int32 def = L_PAINT_LIGHT);
+extern l_int32          ll_check_color_name(const char *_fun, lua_State *L, int arg, l_int32 def = 0x1000000);
 extern const char     * ll_string_color_name(l_uint32 rotation);
+
+extern int              ll_check_color(const char *_fun, lua_State *L, int arg,
+                                       l_int32 *pr = nullptr,
+                                       l_int32 *pg = nullptr,
+                                       l_int32 *pb = nullptr,
+                                       l_int32 *pa = nullptr);
 
 /* lualept.cpp */
 extern LuaLept        * ll_check_lualept(const char *_fun, lua_State *L, int arg);
