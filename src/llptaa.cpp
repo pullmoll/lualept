@@ -361,6 +361,10 @@ ll_take_Ptaa(const char *_fun, lua_State *L, int arg)
 {
     Ptaa **pptaa = ll_check_udata<Ptaa>(_fun, L, arg, TNAME);
     Ptaa *ptaa = *pptaa;
+    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "pptaa", reinterpret_cast<void *>(pptaa),
+        "ptaa", reinterpret_cast<void *>(ptaa));
     *pptaa = nullptr;
     return ptaa;
 }
@@ -373,11 +377,11 @@ ll_take_Ptaa(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Amap* contained in the user data
  */
 Ptaa *
-ll_global_Ptaa(const char *_fun, lua_State *L, const char *name)
+ll_get_global_Ptaa(const char *_fun, lua_State *L, const char *name)
 {
     if (LUA_TUSERDATA != lua_getglobal(L, name))
         return nullptr;
-    return ll_take_Ptaa(_fun, L, 1);
+    return ll_take_Ptaa(_fun, L, -1);
 }
 
 /**
@@ -451,7 +455,7 @@ ll_open_Ptaa(lua_State *L)
         LUA_SENTINEL
     };
     LO_FUNC(TNAME);
-    ll_global_cfunct(_fun, L, TNAME, ll_new_Ptaa);
+    ll_set_global_cfunct(_fun, L, TNAME, ll_new_Ptaa);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;
 }

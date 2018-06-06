@@ -150,6 +150,10 @@ ll_take_DnaHash(const char *_fun, lua_State *L, int arg)
 {
     DnaHash **pdah = ll_check_udata<DnaHash>(_fun, L, arg, TNAME);
     DnaHash *dah = *pdah;
+    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "pdah", reinterpret_cast<void *>(pdah),
+        "dah", reinterpret_cast<void *>(dah));
     *pdah = nullptr;
     return dah;
 }
@@ -162,11 +166,11 @@ ll_take_DnaHash(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Amap* contained in the user data
  */
 DnaHash *
-ll_global_DnaHash(const char *_fun, lua_State *L, const char *name)
+ll_get_global_DnaHash(const char *_fun, lua_State *L, const char *name)
 {
     if (LUA_TUSERDATA != lua_getglobal(L, name))
         return nullptr;
-    return ll_take_DnaHash(_fun, L, 1);
+    return ll_take_DnaHash(_fun, L, -1);
 }
 
 /**
@@ -250,7 +254,7 @@ ll_open_DnaHash(lua_State *L)
                 LUA_SENTINEL
         };
         LO_FUNC(TNAME);
-        ll_global_cfunct(_fun, L, TNAME, ll_new_DnaHash);
+        ll_set_global_cfunct(_fun, L, TNAME, ll_new_DnaHash);
         ll_register_class(_fun, L, TNAME, methods);
         return 1;
 }

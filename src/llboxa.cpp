@@ -2828,6 +2828,10 @@ ll_take_Boxa(const char *_fun, lua_State *L, int arg)
 {
     Boxa **pboxa = ll_check_udata<Boxa>(_fun, L, arg, TNAME);
     Boxa *boxa = *pboxa;
+    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "pboxa", reinterpret_cast<void *>(pboxa),
+        "boxa", reinterpret_cast<void *>(boxa));
     *pboxa = nullptr;
     return boxa;
 }
@@ -2840,11 +2844,11 @@ ll_take_Boxa(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Amap* contained in the user data
  */
 Boxa *
-ll_global_Boxa(const char *_fun, lua_State *L, const char *name)
+ll_get_global_Boxa(const char *_fun, lua_State *L, const char *name)
 {
     if (LUA_TUSERDATA != lua_getglobal(L, name))
         return nullptr;
-    return ll_take_Boxa(_fun, L, 1);
+    return ll_take_Boxa(_fun, L, -1);
 }
 
 /**
@@ -3046,7 +3050,7 @@ ll_open_Boxa(lua_State *L)
         LUA_SENTINEL
     };
     LO_FUNC(TNAME);
-    ll_global_cfunct(_fun, L, TNAME, ll_new_Boxa);
+    ll_set_global_cfunct(_fun, L, TNAME, ll_new_Boxa);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;
 }

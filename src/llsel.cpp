@@ -734,6 +734,10 @@ ll_take_Sel(const char *_fun, lua_State *L, int arg)
 {
     Sel **psel = ll_check_udata<Sel>(_fun, L, arg, TNAME);
     Sel *sel = *psel;
+    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "psel", reinterpret_cast<void *>(psel),
+        "sel", reinterpret_cast<void *>(sel));
     *psel = nullptr;
     return sel;
 }
@@ -746,11 +750,11 @@ ll_take_Sel(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Amap* contained in the user data
  */
 Sel *
-ll_global_Sel(const char *_fun, lua_State *L, const char *name)
+ll_get_global_Sel(const char *_fun, lua_State *L, const char *name)
 {
     if (LUA_TUSERDATA != lua_getglobal(L, name))
         return nullptr;
-    return ll_take_Sel(_fun, L, 1);
+    return ll_take_Sel(_fun, L, -1);
 }
 
 /**
@@ -897,7 +901,7 @@ ll_open_Sel(lua_State *L)
         LUA_SENTINEL
     };
     LO_FUNC(TNAME);
-    ll_global_cfunct(_fun, L, TNAME, ll_new_Sel);
+    ll_set_global_cfunct(_fun, L, TNAME, ll_new_Sel);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;
 }

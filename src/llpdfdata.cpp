@@ -324,6 +324,10 @@ ll_take_PdfData(const char *_fun, lua_State *L, int arg)
 {
     PdfData **ppdd = ll_check_udata<PdfData>(_fun, L, arg, TNAME);
     PdfData *pdd = *ppdd;
+    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "ppdd", reinterpret_cast<void *>(ppdd),
+        "pdd", reinterpret_cast<void *>(pdd));
     *ppdd = nullptr;
     return pdd;
 }
@@ -336,11 +340,11 @@ ll_take_PdfData(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Amap* contained in the user data
  */
 PdfData *
-ll_global_PdfData(const char *_fun, lua_State *L, const char *name)
+ll_get_global_PdfData(const char *_fun, lua_State *L, const char *name)
 {
     if (LUA_TUSERDATA != lua_getglobal(L, name))
         return nullptr;
-    return ll_take_PdfData(_fun, L, 1);
+    return ll_take_PdfData(_fun, L, -1);
 }
 
 /**
@@ -406,7 +410,7 @@ ll_open_PdfData(lua_State *L)
         LUA_SENTINEL
     };
     LO_FUNC(TNAME);
-    ll_global_cfunct(_fun, L, TNAME, ll_new_PdfData);
+    ll_set_global_cfunct(_fun, L, TNAME, ll_new_PdfData);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;
 }

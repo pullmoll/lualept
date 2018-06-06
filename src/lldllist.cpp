@@ -459,6 +459,10 @@ ll_take_DoubleLinkedList(const char *_fun, lua_State *L, int arg)
 {
     DoubleLinkedList **plist = ll_check_udata<DoubleLinkedList>(_fun, L, arg, TNAME);
     DoubleLinkedList *list = *plist;
+    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "plist", reinterpret_cast<void *>(plist),
+        "list", reinterpret_cast<void *>(list));
     *plist = nullptr;
     return list;
 }
@@ -471,11 +475,11 @@ ll_take_DoubleLinkedList(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Amap* contained in the user data
  */
 DoubleLinkedList *
-ll_global_DoubleLinkedList(const char *_fun, lua_State *L, const char *name)
+ll_get_global_DoubleLinkedList(const char *_fun, lua_State *L, const char *name)
 {
     if (LUA_TUSERDATA != lua_getglobal(L, name))
         return nullptr;
-    return ll_take_DoubleLinkedList(_fun, L, 1);
+    return ll_take_DoubleLinkedList(_fun, L, -1);
 }
 
 /**
@@ -553,7 +557,7 @@ ll_open_DoubleLinkedList(lua_State *L)
         LUA_SENTINEL
     };
     LO_FUNC(TNAME);
-    ll_global_cfunct(_fun, L, TNAME, ll_new_DoubleLinkedList);
+    ll_set_global_cfunct(_fun, L, TNAME, ll_new_DoubleLinkedList);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;
 }

@@ -1,6 +1,9 @@
 AM_CFLAGS = $(DEBUG_FLAGS)
-AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_builddir)/src \
-	$(LEPT_CFLAGS) $(LUA53_CFLAGS)
+AM_CPPFLAGS = \
+	-I../src \
+	$(LEPT_CFLAGS) \
+	$(LUA_CFLAGS)
+
 INSTALL_PROGS = llua
 bin_PROGRAMS = $(INSTALL_PROGS)
 llua_SOURCES = llua.cpp ../src/lualept.h

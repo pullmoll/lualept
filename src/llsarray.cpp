@@ -1174,6 +1174,10 @@ ll_take_Sarray(const char *_fun, lua_State *L, int arg)
 {
     Sarray **psa = ll_check_udata<Sarray>(_fun, L, arg, TNAME);
     Sarray *sa = *psa;
+    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "psa", reinterpret_cast<void *>(psa),
+        "sa", reinterpret_cast<void *>(sa));
     *psa = nullptr;
     return sa;
 }
@@ -1186,11 +1190,11 @@ ll_take_Sarray(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Amap* contained in the user data
  */
 Sarray *
-ll_global_Sarray(const char *_fun, lua_State *L, const char *name)
+ll_get_global_Sarray(const char *_fun, lua_State *L, const char *name)
 {
     if (LUA_TUSERDATA != lua_getglobal(L, name))
         return nullptr;
-    return ll_take_Sarray(_fun, L, 1);
+    return ll_take_Sarray(_fun, L, -1);
 }
 
 /**
@@ -1323,7 +1327,7 @@ ll_open_Sarray(lua_State *L)
         LUA_SENTINEL
     };
     LO_FUNC(TNAME);
-    ll_global_cfunct(_fun, L, TNAME, ll_new_Sarray);
+    ll_set_global_cfunct(_fun, L, TNAME, ll_new_Sarray);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;
 }

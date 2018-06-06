@@ -555,6 +555,10 @@ ll_take_CCBorda(const char *_fun, lua_State *L, int arg)
 {
     CCBorda **pccba = ll_check_udata<CCBorda>(_fun, L, arg, TNAME);
     CCBorda *ccba = *pccba;
+    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "pccba", reinterpret_cast<void *>(pccba),
+        "ccba", reinterpret_cast<void *>(ccba));
     *pccba = nullptr;
     return ccba;
 }
@@ -567,11 +571,11 @@ ll_take_CCBorda(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Amap* contained in the user data
  */
 CCBorda *
-ll_global_CCBorda(const char *_fun, lua_State *L, const char *name)
+ll_get_global_CCBorda(const char *_fun, lua_State *L, const char *name)
 {
     if (LUA_TUSERDATA != lua_getglobal(L, name))
         return nullptr;
-    return ll_take_CCBorda(_fun, L, 1);
+    return ll_take_CCBorda(_fun, L, -1);
 }
 
 /**
@@ -688,7 +692,7 @@ ll_open_CCBorda(lua_State *L)
         LUA_SENTINEL
     };
     LO_FUNC(TNAME);
-    ll_global_cfunct(_fun, L, TNAME, ll_new_CCBorda);
+    ll_set_global_cfunct(_fun, L, TNAME, ll_new_CCBorda);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;
 }

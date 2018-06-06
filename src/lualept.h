@@ -32,7 +32,6 @@
 #pragma once
 #if !defined(LUALEPT_H)
 #define  LUALEPT_H
-#include <allheaders.h>
 
 #if defined (HAVE_CONFIG_H)
 #include "config.h"
@@ -43,6 +42,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <allheaders.h>
 
 /** Local type definition of lua_State to avoid including lua.h here */
 typedef struct lua_State lua_State;
@@ -97,20 +98,20 @@ typedef struct lua_State lua_State;
 #define	LL_STACK        "Stack"         /*!< Lua class: Stack */
 #define	LL_WSHED        "WShed"         /*!< Lua class: Stack */
 
-typedef struct lualept_global_var_s {
+typedef struct ll_global_var_s {
     const char *type;       /*!< Type is one of LL_... macros */
     const char *name;       /*!< Variable name when executing the Lua script */
     void *ptr;              /*!< Pointer to the variable */
-}   lualept_global_var_t;
+}   ll_global_var_t;
 
-/** Use this sentinel as the last entry in an array of lualept_global_var_t */
+/** Use this sentinel as the last entry in an array of ll_global_var_t */
 #define LL_SENTINEL {NULL, NULL, NULL}
 
+LUALEPT_DLL extern void ll_res_globals(void);
 LUALEPT_DLL extern int ll_set_global(const char *type, const char *name, void** data);
-LUALEPT_DLL extern int ll_set_globals(const lualept_global_var_t *vars);
-
+LUALEPT_DLL extern int ll_set_globals(const ll_global_var_t *vars);
 LUALEPT_DLL extern int ll_get_global(const char *type, const char *name, void **pdata);
-LUALEPT_DLL extern int ll_get_globals(const lualept_global_var_t *vars);
+LUALEPT_DLL extern int ll_get_globals(const ll_global_var_t *vars);
 
 LUALEPT_DLL extern int ll_open_Amap(lua_State *L);
 LUALEPT_DLL extern int ll_open_Aset(lua_State *L);

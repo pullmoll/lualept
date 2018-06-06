@@ -714,6 +714,10 @@ ll_take_Numa(const char *_fun, lua_State *L, int arg)
 {
     Numa **pna = ll_check_udata<Numa>(_fun, L, arg, TNAME);
     Numa *na = *pna;
+    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "pna", reinterpret_cast<void *>(pna),
+        "na", reinterpret_cast<void *>(na));
     *pna = nullptr;
     return na;
 }
@@ -726,11 +730,11 @@ ll_take_Numa(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Amap* contained in the user data
  */
 Numa *
-ll_global_Numa(const char *_fun, lua_State *L, const char *name)
+ll_get_global_Numa(const char *_fun, lua_State *L, const char *name)
 {
     if (LUA_TUSERDATA != lua_getglobal(L, name))
         return nullptr;
-    return ll_take_Numa(_fun, L, 1);
+    return ll_take_Numa(_fun, L, -1);
 }
 
 /**
@@ -870,7 +874,7 @@ ll_open_Numa(lua_State *L)
         LUA_SENTINEL
     };
     LO_FUNC(TNAME);
-    ll_global_cfunct(_fun, L, TNAME, ll_new_Numa);
+    ll_set_global_cfunct(_fun, L, TNAME, ll_new_Numa);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;
 }

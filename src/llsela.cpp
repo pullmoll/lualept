@@ -687,6 +687,10 @@ ll_take_Sela(const char *_fun, lua_State *L, int arg)
 {
     Sela **psela = ll_check_udata<Sela>(_fun, L, arg, TNAME);
     Sela *sela = *psela;
+    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "psela", reinterpret_cast<void *>(psela),
+        "sela", reinterpret_cast<void *>(sela));
     *psela = nullptr;
     return sela;
 }
@@ -699,11 +703,11 @@ ll_take_Sela(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Amap* contained in the user data
  */
 Sela *
-ll_global_Sela(const char *_fun, lua_State *L, const char *name)
+ll_get_global_Sela(const char *_fun, lua_State *L, const char *name)
 {
     if (LUA_TUSERDATA != lua_getglobal(L, name))
         return nullptr;
-    return ll_take_Sela(_fun, L, 1);
+    return ll_take_Sela(_fun, L, -1);
 }
 
 /**
@@ -828,7 +832,7 @@ ll_open_Sela(lua_State *L)
         LUA_SENTINEL
     };
     LO_FUNC(TNAME);
-    ll_global_cfunct(_fun, L, TNAME, ll_new_Sela);
+    ll_set_global_cfunct(_fun, L, TNAME, ll_new_Sela);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;
 }

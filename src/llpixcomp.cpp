@@ -109,6 +109,10 @@ ll_take_PixComp(const char *_fun, lua_State *L, int arg)
 {
     PixComp **ppixc = ll_check_udata<PixComp>(_fun, L, arg, TNAME);
     PixComp *pixc = *ppixc;
+    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "ppixc", reinterpret_cast<void *>(ppixc),
+        "pixc", reinterpret_cast<void *>(pixc));
     *ppixc = nullptr;
     return pixc;
 }
@@ -121,11 +125,11 @@ ll_take_PixComp(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Amap* contained in the user data
  */
 PixComp *
-ll_global_PixComp(const char *_fun, lua_State *L, const char *name)
+ll_get_global_PixComp(const char *_fun, lua_State *L, const char *name)
 {
     if (LUA_TUSERDATA != lua_getglobal(L, name))
         return nullptr;
-    return ll_take_PixComp(_fun, L, 1);
+    return ll_take_PixComp(_fun, L, -1);
 }
 
 /**
@@ -214,7 +218,7 @@ ll_open_PixComp(lua_State *L)
         LUA_SENTINEL
     };
     LO_FUNC(TNAME);
-    ll_global_cfunct(_fun, L, TNAME, ll_new_PixComp);
+    ll_set_global_cfunct(_fun, L, TNAME, ll_new_PixComp);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;
 }

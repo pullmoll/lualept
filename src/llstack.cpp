@@ -196,6 +196,10 @@ ll_take_Stack(const char *_fun, lua_State *L, int arg)
 {
     Stack **pstack = ll_check_udata<Stack>(_fun, L, arg, TNAME);
     Stack *stack = *pstack;
+    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "pstack", reinterpret_cast<void *>(pstack),
+        "stack", reinterpret_cast<void *>(stack));
     *pstack = nullptr;
     return stack;
 }
@@ -208,11 +212,11 @@ ll_take_Stack(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Amap* contained in the user data
  */
 Stack *
-ll_global_Stack(const char *_fun, lua_State *L, const char *name)
+ll_get_global_Stack(const char *_fun, lua_State *L, const char *name)
 {
     if (LUA_TUSERDATA != lua_getglobal(L, name))
         return nullptr;
-    return ll_take_Stack(_fun, L, 1);
+    return ll_take_Stack(_fun, L, -1);
 }
 
 /**
@@ -302,7 +306,7 @@ ll_open_Stack(lua_State *L)
         LUA_SENTINEL
     };
     LO_FUNC(TNAME);
-    ll_global_cfunct(_fun, L, TNAME, ll_new_Stack);
+    ll_set_global_cfunct(_fun, L, TNAME, ll_new_Stack);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;
 }

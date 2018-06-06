@@ -1094,6 +1094,10 @@ ll_take_PixColormap(const char *_fun, lua_State *L, int arg)
 {
     PixColormap **pcmap = ll_check_udata<PixColormap>(_fun, L, arg, TNAME);
     PixColormap *cmap = *pcmap;
+    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "pcmap", reinterpret_cast<void *>(pcmap),
+        "cmap", reinterpret_cast<void *>(cmap));
     *pcmap = nullptr;
     return cmap;
 }
@@ -1106,11 +1110,11 @@ ll_take_PixColormap(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Amap* contained in the user data
  */
 PixColormap *
-ll_global_PixColormap(const char *_fun, lua_State *L, const char *name)
+ll_get_global_PixColormap(const char *_fun, lua_State *L, const char *name)
 {
     if (LUA_TUSERDATA != lua_getglobal(L, name))
         return nullptr;
-    return ll_take_PixColormap(_fun, L, 1);
+    return ll_take_PixColormap(_fun, L, -1);
 }
 
 /**
@@ -1260,7 +1264,7 @@ ll_open_PixColormap(lua_State *L)
         LUA_SENTINEL
     };
     LO_FUNC(TNAME);
-    ll_global_cfunct(_fun, L, TNAME, ll_new_PixColormap);
+    ll_set_global_cfunct(_fun, L, TNAME, ll_new_PixColormap);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;
 }

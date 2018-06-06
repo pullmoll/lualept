@@ -574,6 +574,10 @@ ll_take_Kernel(const char *_fun, lua_State *L, int arg)
 {
     Kernel **pkel = ll_check_udata<Kernel>(_fun, L, arg, TNAME);
     Kernel *kel = *pkel;
+    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "pkel", reinterpret_cast<void *>(pkel),
+        "kel", reinterpret_cast<void *>(kel));
     *pkel = nullptr;
     return kel;
 }
@@ -586,11 +590,11 @@ ll_take_Kernel(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Amap* contained in the user data
  */
 Kernel *
-ll_global_Kernel(const char *_fun, lua_State *L, const char *name)
+ll_get_global_Kernel(const char *_fun, lua_State *L, const char *name)
 {
     if (LUA_TUSERDATA != lua_getglobal(L, name))
         return nullptr;
-    return ll_take_Kernel(_fun, L, 1);
+    return ll_take_Kernel(_fun, L, -1);
 }
 
 /**
@@ -731,7 +735,7 @@ ll_open_Kernel(lua_State *L)
         LUA_SENTINEL
     };
     LO_FUNC(TNAME);
-    ll_global_cfunct(_fun, L, TNAME, ll_new_Kernel);
+    ll_set_global_cfunct(_fun, L, TNAME, ll_new_Kernel);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;
 }

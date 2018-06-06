@@ -298,6 +298,10 @@ ll_take_ByteBuffer(const char *_fun, lua_State *L, int arg)
 {
     ByteBuffer **pbb = ll_check_udata<ByteBuffer>(_fun, L, arg, TNAME);
     ByteBuffer *bb = *pbb;
+    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "pbb", reinterpret_cast<void *>(pbb),
+        "bb", reinterpret_cast<void *>(bb));
     *pbb = nullptr;
     return bb;
 }
@@ -310,11 +314,11 @@ ll_take_ByteBuffer(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Amap* contained in the user data
  */
 ByteBuffer *
-ll_global_ByteBuffer(const char *_fun, lua_State *L, const char *name)
+ll_get_global_ByteBuffer(const char *_fun, lua_State *L, const char *name)
 {
     if (LUA_TUSERDATA != lua_getglobal(L, name))
         return nullptr;
-    return ll_take_ByteBuffer(_fun, L, 1);
+    return ll_take_ByteBuffer(_fun, L, -1);
 }
 
 /**
@@ -394,7 +398,7 @@ ll_open_ByteBuffer(lua_State *L)
         LUA_SENTINEL
     };
     LO_FUNC(TNAME);
-    ll_global_cfunct(_fun, L, TNAME, ll_new_ByteBuffer);
+    ll_set_global_cfunct(_fun, L, TNAME, ll_new_ByteBuffer);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;
 }

@@ -52,7 +52,6 @@ typedef unsigned int uintptr_t;
 #define powf(x, y) (float)pow((double)(x), (double)(y))
 #define expf(x) (float)exp((double)(x))
 #endif
-
 #endif /* _MSC_VER */
 
 /* Windows specifics */

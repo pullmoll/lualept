@@ -393,6 +393,10 @@ ll_take_Aset(const char *_fun, lua_State *L, int arg)
 {
     Aset **paset = ll_check_udata<Aset>(_fun, L, arg, TNAME);
     Aset *aset = *paset;
+    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "paset", reinterpret_cast<void *>(paset),
+        "aset", reinterpret_cast<void *>(aset));
     *paset = nullptr;
     return aset;
 }
@@ -405,11 +409,11 @@ ll_take_Aset(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Amap* contained in the user data
  */
 Aset *
-ll_global_Aset(const char *_fun, lua_State *L, const char *name)
+ll_get_global_Aset(const char *_fun, lua_State *L, const char *name)
 {
     if (LUA_TUSERDATA != lua_getglobal(L, name))
         return nullptr;
-    return ll_take_Aset(_fun, L, 1);
+    return ll_take_Aset(_fun, L, -1);
 }
 
 /**
@@ -497,7 +501,7 @@ ll_open_Aset(lua_State *L)
         LUA_SENTINEL
     };
     LO_FUNC(TNAME);
-    ll_global_cfunct(_fun, L, TNAME, ll_new_Aset);
+    ll_set_global_cfunct(_fun, L, TNAME, ll_new_Aset);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;
 }

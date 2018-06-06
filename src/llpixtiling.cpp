@@ -160,6 +160,10 @@ ll_take_PixTiling(const char *_fun, lua_State *L, int arg)
 {
     PixTiling **ppixt = ll_check_udata<PixTiling>(_fun, L, arg, TNAME);
     PixTiling *pixt = *ppixt;
+    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "ppixt", reinterpret_cast<void *>(ppixt),
+        "pixt", reinterpret_cast<void *>(pixt));
     *ppixt = nullptr;
     return pixt;
 }
@@ -172,11 +176,11 @@ ll_take_PixTiling(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Amap* contained in the user data
  */
 PixTiling *
-ll_global_PixTiling(const char *_fun, lua_State *L, const char *name)
+ll_get_global_PixTiling(const char *_fun, lua_State *L, const char *name)
 {
     if (LUA_TUSERDATA != lua_getglobal(L, name))
         return nullptr;
-    return ll_take_PixTiling(_fun, L, 1);
+    return ll_take_PixTiling(_fun, L, -1);
 }
 
 /**
@@ -252,7 +256,7 @@ ll_open_PixTiling(lua_State *L)
         LUA_SENTINEL
     };
     LO_FUNC(TNAME);
-    ll_global_cfunct(_fun, L, TNAME, ll_new_PixTiling);
+    ll_set_global_cfunct(_fun, L, TNAME, ll_new_PixTiling);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;
 }

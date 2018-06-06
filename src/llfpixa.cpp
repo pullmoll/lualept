@@ -432,6 +432,10 @@ ll_take_FPixa(const char *_fun, lua_State *L, int arg)
 {
     FPixa **pfpixa = ll_check_udata<FPixa>(_fun, L, arg, TNAME);
     FPixa *fpixa = *pfpixa;
+    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "pfpixa", reinterpret_cast<void *>(pfpixa),
+        "fpixa", reinterpret_cast<void *>(fpixa));
     *pfpixa = nullptr;
     return fpixa;
 }
@@ -444,11 +448,11 @@ ll_take_FPixa(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Amap* contained in the user data
  */
 FPixa *
-ll_global_FPixa(const char *_fun, lua_State *L, const char *name)
+ll_get_global_FPixa(const char *_fun, lua_State *L, const char *name)
 {
     if (LUA_TUSERDATA != lua_getglobal(L, name))
         return nullptr;
-    return ll_take_FPixa(_fun, L, 1);
+    return ll_take_FPixa(_fun, L, -1);
 }
 
 /**
@@ -534,7 +538,7 @@ ll_open_FPixa(lua_State *L)
         LUA_SENTINEL
     };
     LO_FUNC(TNAME);
-    ll_global_cfunct(_fun, L, TNAME, ll_new_Pixa);
+    ll_set_global_cfunct(_fun, L, TNAME, ll_new_Pixa);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;
 }

@@ -221,6 +221,10 @@ ll_take_Bmf(const char *_fun, lua_State *L, int arg)
 {
     Bmf **pbmf = ll_check_udata<Bmf>(_fun, L, arg, TNAME);
     Bmf *bmf = *pbmf;
+    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "pbmf", reinterpret_cast<void *>(pbmf),
+        "bmf", reinterpret_cast<void *>(bmf));
     *pbmf = nullptr;
     return bmf;
 }
@@ -233,11 +237,11 @@ ll_take_Bmf(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Amap* contained in the user data
  */
 Bmf *
-ll_global_Bmf(const char *_fun, lua_State *L, const char *name)
+ll_get_global_Bmf(const char *_fun, lua_State *L, const char *name)
 {
     if (LUA_TUSERDATA != lua_getglobal(L, name))
         return nullptr;
-    return ll_take_Bmf(_fun, L, 1);
+    return ll_take_Bmf(_fun, L, -1);
 }
 
 /**
@@ -310,7 +314,7 @@ ll_open_Bmf(lua_State *L)
         LUA_SENTINEL
     };
     LO_FUNC(TNAME);
-    ll_global_cfunct(_fun, L, TNAME, ll_new_Bmf);
+    ll_set_global_cfunct(_fun, L, TNAME, ll_new_Bmf);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;
 }

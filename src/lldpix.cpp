@@ -873,6 +873,10 @@ ll_take_DPix(const char *_fun, lua_State *L, int arg)
 {
     DPix **pdpix = ll_check_udata<DPix>(_fun, L, arg, TNAME);
     DPix *dpix = *pdpix;
+    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
+        TNAME,
+        "pdpix", reinterpret_cast<void *>(pdpix),
+        "dpix", reinterpret_cast<void *>(dpix));
     *pdpix = nullptr;
     return dpix;
 }
@@ -885,11 +889,11 @@ ll_take_DPix(const char *_fun, lua_State *L, int arg)
  * \return pointer to the Amap* contained in the user data
  */
 DPix *
-ll_global_DPix(const char *_fun, lua_State *L, const char *name)
+ll_get_global_DPix(const char *_fun, lua_State *L, const char *name)
 {
     if (LUA_TUSERDATA != lua_getglobal(L, name))
         return nullptr;
-    return ll_take_DPix(_fun, L, 1);
+    return ll_take_DPix(_fun, L, -1);
 }
 
 /**
@@ -1035,7 +1039,7 @@ ll_open_DPix(lua_State *L)
         LUA_SENTINEL
     };
     LO_FUNC(TNAME);
-    ll_global_cfunct(_fun, L, TNAME, ll_new_DPix);
+    ll_set_global_cfunct(_fun, L, TNAME, ll_new_DPix);
     ll_register_class(_fun, L, TNAME, methods);
     return 1;
 }

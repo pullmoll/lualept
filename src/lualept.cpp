@@ -150,7 +150,7 @@ ll_strcasecmp(const char* dst, const char* src)
 /**
  * @brief Bit mask (flags) for enabled log output
  */
-static int dbg_enabled = LOG_REGISTER | LOG_SDL2 | LOG_NEW_CLASS | LOG_NEW_PARAM;
+static int dbg_enabled = LOG_REGISTER | LOG_SDL2 | LOG_NEW_CLASS | LOG_NEW_PARAM | LOG_TAKE;
 
 /**
  * @brief Return a time stamp for the current date and time
@@ -403,7 +403,7 @@ ll_register_class(const char *_fun, lua_State *L, const char *tname, const luaL_
  * @return 0 for nothing on the Lua stack
  */
 int
-ll_global_cfunct(const char *_fun, lua_State *L, const char* tname, lua_CFunction cfunct)
+ll_set_global_cfunct(const char *_fun, lua_State *L, const char* tname, lua_CFunction cfunct)
 {
     lua_pushcfunction(L, cfunct);
     lua_setglobal(L, tname);
@@ -421,7 +421,7 @@ ll_global_cfunct(const char *_fun, lua_State *L, const char* tname, lua_CFunctio
  * @return 0 for nothing on the Lua stack
  */
 int
-ll_global_table(const char *_fun, lua_State *L, const char* tname, lua_CFunction cfunct)
+ll_set_global_table(const char *_fun, lua_State *L, const char* tname, lua_CFunction cfunct)
 {
     (*cfunct)(L);
     lua_setglobal(L, tname);
@@ -4260,6 +4260,26 @@ ll_check_type(const char *type)
 }
 
 /**
+ * @brief Reset the linked list of global variables.
+ *
+ * Traverses the linked list global_vars and frees each entry.
+ */
+void
+ll_res_globals(void)
+{
+    global_var_t *var = global_vars;
+    global_var_t *next = nullptr;
+
+    while (var) {
+        next = var->next;
+        ll_free(var);
+        var = next;
+    }
+
+    global_vars = nullptr;
+}
+
+/**
  * @brief Add a pointer to a global variable to put into L when running the script.
  * @param type type of the variable (LL_...)
  * @param name name of the global variable.
@@ -4294,14 +4314,14 @@ ll_set_global(const char *type, const char* name, void **in_ptr)
 /**
  * @brief Add global variables to put into L when running the script.
  * The %vars array must be terminated with a {NULL, NULL, NULL} sentinel e.g. LL_SENTINEL.
- * @param vars pointer to an array of lualept_global_var_t
+ * @param vars pointer to an array of ll_global_var_t
  * @return 0 on success, or 1 on error
  */
 int
-ll_set_globals(const lualept_global_var_t *vars)
+ll_set_globals(const ll_global_var_t *vars)
 {
     FUNC("ll_set_globals");
-    const lualept_global_var_t *var;
+    const ll_global_var_t *var;
     for (var = vars; var->type; var++)
         ll_set_global(var->type, var->name, reinterpret_cast<void **>(var->ptr));
     return 0;
@@ -4342,14 +4362,14 @@ ll_get_global(const char *type, const char *name, void **out_ptr)
 /**
  * @brief Add global variables to get from L after running the script.
  * The %vars array must be terminated with a {NULL, NULL, NULL} sentinel e.g. LL_SENTINEL.
- * @param vars pointer to an array of lualept_global_var_t
+ * @param vars pointer to an array of ll_global_var_t
  * @return 0 on success, or 1 on error
  */
 int
-ll_get_globals(const lualept_global_var_t *vars)
+ll_get_globals(const ll_global_var_t *vars)
 {
     FUNC("ll_get_globals");
-    const lualept_global_var_t *var;
+    const ll_global_var_t *var;
     for (var = vars; var->type; var++)
         ll_get_global(var->type, var->name, reinterpret_cast<void **>(var->ptr));
     return 0;
@@ -4368,7 +4388,7 @@ ll_set_all_globals(const char *_fun, lua_State *L, global_var_t *vars)
     global_var_t *var;
 
     for (var = vars; var; var = var->next) {
-        if (!var->i.pptr)
+        if (nullptr == var->i.pptr)
             continue;
 
         if (!strcmp(LL_BOOLEAN, var->type)) {
@@ -4683,7 +4703,7 @@ ll_get_all_globals(const char *_fun, lua_State *L, global_var_t *vars)
     global_var_t *var;
 
     for (var = vars; var; var = var->next) {
-        if (!var->o.pptr)
+        if (nullptr == var->o.pptr)
             continue;
 
         if (!strcmp(LL_BOOLEAN, var->type)) {
@@ -4786,162 +4806,162 @@ ll_get_all_globals(const char *_fun, lua_State *L, global_var_t *vars)
         }
 
         if (!strcmp(LL_AMAP, var->type)) {
-            *var->o.pamap = ll_global_Amap(_fun, L, var->name);
+            *var->o.pamap = ll_get_global_Amap(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_ASET, var->type)) {
-            *var->o.paset = ll_global_Aset(_fun, L, var->name);
+            *var->o.paset = ll_get_global_Aset(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_BBUFFER, var->type)) {
-            *var->o.pbb = ll_global_ByteBuffer(_fun, L, var->name);
+            *var->o.pbb = ll_get_global_ByteBuffer(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_BMF, var->type)) {
-            *var->o.pbmf = ll_global_Bmf(_fun, L, var->name);
+            *var->o.pbmf = ll_get_global_Bmf(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_BOX, var->type)) {
-            *var->o.pbox = ll_global_Box(_fun, L, var->name);
+            *var->o.pbox = ll_get_global_Box(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_BOXA, var->type)) {
-            *var->o.pboxa = ll_global_Boxa(_fun, L, var->name);
+            *var->o.pboxa = ll_get_global_Boxa(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_BOXAA, var->type)) {
-            *var->o.pboxaa = ll_global_Boxaa(_fun, L, var->name);
+            *var->o.pboxaa = ll_get_global_Boxaa(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_COMPDATA, var->type)) {
-            *var->o.pcid = ll_global_CompData(_fun, L, var->name);
+            *var->o.pcid = ll_get_global_CompData(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_CCBORD, var->type)) {
-            *var->o.pccb = ll_global_CCBord(_fun, L, var->name);
+            *var->o.pccb = ll_get_global_CCBord(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_CCBORDA, var->type)) {
-            *var->o.pccba = ll_global_CCBorda(_fun, L, var->name);
+            *var->o.pccba = ll_get_global_CCBorda(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_DEWARP, var->type)) {
-            *var->o.pdew = ll_global_Dewarp(_fun, L, var->name);
+            *var->o.pdew = ll_get_global_Dewarp(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_DEWARPA, var->type)) {
-            *var->o.pdewa = ll_global_Dewarpa(_fun, L, var->name);
+            *var->o.pdewa = ll_get_global_Dewarpa(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_DLLIST, var->type)) {
-            *var->o.plist = ll_global_DoubleLinkedList(_fun, L, var->name);
+            *var->o.plist = ll_get_global_DoubleLinkedList(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_DNA, var->type)) {
-            *var->o.pda = ll_global_Dna(_fun, L, var->name);
+            *var->o.pda = ll_get_global_Dna(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_DNAA, var->type)) {
-            *var->o.pdaa = ll_global_Dnaa(_fun, L, var->name);
+            *var->o.pdaa = ll_get_global_Dnaa(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_DNAHASH, var->type)) {
-            *var->o.pdah = ll_global_DnaHash(_fun, L, var->name);
+            *var->o.pdah = ll_get_global_DnaHash(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_DPIX, var->type)) {
-            *var->o.pdpix = ll_global_DPix(_fun, L, var->name);
+            *var->o.pdpix = ll_get_global_DPix(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_FPIX, var->type)) {
-            *var->o.pfpix = ll_global_FPix(_fun, L, var->name);
+            *var->o.pfpix = ll_get_global_FPix(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_FPIXA, var->type)) {
-            *var->o.pfpixa = ll_global_FPixa(_fun, L, var->name);
+            *var->o.pfpixa = ll_get_global_FPixa(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_KERNEL, var->type)) {
-            *var->o.pkel = ll_global_Kernel(_fun, L, var->name);
+            *var->o.pkel = ll_get_global_Kernel(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_NUMA, var->type)) {
-            *var->o.pna = ll_global_Numa(_fun, L, var->name);
+            *var->o.pna = ll_get_global_Numa(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_NUMAA, var->type)) {
-            *var->o.pnaa = ll_global_Numaa(_fun, L, var->name);
+            *var->o.pnaa = ll_get_global_Numaa(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_PDFDATA, var->type)) {
-            *var->o.ppdd = ll_global_PdfData(_fun, L, var->name);
+            *var->o.ppdd = ll_get_global_PdfData(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_PIX, var->type)) {
-            *var->o.ppix = ll_global_Pix(_fun, L, var->name);
+            *var->o.ppix = ll_get_global_Pix(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_PIXA, var->type)) {
-            *var->o.ppixa = ll_global_Pixa(_fun, L, var->name);
+            *var->o.ppixa = ll_get_global_Pixa(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_PIXAA, var->type)) {
-            *var->o.ppixaa = ll_global_Pixaa(_fun, L, var->name);
+            *var->o.ppixaa = ll_get_global_Pixaa(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_PIXCMAP, var->type)) {
-            *var->o.pcmap = ll_global_PixColormap(_fun, L, var->name);
+            *var->o.pcmap = ll_get_global_PixColormap(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_PIXTILING, var->type)) {
-            *var->o.ppixt = ll_global_PixTiling(_fun, L, var->name);
+            *var->o.ppixt = ll_get_global_PixTiling(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_PIXCOMP, var->type)) {
-            *var->o.ppixc = ll_global_PixComp(_fun, L, var->name);
+            *var->o.ppixc = ll_get_global_PixComp(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_PIXACOMP, var->type)) {
-            *var->o.ppixac = ll_global_PixaComp(_fun, L, var->name);
+            *var->o.ppixac = ll_get_global_PixaComp(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_PTA, var->type)) {
-            *var->o.ppta = ll_global_Pta(_fun, L, var->name);
+            *var->o.ppta = ll_get_global_Pta(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_PTAA, var->type)) {
-            *var->o.pptaa = ll_global_Ptaa(_fun, L, var->name);
+            *var->o.pptaa = ll_get_global_Ptaa(_fun, L, var->name);
             continue;
         }
 
@@ -4951,27 +4971,27 @@ ll_get_all_globals(const char *_fun, lua_State *L, global_var_t *vars)
         }
 
         if (!strcmp(LL_SARRAY, var->type)) {
-            *var->o.psa = ll_global_Sarray(_fun, L, var->name);
+            *var->o.psa = ll_get_global_Sarray(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_SEL, var->type)) {
-            *var->o.psel = ll_global_Sel(_fun, L, var->name);
+            *var->o.psel = ll_get_global_Sel(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_SELA, var->type)) {
-            *var->o.psela = ll_global_Sela(_fun, L, var->name);
+            *var->o.psela = ll_get_global_Sela(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_STACK, var->type)) {
-            *var->o.pstack = ll_global_Stack(_fun, L, var->name);
+            *var->o.pstack = ll_get_global_Stack(_fun, L, var->name);
             continue;
         }
 
         if (!strcmp(LL_WSHED, var->type)) {
-            *var->o.pwshed = ll_global_WShed(_fun, L, var->name);
+            *var->o.pwshed = ll_get_global_WShed(_fun, L, var->name);
             continue;
         }
 
@@ -5419,7 +5439,7 @@ luaopen_lualept(lua_State *L)
     FUNC("luaopen_lualept");
 
     ll_register_class(_fun, L, TNAME, methods);
-    ll_global_table(_fun, L, TNAME, ll_new_lualept);
+    ll_set_global_table(_fun, L, TNAME, ll_new_lualept);
 
     ll_open_Amap(L);
     ll_open_Aset(L);
