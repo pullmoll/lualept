@@ -42,7 +42,7 @@ int main(int argc, char **argv)
 {
     char buff[256];
     const char* progname = nullptr;
-    const char* script = nullptr;
+    const char* filename = nullptr;
 
     static Box *box_in = nullptr;
     static Sarray *sa = nullptr;
@@ -76,7 +76,7 @@ int main(int argc, char **argv)
         fprintf(stderr, "Usage: %s <script.lua>\n", progname);
         return 1;
     }
-    script = argv[1];
+    filename = argv[1];
 
     /* Example for passing a Leptonica type to the script */
 
@@ -87,12 +87,7 @@ int main(int argc, char **argv)
     /* Create the Box* box_in */
     box_in = boxCreate(40, 40, 320, 240);
 
-    /* Register the globals which go in */
-    ll_set_globals(set_vars);
-    /* Register the globals which come out */
-    ll_get_globals(get_vars);
-
-    res = ll_RunScript(script);
+    res = ll_run(filename, nullptr, set_vars, get_vars);
     printf("%s: %s returned %d\n", progname, "ll_RunScript(script)", res);
 
     printf("%s: Box* box_out = %p\n", progname, reinterpret_cast<void *>(box_out));

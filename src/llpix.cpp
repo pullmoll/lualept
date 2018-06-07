@@ -745,19 +745,8 @@ AddBorder(lua_State *L)
     LL_FUNC("AddBorder");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 npix = ll_check_l_int32(_fun, L, 2);
-    l_uint32 val = 0;
-    l_int32 rval = 0;
-    l_int32 gval = 0;
-    l_int32 bval = 0;
-    l_int32 aval = 0;
-    ll_check_color(_fun, L, 3, &rval, &gval, &bval, &aval);
-    composeRGBAPixel(rval, gval, bval, aval, &val);
+    l_uint32 val = ll_check_color_index(_fun, L, 3, pixs);
     Pix* pixd = pixAddBorder(pixs, npix, val);
-    if (32 != pixGetDepth(pixs)) {
-        /* it's a color index */
-        if (val > 0)
-            val = val - 1;
-    }
     ll_push_Pix(_fun, L, pixd);
     return 1;
 }
@@ -806,18 +795,7 @@ AddBorderGeneral(lua_State *L)
     l_int32 right = ll_check_l_int32(_fun, L, 3);
     l_int32 top = ll_check_l_int32(_fun, L, 4);
     l_int32 bottom = ll_check_l_int32(_fun, L, 5);
-    l_uint32 val = 0;
-    l_int32 rval = 0;
-    l_int32 gval = 0;
-    l_int32 bval = 0;
-    l_int32 aval = 0;
-    ll_check_color(_fun, L, 6, &rval, &gval, &bval, &aval);
-    composeRGBAPixel(rval, gval, bval, aval, &val);
-    if (32 != pixGetDepth(pixs)) {
-        /* it's a color index */
-        if (val > 0)
-            val = val - 1;
-    }
+    l_uint32 val = ll_check_color_index(_fun, L, 6, pixs);
     Pix* pixd = pixAddBorderGeneral(pixs, left, right, top, bottom, val);
     ll_push_Pix(_fun, L, pixd);
     return 1;
@@ -1125,8 +1103,8 @@ AddRepeatedBorder(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Bmf* (bmf).
  * Arg #3 is expected to be a string (textstr).
- * Arg #4 is expected to be a l_int32 (location).
- * Arg #5 is expected to be a l_uint32 (val).
+ * Arg #4 is expected to be a l_uint32 (val).
+ * Arg #5 is expected to be a l_int32 (location).
  *
  * Leptonica's Notes:
  *      (1) This function paints a set of lines of text over an image.
@@ -1152,20 +1130,9 @@ AddSingleTextblock(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Bmf *bmf = ll_check_Bmf(_fun, L, 2);
     const char *textstr = ll_check_string(_fun, L, 3);
-    l_int32 location = ll_check_l_int32(_fun, L, 4);
+    l_uint32 val = ll_check_color_index(_fun, L, 4, pixs);
+    l_int32 location = ll_check_l_int32(_fun, L, 5);
     l_int32 overflow = 0;
-    l_uint32 val = 0;
-    l_int32 rval = 0;
-    l_int32 gval = 0;
-    l_int32 bval = 0;
-    l_int32 aval = 0;
-    ll_check_color(_fun, L, 5, &rval, &gval, &bval, &aval);
-    composeRGBAPixel(rval, gval, bval, aval, &val);
-    if (32 != pixGetDepth(pixs)) {
-        /* it's a color index */
-        if (val > 0)
-            val = val - 1;
-    }
     if (pixAddSingleTextblock(pixs, bmf, textstr, val, location, &overflow))
         return ll_push_nil(L);
     ll_push_l_int32(_fun, L, overflow);
@@ -1233,7 +1200,7 @@ AddTextlines(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Bmf *bmf = ll_check_Bmf(_fun, L, 2);
     const char *textstr = ll_check_string(_fun, L, 3);
-    l_uint32 val = ll_check_l_uint32(_fun, L, 4);
+    l_uint32 val = ll_check_color_index(_fun, L, 4, pixs);
     l_int32 location = ll_check_l_int32(_fun, L, 5);
     if (32 != pixGetDepth(pixs)) {
         /* it's a color index */
@@ -3254,13 +3221,8 @@ BlendInRect(lua_State *L)
     LL_FUNC("BlendInRect");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
-    l_uint32 val = ll_check_l_uint32(_fun, L, 3);
+    l_uint32 val = ll_check_color_index(_fun, L, 3, pix);
     l_float32 fract = ll_check_l_float32(_fun, L, 4);
-    if (32 != pixGetDepth(pix)) {
-        /* it's a color index */
-        if (val > 0)
-            val = val - 1;
-    }
     return ll_push_boolean(_fun, L, 0 == pixBlendInRect(pix, box, val, fract));
 }
 
@@ -6658,8 +6620,8 @@ Convert1To32(lua_State *L)
 {
     LL_FUNC("Convert1To32");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_uint32 val0 = ll_check_l_uint32(_fun, L, 2);
-    l_uint32 val1 = ll_check_l_uint32(_fun, L, 3);
+    l_uint32 val0 = ll_check_color_index(_fun, L, 2, nullptr);
+    l_uint32 val1 = ll_check_color_index(_fun, L, 3, nullptr);
     return ll_push_Pix(_fun, L, pixConvert1To32(nullptr, pixs, val0, val1));
 }
 
@@ -10374,14 +10336,8 @@ DisplayLayersRGBA(lua_State *L)
 {
     LL_FUNC("DisplayLayersRGBA");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_uint32 val = 0;
-    l_int32 rval = 0;
-    l_int32 gval = 0;
-    l_int32 bval = 0;
-    l_int32 aval = 0;
+    l_uint32 val = ll_check_color_index(_fun, L, 2, pixs);
     l_int32 maxw = ll_check_l_int32(_fun, L, 3);
-    ll_check_color(_fun, L, 2, &rval, &gval, &bval, &aval);
-    composeRGBAPixel(rval, gval, bval, aval, &val);
     Pix *pixd = pixDisplayLayersRGBA(pixs, val, maxw);
     return ll_push_Pix(_fun, L, pixd);
 }
@@ -10793,18 +10749,7 @@ DrawBoxa(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Boxa *boxa = ll_check_Boxa(_fun, L, 2);
     l_int32 width = ll_check_l_int32(_fun, L, 3);
-    l_uint32 val = 0;
-    l_int32 rval = 0;
-    l_int32 gval = 0;
-    l_int32 bval = 0;
-    l_int32 aval = 0;
-    ll_check_color(_fun, L, 4, &rval, &gval, &bval, &aval);
-    composeRGBAPixel(rval, gval, bval, aval, &val);
-    if (32 != pixGetDepth(pixs)) {
-        /* it's a color index */
-        if (val > 0)
-            val = val - 1;
-    }
+    l_uint32 val = ll_check_color_index(_fun, L, 4, pixs);
     Pix *pix = pixDrawBoxa(pixs, boxa, width, val);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -21217,18 +21162,7 @@ PaintBoxa(lua_State *L)
     LL_FUNC("PaintBoxa");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Boxa *boxa = ll_check_Boxa(_fun, L, 2);
-    l_uint32 val = 0;
-    l_int32 rval = 0;
-    l_int32 gval = 0;
-    l_int32 bval = 0;
-    l_int32 aval = 0;
-    ll_check_color(_fun, L, 3, &rval, &gval, &bval, &aval);
-    composeRGBAPixel(rval, gval, bval, aval, &val);
-    if (32 != pixGetDepth(pixs)) {
-        /* it's a color index */
-        if (val > 0)
-            val = val - 1;
-    }
+    l_uint32 val = ll_check_color_index(_fun, L, 3, pixs);
     Pix *pix = pixPaintBoxa(pixs, boxa, val);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -21388,18 +21322,7 @@ PaintThroughMask(lua_State *L)
     Pix *pixm = ll_check_Pix(_fun, L, 2);
     l_int32 x = ll_check_l_int32(_fun, L, 3);
     l_int32 y = ll_check_l_int32(_fun, L, 4);
-    l_uint32 val = 0;
-    l_int32 rval = 0;
-    l_int32 gval = 0;
-    l_int32 bval = 0;
-    l_int32 aval = 0;
-    ll_check_color(_fun, L, 5, &rval, &gval, &bval, &aval);
-    composeRGBAPixel(rval, gval, bval, aval, &val);
-    if (32 != pixGetDepth(pixd)) {
-        /* it's a color index */
-        if (val > 0)
-            val = val - 1;
-    }
+    l_uint32 val = ll_check_color_index(_fun, L, 5, pixd);
     return ll_push_boolean(_fun, L, 0 == pixPaintThroughMask(pixd, pixm, x, y, val));
 }
 
@@ -25887,8 +25810,8 @@ SaveTiledOutline(lua_State *L)
  * Arg #6 is expected to be a l_int32 (linewidth).
  * Arg #7 is expected to be a Bmf* (bmf).
  * Arg #8 is expected to be a string (textstr).
- * Arg #9 is expected to be a l_int32 (location).
- * Arg #10 is expected to be a l_uint32 (val).
+ * Arg #9 is expected to be a l_uint32 (val).
+ * Arg #10 is expected to be a l_int32 (location).
  *
  * Leptonica's Notes:
  *      (1) Before calling this function for the first time, use
@@ -25924,19 +25847,8 @@ SaveTiledWithText(lua_State *L)
     l_int32 linewidth = ll_check_l_int32(_fun, L, 6);
     Bmf *bmf = ll_check_Bmf(_fun, L, 7);
     const char *textstr = ll_check_string(_fun, L, 8);
-    l_int32 location = ll_check_l_int32(_fun, L, 9);
-    l_uint32 val = 0;
-    l_int32 rval = 0;
-    l_int32 gval = 0;
-    l_int32 bval = 0;
-    l_int32 aval = 0;
-    ll_check_color(_fun, L, 10, &rval, &gval, &bval, &aval);
-    composeRGBAPixel(rval, gval, bval, aval, &val);
-    if (32 != pixGetDepth(pixs)) {
-        /* it's a color index */
-        if (val > 0)
-            val = val - 1;
-    }
+    l_uint32 val = ll_check_color_index(_fun, L, 9, pixs);
+    l_int32 location = ll_check_l_int32(_fun, L, 10);
     l_int32 result = pixSaveTiledWithText(pixs, pixa, outwidth, newrow, space, linewidth, bmf, textstr, val, location);
     return ll_push_l_int32(_fun, L, result);
 }
@@ -28405,18 +28317,7 @@ SetAllArbitrary(lua_State *L)
 {
     LL_FUNC("SetAllArbitrary");
     Pix *pix = ll_check_Pix(_fun, L, 1);
-    l_uint32 val = 0;
-    l_int32 rval = 0;
-    l_int32 gval = 0;
-    l_int32 bval = 0;
-    l_int32 aval = 0;
-    ll_check_color(_fun, L, 2, &rval, &gval, &bval, &aval);
-    composeRGBAPixel(rval, gval, bval, aval, &val);
-    if (32 != pixGetDepth(pix)) {
-        /* it's a color index */
-        if (val > 0)
-            val = val - 1;
-    }
+    l_uint32 val = ll_check_color_index(_fun, L, 2, pix);
     return ll_push_boolean(_fun, L, 0 == pixSetAllArbitrary(pix, val));
 }
 
@@ -28556,18 +28457,7 @@ SetBorderRingVal(lua_State *L)
     LL_FUNC("SetBorderRingVal");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 dist = ll_check_l_int32(_fun, L, 2);
-    l_uint32 val = 0;
-    l_int32 rval = 0;
-    l_int32 gval = 0;
-    l_int32 bval = 0;
-    l_int32 aval = 0;
-    ll_check_color(_fun, L, 3, &rval, &gval, &bval, &aval);
-    composeRGBAPixel(rval, gval, bval, aval, &val);
-    if (32 != pixGetDepth(pix)) {
-        /* it's a color index */
-        if (val > 0)
-            val = val - 1;
-    }
+    l_uint32 val = ll_check_color_index(_fun, L, 3, pix);
     return ll_push_boolean(_fun, L, 0 == pixSetBorderRingVal(pix, dist, val));
 }
 
@@ -28605,18 +28495,7 @@ SetBorderVal(lua_State *L)
     l_int32 right = ll_check_l_int32(_fun, L, 3);
     l_int32 top = ll_check_l_int32(_fun, L, 4);
     l_int32 bottom = ll_check_l_int32(_fun, L, 5);
-    l_uint32 val = 0;
-    l_int32 rval = 0;
-    l_int32 gval = 0;
-    l_int32 bval = 0;
-    l_int32 aval = 0;
-    ll_check_color(_fun, L, 6, &rval, &gval, &bval, &aval);
-    composeRGBAPixel(rval, gval, bval, aval, &val);
-    if (32 != pixGetDepth(pix)) {
-        /* it's a color index */
-        if (val > 0)
-            val = val - 1;
-    }
+    l_uint32 val = ll_check_color_index(_fun, L, 6, pix);
     return ll_push_boolean(_fun, L, 0 == pixSetBorderVal(pix, left, right, top, bottom, val));
 }
 
@@ -28822,18 +28701,7 @@ SetInRectArbitrary(lua_State *L)
     LL_FUNC("SetInRectArbitrary");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
-    l_uint32 val = 0;
-    l_int32 rval = 0;
-    l_int32 gval = 0;
-    l_int32 bval = 0;
-    l_int32 aval = 0;
-    ll_check_color(_fun, L, 3, &rval, &gval, &bval, &aval);
-    composeRGBAPixel(rval, gval, bval, aval, &val);
-    if (32 != pixGetDepth(pix)) {
-        /* it's a color index */
-        if (val > 0)
-            val = val - 1;
-    }
+    l_uint32 val = ll_check_color_index(_fun, L, 3, pix);
     return ll_push_boolean(_fun, L, 0 == pixSetInRectArbitrary(pix, box, val));
 }
 
@@ -28923,18 +28791,7 @@ SetMasked(lua_State *L)
     LL_FUNC("SetMasked");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixm = ll_check_Pix(_fun, L, 2);
-    l_uint32 val = 0;
-    l_int32 rval = 0;
-    l_int32 gval = 0;
-    l_int32 bval = 0;
-    l_int32 aval = 0;
-    ll_check_color(_fun, L, 3, &rval, &gval, &bval, &aval);
-    composeRGBAPixel(rval, gval, bval, aval, &val);
-    if (32 != pixGetDepth(pixd)) {
-        /* it's a color index */
-        if (val > 0)
-            val = val - 1;
-    }
+    l_uint32 val = ll_check_color_index(_fun, L, 3, pixd);
     return ll_push_boolean(_fun, L, 0 == pixSetMasked(pixd, pixm, val));
 }
 
@@ -29017,18 +28874,7 @@ SetMaskedGeneral(lua_State *L)
     Pix *pixm = ll_check_Pix(_fun, L, 2);
     l_int32 x = ll_check_l_int32(_fun, L, 3);
     l_int32 y = ll_check_l_int32(_fun, L, 4);
-    l_uint32 val = 0;
-    l_int32 rval = 0;
-    l_int32 gval = 0;
-    l_int32 bval = 0;
-    l_int32 aval = 0;
-    ll_check_color(_fun, L, 5, &rval, &gval, &bval, &aval);
-    composeRGBAPixel(rval, gval, bval, aval, &val);
-    if (32 != pixGetDepth(pixd)) {
-        /* it's a color index */
-        if (val > 0)
-            val = val - 1;
-    }
+    l_uint32 val = ll_check_color_index(_fun, L, 3, pixd);
     return ll_push_boolean(_fun, L, 0 == pixSetMaskedGeneral(pixd, pixm, val, x, y));
 }
 
@@ -29195,18 +29041,7 @@ SetPixel(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 x = ll_check_l_int32(_fun, L, 2);
     l_int32 y = ll_check_l_int32(_fun, L, 3);
-    l_uint32 val = 0;
-    l_int32 rval = 0;
-    l_int32 gval = 0;
-    l_int32 bval = 0;
-    l_int32 aval = 0;
-    ll_check_color(_fun, L, 4, &rval, &gval, &bval, &aval);
-    composeRGBAPixel(rval, gval, bval, aval, &val);
-    if (32 != pixGetDepth(pix)) {
-        /* it's a color index */
-        if (val > 0)
-            val = val - 1;
-    }
+    l_uint32 val = ll_check_color_index(_fun, L, 4, pix);
     return ll_push_boolean(_fun, L, 0 == pixSetPixel(pix, x, y, val));
 }
 
@@ -29493,11 +29328,11 @@ SetText(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Bmf* (bmf).
  * Arg #3 is expected to be a string (textstr).
- * Arg #4 is expected to be a l_int32 (x0).
- * Arg #5 is expected to be a l_int32 (y0).
- * Arg #6 is expected to be a l_int32 (wtext).
- * Arg #7 is expected to be a l_int32 (firstindent).
- * Arg #8 is expected to be a l_uint32 (val).
+ * Arg #4 is expected to be a l_uint32 (val).
+ * Arg #5 is expected to be a l_int32 (x0).
+ * Arg #6 is expected to be a l_int32 (y0).
+ * Arg #7 is expected to be a l_int32 (wtext).
+ * Arg #8 is expected to be a l_int32 (firstindent).
  *
  * Leptonica's Notes:
  *      (1) This function paints a set of lines of text over an image.
@@ -29523,23 +29358,12 @@ SetTextblock(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Bmf *bmf = ll_check_Bmf(_fun, L, 2);
     const char *textstr = ll_check_string(_fun, L, 3);
-    l_int32 x0 = ll_check_l_int32(_fun, L, 4);
-    l_int32 y0 = ll_check_l_int32(_fun, L, 5);
-    l_int32 wtext = ll_check_l_int32(_fun, L, 6);
-    l_int32 firstindent = ll_check_l_int32(_fun, L, 7);
+    l_uint32 val = ll_check_color_index(_fun, L, 4, pixs);
+    l_int32 x0 = ll_check_l_int32(_fun, L, 5);
+    l_int32 y0 = ll_check_l_int32(_fun, L, 6);
+    l_int32 wtext = ll_check_l_int32(_fun, L, 7);
+    l_int32 firstindent = ll_check_l_int32(_fun, L, 8);
     l_int32 overflow = 0;
-    l_uint32 val = 0;
-    l_int32 rval = 0;
-    l_int32 gval = 0;
-    l_int32 bval = 0;
-    l_int32 aval = 0;
-    ll_check_color(_fun, L, 8, &rval, &gval, &bval, &aval);
-    composeRGBAPixel(rval, gval, bval, aval, &val);
-    if (32 != pixGetDepth(pixs)) {
-        /* it's a color index */
-        if (val > 0)
-            val = val - 1;
-    }
     if (pixSetTextblock(pixs, bmf, textstr, val, x0, y0, wtext, firstindent, &overflow))
         return ll_push_nil(L);
     ll_push_l_int32(_fun, L, overflow);
@@ -29552,9 +29376,9 @@ SetTextblock(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Bmf* (bmf).
  * Arg #3 is expected to be a string (textstr).
- * Arg #4 is expected to be a l_int32 (x0).
- * Arg #5 is expected to be a l_int32 (y0).
- * Arg #6 is expected to be a l_uint32 (val).
+ * Arg #4 is expected to be a l_uint32 (val).
+ * Arg #5 is expected to be a l_int32 (x0).
+ * Arg #6 is expected to be a l_int32 (y0).
  *
  * Leptonica's Notes:
  *      (1) This function paints a line of text over an image.
@@ -29580,22 +29404,11 @@ SetTextline(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Bmf *bmf = ll_check_Bmf(_fun, L, 2);
     const char *textstr = ll_check_string(_fun, L, 3);
-    l_int32 x0 = ll_check_l_int32(_fun, L, 4);
-    l_int32 y0 = ll_check_l_int32(_fun, L, 5);
+    l_uint32 val = ll_check_color_index(_fun, L, 4, pixs);
+    l_int32 x0 = ll_opt_l_int32(_fun, L, 5, 0);
+    l_int32 y0 = ll_opt_l_int32(_fun, L, 6, 0);
     l_int32 width = 0;
     l_int32 overflow = 0;
-    l_uint32 val = 0;
-    l_int32 rval = 0;
-    l_int32 gval = 0;
-    l_int32 bval = 0;
-    l_int32 aval = 0;
-    ll_check_color(_fun, L, 6, &rval, &gval, &bval, &aval);
-    composeRGBAPixel(rval, gval, bval, aval, &val);
-    if (32 != pixGetDepth(pixs)) {
-        /* it's a color index */
-        if (val > 0)
-            val = val - 1;
-    }
     if (pixSetTextline(pixs, bmf, textstr, val, x0, y0, &width, &overflow))
         return ll_push_nil(L);
     ll_push_l_int32(_fun, L, width);
@@ -29660,18 +29473,7 @@ SetUnderTransparency(lua_State *L)
 {
     LL_FUNC("SetUnderTransparency");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_uint32 val = 0;
-    l_int32 rval = 0;
-    l_int32 gval = 0;
-    l_int32 bval = 0;
-    l_int32 aval = 0;
-    ll_check_color(_fun, L, 2, &rval, &gval, &bval, &aval);
-    composeRGBAPixel(rval, gval, bval, aval, &val);
-    if (32 != pixGetDepth(pixs)) {
-        /* it's a color index */
-        if (val > 0)
-            val = val - 1;
-    }
+    l_uint32 val = ll_check_color_index(_fun, L, 2, pixs);
     ll_push_Pix(_fun, L, pixSetUnderTransparency(pixs, val, 0));
     return 1;
 }
@@ -32419,7 +32221,7 @@ VarianceInRectangle(lua_State *L)
 }
 
 /**
- * @brief View a Pix* using the ViewSDL2 function, if availble
+ * \brief View a Pix* using the ViewSDL2 function, if availble
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is an optional string (title)

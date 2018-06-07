@@ -153,13 +153,13 @@ ll_strcasecmp(const char* dst, const char* src)
 #if defined(LLUA_DEBUG) && (LLUA_DEBUG>0)
 
 /**
- * @brief Bit mask (flags) for enabled log output
+ * \brief Bit mask (flags) for enabled log output
  */
 static int dbg_enabled = LOG_REGISTER | LOG_SDL2 | LOG_NEW_CLASS | LOG_NEW_PARAM | LOG_TAKE;
 
 /**
- * @brief Return a time stamp for the current date and time
- * @return Temporary string with date and time
+ * \brief Return a time stamp for the current date and time
+ * \return Temporary string with date and time
  */
 static const char*
 timestamp(void)
@@ -195,9 +195,9 @@ timestamp(void)
 }
 
 /**
- * @brief Print debug output to stdout
- * @param enable bit mask (flag) which defines the type of log output
- * @param format format string followed by optional varargs
+ * \brief Print debug output to stdout
+ * \param enable bit mask (flag) which defines the type of log output
+ * \param format format string followed by optional varargs
  */
 void
 dbg(int enable, const char* format, ...)
@@ -400,12 +400,12 @@ ll_register_class(const char *_fun, lua_State *L, const char *tname, const luaL_
 }
 
 /**
- * @brief Create a global lua_CFunction (%cfunct) with name (%tname)
+ * \brief Create a global lua_CFunction (%cfunct) with name (%tname)
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param tname table name for the udata
  * \param cfunct lua_Cfunction to register
- * @return 0 for nothing on the Lua stack
+ * \return 0 for nothing on the Lua stack
  */
 int
 ll_set_global_cfunct(const char *_fun, lua_State *L, const char* tname, lua_CFunction cfunct)
@@ -418,12 +418,12 @@ ll_set_global_cfunct(const char *_fun, lua_State *L, const char* tname, lua_CFun
 }
 
 /**
- * @brief Create a global table with name (%tname)
+ * \brief Create a global table with name (%tname)
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param tname table name for the udata
  * \param cfunct C function which creates a table on the Lua stack
- * @return 0 for nothing on the Lua stack
+ * \return 0 for nothing on the Lua stack
  */
 int
 ll_set_global_table(const char *_fun, lua_State *L, const char* tname, lua_CFunction cfunct)
@@ -1358,6 +1358,46 @@ ll_check_index(const char *_fun, lua_State *L, int arg, l_int32 imax)
         return 0;       /* NOTREACHED */
     }
     return static_cast<l_int32>(index);
+}
+
+/**
+ * @brief Check if an argument (%arg) is a color or pixel index.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the integer
+ * @param pix [optional] pointer to a Pix*.
+ * @return color or pixel index
+ */
+l_uint32
+ll_check_color_index(const char *_fun, lua_State *L, int arg, Pix* pix)
+{
+    l_int32 rval = 0;
+    l_int32 gval = 0;
+    l_int32 bval = 0;
+    l_int32 aval = 0;
+    l_int32 depth = pix ? pixGetDepth(pix) : 0;
+    l_uint64 mask = (1u << depth) - 1;
+    l_uint32 pixel = 0;
+
+    if (0 == depth || 32 == depth) {
+        /* no Pix* or Pix* is 32bpp */
+        ll_check_color(_fun, L, arg, &rval, &gval, &bval, &aval);
+        if (composeRGBAPixel(rval, gval, bval, aval, &pixel))
+            return 0;
+    } else if (ll_isinteger(_fun, L, arg)) {
+        /* integer should be a color index */
+        pixel = ll_check_l_uint32(_fun, L, arg);
+        if (pixel > 0)
+            pixel -= 1;
+    } else {
+        /* arg is not an integer but something else */
+        ll_check_color(_fun, L, arg, &rval, &gval, &bval, &aval);
+        if (composeRGBAPixel(rval, gval, bval, aval, &pixel))
+            return 0;
+    }
+    if (0 != mask)
+        pixel = pixel & mask;
+    return pixel;
 }
 
 /**
@@ -4201,15 +4241,15 @@ ll_string_color_name(l_uint32 color)
 }
 
 /**
- * @brief Let's try our best to convert argument(s) to RGBA values
+ * \brief Let's try our best to convert argument(s) to RGBA values
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index of the first parameter
- * @param pr [optional] pointer to red value to return
- * @param pg [optional] pointer to green value to return
- * @param pb [optional] pointer to blue value to return
- * @param pa [optional] pointer to alpah value to return
- * @return
+ * \param pr [optional] pointer to red value to return
+ * \param pg [optional] pointer to green value to return
+ * \param pb [optional] pointer to blue value to return
+ * \param pa [optional] pointer to alpah value to return
+ * \return 0 on success, or 1 on error
  */
 int
 ll_check_color(const char *_fun, lua_State *L, int arg, l_int32 *pr, l_int32 *pg, l_int32 *pb, l_int32 *pa)
@@ -4230,28 +4270,28 @@ ll_check_color(const char *_fun, lua_State *L, int arg, l_int32 *pr, l_int32 *pg
         *pa = 0;
 
     if (ll_istable(_fun, L, arg)) {
-           /* expect a table with up to 4 integer values */
-           l_int32 len = 0;
-           l_int32 *tbl = ll_unpack_Iarray(_fun, L, arg, &len);
-           if (len > 0)
-               r = tbl[0];
-           if (len > 1)
-               g = tbl[1];
-           if (len > 2)
-               b = tbl[2];
-           if (len > 3)
-               b = tbl[3];
-           ll_free(tbl);
+        /* expect a table with up to 4 integer values */
+        l_int32 len = 0;
+        l_int32 *tbl = ll_unpack_Iarray(_fun, L, arg, &len);
+        if (len > 0)
+            r = tbl[0];
+        if (len > 1)
+            g = tbl[1];
+        if (len > 2)
+            b = tbl[2];
+        if (len > 3)
+            b = tbl[3];
+        ll_free(tbl);
     } else if (ll_isinteger(_fun, L, arg)) {
-           /*
-            * Expect up to 4 integer values, where g defaults to r
-            * and b defaults to g, so that color(60) => 60, 60, 60
-            * Alpha defaults to 255.
-            */
-           r = ll_check_l_int32(_fun, L, arg);
-           g = ll_opt_l_int32(_fun, L, arg + 1, r);
-           b = ll_opt_l_int32(_fun, L, arg + 2, g);
-           a = ll_opt_l_int32(_fun, L, arg + 3, 255);
+        /*
+         * Expect min 1 to max 4 integer values, where g defaults to r
+         * and b defaults to g, so that color(60) => 60, 60, 60
+         * Alpha defaults to 255.
+         */
+        r = ll_check_l_int32(_fun, L, arg);
+        g = ll_opt_l_int32(_fun, L, arg + 1, r);
+        b = ll_opt_l_int32(_fun, L, arg + 2, g);
+        a = ll_opt_l_int32(_fun, L, arg + 3, 255);
     } else if (ll_isstring(_fun, L, arg)) {
         color = ll_check_color_name(_fun, L, arg);
         if (color >= 1 << 24) {
@@ -4289,9 +4329,36 @@ ll_check_color(const char *_fun, lua_State *L, int arg, l_int32 *pr, l_int32 *pg
     return 0;
 }
 
-static global_var_t *global_vars = nullptr;
+/**
+ * \brief ll_check_color
+ * \brief Let's try our best to convert argument(s) to RGBA values
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index of the first parameter
+ * \param ppixel pointer to RGBA value
+ * \return 0 on success, or 1 on error
+ */
+int
+ll_check_color(const char *_fun, lua_State *L, int arg, l_uint32 *ppixel)
+{
+    l_int32 r = 0;
+    l_int32 g = 0;
+    l_int32 b = 0;
+    l_int32 a = 0;
 
-static int
+    if (ppixel)
+        *ppixel = 0;
+    if (ll_check_color(_fun, L, arg, &r, &g, &b, &a))
+        return 1;
+    return composeRGBAPixel(r, g, b, a, ppixel);
+}
+
+/**
+ * \brief Check if %type is a known lualept type name
+ * \param type string with the name of a type
+ * \return true on success, or false on error
+ */
+static bool
 ll_check_type(const char *type)
 {
     static const char* types[] = {
@@ -4349,19 +4416,20 @@ ll_check_type(const char *type)
 
     for (i = 0; i < ARRAYSIZE(types); i++)
         if (!strcmp(type, types[i]))
-            return 0;
-    return 1;
+            return true;
+    return false;
 }
 
 /**
- * @brief Reset the linked list of global variables.
+ * \brief Reset the linked list of global variables.
  *
- * Traverses the linked list global_vars and frees each entry.
+ * Traverses the linked list gvars and frees each entry.
+ * \param gvars linked list of global variable definitions
  */
 void
-ll_res_globals(void)
+ll_res_globals(global_var_t*& gvars)
 {
-    global_var_t *var = global_vars;
+    global_var_t *var = gvars;
     global_var_t *next = nullptr;
 
     while (var) {
@@ -4370,24 +4438,25 @@ ll_res_globals(void)
         var = next;
     }
 
-    global_vars = nullptr;
+    gvars = nullptr;
 }
 
 /**
- * @brief Add a pointer to a global variable to put into L when running the script.
- * @param type type of the variable (LL_...)
- * @param name name of the global variable.
- * @param in_ptr pointer to the contained type, e.g. Box*.
- * @return 0 on success, or 1 on error
+ * \brief Add a pointer to a global variable to put into L when running the script.
+ * \param gvars linked list of global variable definitions
+ * \param type type of the variable (LL_...)
+ * \param name name of the global variable.
+ * \param in_ptr pointer to the contained type, e.g. Box*.
+ * \return 0 on success, or 1 on error
  */
 int
-ll_set_global(const char *type, const char* name, void **in_ptr)
+ll_set_global(global_var_t*& gvars, const char *type, const char* name, void **in_ptr)
 {
     FUNC("ll_set_global");
     char msg[256];
     global_var_t *var = nullptr;
 
-    if (ll_check_type(type)) {
+    if (!ll_check_type(type)) {
         snprintf(msg, sizeof(msg), "Parameter type='%s' is not known.\n", type);
         return ERROR_INT(msg, _fun, 1);
     }
@@ -4400,42 +4469,44 @@ ll_set_global(const char *type, const char* name, void **in_ptr)
     var->type = type;
     var->name = name;
     var->i.pptr = in_ptr;
-    var->next = global_vars;
-    global_vars = var;
+    var->next = gvars;
+    gvars = var;
     return 0;
 }
 
 /**
- * @brief Add global variables to put into L when running the script.
+ * \brief Add global variables to put into L when running the script.
  * The %vars array must be terminated with a {NULL, NULL, NULL} sentinel e.g. LL_SENTINEL.
- * @param vars pointer to an array of ll_global_var_t
- * @return 0 on success, or 1 on error
+ * \param gvars linked list of global variable definitions
+ * \param vars pointer to an array of ll_global_var_t
+ * \return 0 on success, or 1 on error
  */
 int
-ll_set_globals(const ll_global_var_t *vars)
+ll_set_globals(global_var_t*& gvars, const ll_global_var_t *vars)
 {
     FUNC("ll_set_globals");
     const ll_global_var_t *var;
     for (var = vars; var->type; var++)
-        ll_set_global(var->type, var->name, reinterpret_cast<void **>(var->ptr));
+        ll_set_global(gvars, var->type, var->name, reinterpret_cast<void **>(var->ptr));
     return 0;
 }
 
 /**
- * @brief Add a pointer to a global variable to get from L after running the script.
- * @param type type of the variable (LL_...)
- * @param name name of the global variable.
- * @param out_ptr pointer to the result pointer to store.
- * @return 0 on success, or 1 on error
+ * \brief Add a pointer to a global variable to get from L after running the script.
+ * \param gvars linked list of global variable definitions
+ * \param type type of the variable (LL_...)
+ * \param name name of the global variable.
+ * \param out_ptr pointer to the result pointer to store.
+ * \return 0 on success, or 1 on error
  */
 int
-ll_get_global(const char *type, const char *name, void **out_ptr)
+ll_get_global(global_var_t*& gvars, const char *type, const char *name, void **out_ptr)
 {
     FUNC("ll_get_global");
     char msg[256];
     global_var_t *var = nullptr;
 
-    if (ll_check_type(type)) {
+    if (!ll_check_type(type)) {
         snprintf(msg, sizeof(msg), "Parameter type='%s' is not known.\n", type);
         return ERROR_INT(msg, _fun, 1);
     }
@@ -4448,33 +4519,34 @@ ll_get_global(const char *type, const char *name, void **out_ptr)
     var->type = type;
     var->name = name;
     var->o.pptr = out_ptr;
-    var->next = global_vars;
-    global_vars = var;
+    var->next = gvars;
+    gvars = var;
     return 0;
 }
 
 /**
- * @brief Add global variables to get from L after running the script.
+ * \brief Add global variables to get from L after running the script.
+ * \param gvars linked list of global variable definitions
  * The %vars array must be terminated with a {NULL, NULL, NULL} sentinel e.g. LL_SENTINEL.
- * @param vars pointer to an array of ll_global_var_t
- * @return 0 on success, or 1 on error
+ * \param vars pointer to an array of ll_global_var_t
+ * \return 0 on success, or 1 on error
  */
 int
-ll_get_globals(const ll_global_var_t *vars)
+ll_get_globals(global_var_t*& gvars, const ll_global_var_t *vars)
 {
     FUNC("ll_get_globals");
     const ll_global_var_t *var;
     for (var = vars; var->type; var++)
-        ll_get_global(var->type, var->name, reinterpret_cast<void **>(var->ptr));
+        ll_get_global(gvars, var->type, var->name, reinterpret_cast<void **>(var->ptr));
     return 0;
 }
 
 /**
- * @brief Set all global variables defined in %vars.
+ * \brief Set all global variables defined in %vars.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
- * @param vars pointer to the root global_var_t
- * @return 0 on success, or die on error
+ * \param vars pointer to the root global_var_t
+ * \return 0 on success, or die on error
  */
 int
 ll_set_all_globals(const char *_fun, lua_State *L, global_var_t *vars)
@@ -4785,11 +4857,11 @@ ll_set_all_globals(const char *_fun, lua_State *L, global_var_t *vars)
 }
 
 /**
- * @brief Get all global variables defined in %vars.
+ * \brief Get all global variables defined in %vars.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
- * @param vars pointer to the root global_var_t
- * @return 0 on success, or die on error
+ * \param vars pointer to the root global_var_t
+ * \return 0 on success, or die on error
  */
 int
 ll_get_all_globals(const char *_fun, lua_State *L, global_var_t *vars)
@@ -5685,39 +5757,27 @@ luaopen_lualept(lua_State *L)
     return 1;
 }
 
-#define	DO_CHDIR	0
-
+/**
+ * \brief Run a Lua script.
+ * \param filename name of an external file to run, if script == nullptr
+ * \param script if != nullptr, load the string and run it
+ * \return 0 on success, or 1 on error
+ */
 int
-ll_RunScript(const char *script)
+ll_run(const char *filename, const char *script, ll_global_var_t *set_vars, ll_global_var_t *get_vars)
 {
-    FUNC("ll_RunScript");
-#if DO_CHDIR
-    char cwd[4096];
-    char path[4096];
-    char *slash;
-#endif
+    FUNC("ll_run");
+    global_var_t *gvars = nullptr;
     lua_State *L;
-    global_var_t* var;
     int res;
 
-#if DO_CHDIR
-    /* Save current working directory */
-    getcwd(cwd, sizeof(cwd));
+    if (ll_set_globals(gvars, set_vars)) {
+        return ERROR_INT("Failed to register set_vars.", _fun, 1);
+    }
 
-    snprintf(path, sizeof(path), "%s", script);
-    slash = strrchr(path, '/');
-    if (!slash)
-        slash = strrchr(path, '\\');
-    if (slash) {
-        *slash++ = '\0';
-        script = slash;
+    if (ll_get_globals(gvars, get_vars)) {
+        return ERROR_INT("Failed to register get_vars.", _fun, 1);
     }
-    if (chdir(path)) {
-        DBG(1, "%s: chdir(\"%s\") failed (%s)\n", _fun,
-            path, strerror(errno));
-        return 1;
-    }
-#endif
 
     /* Disable Leptonica debugging (pixDisplay ...) */
     setLeptDebugOK(FALSE);
@@ -5731,17 +5791,26 @@ ll_RunScript(const char *script)
     /* Register our libraries */
     luaopen_lualept(L);
 
-    /* Set any globals */
-    ll_set_all_globals(_fun, L, global_vars);
+    /* Set any global variables */
+    ll_set_all_globals(_fun, L, gvars);
 
-    res = luaL_loadfile(L, script);
-    if (LUA_OK != res) {
-        const char* msg = lua_tostring(L, -1);
-        lua_close(L);
-#if DO_CHDIR
-        chdir(cwd);
-#endif
-        return ERROR_INT(msg, _fun, 1);
+    if (nullptr == script) {
+        /* load from a filename */
+        res = luaL_loadfile(L, filename);
+        if (LUA_OK != res) {
+            const char* msg = lua_tostring(L, -1);
+            lua_close(L);
+            return ERROR_INT(msg, _fun, 1);
+        }
+    } else {
+        /* load from string %script */
+        size_t size = strlen(script);
+        res = luaL_loadbufferx(L, script, size, filename, "rb");
+        if (LUA_OK != res) {
+            const char* msg = lua_tostring(L, -1);
+            lua_close(L);
+            return ERROR_INT(msg, _fun, 1);
+        }
     }
 
     /* Ask Lua to run our script */
@@ -5749,18 +5818,15 @@ ll_RunScript(const char *script)
     if (LUA_OK != res) {
         const char* msg = lua_tostring(L, -1);
         lua_close(L);
-#if DO_CHDIR
-        chdir(cwd);
-#endif
         return ERROR_INT(msg, _fun, 1);
     }
 
-    /* Get any globals */
-    ll_get_all_globals(_fun, L, global_vars);
+    /* Get any global variables */
+    ll_get_all_globals(_fun, L, gvars);
 
     lua_close(L);
-#if DO_CHDIR
-    chdir(cwd);
-#endif
+
+    /* Reset the global variables for the next run */
+    ll_res_globals(gvars);
     return 0;
 }

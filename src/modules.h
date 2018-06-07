@@ -40,7 +40,7 @@
 #endif
 
 /**
- * @brief The log_enable_flags enum defines bit masks
+ * \brief The log_enable_flags enum defines bit masks
  * to define which kind of debug output is to be printed.
  */
 enum dbg_enable_flags {
@@ -487,6 +487,7 @@ extern l_float64      * ll_unpack_Darray_2d(const char *_fun, lua_State *L, int 
 extern Sarray         * ll_unpack_Sarray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
 
 extern l_int32          ll_check_index(const char *_fun, lua_State *L, int arg, l_int32 imax = INT32_MAX);
+extern l_uint32         ll_check_color_index(const char *_fun, lua_State *L, int arg, Pix* pix);
 extern char             ll_check_char(const char *_fun, lua_State *L, int arg);
 extern const char     * ll_check_string(const char *_fun, lua_State *L, int arg);
 extern const char     * ll_opt_string(const char *_fun, lua_State *L, int arg, const char* def = nullptr);
@@ -646,6 +647,7 @@ extern int              ll_check_color(const char *_fun, lua_State *L, int arg,
                                        l_int32 *pg = nullptr,
                                        l_int32 *pb = nullptr,
                                        l_int32 *pa = nullptr);
+extern int              ll_check_color(const char *_fun, lua_State *L, int arg, l_uint32 *ppixel);
 
 /* lualept.cpp */
 extern LuaLept        * ll_check_lualept(const char *_fun, lua_State *L, int arg);
@@ -950,5 +952,14 @@ extern int              ll_new_WShed(lua_State *L);
 
 /* lualept-sdl2.cpp */
 extern int ViewSDL2(Pix* pix, const char* title = nullptr, int x0 = 0, int y0 = 0, float dscale = 0.0f);
+
+/* lualept.cpp */
+
+extern void ll_res_globals(global_var_t *&gvars);
+extern int ll_set_global(global_var_t *&gvars, const char *type, const char *name, void** data);
+extern int ll_set_globals(global_var_t *&gvars, const ll_global_var_t *vars);
+extern int ll_get_global(global_var_t *&gvars, const char *type, const char *name, void **pdata);
+extern int ll_get_globals(global_var_t *&gvars, const ll_global_var_t *vars);
+
 
 #endif /* !defined(LUALEPT_EXPORTS_H) */

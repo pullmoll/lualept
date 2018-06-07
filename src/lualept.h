@@ -107,12 +107,6 @@ typedef struct ll_global_var_s {
 /** Use this sentinel as the last entry in an array of ll_global_var_t */
 #define LL_SENTINEL {NULL, NULL, NULL}
 
-LUALEPT_DLL extern void ll_res_globals(void);
-LUALEPT_DLL extern int ll_set_global(const char *type, const char *name, void** data);
-LUALEPT_DLL extern int ll_set_globals(const ll_global_var_t *vars);
-LUALEPT_DLL extern int ll_get_global(const char *type, const char *name, void **pdata);
-LUALEPT_DLL extern int ll_get_globals(const ll_global_var_t *vars);
-
 LUALEPT_DLL extern int ll_open_Amap(lua_State *L);
 LUALEPT_DLL extern int ll_open_Aset(lua_State *L);
 LUALEPT_DLL extern int ll_open_ByteBuffer(lua_State *L);
@@ -152,7 +146,7 @@ LUALEPT_DLL extern int ll_open_Stack(lua_State *L);
 LUALEPT_DLL extern int ll_open_WShed(lua_State *L);
 
 LUALEPT_DLL extern int luaopen_lualept(lua_State *L);
-LUALEPT_DLL extern int ll_RunScript(const char* script);
+LUALEPT_DLL extern int ll_run(const char* filename, const char* script, ll_global_var_t* set_vars, ll_global_var_t* get_vars);
 
 #if defined(_MSC_VER)
 LEPT_DLL extern int LeptMsgSeverity;

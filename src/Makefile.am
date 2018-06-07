@@ -49,4 +49,4 @@ liblualept_la_SOURCES = \
 	llstack.cpp \
 	llwshed.cpp
 
-pkginclude_HEADERS = lualept.h
+pkginclude_HEADERS = lualept.h llenviron.h

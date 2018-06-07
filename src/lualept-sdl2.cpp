@@ -37,14 +37,14 @@
 #include <SDL_video.h>
 
 /**
- * @brief Set a pixel using %scale in the %image at %x, %y to color %r, %g, %b
- * @param image pointer to the SDL_Surface
- * @param x pixel column
- * @param y pixel row
- * @param r red value
- * @param g green value
- * @param b blue value
- * @param a alpha value
+ * \brief Set a pixel using %scale in the %image at %x, %y to color %r, %g, %b
+ * \param image pointer to the SDL_Surface
+ * \param x pixel column
+ * \param y pixel row
+ * \param r red value
+ * \param g green value
+ * \param b blue value
+ * \param a alpha value
  */
 static inline void
 SetPixelRGB(SDL_Surface *image, int x, int y, uint8_t r, uint8_t g, uint8_t b)
@@ -59,14 +59,14 @@ SetPixelRGB(SDL_Surface *image, int x, int y, uint8_t r, uint8_t g, uint8_t b)
 }
 
 /**
- * @brief Set a pixel using %scale in the %image at %x, %y to color %r, %g, %b, %a
- * @param image pointer to the SDL_Surface
- * @param x pixel column
- * @param y pixel row
- * @param r red value
- * @param g green value
- * @param b blue value
- * @param a alpha value
+ * \brief Set a pixel using %scale in the %image at %x, %y to color %r, %g, %b, %a
+ * \param image pointer to the SDL_Surface
+ * \param x pixel column
+ * \param y pixel row
+ * \param r red value
+ * \param g green value
+ * \param b blue value
+ * \param a alpha value
  */
 static inline void
 SetPixelRGBA(SDL_Surface *image, int x, int y, uint8_t r, uint8_t g, uint8_t b, uint8_t a)
@@ -81,11 +81,11 @@ SetPixelRGBA(SDL_Surface *image, int x, int y, uint8_t r, uint8_t g, uint8_t b, 
 }
 
 /**
- * @brief Set a pixel using %scale in the %image at %x, %y to %color
- * @param image pointer to the SDL_Surface
- * @param x pixel column
- * @param y pixel row
- * @param index pixel value
+ * \brief Set a pixel using %scale in the %image at %x, %y to %color
+ * \param image pointer to the SDL_Surface
+ * \param x pixel column
+ * \param y pixel row
+ * \param index pixel value
  */
 static inline void
 SetPixelIndex(SDL_Surface *image, int x, int y, uint32_t index)
@@ -99,10 +99,10 @@ SetPixelIndex(SDL_Surface *image, int x, int y, uint32_t index)
 }
 
 /**
- * @brief Paint a Pix* %pix into the SDL_Surface %image using %scale
- * @param image pointer to the SDL_Surface
- * @param format pointer to the SDL_PixelFormat
- * @param pix pointer to the Pix
+ * \brief Paint a Pix* %pix into the SDL_Surface %image using %scale
+ * \param image pointer to the SDL_Surface
+ * \param format pointer to the SDL_PixelFormat
+ * \param pix pointer to the Pix
  */
 static void
 PaintImagePix(SDL_Surface *surface, Pix *pix)
@@ -300,12 +300,12 @@ ChangeScale(SDL_Window * window, float scale, int & swidth, int & sheight, const
 }
 
 /**
- * @brief Fill a SDL_Palette with colors from a PixColormap*
- * @param palette pointer to the SDL_Palette
- * @param cmap pointer to the PixColormap
- * @param firstcolor first color index (usually 0)
- * @param ncolors number of colors (2, 16, 256)
- * @return pointer to allocated SDL_Palette
+ * \brief Fill a SDL_Palette with colors from a PixColormap*
+ * \param palette pointer to the SDL_Palette
+ * \param cmap pointer to the PixColormap
+ * \param firstcolor first color index (usually 0)
+ * \param ncolors number of colors (2, 16, 256)
+ * \return pointer to allocated SDL_Palette
  */
 static void
 FillGrays(SDL_Palette* palette, int ncolors, int firstcolor = 0)
@@ -342,12 +342,12 @@ FillGrays(SDL_Palette* palette, int ncolors, int firstcolor = 0)
 }
 
 /**
- * @brief Fill a SDL_Palette with colors from a PixColormap*
- * @param palette pointer to the SDL_Palette
- * @param cmap pointer to the PixColormap
- * @param firstcolor first color index (usually 0)
- * @param ncolors number of colors (2, 16, 256)
- * @return pointer to allocated SDL_Palette
+ * \brief Fill a SDL_Palette with colors from a PixColormap*
+ * \param palette pointer to the SDL_Palette
+ * \param cmap pointer to the PixColormap
+ * \param firstcolor first color index (usually 0)
+ * \param ncolors number of colors (2, 16, 256)
+ * \return pointer to allocated SDL_Palette
  */
 static void
 FillColors(SDL_Palette* palette, PixColormap *cmap, int ncolors, int firstcolor = 0)
