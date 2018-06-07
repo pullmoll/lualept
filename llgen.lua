@@ -5,7 +5,7 @@
 --]]
 
 -- set to true to debug parsing
-debug = true
+debug = false
 
 -- array of functions
 funcs = {}
@@ -295,7 +295,11 @@ function getter(vtype, arg, name)
 		return "ll_unpack_Uarray(_fun, L, " .. arg .. ", &size)"
 	end
 	if vtype == "l_float32*" then
-		return "ll_unpack_Farray(_fun, L, " .. arg .. ", &size)"
+		if name == "vc" then
+			return "ll_check_vector(_fun, L, " .. arg .. ")"
+		else
+			return "ll_unpack_Farray(_fun, L, " .. arg .. ", &size)"
+		end
 	end
 	if vtype == "l_float64*" then
 		return "ll_unpack_Darray(_fun, L, " .. arg .. ", &size)"
@@ -308,6 +312,9 @@ function getter(vtype, arg, name)
 	end
 	if name == "index" then
 		return "ll_check_index(_fun, L, " .. arg .. ")"
+	end
+	if name == "incolor" then
+		return "ll_check_set_black_white(_fun, L, " .. arg .. ")"
 	end
 	vtype = vtype:gsub("%*", "")
 	vtype = vtype:gsub("%s", "")
