@@ -1268,7 +1268,8 @@ AddWithIndicator(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #3 is expected to be a l_int32 (incolor).
+ * Arg #2 is expected to be a l_int32 (incolor).
+ * Arg #3 and following is expected to be a vector of l_float32 (vc)
  *
  * Leptonica's Notes:
  *      (1) Brings in either black or white pixels from the boundary
@@ -1282,12 +1283,11 @@ Affine(lua_State *L)
 {
     LL_FUNC("Affine");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_float32 vc = 0;
-    l_int32 incolor = ll_check_l_int32(_fun, L, 3);
-    if (pixAffine(pixs, &vc, incolor))
-        return ll_push_nil(L);
-    ll_push_l_float32(_fun, L, vc);
-    return 1;
+    l_int32 incolor = ll_check_l_int32(_fun, L, 2);
+    l_float32 *vc = ll_check_vector(_fun, L, 3);
+    Pix *pix = pixAffine(pixs, vc, incolor);
+    ll_free(vc);
+    return ll_push_Pix(_fun, L, pix);
 }
 
 /**
@@ -1295,6 +1295,7 @@ Affine(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_uint32 (colorval).
+ * Arg #3 and following is expected to be a vector of l_float32 (vc)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -1304,25 +1305,19 @@ AffineColor(lua_State *L)
 {
     LL_FUNC("AffineColor");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_float32 vc = 0;
-    l_uint32 colorval = 0;
-    l_int32 rval = 0;
-    l_int32 gval = 0;
-    l_int32 bval = 0;
-    l_int32 aval = 0;
-    ll_check_color(_fun, L, 2, &rval, &gval, &bval, &aval);
-    composeRGBAPixel(rval, gval, bval, aval, &colorval);
-    if (pixAffineColor(pixs, &vc, colorval))
-        return ll_push_nil(L);
-    ll_push_l_float32(_fun, L, vc);
-    return 1;
+    l_uint32 colorval = ll_check_color_index(_fun, L, 2, pixs);
+    l_float32 *vc = ll_check_vector(_fun, L, 3);
+    Pix *pix = pixAffineColor(pixs, vc, colorval);
+    ll_free(vc);
+    return ll_push_Pix(_fun, L, pix);
 }
 
 /**
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #3 is expected to be a l_uint8 (grayval).
+ * Arg #2 is expected to be a l_uint8 (grayval).
+ * Arg #3 and following is expected to be a vector of l_float32 (vc)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -1332,12 +1327,11 @@ AffineGray(lua_State *L)
 {
     LL_FUNC("AffineGray");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_float32 vc = 0;
-    l_uint8 grayval = ll_check_l_uint8(_fun, L, 3);
-    if (pixAffineGray(pixs, &vc, grayval))
-        return ll_push_nil(L);
-    ll_push_l_float32(_fun, L, vc);
-    return 1;
+    l_uint8 grayval = ll_check_l_uint8(_fun, L, 2);
+    l_float32 *vc = ll_check_vector(_fun, L, 3);
+    Pix *pix = pixAffineGray(pixs, vc, grayval);
+    ll_free(vc);
+    return ll_push_Pix(_fun, L, pix);
 }
 
 /**
@@ -1373,7 +1367,7 @@ AffinePta(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pta* (ptad).
  * Arg #3 is expected to be a Pta* (ptas).
- * Arg #4 is expected to be a l_uint32 (color).
+ * Arg #4 is expected to be a l_uint32 (colorval).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -1385,13 +1379,7 @@ AffinePtaColor(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Pta *ptad = ll_check_Pta(_fun, L, 2);
     Pta *ptas = ll_check_Pta(_fun, L, 3);
-    l_uint32 colorval = 0;
-    l_int32 rval = 0;
-    l_int32 gval = 0;
-    l_int32 bval = 0;
-    l_int32 aval = 0;
-    ll_check_color(_fun, L, 4, &rval, &gval, &bval, &aval);
-    composeRGBAPixel(rval, gval, bval, aval, &colorval);
+    l_uint32 colorval = ll_check_color_index(_fun, L, 4, pixs);
     Pix *pix = pixAffinePtaColor(pixs, ptad, ptas, colorval);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -1479,7 +1467,8 @@ AffinePtaWithAlpha(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #3 is expected to be a l_int32 (incolor).
+ * Arg #2 is expected to be a l_int32 (incolor).
+ * Arg #3 and following is expected to be a vector of l_float32 (vc)
  *
  * Leptonica's Notes:
  *      (1) Brings in either black or white pixels from the boundary.
@@ -1496,12 +1485,11 @@ AffineSampled(lua_State *L)
 {
     LL_FUNC("AffineSampled");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_float32 vc = 0;
-    l_int32 incolor = ll_check_l_int32(_fun, L, 3);
-    if (pixAffineSampled(pixs, &vc, incolor))
-        return ll_push_nil(L);
-    ll_push_l_float32(_fun, L, vc);
-    return 1;
+    l_int32 incolor = ll_check_l_int32(_fun, L, 2);
+    l_float32 *vc = ll_check_vector(_fun, L, 3);
+    Pix *pix = pixAffineSampled(pixs, vc, incolor);
+    ll_free(vc);
+    return ll_push_Pix(_fun, L, pix);
 }
 
 /**
@@ -2522,7 +2510,8 @@ BilateralGrayExact(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #3 is expected to be a l_int32 (incolor).
+ * Arg #2 is expected to be a l_int32 (incolor).
+ * Arg #3 and following is expected to be a vector of l_float32 (vc)
  *
  * Leptonica's Notes:
  *      (1) Brings in either black or white pixels from the boundary
@@ -2536,12 +2525,11 @@ Bilinear(lua_State *L)
 {
     LL_FUNC("Bilinear");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_float32 vc = 0;
-    l_int32 incolor = ll_check_l_int32(_fun, L, 3);
-    if (pixBilinear(pixs, &vc, incolor))
-        return ll_push_nil(L);
-    ll_push_l_float32(_fun, L, vc);
-    return 1;
+    l_int32 incolor = ll_check_l_int32(_fun, L, 2);
+    l_float32 *vc = ll_check_vector(_fun, L, 3);
+    Pix *pix = pixBilinear(pixs, vc, incolor);
+    ll_free(vc);
+    return ll_push_Pix(_fun, L, pix);
 }
 
 /**
@@ -2549,6 +2537,7 @@ Bilinear(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_uint32 (colorval).
+ * Arg #3 and following is expected to be a vector of l_float32 (vc)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -2558,25 +2547,19 @@ BilinearColor(lua_State *L)
 {
     LL_FUNC("BilinearColor");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_float32 vc = 0;
-    l_uint32 colorval = 0;
-    l_int32 rval = 0;
-    l_int32 gval = 0;
-    l_int32 bval = 0;
-    l_int32 aval = 0;
-    ll_check_color(_fun, L, 2, &rval, &gval, &bval, &aval);
-    composeRGBAPixel(rval, gval, bval, aval, &colorval);
-    if (pixBilinearColor(pixs, &vc, colorval))
-        return ll_push_nil(L);
-    ll_push_l_float32(_fun, L, vc);
-    return 1;
+    l_uint32 colorval = ll_check_color_index(_fun, L, 2, pixs);
+    l_float32 *vc = ll_check_vector(_fun, L, 3);
+    Pix *pix = pixBilinearColor(pixs, vc, colorval);
+    ll_free(vc);
+    return ll_push_Pix(_fun, L, pix);
 }
 
 /**
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #3 is expected to be a l_uint8 (grayval).
+ * Arg #2 is expected to be a l_uint8 (grayval).
+ * Arg #3 and following is expected to be a vector of l_float32 (vc)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -2586,12 +2569,11 @@ BilinearGray(lua_State *L)
 {
     LL_FUNC("BilinearGray");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_float32 vc = 0;
-    l_uint8 grayval = ll_check_l_uint8(_fun, L, 3);
-    if (pixBilinearGray(pixs, &vc, grayval))
-        return ll_push_nil(L);
-    ll_push_l_float32(_fun, L, vc);
-    return 1;
+    l_uint8 grayval = ll_check_l_uint8(_fun, L, 2);
+    l_float32 *vc = ll_check_vector(_fun, L, 3);
+    Pix *pix = pixBilinearGray(pixs, vc, grayval);
+    ll_free(vc);
+    return ll_push_Pix(_fun, L, pix);
 }
 
 /**
@@ -2639,13 +2621,7 @@ BilinearPtaColor(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Pta *ptad = ll_check_Pta(_fun, L, 2);
     Pta *ptas = ll_check_Pta(_fun, L, 3);
-    l_uint32 colorval = 0;
-    l_int32 rval = 0;
-    l_int32 gval = 0;
-    l_int32 bval = 0;
-    l_int32 aval = 0;
-    ll_check_color(_fun, L, 4, &rval, &gval, &bval, &aval);
-    composeRGBAPixel(rval, gval, bval, aval, &colorval);
+    l_uint32 colorval = ll_check_color_index(_fun, L, 4, pixs);
     Pix *pix = pixBilinearPtaColor(pixs, ptad, ptas, colorval);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -2733,7 +2709,8 @@ BilinearPtaWithAlpha(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #3 is expected to be a l_int32 (incolor).
+ * Arg #2 is expected to be a l_int32 (incolor).
+ * Arg #3 and following is expected to be a vector of l_float32 (vc)
  *
  * Leptonica's Notes:
  *      (1) Brings in either black or white pixels from the boundary.
@@ -2750,12 +2727,11 @@ BilinearSampled(lua_State *L)
 {
     LL_FUNC("BilinearSampled");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_float32 vc = 0;
-    l_int32 incolor = ll_check_l_int32(_fun, L, 3);
-    if (pixBilinearSampled(pixs, &vc, incolor))
-        return ll_push_nil(L);
-    ll_push_l_float32(_fun, L, vc);
-    return 1;
+    l_int32 incolor = ll_check_l_int32(_fun, L, 2);
+    l_float32 *vc = ll_check_vector(_fun, L, 3);
+    Pix *pix = pixBilinearSampled(pixs, vc, incolor);
+    ll_free(vc);
+    return ll_push_Pix(_fun, L, pix);
 }
 
 /**
@@ -21431,7 +21407,8 @@ ProcessBarcodes(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #3 is expected to be a l_int32 (incolor).
+ * Arg #2 is expected to be a l_int32 (incolor).
+ * Arg #3 and following is expected to be a vector of l_float32 (vc)
  *
  * Leptonica's Notes:
  *      (1) Brings in either black or white pixels from the boundary
@@ -21445,19 +21422,19 @@ Projective(lua_State *L)
 {
     LL_FUNC("Projective");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_float32 vc = 0;
-    l_int32 incolor = ll_check_l_int32(_fun, L, 3);
-    if (pixProjective(pixs, &vc, incolor))
-        return ll_push_nil(L);
-    ll_push_l_float32(_fun, L, vc);
-    return 1;
+    l_int32 incolor = ll_check_l_int32(_fun, L, 2);
+    l_float32 *vc = ll_check_vector(_fun, L, 3);
+    Pix *pix = pixProjective(pixs, vc, incolor);
+    ll_free(vc);
+    return ll_push_Pix(_fun, L, pix);
 }
 
 /**
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #3 is expected to be a l_uint32 (colorval).
+ * Arg #2 is expected to be a l_uint32 (colorval).
+ * Arg #3 and following is expected to be a vector of l_float32 (vc)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -21467,19 +21444,19 @@ ProjectiveColor(lua_State *L)
 {
     LL_FUNC("ProjectiveColor");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_float32 vc = 0;
-    l_uint32 colorval = ll_check_l_uint32(_fun, L, 3);
-    if (pixProjectiveColor(pixs, &vc, colorval))
-        return ll_push_nil(L);
-    ll_push_l_float32(_fun, L, vc);
-    return 1;
+    l_uint32 colorval = ll_check_l_uint32(_fun, L, 2);
+    l_float32 *vc = ll_check_vector(_fun, L, 3);
+    Pix *pix = pixProjectiveColor(pixs, vc, colorval);
+    ll_free(vc);
+    return ll_push_Pix(_fun, L, pix);
 }
 
 /**
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #3 is expected to be a l_uint8 (grayval).
+ * Arg #2 is expected to be a l_uint8 (grayval).
+ * Arg #3 and following is expected to be a vector of l_float32 (vc)
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -21489,12 +21466,11 @@ ProjectiveGray(lua_State *L)
 {
     LL_FUNC("ProjectiveGray");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_float32 vc = 0;
-    l_uint8 grayval = ll_check_l_uint8(_fun, L, 3);
-    if (pixProjectiveGray(pixs, &vc, grayval))
-        return ll_push_nil(L);
-    ll_push_l_float32(_fun, L, vc);
-    return 1;
+    l_uint8 grayval = ll_check_l_uint8(_fun, L, 2);
+    l_float32 *vc = ll_check_vector(_fun, L, 3);
+    Pix *pix = pixProjectiveGray(pixs, vc, grayval);
+    ll_free(vc);
+    return ll_push_Pix(_fun, L, pix);
 }
 
 /**
@@ -21631,7 +21607,8 @@ ProjectivePtaWithAlpha(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #3 is expected to be a l_int32 (incolor).
+ * Arg #2 is expected to be a l_int32 (incolor).
+ * Arg #3 and following is expected to be a vector of l_float32 (vc)
  *
  * Leptonica's Notes:
  *      (1) Brings in either black or white pixels from the boundary.
@@ -21648,12 +21625,11 @@ ProjectiveSampled(lua_State *L)
 {
     LL_FUNC("ProjectiveSampled");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_float32 vc = 0;
-    l_int32 incolor = ll_check_l_int32(_fun, L, 3);
-    if (pixProjectiveSampled(pixs, &vc, incolor))
-        return ll_push_nil(L);
-    ll_push_l_float32(_fun, L, vc);
-    return 1;
+    l_int32 incolor = ll_check_l_int32(_fun, L, 2);
+    l_float32 *vc = ll_check_vector(_fun, L, 3);
+    Pix *pix = pixProjectiveSampled(pixs, vc, incolor);
+    ll_free(vc);
+    return ll_push_Pix(_fun, L, pix);
 }
 
 /**
@@ -25125,7 +25101,7 @@ RotateAMColorFast(lua_State *L)
     LL_FUNC("RotateAMColorFast");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 angle = ll_check_l_float32(_fun, L, 2);
-    l_uint32 colorval = ll_check_l_uint32(_fun, L, 3);
+    l_uint32 colorval = ll_check_color_index(_fun, L, 3, pixs);
     Pix *pix = pixRotateAMColorFast(pixs, angle, colorval);
     return ll_push_Pix(_fun, L, pix);
 }

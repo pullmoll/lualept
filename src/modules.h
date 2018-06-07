@@ -35,8 +35,8 @@
 
 #include "lualept.h"
 
-#if !defined(LLUA_DEBUG)
-#define LLUA_DEBUG 1    /*!< set to 1 to enable debugging */
+#if !defined(LUALEPT_DEBUG)
+#define LUALEPT_DEBUG 0 /*!< set to 1 to enable debugging */
 #endif
 
 /**
@@ -122,7 +122,7 @@ enum dbg_enable_flags {
 
 #define	LL_LUALEPT      "LuaLept"       /*!< Lua class: LuaLept (top level) */
 
-#if defined(LLUA_DEBUG) && (LLUA_DEBUG > 0)
+#if defined(LUALEPT_DEBUG) && (LUALEPT_DEBUG > 0)
 extern void dbg(int enable, const char* format, ...)
 #if defined(__GNUC__)
     __attribute__((__format__(printf, 2, 3)))
@@ -513,6 +513,7 @@ extern l_float32        ll_check_l_float32(const char *_fun, lua_State *L, int a
 extern l_float32        ll_opt_l_float32(const char *_fun, lua_State *L, int arg, l_float32 def = 0.0f);
 extern l_float64        ll_check_l_float64(const char *_fun, lua_State *L, int arg);
 extern l_float64        ll_opt_l_float64(const char *_fun, lua_State *L, int arg, l_float32 def = 0.0);
+extern l_float32      * ll_check_vector(const char *_fun, lua_State *L, int arg, int n = 6);
 
 /*
  *  lualept string Leptonica enumeration value lookup functions

@@ -150,7 +150,7 @@ ll_strcasecmp(const char* dst, const char* src)
 }
 #endif
 
-#if defined(LLUA_DEBUG) && (LLUA_DEBUG>0)
+#if defined(LUALEPT_DEBUG) && (LUALEPT_DEBUG>0)
 
 /**
  * \brief Bit mask (flags) for enabled log output
@@ -1361,12 +1361,12 @@ ll_check_index(const char *_fun, lua_State *L, int arg, l_int32 imax)
 }
 
 /**
- * @brief Check if an argument (%arg) is a color or pixel index.
+ * \brief Check if an argument (%arg) is a color or pixel index.
  * \param _fun calling function's name
  * \param L pointer to the lua_State
  * \param arg index where to find the integer
- * @param pix [optional] pointer to a Pix*.
- * @return color or pixel index
+ * \param pix [optional] pointer to a Pix*.
+ * \return color or pixel index
  */
 l_uint32
 ll_check_color_index(const char *_fun, lua_State *L, int arg, Pix* pix)
@@ -1384,16 +1384,18 @@ ll_check_color_index(const char *_fun, lua_State *L, int arg, Pix* pix)
         ll_check_color(_fun, L, arg, &rval, &gval, &bval, &aval);
         if (composeRGBAPixel(rval, gval, bval, aval, &pixel))
             return 0;
-    } else if (ll_isinteger(_fun, L, arg)) {
-        /* integer should be a color index */
-        pixel = ll_check_l_uint32(_fun, L, arg);
-        if (pixel > 0)
-            pixel -= 1;
-    } else {
-        /* arg is not an integer but something else */
+    } else if (ll_isinteger(_fun, L, arg) &&
+               ll_isinteger(_fun, L, arg+1) &&
+               ll_isinteger(_fun, L, arg+2)) {
+        /* arg is probably 3 or 4 color components (rval, gval, bval[, aval]) */
         ll_check_color(_fun, L, arg, &rval, &gval, &bval, &aval);
         if (composeRGBAPixel(rval, gval, bval, aval, &pixel))
             return 0;
+    } else {
+        /* unsigned integer should be a color index */
+        pixel = ll_check_l_uint32(_fun, L, arg);
+        if (pixel > 0)
+            pixel -= 1;
     }
     if (0 != mask)
         pixel = pixel & mask;
@@ -1833,7 +1835,10 @@ ll_check_l_float32(const char *_fun, lua_State *L, int arg)
 
     if (val < static_cast<lua_Number>(-FLT_MAX) || val > static_cast<lua_Number>(FLT_MAX)) {
         lua_pushfstring(L, "%s: l_float32 #%d out of bounds (%f < %f < %f)",
-                        _fun, arg, (lua_Number)-FLT_MAX, val, (lua_Number)FLT_MAX);
+                        _fun, arg,
+                        static_cast<lua_Number>(-FLT_MAX),
+                        val,
+                        static_cast<lua_Number>(FLT_MAX));
         lua_error(L);
         return 0.0f;    /* NOTREACHED */
     }
@@ -1851,11 +1856,14 @@ ll_check_l_float32(const char *_fun, lua_State *L, int arg)
 l_float32
 ll_opt_l_float32(const char *_fun, lua_State *L, int arg, l_float32 def)
 {
-    lua_Number val = luaL_optnumber(L, arg, (lua_Number)def);
+    lua_Number val = luaL_optnumber(L, arg, static_cast<lua_Number>(def));
 
     if (val < static_cast<lua_Number>(-FLT_MAX) || val > static_cast<lua_Number>(FLT_MAX)) {
         lua_pushfstring(L, "%s: l_float32 #%d out of bounds (%f < %f < %f)",
-                        _fun, arg, (lua_Number)-FLT_MAX, val, (lua_Number)FLT_MAX);
+                        _fun, arg,
+                        static_cast<lua_Number>(-FLT_MAX),
+                        val,
+                        static_cast<lua_Number>(FLT_MAX));
         lua_error(L);
         return 0.0f;    /* NOTREACHED */
     }
@@ -1891,6 +1899,37 @@ ll_opt_l_float64(const char *_fun, lua_State *L, int arg, l_float64 def)
     lua_Number val = luaL_optnumber(L, arg, def);
     (void)_fun;
     return static_cast<l_float64>(val);
+}
+
+/**
+ * \brief Check for a vector of n l_float32 values
+ *
+ * The vector can be given as a table array of 6 float values,
+ * or as 6 arguments at %arg, %arg+1, ..., %arg+5
+ *
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the integer
+ * \param n number of values expected in the vector
+ * \return pointer to n times l_float32; caller must free
+ */
+l_float32 *
+ll_check_vector(const char *_fun, lua_State *L, int arg, int n)
+{
+    l_float32 *vec = ll_calloc<l_float32>(_fun, L, n);
+    l_float32 *array = nullptr;
+    l_int32 len;
+    if (lua_istable(L, arg)) {
+        array = ll_unpack_Farray(_fun, L, arg, &len);
+        for (int i = 0; i < n && i < 6; i++)
+            vec[i] = array[i];
+        ll_free(array);
+    } else {
+        for (int i = 0; i < n; i++) {
+            vec[i] = ll_check_l_float32(_fun, L, arg + i);
+        }
+    }
+    return vec;
 }
 
 /**
@@ -5195,7 +5234,7 @@ DebugOn(lua_State *L)
         l_int32 mask = ll_check_debug(_fun, L, i);
         if (!mask)
             return 1;
-#if defined(LLUA_DEBUG) && (LLUA_DEBUG > 0)
+#if defined(LUALEPT_DEBUG) && (LUALEPT_DEBUG > 0)
         dbg_enabled |= mask;
 #endif
     }
@@ -5220,7 +5259,7 @@ DebugOff(lua_State *L)
         l_int32 mask = ll_check_debug(_fun, L, i);
         if (!mask)
             return 1;
-#if defined(LLUA_DEBUG) && (LLUA_DEBUG > 0)
+#if defined(LUALEPT_DEBUG) && (LUALEPT_DEBUG > 0)
         dbg_enabled &= ~mask;
 #endif
     }
@@ -5240,7 +5279,7 @@ Debug(lua_State *L)
     luaL_Buffer B;
 
     luaL_buffinit(L, &B);
-#if defined(LLUA_DEBUG) && (LLUA_DEBUG > 0)
+#if defined(LUALEPT_DEBUG) && (LUALEPT_DEBUG > 0)
     luaL_addstring(&B, ll_string_debug(dbg_enabled));
 #endif
     luaL_pushresult(&B);
@@ -5761,6 +5800,8 @@ luaopen_lualept(lua_State *L)
  * \brief Run a Lua script.
  * \param filename name of an external file to run, if script == nullptr
  * \param script if != nullptr, load the string and run it
+ * \param set_vars optional array of global variable definitions to set.
+ * \param get_vars optional array of global variable definitions to get.
  * \return 0 on success, or 1 on error
  */
 int
