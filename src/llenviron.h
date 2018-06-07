@@ -30,7 +30,8 @@
  *************************************************************************/
 
 #pragma once
-#if !defined(LUALEPT_ENVIRON_H)
+#if !defined(LUALEPT_LLENVIRON_H)
+#define LUALEPT_LLENVIRON_H
 
 /* MS VC++ does not provide stdint.h, so define the missing types here */
 #ifdef _MSC_VER
@@ -69,4 +70,4 @@ typedef unsigned int uintptr_t;
   #define LUALEPT_DLL
 #endif  /* _WIN32 */
 
-#endif	/* !defined(LUALEPT_ENVIRON_H) */
+#endif	/* !defined(LUALEPT_LLENVIRON_H) */

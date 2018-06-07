@@ -37,7 +37,7 @@
 #include "config.h"
 #endif
 
-#include "environ.h"
+#include "llenviron.h"
 
 #ifdef __cplusplus
 extern "C" {
