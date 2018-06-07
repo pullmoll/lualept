@@ -17,7 +17,7 @@ print (pad("dimensions"), w, h, d)
 print (pad("area"), w * h)
 print (pad("RGB colors"), pix:CountRGBColors())
 local hist = pix:GetColorAmapHistogram(1)
-print (pad("color histogram"), hist)
+print (pad("color histogram #"), #hist)
 
 local pixm = pix:MakeArbMaskFromRGB(-0.5, -0.5, 0.75, 0.05)
 pixm:View()

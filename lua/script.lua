@@ -17,19 +17,19 @@ print(pad("LuaLept:LeptVersion()"), LuaLept:LeptVersion())
 print(pad("global sa"), sa)
 print(pad("global box"), box)
 
--- require "lua/aset"
--- require "lua/amap"
--- require "lua/bbuffer"
--- require "lua/bmf"
--- require "lua/box"
--- require "lua/pta"
--- require "lua/numa"
--- require "lua/dna"
--- require "lua/pix"
--- require "lua/pix2"
--- require "lua/pix3"
--- require "lua/fpix"
--- require "lua/dpix"
+require "lua/aset"
+require "lua/amap"
+require "lua/bbuffer"
+require "lua/bmf"
+require "lua/box"
+require "lua/pta"
+require "lua/numa"
+require "lua/dna"
+require "lua/pix"
+require "lua/pix2"
+require "lua/pix3"
+require "lua/fpix"
+require "lua/dpix"
 
 ok = true
 

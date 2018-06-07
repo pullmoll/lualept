@@ -116,7 +116,7 @@ local pix3 = Pix()
 print(pad("pix3 = Pix()"), pix3)
 local pix3 = pix3.DisplayColorArray(240, 4, 6, carray)
 print(pad("pix3 = pix3.DisplayColorArray(240, 4, 6, carray)"), pix3)
-local pix3 = pix3:AddBorder(20, LuaLept.RGB(255,255,255))
+local pix3 = pix3:AddBorder(20, "white")
 print(pad("pix3 = pix3:AddBorder(20, LuaLept.RGB(255,255,255))"), pix3)
 pix3:View()
 

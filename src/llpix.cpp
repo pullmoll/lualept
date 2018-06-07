@@ -1268,7 +1268,7 @@ AddWithIndicator(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is expected to be a l_int32 (incolor).
+ * Arg #2 is expected to be a string descibing black or white (incolor).
  * Arg #3 and following is expected to be a vector of l_float32 (vc)
  *
  * Leptonica's Notes:
@@ -1283,7 +1283,7 @@ Affine(lua_State *L)
 {
     LL_FUNC("Affine");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 2);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 2);
     l_float32 *vc = ll_check_vector(_fun, L, 3);
     Pix *pix = pixAffine(pixs, vc, incolor);
     ll_free(vc);
@@ -1340,7 +1340,7 @@ AffineGray(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pta* (ptad).
  * Arg #3 is expected to be a Pta* (ptas).
- * Arg #4 is expected to be a l_int32 (incolor).
+ * Arg #4 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) Brings in either black or white pixels from the boundary
@@ -1356,7 +1356,7 @@ AffinePta(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Pta *ptad = ll_check_Pta(_fun, L, 2);
     Pta *ptas = ll_check_Pta(_fun, L, 3);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 4);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 4);
     Pix *pix = pixAffinePta(pixs, ptad, ptas, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -1467,7 +1467,7 @@ AffinePtaWithAlpha(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is expected to be a l_int32 (incolor).
+ * Arg #2 is expected to be a string descibing black or white (incolor).
  * Arg #3 and following is expected to be a vector of l_float32 (vc)
  *
  * Leptonica's Notes:
@@ -1485,7 +1485,7 @@ AffineSampled(lua_State *L)
 {
     LL_FUNC("AffineSampled");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 2);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 2);
     l_float32 *vc = ll_check_vector(_fun, L, 3);
     Pix *pix = pixAffineSampled(pixs, vc, incolor);
     ll_free(vc);
@@ -1498,7 +1498,7 @@ AffineSampled(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pta* (ptad).
  * Arg #3 is expected to be a Pta* (ptas).
- * Arg #4 is expected to be a l_int32 (incolor).
+ * Arg #4 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) Brings in either black or white pixels from the boundary.
@@ -1529,7 +1529,7 @@ AffineSampledPta(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Pta *ptad = ll_check_Pta(_fun, L, 2);
     Pta *ptas = ll_check_Pta(_fun, L, 3);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 4);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 4);
     Pix *pix = pixAffineSampledPta(pixs, ptad, ptas, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -2510,7 +2510,7 @@ BilateralGrayExact(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is expected to be a l_int32 (incolor).
+ * Arg #2 is expected to be a string descibing black or white (incolor).
  * Arg #3 and following is expected to be a vector of l_float32 (vc)
  *
  * Leptonica's Notes:
@@ -2525,7 +2525,7 @@ Bilinear(lua_State *L)
 {
     LL_FUNC("Bilinear");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 2);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 2);
     l_float32 *vc = ll_check_vector(_fun, L, 3);
     Pix *pix = pixBilinear(pixs, vc, incolor);
     ll_free(vc);
@@ -2582,7 +2582,7 @@ BilinearGray(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pta* (ptad).
  * Arg #3 is expected to be a Pta* (ptas).
- * Arg #4 is expected to be a l_int32 (incolor).
+ * Arg #4 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) Brings in either black or white pixels from the boundary
@@ -2598,7 +2598,7 @@ BilinearPta(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Pta *ptad = ll_check_Pta(_fun, L, 2);
     Pta *ptas = ll_check_Pta(_fun, L, 3);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 4);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 4);
     Pix *pix = pixBilinearPta(pixs, ptad, ptas, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -2709,7 +2709,7 @@ BilinearPtaWithAlpha(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is expected to be a l_int32 (incolor).
+ * Arg #2 is expected to be a string descibing black or white (incolor).
  * Arg #3 and following is expected to be a vector of l_float32 (vc)
  *
  * Leptonica's Notes:
@@ -2727,7 +2727,7 @@ BilinearSampled(lua_State *L)
 {
     LL_FUNC("BilinearSampled");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 2);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 2);
     l_float32 *vc = ll_check_vector(_fun, L, 3);
     Pix *pix = pixBilinearSampled(pixs, vc, incolor);
     ll_free(vc);
@@ -2740,7 +2740,7 @@ BilinearSampled(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pta* (ptad).
  * Arg #3 is expected to be a Pta* (ptas).
- * Arg #4 is expected to be a l_int32 (incolor).
+ * Arg #4 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) Brings in either black or white pixels from the boundary.
@@ -2760,7 +2760,7 @@ BilinearSampledPta(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Pta *ptad = ll_check_Pta(_fun, L, 2);
     Pta *ptas = ll_check_Pta(_fun, L, 3);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 4);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 4);
     Pix *pix = pixBilinearSampledPta(pixs, ptad, ptas, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -10762,7 +10762,7 @@ DrawBoxaRandom(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (angle).
- * Arg #3 is expected to be a l_int32 (incolor).
+ * Arg #3 is expected to be a string descibing black or white (incolor).
  * Arg #4 is expected to be a l_int32 (width).
  * Arg #5 is expected to be a l_int32 (height).
  *
@@ -10805,7 +10805,7 @@ EmbedForRotation(lua_State *L)
     LL_FUNC("EmbedForRotation");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 angle = ll_check_l_float32(_fun, L, 2);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 3);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 3);
     l_int32 width = ll_check_l_int32(_fun, L, 4);
     l_int32 height = ll_check_l_int32(_fun, L, 5);
     Pix *pix = pixEmbedForRotation(pixs, angle, incolor, width, height);
@@ -17568,7 +17568,7 @@ HMTDwa_1(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (yloc).
  * Arg #4 is expected to be a l_float32 (radang).
- * Arg #5 is expected to be a l_int32 (incolor).
+ * Arg #5 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) There are 3 cases:
@@ -17607,7 +17607,7 @@ HShear(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     l_int32 yloc = ll_check_l_int32(_fun, L, 3);
     l_float32 radang = ll_check_l_float32(_fun, L, 4);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 5);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 5);
     Pix *pix = pixHShear(pixd, pixs, yloc, radang, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -17618,7 +17618,7 @@ HShear(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_float32 (radang).
- * Arg #4 is expected to be a l_int32 (incolor).
+ * Arg #4 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) See pixHShear() for usage.
@@ -17635,7 +17635,7 @@ HShearCenter(lua_State *L)
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     l_float32 radang = ll_check_l_float32(_fun, L, 3);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 4);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 4);
     Pix *pix = pixHShearCenter(pixd, pixs, radang, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -17646,7 +17646,7 @@ HShearCenter(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_float32 (radang).
- * Arg #4 is expected to be a l_int32 (incolor).
+ * Arg #4 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) See pixHShear() for usage.
@@ -17663,7 +17663,7 @@ HShearCorner(lua_State *L)
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     l_float32 radang = ll_check_l_float32(_fun, L, 3);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 4);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 4);
     Pix *pix = pixHShearCorner(pixd, pixs, radang, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -17674,7 +17674,7 @@ HShearCorner(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (yloc).
  * Arg #3 is expected to be a l_float32 (radang).
- * Arg #4 is expected to be a l_int32 (incolor).
+ * Arg #4 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) This is an in-place version of pixHShear(); see comments there.
@@ -17694,7 +17694,7 @@ HShearIP(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 yloc = ll_check_l_int32(_fun, L, 2);
     l_float32 radang = ll_check_l_float32(_fun, L, 3);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 4);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 4);
     return ll_push_boolean(_fun, L, 0 == pixHShearIP(pixs, yloc, radang, incolor));
 }
 
@@ -17704,7 +17704,7 @@ HShearIP(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (yloc).
  * Arg #3 is expected to be a l_float32 (radang).
- * Arg #4 is expected to be a l_int32 (incolor).
+ * Arg #4 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) This does horizontal shear with linear interpolation for
@@ -17729,7 +17729,7 @@ HShearLI(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 yloc = ll_check_l_int32(_fun, L, 2);
     l_float32 radang = ll_check_l_float32(_fun, L, 3);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 4);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 4);
     Pix *pix = pixHShearLI(pixs, yloc, radang, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -21407,7 +21407,7 @@ ProcessBarcodes(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is expected to be a l_int32 (incolor).
+ * Arg #2 is expected to be a string descibing black or white (incolor).
  * Arg #3 and following is expected to be a vector of l_float32 (vc)
  *
  * Leptonica's Notes:
@@ -21422,7 +21422,7 @@ Projective(lua_State *L)
 {
     LL_FUNC("Projective");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 2);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 2);
     l_float32 *vc = ll_check_vector(_fun, L, 3);
     Pix *pix = pixProjective(pixs, vc, incolor);
     ll_free(vc);
@@ -21479,7 +21479,7 @@ ProjectiveGray(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pta* (ptad).
  * Arg #3 is expected to be a Pta* (ptas).
- * Arg #4 is expected to be a l_int32 (incolor).
+ * Arg #4 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) Brings in either black or white pixels from the boundary
@@ -21495,7 +21495,7 @@ ProjectivePta(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Pta *ptad = ll_check_Pta(_fun, L, 2);
     Pta *ptas = ll_check_Pta(_fun, L, 3);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 4);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 4);
     Pix *pix = pixProjectivePta(pixs, ptad, ptas, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -21607,7 +21607,7 @@ ProjectivePtaWithAlpha(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is expected to be a l_int32 (incolor).
+ * Arg #2 is expected to be a string descibing black or white (incolor).
  * Arg #3 and following is expected to be a vector of l_float32 (vc)
  *
  * Leptonica's Notes:
@@ -21625,7 +21625,7 @@ ProjectiveSampled(lua_State *L)
 {
     LL_FUNC("ProjectiveSampled");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 2);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 2);
     l_float32 *vc = ll_check_vector(_fun, L, 3);
     Pix *pix = pixProjectiveSampled(pixs, vc, incolor);
     ll_free(vc);
@@ -21638,7 +21638,7 @@ ProjectiveSampled(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pta* (ptad).
  * Arg #3 is expected to be a Pta* (ptas).
- * Arg #4 is expected to be a l_int32 (incolor).
+ * Arg #4 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) Brings in either black or white pixels from the boundary.
@@ -21658,7 +21658,7 @@ ProjectiveSampledPta(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Pta *ptad = ll_check_Pta(_fun, L, 2);
     Pta *ptas = ll_check_Pta(_fun, L, 3);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 4);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 4);
     Pix *pix = pixProjectiveSampledPta(pixs, ptad, ptas, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -21671,7 +21671,7 @@ ProjectiveSampledPta(lua_State *L)
  * Arg #3 is expected to be a l_int32 (vmaxt).
  * Arg #4 is expected to be a l_int32 (vmaxb).
  * Arg #5 is expected to be a l_int32 (operation).
- * Arg #6 is expected to be a l_int32 (incolor).
+ * Arg #6 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) This gives a quadratic bending, upward or downward, as you
@@ -21701,7 +21701,7 @@ QuadraticVShear(lua_State *L)
     l_int32 vmaxt = ll_check_l_int32(_fun, L, 3);
     l_int32 vmaxb = ll_check_l_int32(_fun, L, 4);
     l_int32 operation = ll_check_l_int32(_fun, L, 5);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 6);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 6);
     Pix *pix = pixQuadraticVShear(pixs, dir, vmaxt, vmaxb, operation, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -21713,7 +21713,7 @@ QuadraticVShear(lua_State *L)
  * Arg #2 is expected to be a l_int32 (dir).
  * Arg #3 is expected to be a l_int32 (vmaxt).
  * Arg #4 is expected to be a l_int32 (vmaxb).
- * Arg #5 is expected to be a l_int32 (incolor).
+ * Arg #5 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) See pixQuadraticVShear() for details.
@@ -21729,7 +21729,7 @@ QuadraticVShearLI(lua_State *L)
     l_int32 dir = ll_check_l_int32(_fun, L, 2);
     l_int32 vmaxt = ll_check_l_int32(_fun, L, 3);
     l_int32 vmaxb = ll_check_l_int32(_fun, L, 4);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 5);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 5);
     Pix *pix = pixQuadraticVShearLI(pixs, dir, vmaxt, vmaxb, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -21741,7 +21741,7 @@ QuadraticVShearLI(lua_State *L)
  * Arg #2 is expected to be a l_int32 (dir).
  * Arg #3 is expected to be a l_int32 (vmaxt).
  * Arg #4 is expected to be a l_int32 (vmaxb).
- * Arg #5 is expected to be a l_int32 (incolor).
+ * Arg #5 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) See pixQuadraticVShear() for details.
@@ -21757,7 +21757,7 @@ QuadraticVShearSampled(lua_State *L)
     l_int32 dir = ll_check_l_int32(_fun, L, 2);
     l_int32 vmaxt = ll_check_l_int32(_fun, L, 3);
     l_int32 vmaxb = ll_check_l_int32(_fun, L, 4);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 5);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 5);
     Pix *pix = pixQuadraticVShearSampled(pixs, dir, vmaxt, vmaxb, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -22418,7 +22418,7 @@ RasteropFullImage(lua_State *L)
  * Arg #2 is expected to be a l_int32 (by).
  * Arg #3 is expected to be a l_int32 (bh).
  * Arg #4 is expected to be a l_int32 (hshift).
- * Arg #5 is expected to be a l_int32 (incolor).
+ * Arg #5 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) This rasterop translates a horizontal band of the
@@ -22439,7 +22439,7 @@ RasteropHip(lua_State *L)
     l_int32 by = ll_check_l_int32(_fun, L, 2);
     l_int32 bh = ll_check_l_int32(_fun, L, 3);
     l_int32 hshift = ll_check_l_int32(_fun, L, 4);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 5);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 5);
     l_int32 result = pixRasteropHip(pixd, by, bh, hshift, incolor);
     return ll_push_l_int32(_fun, L, result);
 }
@@ -22450,7 +22450,7 @@ RasteropHip(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a l_int32 (hshift).
  * Arg #3 is expected to be a l_int32 (vshift).
- * Arg #4 is expected to be a l_int32 (incolor).
+ * Arg #4 is expected to be a string descibing black or white (incolor).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -22462,7 +22462,7 @@ RasteropIP(lua_State *L)
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     l_int32 hshift = ll_check_l_int32(_fun, L, 2);
     l_int32 vshift = ll_check_l_int32(_fun, L, 3);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 4);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 4);
     l_int32 result = pixRasteropIP(pixd, hshift, vshift, incolor);
     return ll_push_l_int32(_fun, L, result);
 }
@@ -22474,7 +22474,7 @@ RasteropIP(lua_State *L)
  * Arg #2 is expected to be a l_int32 (bx).
  * Arg #3 is expected to be a l_int32 (bw).
  * Arg #4 is expected to be a l_int32 (vshift).
- * Arg #5 is expected to be a l_int32 (incolor).
+ * Arg #5 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) This rasterop translates a vertical band of the
@@ -22495,7 +22495,7 @@ RasteropVip(lua_State *L)
     l_int32 bx = ll_check_l_int32(_fun, L, 2);
     l_int32 bw = ll_check_l_int32(_fun, L, 3);
     l_int32 vshift = ll_check_l_int32(_fun, L, 4);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 5);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 5);
     l_int32 result = pixRasteropVip(pixd, bx, bw, vshift, incolor);
     return ll_push_l_int32(_fun, L, result);
 }
@@ -24817,7 +24817,7 @@ ReversalProfile(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (angle).
  * Arg #3 is expected to be a l_int32 (type).
- * Arg #4 is expected to be a l_int32 (incolor).
+ * Arg #4 is expected to be a string descibing black or white (incolor).
  * Arg #5 is expected to be a l_int32 (width).
  * Arg #6 is expected to be a l_int32 (height).
  *
@@ -24848,7 +24848,7 @@ Rotate(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 angle = ll_check_l_float32(_fun, L, 2);
     l_int32 type = ll_check_l_int32(_fun, L, 3);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 4);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 4);
     l_int32 width = ll_check_l_int32(_fun, L, 5);
     l_int32 height = ll_check_l_int32(_fun, L, 6);
     Pix *pix = pixRotate(pixs, angle, type, incolor, width, height);
@@ -24895,7 +24895,7 @@ Rotate180(lua_State *L)
  * Arg #2 is expected to be a l_int32 (xcen).
  * Arg #3 is expected to be a l_int32 (ycen).
  * Arg #4 is expected to be a l_float32 (angle).
- * Arg #5 is expected to be a l_int32 (incolor).
+ * Arg #5 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) This rotates the image about the given point, using the 2-shear
@@ -24922,7 +24922,7 @@ Rotate2Shear(lua_State *L)
     l_int32 xcen = ll_check_l_int32(_fun, L, 2);
     l_int32 ycen = ll_check_l_int32(_fun, L, 3);
     l_float32 angle = ll_check_l_float32(_fun, L, 4);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 5);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 5);
     Pix *pix = pixRotate2Shear(pixs, xcen, ycen, angle, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -24934,7 +24934,7 @@ Rotate2Shear(lua_State *L)
  * Arg #2 is expected to be a l_int32 (xcen).
  * Arg #3 is expected to be a l_int32 (ycen).
  * Arg #4 is expected to be a l_float32 (angle).
- * Arg #5 is expected to be a l_int32 (incolor).
+ * Arg #5 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) This rotates the image about the given point, using the 3-shear
@@ -24967,7 +24967,7 @@ Rotate3Shear(lua_State *L)
     l_int32 xcen = ll_check_l_int32(_fun, L, 2);
     l_int32 ycen = ll_check_l_int32(_fun, L, 3);
     l_float32 angle = ll_check_l_float32(_fun, L, 4);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 5);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 5);
     Pix *pix = pixRotate3Shear(pixs, xcen, ycen, angle, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -25001,7 +25001,7 @@ Rotate90(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (angle).
- * Arg #3 is expected to be a l_int32 (incolor).
+ * Arg #3 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) Rotates about image center.
@@ -25017,7 +25017,7 @@ RotateAM(lua_State *L)
     LL_FUNC("RotateAM");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 angle = ll_check_l_float32(_fun, L, 2);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 3);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 3);
     Pix *pix = pixRotateAM(pixs, angle, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -25111,7 +25111,7 @@ RotateAMColorFast(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (angle).
- * Arg #3 is expected to be a l_int32 (incolor).
+ * Arg #3 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) Rotates about the UL corner of the image.
@@ -25127,7 +25127,7 @@ RotateAMCorner(lua_State *L)
     LL_FUNC("RotateAMCorner");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 angle = ll_check_l_float32(_fun, L, 2);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 3);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 3);
     Pix *pix = pixRotateAMCorner(pixs, angle, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -25189,7 +25189,7 @@ RotateAMGrayCorner(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (angle).
- * Arg #3 is expected to be a l_int32 (incolor).
+ * Arg #3 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) For very small rotations, just return a clone.
@@ -25215,7 +25215,7 @@ RotateBinaryNice(lua_State *L)
     LL_FUNC("RotateBinaryNice");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 angle = ll_check_l_float32(_fun, L, 2);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 3);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 3);
     Pix *pix = pixRotateBinaryNice(pixs, angle, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -25227,7 +25227,7 @@ RotateBinaryNice(lua_State *L)
  * Arg #2 is expected to be a l_int32 (xcen).
  * Arg #3 is expected to be a l_int32 (ycen).
  * Arg #4 is expected to be a l_float32 (angle).
- * Arg #5 is expected to be a l_int32 (incolor).
+ * Arg #5 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) For very small rotations, just return a clone.
@@ -25246,7 +25246,7 @@ RotateBySampling(lua_State *L)
     l_int32 xcen = ll_check_l_int32(_fun, L, 2);
     l_int32 ycen = ll_check_l_int32(_fun, L, 3);
     l_float32 angle = ll_check_l_float32(_fun, L, 4);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 5);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 5);
     Pix *pix = pixRotateBySampling(pixs, xcen, ycen, angle, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -25277,7 +25277,7 @@ RotateOrth(lua_State *L)
  * Arg #2 is expected to be a l_int32 (xcen).
  * Arg #3 is expected to be a l_int32 (ycen).
  * Arg #4 is expected to be a l_float32 (angle).
- * Arg #5 is expected to be a l_int32 (incolor).
+ * Arg #5 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) This rotates an image about the given point, using
@@ -25299,7 +25299,7 @@ RotateShear(lua_State *L)
     l_int32 xcen = ll_check_l_int32(_fun, L, 2);
     l_int32 ycen = ll_check_l_int32(_fun, L, 3);
     l_float32 angle = ll_check_l_float32(_fun, L, 4);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 5);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 5);
     Pix *pix = pixRotateShear(pixs, xcen, ycen, angle, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -25309,7 +25309,7 @@ RotateShear(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (angle).
- * Arg #3 is expected to be a l_int32 (incolor).
+ * Arg #3 is expected to be a string descibing black or white (incolor).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 Pix * on the Lua stack
@@ -25320,7 +25320,7 @@ RotateShearCenter(lua_State *L)
     LL_FUNC("RotateShearCenter");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 angle = ll_check_l_float32(_fun, L, 2);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 3);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 3);
     Pix *pix = pixRotateShearCenter(pixs, angle, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -25330,7 +25330,7 @@ RotateShearCenter(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (angle).
- * Arg #3 is expected to be a l_int32 (incolor).
+ * Arg #3 is expected to be a string descibing black or white (incolor).
  * </pre>
  * \param L pointer to the lua_State
  * \return 1 l_int32 on the Lua stack
@@ -25341,7 +25341,7 @@ RotateShearCenterIP(lua_State *L)
     LL_FUNC("RotateShearCenterIP");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 angle = ll_check_l_float32(_fun, L, 2);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 3);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 3);
     l_int32 result = pixRotateShearCenterIP(pixs, angle, incolor);
     return ll_push_l_int32(_fun, L, result);
 }
@@ -25353,7 +25353,7 @@ RotateShearCenterIP(lua_State *L)
  * Arg #2 is expected to be a l_int32 (xcen).
  * Arg #3 is expected to be a l_int32 (ycen).
  * Arg #4 is expected to be a l_float32 (angle).
- * Arg #5 is expected to be a l_int32 (incolor).
+ * Arg #5 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) This does an in-place rotation of the image about the
@@ -25382,7 +25382,7 @@ RotateShearIP(lua_State *L)
     l_int32 xcen = ll_check_l_int32(_fun, L, 2);
     l_int32 ycen = ll_check_l_int32(_fun, L, 3);
     l_float32 angle = ll_check_l_float32(_fun, L, 4);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 5);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 5);
     l_int32 result = pixRotateShearIP(pixs, xcen, ycen, angle, incolor);
     return ll_push_l_int32(_fun, L, result);
 }
@@ -30185,7 +30185,7 @@ StereoFromPair(lua_State *L)
  * Arg #3 is expected to be a l_int32 (type).
  * Arg #4 is expected to be a l_int32 (hmax).
  * Arg #5 is expected to be a l_int32 (operation).
- * Arg #6 is expected to be a l_int32 (incolor).
+ * Arg #6 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) If %hmax > 0, this is an increase in the coordinate value of
@@ -30214,7 +30214,7 @@ StretchHorizontal(lua_State *L)
     l_int32 type = ll_check_l_int32(_fun, L, 3);
     l_int32 hmax = ll_check_l_int32(_fun, L, 4);
     l_int32 operation = ll_check_l_int32(_fun, L, 5);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 6);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 6);
     Pix *pix = pixStretchHorizontal(pixs, dir, type, hmax, operation, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -30226,7 +30226,7 @@ StretchHorizontal(lua_State *L)
  * Arg #2 is expected to be a l_int32 (dir).
  * Arg #3 is expected to be a l_int32 (type).
  * Arg #4 is expected to be a l_int32 (hmax).
- * Arg #5 is expected to be a l_int32 (incolor).
+ * Arg #5 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) See pixStretchHorizontal() for details.
@@ -30242,7 +30242,7 @@ StretchHorizontalLI(lua_State *L)
     l_int32 dir = ll_check_l_int32(_fun, L, 2);
     l_int32 type = ll_check_l_int32(_fun, L, 3);
     l_int32 hmax = ll_check_l_int32(_fun, L, 4);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 5);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 5);
     Pix *pix = pixStretchHorizontalLI(pixs, dir, type, hmax, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -30254,7 +30254,7 @@ StretchHorizontalLI(lua_State *L)
  * Arg #2 is expected to be a l_int32 (dir).
  * Arg #3 is expected to be a l_int32 (type).
  * Arg #4 is expected to be a l_int32 (hmax).
- * Arg #5 is expected to be a l_int32 (incolor).
+ * Arg #5 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) See pixStretchHorizontal() for details.
@@ -30270,7 +30270,7 @@ StretchHorizontalSampled(lua_State *L)
     l_int32 dir = ll_check_l_int32(_fun, L, 2);
     l_int32 type = ll_check_l_int32(_fun, L, 3);
     l_int32 hmax = ll_check_l_int32(_fun, L, 4);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 5);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 5);
     Pix *pix = pixStretchHorizontalSampled(pixs, dir, type, hmax, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -31412,7 +31412,7 @@ TransferAllData(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (hshift).
  * Arg #4 is expected to be a l_int32 (vshift).
- * Arg #5 is expected to be a l_int32 (incolor).
+ * Arg #5 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) The general pattern is:
@@ -31435,7 +31435,7 @@ Translate(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     l_int32 hshift = ll_check_l_int32(_fun, L, 3);
     l_int32 vshift = ll_check_l_int32(_fun, L, 4);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 5);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 5);
     Pix *pix = pixTranslate(pixd, pixs, hshift, vshift, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -31900,7 +31900,7 @@ UsesCmapColor(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_int32 (xloc).
  * Arg #4 is expected to be a l_float32 (radang).
- * Arg #5 is expected to be a l_int32 (incolor).
+ * Arg #5 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) There are 3 cases:
@@ -31939,7 +31939,7 @@ VShear(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     l_int32 xloc = ll_check_l_int32(_fun, L, 3);
     l_float32 radang = ll_check_l_float32(_fun, L, 4);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 5);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 5);
     Pix *pix = pixVShear(pixd, pixs, xloc, radang, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -31950,7 +31950,7 @@ VShear(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_float32 (radang).
- * Arg #4 is expected to be a l_int32 (incolor).
+ * Arg #4 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) See pixVShear() for usage.
@@ -31967,7 +31967,7 @@ VShearCenter(lua_State *L)
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     l_float32 radang = ll_check_l_float32(_fun, L, 3);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 4);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 4);
     Pix *pix = pixVShearCenter(pixd, pixs, radang, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -31978,7 +31978,7 @@ VShearCenter(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a l_float32 (radang).
- * Arg #4 is expected to be a l_int32 (incolor).
+ * Arg #4 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) See pixVShear() for usage.
@@ -31995,7 +31995,7 @@ VShearCorner(lua_State *L)
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     l_float32 radang = ll_check_l_float32(_fun, L, 3);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 4);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 4);
     Pix *pix = pixVShearCorner(pixd, pixs, radang, incolor);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -32006,7 +32006,7 @@ VShearCorner(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (xloc).
  * Arg #3 is expected to be a l_float32 (radang).
- * Arg #4 is expected to be a l_int32 (incolor).
+ * Arg #4 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) This is an in-place version of pixVShear(); see comments there.
@@ -32026,7 +32026,7 @@ VShearIP(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 xloc = ll_check_l_int32(_fun, L, 2);
     l_float32 radang = ll_check_l_float32(_fun, L, 3);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 4);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 4);
     l_int32 result = pixVShearIP(pixs, xloc, radang, incolor);
     return ll_push_l_int32(_fun, L, result);
 }
@@ -32037,7 +32037,7 @@ VShearIP(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (xloc).
  * Arg #3 is expected to be a l_float32 (radang).
- * Arg #4 is expected to be a l_int32 (incolor).
+ * Arg #4 is expected to be a string descibing black or white (incolor).
  *
  * Leptonica's Notes:
  *      (1) This does vertical shear with linear interpolation for
@@ -32062,7 +32062,7 @@ VShearLI(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 xloc = ll_check_l_int32(_fun, L, 2);
     l_float32 radang = ll_check_l_float32(_fun, L, 3);
-    l_int32 incolor = ll_check_l_int32(_fun, L, 4);
+    l_int32 incolor = ll_check_set_black_white(_fun, L, 4);
     Pix *pix = pixVShearLI(pixs, xloc, radang, incolor);
     return ll_push_Pix(_fun, L, pix);
 }

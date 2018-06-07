@@ -487,7 +487,7 @@ extern l_float64      * ll_unpack_Darray_2d(const char *_fun, lua_State *L, int 
 extern Sarray         * ll_unpack_Sarray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
 
 extern l_int32          ll_check_index(const char *_fun, lua_State *L, int arg, l_int32 imax = INT32_MAX);
-extern l_uint32         ll_check_color_index(const char *_fun, lua_State *L, int arg, Pix* pix);
+extern l_uint32         ll_check_color_index(const char *_fun, lua_State *L, int arg, Pix* pix = nullptr);
 extern char             ll_check_char(const char *_fun, lua_State *L, int arg);
 extern const char     * ll_check_string(const char *_fun, lua_State *L, int arg);
 extern const char     * ll_opt_string(const char *_fun, lua_State *L, int arg, const char* def = nullptr);
