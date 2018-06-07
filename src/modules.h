@@ -176,6 +176,7 @@ typedef L_BBUFFER           ByteBuffer;     /*!< Local type name for L_BBUFFER *
 typedef L_BMF               Bmf;            /*!< Local type name for L_BMF */
 typedef L_DEWARP            Dewarp;         /*!< Local type name for L_DEWAP */
 typedef L_DEWARPA           Dewarpa;        /*!< Local type name for L_DEWARPA */
+typedef DoubleLinkedList    DLList;         /*!< Local type name for L_DLLIST */
 typedef L_DNA               Dna;            /*!< Local type name for L_DNA */
 typedef L_DNAA              Dnaa;           /*!< Local type name for L_DNAA */
 typedef L_DNAHASH           DnaHash;        /*!< Local type name for L_DNAHASH */
@@ -247,7 +248,7 @@ typedef struct global_var_s {
         CCBorda **pccba;                    /*!< input pointer to a CCBorda */
         Dewarp **pdew;                      /*!< input pointer to a Dewarp */
         Dewarpa **pdewa;                    /*!< input pointer to a Dewarpa */
-        DoubleLinkedList **plist;           /*!< input pointer to a DoubleLinkedList */
+        DLList **plist;           /*!< input pointer to a DLList */
         Dna **pda;                          /*!< input pointer to a Dna */
         Dnaa **pdaa;                        /*!< input pointer to a Dnaa */
         DnaHash **pdah;                     /*!< input pointer to a DnaHash */
@@ -299,7 +300,7 @@ typedef struct global_var_s {
         CCBorda **pccba;                    /*!< output pointer to a pointer to a CCBorda */
         Dewarp **pdew;                      /*!< output pointer to a pointer to a Dewarp */
         Dewarpa **pdewa;                    /*!< output pointer to a pointer to a Dewarpa */
-        DoubleLinkedList **plist;           /*!< output pointer to a pointer to a DoubleLinkedList */
+        DLList **plist;           /*!< output pointer to a pointer to a DLList */
         Dna **pda;                          /*!< output pointer to a pointer to a Dna */
         Dnaa **pdaa;                        /*!< output pointer to a pointer to a Dnaa */
         DnaHash **pdah;                     /*!< output pointer to a pointer to a DnaHash */
@@ -688,12 +689,12 @@ extern int              ll_push_Bmf(const char *_fun, lua_State *L, Bmf *bmf);
 extern int              ll_new_Bmf(lua_State *L);
 
 /* lllist.cpp */
-extern DoubleLinkedList* ll_check_DoubleLinkedList(const char *_fun, lua_State *L, int arg);
-extern DoubleLinkedList* ll_take_DoubleLinkedList(const char *_fun, lua_State *L, int arg);
-extern DoubleLinkedList* ll_opt_DoubleLinkedList(const char *_fun, lua_State *L, int arg);
-extern DoubleLinkedList* ll_get_global_DoubleLinkedList(const char *_fun, lua_State *L, const char *name);
-extern int              ll_push_DoubleLinkedList(const char *_fun, lua_State *L, DoubleLinkedList *list);
-extern int              ll_new_DoubleLinkedList(lua_State *L);
+extern DLList* ll_check_DLList(const char *_fun, lua_State *L, int arg);
+extern DLList* ll_take_DLList(const char *_fun, lua_State *L, int arg);
+extern DLList* ll_opt_DLList(const char *_fun, lua_State *L, int arg);
+extern DLList* ll_get_global_DLList(const char *_fun, lua_State *L, const char *name);
+extern int              ll_push_DLList(const char *_fun, lua_State *L, DLList *list);
+extern int              ll_new_DLList(lua_State *L);
 
 /* llnuma.cpp */
 extern Numa           * ll_check_Numa(const char *_fun, lua_State *L, int arg);

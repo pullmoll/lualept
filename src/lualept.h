@@ -71,7 +71,7 @@ typedef struct lua_State lua_State;
 #define	LL_CCBORDA      "CCBorda"       /*!< Lua class: CCBorda (array of CCBord) */
 #define	LL_DEWARP       "Dewarp"        /*!< Lua class: Dewarp */
 #define	LL_DEWARPA      "Dewarpa"       /*!< Lua class: Dewarpa (array of Dewarp) */
-#define	LL_DLLIST	"Dllist"        /*!< Lua class: DoubleLinkedList */
+#define	LL_DLLIST	"Dllist"        /*!< Lua class: DLList */
 #define	LL_DNA		"Dna"           /*!< Lua class: array of doubles (l_float64, equiv. to lua_Number) */
 #define	LL_DNAA		"Dnaa"          /*!< Lua class: Dnaa (array of Dna) */
 #define LL_DNAHASH      "DnaHash"       /*!< Lua class: DnaHash */
@@ -111,7 +111,7 @@ LUALEPT_DLL extern int ll_open_Amap(lua_State *L);
 LUALEPT_DLL extern int ll_open_Aset(lua_State *L);
 LUALEPT_DLL extern int ll_open_ByteBuffer(lua_State *L);
 LUALEPT_DLL extern int ll_open_Bmf(lua_State *L);
-LUALEPT_DLL extern int ll_open_DoubleLinkedList(lua_State *L);
+LUALEPT_DLL extern int ll_open_DLList(lua_State *L);
 LUALEPT_DLL extern int ll_open_Numa(lua_State *L);
 LUALEPT_DLL extern int ll_open_Numaa(lua_State *L);
 LUALEPT_DLL extern int ll_open_Dewarp(lua_State *L);

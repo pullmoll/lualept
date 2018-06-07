@@ -63,7 +63,7 @@
  * - CCBorda
  * - Dewarp
  * - Dewarpa
- * - DoubleLinkedList
+ * - DLList
  * - Dna
  * - Dnaa
  * - DPix
@@ -4735,7 +4735,7 @@ ll_set_all_globals(const char *_fun, lua_State *L, global_var_t *vars)
         }
 
         if (!strcmp(LL_DLLIST, var->type)) {
-            ll_push_DoubleLinkedList(_fun, L, *var->i.plist);
+            ll_push_DLList(_fun, L, *var->i.plist);
             lua_setglobal(L, var->name);
             continue;
         }
@@ -5071,7 +5071,7 @@ ll_get_all_globals(const char *_fun, lua_State *L, global_var_t *vars)
         }
 
         if (!strcmp(LL_DLLIST, var->type)) {
-            *var->o.plist = ll_get_global_DoubleLinkedList(_fun, L, var->name);
+            *var->o.plist = ll_get_global_DLList(_fun, L, var->name);
             continue;
         }
 
@@ -5772,7 +5772,7 @@ luaopen_lualept(lua_State *L)
     ll_open_Dna(L);
     ll_open_Dnaa(L);
     ll_open_DnaHash(L);
-    ll_open_DoubleLinkedList(L);
+    ll_open_DLList(L);
     ll_open_FPix(L);
     ll_open_FPixa(L);
     ll_open_Kernel(L);
@@ -5798,14 +5798,15 @@ luaopen_lualept(lua_State *L)
 
 /**
  * \brief Run a Lua script.
- * \param filename name of an external file to run, if script == nullptr
+ * \param name filename of an external file to run, if script == nullptr
  * \param script if != nullptr, load the string and run it
+ *        using %name as chunk name for debug output
  * \param set_vars optional array of global variable definitions to set.
  * \param get_vars optional array of global variable definitions to get.
  * \return 0 on success, or 1 on error
  */
 int
-ll_run(const char *filename, const char *script, ll_global_var_t *set_vars, ll_global_var_t *get_vars)
+ll_run(const char *name, const char *script, ll_global_var_t *set_vars, ll_global_var_t *get_vars)
 {
     FUNC("ll_run");
     global_var_t *gvars = nullptr;
@@ -5836,17 +5837,17 @@ ll_run(const char *filename, const char *script, ll_global_var_t *set_vars, ll_g
     ll_set_all_globals(_fun, L, gvars);
 
     if (nullptr == script) {
-        /* load from a filename */
-        res = luaL_loadfile(L, filename);
+        /* load from a file %name */
+        res = luaL_loadfile(L, name);
         if (LUA_OK != res) {
             const char* msg = lua_tostring(L, -1);
             lua_close(L);
             return ERROR_INT(msg, _fun, 1);
         }
     } else {
-        /* load from string %script */
+        /* load from text string %script and use %name as chunk name */
         size_t size = strlen(script);
-        res = luaL_loadbufferx(L, script, size, filename, "rb");
+        res = luaL_loadbufferx(L, script, size, name, "t");
         if (LUA_OK != res) {
             const char* msg = lua_tostring(L, -1);
             lua_close(L);
