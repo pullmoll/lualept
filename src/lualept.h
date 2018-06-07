@@ -63,6 +63,7 @@ typedef struct lua_State lua_State;
 #define	LL_ASET		"Aset"          /*!< Lua class: Aset (key set) */
 #define	LL_BBUFFER	"Bbuffer"       /*!< Lua class: Bbuffer (byte buffer) */
 #define	LL_BMF		"Bmf"           /*!< Lua class: Bmf (Bitmap font) */
+#define	LL_BYTEA        "Bytea"         /*!< Lua class: Bytea (array of bytes) */
 #define	LL_BOX		"Box"           /*!< Lua class: Box (quad l_int32 for x,y,w,h) */
 #define	LL_BOXA		"Boxa"          /*!< Lua class: Boxa (array of Box) */
 #define	LL_BOXAA	"Boxaa"         /*!< Lua class: Boxaa (array of Boxa) */
@@ -109,8 +110,9 @@ typedef struct ll_global_var_s {
 
 LUALEPT_DLL extern int ll_open_Amap(lua_State *L);
 LUALEPT_DLL extern int ll_open_Aset(lua_State *L);
-LUALEPT_DLL extern int ll_open_ByteBuffer(lua_State *L);
 LUALEPT_DLL extern int ll_open_Bmf(lua_State *L);
+LUALEPT_DLL extern int ll_open_ByteBuffer(lua_State *L);
+LUALEPT_DLL extern int ll_open_Bytea(lua_State *L);
 LUALEPT_DLL extern int ll_open_DLList(lua_State *L);
 LUALEPT_DLL extern int ll_open_Numa(lua_State *L);
 LUALEPT_DLL extern int ll_open_Numaa(lua_State *L);

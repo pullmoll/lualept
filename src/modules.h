@@ -174,6 +174,7 @@ typedef L_ASET              Aset;           /*!< Local type name for L_ASET */
 typedef L_ASET_NODE         AsetNode;       /*!< Local type name for L_ASET_NODE */
 typedef L_BBUFFER           ByteBuffer;     /*!< Local type name for L_BBUFFER */
 typedef L_BMF               Bmf;            /*!< Local type name for L_BMF */
+typedef L_BYTEA             Bytea;          /*!< Local type name for L_BYTEA */
 typedef L_DEWARP            Dewarp;         /*!< Local type name for L_DEWAP */
 typedef L_DEWARPA           Dewarpa;        /*!< Local type name for L_DEWARPA */
 typedef DoubleLinkedList    DLList;         /*!< Local type name for L_DLLIST */
@@ -515,6 +516,8 @@ extern l_float32        ll_opt_l_float32(const char *_fun, lua_State *L, int arg
 extern l_float64        ll_check_l_float64(const char *_fun, lua_State *L, int arg);
 extern l_float64        ll_opt_l_float64(const char *_fun, lua_State *L, int arg, l_float32 def = 0.0);
 extern l_float32      * ll_check_vector(const char *_fun, lua_State *L, int arg, int n = 6);
+extern size_t           ll_check_size_t(const char *_fun, lua_State *L, int arg);
+extern size_t           ll_opt_size_t(const char *_fun, lua_State *L, int arg, size_t def = 0);
 
 /*
  *  lualept string Leptonica enumeration value lookup functions
@@ -687,6 +690,14 @@ extern Bmf            * ll_opt_Bmf(const char *_fun, lua_State *L, int arg);
 extern Bmf            * ll_get_global_Bmf(const char *_fun, lua_State *L, const char *name);
 extern int              ll_push_Bmf(const char *_fun, lua_State *L, Bmf *bmf);
 extern int              ll_new_Bmf(lua_State *L);
+
+/* llbytea.cpp */
+extern Bytea          * ll_check_Bytea(const char *_fun, lua_State *L, int arg);
+extern Bytea          * ll_take_Bytea(const char *_fun, lua_State *L, int arg);
+extern Bytea          * ll_opt_Bytea(const char *_fun, lua_State *L, int arg);
+extern Bytea          * ll_get_global_Bytea(const char *_fun, lua_State *L, const char *name);
+extern int              ll_push_Bytea(const char *_fun, lua_State *L, Bytea *bmf);
+extern int              ll_new_Bytea(lua_State *L);
 
 /* lllist.cpp */
 extern DLList* ll_check_DLList(const char *_fun, lua_State *L, int arg);

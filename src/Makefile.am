@@ -18,6 +18,7 @@ liblualept_la_SOURCES = \
 	llbox.cpp \
 	llboxa.cpp \
 	llboxaa.cpp \
+	llbytea.cpp \
 	llccbord.cpp \
 	llccborda.cpp \
 	llcompdata.cpp \

@@ -1933,6 +1933,47 @@ ll_check_vector(const char *_fun, lua_State *L, int arg, int n)
 }
 
 /**
+ * \brief Check if an argument is a lua_Integer in the range of size_t.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the integer
+ * \return size_t for the integer; lua_error if out of bounds
+ */
+size_t
+ll_check_size_t(const char *_fun, lua_State *L, int arg)
+{
+    lua_Integer val = luaL_checkinteger(L, arg);
+
+    if (val < 0 || static_cast<size_t>(val) > SIZE_MAX) {
+        lua_pushfstring(L, "%s: size_t #%d out of bounds (%d)", _fun, arg, val);
+        lua_error(L);
+        return 0;    /* NOTREACHED */
+    }
+    return static_cast<size_t>(val);
+}
+
+/**
+ * \brief Return an argument lua_Integer in the range of size_t or the default.
+ * \param _fun calling function's name
+ * \param L pointer to the lua_State
+ * \param arg index where to find the integer
+ * \param def default value
+ * \return size_t for the integer; lua_error if out of bounds
+ */
+size_t
+ll_opt_size_t(const char *_fun, lua_State *L, int arg, size_t def)
+{
+    lua_Integer val = luaL_optinteger(L, arg, static_cast<lua_Integer>(def));
+
+    if (val < 0 || val > UINT32_MAX) {
+        lua_pushfstring(L, "%s: size_t #%d out of bounds (%d)", _fun, arg, val);
+        lua_error(L);
+        return def;    /* NOTREACHED */
+    }
+    return static_cast<size_t>(val);
+}
+
+/**
  * \brief Push a string to the Lua stack listing the table of options.
  * \param L pointer to the lua_State
  * \param tbl table of key/value pairs
@@ -5759,10 +5800,11 @@ luaopen_lualept(lua_State *L)
     ll_open_Amap(L);
     ll_open_Aset(L);
     ll_open_Bmf(L);
-    ll_open_ByteBuffer(L);
     ll_open_Box(L);
     ll_open_Boxa(L);
     ll_open_Boxaa(L);
+    ll_open_ByteBuffer(L);
+    ll_open_Bytea(L);
     ll_open_CCBord(L);
     ll_open_CCBorda(L);
     ll_open_CompData(L);

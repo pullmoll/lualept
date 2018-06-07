@@ -276,15 +276,23 @@ end
 -- \return string with call to function to retrieve vtype
 --
 function getter(vtype, arg, name)
+	if vtype == "void *" then
+		-- check for light user data
+		return "ll_check_ludata(_fun, L, " .. arg .. ")"
+	end
 	if vtype == "const char*" then
+		-- check for a string
 		return "ll_check_string(_fun, L, " .. arg .. ")"
 	end
 	if vtype == "const l_uint8*" then
+		-- check for a lstring cast to l_uint8*
 		return "ll_check_lbytes(_fun, L, " .. arg .. ", &size)"
 	end
+	--[[
 	if vtype:match("FILE%s*%*") then
 		return "ll_check_stream(_fun, L, " .. arg .. ")"
 	end
+	--]]
 	if vtype:match("luaL_Stream%s*%*") then
 		return "ll_check_stream(_fun, L, " .. arg .. ")"
 	end
@@ -307,6 +315,7 @@ function getter(vtype, arg, name)
 	if vtype == "Sarray*" then
 		return "ll_unpack_Sarray(_fun, L, " .. arg .. ", nullptr)"
 	end
+	-- detecting well known variable names
 	if name == "accessflag" or name == "copyflag" then
 		return "ll_check_access_storage(_fun, L, " .. arg .. ")"
 	end
@@ -315,6 +324,9 @@ function getter(vtype, arg, name)
 	end
 	if name == "incolor" then
 		return "ll_check_set_black_white(_fun, L, " .. arg .. ")"
+	end
+	if name == "useboth" then
+		return "ll_opt_boolean(_fun, L, " .. arg .. ", FALSE)"
 	end
 	vtype = vtype:gsub("%*", "")
 	vtype = vtype:gsub("%s", "")
@@ -344,6 +356,9 @@ function pusher(vtype, var, isref)
 	if vtype:match("l_ok") then
 		return "ll_push_boolean(_fun, L, 0 == " .. var .. ")"
 	end
+	if vtype:match("FILE%s*%*") then
+		return "ll_push_stream(_fun, L, " .. var .. ")"
+	end
 	if isref then
 		if vtype:match("l_uint8%s*%*") then
 			return "ll_push_lbytes(_fun, L, " .. var ..", size)"
@@ -367,6 +382,7 @@ function pusher(vtype, var, isref)
 			return "ll_pack_Sarray(_fun, L, " .. var .. ")"
 		end
 	end
+	vtype = vtype:gsub("%s*", "")
 	vtype = vtype:gsub("%*$", "")
 	return "ll_push_" .. vtype .. "(_fun, L, " .. var ..")"
 end
@@ -388,8 +404,10 @@ function result_name(rtype, names)
 				Box		= "box",
 				Boxa		= "boxa",
 				Boxaa		= "boxaa",
+				Bytea		= "ba",
 				CCBord		= "ccb",
 				CCBorda		= "ccba",
+				DLList		= "list",
 				DPix		= "dpix",
 				FPix		= "fpix",
 				FPixa		= "fpixa",
@@ -415,6 +433,7 @@ function result_name(rtype, names)
 				Sel		= "sel",
 				Sela		= "sela",
 				WShed		= "ws",
+				l_ok		= "ok"
 			}
 			return varname[s] or "result"
 		end)
@@ -439,9 +458,6 @@ function typedescr(vtype)
 	end
 	if vtype:match("((const )?l_uint8$s*%*)") then
 		return "lstring"
-	end
-	if vtype:match("FILE%s*%*") then
-		return "luaL_Stream*"
 	end
 	vtype = vtype:gsub("%s+%*", "*")
 	vtype = vtype:gsub("%s+$", "")
@@ -493,10 +509,12 @@ function parse(fd, str)
 				BOXAA		= "Boxaa",
 				CCBORD		= "CCBord",
 				CCBORDA		= "CCBorda",
+				DLLIST		= "DLList",
 				DPIX		= "DPix",
 				FPIX		= "FPix",
 				FPIXA		= "FPixa",
 				L_BBUFFER	= "ByteBuffer",
+				L_BYTEA		= "Bytea",
 				L_COMP_DATA	= "CompData",
 				L_DEWARP	= "Dewarp",
 				L_DEWARPA	= "Dewarpa",
@@ -564,7 +582,7 @@ function parse(fd, str)
 		local vtype, name, get
 		if p == "..." then
 			vtype, name = "va_list", "ap"
-		elseif p == "FILE *" then
+		elseif p:match("FILE%s*%*") then
 			-- replace "FILE* fp" with "luaL_Stream* stream"
 			vtype = "luaL_Stream*"
 			name = "stream"
@@ -611,9 +629,12 @@ function parse(fd, str)
 			argi = argi + 1
 		end
 		vtype = vtype:gsub("%*", " *")
+		vars[argc] = '    ' .. vtype .. name .. ' = ' .. get .. ';'
+		if name == "stream" then
+			name = name .. "->f"
+		end
 		types[argc] = vtype
 		names[argc] = name
-		vars[argc] = '    ' .. vtype .. name .. ' = ' .. get .. ';'
 		argc = argc + 1
 	end
 
@@ -630,12 +651,13 @@ function parse(fd, str)
 		local name = names[i]
 		local param = typedescr(vtype)
 		if refs[name] then
+			-- this is a return value
 			retn = retn + 1
 		else
 			-- this is a true parameter
 			line = ' * Arg #' .. argi
 			if argi == 1 then
-				-- this is wrong for constructors...
+				-- this comment is wrong for constructors...
 				line = line .. ' (i.e. self)'
 			end
 			line = line .. ' is expected to be a ' .. param
@@ -645,6 +667,7 @@ function parse(fd, str)
 		end
 	end
 
+	-- emit the doxygen "Note(s):" header found in Leptonica's source
 	if heads[fname] ~= nil then
 		local t = heads[fname]
 		-- empty line
@@ -684,8 +707,8 @@ function parse(fd, str)
 		end
 	end
 
+	local rname = result_name(rtype, names)
 	if tsize(refs) > 0 then
-		local rname = result_name(rtype, names)
 		-- there were references to variables
 		if rtype == "l_ok" then
 			-- The Leptonica function returns 0 on success
@@ -704,13 +727,19 @@ function parse(fd, str)
 			local name = names[i]
 			if refs[name] ~= nil then
 				local vtype = types[i]
-				func[#func+1] = '    ' .. pusher(vtype, name, false) .. ';'
+				-- handle pushing a vector of 6 floats
+				if vtype:match("l_float32%s*%*") and name:match("p?vci?") then
+					for j = 0, 5 do
+						func[#func+1] = '    ' .. pusher(vtype, name .. '[' .. j .. ']', false) .. ';'
+					end
+					retn = 6
+				else
+					func[#func+1] = '    ' .. pusher(vtype, name, false) .. ';'
+				end
 			end
 		end
 		func[#func+1] = '    return ' .. retn .. ';'
 	else
-		local rname = result_name(rtype, names)
-		-- there were references to variables
 		-- there were no references to variables
 		-- assume the Leptonica function returns the result
 		if not rtype:match("%*$") then
