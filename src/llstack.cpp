@@ -182,41 +182,6 @@ ll_check_Stack(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class Stack* and take it.
- * \param _fun calling function's name
- * \param L Lua state
- * \param arg index where to find the user data (usually 1)
- * \return pointer to the Stack* contained in the user data
- */
-Stack *
-ll_take_Stack(const char *_fun, lua_State *L, int arg)
-{
-    Stack **pstack = ll_check_udata<Stack>(_fun, L, arg, TNAME);
-    Stack *stack = *pstack;
-    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
-        TNAME,
-        "pstack", reinterpret_cast<void *>(pstack),
-        "stack", reinterpret_cast<void *>(stack));
-    *pstack = nullptr;
-    return stack;
-}
-
-/**
- * \brief Take a Stack* from a global variable %name.
- * \param _fun calling function's name
- * \param L Lua state
- * \param name of the global variable
- * \return pointer to the Amap* contained in the user data
- */
-Stack *
-ll_get_global_Stack(const char *_fun, lua_State *L, const char *name)
-{
-    if (LUA_TUSERDATA != lua_getglobal(L, name))
-        return nullptr;
-    return ll_take_Stack(_fun, L, -1);
-}
-
-/**
  * \brief Optionally expect a Stack* at index (%arg) on the Lua stack.
  * \param _fun calling function's name
  * \param L Lua state

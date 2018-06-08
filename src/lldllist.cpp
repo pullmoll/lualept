@@ -445,41 +445,6 @@ ll_check_DLList(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class DLList* and take it.
- * \param _fun calling function's name
- * \param L Lua state
- * \param arg index where to find the user data (usually 1)
- * \return pointer to the DLList* contained in the user data
- */
-DLList *
-ll_take_DLList(const char *_fun, lua_State *L, int arg)
-{
-    DLList **plist = ll_check_udata<DLList>(_fun, L, arg, TNAME);
-    DLList *list = *plist;
-    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
-        TNAME,
-        "plist", reinterpret_cast<void *>(plist),
-        "list", reinterpret_cast<void *>(list));
-    *plist = nullptr;
-    return list;
-}
-
-/**
- * \brief Take a DLList* from a global variable %name.
- * \param _fun calling function's name
- * \param L Lua state
- * \param name of the global variable
- * \return pointer to the Amap* contained in the user data
- */
-DLList *
-ll_get_global_DLList(const char *_fun, lua_State *L, const char *name)
-{
-    if (LUA_TUSERDATA != lua_getglobal(L, name))
-        return nullptr;
-    return ll_take_DLList(_fun, L, -1);
-}
-
-/**
  * \brief Optionally expect a DLList* at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L Lua state

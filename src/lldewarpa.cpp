@@ -894,41 +894,6 @@ ll_check_Dewarpa(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class Dewarpa* and take it.
- * \param _fun calling function's name
- * \param L Lua state
- * \param arg index where to find the user data (usually 1)
- * \return pointer to the Dewarpa* contained in the user data
- */
-Dewarpa *
-ll_take_Dewarpa(const char *_fun, lua_State *L, int arg)
-{
-    Dewarpa **pdewa = ll_check_udata<Dewarpa>(_fun, L, arg, TNAME);
-    Dewarpa *dewa = *pdewa;
-    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
-        TNAME,
-        "pdewa", reinterpret_cast<void *>(pdewa),
-        "dewa", reinterpret_cast<void *>(dewa));
-    *pdewa = nullptr;
-    return dewa;
-}
-
-/**
- * \brief Take a Dewarpa* from a global variable %name.
- * \param _fun calling function's name
- * \param L Lua state
- * \param name of the global variable
- * \return pointer to the Amap* contained in the user data
- */
-Dewarpa *
-ll_get_global_Dewarpa(const char *_fun, lua_State *L, const char *name)
-{
-    if (LUA_TUSERDATA != lua_getglobal(L, name))
-        return nullptr;
-    return ll_take_Dewarpa(_fun, L, -1);
-}
-
-/**
  * \brief Optionally expect a Dewarpa* at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L Lua state

@@ -703,41 +703,6 @@ ll_check_Kernel(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class Kernel* and take it.
- * \param _fun calling function's name
- * \param L Lua state
- * \param arg index where to find the user data (usually 1)
- * \return pointer to the Kernel* contained in the user data
- */
-Kernel *
-ll_take_Kernel(const char *_fun, lua_State *L, int arg)
-{
-    Kernel **pkel = ll_check_udata<Kernel>(_fun, L, arg, TNAME);
-    Kernel *kel = *pkel;
-    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
-        TNAME,
-        "pkel", reinterpret_cast<void *>(pkel),
-        "kel", reinterpret_cast<void *>(kel));
-    *pkel = nullptr;
-    return kel;
-}
-
-/**
- * \brief Take a Kernel* from a global variable %name.
- * \param _fun calling function's name
- * \param L Lua state
- * \param name of the global variable
- * \return pointer to the Amap* contained in the user data
- */
-Kernel *
-ll_get_global_Kernel(const char *_fun, lua_State *L, const char *name)
-{
-    if (LUA_TUSERDATA != lua_getglobal(L, name))
-        return nullptr;
-    return ll_take_Kernel(_fun, L, -1);
-}
-
-/**
  * \brief Optionally expect a Kernel* at index (%arg) on the Lua stack.
  * \param _fun calling function's name
  * \param L Lua state

@@ -861,41 +861,6 @@ ll_check_DPix(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class DPix* and take it.
- * \param _fun calling function's name
- * \param L Lua state
- * \param arg index where to find the user data (usually 1)
- * \return pointer to the DPix* contained in the user data
- */
-DPix *
-ll_take_DPix(const char *_fun, lua_State *L, int arg)
-{
-    DPix **pdpix = ll_check_udata<DPix>(_fun, L, arg, TNAME);
-    DPix *dpix = *pdpix;
-    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
-        TNAME,
-        "pdpix", reinterpret_cast<void *>(pdpix),
-        "dpix", reinterpret_cast<void *>(dpix));
-    *pdpix = nullptr;
-    return dpix;
-}
-
-/**
- * \brief Take a DPix* from a global variable %name.
- * \param _fun calling function's name
- * \param L Lua state
- * \param name of the global variable
- * \return pointer to the Amap* contained in the user data
- */
-DPix *
-ll_get_global_DPix(const char *_fun, lua_State *L, const char *name)
-{
-    if (LUA_TUSERDATA != lua_getglobal(L, name))
-        return nullptr;
-    return ll_take_DPix(_fun, L, -1);
-}
-
-/**
  * \brief Optionally expect a DPix* at index (%arg) on the Lua stack.
  * \param _fun calling function's name
  * \param L Lua state

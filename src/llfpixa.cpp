@@ -418,41 +418,6 @@ ll_check_FPixa(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class FPixa* and take it.
- * \param _fun calling function's name
- * \param L Lua state
- * \param arg index where to find the user data (usually 1)
- * \return pointer to the FPixa* contained in the user data
- */
-FPixa *
-ll_take_FPixa(const char *_fun, lua_State *L, int arg)
-{
-    FPixa **pfpixa = ll_check_udata<FPixa>(_fun, L, arg, TNAME);
-    FPixa *fpixa = *pfpixa;
-    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
-        TNAME,
-        "pfpixa", reinterpret_cast<void *>(pfpixa),
-        "fpixa", reinterpret_cast<void *>(fpixa));
-    *pfpixa = nullptr;
-    return fpixa;
-}
-
-/**
- * \brief Take a FPixa* from a global variable %name.
- * \param _fun calling function's name
- * \param L Lua state
- * \param name of the global variable
- * \return pointer to the Amap* contained in the user data
- */
-FPixa *
-ll_get_global_FPixa(const char *_fun, lua_State *L, const char *name)
-{
-    if (LUA_TUSERDATA != lua_getglobal(L, name))
-        return nullptr;
-    return ll_take_FPixa(_fun, L, -1);
-}
-
-/**
  * \brief Optionally expect a FPixa* at index (%arg) on the Lua stack.
  * \param _fun calling function's name
  * \param L Lua state

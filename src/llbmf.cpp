@@ -207,41 +207,6 @@ ll_check_Bmf(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class Bmf* and take it.
- * \param _fun calling function's name
- * \param L Lua state
- * \param arg index where to find the user data (usually 1)
- * \return pointer to the Bmf* contained in the user data
- */
-Bmf *
-ll_take_Bmf(const char *_fun, lua_State *L, int arg)
-{
-    Bmf **pbmf = ll_check_udata<Bmf>(_fun, L, arg, TNAME);
-    Bmf *bmf = *pbmf;
-    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
-        TNAME,
-        "pbmf", reinterpret_cast<void *>(pbmf),
-        "bmf", reinterpret_cast<void *>(bmf));
-    *pbmf = nullptr;
-    return bmf;
-}
-
-/**
- * \brief Take a Bmf* from a global variable %name.
- * \param _fun calling function's name
- * \param L Lua state
- * \param name of the global variable
- * \return pointer to the Amap* contained in the user data
- */
-Bmf *
-ll_get_global_Bmf(const char *_fun, lua_State *L, const char *name)
-{
-    if (LUA_TUSERDATA != lua_getglobal(L, name))
-        return nullptr;
-    return ll_take_Bmf(_fun, L, -1);
-}
-
-/**
  * \brief Optionally expect a LL_DLLIST at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L Lua state

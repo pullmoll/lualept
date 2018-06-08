@@ -252,41 +252,6 @@ ll_check_WShed(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class WShed* and take it.
- * \param _fun calling function's name
- * \param L Lua state
- * \param arg index where to find the user data (usually 1)
- * \return pointer to the WShed* contained in the user data
- */
-WShed *
-ll_take_WShed(const char *_fun, lua_State *L, int arg)
-{
-    WShed **pwshed = ll_check_udata<WShed>(_fun, L, arg, TNAME);
-    WShed *wshed = *pwshed;
-    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
-        TNAME,
-        "pwshed", reinterpret_cast<void *>(pwshed),
-        "wshed", reinterpret_cast<void *>(wshed));
-    *pwshed = nullptr;
-    return wshed;
-}
-
-/**
- * \brief Take a WShed* from a global variable %name.
- * \param _fun calling function's name
- * \param L Lua state
- * \param name of the global variable
- * \return pointer to the Amap* contained in the user data
- */
-WShed *
-ll_get_global_WShed(const char *_fun, lua_State *L, const char *name)
-{
-    if (LUA_TUSERDATA != lua_getglobal(L, name))
-        return nullptr;
-    return ll_take_WShed(_fun, L, -1);
-}
-
-/**
  * \brief Optionally expect a LL_DLLIST at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L Lua state

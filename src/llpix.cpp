@@ -28523,7 +28523,7 @@ SetColormap(lua_State *L)
 {
     LL_FUNC("SetColormap");
     Pix *pix = ll_check_Pix(_fun, L, 1);
-    PixColormap* colormap = ll_take_PixColormap(_fun, L, 2);
+    PixColormap* colormap = ll_take_udata<PixColormap>(_fun, L, 2, LL_PIXCMAP);
     return ll_push_boolean(_fun, L, 0 == pixSetColormap(pix, colormap));
 }
 
@@ -33902,41 +33902,6 @@ Pix *
 ll_check_Pix(const char *_fun, lua_State *L, int arg)
 {
     return *ll_check_udata<Pix>(_fun, L, arg, TNAME);
-}
-
-/**
- * \brief Check Lua stack at index %arg for udata of class Pix* and take it.
- * \param _fun calling function's name
- * \param L Lua state
- * \param arg index where to find the user data (usually 1)
- * \return pointer to the Pix* contained in the user data
- */
-Pix *
-ll_take_Pix(const char *_fun, lua_State *L, int arg)
-{
-    Pix **ppix = ll_check_udata<Pix>(_fun, L, arg, TNAME);
-    Pix *pix = *ppix;
-    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
-        TNAME,
-        "ppix", reinterpret_cast<void *>(ppix),
-        "pix", reinterpret_cast<void *>(pix));
-    *ppix = nullptr;
-    return pix;
-}
-
-/**
- * \brief Take a Pix* from a global variable %name.
- * \param _fun calling function's name
- * \param L Lua state
- * \param name of the global variable
- * \return pointer to the Amap* contained in the user data
- */
-Pix *
-ll_get_global_Pix(const char *_fun, lua_State *L, const char *name)
-{
-    if (LUA_TUSERDATA != lua_getglobal(L, name))
-        return nullptr;
-    return ll_take_Pix(_fun, L, -1);
 }
 
 /**

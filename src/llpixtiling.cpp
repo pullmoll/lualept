@@ -142,41 +142,6 @@ ll_check_PixTiling(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class PixTiling* and take it.
- * \param _fun calling function's name
- * \param L Lua state
- * \param arg index where to find the user data (usually 1)
- * \return pointer to the PixTiling* contained in the user data
- */
-PixTiling *
-ll_take_PixTiling(const char *_fun, lua_State *L, int arg)
-{
-    PixTiling **ppixt = ll_check_udata<PixTiling>(_fun, L, arg, TNAME);
-    PixTiling *pixt = *ppixt;
-    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
-        TNAME,
-        "ppixt", reinterpret_cast<void *>(ppixt),
-        "pixt", reinterpret_cast<void *>(pixt));
-    *ppixt = nullptr;
-    return pixt;
-}
-
-/**
- * \brief Take a PixTiling* from a global variable %name.
- * \param _fun calling function's name
- * \param L Lua state
- * \param name of the global variable
- * \return pointer to the Amap* contained in the user data
- */
-PixTiling *
-ll_get_global_PixTiling(const char *_fun, lua_State *L, const char *name)
-{
-    if (LUA_TUSERDATA != lua_getglobal(L, name))
-        return nullptr;
-    return ll_take_PixTiling(_fun, L, -1);
-}
-
-/**
  * \brief Optionally expect a PixTiling* at index (%arg) on the Lua stack.
  * \param _fun calling function's name
  * \param L Lua state

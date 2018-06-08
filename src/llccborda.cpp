@@ -541,41 +541,6 @@ ll_check_CCBorda(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class CCBorda* and take it.
- * \param _fun calling function's name
- * \param L Lua state
- * \param arg index where to find the user data (usually 1)
- * \return pointer to the CCBorda* contained in the user data
- */
-CCBorda *
-ll_take_CCBorda(const char *_fun, lua_State *L, int arg)
-{
-    CCBorda **pccba = ll_check_udata<CCBorda>(_fun, L, arg, TNAME);
-    CCBorda *ccba = *pccba;
-    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
-        TNAME,
-        "pccba", reinterpret_cast<void *>(pccba),
-        "ccba", reinterpret_cast<void *>(ccba));
-    *pccba = nullptr;
-    return ccba;
-}
-
-/**
- * \brief Take a CCBorda* from a global variable %name.
- * \param _fun calling function's name
- * \param L Lua state
- * \param name of the global variable
- * \return pointer to the Amap* contained in the user data
- */
-CCBorda *
-ll_get_global_CCBorda(const char *_fun, lua_State *L, const char *name)
-{
-    if (LUA_TUSERDATA != lua_getglobal(L, name))
-        return nullptr;
-    return ll_take_CCBorda(_fun, L, -1);
-}
-
-/**
  * \brief Optionally expect a CCBorda* at index (%arg) on the Lua stack.
  * \param _fun calling function's name
  * \param L Lua state

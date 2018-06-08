@@ -673,41 +673,6 @@ ll_check_Sela(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class Sela* and take it.
- * \param _fun calling function's name
- * \param L Lua state
- * \param arg index where to find the user data (usually 1)
- * \return pointer to the Sela* contained in the user data
- */
-Sela *
-ll_take_Sela(const char *_fun, lua_State *L, int arg)
-{
-    Sela **psela = ll_check_udata<Sela>(_fun, L, arg, TNAME);
-    Sela *sela = *psela;
-    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
-        TNAME,
-        "psela", reinterpret_cast<void *>(psela),
-        "sela", reinterpret_cast<void *>(sela));
-    *psela = nullptr;
-    return sela;
-}
-
-/**
- * \brief Take a Sela* from a global variable %name.
- * \param _fun calling function's name
- * \param L Lua state
- * \param name of the global variable
- * \return pointer to the Amap* contained in the user data
- */
-Sela *
-ll_get_global_Sela(const char *_fun, lua_State *L, const char *name)
-{
-    if (LUA_TUSERDATA != lua_getglobal(L, name))
-        return nullptr;
-    return ll_take_Sela(_fun, L, -1);
-}
-
-/**
  * \brief Optionally expect a Sela* at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L Lua state

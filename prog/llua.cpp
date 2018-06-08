@@ -44,23 +44,28 @@ int main(int argc, char **argv)
     const char* progname = nullptr;
     const char* filename = nullptr;
 
+    static Pix *pix_in = nullptr;
     static Box *box_in = nullptr;
     static Sarray *sa = nullptr;
+
+    static Pix *pix_out = nullptr;
     static Box *box_out = nullptr;
     static bool ok = false;
 
     static ll_global_var_t set_vars[] = {
-        {LL_SARRAY,     "sa",   &sa},
         {LL_BOX,        "box",  &box_in},
+        {LL_SARRAY,     "sa",   &sa},
+        {LL_PIX,        "pix",  &pix_in},
         LL_SENTINEL
     };
 
     static ll_global_var_t get_vars[] = {
         {LL_BOX,        "box",  &box_out},
         {LL_BOOLEAN,    "ok",   &ok},
+        {LL_PIX,        "pix",  &pix_out},
         LL_SENTINEL
     };
-    l_int32 x, y, w, h;
+    l_int32 x, y, w, h, d;
     int res;
 
     progname = strrchr(argv[0], '\\');
@@ -84,16 +89,28 @@ int main(int argc, char **argv)
     sa = sarrayCreate(8);
     snprintf(buff, sizeof(buff), "%s", "Hello, Lua!");
     sarrayAddString(sa, buff, L_COPY);
+
+    /* Create the Pix* pix_in */
+    pix_in = pixCreate(64, 64, 4);
+
     /* Create the Box* box_in */
     box_in = boxCreate(40, 40, 320, 240);
 
     res = ll_run(filename, nullptr, set_vars, get_vars);
     printf("%s: %s returned %d\n", progname, "ll_RunScript(script)", res);
 
+    printf("%s: Pix* pix_out = %p\n", progname, reinterpret_cast<void *>(pix_out));
+    if (pix_out) {
+        pixGetDimensions(pix_out, &w, &h, &d);
+        printf("%s: w, h, d = %d, %d, %d\n", progname, w, h, d);
+        pixDestroy(&pix_out);
+    }
+
     printf("%s: Box* box_out = %p\n", progname, reinterpret_cast<void *>(box_out));
     if (box_out) {
         boxGetGeometry(box_out, &x, &y, &w, &h);
         printf("%s: x, y, w, h = %d, %d, %d, %d\n", progname, x, y, w, h);
+        boxDestroy(&box_out);
     }
     printf("%s: bool ok = %s\n", progname, ok ? "true" : "false");
     return res;

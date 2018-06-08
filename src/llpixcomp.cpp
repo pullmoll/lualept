@@ -95,41 +95,6 @@ ll_check_PixComp(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class PixComp* and take it.
- * \param _fun calling function's name
- * \param L Lua state
- * \param arg index where to find the user data (usually 1)
- * \return pointer to the PixComp* contained in the user data
- */
-PixComp *
-ll_take_PixComp(const char *_fun, lua_State *L, int arg)
-{
-    PixComp **ppixc = ll_check_udata<PixComp>(_fun, L, arg, TNAME);
-    PixComp *pixc = *ppixc;
-    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
-        TNAME,
-        "ppixc", reinterpret_cast<void *>(ppixc),
-        "pixc", reinterpret_cast<void *>(pixc));
-    *ppixc = nullptr;
-    return pixc;
-}
-
-/**
- * \brief Take a PixComp* from a global variable %name.
- * \param _fun calling function's name
- * \param L Lua state
- * \param name of the global variable
- * \return pointer to the Amap* contained in the user data
- */
-PixComp *
-ll_get_global_PixComp(const char *_fun, lua_State *L, const char *name)
-{
-    if (LUA_TUSERDATA != lua_getglobal(L, name))
-        return nullptr;
-    return ll_take_PixComp(_fun, L, -1);
-}
-
-/**
  * \brief Optionally expect a PixComp* at index (%arg) on the Lua stack.
  * \param _fun calling function's name
  * \param L Lua state

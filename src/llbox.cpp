@@ -1012,41 +1012,6 @@ ll_check_Box(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class Box* and take it.
- * \param _fun calling function's name
- * \param L Lua state
- * \param arg index where to find the user data (usually 1)
- * \return pointer to the Box* contained in the user data
- */
-Box *
-ll_take_Box(const char *_fun, lua_State *L, int arg)
-{
-    Box **pbox = ll_check_udata<Box>(_fun, L, arg, TNAME);
-    Box *box = *pbox;
-    DBG(LOG_TAKE, "%s: '%s' %s = %p, %s = %p\n", _fun,
-        TNAME,
-        "pbox", reinterpret_cast<void *>(pbox),
-        "box", reinterpret_cast<void *>(box));
-    *pbox = nullptr;
-    return box;
-}
-
-/**
- * \brief Take a Box* from a global variable %name.
- * \param _fun calling function's name
- * \param L Lua state
- * \param name of the global variable
- * \return pointer to the Amap* contained in the user data
- */
-Box *
-ll_get_global_Box(const char *_fun, lua_State *L, const char *name)
-{
-    if (LUA_TUSERDATA != lua_getglobal(L, name))
-        return nullptr;
-    return ll_take_Box(_fun, L, -1);
-}
-
-/**
  * \brief Optionally expect a Box* at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L Lua state

@@ -2834,21 +2834,6 @@ ll_take_Boxa(const char *_fun, lua_State *L, int arg)
 }
 
 /**
- * \brief Take a Boxa* from a global variable %name.
- * \param _fun calling function's name
- * \param L Lua state
- * \param name of the global variable
- * \return pointer to the Amap* contained in the user data
- */
-Boxa *
-ll_get_global_Boxa(const char *_fun, lua_State *L, const char *name)
-{
-    if (LUA_TUSERDATA != lua_getglobal(L, name))
-        return nullptr;
-    return ll_take_Boxa(_fun, L, -1);
-}
-
-/**
  * \brief Optionally expect a Boxa* at index %arg on the Lua stack.
  * \param _fun calling function's name
  * \param L Lua state
