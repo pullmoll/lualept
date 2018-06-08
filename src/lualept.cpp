@@ -5359,7 +5359,9 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Return the lualept version number.
+ * \brief Return the a version number.
+ * Arg #1 (i.e. self) is expected to be a LuaLept* (ll)
+ * Arg #2 is expected to be a string describing the version of which library to return (which)
  * \param L Lua state
  * \return 1 string on the Lua stack
  */
@@ -5368,35 +5370,16 @@ Version(lua_State *L)
 {
     LL_FUNC("Version");
     LuaLept *ll = ll_check_lualept(_fun, L, 1);
-    lua_pushstring(L, ll->str_version);
-    return 1;
-}
-
-/**
- * \brief Return the Lua version number.
- * \param L Lua state
- * \return 1 string on the Lua stack
- */
-static int
-LuaVersion(lua_State *L)
-{
-    LL_FUNC("LuaVersion");
-    LuaLept *ll = ll_check_lualept(_fun, L, 1);
-    lua_pushstring(L, ll->str_version_lua);
-    return 1;
-}
-
-/**
- * \brief Return the Leptonica version number.
- * \param L Lua state
- * \return 1 string on the Lua stack
- */
-static int
-LeptVersion(lua_State *L)
-{
-    LL_FUNC("LeptVersion");
-    LuaLept *ll = ll_check_lualept(_fun, L, 1);
-    lua_pushstring(L, ll->str_version_lept);
+    const char *which = ll_opt_string(_fun, L, 2);
+    if (nullptr == which || 0 == ll_strcasecmp(which, "lualept")) {
+        lua_pushstring(L, ll->str_version);
+    } else if (0 == ll_strcasecmp(which, "lua")) {
+        lua_pushstring(L, ll->str_version_lua);
+    } else if (0 == ll_strcasecmp(which, "lept") || 0 == ll_strcasecmp(which, "leptonica")) {
+        lua_pushstring(L, ll->str_version_lept);
+    } else {
+        lua_pushfstring(L, "<unknown %s>", which);
+    }
     return 1;
 }
 
@@ -5771,8 +5754,6 @@ luaopen_lualept(lua_State *L)
         {"Debug",                   Debug},
         {"Create",                  Create},
         {"Version",                 Version},
-        {"LuaVersion",              LuaVersion},
-        {"LeptVersion",             LeptVersion},
         {"ComposeRGB",              ComposeRGB},
         {"ComposeRGBA",             ComposeRGBA},
         {"RGB",                     ComposeRGB},
