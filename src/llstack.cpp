@@ -59,24 +59,21 @@
  *      (3) To destroy the lstack, we destroy the ptr array, then
  *          the lstack, and then null the contents of the input ptr.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 void on the Lua stack
  */
 static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    Stack **pstack = ll_check_udata<Stack>(_fun, L, 1, TNAME);
+    Stack *stack = ll_take_udata<Stack>(_fun, L, 1, TNAME);
     l_int32 freeflag = ll_opt_boolean(_fun, L, 2, FALSE);
-    Stack *stack = *pstack;
-    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d, %s = %s\n", _fun,
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %d, %s = %s\n", _fun,
         TNAME,
-        "pstack", reinterpret_cast<void *>(pstack),
         "stack", reinterpret_cast<void *>(stack),
         "count", lstackGetCount(stack),
         "freeflag", freeflag ? "TRUE" : "FALSE");
     lstackDestroy(&stack, freeflag);
-    *pstack = nullptr;
     return 0;
 }
 
@@ -85,7 +82,7 @@ Destroy(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Stack* (lstack).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -103,7 +100,7 @@ GetCount(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Stack* (lstack).
  * Arg #2 is expected to be a light user data (item).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -123,7 +120,7 @@ Add(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a l_int32 (nalloc).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Stack * on the Lua stack
  */
 static int
@@ -140,7 +137,7 @@ Create(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Stack* (stack).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 light user data on the Lua stack
  */
 static int
@@ -159,7 +156,7 @@ Remove(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Stack* (lstack).
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -174,7 +171,7 @@ Print(lua_State *L)
 /**
  * \brief Check Lua stack at index (%arg) for udata of class Stack*.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Stack* contained in the user data
  */
@@ -187,7 +184,7 @@ ll_check_Stack(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Check Lua stack at index %arg for udata of class Stack* and take it.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Stack* contained in the user data
  */
@@ -207,7 +204,7 @@ ll_take_Stack(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Take a Stack* from a global variable %name.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param name of the global variable
  * \return pointer to the Amap* contained in the user data
  */
@@ -222,7 +219,7 @@ ll_get_global_Stack(const char *_fun, lua_State *L, const char *name)
 /**
  * \brief Optionally expect a Stack* at index (%arg) on the Lua stack.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Stack* contained in the user data
  */
@@ -237,7 +234,7 @@ ll_opt_Stack(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push Stack* to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param cd pointer to the L_Stack
  * \return 1 Stack* on the Lua stack
  */
@@ -255,7 +252,7 @@ ll_push_Stack(const char *_fun, lua_State *L, Stack *cd)
  * Arg #1 is expected to be a string (dir).
  * Arg #2 is expected to be a l_int32 (fontsize).
  *
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Stack* on the Lua stack
  */
 int
@@ -285,7 +282,7 @@ ll_new_Stack(lua_State *L)
 
 /**
  * \brief Register the Stack methods and functions in the Stack meta table.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 table on the Lua stack
  */
 int

@@ -53,22 +53,19 @@
  *      (1) Decrements the ref count and, if 0, destroys the pixa.
  *      (2) Always nulls the input ptr.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 nothing on the Lua stack
  */
 static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    Pixa **ppixa = ll_check_udata<Pixa>(_fun, L, 1, TNAME);
-    Pixa *pixa = *ppixa;
-    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d, %s = %d\n", _fun,
+    Pixa *pixa = ll_take_udata<Pixa>(_fun, L, 1, TNAME);
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %d\n", _fun,
         TNAME,
-        "ppixa", reinterpret_cast<void *>(ppixa),
         "pixa", reinterpret_cast<void *>(pixa),
         "count", pixaGetCount(pixa));
     pixaDestroy(&pixa);
-    *ppixa = nullptr;
     return 0;
 }
 
@@ -77,7 +74,7 @@ Destroy(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa*.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -95,7 +92,7 @@ GetCount(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pixa*.
  * Arg #2 is expected to be a Pix*.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -118,7 +115,7 @@ AddPix(lua_State *L)
  *          all boxes in the boxa.  The ptrs in the pix ptr array
  *          are all null'd.  The number of allocated pix, n, is set to 0.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -135,7 +132,7 @@ Clear(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pixa*.
  * Arg #2 is an optional string defining the storage flags (copy, clone, copy_clone).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pixa* on the Lua stack
  */
 static int
@@ -156,7 +153,7 @@ Copy(lua_State *L)
  * Leptonica's Notes:
  *      (1) This creates an empty boxa.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pixa* on the Lua stack
  */
 static int
@@ -180,7 +177,7 @@ Create(lua_State *L)
  *      (1) For bpp = 1, we truncate each retrieved pix to the ON
  *          pixels, which we assume for now start at (0,0)
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -206,7 +203,7 @@ CreateFromPix(lua_State *L)
  *          be set to 0 before the conversion, so that pixacompGetPix()
  *          fetches all the pixcomps.  It is reset at the end.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -234,7 +231,7 @@ CreateFromPixacomp(lua_State *L)
  *          mode value is returned as 0.  To always return the actual
  *          mode value, set %thresh = 0.  See pixGetRowStats().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -255,7 +252,7 @@ GetAlignedStats(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pixa*.
  * Arg #2 is expected to be a l_int32 (idx).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 4 integers on the Lua stack: x, y, w, h
  */
 static int
@@ -280,7 +277,7 @@ GetBoxGeometry(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pixa*.
  * Arg #2 is expected to be a l_int32 (idx).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 4 integers on the Lua stack: x, y, w, h
  */
 static int
@@ -310,7 +307,7 @@ GetPix(lua_State *L)
  *          because the function is O(n).
  *      (4) To append a pix to a pixa, it's easier to use pixaAddPix().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -340,7 +337,7 @@ InsertPix(lua_State *L)
  *      (2) If the two pixa have different sizes, a warning is issued,
  *          and the number of pairs returned is the minimum size.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pixa* on the Lua stack
  */
 static int
@@ -366,7 +363,7 @@ Interleave(lua_State *L)
  *      (3) iend < 0 means 'read to the end'
  *      (4) If pixas is NULL or contains no pix, this is a no-op.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -389,7 +386,7 @@ Join(lua_State *L)
  *      (1) The pix are stored in the file as png.
  *          If the png library is not linked, this will fail.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pixa* on the Lua stack
  */
 static int
@@ -414,7 +411,7 @@ Read(lua_State *L)
  *          filenames are read into the Pixa.  If substr is NULL,
  *          all filenames are read into the Pixa.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pixa* on the Lua stack
  */
 static int
@@ -432,7 +429,7 @@ ReadFiles(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string (data).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pixa* on the Lua stack
  */
 static int
@@ -454,7 +451,7 @@ ReadMem(lua_State *L)
  *      (1) The pix are stored in the file as png.
  *          If the png library is not linked, this will fail.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pixa* on the Lua stack
  */
 static int
@@ -478,7 +475,7 @@ ReadStream(lua_State *L)
  *          because the function is O(n).
  *      (3) The corresponding box is removed as well, if it exists.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -503,7 +500,7 @@ RemovePix(lua_State *L)
  *      (3) The corresponding box is removed as well, if it exists.
  *      (4) The removed pix and box can either be retained or destroyed.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 2 Pix* (pix) and one Box* (box) on the Lua stack
  */
 static int
@@ -531,7 +528,7 @@ RemovePixAndSave(lua_State *L)
  *      (1) In-place replacement of one pix.
  *      (2) The previous pix at that location is destroyed.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -555,7 +552,7 @@ ReplacePix(lua_State *L)
  * Arg #2 is expected to be a Numa* (na).
  *
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -578,7 +575,7 @@ TemplatesFromComposites(lua_State *L)
  *      (1) The pix are stored in the file as png.
  *          If the png library is not linked, this will fail.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -598,7 +595,7 @@ Write(lua_State *L)
  * Leptonica's Notes:
  *      (1) Serializes a pixa in memory and puts the result in a buffer.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -625,7 +622,7 @@ WriteMem(lua_State *L)
  *      (1) The pix are stored in the file as png.
  *          If the png library is not linked, this will fail.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -654,7 +651,7 @@ WriteStream(lua_State *L)
  *          or color each successive pix is blitted with just the src.
  *      (5) If the pixa is empty, returns an empty 1 bpp pix.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -671,7 +668,7 @@ Display(lua_State *L)
 /**
  * \brief Check Lua stack at index %arg for udata of class Pixa*.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the PIXA contained in the user data
  */
@@ -684,7 +681,7 @@ ll_check_Pixa(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Check Lua stack at index %arg for udata of class Pixa* and take it.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Pixa* contained in the user data
  */
@@ -704,7 +701,7 @@ ll_take_Pixa(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Take a Pixa* from a global variable %name.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param name of the global variable
  * \return pointer to the Amap* contained in the user data
  */
@@ -719,7 +716,7 @@ ll_get_global_Pixa(const char *_fun, lua_State *L, const char *name)
 /**
  * \brief Optionally expect a Pixa* at index %arg on the Lua stack.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Pixa* contained in the user data
  */
@@ -734,7 +731,7 @@ ll_opt_Pixa(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push Pixa* to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param pixa pointer to the PIXA
  * \return 1 Pixa* on the Lua stack
  */
@@ -748,7 +745,7 @@ ll_push_Pixa(const char *_fun, lua_State *L, Pixa *pixa)
 
 /**
  * \brief Create a new Pixa*.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pixa* on the Lua stack
  */
 int
@@ -825,7 +822,7 @@ ll_new_Pixa(lua_State *L)
 
 /**
  * \brief Register the PIX methods and functions in the LL_PIX meta table.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 table on the Lua stack
  */
 int

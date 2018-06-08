@@ -49,22 +49,19 @@
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 for nothing on the Lua stack
  */
 static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    Boxaa **pbaa = ll_check_udata<Boxaa>(_fun, L, 1, TNAME);
-    Boxaa *baa = *pbaa;
-    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d\n", _fun,
+    Boxaa *baa = ll_take_udata<Boxaa>(_fun, L, 1, TNAME);
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %d\n", _fun,
         TNAME,
-        "pbaa", reinterpret_cast<void *>(pbaa),
         "baa", reinterpret_cast<void *>(baa),
         "count", boxaaGetCount(baa));
     boxaaDestroy(&baa);
-    *pbaa = nullptr;
     return 0;
 }
 
@@ -73,7 +70,7 @@ Destroy(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -90,7 +87,7 @@ GetCount(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 string on the Lua stack
  */
 static int
@@ -141,7 +138,7 @@ toString(lua_State *L)
  * Leptonica's Notes:
  *      (1) Adds to an existing boxa only.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -161,7 +158,7 @@ AddBox(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
  * Arg #2 is expected to be a Boxa* user data.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -185,7 +182,7 @@ AddBoxa(lua_State *L)
  *      (1) This is not greedy.  It finds the boxa whose vertical
  *          extent has the closest overlap with the input box.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -212,7 +209,7 @@ AlignBox(lua_State *L)
  *      (1) L_COPY makes a copy of each boxa in baas.
  *          L_CLONE makes a clone of each boxa in baas.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Boxaa* on the Lua stack
  */
 static int
@@ -230,7 +227,7 @@ Copy(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a l_int32 (n).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Boxaa* on the Lua stack
  */
 static int
@@ -265,7 +262,7 @@ Create(lua_State *L)
  *            - the minimum size required using all boxes in %baa.
  *
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -289,7 +286,7 @@ Display(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -309,7 +306,7 @@ ExtendArray(lua_State *L)
  * Leptonica's Notes:
  *      (1) If necessary, reallocs the boxa ptr array to %size.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -334,7 +331,7 @@ ExtendArrayToSize(lua_State *L)
  *          loading all the additional ptrs with copies of boxa.
  *          Typically, boxa will be empty.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -363,7 +360,7 @@ ExtendWithInit(lua_State *L)
  *          by inserting one or more fillerbox(es) or, if %fillerbox == NULL,
  *          one or more invalid placeholder boxes.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Boxa* on the Lua stack
  */
 static int
@@ -395,7 +392,7 @@ FlattenAligned(lua_State *L)
  *      (3) If &naindex is defined, we generate a Numa that gives, for
  *          each box in the baa, the index of the boxa to which it belongs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -417,7 +414,7 @@ FlattenToBoxa(lua_State *L)
  * Arg #2 is expected to be a l_int32 (ibox).
  * Arg #3 is an optional string defining the storage flags (copy, clone)..
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -437,7 +434,7 @@ GetBox(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -456,7 +453,7 @@ GetBoxCount(lua_State *L)
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is an optional string defining the storage flags (copy, clone)..
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -483,7 +480,7 @@ GetBoxa(lua_State *L)
  *      (3) If there are no valid boxes in a boxa, the box corresponding
  *          to its extent has all fields set to 0 (an invalid box).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 4 on the Lua stack (w, h, Box*, Boxa*)
  */
 static int
@@ -530,7 +527,7 @@ GetExtent(lua_State *L)
  *          and to replace only a subset that must be aligned with
  *          something else, such as a pixa.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 on the Lua stack
  */
 static int
@@ -558,7 +555,7 @@ InitFull(lua_State *L)
  *      (4) This should not be used repeatedly to insert into large arrays,
  *          because the function is O(n).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -586,7 +583,7 @@ InsertBoxa(lua_State *L)
  *      (3) iend < 0 means 'read to the end'
  *      (4) if baas == NULL, this is a no-op.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -616,7 +613,7 @@ Join(lua_State *L)
  *      (2) At each level, the rectangles in the boxa are in "raster"
  *          order, with LR (fast scan) and TB (slow scan).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -635,7 +632,7 @@ QuadtreeRegions(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string (filename).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Box* on the Lua stack
  */
 static int
@@ -664,7 +661,7 @@ Read(lua_State *L)
  *          a contiguous set of files, that have been lexically
  *          sorted in increasing order.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -684,7 +681,7 @@ ReadFromFiles(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a pstring (data).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Box* on the Lua stack
  */
 static int
@@ -702,7 +699,7 @@ ReadMem(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a luaL_Stream* (stream).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Box* on the Lua stack
  */
 static int
@@ -727,7 +724,7 @@ ReadStream(lua_State *L)
  *      (2) This should not be used repeatedly on large arrays,
  *          because the function is O(n).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -751,7 +748,7 @@ RemoveBoxa(lua_State *L)
  *          is inserted in its place.
  *      (2) If the index is invalid, return 1 (error)
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -777,7 +774,7 @@ ReplaceBoxa(lua_State *L)
  *          Specifically, L_CLONE inserts a clone into baad of each
  *          selected boxa from baas.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Boxaa* on the Lua stack
  */
 static int
@@ -798,7 +795,7 @@ SelectRange(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
  *
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 4 l_int32 on the Lua stack (%minw, %minh, %maxw, %maxh)
  */
 static int
@@ -826,7 +823,7 @@ SizeRange(lua_State *L)
  * Arg #2 is expected to be a Numaa* (naa).
  *
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -855,7 +852,7 @@ Sort2dByIndex(lua_State *L)
  *          %baas has the same number of boxes.  This operation is useful
  *          when the i-th boxes in each boxa are meaningfully related.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -873,7 +870,7 @@ Transpose(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Box* (box).
  * Arg #2 is expected to be a string (filename).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -893,7 +890,7 @@ Write(lua_State *L)
  * Leptonica's Notes:
  *      (1) Serializes a boxaa in memory and puts the result in a buffer.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 string on the Lua stack
  */
 static int
@@ -916,7 +913,7 @@ WriteMem(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Box* (box).
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -931,7 +928,7 @@ WriteStream(lua_State *L)
 /**
  * \brief Check Lua stack at index %arg for udata of class Boxaa.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Boxaa* contained in the user data
  */
@@ -944,7 +941,7 @@ ll_check_Boxaa(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Check Lua stack at index %arg for udata of class Boxaa* and take it.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Boxaa* contained in the user data
  */
@@ -964,7 +961,7 @@ ll_take_Boxaa(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Take a Boxaa* from a global variable %name.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param name of the global variable
  * \return pointer to the Amap* contained in the user data
  */
@@ -979,7 +976,7 @@ ll_get_global_Boxaa(const char *_fun, lua_State *L, const char *name)
 /**
  * \brief Optionally expect a Boxaa* at index %arg on the Lua stack.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Boxaa* contained in the user data
  */
@@ -994,7 +991,7 @@ ll_opt_Boxaa(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push Boxaa* to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param boxaa pointer to the BOXAA
  * \return 1 Boxaa* on the Lua stack
  */
@@ -1007,7 +1004,7 @@ ll_push_Boxaa(const char *_fun, lua_State *L, Boxaa *boxaa)
 }
 /**
  * \brief Create and push a new Boxaa*.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Boxaa* on the Lua stack
  */
 int
@@ -1066,7 +1063,7 @@ ll_new_Boxaa(lua_State *L)
 }
 /**
  * \brief Register the BOX methods and functions in the LL_BOX meta table.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 table on the Lua stack
  */
 int

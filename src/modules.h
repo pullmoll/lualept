@@ -36,7 +36,7 @@
 #include "lualept.h"
 
 #if !defined(LUALEPT_DEBUG)
-#define LUALEPT_DEBUG 0 /*!< set to 1 to enable debugging */
+#define LUALEPT_DEBUG 0     /*!< set to 1 to enable debugging */
 #endif
 
 /**
@@ -184,6 +184,7 @@ typedef L_DNAHASH           DnaHash;        /*!< Local type name for L_DNAHASH *
 typedef L_KERNEL            Kernel;         /*!< Local type name for L_KERNEL */
 typedef L_COMP_DATA         CompData;       /*!< Local type name for L_COMP_DATA */
 typedef L_PDF_DATA          PdfData;        /*!< Local type name for L_PDF_DATA */
+typedef L_RBTREE	    Rbtree;         /*!< Local type name for L_RBTREE */
 typedef L_RBTREE_NODE       RbtreeNode;     /*!< Local type name for L_RBTREE_NODE */
 typedef L_STACK             Stack;          /*!< Local type name for L_STACK */
 typedef L_WSHED             WShed;          /*!< Local type name for L_WSched */
@@ -225,108 +226,108 @@ typedef struct global_var_s {
     const char *type;                       /*!< type name of this variable */
     const char *name;                       /*!< global name of this variable */
     union {
-        void **pptr;                        /*!< generic input pointer to variable */
-        bool *pb;                           /*!< input pointer to a bool */
-        l_int8 *pi8;                        /*!< input pointer to a l_int8 */
-        l_uint8 *pu8;                       /*!< input pointer to a l_uint8 */
-        l_int16 *pi16;                      /*!< input pointer to a l_int16 */
-        l_uint16 *pu16;                     /*!< input pointer to a l_uint16 */
-        l_int32 *pi32;                      /*!< input pointer to a l_int32 */
-        l_uint32 *pu32;                     /*!< input pointer to a l_uint32 */
-        l_int64 *pi64;                      /*!< input pointer to a l_int64 */
-        l_uint64 *pu64;                     /*!< input pointer to a l_uint64 */
-        l_float32 *pf32;                    /*!< input pointer to a l_float32 */
-        l_float64 *pf64;                    /*!< input pointer to a l_float64 */
-        Amap **pamap;                       /*!< input pointer to a Amap */
-        Aset **paset;                       /*!< input pointer to a Aset */
-        ByteBuffer **pbb;                   /*!< input pointer to a ByteBuffer */
-        Bmf **pbmf;                         /*!< input pointer to a Bmf */
-        Box **pbox;                         /*!< input pointer to a Box */
-        Boxa **pboxa;                       /*!< input pointer to a Boxa */
-        Boxaa **pboxaa;                     /*!< input pointer to a Boxaa */
-        CompData **pcid;                    /*!< input pointer to a CompData */
-        CCBord **pccb;                      /*!< input pointer to a CCBord */
-        CCBorda **pccba;                    /*!< input pointer to a CCBorda */
-        Dewarp **pdew;                      /*!< input pointer to a Dewarp */
-        Dewarpa **pdewa;                    /*!< input pointer to a Dewarpa */
-        DLList **plist;           /*!< input pointer to a DLList */
-        Dna **pda;                          /*!< input pointer to a Dna */
-        Dnaa **pdaa;                        /*!< input pointer to a Dnaa */
-        DnaHash **pdah;                     /*!< input pointer to a DnaHash */
-        DPix **pdpix;                       /*!< input pointer to a DPix */
-        FPix **pfpix;                       /*!< input pointer to a FPix */
-        FPixa **pfpixa;                     /*!< input pointer to a FPixa */
-        Kernel **pkel;                      /*!< input pointer to a Kernel */
-        Numa **pna;                         /*!< input pointer to a Numa */
-        Numaa **pnaa;                       /*!< input pointer to a Numaa */
-        PdfData **ppdd;                     /*!< input pointer to a PdfData */
-        Pix **ppix;                         /*!< input pointer to a Pix */
-        Pixa **ppixa;                       /*!< input pointer to a Pixa */
-        Pixaa **ppixaa;                     /*!< input pointer to a Pixaa */
-        PixColormap **pcmap;                /*!< input pointer to a PixColormap */
-        PixTiling **ppixt;                  /*!< input pointer to a PixTiling */
-        PixComp **ppixc;                    /*!< input pointer to a PixComp */
-        PixaComp **ppixac;                  /*!< input pointer to a PixaComp */
-        Pta **ppta;                         /*!< input pointer to a Pta */
-        Ptaa **pptaa;                       /*!< input pointer to a Ptaa */
-        RbtreeNode **pnode;                 /*!< input pointer to a RbtreeNode */
-        Sarray **psa;                       /*!< input pointer to a Sarray */
-        Sel **psel;                         /*!< input pointer to a Sel */
-        Sela **psela;                       /*!< input pointer to a Sela */
-        Stack **pstack;                     /*!< input pointer to a Stack */
-        WShed **pwshed;                     /*!< input pointer to a WShed */
+	void **pptr;                        /*!< generic input pointer to variable */
+	bool *pb;                           /*!< input pointer to a bool */
+	l_int8 *pi8;                        /*!< input pointer to a l_int8 */
+	l_uint8 *pu8;                       /*!< input pointer to a l_uint8 */
+	l_int16 *pi16;                      /*!< input pointer to a l_int16 */
+	l_uint16 *pu16;                     /*!< input pointer to a l_uint16 */
+	l_int32 *pi32;                      /*!< input pointer to a l_int32 */
+	l_uint32 *pu32;                     /*!< input pointer to a l_uint32 */
+	l_int64 *pi64;                      /*!< input pointer to a l_int64 */
+	l_uint64 *pu64;                     /*!< input pointer to a l_uint64 */
+	l_float32 *pf32;                    /*!< input pointer to a l_float32 */
+	l_float64 *pf64;                    /*!< input pointer to a l_float64 */
+	Amap **pamap;                       /*!< input pointer to a Amap */
+	Aset **paset;                       /*!< input pointer to a Aset */
+	ByteBuffer **pbb;                   /*!< input pointer to a ByteBuffer */
+	Bmf **pbmf;                         /*!< input pointer to a Bmf */
+	Box **pbox;                         /*!< input pointer to a Box */
+	Boxa **pboxa;                       /*!< input pointer to a Boxa */
+	Boxaa **pboxaa;                     /*!< input pointer to a Boxaa */
+	CompData **pcid;                    /*!< input pointer to a CompData */
+	CCBord **pccb;                      /*!< input pointer to a CCBord */
+	CCBorda **pccba;                    /*!< input pointer to a CCBorda */
+	Dewarp **pdew;                      /*!< input pointer to a Dewarp */
+	Dewarpa **pdewa;                    /*!< input pointer to a Dewarpa */
+	DLList **plist;           /*!< input pointer to a DLList */
+	Dna **pda;                          /*!< input pointer to a Dna */
+	Dnaa **pdaa;                        /*!< input pointer to a Dnaa */
+	DnaHash **pdah;                     /*!< input pointer to a DnaHash */
+	DPix **pdpix;                       /*!< input pointer to a DPix */
+	FPix **pfpix;                       /*!< input pointer to a FPix */
+	FPixa **pfpixa;                     /*!< input pointer to a FPixa */
+	Kernel **pkel;                      /*!< input pointer to a Kernel */
+	Numa **pna;                         /*!< input pointer to a Numa */
+	Numaa **pnaa;                       /*!< input pointer to a Numaa */
+	PdfData **ppdd;                     /*!< input pointer to a PdfData */
+	Pix **ppix;                         /*!< input pointer to a Pix */
+	Pixa **ppixa;                       /*!< input pointer to a Pixa */
+	Pixaa **ppixaa;                     /*!< input pointer to a Pixaa */
+	PixColormap **pcmap;                /*!< input pointer to a PixColormap */
+	PixTiling **ppixt;                  /*!< input pointer to a PixTiling */
+	PixComp **ppixc;                    /*!< input pointer to a PixComp */
+	PixaComp **ppixac;                  /*!< input pointer to a PixaComp */
+	Pta **ppta;                         /*!< input pointer to a Pta */
+	Ptaa **pptaa;                       /*!< input pointer to a Ptaa */
+	RbtreeNode **pnode;                 /*!< input pointer to a RbtreeNode */
+	Sarray **psa;                       /*!< input pointer to a Sarray */
+	Sel **psel;                         /*!< input pointer to a Sel */
+	Sela **psela;                       /*!< input pointer to a Sela */
+	Stack **pstack;                     /*!< input pointer to a Stack */
+	WShed **pwshed;                     /*!< input pointer to a WShed */
     }   i;
     union {
-        void **pptr;                        /*!< generic output pointer to a pointer to a variable */
-        bool *pb;                           /*!< output pointer to a bool */
-        l_int8 *pi8;                        /*!< output pointer to a l_int8 */
-        l_uint8 *pu8;                       /*!< output pointer to a l_uint8 */
-        l_int16 *pi16;                      /*!< output pointer to a l_int16 */
-        l_uint16 *pu16;                     /*!< output pointer to a l_uint16 */
-        l_int32 *pi32;                      /*!< output pointer to a l_int32 */
-        l_uint32 *pu32;                     /*!< output pointer to a l_uint32 */
-        l_int64 *pi64;                      /*!< output pointer to a l_int64 */
-        l_uint64 *pu64;                     /*!< output pointer to a l_uint64 */
-        l_float32 *pf32;                    /*!< output pointer to a l_float32 */
-        l_float64 *pf64;                    /*!< output pointer to a l_float64 */
-        Amap **pamap;                       /*!< output pointer to a pointer to a Amap */
-        Aset **paset;                       /*!< output pointer to a pointer to a Aset */
-        ByteBuffer **pbb;                   /*!< output pointer to a pointer to a ByteBuffer */
-        Bmf **pbmf;                         /*!< output pointer to a pointer to a Bmf */
-        Box **pbox;                         /*!< output pointer to a pointer to a Box */
-        Boxa **pboxa;                       /*!< output pointer to a pointer to a Boxa */
-        Boxaa **pboxaa;                     /*!< output pointer to a pointer to a Boxaa */
-        CompData **pcid;                    /*!< output pointer to a pointer to a CompData */
-        CCBord **pccb;                      /*!< output pointer to a pointer to a CCBord */
-        CCBorda **pccba;                    /*!< output pointer to a pointer to a CCBorda */
-        Dewarp **pdew;                      /*!< output pointer to a pointer to a Dewarp */
-        Dewarpa **pdewa;                    /*!< output pointer to a pointer to a Dewarpa */
-        DLList **plist;           /*!< output pointer to a pointer to a DLList */
-        Dna **pda;                          /*!< output pointer to a pointer to a Dna */
-        Dnaa **pdaa;                        /*!< output pointer to a pointer to a Dnaa */
-        DnaHash **pdah;                     /*!< output pointer to a pointer to a DnaHash */
-        DPix **pdpix;                       /*!< output pointer to a pointer to a DPix */
-        FPix **pfpix;                       /*!< output pointer to a pointer to a FPix */
-        FPixa **pfpixa;                     /*!< output pointer to a pointer to a FPixa */
-        Kernel **pkel;                      /*!< output pointer to a pointer to a Kernel */
-        Numa **pna;                         /*!< output pointer to a pointer to a Numa */
-        Numaa **pnaa;                       /*!< output pointer to a pointer to a Numaa */
-        PdfData **ppdd;                     /*!< output pointer to a pointer to a PdfData */
-        Pix **ppix;                         /*!< output pointer to a pointer to a Pix */
-        Pixa **ppixa;                       /*!< output pointer to a pointer to a Pixa */
-        Pixaa **ppixaa;                     /*!< output pointer to a pointer to a Pixaa */
-        PixColormap **pcmap;                /*!< output pointer to a pointer to a PixColormap */
-        PixTiling **ppixt;                  /*!< output pointer to a pointer to a PixTiling */
-        PixComp **ppixc;                    /*!< output pointer to a pointer to a PixComp */
-        PixaComp **ppixac;                  /*!< output pointer to a pointer to a PixaComp */
-        Pta **ppta;                         /*!< output pointer to a pointer to a Pta */
-        Ptaa **pptaa;                       /*!< output pointer to a pointer to a Ptaa */
-        RbtreeNode **pnode;                 /*!< output pointer to a pointer to a RbtreeNode */
-        Sarray **psa;                       /*!< output pointer to a pointer to a Sarray */
-        Sel **psel;                         /*!< output pointer to a pointer to a Sel */
-        Sela **psela;                       /*!< output pointer to a pointer to a Sela */
-        Stack **pstack;                     /*!< output pointer to a pointer to a Stack */
-        WShed **pwshed;                     /*!< output pointer to a pointer to a WShed */
+	void **pptr;                        /*!< generic output pointer to a pointer to a variable */
+	bool *pb;                           /*!< output pointer to a bool */
+	l_int8 *pi8;                        /*!< output pointer to a l_int8 */
+	l_uint8 *pu8;                       /*!< output pointer to a l_uint8 */
+	l_int16 *pi16;                      /*!< output pointer to a l_int16 */
+	l_uint16 *pu16;                     /*!< output pointer to a l_uint16 */
+	l_int32 *pi32;                      /*!< output pointer to a l_int32 */
+	l_uint32 *pu32;                     /*!< output pointer to a l_uint32 */
+	l_int64 *pi64;                      /*!< output pointer to a l_int64 */
+	l_uint64 *pu64;                     /*!< output pointer to a l_uint64 */
+	l_float32 *pf32;                    /*!< output pointer to a l_float32 */
+	l_float64 *pf64;                    /*!< output pointer to a l_float64 */
+	Amap **pamap;                       /*!< output pointer to a pointer to a Amap */
+	Aset **paset;                       /*!< output pointer to a pointer to a Aset */
+	ByteBuffer **pbb;                   /*!< output pointer to a pointer to a ByteBuffer */
+	Bmf **pbmf;                         /*!< output pointer to a pointer to a Bmf */
+	Box **pbox;                         /*!< output pointer to a pointer to a Box */
+	Boxa **pboxa;                       /*!< output pointer to a pointer to a Boxa */
+	Boxaa **pboxaa;                     /*!< output pointer to a pointer to a Boxaa */
+	CompData **pcid;                    /*!< output pointer to a pointer to a CompData */
+	CCBord **pccb;                      /*!< output pointer to a pointer to a CCBord */
+	CCBorda **pccba;                    /*!< output pointer to a pointer to a CCBorda */
+	Dewarp **pdew;                      /*!< output pointer to a pointer to a Dewarp */
+	Dewarpa **pdewa;                    /*!< output pointer to a pointer to a Dewarpa */
+	DLList **plist;           /*!< output pointer to a pointer to a DLList */
+	Dna **pda;                          /*!< output pointer to a pointer to a Dna */
+	Dnaa **pdaa;                        /*!< output pointer to a pointer to a Dnaa */
+	DnaHash **pdah;                     /*!< output pointer to a pointer to a DnaHash */
+	DPix **pdpix;                       /*!< output pointer to a pointer to a DPix */
+	FPix **pfpix;                       /*!< output pointer to a pointer to a FPix */
+	FPixa **pfpixa;                     /*!< output pointer to a pointer to a FPixa */
+	Kernel **pkel;                      /*!< output pointer to a pointer to a Kernel */
+	Numa **pna;                         /*!< output pointer to a pointer to a Numa */
+	Numaa **pnaa;                       /*!< output pointer to a pointer to a Numaa */
+	PdfData **ppdd;                     /*!< output pointer to a pointer to a PdfData */
+	Pix **ppix;                         /*!< output pointer to a pointer to a Pix */
+	Pixa **ppixa;                       /*!< output pointer to a pointer to a Pixa */
+	Pixaa **ppixaa;                     /*!< output pointer to a pointer to a Pixaa */
+	PixColormap **pcmap;                /*!< output pointer to a pointer to a PixColormap */
+	PixTiling **ppixt;                  /*!< output pointer to a pointer to a PixTiling */
+	PixComp **ppixc;                    /*!< output pointer to a pointer to a PixComp */
+	PixaComp **ppixac;                  /*!< output pointer to a pointer to a PixaComp */
+	Pta **ppta;                         /*!< output pointer to a pointer to a Pta */
+	Ptaa **pptaa;                       /*!< output pointer to a pointer to a Ptaa */
+	RbtreeNode **pnode;                 /*!< output pointer to a pointer to a RbtreeNode */
+	Sarray **psa;                       /*!< output pointer to a pointer to a Sarray */
+	Sel **psel;                         /*!< output pointer to a pointer to a Sel */
+	Sela **psela;                       /*!< output pointer to a pointer to a Sela */
+	Stack **pstack;                     /*!< output pointer to a pointer to a Stack */
+	WShed **pwshed;                     /*!< output pointer to a pointer to a WShed */
     }   o;
 }   global_var_t;
 
@@ -338,7 +339,7 @@ extern void **ll_udata(const char *_fun, lua_State* L, int arg, const char *tnam
  * \brief Cast the result of LEPT_MALLOC() to the given type.
  * T is the typename of the result pointer
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param size size of the memory block
  * \result memory allocated and cast to T*
  */
@@ -347,8 +348,8 @@ ll_malloc(const char* _fun, lua_State *L, size_t size)
 {
     void *ptr = LEPT_MALLOC(size);
     if (!ptr) {
-        die(_fun, L, "failed to malloc(%d)", size);
-        return nullptr;
+	die(_fun, L, "failed to malloc(%d)", size);
+	return nullptr;
     }
     return reinterpret_cast<T *>(ptr);
 }
@@ -357,7 +358,7 @@ ll_malloc(const char* _fun, lua_State *L, size_t size)
  * \brief Cast the result of LEPT_CALLOC() to the given type.
  * T is the typename of the result pointer
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param nmemb number of members
  * \param size size of one member
  * \result memory allocated, zeroed and cast to T*
@@ -367,8 +368,8 @@ ll_calloc(const char* _fun, lua_State *L, size_t nmemb, size_t size)
 {
     void *ptr = LEPT_CALLOC(nmemb, size);
     if (!ptr) {
-        die(_fun, L, "failed to calloc(%d,%d)", nmemb, size);
-        return nullptr;
+	die(_fun, L, "failed to calloc(%d,%d)", nmemb, size);
+	return nullptr;
     }
     return reinterpret_cast<T *>(ptr);
 }
@@ -386,7 +387,7 @@ ll_calloc(const char* _fun, lua_State *L, l_int32 nmemb, l_int32 size)
  * \brief Cast the result of LEPT_CALLOC() to the given type.
  * T is the typename of the result pointer
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param nmemb number of members
  * \result memory allocated, zeroed and cast to T*
  */
@@ -395,8 +396,8 @@ ll_calloc(const char* _fun, lua_State *L, size_t nmemb)
 {
     void *ptr = LEPT_CALLOC(nmemb, sizeof(T));
     if (!ptr) {
-        die(_fun, L, "failed to calloc(%d,%d)", nmemb, sizeof(T));
-        return nullptr;
+	die(_fun, L, "failed to calloc(%d,%d)", nmemb, sizeof(T));
+	return nullptr;
     }
     return reinterpret_cast<T *>(ptr);
 }
@@ -414,7 +415,7 @@ ll_calloc(const char* _fun, lua_State *L, l_int32 nmemb)
  * \brief Check Lua stack at index %arg for user data with type name %tname.
  * T is the typename of the expected return value.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg argument index
  * \param tname tname of the expected udata
  * \return pointer to the udata
@@ -426,10 +427,33 @@ ll_check_udata(const char *_fun, lua_State *L, int arg, const char* tname)
 }
 
 /**
+ * \brief Check Lua stack at index %arg for user data with type name %tname.
+ * T is the typename of the expected return value.
+ * This version takes ownership of the pointer contained in the
+ * user data and stores a nullptr there.
+ * \param _fun calling function's name
+ * \param L Lua state
+ * \param arg argument index
+ * \param tname tname of the expected udata
+ * \return pointer to the T contained in the udata
+ */
+template<typename T> T *
+ll_take_udata(const char *_fun, lua_State *L, int arg, const char* tname)
+{
+    T **pptr = reinterpret_cast<T **>(ll_udata(_fun, L, arg, tname));
+    T *ptr = *pptr;
+    DBG(LOG_TAKE, "%s: %s = %p, %s = %p\n", _fun,
+	"pptr", reinterpret_cast<void *>(pptr),
+	"ptr", reinterpret_cast<void *>(ptr));
+    *pptr = nullptr;
+    return ptr;
+}
+
+/**
  * \brief Check Lua stack at index %arg for light user data.
  * T is the typename of the return value.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg argument index
  * \return pointer to the udata
  */
@@ -648,10 +672,10 @@ extern l_int32          ll_check_color_name(const char *_fun, lua_State *L, int 
 extern const char     * ll_string_color_name(l_uint32 rotation);
 
 extern int              ll_check_color(const char *_fun, lua_State *L, int arg,
-                                       l_int32 *pr = nullptr,
-                                       l_int32 *pg = nullptr,
-                                       l_int32 *pb = nullptr,
-                                       l_int32 *pa = nullptr);
+				       l_int32 *pr = nullptr,
+				       l_int32 *pg = nullptr,
+				       l_int32 *pb = nullptr,
+				       l_int32 *pa = nullptr);
 extern int              ll_check_color(const char *_fun, lua_State *L, int arg, l_uint32 *ppixel);
 
 /* lualept.cpp */

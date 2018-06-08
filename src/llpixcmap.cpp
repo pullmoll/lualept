@@ -49,22 +49,19 @@
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmaps).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 for nothing on the Lua stack
  */
 static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    PixColormap **pcmap = ll_check_udata<PixColormap>(_fun, L, 1, TNAME);
-    PixColormap *cmap = *pcmap;
-    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d\n", _fun,
+    PixColormap *cmap = ll_take_udata<PixColormap>(_fun, L, 1, TNAME);
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %d\n", _fun,
         TNAME,
-        "pcmap", reinterpret_cast<void *>(pcmap),
         "cmap", reinterpret_cast<void *>(cmap),
         "count", pixcmapGetCount(cmap));
     pixcmapDestroy(&cmap);
-    *pcmap = nullptr;
     return 0;
 }
 
@@ -73,7 +70,7 @@ Destroy(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a l_int32 (depth).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 PixColormap* on the Lua stack
  */
 static int
@@ -90,7 +87,7 @@ Create(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -108,7 +105,7 @@ GetCount(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmaps).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 string on the Lua stack
  */
 static int
@@ -152,7 +149,7 @@ toString(lua_State *L)
  *      (4) If there is no room in the colormap, returns the index
  *          of the closest color.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -180,7 +177,7 @@ AddBlackOrWhite(lua_State *L)
  *      (1) This always adds the color if there is room.
  *      (2) The alpha component is 255 (opaque)
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -208,7 +205,7 @@ AddColor(lua_State *L)
  *      (3) If it's not in the colormap and there is no room to add
  *          another color, this returns the index of the nearest color.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 lua_Integer on the Lua stack
  */
 static int
@@ -242,7 +239,7 @@ AddNearestColor(lua_State *L)
  *      (4) Returns 2 with a warning if unable to add this color;
  *          the caller should check the return value.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 lua_Integer on the Lua stack
  */
 static int
@@ -273,7 +270,7 @@ AddNewColor(lua_State *L)
  * Leptonica's Notes:
  *      (1) This always adds the color if there is room.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -297,7 +294,7 @@ AddRGBA(lua_State *L)
  * Leptonica's Notes:
  *      (1) This removes the colors by setting the count to 0.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -322,7 +319,7 @@ Clear(lua_State *L)
  *      (3) This is used in pdf files to express the colormap as an
  *          array in ascii (human-readable) format.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 PixColormap* on the Lua stack
  */
 static int
@@ -346,7 +343,7 @@ ConvertToHex(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmaps).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 PixColormap* on the Lua stack
  */
 static int
@@ -366,7 +363,7 @@ Copy(lua_State *L)
  * Leptonica's Notes:
  *      (1) This counts the unique gray colors, including black and white.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -391,7 +388,7 @@ CountGrayColors(lua_State *L)
  *      (1) Colormap has equally spaced gray color values
  *          from black (0, 0, 0) to white (255, 255, 255).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 PixColormap* on the Lua stack
  */
 static int
@@ -427,7 +424,7 @@ CreateLinear(lua_State *L)
  *          bits, but older ones don't.  Here, we're just using rand()
  *          to choose colors for output.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 PixColormap* on the Lua stack
  */
 static int
@@ -447,7 +444,7 @@ CreateRandom(lua_State *L)
  * Arg #1 is expected to be a string (data).
  * Arg #2 is expected to be a l_int32 (cpc; 0 < cpc <= 4).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 PixColormap* on the Lua stack
  */
 static int
@@ -472,7 +469,7 @@ DeserializeFromMemory(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
  * Arg #2 is expected to be a l_int32 (idx).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 3 integers on the Lua stack
  */
 static int
@@ -501,7 +498,7 @@ GetColor(lua_State *L)
  * Leptonica's Notes:
  *      (1) The returned alpha channel value is 255.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -522,7 +519,7 @@ GetColor32(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -540,7 +537,7 @@ GetDepth(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -561,7 +558,7 @@ GetFreeCount(lua_State *L)
  * Arg #3 is expected to be a l_int32 (gval).
  * Arg #4 is expected to be a l_int32 (bval).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -588,7 +585,7 @@ GetIndex(lua_State *L)
  * Leptonica's Notes:
  *      (1) On error, &mindepth is returned as 0.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -609,7 +606,7 @@ GetMinDepth(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
  * Arg #2 is expected to be a l_int32 (idx).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 4 integers on the Lua stack
  */
 static int
@@ -637,7 +634,7 @@ GetRGBA(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
  * Arg #2 is expected to be a l_int32 (idx).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -658,7 +655,7 @@ GetRGBA32(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -678,7 +675,7 @@ HasColor(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -698,7 +695,7 @@ IsBlackAndWhite(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -718,7 +715,7 @@ IsOpaque(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string (filename).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -735,7 +732,7 @@ Read(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string (data).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Ptaa* on the Lua stack
  */
 static int
@@ -753,7 +750,7 @@ ReadMem(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string (filename).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -779,7 +776,7 @@ ReadStream(lua_State *L)
  *          been set and included in the count of colors.
  *      (2) The alpha component is 255 (opaque)
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -803,7 +800,7 @@ ResetColor(lua_State *L)
  * Leptonica's Notes:
  *      (1) When serializing to store in a pdf, use %cpc = 3.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 string on the Lua stack
  */
 static int
@@ -834,7 +831,7 @@ SerializeToMemory(lua_State *L)
  *          This is used when extracting the colormap from a PNG file
  *          without decoding the image.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -854,7 +851,7 @@ SetAlpha(lua_State *L)
  * Arg #2 is expected to be a boolean (setblack).
  * Arg #3 is expected to be a boolean (setwhite).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -872,7 +869,7 @@ SetBlackAndWhite(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 4 array tables on the Lua stack
  */
 static int
@@ -907,7 +904,7 @@ ToArrays(lua_State *L)
  * When I print the table entries in Lua, each value is 255. It seems as if only
  * the least significant byte of each l_uint32 is pushed?
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 4 array tables on the Lua stack
  */
 static int
@@ -936,7 +933,7 @@ ToRGBTable(lua_State *L)
  *      (1) This checks if the color already exists or if there is
  *          room to add it.  It makes no change in the colormap.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -961,7 +958,7 @@ UsableColor(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
  * Arg #2 is expected to be a string (filename).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -984,7 +981,7 @@ Write(lua_State *L)
  * Leptonica's Notes:
  *      (1) Serializes a pixcmap in memory and puts the result in a buffer.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -1007,7 +1004,7 @@ WriteMem(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
  * Arg #2 is expected to be a string (filename).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -1049,7 +1046,7 @@ WriteStream(lua_State *L)
  *          pixels are assigned the invalid index 256.
  *      (5) See pixColorGrayCmap() for usage.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -1072,7 +1069,7 @@ AddColorizedGrayToCmap(lua_State *L)
 /**
  * \brief Check Lua stack at index %arg for udata of class PixColormap*.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the PixColormap* contained in the user data
  */
@@ -1091,7 +1088,7 @@ ll_check_PixColormap(const char *_fun, lua_State *L, int arg)
  * count and thus can be used exactly once in Pix:SetColormap().
  *
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the PixColormap* contained in the user data
  */
@@ -1111,7 +1108,7 @@ ll_take_PixColormap(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Take a PixColormap* from a global variable %name.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param name of the global variable
  * \return pointer to the Amap* contained in the user data
  */
@@ -1126,7 +1123,7 @@ ll_get_global_PixColormap(const char *_fun, lua_State *L, const char *name)
 /**
  * \brief Optionally expect a PixColormap* at index %arg on the Lua stack.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the PixColormap* contained in the user data
  */
@@ -1141,7 +1138,7 @@ ll_opt_PixColormap(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push PixColormap* user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param cmap pointer to the PIXCMAP
  * \return 1 PixColormap* on the Lua stack
  */
@@ -1155,7 +1152,7 @@ ll_push_PixColormap(const char *_fun, lua_State *L, PixColormap *cmap)
 
 /**
  * \brief Create a new PixColormap*.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 PixColormap* on the Lua stack
  */
 int
@@ -1217,7 +1214,7 @@ ll_new_PixColormap(lua_State *L)
 
 /**
  * \brief Register the PIXCMAP methods and functions in the LL_PIX meta table.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 table on the Lua stack
  */
 int

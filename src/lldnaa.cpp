@@ -49,22 +49,19 @@
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dnaa* user data.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 for nothing on the Lua stack
  */
 static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    Dnaa **pdaa = ll_check_udata<Dnaa>(_fun, L, 1, TNAME);
-    Dnaa *daa = *pdaa;
-    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d\n", _fun,
+    Dnaa *daa = ll_take_udata<Dnaa>(_fun, L, 1, TNAME);
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %d\n", _fun,
         TNAME,
-        "pdaa", reinterpret_cast<void *>(pdaa),
         "daa", reinterpret_cast<void *>(daa),
         "count", l_dnaaGetCount(daa));
     l_dnaaDestroy(&daa);
-    *pdaa = nullptr;
     return 0;
 }
 
@@ -73,7 +70,7 @@ Destroy(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dnaa* user data.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -97,7 +94,7 @@ GetCount(lua_State *L)
  *          is inserted in its place.
  *      (2) If the index is invalid, return 1 (error)
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -115,7 +112,7 @@ ReplaceDna(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dnaa* user data.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 string on the Lua stack
  */
 static int
@@ -161,7 +158,7 @@ toString(lua_State *L)
  * Arg #2 is expected to be a L_Dna* user data.
  * Arg #3 is an optional string defining the storage flags (copyflag).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -184,7 +181,7 @@ AddDna(lua_State *L)
  * Leptonica's Notes:
  *      (1) Adds to an existing l_dna only.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -204,7 +201,7 @@ AddNumber(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a l_int32 (n).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 DNAA* on the Lua stack
  */
 static int
@@ -228,7 +225,7 @@ Create(lua_State *L)
  *              l_dnaaAddNumber(dnaa, index, val);
  *          to add val to the index-th dna in dnaa.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 DNAA* on the Lua stack
  */
 static int
@@ -251,7 +248,7 @@ CreateFull(lua_State *L)
  *          each dna in the dnaa.
  *      (2) It leaves the input dnaa unchanged.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 DNA on the Lua stack, or nil on error
  */
 static int
@@ -269,7 +266,7 @@ FlattenToDna(lua_State *L)
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is an optional string defining the storage flags (accessflag).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -289,7 +286,7 @@ GetDna(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dnaa* user data.
  * Arg #2 is expected to be a l_int32 (idx).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -307,7 +304,7 @@ GetDnaCount(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dnaa* user data.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -326,7 +323,7 @@ GetNumberCount(lua_State *L)
  * Arg #2 is expected to be a l_int32 (i).
  * Arg #3 is expected to be a l_int32 (j).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -348,7 +345,7 @@ GetValue(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string containing the filename.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 DNAA on the Lua stack, or nil on error
  */
 static int
@@ -365,7 +362,7 @@ Read(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a luaL_Stream* (stream).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 DNAA on the Lua stack, or nil on error
  */
 static int
@@ -387,7 +384,7 @@ ReadStream(lua_State *L)
  *          has any numbers within it, destroys all dna beyond that
  *          index, and resets the count.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -404,7 +401,7 @@ Truncate(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dnaa* user data.
  * Arg #2 is expected to be a string containing the filename.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -422,7 +419,7 @@ Write(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dnaa* user data.
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -437,7 +434,7 @@ WriteStream(lua_State *L)
 /**
  * \brief Check Lua stack at index %arg for udata of class Dnaa*.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Dnaa* contained in the user data
  */
@@ -450,7 +447,7 @@ ll_check_Dnaa(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Check Lua stack at index %arg for udata of class Dnaa* and take it.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Dnaa* contained in the user data
  */
@@ -470,7 +467,7 @@ ll_take_Dnaa(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Take a Dnaa* from a global variable %name.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param name of the global variable
  * \return pointer to the Amap* contained in the user data
  */
@@ -485,7 +482,7 @@ ll_get_global_Dnaa(const char *_fun, lua_State *L, const char *name)
 /**
  * \brief Optionally expect a Dnaa* at index %arg on the Lua stack.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Dnaa* contained in the user data
  */
@@ -500,7 +497,7 @@ ll_opt_Dnaa(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push Dnaa* user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param daa pointer to the L_DNAA
  * \return 1 DNAA* on the Lua stack
  */
@@ -513,7 +510,7 @@ ll_push_Dnaa(const char *_fun, lua_State *L, Dnaa *daa)
 }
 /**
  * \brief Create and push a new DNAA*.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 DNAA* on the Lua stack
  */
 int
@@ -567,7 +564,7 @@ ll_new_Dnaa(lua_State *L)
 
 /**
  * \brief Register the Dnaa methods and functions in the Dnaa meta table.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 table on the Lua stack
  */
 int

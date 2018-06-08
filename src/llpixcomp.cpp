@@ -47,21 +47,18 @@
 /**
  * \brief Destroy a PixComp*.
  *
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 for nothing on the Lua stack
  */
 static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    PixComp **ppixc = ll_check_udata<PixComp>(_fun, L, 1, TNAME);
-    PixComp *pixc = *ppixc;
-    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p\n", _fun,
+    PixComp *pixc = ll_take_udata<PixComp>(_fun, L, 1, TNAME);
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p\n", _fun,
         TNAME,
-        "ppixc", reinterpret_cast<void *>(ppixc),
         "pixc", reinterpret_cast<void *>(pixc));
     pixcompDestroy(&pixc);
-    *ppixc = nullptr;
     return 0;
 }
 
@@ -71,7 +68,7 @@ Destroy(lua_State *L)
  * Arg #1 is expected to be a l_int32 (width).
  * Arg #2 is expected to be a l_int32 (height).
  *
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 PixComp* on the Lua stack
  */
 static int
@@ -87,7 +84,7 @@ CreateFromPix(lua_State *L)
 /**
  * \brief Check Lua stack at index (%arg) for udata of class PixComp*.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the PixComp* contained in the user data
  */
@@ -100,7 +97,7 @@ ll_check_PixComp(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Check Lua stack at index %arg for udata of class PixComp* and take it.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the PixComp* contained in the user data
  */
@@ -120,7 +117,7 @@ ll_take_PixComp(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Take a PixComp* from a global variable %name.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param name of the global variable
  * \return pointer to the Amap* contained in the user data
  */
@@ -135,7 +132,7 @@ ll_get_global_PixComp(const char *_fun, lua_State *L, const char *name)
 /**
  * \brief Optionally expect a PixComp* at index (%arg) on the Lua stack.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the PixComp* contained in the user data
  */
@@ -150,7 +147,7 @@ ll_opt_PixComp(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push PixComp* to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param pixcomp pointer to the PixComp
  * \return 1 PixComp* on the Lua stack
  */
@@ -164,7 +161,7 @@ ll_push_PixComp(const char *_fun, lua_State *L, PixComp *pixcomp)
 
 /**
  * \brief Create and push a new PixComp*.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 PixComp* on the Lua stack
  */
 int
@@ -204,7 +201,7 @@ ll_new_PixComp(lua_State *L)
 
 /**
  * \brief Register the PixComp methods and functions in the PixComp meta table.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 table on the Lua stack
  */
 int

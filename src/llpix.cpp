@@ -64,22 +64,19 @@ static l_int32 tab8[256];
  *      (1) Decrements the ref count and, if 0, destroys the pix.
  *      (2) Always nulls the input ptr.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 for nothing on the Lua stack
  */
 static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    Pix **ppix = ll_check_udata<Pix>(_fun, L, 1, TNAME);
-    Pix *pix = *ppix;
-    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d, %s = %d\n", _fun,
+    Pix *pix = ll_take_udata<Pix>(_fun, L, 1, TNAME);
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %d\n", _fun,
         TNAME,
-        "ppix", reinterpret_cast<void *>(ppix),
         "pix", reinterpret_cast<void *>(pix),
         "refcount", pixGetRefcount(pix));
     pixDestroy(&pix);
-    *ppix = nullptr;
     return 0;
 }
 
@@ -110,7 +107,7 @@ Destroy(lua_State *L)
  *      (5) The size of the result is determined by pixs1.
  *      (6) The depths of pixs1 and pixs2 must be equal.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -141,7 +138,7 @@ Subtract(lua_State *L)
  *           (b) pixInvert(pixs, pixs);
  *           (c) pixInvert(pixd, pixs);
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -181,7 +178,7 @@ Invert(lua_State *L)
  *          result: the copy puts pixs1 image data in pixs2, and
  *          the rasterop is then between pixs2 and pixs2 (a no-op).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -221,7 +218,7 @@ And(lua_State *L)
  *          result: the copy puts pixs1 image data in pixs2, and
  *          the rasterop is then between pixs2 and pixs2 (a no-op).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -261,7 +258,7 @@ Or(lua_State *L)
  *          result: the copy puts pixs1 image data in pixs2, and
  *          the rasterop is then between pixs2 and pixs2 (a no-op).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -277,7 +274,7 @@ Xor(lua_State *L)
 
 /**
  * \brief Printable string for a Pix*.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 string on the Lua stack
  */
 static int
@@ -299,26 +296,32 @@ toString(lua_State* L)
         luaL_addstring(&B, "nil");
     } else {
         if (pixGetDimensions(pix, &w, &h, &d)) {
-            snprintf(str, sizeof(str), "invalid");
+            luaL_addstring(&B, "invalid");
         } else {
             spp = pixGetSpp(pix);
             wpl = pixGetWpl(pix);
             size = static_cast<long>(sizeof(l_uint32)) * wpl * h;
             data = pixGetData(pix);
-            refcnt = pixGetRefcount(pix);
             xres = pixGetXRes(pix);
             yres = pixGetYRes(pix);
+            refcnt = pixGetRefcount(pix);
             format = ll_string_input_format(pixGetInputFormat(pix));
-            snprintf(str, sizeof(str),
-                    "Pix: %p\n"
-                    "    width = %d, height = %d, depth = %d, spp = %d\n"
-                    "    wpl = %d, data = %p, size = %#" PRIx64 "\n"
-                    "    xres = %d, yres = %d, refcount = %d\n"
-                    "    format = %s",
-                     reinterpret_cast<void *>(pix),
-                     w, h, d, spp, wpl, data, size, xres, yres, refcnt, format);
+
+            snprintf(str, sizeof(str), TNAME ": %p\n", reinterpret_cast<void *>(pix));
+            luaL_addstring(&B, str);
+
+            snprintf(str, sizeof(str), "    width = %d, height = %d, depth = %d, spp = %d\n", w, h, d, spp);
+            luaL_addstring(&B, str);
+
+            snprintf(str, sizeof(str), "    wpl = %d, data = %p, size = %#" PRIx64 "\n", wpl, data, size);
+            luaL_addstring(&B, str);
+
+            snprintf(str, sizeof(str), "    xres = %d, yres = %d, refcount = %d\n", xres, yres, refcnt);
+            luaL_addstring(&B, str);
+
+            snprintf(str, sizeof(str), "    format = %s\n", format);
+            luaL_addstring(&B, str);
         }
-        luaL_addstring(&B, str);
 
         cmap = pixGetColormap(pix);
         if (cmap) {
@@ -357,7 +360,7 @@ toString(lua_State* L)
  *      (2) To resample for a bin size different from 1, use
  *          numaUniformSampling() on the result of this function.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa* on the Lua stack
  */
 static int
@@ -382,7 +385,7 @@ AbsDiffByColumn(lua_State *L)
  *      (2) To resample for a bin size different from 1, use
  *          numaUniformSampling() on the result of this function.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa* on the Lua stack
  */
 static int
@@ -408,7 +411,7 @@ AbsDiffByRow(lua_State *L)
  *             row:     dir == L_HORIZONTAL_LINE
  *             column:  dir == L_VERTICAL_LINE
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa* on the Lua stack
  */
 static int
@@ -437,7 +440,7 @@ AbsDiffInRect(lua_State *L)
  *          or vertical.
  *      (2) If horizontal, require x1 < x2; if vertical, require y1 < y2.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa* on the Lua stack
  */
 static int
@@ -471,7 +474,7 @@ AbsDiffOnLine(lua_State *L)
  *      (5) Computes the absolute value of the difference between
  *          each component value.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -497,7 +500,7 @@ AbsDifference(lua_State *L)
  *          do not need to be the same size.
  *      (3) The alignment is to the origin [UL corner] of pixs & pixd.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -523,7 +526,7 @@ Accumulate(lua_State *L)
  *          after use.  If this is called many times, it is better
  *          to precompute the pta.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -567,7 +570,7 @@ AccumulateSamples(lua_State *L)
  *          170 was mapped to 255, choosing 200 for the threshold is
  *          quite safe for avoiding speckle noise from the background.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -604,7 +607,7 @@ AdaptThresholdToBinary(lua_State *L)
  *             whiteval  ~190
  *             thresh    ~200
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -636,7 +639,7 @@ AdaptThresholdToBinaryGen(lua_State *L)
  *          representation of a stencil, that can be used to paint over pixels
  *          of a backing image that are masked by the foreground in pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -669,7 +672,7 @@ AddAlphaTo1bpp(lua_State *L)
  *      (4) If pixs has a colormap, it is removed to rgb.
  *      (5) If pixs already has an alpha layer, it is overwritten.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -708,7 +711,7 @@ AddAlphaToBlend(lua_State *L)
  *              pixSetBlackOrWhite(pixd, L_SET_WHITE);  // uses cmap
  *              pixRasterop(pixd, left, top, ws, hs, PIX_SET, pixs, 0, 0);
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -736,7 +739,7 @@ AddBlackOrWhiteBorder(lua_State *L)
  * Leptonica's Notes:
  *      (1) See pixGetBlackOrWhiteVal() for values of black and white pixels.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -783,7 +786,7 @@ AddBorder(lua_State *L)
  *             black: pixcmapGetRankIntensity(cmap, 0.0, &index);
  *          and use that for val.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -814,7 +817,7 @@ AddBorderGeneral(lua_State *L)
  *          to 0xff and 0xffff, rsp.
  *      (4) For 8 and 16 bpp, if val < 0 the result is clipped to 0.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -839,7 +842,7 @@ AddConstantGray(lua_State *L)
  *      (1) This adds pixels on each side whose values are equal to
  *          the value on the closest boundary pixel.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -866,7 +869,7 @@ AddContinuedBorder(lua_State *L)
  *      (1) This adds noise to each pixel, taken from a normal
  *          distribution with zero mean and specified standard deviation.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -898,7 +901,7 @@ AddGaussianNoise(lua_State *L)
  *          * pixd != pixs1:  (src1 + src2) --> input pixd
  *      (5) pixs2 must be different from both pixd and pixs1.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -920,7 +923,7 @@ AddGray(lua_State *L)
  * Leptonica's Notes:
  *      (1) If pixs has a colormap, this is a no-op.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -941,7 +944,7 @@ AddGrayColormap8(lua_State *L)
  *          that has the same number of colormap entries as the
  *          input image has unique gray levels.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -977,7 +980,7 @@ AddMinimalGrayColormap8(lua_State *L)
  *      (3) The general pixRasterop() is used for an in-place operation here
  *          because there is no overlap between the src and dest rectangles.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -1020,7 +1023,7 @@ AddMirroredBorder(lua_State *L)
  *          operation here because there is no overlap between the
  *          src and dest rectangles.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -1051,7 +1054,7 @@ AddMixedBorder(lua_State *L)
  *      (4) This is useful to combine two images where most of the
  *          pixels are essentially black, such as in pixPerceptualDiff().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -1080,7 +1083,7 @@ AddRGB(lua_State *L)
  *      (2) The general pixRasterop() is used for an in-place operation here
  *          because there is no overlap between the src and dest rectangles.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -1120,7 +1123,7 @@ AddRepeatedBorder(lua_State *L)
  *          the requested color, or something similar to it.
  *      (5) Typical usage is for labelling a pix with some text data.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -1150,7 +1153,7 @@ AddSingleTextblock(lua_State *L)
  *      (2) Either or both the existing text and the new text
  *          string can be null.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -1190,7 +1193,7 @@ AddText(lua_State *L)
  *          the requested color, or something similar to it.
  *      (5) Typical usage is for labelling a pix with some text data.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -1222,7 +1225,7 @@ AddTextlines(lua_State *L)
  *      (1) Search is in 4-connected directions first; then on diagonals.
  *          This allows traversal along a 4-connected boundary.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 2 on the Lua stack
  */
 static int
@@ -1251,7 +1254,7 @@ AdjacentOnPixelInRaster(lua_State *L)
  *      (1) This complements pixRemoveWithIndicator().   Here, the selected
  *          components are added to pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -1275,7 +1278,7 @@ AddWithIndicator(lua_State *L)
  *      (1) Brings in either black or white pixels from the boundary
  *      (2) Removes any existing colormap, if necessary, before transforming
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -1297,7 +1300,7 @@ Affine(lua_State *L)
  * Arg #2 is expected to be a l_uint32 (colorval).
  * Arg #3 and following is expected to be a vector of l_float32 (vc)
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -1319,7 +1322,7 @@ AffineColor(lua_State *L)
  * Arg #2 is expected to be a l_uint8 (grayval).
  * Arg #3 and following is expected to be a vector of l_float32 (vc)
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -1346,7 +1349,7 @@ AffineGray(lua_State *L)
  *      (1) Brings in either black or white pixels from the boundary
  *      (2) Removes any existing colormap, if necessary, before transforming
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -1369,7 +1372,7 @@ AffinePta(lua_State *L)
  * Arg #3 is expected to be a Pta* (ptas).
  * Arg #4 is expected to be a l_uint32 (colorval).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -1392,7 +1395,7 @@ AffinePtaColor(lua_State *L)
  * Arg #3 is expected to be a Pta* (ptas).
  * Arg #4 is expected to be a l_uint8 (grayval).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -1446,7 +1449,7 @@ AffinePtaGray(lua_State *L)
  *          (b) softens the edges by weakening the aliasing there.
  *          Use l_setAlphaMaskBorder() to change these values.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -1477,7 +1480,7 @@ AffinePtaWithAlpha(lua_State *L)
  *          somewhat slower pixAffine().  See that function
  *          for relative timings between sampled and interpolated.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -1519,7 +1522,7 @@ AffineSampled(lua_State *L)
  *      (7) To repeat, use of the sequential transform,
  *          pixAffineSequential(), for any images, is discouraged.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -1559,7 +1562,7 @@ AffineSampledPta(lua_State *L)
  *          on 1 bpp images than pixAffineSampled(), but the results
  *          on text are much inferior.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -1589,7 +1592,7 @@ AffineSequential(lua_State *L)
  *      (2) If pixs does not have an alpha channel, it returns a clone
  *          of pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -1607,7 +1610,7 @@ AlphaBlendUniform(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -1630,7 +1633,7 @@ AlphaIsOpaque(lua_State *L)
  * Arg #3 is expected to be a l_int32 (sx).
  * Arg #4 is expected to be a l_int32 (sy).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -1655,7 +1658,7 @@ ApplyInvBackgroundGrayMap(lua_State *L)
  * Arg #5 is expected to be a l_int32 (sx).
  * Arg #6 is expected to be a l_int32 (sy).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -1679,7 +1682,7 @@ ApplyInvBackgroundRGBMap(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixth).
  * Arg #3 is expected to be a l_int32 (redfactor).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -1716,7 +1719,7 @@ ApplyLocalThreshold(lua_State *L)
  *          pixVarThresholdToBinary().
  *      (2) The sizes of pixs and pixg must be equal.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -1766,7 +1769,7 @@ ApplyVariableGrayMap(lua_State *L)
  *          brute-force search for the closest colormap color to each
  *          pixel in the image.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -1797,7 +1800,7 @@ AssignToNearestColor(lua_State *L)
  *      (2) If type == L_BLACK_IS_MAX, black pixels get the maximum
  *          value (0xff for 8 bpp, 0xffff for 16 bpp) and white get 0.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa* on the Lua stack
  */
 static int
@@ -1824,7 +1827,7 @@ AverageByColumn(lua_State *L)
  *      (2) If type == L_BLACK_IS_MAX, black pixels get the maximum
  *          value (0xff for 8 bpp, 0xffff for 16 bpp) and white get 0.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa* on the Lua stack
  */
 static int
@@ -1844,7 +1847,7 @@ AverageByRow(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is an optional Box* (box).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa* on the Lua stack
  */
 static int
@@ -1887,7 +1890,7 @@ AverageInRect(lua_State *L)
  *      (4) The averages are measured over the central %fract of the image.
  *          Use %fract == 1.0 to average across the entire width or height.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa * on the Lua stack
  */
 static int
@@ -1923,7 +1926,7 @@ AverageIntensityProfile(lua_State *L)
  *          characterize the intensity smoothness along a line.
  *      (3) Input end points are clipped to the pix.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_float32 on the Lua stack
  */
 static int
@@ -1995,7 +1998,7 @@ AverageOnLine(lua_State *L)
  *        is 2 * (smoothing factor) + 1, so a
  *        value of 0 means no smoothing. A value of 1 or 2 is recommended.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -2042,7 +2045,7 @@ BackgroundNorm(lua_State *L)
  *          bg regions will be lifted, causing thickening of
  *          the fg regions.  Use 0 to skip.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -2078,7 +2081,7 @@ BackgroundNormFlex(lua_State *L)
  *        pixApplyInvBackgroundGrayMap() to generate a normalized version
  *        of the input pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -2114,7 +2117,7 @@ BackgroundNormGrayArray(lua_State *L)
  *        pixApplyInvBackgroundGrayMap() to generate a normalized version
  *        of the input pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -2168,7 +2171,7 @@ BackgroundNormGrayArrayMorph(lua_State *L)
  *        should be at least 128.  If set too close to 255, some
  *        clipping will occur in the result.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -2204,7 +2207,7 @@ BackgroundNormMorph(lua_State *L)
  *        pixApplyInvBackgroundGrayMap() to generate a normalized version
  *        of each component of the input pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 3 Pix* on the Lua stack (%pix_r, %pix_g, %pix_b)
  */
 static int
@@ -2245,7 +2248,7 @@ BackgroundNormRGBArrays(lua_State *L)
  *        pixApplyInvBackgroundGrayMap() to generate a normalized version
  *        of each component of the input pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 3 Pix* on the Lua stack (%pixr, %pixg, %pixb)
  */
 static int
@@ -2278,7 +2281,7 @@ BackgroundNormRGBArraysMorph(lua_State *L)
  *    (2) The input image is either grayscale or rgb.
  *    (3) See pixBackgroundNorm() for usage and function.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -2324,7 +2327,7 @@ BackgroundNormSimple(lua_State *L)
  *          in a coarse-to-fine sequence.  See the use of this function
  *          in pixCompareWithTranslation().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -2403,7 +2406,7 @@ BestCorrelation(lua_State *L)
  *          As spatial_dev gets larger, we get the counter-intuitive
  *          result that the body of the red fish becomes less blurry.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -2439,7 +2442,7 @@ Bilateral(lua_State *L)
  *          of the range value difference.  This degenerates to a regular
  *          pixConvolve() with a normalized kernel.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -2466,7 +2469,7 @@ BilateralExact(lua_State *L)
  *      (1) See pixBilateral() for constraints on the input parameters.
  *      (2) See pixBilateral() for algorithm details.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -2492,7 +2495,7 @@ BilateralGray(lua_State *L)
  * Leptonica's Notes:
  *      (1) See pixBilateralExact().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -2517,7 +2520,7 @@ BilateralGrayExact(lua_State *L)
  *      (1) Brings in either black or white pixels from the boundary
  *      (2) Removes any existing colormap, if necessary, before transforming
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -2539,7 +2542,7 @@ Bilinear(lua_State *L)
  * Arg #2 is expected to be a l_uint32 (colorval).
  * Arg #3 and following is expected to be a vector of l_float32 (vc)
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -2561,7 +2564,7 @@ BilinearColor(lua_State *L)
  * Arg #2 is expected to be a l_uint8 (grayval).
  * Arg #3 and following is expected to be a vector of l_float32 (vc)
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -2588,7 +2591,7 @@ BilinearGray(lua_State *L)
  *      (1) Brings in either black or white pixels from the boundary
  *      (2) Removes any existing colormap, if necessary, before transforming
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -2611,7 +2614,7 @@ BilinearPta(lua_State *L)
  * Arg #3 is expected to be a Pta* (ptas).
  * Arg #4 is expected to be a l_uint32 (colorval).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -2634,7 +2637,7 @@ BilinearPtaColor(lua_State *L)
  * Arg #3 is expected to be a Pta* (ptas).
  * Arg #4 is expected to be a l_uint8 (grayval).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -2688,7 +2691,7 @@ BilinearPtaGray(lua_State *L)
  *          (b) softens the edges by weakening the aliasing there.
  *          Use l_setAlphaMaskBorder() to change these values.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -2719,7 +2722,7 @@ BilinearPtaWithAlpha(lua_State *L)
  *          somewhat slower pixBilinear().  See that function
  *          for relative timings between sampled and interpolated.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -2750,7 +2753,7 @@ BilinearSampled(lua_State *L)
  *          somewhat slower pixBilinearPta().  See that
  *          function for relative timings between sampled and interpolated.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -2778,7 +2781,7 @@ BilinearSampledPta(lua_State *L)
  *      (1) This is a simple top-level interface.  For more flexibility,
  *          call directly into pixBlendMask(), etc.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -2818,7 +2821,7 @@ Blend(lua_State *L)
  *          To skip the TRC, use %gamma == 1, %minval = 0, %maxval = 255.
  *          See pixGammaTRC() for details.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -2851,7 +2854,7 @@ BlendBackgroundToColor(lua_State *L)
  *      (4) If boxes overlap, the final color depends only on the last
  *          rect that is used.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -2890,7 +2893,7 @@ BlendBoxaRandom(lua_State *L)
  *          the new index corresponding to the blender pixel is substituted
  *          for sindex.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -2931,7 +2934,7 @@ BlendCmap(lua_State *L)
  *      (8) If transparent = 1, all pixels of value transpix (typically
  *          either 0 or 0xffffff00) in pixs2 are transparent in the blend.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -2964,7 +2967,7 @@ BlendColor(lua_State *L)
  * Arg #9 is expected to be a l_int32 (transparent).
  * Arg #10 is expected to be a l_uint32 (transpix).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -3022,7 +3025,7 @@ BlendColorByChannel(lua_State *L)
  *      (9) Invalid %fract defaults to 0.5 with a warning.
  *          Invalid %type defaults to L_BLEND_GRAY with a warning.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -3081,7 +3084,7 @@ BlendGray(lua_State *L)
  *          A blender value of 0 has maximum mixing; a value of 255
  *          has no mixing and hence is transparent.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -3131,7 +3134,7 @@ BlendGrayAdapt(lua_State *L)
  *          For c == 0 (black) we get maximum inversion:
  *               d  -->  f * (1 - d) + d * (1 - f)   [inversion by fraction f]
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -3158,7 +3161,7 @@ BlendGrayInverse(lua_State *L)
  * Arg #5 is expected to be a l_int32 (y).
  * Arg #6 is expected to be a l_float32 (fract).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -3188,7 +3191,7 @@ BlendHardLight(lua_State *L)
  *          with the pixels in pixs in the specified rectangle.
  *          If no rectangle is specified, it blends over the entire image.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -3224,7 +3227,7 @@ BlendInRect(lua_State *L)
  *      (6) Invalid %fract defaults to 0.5 with a warning.
  *          Invalid %type defaults to L_BLEND_WITH_INVERSE with a warning.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -3273,7 +3276,7 @@ BlendMask(lua_State *L)
  *      (5) A typical use is for the pixs2/pixg combination to be
  *          a small watermark that is applied to pixs1.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -3322,7 +3325,7 @@ BlendWithGrayMask(lua_State *L)
  *             T = 1.2 * 10^-8 * (A * sh^2)  sec
  *          where A = # of pixels, sh = spatial halfwidth of filter.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -3350,7 +3353,7 @@ BlockBilateralExact(lua_State *L)
  *      (3) Require that w >= 2 * wc + 1 and h >= 2 * hc + 1,
  *          where (w,h) are the dimensions of pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -3377,7 +3380,7 @@ Blockconv(lua_State *L)
  *          For the first column, the special case is
  *            a(i,j) = v(i,j) + a(i-1, j)
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -3406,7 +3409,7 @@ BlockconvAccum(lua_State *L)
  *      (4) Require that w >= 2 * wc + 1 and h >= 2 * hc + 1,
  *          where (w,h) are the dimensions of pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -3440,7 +3443,7 @@ BlockconvGray(lua_State *L)
  *      (4) Require that w > 2 * wc + 1 and h > 2 * hc + 1,
  *          where (w,h) are the dimensions of pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -3488,7 +3491,7 @@ BlockconvGrayTile(lua_State *L)
  *          mirrored borders and destination indexing makes the
  *          implementation very simple.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -3531,7 +3534,7 @@ BlockconvGrayUnnormalized(lua_State *L)
  *          (c) Each tile can be processed independently, in parallel,
  *              on a multicore processor.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -3572,7 +3575,7 @@ BlockconvTiled(lua_State *L)
  *      (5) Require that w >= 2 * wc + 1 and h >= 2 * hc + 1,
  *          where (w,h) are the dimensions of pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -3617,7 +3620,7 @@ Blockrank(lua_State *L)
  *          are normalized by the number of participating pixels
  *          within the block.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -3657,7 +3660,7 @@ Blocksum(lua_State *L)
  *      (4) If accum pix is null, make one, use it, and destroy it
  *          before returning; otherwise, just use the input accum pix
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -3680,7 +3683,7 @@ CensusTransform(lua_State *L)
  *      (1) Any table not passed in will be made internally and destroyed
  *          after use.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -3714,7 +3717,7 @@ Centroid(lua_State *L)
  *          is computed based on the "foreground" gray pixels, and the
  *          darker the pixel, the more weight it is given.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -3738,7 +3741,7 @@ Centroid8(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (delta).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -3761,7 +3764,7 @@ ChangeRefcount(lua_State *L)
  *          will be IFF_UNKNOWN, and in that case it is written out
  *          in a compressed but lossless format.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 (%iff) on the Lua stack
  */
 static int
@@ -3792,7 +3795,7 @@ ChooseOutputFormat(lua_State *L)
  *          blackval   70  (a bit more than 60)
  *          whiteval  190  (a bit less than 200)
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -3818,7 +3821,7 @@ CleanBackgroundToWhite(lua_State *L)
  *      (1) This must be called after processing that was initiated
  *          by pixSetupByteProcessing() has finished.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -3846,7 +3849,7 @@ CleanupByteProcessing(lua_State *L)
  *      (2) Caution: for colormapped pix, this sets the color to the first
  *          one in the colormap.  Be sure that this is the intended color!
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -3869,7 +3872,7 @@ ClearAll(lua_State *L)
  *      (2) Caution: for colormapped pix, this sets the color to the first
  *          one in the colormap.  Be sure that this is the intended color!
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -3888,7 +3891,7 @@ ClearInRect(lua_State *L)
  * Arg #2 is expected to be a l_int32 (x).
  * Arg #3 is expected to be a l_int32 (y).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -3928,7 +3931,7 @@ ClearPixel(lua_State *L)
  *      (7) If the low and high thresholds are both 1, this is equivalent
  *          to pixClipBoxToForeground().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -3962,7 +3965,7 @@ ClipBoxToEdges(lua_State *L)
  *      (3) Do not use &pixs for the 3rd arg or &boxs for the 4th arg;
  *          this will leak memory.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -4006,7 +4009,7 @@ ClipBoxToForeground(lua_State *L)
  *          (1) in pix1.  The function call looks like
  *             pixClipMasked(pix2, pixInvert(pix1, pix1), x, y, 1);
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -4053,7 +4056,7 @@ ClipMasked(lua_State *L)
  *  Accordingly, this function has a third (optional) argument, which is
  *  the input box clipped to the src pix.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -4079,7 +4082,7 @@ ClipRectangle(lua_State *L)
  *     (1) The returned pixa includes the actual regions clipped out from
  *         the input pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pixa * on the Lua stack
  */
 static int
@@ -4101,7 +4104,7 @@ ClipRectangles(lua_State *L)
  *      (1) At least one of {&pixd, &box} must be specified.
  *      (2) If there are no fg pixels, the returned ptrs are null.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -4139,7 +4142,7 @@ ClipToForeground(lua_State *L)
  *              only destroys the pix when pixDestroy() has been
  *              called on all handles.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -4173,7 +4176,7 @@ Clone(lua_State *L)
  *          (c) pixClose(pixd, pixs, ...);
  *      (5) The size of the result is determined by pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -4209,7 +4212,7 @@ Close(lua_State *L)
  *          (c) pixCloseBrick(pixd, pixs, ...);
  *      (6) The size of the result is determined by pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -4257,7 +4260,7 @@ CloseBrick(lua_State *L)
  *      (11) If either linear Sel is not found, this calls
  *           the appropriate decomposible function.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -4308,7 +4311,7 @@ CloseBrickDwa(lua_State *L)
  *          terms, 6 and 6, so that the net result is a dilation
  *          with hsize = 36.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -4364,7 +4367,7 @@ CloseCompBrick(lua_State *L)
  *           terms, 6 and 6, so that the net result is a dilation
  *           with hsize = 36.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -4387,7 +4390,7 @@ CloseCompBrickDwa(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -4425,7 +4428,7 @@ CloseCompBrickExtendDwa(lua_State *L)
  *          (c) pixCloseGeneralized(pixd, pixs, ...);
  *      (6) The size of the result is determined by pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -4450,7 +4453,7 @@ CloseGeneralized(lua_State *L)
  *      (1) Sel is a brick with all elements being hits
  *      (2) If hsize = vsize = 1, just returns a copy.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -4475,7 +4478,7 @@ CloseGray(lua_State *L)
  *      (1) Special case for 1x3, 3x1 or 3x3 brick sel (all hits)
  *      (2) If hsize = vsize = 1, just returns a copy.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -4515,7 +4518,7 @@ CloseGray3(lua_State *L)
  *          (c) pixCloseSafe(pixd, pixs, ...);
  *      (6) The size of the result is determined by pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -4556,7 +4559,7 @@ CloseSafe(lua_State *L)
  *          (c) pixCloseBrick(pixd, pixs, ...);
  *      (7) The size of the result is determined by pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -4612,7 +4615,7 @@ CloseSafeBrick(lua_State *L)
  *          terms, 6 and 6, so that the net result is a dilation
  *          with hsize = 36.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -4655,7 +4658,7 @@ CloseSafeCompBrick(lua_State *L)
  *          magnitude is to be calculated without either white balance
  *          correction or dark filtering.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -4719,7 +4722,7 @@ ColorContent(lua_State *L)
  *          2^(level) octcubes on the diagonal are the only ones
  *          that can be occupied.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -4779,7 +4782,7 @@ ColorFraction(lua_State *L)
  *          setting thresh < 255 will make the function considerably
  *          more efficient without affecting the final result.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -4834,7 +4837,7 @@ ColorGray(lua_State *L)
  *          amount of fading increases with the brightness of the
  *          original pixel color.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -4879,7 +4882,7 @@ ColorGrayCmap(lua_State *L)
  *      (5) This can be used in conjunction with pixHasHighlightRed() to
  *          add highlight color to a grayscale image.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -4919,7 +4922,7 @@ ColorGrayMasked(lua_State *L)
  *          input colormap.  If there is not enough room in the colormap
  *          for this expansion, it returns 1 (error).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -4962,7 +4965,7 @@ ColorGrayMaskedCmap(lua_State *L)
  *      (4) This can be used in conjunction with pixHasHighlightRed() to
  *          add highlight color to a grayscale image.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -5007,7 +5010,7 @@ ColorGrayRegions(lua_State *L)
  *          are colorized in the first box must be excluded in the
  *          second because their value exceeds the size of the map.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -5070,7 +5073,7 @@ ColorGrayRegionsCmap(lua_State *L)
  *          They must either be all 0 or all non-zero.  To turn this
  *          off, set them all to 0.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -5100,7 +5103,7 @@ ColorMagnitude(lua_State *L)
  *      (2) Sel is a brick with all elements being hits.
  *      (3) If hsize = vsize = 1, just returns a copy.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -5150,7 +5153,7 @@ ColorMorph(lua_State *L)
  *             "c5.3 + o7.5"
  *             "D9.1"
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -5202,7 +5205,7 @@ ColorMorphSequence(lua_State *L)
  *          maxcolors, the result will be noisy.  If you use too few,
  *          the result will be a relatively poor assignment of colors.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -5232,7 +5235,7 @@ ColorSegment(lua_State *L)
  *          large population are closed first; this operation absorbs
  *          small sets of intercolated pixels of a different color.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -5267,7 +5270,7 @@ ColorSegmentClean(lua_State *L)
  *          Note that the diagonal of the 8-bit rgb color cube is about
  *          440, so for 'maxdist' = 440, you are guaranteed to get 1 color!
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -5298,7 +5301,7 @@ ColorSegmentCluster(lua_State *L)
  *          For highest accuracy, for pixels that are being replaced,
  *          we find the nearest colormap color  to the original rgb color.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -5333,7 +5336,7 @@ ColorSegmentRemoveColors(lua_State *L)
  *            rfract = 1 ==> r = 255
  *            rfract = -1 ==> r = 0
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -5360,7 +5363,7 @@ ColorShiftRGB(lua_State *L)
  *      (2) If pixs already has a colormap, it is removed to gray
  *          before colorizing.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -5439,7 +5442,7 @@ ColorizeGray(lua_State *L)
  *          completely eliminate measurement of jpeg quantization noise
  *          in the white background of grayscale or color images.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -5474,7 +5477,7 @@ ColorsForQuantization(lua_State *L)
  *             pixVarianceByColumn()
  *             pixGetColumnStats()
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 6 Numa* on the Lua stack (mean, median, mode, modecount, var, rootvar)
  */
 static int
@@ -5525,7 +5528,7 @@ ColumnStats(lua_State *L)
  *          If the mask is relatively sparse, the byte-check method
  *          is actually faster!
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -5576,7 +5579,7 @@ CombineMasked(lua_State *L)
  *             pixDestroy(&pixt);
  *             pixDestroy(&pixm8);
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -5604,7 +5607,7 @@ CombineMaskedGeneral(lua_State *L)
  *      (2) If using L_COMPARE_SUBTRACT, pix2 is subtracted from pix1.
  *      (3) The total number of pixels is determined by pix1.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -5637,7 +5640,7 @@ CompareBinary(lua_State *L)
  *      (3) Note: setting %plottype > 0 can result in writing named
  *                output files.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -5723,7 +5726,7 @@ CompareGray(lua_State *L)
  *                 grayInterHistogramStats()
  *              to determine whether it is photo or line graphics.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -5777,7 +5780,7 @@ CompareGrayByHisto(lua_State *L)
  *          parameter 'rmsdiff'.  For RGB, we return the average of
  *          the RMS differences for each of the components.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -5851,7 +5854,7 @@ CompareGrayOrRGB(lua_State *L)
  *      (8) With debug on, you get a pdf that shows, for each tile,
  *          the images, histograms and score.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -5887,7 +5890,7 @@ ComparePhotoRegionsByHisto(lua_State *L)
  *      (2) Note: setting %plottype > 0 can result in writing named
  *                output files.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -5934,7 +5937,7 @@ CompareRGB(lua_State *L)
  *      (4) If RGB, pixel differences for each component are aggregated
  *          into a single histogram.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa * on the Lua stack
  */
 static int
@@ -5969,7 +5972,7 @@ CompareRankDifference(lua_State *L)
  *          components of each pixel in the tile.
  *      (4) The result, pixdiff, contains one pixel for each source tile.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -6013,7 +6016,7 @@ CompareTiled(lua_State *L)
  *          have fg pixels, and white pixels are where neither image
  *          has fg pixels.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -6058,7 +6061,7 @@ CompareWithTranslation(lua_State *L)
  *          is much larger than 1.  Choose 256 "arbitrarily".
  *
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 FPix * on the Lua stack
  */
 static int
@@ -6106,7 +6109,7 @@ ComponentFunction(lua_State *L)
  *          It's easiest to fill from the boundary, and then verify that
  *          there are no filled pixels farther than %dist from the boundary.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -6134,7 +6137,7 @@ ConformsToRectangle(lua_State *L)
  *          a pixa of the components, and it can be used instead
  *          of either pixConnCompBB() or pixConnCompPixa(), rsp.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Boxa * on the Lua stack
  */
 static int
@@ -6162,7 +6165,7 @@ ConnComp(lua_State *L)
  *      (2) For purposes of visualization, the output can be converted
  *          to 8 bpp, using pixConvert32To8() or pixMaxDynamicRange().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -6188,7 +6191,7 @@ ConnCompAreaTransform(lua_State *L)
  *         in raster order and erased one at a time.  In the process,
  *         the b.b. is computed and saved.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Boxa * on the Lua stack
  */
 static int
@@ -6232,7 +6235,7 @@ ConnCompBB(lua_State *L)
  *          of pixels.  This function can be called about 1.3 million times
  *          per second.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -6269,7 +6272,7 @@ ConnCompIncrAdd(lua_State *L)
  *      (5) Always initialize with the first pta in ptaa being empty
  *          and representing the background value (index 0) in the pix.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -6308,7 +6311,7 @@ ConnCompIncrInit(lua_State *L)
  *      (4) If the input is valid, this always returns a boxa and a pixa.
  *          If pixs is empty, the boxa and pixa will be empty.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Boxa * on the Lua stack
  */
 static int
@@ -6343,7 +6346,7 @@ ConnCompPixa(lua_State *L)
  *          if %depth = 16, the assigned label uses mod(2^16 - 2), and
  *          if %depth = 32, no mod is taken.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -6394,7 +6397,7 @@ ConnCompTransform(lua_State *L)
  *          by applying pixGammaTRC() with arbitrary values of gamma
  *          and the 0 and 255 points of the mapping.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -6438,7 +6441,7 @@ ContrastNorm(lua_State *L)
  *      (6) For color images that are not colormapped, the mapping
  *          is applied to each component.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -6466,7 +6469,7 @@ ContrastTRC(lua_State *L)
  *      (2) Masking does not work for colormapped images.
  *      (3) See pixContrastTRC() for details on how to use the parameters.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -6493,7 +6496,7 @@ ContrastTRCMasked(lua_State *L)
  *      (2) With L_CLIP_TO_FF, use min(pixel-value, 0xff) for each
  *          16-bit src pixel.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -6517,7 +6520,7 @@ Convert16To8(lua_State *L)
  *      (2) If pixd is not null, it must be of equal width and height
  *          as pixs.  It is always returned.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -6544,7 +6547,7 @@ Convert1To16(lua_State *L)
  *      (3) A simple unpacking might use val0 = 0 and val1 = 3.
  *      (4) If you want a colormapped pixd, use pixConvert1To2Cmap().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -6565,7 +6568,7 @@ Convert1To2(lua_State *L)
  * Leptonica's Notes:
  *      (1) Input 0 is mapped to (255, 255, 255); 1 is mapped to (0, 0, 0)
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -6588,7 +6591,7 @@ Convert1To2Cmap(lua_State *L)
  *      (2) If pixd is not null, it must be of equal width and height
  *          as pixs.  It is always returned.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -6615,7 +6618,7 @@ Convert1To32(lua_State *L)
  *      (3) A simple unpacking might use val0 = 0 and val1 = 15, or v.v.
  *      (4) If you want a colormapped pixd, use pixConvert1To4Cmap().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -6636,7 +6639,7 @@ Convert1To4(lua_State *L)
  * Leptonica's Notes:
  *      (1) Input 0 is mapped to (255, 255, 255); 1 is mapped to (0, 0, 0)
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -6662,7 +6665,7 @@ Convert1To4Cmap(lua_State *L)
  *      (4) To have a colormap associated with the 8 bpp pixd,
  *          use pixConvert1To8Cmap().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -6683,7 +6686,7 @@ Convert1To8(lua_State *L)
  * Leptonica's Notes:
  *      (1) Input 0 is mapped to (255, 255, 255); 1 is mapped to (0, 0, 0)
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -6712,7 +6715,7 @@ Convert1To8Cmap(lua_State *L)
  *            (a) write them to file in png, jpeg, tiff and pnm
  *            (b) interconvert between 24 and 32 bpp in memory (for testing).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -6750,7 +6753,7 @@ Convert24To32(lua_State *L)
  *          ~ If pixs does not have a colormap, the input values are
  *            used to populate the 8 bpp image.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -6776,7 +6779,7 @@ Convert2To8(lua_State *L)
  *      (1) The data in pixs is typically used for labelling.
  *          It is an array of l_uint32 values, not rgb or rgba.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -6793,7 +6796,7 @@ Convert32To16(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -6811,7 +6814,7 @@ Convert32To24(lua_State *L)
  * Arg #2 is expected to be a string describing the ms/ls 2 byte selection (type16).
  * Arg #2 is expected to be a string describing the ms/ls byte selection (type8).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -6849,7 +6852,7 @@ Convert32To8(lua_State *L)
  *          ~ If pixs does not have a colormap, the pixel values in pixs
  *            are used, with shift replication, to populate pixd.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -6873,7 +6876,7 @@ Convert4To8(lua_State *L)
  *          proportional mapping, with a correct map from 8 bpp white
  *          (0xff) to 16 bpp white (0xffff).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -6893,7 +6896,7 @@ Convert8To16(lua_State *L)
  * Leptonica's Notes:
  *      (1) Any existing colormap is removed to gray.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -6913,7 +6916,7 @@ Convert8To2(lua_State *L)
  *      (1) If there is no colormap, replicates the gray value
  *          into the 3 MSB of the dest pixel.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -6932,7 +6935,7 @@ Convert8To32(lua_State *L)
  * Leptonica's Notes:
  *      (1) Any existing colormap is removed to gray.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -6955,7 +6958,7 @@ Convert8To4(lua_State *L)
  *          (a) colors similar to each other are likely to be in the same class
  *          (b) there is usually much less FG than BG.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -6989,7 +6992,7 @@ ConvertCmapTo1(lua_State *L)
  *          and likewise for g and b.  Vertical subpixel splitting is
  *          handled similarly.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -7018,7 +7021,7 @@ ConvertColorToSubpixelRGB(lua_State *L)
  *      (3) Images without colormaps, that are not 1 bpp or 32 bpp,
  *          are converted to 8 bpp gray.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -7049,7 +7052,7 @@ ConvertForPSWrap(lua_State *L)
  *          levels: 4 levels for d = 2 and 16 levels for d = 4.
  *      (5) In all cases, the depth of the dest is the same as the src.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -7080,7 +7083,7 @@ ConvertGrayToColormap(lua_State *L)
  *          the depth of pixd will be 2 if ngray <= 4 and 4 if ngray > 4
  *          but <= 16.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -7105,7 +7108,7 @@ ConvertGrayToColormap8(lua_State *L)
  *          and then adds the colormap.
  *      (3) The colormap is modeled after the Matlab "jet" configuration.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -7141,7 +7144,7 @@ ConvertGrayToFalseColor(lua_State *L)
  *          in the display that make the pixel color appear to emerge
  *          from the entire pixel.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -7171,7 +7174,7 @@ ConvertGrayToSubpixelRGB(lua_State *L)
  *          the r, g and b values, respectively.  Here, they are explicitly
  *          placed in the 3 MS bytes in the pixel.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -7198,7 +7201,7 @@ ConvertHSVToRGB(lua_State *L)
  *           ~ if d > ds, does the unpacking conversion
  *      (2) If pixs has a colormap, this is an error.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -7227,7 +7230,7 @@ ConvertLossless(lua_State *L)
  *          a threshold and a selection choice of the gray value relative
  *          to %thresh.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -7271,7 +7274,7 @@ ConvertRGBToBinaryArb(lua_State *L)
  *          is about twice as slow and results in significantly larger
  *          files when losslessly compressed (e.g., into png).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -7295,7 +7298,7 @@ ConvertRGBToColormap(lua_State *L)
  * Leptonica's Notes:
  *      (1) Use a weighted average of the RGB values.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -7324,7 +7327,7 @@ ConvertRGBToGray(lua_State *L)
  *          which uses only positive coefficients that sum to 1.
  *      (2) The gray output values are clipped to 0 and 255.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -7352,7 +7355,7 @@ ConvertRGBToGrayArb(lua_State *L)
  *      (2) To combine RGB to gray conversion with subsampling,
  *          use pixScaleRGBToGrayFast() instead.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -7379,7 +7382,7 @@ ConvertRGBToGrayFast(lua_State *L)
  *      (2) The default reference value for boosting the min and max
  *          is 200.  This can be changed with l_setNeutralBoostVal()
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -7417,7 +7420,7 @@ ConvertRGBToGrayMinMax(lua_State *L)
  *          should be chosen near the expected value of the background,
  *          to achieve maximum saturation boost there.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -7461,7 +7464,7 @@ ConvertRGBToGraySatBoost(lua_State *L)
  *                s = 1
  *                h = 1/2 (if r = 0), 5/6 (if g = 0), 1/6 (if b = 0)
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -7486,7 +7489,7 @@ ConvertRGBToHSV(lua_State *L)
  *          at about 10 Mpixels/sec/GHz, which is about
  *          2x faster than using pixConvertRGBToHSV()
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -7507,7 +7510,7 @@ ConvertRGBToHue(lua_State *L)
  *      (1) The [l,a,b] values are stored as float values in three fpix
  *          that are returned in a fpixa.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 FPixa * on the Lua stack
  */
 static int
@@ -7527,7 +7530,7 @@ ConvertRGBToLAB(lua_State *L)
  * Leptonica's Notes:
  *      (1) Use a standard luminance conversion.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -7550,7 +7553,7 @@ ConvertRGBToLuminance(lua_State *L)
  *      (3) If you just want the saturation component, this does it
  *          at about 12 Mpixels/sec/GHz.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -7573,7 +7576,7 @@ ConvertRGBToSaturation(lua_State *L)
  *      (3) If you just want the value component, this does it
  *          at about 35 Mpixels/sec/GHz.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -7610,7 +7613,7 @@ ConvertRGBToValue(lua_State *L)
  *             http://user.engineering.uiowa.edu/~aip/Misc/ColorFAQ.html
  *             http://en.wikipedia.org/wiki/CIE_1931_color_space
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 FPixa * on the Lua stack
  */
 static int
@@ -7646,7 +7649,7 @@ ConvertRGBToXYZ(lua_State *L)
  *          "Frequently Asked Questions about Color" by Charles Poynton,
  *          //http://user.engineering.uiowa.edu/~aip/Misc/ColorFAQ.html
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -7672,7 +7675,7 @@ ConvertRGBToYUV(lua_State *L)
  *      (3) If the input image has 1 bpp and no colormap, the operation is
  *          lossless and a copy is returned.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -7690,7 +7693,7 @@ ConvertTo1(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -7712,7 +7715,7 @@ ConvertTo16(lua_State *L)
  *      (1) This is a quick and dirty, top-level converter.
  *      (2) See pixConvertTo1() for default values.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -7737,7 +7740,7 @@ ConvertTo1BySampling(lua_State *L)
  *      (3) If the input image has 2 bpp and no colormap, the operation is
  *          lossless and a copy is returned.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -7756,7 +7759,7 @@ ConvertTo2(lua_State *L)
  * Leptonica's Notes:
  *      (1) Never returns a clone of pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -7777,7 +7780,7 @@ ConvertTo32(lua_State *L)
  *      (1) This is a fast, quick/dirty, top-level converter.
  *      (2) See pixConvertTo32() for default values.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -7801,7 +7804,7 @@ ConvertTo32BySampling(lua_State *L)
  *      (3) If the input image has 4 bpp and no colormap, the operation is
  *          lossless and a copy is returned.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -7834,7 +7837,7 @@ ConvertTo4(lua_State *L)
  *          to do color quantization, you must specify the type
  *          explicitly, using the color quantization code.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -7857,7 +7860,7 @@ ConvertTo8(lua_State *L)
  *      (1) This is a fast, quick/dirty, top-level converter.
  *      (2) See pixConvertTo8() for default values.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -7887,7 +7890,7 @@ ConvertTo8BySampling(lua_State *L)
  *      (5) For 16 bpp, use the most significant byte.
  *      (6) For 32 bpp RGB, use octcube quantization with optional dithering.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -7914,7 +7917,7 @@ ConvertTo8Colormap(lua_State *L)
  *      (3) Otherwise, the pix is converted to 8 bpp grayscale.
  *          In all cases, pixd does not have a colormap.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -7939,7 +7942,7 @@ ConvertTo8Or32(lua_State *L)
  *          In all other cases the src image is treated as having a single
  *          component of pixel values.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 DPix * on the Lua stack
  */
 static int
@@ -7964,7 +7967,7 @@ ConvertToDPix(lua_State *L)
  *          In all other cases the src image is treated as having a single
  *          component of pixel values.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 FPix * on the Lua stack
  */
 static int
@@ -7997,7 +8000,7 @@ ConvertToFPix(lua_State *L)
  *          image to be written on the page.
  *      (3) See comments in convertToPdf().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -8039,7 +8042,7 @@ ConvertToPdf(lua_State *L)
  *          written on the page.
  *      (3) See comments in convertToPdf().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 2 lstring (%data, %nbytes) and PdfData* (%lpd) on the Lua stack
  */
 static int
@@ -8079,7 +8082,7 @@ ConvertToPdfData(lua_State *L)
  * Leptonica's Notes:
  *      (1) See convertToPdfSegmented() for details.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -8118,7 +8121,7 @@ ConvertToPdfDataSegmented(lua_State *L)
  * Leptonica's Notes:
  *      (1) See convertToPdfSegmented() for details.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -8160,7 +8163,7 @@ ConvertToPdfSegmented(lua_State *L)
  *      (3) See pixConvertGrayToSubpixelRGB() and
  *          pixConvertColorToSubpixelRGB() for further details.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -8189,7 +8192,7 @@ ConvertToSubpixelRGB(lua_State *L)
  *          the r, g and b values, respectively.  Here, they are explicitly
  *          placed in the 3 MS bytes in the pixel.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -8242,7 +8245,7 @@ ConvertYUVToRGB(lua_State *L)
  *          cpu, a 1 Mpixel grayscale image, and a kernel with
  *          (sx * sy) = 25 elements, the convolution takes about 100 msec.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -8278,7 +8281,7 @@ Convolve(lua_State *L)
  *      (5) This uses a mirrored border to avoid special casing on
  *          the boundaries.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -8314,7 +8317,7 @@ ConvolveRGB(lua_State *L)
  *      (4) This uses a mirrored border to avoid special casing on
  *          the boundaries.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -8368,7 +8371,7 @@ ConvolveRGBSep(lua_State *L)
  *      (6) This uses mirrored borders to avoid special casing on
  *          the boundaries.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -8410,7 +8413,7 @@ ConvolveSep(lua_State *L)
  *          If force8 == FALSE, the output will be either 8 or 16 bpp,
  *          to accommodate the dynamic range of output values without scaling.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -8453,7 +8456,7 @@ ConvolveWithBias(lua_State *L)
  *      (4) This operation, like all others that may involve a pre-existing
  *          pixd, will side-effect any existing clones of pixd.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -8483,7 +8486,7 @@ Copy(lua_State *L)
  *          Nevertheless, for safety, if making a new pixd, all the
  *          non-border pixels are initialized to 0.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -8510,7 +8513,7 @@ CopyBorder(lua_State *L)
  *      (1) This always destroys any colormap in pixd (except if
  *          the operation is a no-op.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -8528,7 +8531,7 @@ CopyColormap(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -8546,7 +8549,7 @@ CopyDimensions(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -8569,7 +8572,7 @@ CopyInputFormat(lua_State *L)
  *      (1) The two images are registered to the UL corner.  The sizes
  *          are usually the same, and a warning is issued if they differ.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -8588,7 +8591,7 @@ CopyRGBComponent(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -8606,7 +8609,7 @@ CopyResolution(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
  *
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -8624,7 +8627,7 @@ CopySpp(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be another Pix* (pixs).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -8655,7 +8658,7 @@ CopyText(lua_State *L)
  *      (2) Typically the two images are of equal size, but this
  *          is not enforced.  Instead, the UL corners are aligned.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -8732,7 +8735,7 @@ CorrelationBinary(lua_State *L)
  *  simple implementation.  This very fast correlation matcher was
  *  contributed by William Rucklidge.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -8784,7 +8787,7 @@ CorrelationScore(lua_State *L)
  *      (5) We do not check the sizes of pix1 and pix2, because they should
  *          be comparable.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -8824,7 +8827,7 @@ CorrelationScoreShifted(lua_State *L)
  *      (2) The returned correlation score is 0.0 if the width or height
  *          exceed %maxdiffw or %maxdiffh.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -8896,7 +8899,7 @@ CorrelationScoreSimple(lua_State *L)
  *
  *  This very fast correlation matcher was contributed by William Rucklidge.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -8935,7 +8938,7 @@ CorrelationScoreThresholded(lua_State *L)
  *      (2) Set the subsampling %factor > 1 to reduce the amount of computation.
  *          If %factor > 1, multiply the count by %factor * %factor.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa* on the Lua stack
  */
 static int
@@ -8962,7 +8965,7 @@ CountArbInRect(lua_State *L)
  *      (1) To resample for a bin size different from 1, use
  *          numaUniformSampling() on the result of this function.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa * on the Lua stack
  */
 static int
@@ -8985,7 +8988,7 @@ CountByColumn(lua_State *L)
  *      (1) To resample for a bin size different from 1, use
  *          numaUniformSampling() on the result of this function.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa * on the Lua stack
  */
 static int
@@ -9004,7 +9007,7 @@ CountByRow(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (connectivity).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -9024,7 +9027,7 @@ CountConnComp(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -9043,7 +9046,7 @@ CountPixels(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa* on the Lua stack
  */
 static int
@@ -9060,7 +9063,7 @@ CountPixelsByColumn(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa* on the Lua stack
  */
 static int
@@ -9078,7 +9081,7 @@ CountPixelsByRow(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Box* (box).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -9098,7 +9101,7 @@ CountPixelsInRect(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa* on the Lua stack
  */
 static int
@@ -9118,7 +9121,7 @@ CountPixelsInRow(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -9148,7 +9151,7 @@ CountRGBColors(lua_State *L)
  *          this returns ncols = 0.
  *      (4) For debug output, input a pre-allocated pixa.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -9180,7 +9183,7 @@ CountTextColumns(lua_State *L)
  * or
  * No Arg creates a 1x1 1bpp Pix*
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -9199,7 +9202,7 @@ Create(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixComp* (pixc).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -9229,7 +9232,7 @@ CreateFromPixcomp(lua_State *L)
  *          with bad (or malicious) input, this is where we limit the
  *          requested allocation of image data in a typesafe way.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -9258,7 +9261,7 @@ CreateHeader(lua_State *L)
  *      (1) Must set pad bits to avoid reading unitialized data, because
  *          some optimized routines (e.g., pixConnComp()) read from pad bits.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -9299,7 +9302,7 @@ CreateNoInit(lua_State *L)
  *          The reason is there are many more cache misses when reading
  *          from 3 input images simultaneously.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* (pixd) on the Lua stack
  */
 static int
@@ -9329,7 +9332,7 @@ CreateRGBImage(lua_State *L)
  *          data array allocated and initialized to 0.
  *      (2) Copies the other fields, including colormap if it exists.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -9357,7 +9360,7 @@ CreateTemplate(lua_State *L)
  *          the data array allocated but not initialized to 0.
  *      (2) Copies the other fields, including colormap if it exists.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -9381,7 +9384,7 @@ CreateTemplateNoInit(lua_State *L)
  *          their centroids of their photometric inverses are aligned.
  *          Black pixels have weight 255; white pixels have weight 0.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -9417,7 +9420,7 @@ CropAlignedToCentroid(lua_State *L)
  *      (2) If a pix doesn't need to be cropped, a clone is returned.
  *      (3) Note: the images are implicitly aligned to the UL corner.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -9447,7 +9450,7 @@ CropToMatch(lua_State *L)
  *          of pixs, this returns a cropped image; otherwise it returns
  *          a clone of pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -9482,7 +9485,7 @@ CropToSize(lua_State *L)
  *      (3) This function is useful to enhance pixels relative to a
  *          gray background.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -9521,7 +9524,7 @@ DarkenGray(lua_State *L)
  *      (4) Default for %thresh is 1.3; this seems sufficiently conservative.
  *      (5) Use %pixadebug == NULL unless debug output is requested.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -9579,7 +9582,7 @@ DecideIfPhotoImage(lua_State *L)
  *          trigger the detector.
  *      (9) For debug output, input a pre-allocated pixa.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -9618,7 +9621,7 @@ DecideIfTable(lua_State *L)
  *          result can not be determined, return -1.
  *      (7) For debug output, input a pre-allocated pixa.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -9645,7 +9648,7 @@ DecideIfText(lua_State *L)
  *      (1) See pixSerializeToMemory() for the binary format.
  *      (2) Note the image size limits.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -9672,7 +9675,7 @@ DeserializeFromMemory(lua_State *L)
  *      (2) Typical values at 300 ppi for %redsearch are 2 and 4.
  *          At 75 ppi, one should use %redsearch = 1.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -9698,7 +9701,7 @@ Deskew(lua_State *L)
  *     (1) The (optional) angle returned is the angle in degrees (cw positive)
  *         necessary to rotate the image so that it is deskewed.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -9731,7 +9734,7 @@ DeskewBarcode(lua_State *L)
  *          the underlying pixDeskew().  See usage there.
  *      (2) This may return a clone.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -9759,7 +9762,7 @@ DeskewBoth(lua_State *L)
  *          angle is large enough and there is sufficient confidence,
  *          it returns a deskewed image; otherwise, it returns a clone.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -9810,7 +9813,7 @@ DeskewGeneral(lua_State *L)
  *          Typically, this can be achieved by vertically aligning
  *          the page edge.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -9833,7 +9836,7 @@ DeskewLocal(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -9863,7 +9866,7 @@ DestroyColormap(lua_State *L)
  *          (c) pixDilate(pixd, pixs, ...);
  *      (4) The size of the result is determined by pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -9899,7 +9902,7 @@ Dilate(lua_State *L)
  *          (c) pixDilateBrick(pixd, pixs, ...);
  *      (6) The size of the result is determined by pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -9942,7 +9945,7 @@ DilateBrick(lua_State *L)
  *      (9) If either linear Sel is not found, this calls
  *          the appropriate decomposible function.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -9993,7 +9996,7 @@ DilateBrickDwa(lua_State *L)
  *          terms, 6 and 6, so that the net result is a dilation
  *          with hsize = 36.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -10048,7 +10051,7 @@ DilateCompBrick(lua_State *L)
  *           terms, 6 and 6, so that the net result is a dilation
  *           with hsize = 36.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -10089,7 +10092,7 @@ DilateCompBrickDwa(lua_State *L)
  *      (4) There is no need to call this directly:  pixDilateCompBrickDwa()
  *          calls this function if either brick dimension exceeds 63.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -10115,7 +10118,7 @@ DilateCompBrickExtendDwa(lua_State *L)
  *      (1) Sel is a brick with all elements being hits
  *      (2) If hsize = vsize = 1, just returns a copy.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -10140,7 +10143,7 @@ DilateGray(lua_State *L)
  *      (1) Special case for 1x3, 3x1 or 3x3 brick sel (all hits)
  *      (2) If hsize = vsize = 1, just returns a copy.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -10191,7 +10194,7 @@ DilateGray3(lua_State *L)
  *          alpha, the alpha, and the image as it would appear with
  *          a white background.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -10214,7 +10217,7 @@ Display(lua_State *L)
  * Arg #3 is expected to be a l_int32 (fontsize).
  * Arg #4 is expected to be a Lua array table (carray).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -10247,7 +10250,7 @@ DisplayColorArray(lua_State *L)
  *      (2) This aligns the UL corners of pix1 and pix2, and crops
  *          to the overlapping pixels.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -10274,7 +10277,7 @@ DisplayDiffBinary(lua_State *L)
  *    (2) The colors are conveniently given as 4 bytes in hex format,
  *        such as 0xff008800.  The least significant byte is ignored.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -10304,7 +10307,7 @@ DisplayHitMissSel(lua_State *L)
  *           ~ the alpha layer
  *           ~ the image as it would appear with a white background.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* (pixd) on the Lua stack
  */
 static int
@@ -10342,7 +10345,7 @@ DisplayLayersRGBA(lua_State *L)
  *        Alignment is done using the origin of the Sel and the
  *        centroid of the eroded image to place the stencil pixp.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -10377,7 +10380,7 @@ DisplayMatchedPattern(lua_State *L)
  *      (2) On error, returns pixd to avoid losing pixs if called as
  *             pixs = pixDisplayPta(pixs, pixs, pta);
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -10413,7 +10416,7 @@ DisplayPta(lua_State *L)
  *      (3) A typical pattern to be used is a circle, generated with
  *             generatePtaFilledCircle()
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -10437,7 +10440,7 @@ DisplayPtaPattern(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Ptaa* (ptaa).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -10472,7 +10475,7 @@ DisplayPtaa(lua_State *L)
  *      (4) A typical pattern to be used is a circle, generated with
  *             generatePtaFilledCircle()
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -10502,7 +10505,7 @@ DisplayPtaaPattern(lua_State *L)
  *      (1) See notes for pixDisplay().
  *      (2) This displays the image if dispflag == 1; otherwise it punts.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -10541,7 +10544,7 @@ DisplayWithTitle(lua_State *L)
  *             pix8 = pixConvert16To8(pixt, 0);  // low order byte
  *             pix8 = pixConvert16To8(pixt, 1);  // high order byte
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -10593,7 +10596,7 @@ DisplayWrite(lua_State *L)
  *          and bottom; then coming back reset left and top.  But we
  *          instead use a method that works for both 4- and 8-connected.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -10614,7 +10617,7 @@ DistanceFunction(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (cmapflag).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -10642,7 +10645,7 @@ DitherTo2bpp(lua_State *L)
  *          clipped to black and white without propagating the excess.
  *          For that reason, lowerclip and upperclip should be small numbers.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -10662,7 +10665,7 @@ DitherTo2bppSpec(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -10688,7 +10691,7 @@ DitherToBinary(lua_State *L)
  *          clipped to black and white without propagating the excess.
  *          For that reason, lowerclip and upperclip should be small numbers.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -10715,7 +10718,7 @@ DitherToBinarySpec(lua_State *L)
  *          and the boxa is drawn using a colormap; otherwise,
  *          it is converted to 32 bpp rgb.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -10743,7 +10746,7 @@ DrawBoxa(lua_State *L)
  *      (2) We use up to 254 different colors for drawing the boxes.
  *      (3) If boxes overlap, the later ones draw over earlier ones.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -10796,7 +10799,7 @@ DrawBoxaRandom(lua_State *L)
  *          sin(pi - a) = h/d, cos(pi - a) = -w/d.  The equations
  *          given below follow directly.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -10831,7 +10834,7 @@ EmbedForRotation(lua_State *L)
  *          MSB-to-the-left word order has the bytes in raster
  *          order when serialized, so no byte flipping is required.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -10863,7 +10866,7 @@ EndianByteSwap(lua_State *L)
  *          it is twice as fast to make a new pix in big-endian order,
  *          use it, and destroy it.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -10887,7 +10890,7 @@ EndianByteSwapNew(lua_State *L)
  *          by pixEndianByteSwap(), followed by byte swaps in
  *          each of the 16-bit entities separately.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -10914,7 +10917,7 @@ EndianTwoByteSwap(lua_State *L)
  *          to avoid having to swap twice in situations where the input
  *          pix must be restored to canonical little-endian order.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -10952,7 +10955,7 @@ EndianTwoByteSwapNew(lua_State *L)
  *      (6) For images without colormaps that are not 32 bpp, all bits
  *          in the image part of the data array must be identical.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -10981,7 +10984,7 @@ Equal(lua_State *L)
  *          RGBA images, where spp = 4, you can optionally include
  *          the alpha component in the comparison.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -11014,7 +11017,7 @@ EqualWithAlpha(lua_State *L)
  *      (4) If the colormaps are different, the comparison is done by
  *          slow brute force.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -11060,7 +11063,7 @@ EqualWithCmap(lua_State *L)
  *          is copied back to pixs (which for in-place is the same
  *          as pixd).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -11094,7 +11097,7 @@ EqualizeTRC(lua_State *L)
  *          (c) pixErode(pixd, pixs, ...);
  *      (4) The size of the result is determined by pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -11130,7 +11133,7 @@ Erode(lua_State *L)
  *          (c) pixErodeBrick(pixd, pixs, ...);
  *      (6) The size of the result is determined by pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -11176,7 +11179,7 @@ ErodeBrick(lua_State *L)
  *      (10) If either linear Sel is not found, this calls
  *           the appropriate decomposible function.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -11227,7 +11230,7 @@ ErodeBrickDwa(lua_State *L)
  *          terms, 6 and 6, so that the net result is a dilation
  *          with hsize = 36.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -11282,7 +11285,7 @@ ErodeCompBrick(lua_State *L)
  *           terms, 6 and 6, so that the net result is a dilation
  *           with hsize = 36.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -11310,7 +11313,7 @@ ErodeCompBrickDwa(lua_State *L)
  *      (2) There is no need to call this directly:  pixErodeCompBrickDwa()
  *          calls this function if either brick dimension exceeds 63.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -11336,7 +11339,7 @@ ErodeCompBrickExtendDwa(lua_State *L)
  *      (1) Sel is a brick with all elements being hits
  *      (2) If hsize = vsize = 1, just returns a copy.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -11366,7 +11369,7 @@ ErodeGray(lua_State *L)
  *          8 bytes at the right and bottom to allow unrolling of
  *          the computation of 8 pixels.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -11390,7 +11393,7 @@ ErodeGray3(lua_State *L)
  * Leptonica's Notes:
  *      (1) Caller should check that return bg value is > 0.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -11413,7 +11416,7 @@ EstimateBackground(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -11433,7 +11436,7 @@ ExpandBinaryPower2(lua_State *L)
  * Arg #2 is expected to be a l_int32 (xfact).
  * Arg #3 is expected to be a l_int32 (yfact).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -11453,7 +11456,7 @@ ExpandBinaryReplicate(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -11476,7 +11479,7 @@ ExpandReplicate(lua_State *L)
  * Leptonica's Notes:
  *      (1) The pixel values are extended to the left and down, as required.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -11497,7 +11500,7 @@ ExtendByReplication(lua_State *L)
  * Arg #2 is expected to be a l_float32 (thresh).
  * Arg #3 is expected to be a l_int32 (debugflag).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa * on the Lua stack
  */
 static int
@@ -11527,7 +11530,7 @@ ExtractBarcodeCrossings(lua_State *L)
  *         The histograms of these widths for black and white bars is
  *         generated and interpreted.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa * on the Lua stack
  */
 static int
@@ -11566,7 +11569,7 @@ ExtractBarcodeWidths1(lua_State *L)
  *          On the occasion where there is a '2', it is interpreted as
  *          as ending two runs: the previous one and another one that has length 1.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa * on the Lua stack
  */
 static int
@@ -11591,7 +11594,7 @@ ExtractBarcodeWidths2(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (debugflag).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pixa * on the Lua stack
  */
 static int
@@ -11610,7 +11613,7 @@ ExtractBarcodes(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (connectivity).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -11633,7 +11636,7 @@ ExtractBorderConnComps(lua_State *L)
  *      (1) Extracts the fg or bg boundary pixels for each component.
  *          Components are assumed to end at the boundary of pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -11651,7 +11654,7 @@ ExtractBoundary(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_uint32 * on the Lua stack
  */
 static int
@@ -11685,7 +11688,7 @@ ExtractData(lua_State *L)
  *      (3) Can be used with numaCountReverals(), for example, to
  *          characterize the intensity smoothness along a line.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa * on the Lua stack
  */
 static int
@@ -11734,7 +11737,7 @@ ExtractOnLine(lua_State *L)
  *      (6) The output pixa is composed of subimages, one for each textline,
  *          and the boxa in the pixa tells where in %pixs each textline goes.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pixa * on the Lua stack
  */
 static int
@@ -11791,7 +11794,7 @@ ExtractRawTextlines(lua_State *L)
  *      (8) The output pixa is composed of subimages, one for each textline,
  *          and the boxa in the pixa tells where in %pixs each textline goes.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pixa * on the Lua stack
  */
 static int
@@ -11826,7 +11829,7 @@ ExtractTextlines(lua_State *L)
  *      (3) This handles all required setting of the border pixels
  *          before erosion and dilation.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -11859,7 +11862,7 @@ FHMTGen_1(lua_State *L)
  *      (4) The closing operation is safe; no pixels can be removed
  *          near the boundary.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -11895,7 +11898,7 @@ FMorphopGen_1(lua_State *L)
  *      (4) The closing operation is safe; no pixels can be removed
  *          near the boundary.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -11927,7 +11930,7 @@ FMorphopGen_2(lua_State *L)
  *          to be appied to pixs.  Fade either to white (L_BLEND_TO_WHITE)
  *          or to black (L_BLEND_TO_BLACK).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -11966,7 +11969,7 @@ FadeWithGray(lua_State *L)
  *      (4) The L_TOPHAT_WHITE flag emphasizes small bright regions,
  *          whereas the L_TOPHAT_BLACK flag emphasizes small dark regions.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -12018,7 +12021,7 @@ FastTophat(lua_State *L)
  *             if (!pixq)  // too many colors; don't quantize
  *                 pixq = pixClone(pixs);
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -12063,7 +12066,7 @@ FewColorsMedianCutQuantMixed(lua_State *L)
  *          than the first found pixel.  It is also simpler to use,
  *          because it generates the histogram internally.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -12113,7 +12116,7 @@ FewColorsOctcubeQuant1(lua_State *L)
  *          octcube have exactly the same color, and quantization to
  *          that color is lossless.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -12177,7 +12180,7 @@ FewColorsOctcubeQuant2(lua_State *L)
  *          gives results that are better than pixOctcubeQuantMixedWithGray(),
  *          both in size and appearance.  But it is a bit slower.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -12218,7 +12221,7 @@ FewColorsOctcubeQuantMixed(lua_State *L)
  *              }
  * \endcode
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -12249,7 +12252,7 @@ FillBgFromBorder(lua_State *L)
  *      (5) If the borders are 4-c.c., use 8-c.c. filling, and v.v.
  *      (6) Closed borders within c.c. that represent holes, etc., are filled.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -12288,7 +12291,7 @@ FillClosedBorders(lua_State *L)
  *          which tend to be rectangular, values for maxhfract
  *          and minfgfract around 0.5 are reasonable.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -12334,7 +12337,7 @@ FillHolesToBoundingRect(lua_State *L)
  *          white (255) and use L_FILL_WHITE.
  *      (4) If w is the map width, nx = w or nx = w - 1; ditto for h and ny.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -12364,7 +12367,7 @@ FillMapHoles(lua_State *L)
  *            PIX *pixd = pixFillPolygon(pixt, pta, xmin, ymin);
  *            pixDestroy(&pixt);
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -12392,7 +12395,7 @@ FillPolygon(lua_State *L)
  *      (3) For 8 bpp dest, the result is clipped to [0, 0xff]
  *      (4) For 16 bpp dest, the result is clipped to [0, 0xffff]
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -12417,7 +12420,7 @@ FinalAccumulate(lua_State *L)
  *      (1) The offset must be >= 0 and should not exceed 0x40000000.
  *      (2) The offset is subtracted from the src 32 bpp image
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -12441,7 +12444,7 @@ FinalAccumulateThreshold(lua_State *L)
  *          size of the pix (w * h).  It is typically used for a
  *          single connected component.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -12476,7 +12479,7 @@ FindAreaFraction(lua_State *L)
  *          (x, y) in the mask before ANDing.
  *          If box == NULL, the UL corners of pixs and pixm are aligned.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -12507,7 +12510,7 @@ FindAreaFractionMasked(lua_State *L)
  *          0.0 if there are no fg pixels.
  *      (2) This function is retained because clients are using it.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 3 integers on the Lua stack (thresh, fgbal, bgval)
  */
 static int
@@ -12551,7 +12554,7 @@ FindAreaPerimRatio(lua_State *L)
  *          the differential signal in the region of each baseline
  *          by the inverse of the width of the text line found there.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa * on the Lua stack
  */
 static int
@@ -12621,7 +12624,7 @@ FindBaselines(lua_State *L)
  *                boxa2 = boxaCombineOverlaps(boxa1, NULL);
  *          This is done here in debug mode.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -12659,7 +12662,7 @@ FindColorRegions(lua_State *L)
  *      (1) Finds the 4 corner-most pixels, as defined by a search
  *          inward from each corner, using a 45 degree line.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pta * on the Lua stack
  */
 static int
@@ -12682,7 +12685,7 @@ FindCornerPixels(lua_State *L)
  *           ~ not more than 10% of the image height
  *           ~ not more than 5% of the image width
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -12708,7 +12711,7 @@ FindDifferentialSquareSum(lua_State *L)
  *          image has ON pixels where the pixels in pixs1 and pixs2
  *          have equal values.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -12742,7 +12745,7 @@ FindEqualValues(lua_State *L)
  *      (4) For debugging, after the pixa is returned, display with:
  *          pixd = pixaDisplayTiledInRows(pixa, 32, 1000, 1.0, 0, 30, 2);
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -12780,7 +12783,7 @@ FindHistoPeaksHSV(lua_State *L)
  *          of size w/2 + 1 to insure that they can hold
  *          the maximum number of runs in the raster line.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -12821,7 +12824,7 @@ FindHorizontalRuns(lua_State *L)
  *          in %nrect.  For example, for a 1 MPix image, searching for
  *          the largest 50 boxes takes about 0.2 seconds.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -12885,7 +12888,7 @@ FindLargeRectangles(lua_State *L)
  *          by 1 pixel, you arrive at (b).  The largest rectangle is
  *          then found by taking the Max.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -12914,7 +12917,7 @@ FindLargestRectangle(lua_State *L)
  *      (2) To find background runs, use pixInvert() before applying
  *          this function.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -12943,7 +12946,7 @@ FindMaxHorizontalRunOnLine(lua_State *L)
  *      (2) To find background runs, use pixInvert() before applying
  *          this function.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa * on the Lua stack
  */
 static int
@@ -12970,7 +12973,7 @@ FindMaxRuns(lua_State *L)
  *      (2) To find background runs, use pixInvert() before applying
  *          this function.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -13003,7 +13006,7 @@ FindMaxVerticalRunOnLine(lua_State *L)
  *          ratio of these two values.
  *      (2) If there are no fg pixels, hratio and vratio are returned as 0.0.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -13034,7 +13037,7 @@ FindNormalizedSquareSum(lua_State *L)
  *      (1) The UL corner of pixs2 is placed at (x2, y2) in pixs1.
  *      (2) This measure is similar to the correlation.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -13078,7 +13081,7 @@ FindOverlapFraction(lua_State *L)
  *          with the fg outlined.  If no foreground is found, there is
  *          no output for this page image.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 3 integers on the Lua stack (thresh, fgbal, bgval)
  */
 static int
@@ -13111,7 +13114,7 @@ FindPageForeground(lua_State *L)
  *          It has a value of about 1.0 for rectangular components with
  *          relatively smooth boundaries.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -13145,7 +13148,7 @@ FindPerimSizeRatio(lua_State *L)
  *          of a fg pixel from the nearest bg pixel is d, this has
  *          a value ~1/d.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 3 integers on the Lua stack (thresh, fgbal, bgval)
  */
 static int
@@ -13176,7 +13179,7 @@ FindPerimToAreaRatio(lua_State *L)
  *          given by %minsize and the slop in conforming to a rectangle
  *          determined by %dist.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Boxa * on the Lua stack
  */
 static int
@@ -13215,7 +13218,7 @@ FindRectangleComps(lua_State *L)
  *          input %box.  The number of rows of tiles is determined by
  *          the height of %box and %tsize, with the 50% overlap..
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Box* on the Lua stack
  */
 static int
@@ -13246,7 +13249,7 @@ FindRepCloseTile(lua_State *L)
  *          the image.  It is the angle required for deskew.
  *          Clockwise rotations are positive angles.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -13274,7 +13277,7 @@ FindSkew(lua_State *L)
  *          angle is large enough and there is sufficient confidence,
  *          it returns a deskewed image; otherwise, it returns a clone.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -13303,7 +13306,7 @@ FindSkewAndDeskew(lua_State *L)
  * Arg #8 is expected to be a l_float32 (minbsdelta).
  * Arg #9 is expected to be a l_float32 (confprior).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -13338,7 +13341,7 @@ FindSkewOrthogonalRange(lua_State *L)
  *      (1) This examines the 'score' for skew angles with equal intervals.
  *      (2) Caller must check the return value for validity of the result.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -13378,7 +13381,7 @@ FindSkewSweep(lua_State *L)
  *           ~ not more than 5% of the image width
  *      (4) See also notes in pixFindSkewSweepAndSearchScore()
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -13430,7 +13433,7 @@ FindSkewSweepAndSearch(lua_State *L)
  *          on the application.  Values between 3.0 and 6.0 are common.
  *      (4) By default, the shear is about the UL corner.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -13476,7 +13479,7 @@ FindSkewSweepAndSearchScore(lua_State *L)
  *          to shear about the center because a shear from the UL corner
  *          loses too much of the image.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -13510,7 +13513,7 @@ FindSkewSweepAndSearchScorePivot(lua_State *L)
  * Leptonica's Notes:
  *      (1) Returns half the number of fg boundary pixels.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -13542,7 +13545,7 @@ FindStrokeLength(lua_State *L)
  *          required to determine if the pixels at distance d are above
  *          the noise. It is typically about 0.15.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -13568,7 +13571,7 @@ FindStrokeWidth(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (thresh).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -13600,7 +13603,7 @@ FindThreshFgExtent(lua_State *L)
  *          of size h/2 + 1 to insure that they can hold
  *          the maximum number of runs in the raster line.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -13680,7 +13683,7 @@ FindVerticalRuns(lua_State *L)
  *  evident in regions that are very light or that have subtle
  *  blending of colors.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -13706,7 +13709,7 @@ FixedOctcubeQuant256(lua_State *L)
  *          (at the specified level) containing the pixel.  They are
  *          not quantized to the average of the pixels in that octcube.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -13726,7 +13729,7 @@ FixedOctcubeQuantGenRGB(lua_State *L)
  * Arg #2 is expected to be a Pix* (pixs).
  * Arg #3 is expected to be a char* (selname).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -13781,7 +13784,7 @@ FlipFHMTGen(lua_State *L)
  *                  }
  *              }
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -13801,7 +13804,7 @@ FlipLR(lua_State *L)
  * Arg #2 is expected to be a l_int32 (x).
  * Arg #3 is expected to be a l_int32 (y).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -13838,7 +13841,7 @@ FlipPixel(lua_State *L)
  *          to do all the work on aligned data, regardless of pixel
  *          depth.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -13856,7 +13859,7 @@ FlipTB(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 number on the Lua stack
  */
 static int
@@ -13891,7 +13894,7 @@ ForegroundFraction(lua_State *L)
  *      (5) For example, pix2 could be a frame around the outside of the
  *          image, made from pixMakeFrameMask().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -13912,7 +13915,7 @@ FractionFgInMask(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -13961,7 +13964,7 @@ FreeData(lua_State *L)
  *           e.g., minval = 50, maxval = 200.
  *      (11) See numaGammaTRC() for further examples of use.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -13993,7 +13996,7 @@ GammaTRC(lua_State *L)
  *      (2) Masking does not work for colormapped images.
  *      (3) See pixGammaTRC() for details on how to use the parameters.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -14024,7 +14027,7 @@ GammaTRCMasked(lua_State *L)
  *      (2) This version saves the alpha channel.  It is only valid
  *          for 32 bpp (no colormap), and is a bit slower.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -14046,7 +14049,7 @@ GammaTRCWithAlpha(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a boolean (debug).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* (%pixtext) and l_int32 (%htfound) on the Lua stack
  */
 static int
@@ -14089,7 +14092,7 @@ GenHalftoneMask(lua_State *L)
  *      (5) With debug on, you get a pdf that shows, for each tile,
  *          the images and histograms.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -14132,7 +14135,7 @@ GenPhotoHistos(lua_State *L)
  *             pixSelectBySize(pix, 60, 60, 4, L_SELECT_IF_EITHER,
  *                             L_SELECT_IF_GTE, NULL);
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -14160,7 +14163,7 @@ GenTextblockMask(lua_State *L)
  *      (4) Both the input image and the returned textline mask
  *          are at the same resolution.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -14191,7 +14194,7 @@ GenTextlineMask(lua_State *L)
  *           ~ 0 for binary data (not permitted in PostScript)
  *           ~ 1 for ascii85 (5 for 4) encoded binary data
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -14221,7 +14224,7 @@ GenerateCIData(lua_State *L)
  *      (2) Any points outside (w,h) are silently discarded.
  *      (3) Output 1 bpp pix has values 1 for each point in the pta.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -14245,7 +14248,7 @@ GenerateFromPta(lua_State *L)
  *      (1) This is not intended to work on small thumbnails.  The
  *          dimensions of pixs must be at least MinWidth x MinHeight.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -14283,7 +14286,7 @@ GenerateHalftoneMask(lua_State *L)
  *          an approximate grayscale value for each pixel, and then looks
  *          for gray pixels with the value %val.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -14322,7 +14325,7 @@ GenerateMaskByBand(lua_State *L)
  *      (2) Either (%delm, %delp) or (%fractm, %fractp) can be used.
  *          Set each value in the other pair to 0.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -14357,7 +14360,7 @@ GenerateMaskByBand32(lua_State *L)
  *            ~ majority vote of the individual components
  *          Here, we have a choice of L1 or L2.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -14388,7 +14391,7 @@ GenerateMaskByDiscr32(lua_State *L)
  *          an approximate grayscale value for each pixel, and then looks
  *          for gray pixels with the value %val.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -14418,7 +14421,7 @@ GenerateMaskByValue(lua_State *L)
  *             Pix *pix1 = pixConvert1To8Cmap(pixs);
  *             pixRenderPtaArb(pix1, pta, rval, gval, bval);
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pta * on the Lua stack
  */
 static int
@@ -14468,7 +14471,7 @@ GeneratePtaBoundary(lua_State *L)
  *        sense that you have the most flexibility with the smallest number
  *        of hits and misses.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Sel * on the Lua stack
  */
 static int
@@ -14520,7 +14523,7 @@ GenerateSelBoundary(lua_State *L)
  *        pixDisplayHitMissSel() to visualize the hit-miss sel superimposed
  *        on the generating bitmap.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Sel * on the Lua stack
  */
 static int
@@ -14587,7 +14590,7 @@ GenerateSelRandom(lua_State *L)
  *        pixDisplayHitMissSel() to visualize the hit-miss sel superimposed
  *        on the generating bitmap.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Sel * on the Lua stack
  */
 static int
@@ -14615,7 +14618,7 @@ GenerateSelWithRuns(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 CCBorda * on the Lua stack
  */
 static int
@@ -14641,7 +14644,7 @@ GetAllCCBorders(lua_State *L)
  *          quality 75 if grayscale, rgb or rgba (where it loses
  *          the alpha layer), and lossless png for all other situations.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -14683,7 +14686,7 @@ GetAutoFormat(lua_State *L)
  *      (5) Input x,y are ignored unless pixm exists.
  *      (6) A better name for this would be: pixGetPixelStatsGray()
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 3 numbers on the Lua stack (rval, gval, bval)
  */
 static int
@@ -14719,7 +14722,7 @@ GetAverageMasked(lua_State *L)
  *          component images are extracted.
  *      (3) A better name for this would be: pixGetPixelStatsRGB()
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 3 numbers on the Lua stack (rval, gval, bval)
  */
 static int
@@ -14759,7 +14762,7 @@ GetAverageMaskedRGB(lua_State *L)
  *          within each tile.
  *      (3) If colormapped, converts to 8 bpp gray.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 3 numbers on the Lua stack (rval, gval, bval)
  */
 static int
@@ -14787,7 +14790,7 @@ GetAverageTiled(lua_State *L)
  *      (2) If there is a colormap, it is removed before the 8 bpp
  *          component images are extracted.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 3 numbers on the Lua stack (%pixr, %pixg, %pixb)
  */
 static int
@@ -14821,7 +14824,7 @@ GetAverageTiledRGB(lua_State *L)
  *          images.  It is then propagated into the image regions,
  *          and finally smoothed in each image region.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -14849,7 +14852,7 @@ GetBackgroundGrayMap(lua_State *L)
  * Arg #3 is expected to be a l_int32 (reduction).
  * Arg #4 is expected to be a l_int32 (size).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -14884,7 +14887,7 @@ GetBackgroundGrayMapMorph(lua_State *L)
  *          Otherwise, a grayscale version of pixs will be generated
  *          from the green component only, used, and destroyed.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -14917,7 +14920,7 @@ GetBackgroundRGBMap(lua_State *L)
  * Arg #3 is expected to be a l_int32 (reduction).
  * Arg #4 is expected to be a l_int32 (size).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -14961,7 +14964,7 @@ GetBackgroundRGBMapMorph(lua_State *L)
  *          sets up bins with equal population (not intensity width!),
  *          and gets the average color in each bin.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 table on the Lua stack (carray)
  */
 static int
@@ -14997,7 +15000,7 @@ GetBinnedColor(lua_State *L)
  *          selected color component in the set of rank bins,
  *          where the ranking is done using the specified component.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 2 integers and 1 table on the Lua stack (minval, maxval, carray)
  */
 static int
@@ -15035,7 +15038,7 @@ GetBinnedComponentRange(lua_State *L)
  *          it is added and the new index is returned.  If there is no room,
  *          the index of the closest color in intensity is returned.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -15055,7 +15058,7 @@ GetBlackOrWhiteVal(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -15092,7 +15095,7 @@ GetBlackVal(lua_State *L)
  *      (4) For the definition of the three tables -- xpostab[], ypostab[]
  *          and qpostab[] -- see above where they are defined.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 CCBord * on the Lua stack
  */
 static int
@@ -15116,7 +15119,7 @@ GetCCBorders(lua_State *L)
  *          and is of size 2^d.
  *      (2) Set the subsampling %factor > 1 to reduce the amount of computation.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa* on the Lua stack
  */
 static int
@@ -15141,7 +15144,7 @@ GetCmapHistogram(lua_State *L)
  *      (2) Set the subsampling %factor > 1 to reduce the amount of computation.
  *      (3) Clipping to the box is done in the inner loop.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa* on the Lua stack
  */
 static int
@@ -15169,7 +15172,7 @@ GetCmapHistogramInRect(lua_State *L)
  *      (2) Set the subsampling %factor > 1 to reduce the amount of computation.
  *      (3) Clipping of pixm to pixs is done in the inner loop.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa* on the Lua stack
  */
 static int
@@ -15194,7 +15197,7 @@ GetCmapHistogramMasked(lua_State *L)
  *      (1) This generates an ordered map from pixel value to histogram count.
  *      (2) Use amapGetCountForColor() to use the map to look up a count.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -15217,7 +15220,7 @@ GetColorAmapHistogram(lua_State *L)
  *          one for each color component (r,g,b).
  *      (2) Set the subsampling %factor > 1 to reduce the amount of computation.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 3 Numa* on the Lua stack (red, green, blue)
  */
 static int
@@ -15249,7 +15252,7 @@ GetColorHistogram(lua_State *L)
  *      (3) Clipping of pixm (if it exists) to pixs is done in the inner loop.
  *      (4) Input x,y are ignored unless pixm exists.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 3 Numa* on the Lua stack (red, green, blue)
  */
 static int
@@ -15282,7 +15285,7 @@ GetColorHistogramMasked(lua_State *L)
  *          roughly a distance %dist from the c.c. boundary and in the
  *          background of the mask image.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -15304,7 +15307,7 @@ GetColorNearMaskBoundary(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 PixColormap* on the Lua stack
  */
 static int
@@ -15336,7 +15339,7 @@ GetColormap(lua_State *L)
  *          The larger %thresh, the narrower the distribution must be
  *          for the mode value to be returned (instead of returning 0).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return nbins numbers on the Lua stack (colvect[])
  */
 static int
@@ -15362,7 +15365,7 @@ GetColumnStats(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 array table (h) of array tables (wpl) on the Lua stack
  */
 static int
@@ -15381,7 +15384,7 @@ GetData(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -15409,7 +15412,7 @@ GetDepth(lua_State *L)
  *      (3) If RGB, the maximum difference between pixel components is
  *          saved in the histogram.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa * on the Lua stack
  */
 static int
@@ -15458,7 +15461,7 @@ GetDifferenceHistogram(lua_State *L)
  *          minimum values required for fractdiff and avediff in order
  *          that the two pix will be considered similar.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -15484,7 +15487,7 @@ GetDifferenceStats(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 3 integers (width, height, depth) on the Lua stack
  */
 static int
@@ -15505,7 +15508,7 @@ GetDimensions(lua_State *L)
  * Arg #2 is expected to be a l_int32 (side).
  * Arg #3 is expected to be a string (debugfile).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa * on the Lua stack
  */
 static int
@@ -15532,7 +15535,7 @@ GetEdgeProfile(lua_State *L)
  *          each requested color component is returned.  At least
  *          one color component (address) must be input.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 4 integers on the Lua stack (%rval, %gval, %bval, %grayval)
  */
 static int
@@ -15568,7 +15571,7 @@ GetExtremeValue(lua_State *L)
  *          of size 2^d, where d is the depth of pixs.
  *      (3) Set the subsampling factor > 1 to reduce the amount of computation.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa* on the Lua stack
  */
 static int
@@ -15594,7 +15597,7 @@ GetGrayHistogram(lua_State *L)
  *      (2) This always returns a 256-value histogram of pixel values.
  *      (3) Set the subsampling %factor > 1 to reduce the amount of computation.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa* on the Lua stack
  */
 static int
@@ -15625,7 +15628,7 @@ GetGrayHistogramInRect(lua_State *L)
  *      (4) Clipping of pixm (if it exists) to pixs is done in the inner loop.
  *      (5) Input x,y are ignored unless pixm exists.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa* on the Lua stack
  */
 static int
@@ -15653,7 +15656,7 @@ GetGrayHistogramMasked(lua_State *L)
  *      (2) This returns a set of 256-value histograms of pixel values.
  *      (3) Set the subsampling factor > 1 to reduce the amount of computation.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numaa* on the Lua stack
  */
 static int
@@ -15672,7 +15675,7 @@ GetGrayHistogramTiled(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -15700,7 +15703,7 @@ GetHeight(lua_State *L)
  *      (3) same position tables and stopping condition as for
  *          exterior borders
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -15720,7 +15723,7 @@ GetHoleBorder(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 string on the Lua stack
  */
 static int
@@ -15745,7 +15748,7 @@ GetInputFormat(lua_State *L)
  *     (2) pixd is a normalization image; the original image is
  *       multiplied by pixd and the result is divided by 256.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -15768,7 +15771,7 @@ GetInvBackgroundMap(lua_State *L)
  * Arg #3 is expected to be a l_int32 (y).
  * Arg #4 is expected to be a l_int32 (direction).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -15794,7 +15797,7 @@ GetLastOffPixelInRun(lua_State *L)
  * Arg #3 is expected to be a l_int32 (y).
  * Arg #4 is expected to be a l_int32 (direction).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -15878,7 +15881,7 @@ GetLastOnPixelInRun(lua_State *L)
  *              }
  *              pixCleanupByteProcessing(pix, lineptrs);
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 void ** on the Lua stack
  */
 static int
@@ -15919,7 +15922,7 @@ GetLinePtrs(lua_State *L)
  *          the left edge of the image with the angle given by this
  *          array, evaluated at the raster line of intersection.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa * on the Lua stack
  */
 static int
@@ -15962,7 +15965,7 @@ GetLocalSkewAngles(lua_State *L)
  *          can then be used, in a projective or bilinear transform,
  *          to remove keystoning in the src.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -15997,7 +16000,7 @@ GetLocalSkewTransform(lua_State *L)
  *      (2) Note that here a 32 bpp pixs has pixel values that are simply
  *          numbers.  They are not 8 bpp components in a colorspace.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 3 integers on the Lua stack (maxval, xmax, ymax)
  */
 static int
@@ -16022,7 +16025,7 @@ GetMaxValueInRect(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (order; 1 or 2).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa* on the Lua stack
  */
 static int
@@ -16051,7 +16054,7 @@ GetMomentByColumn(lua_State *L)
  *      (3) The output array of colors can be displayed using
  *               pixDisplayColorArray(array, ncolors, ...);
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -16088,7 +16091,7 @@ GetMostPopulatedColors(lua_State *L)
  *          these 2 pixels recur in sequence proves the path is closed,
  *          and we do not store the second pixel again.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -16116,7 +16119,7 @@ GetOuterBorder(lua_State *L)
  *          location of the pix in global coordinates, and the returned
  *          pta will be in those global coordinates.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pta * on the Lua stack
  */
 static int
@@ -16134,7 +16137,7 @@ GetOuterBorderPta(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Ptaa * on the Lua stack
  */
 static int
@@ -16174,7 +16177,7 @@ GetOuterBordersPtaa(lua_State *L)
  *          PSNR = 1000, which corresponds to the very small MSE of
  *          about 10^(-48).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_float32 on the Lua stack
  */
 static int
@@ -16231,7 +16234,7 @@ GetPSNR(lua_State *L)
  *          and threshold to get the fraction of pixels with a difference
  *          below the threshold.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -16274,7 +16277,7 @@ GetPerceptualDiff(lua_State *L)
  *      (3) If the point is outside the image, this returns an error (1),
  *          with 0 in %pval.  To avoid spamming output, it fails silently.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -16313,7 +16316,7 @@ GetPixel(lua_State *L)
  *      (4) Clipping of pixm (if it exists) to pixs is done in the inner loop.
  *      (5) Input x,y are ignored if %pixm does not exist.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -16344,7 +16347,7 @@ GetPixelAverage(lua_State *L)
  *      (3) To get the average pixel value of an RGB image, suggest using
  *          pixGetPixelAverage(), which is considerably faster.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -16374,7 +16377,7 @@ GetPixelStats(lua_State *L)
  *          there are many more cache misses when writing to three
  *          output images simultaneously.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* (pixd) on the Lua stack
  */
 static int
@@ -16396,7 +16399,7 @@ GetRGBComponent(lua_State *L)
  * Leptonica's Notes:
  *      (1) In leptonica, we do not support alpha in colormaps.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -16422,7 +16425,7 @@ GetRGBComponentCmap(lua_State *L)
  *          uses red sigbits as the most significant and blue as the least.
  *      (3) This function produces the same result as pixMedianCutHisto().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa * on the Lua stack
  */
 static int
@@ -16445,7 +16448,7 @@ GetRGBHistogram(lua_State *L)
  *      (1) This puts rgb components from the input line in pixs
  *          into the given buffers.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 3 lstrings on the Lua stack (%bufr, %bufg, %bufb)
  */
 static int
@@ -16479,7 +16482,7 @@ GetRGBLine(lua_State *L)
  * Arg #2 is expected to be a l_int32 (x).
  * Arg #3 is expected to be a l_int32 (y).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 3 l_int32 on the Lua stack
  */
 static int
@@ -16507,7 +16510,7 @@ GetRGBPixel(lua_State *L)
  * Leptonica's Notes:
  *      (1) If the pix is colormapped, it returns the rgb value.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 3 l_int32 on the Lua stack (val, x, y)
  */
 static int
@@ -16535,7 +16538,7 @@ GetRandomPixel(lua_State *L)
  * Leptonica's Notes:
  *      (1) If pixs is 8 bpp grayscale, the color selection type is ignored.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 2 integers on the Lua stack (minval, maxval)
  */
 static int
@@ -16581,7 +16584,7 @@ GetRangeValues(lua_State *L)
  *      (5) Compare this with pixGetBinnedColor(), which generates equal
  *          width intensity bins and finds the average color in each bin.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 table on the Lua stack (carray)
  */
 static int
@@ -16615,7 +16618,7 @@ GetRankColorArray(lua_State *L)
  *          used to linearly remap the colors based on the median
  *          of a target image, using pixLinearMapToTargetColor().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -16657,7 +16660,7 @@ GetRankValue(lua_State *L)
  *              numaHistogramGetValFromRank(na, rank, &val);
  *          on the returned Numa for additional rank values.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 number (value) and a Numa* (histogram) on the Lua stack
  */
 static int
@@ -16699,7 +16702,7 @@ GetRankValueMasked(lua_State *L)
  *      (5) The rank must be in [0.0 ... 1.0], where the brightest pixel
  *          has rank 1.0.  For the median pixel value, use 0.5.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 3 numbers on the Lua stack (rval, gval, bval)
  */
 static int
@@ -16734,7 +16737,7 @@ GetRankValueMaskedRGB(lua_State *L)
  *          For rgb, the bytes are in (rgb) order.  This is the format
  *          required for flate encoding of pixels in a PostScript file.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -16755,7 +16758,7 @@ GetRasterData(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -16777,7 +16780,7 @@ GetRefcount(lua_State *L)
  *      (1) It is best to deskew the image before segmenting.
  *      (2) Passing in %pixadb enables debug output.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -16802,7 +16805,7 @@ GetRegionsBinary(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 2 for two integer on the Lua stack
  */
 static int
@@ -16842,7 +16845,7 @@ GetResolution(lua_State *L)
  *          be stored as a column in a Pix of the same size as
  *          each Pix in the Pixa.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return nbins numbers on the Lua stack (colvect[])
  */
 static int
@@ -16890,7 +16893,7 @@ GetRowStats(lua_State *L)
  *          minlength constraint, the returned Numa is empty.  This
  *          is not an error.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa * on the Lua stack
  */
 static int
@@ -16922,7 +16925,7 @@ GetRunCentersOnLine(lua_State *L)
  *      (2) If the first pixel on the line is black, the length of the
  *          first returned run (which is white) is 0.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa * on the Lua stack
  */
 static int
@@ -16956,7 +16959,7 @@ GetRunsOnLine(lua_State *L)
  *      (3) For either 4 or 8 connectivity, the maximum number of unique
  *          neighbor values is 4.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -16981,7 +16984,7 @@ GetSortedNeighborValues(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -17002,7 +17005,7 @@ GetSpp(lua_State *L)
  *      (1) The text string belongs to the pix.  The caller must
  *          NOT free it!
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 string on the Lua stack
  */
 static int
@@ -17020,7 +17023,7 @@ GetText(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -17039,7 +17042,7 @@ GetWhiteVal(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -17067,7 +17070,7 @@ GetWidth(lua_State *L)
  *          giving the textline index for each word.
  *          See pixGetWordsInTextlines() for more details.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -17128,7 +17131,7 @@ GetWordBoxesInTextlines(lua_State *L)
  *          small connected components in a dense texture, this is likely
  *          to generate tall components that will be eliminated in pixf.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -17156,7 +17159,7 @@ GetWordsInTextlines(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -17173,7 +17176,7 @@ GetWpl(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -17190,7 +17193,7 @@ GetXRes(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -17233,7 +17236,7 @@ GetYRes(lua_State *L)
  *        avoid saturation of any component in the image (save for a
  *        fraction of the pixels given by the input rank value).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -17284,7 +17287,7 @@ GlobalNormNoSatRGB(lua_State *L)
  *        Or more generally, if you want bgval to be mapped to mapval:
  *            pixGammaTRC(pixd, pixs, 1.0, 0, 255 * bgval / mapval);
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -17342,7 +17345,7 @@ GlobalNormRGB(lua_State *L)
  *             "c5.3 + o7.5"
  *             "c9.9 + tw9.9"
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -17369,7 +17372,7 @@ GrayMorphSequence(lua_State *L)
  *          If there is an existing colormap, a warning is issued and
  *          a copy of the input pixs is returned.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -17425,7 +17428,7 @@ GrayQuantFromCmap(lua_State *L)
  *      (5) We estimate the total number of colors (color plus gray);
  *          if it exceeds 255, return null.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -17486,7 +17489,7 @@ GrayQuantFromHisto(lua_State *L)
  *      (6) For segmentation, the resulting image, pixd, can be thresholded
  *          and used as a seed for another filling operation.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -17521,7 +17524,7 @@ HDome(lua_State *L)
  *          (c) pixHMT(pixd, pixs, ...);
  *      (4) The size of the result is determined by pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -17547,7 +17550,7 @@ HMT(lua_State *L)
  *          pixFHMTGen_*(), and removes the border.
  *          See notes below for that function.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -17596,7 +17599,7 @@ HMTDwa_1(lua_State *L)
  *          not permitted to be within MIN_DIFF_FROM_HALF_PI radians
  *          from either -pi/2 or pi/2.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -17625,7 +17628,7 @@ HShear(lua_State *L)
  *      (2) This does a horizontal shear about the center, with (+) shear
  *          pushing increasingly leftward (-x) with increasing y.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -17653,7 +17656,7 @@ HShearCenter(lua_State *L)
  *      (2) This does a horizontal shear about the UL corner, with (+) shear
  *          pushing increasingly leftward (-x) with increasing y.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -17684,7 +17687,7 @@ HShearCorner(lua_State *L)
  *      (4) Does a horizontal full-band shear about the line with (+) shear
  *          pushing increasingly leftward (-x) with increasing y.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -17719,7 +17722,7 @@ HShearIP(lua_State *L)
  *      (4) The angle is brought into the range [-pi/2 + del, pi/2 - del],
  *          where del == MIN_DIFF_FROM_HALF_PI.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -17764,7 +17767,7 @@ HShearLI(lua_State *L)
  *          signal difference is positive on the lower half of
  *          the transition.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -17801,7 +17804,7 @@ HalfEdgeByBandpass(lua_State *L)
  *      (3) A typical value for fthresh = 2.5.  Higher values give less
  *          sensitivity to red, and fewer false positives.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -17846,7 +17849,7 @@ HasHighlightRed(lua_State *L)
  *  Checks are done in both direction.  A single pixel not
  *  contained in either direction results in failure of the test.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -17875,7 +17878,7 @@ Haustest(lua_State *L)
  *         4-connected filling; to get 8-c.c. holes of the 4-c.c.
  *         as foreground, use 8-connected filling.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -17908,7 +17911,7 @@ HolesByFilling(lua_State *L)
  *          multiplication by a constant, and final extraction!
  *      (5) If you're only adding positive values, offset can be 0.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -17929,7 +17932,7 @@ InitAccumulate(lua_State *L)
  * Arg #2 is expected to be a Sela* (sela).
  * Arg #3 is expected to be a l_int32 (type).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -17971,7 +17974,7 @@ IntersectionOfMorphOps(lua_State *L)
  *      (4) Note that sel_ital2 is shorter than sel_ital1.  It is
  *          more appropriate for a typical font scanned at 200 ppi.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Boxa* (%boxa) on the Lua stack
  */
 static int
@@ -18005,7 +18008,7 @@ ItalicWords(lua_State *L)
  *          from the edge.  %maxfade must be in [0, 1].
  *      (3) %distrfact must be in [0, 1], and typically it would be <= 0.5.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -18045,7 +18048,7 @@ LinearEdgeFade(lua_State *L)
  *      (4) For generating a new pixd:
  *            pixd = pixLinearMapToTargetColor(NULL, pixs, ...)
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -18081,7 +18084,7 @@ LinearMapToTargetColor(lua_State *L)
  *      (5) The LUTs that do the mapping are generated as needed
  *          and stored for reuse in an integer array within the ptr array iaa[].
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -18114,7 +18117,7 @@ LinearTRCTiled(lua_State *L)
  *          by performing this transform and calculating the
  *          "earth-mover" distance on the resulting R,G,B histograms.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -18156,7 +18159,7 @@ LocToColorTransform(lua_State *L)
  *      (4) The generated masks can be used as markers for
  *          further operations.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -18181,7 +18184,7 @@ LocalExtrema(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (thresh).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Boxa * on the Lua stack
  */
 static int
@@ -18227,7 +18230,7 @@ LocateBarcodes(lua_State *L)
  *              boxGetGeometry(box, &x, &y, NULL, NULL);
  *              pix4 = pixBlendWithGrayMask(pix1, pix2, pix3, x, y);
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack or 2 Pix* and Box* on the Lua stack
  */
 static int
@@ -18269,7 +18272,7 @@ MakeAlphaFromMask(lua_State *L)
  *          same constant (as long as nothing saturates).  This can be
  *          useful if, for example, the illumination is not uniform.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -18315,7 +18318,7 @@ MakeArbMaskFromRGB(lua_State *L)
  *          is 0.5 * (vf2 - vf1) * h.  The horizontal thickness of the
  *          vertical mask parts is 0.5 * (hf2 - hf1) * w.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -18346,7 +18349,7 @@ MakeFrameMask(lua_State *L)
  *          is 32 bpp.  The value at each point is simply the number
  *          of pixels found at that value of hue and saturation.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -18378,7 +18381,7 @@ MakeHistoHS(lua_State *L)
  *          is 32 bpp.  The value at each point is simply the number
  *          of pixels found at that value of hue and intensity.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -18410,7 +18413,7 @@ MakeHistoHV(lua_State *L)
  *          is 32 bpp.  The value at each point is simply the number
  *          of pixels found at that value of saturation and intensity.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -18440,7 +18443,7 @@ MakeHistoSV(lua_State *L)
  *          to a 1 in the LUT.
  *      (2) The LUT should be of size 256.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -18480,7 +18483,7 @@ MakeMaskFromLUT(lua_State *L)
  *          the mask for each pixel in pixs that has a value %val.
  *      (2) If no pixels have the value, an empty mask is generated.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -18513,7 +18516,7 @@ MakeMaskFromVal(lua_State *L)
  *          Use %regionflag == L_EXCLUDE_REGION to take all pixels except
  *          those within the rectangular region specified in HS space.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -18550,7 +18553,7 @@ MakeRangeMaskHS(lua_State *L)
  *          Use %regionflag == L_EXCLUDE_REGION to take all pixels except
  *          those within the rectangular region specified in HV space.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -18586,7 +18589,7 @@ MakeRangeMaskHV(lua_State *L)
  *          Use %regionflag == L_EXCLUDE_REGION to take all pixels except
  *          those within the rectangular region specified in SV space.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -18626,7 +18629,7 @@ MakeRangeMaskSV(lua_State *L)
  *              pix = pixCreate(w, h, 1);
  *              pixMaskBoxa(pix, pix, boxa, L_SET_PIXELS);
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -18652,7 +18655,7 @@ MaskBoxa(lua_State *L)
  *          b.b. of the c.c. in pixs.  If there are no ON pixels in pixs,
  *          pixd will also have no ON pixels.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -18692,7 +18695,7 @@ MaskConnComp(lua_State *L)
  *          in transition regions near sharp edges that go from dark
  *          to light, so this allows these transition regions to be removed.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -18717,7 +18720,7 @@ MaskOverColorPixels(lua_State *L)
  * Arg #6 is expected to be a l_int32 (bmin).
  * Arg #7 is expected to be a l_int32 (bmax).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -18769,7 +18772,7 @@ MaskOverColorRange(lua_State *L)
  *            mincount = 50
  *            smoothx, smoothy = 2
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -18805,7 +18808,7 @@ MaskedThreshOnBackgroundNorm(lua_State *L)
  *          not as a 3-component rgb pixel value.
  *      (3) Uses a LUT for log scaling.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -18832,7 +18835,7 @@ MaxDynamicRange(lua_State *L)
  *          count in a histogram generated by pixMakeHistoHS()).
  *      (3) Uses a LUT for log scaling.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -18857,7 +18860,7 @@ MaxDynamicRangeRGB(lua_State *L)
  *          on the same image.  It can find the mean within a
  *          rectangle in O(1), independent of the size of the rectangle.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -18891,7 +18894,7 @@ MeanInRectangle(lua_State *L)
  *          For the first column, the special case is
  *            a(i,j) = v(i,j) + a(i-1, j)
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 DPix * on the Lua stack
  */
 static int
@@ -18926,7 +18929,7 @@ MeanSquareAccum(lua_State *L)
  *      (2) The input pix should be a single connected component, but
  *          this is not required.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -18955,7 +18958,7 @@ MeasureEdgeSmoothness(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -18984,7 +18987,7 @@ MeasureSaturation(lua_State *L)
  *      (2) Indexing into the array from rgb uses red sigbits as
  *          most significant and blue as least.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 * on the Lua stack
  */
 static int
@@ -19009,7 +19012,7 @@ MedianCutHisto(lua_State *L)
  *      (1) Simple interface.  See pixMedianCutQuantGeneral() for
  *          use of defaulted parameters.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -19059,7 +19062,7 @@ MedianCutQuant(lua_State *L)
  *          regions, and it does a very poor job if all the pixels are
  *          near the diagonal of the color space cube.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -19111,7 +19114,7 @@ MedianCutQuantGeneral(lua_State *L)
  *          using median cut color quantization for the color pixels
  *          and equal-bin grayscale quantization for the non-color pixels.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -19135,7 +19138,7 @@ MedianCutQuantMixed(lua_State *L)
  * Arg #2 is expected to be a l_int32 (wf).
  * Arg #3 is expected to be a l_int32 (hf).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -19173,7 +19176,7 @@ MedianFilter(lua_State *L)
  *          negative and the function must return 0.
  *      (4) All accessed pixels are clipped to the pix.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -19215,7 +19218,7 @@ MinMaxNearLine(lua_State *L)
  *          max pixel values in each tile of the image.
  *      (2) See pixContrastNorm() for usage.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -19255,7 +19258,7 @@ MinMaxTiles(lua_State *L)
  *          ~  if pixd == pixs1,  Min(src1, src2) --> src1  (in-place)
  *          ~  if pixd != pixs1,  Min(src1, src2) --> input pixd
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -19305,7 +19308,7 @@ MinOrMax(lua_State *L)
  *          to allow these characters to remain open.  The wonders
  *          of morphology!
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -19334,7 +19337,7 @@ MirrorDetect(lua_State *L)
  *          ascenders going up.
  *      (2) See notes in pixMirrorDetect().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -19369,7 +19372,7 @@ MirrorDetectDwa(lua_State *L)
  *                  | TB   |  LR/TB |
  *                  -----------------
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa* on the Lua stack
  */
 static int
@@ -19401,7 +19404,7 @@ MirroredTiling(lua_State *L)
  *          unless in-place, in which case this is a no-op.
  *      (3) See discussion of color-modification methods, in coloring.c.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -19434,7 +19437,7 @@ ModifyBrightness(lua_State *L)
  *          return a copy unless in-place, in which case this is a no-op.
  *      (3) See discussion of color-modification methods, in coloring.c.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -19466,7 +19469,7 @@ ModifyHue(lua_State *L)
  *          unless in-place, in which case this is a no-op.
  *      (3) See discussion of color-modification methods, in coloring.c.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -19487,7 +19490,7 @@ ModifySaturation(lua_State *L)
  * Arg #2 is expected to be a l_float32 (width).
  * Arg #3 is expected to be a l_float32 (targetw).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -19537,7 +19540,7 @@ ModifyStrokeWidth(lua_State *L)
  *            ~ The arg to the expansion is a power of two, in the set
  *              {2, 4, 8, 16}.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -19568,7 +19571,7 @@ MorphCompSequence(lua_State *L)
  *          generated and run.
  *      (6) See pixMorphSequence() for further information about usage.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -19597,7 +19600,7 @@ MorphCompSequenceDwa(lua_State *L)
  *      (2) The size of the border depends on the operation
  *          and the boundary conditions.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -19629,7 +19632,7 @@ MorphDwa_1(lua_State *L)
  *      (2) The size of the border depends on the operation
  *          and the boundary conditions.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -19654,7 +19657,7 @@ MorphDwa_2(lua_State *L)
  * Arg #3 is expected to be a l_int32 (vsize).
  * Arg #4 is expected to be a l_int32 (smoothing).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -19734,7 +19737,7 @@ MorphGradient(lua_State *L)
  *                added at the beginning, the result must be at the
  *                same resolution as the input!
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -19767,7 +19770,7 @@ MorphSequence(lua_State *L)
  *          or exceed a minimum size for the operation to take place.
  *      (5) Use NULL for boxa to avoid returning the boxa.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -19810,7 +19813,7 @@ MorphSequenceByComponent(lua_State *L)
  *          equal or exceed a minimum size for the operation to take place.
  *      (5) Use NULL for %pboxa to avoid returning the boxa.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -19847,7 +19850,7 @@ MorphSequenceByRegion(lua_State *L)
  *          generated and run.
  *      (6) See pixMorphSequence() for further information about usage.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -19874,7 +19877,7 @@ MorphSequenceDwa(lua_State *L)
  *          changes in pixs for pixels under the background of pixm.
  *      (5) If pixm is NULL, this is just pixMorphSequence().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -19913,7 +19916,7 @@ MorphSequenceMasked(lua_State *L)
  *          iteration, the center offsets are set to the best match so
  *          far, and the %delta increments are typically reduced.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -19942,7 +19945,7 @@ MosaicColorShiftRGB(lua_State *L)
  *      (2) This multiplies each pixel, relative to offset, by the input factor
  *      (3) The result is returned with the offset back in place.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -19971,7 +19974,7 @@ MultConstAccumulate(lua_State *L)
  *      (2) For multiplication with a general 3x3 matrix of constants,
  *          use pixMultMatrixColor().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -19997,7 +20000,7 @@ MultConstantColor(lua_State *L)
  *      (2) No clipping for 32 bpp.
  *      (3) For 8 and 16 bpp, the result is clipped to 0xff and 0xffff, rsp.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -20040,7 +20043,7 @@ MultConstantGray(lua_State *L)
  *          be larger than 1.0.  All transformed component values
  *          are clipped to [0, 255].
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -20069,7 +20072,7 @@ MultMatrixColor(lua_State *L)
  *      (2) If pixd == pixs, this is done in-place.
  *      (3) If box == NULL, this is performed on all of pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -20102,7 +20105,7 @@ MultiplyByColor(lua_State *L)
  *      (4) For d = 32 bpp (rgb), if the number of colors is
  *          greater than 256, this returns 0 in 'ncolors'.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -20142,7 +20145,7 @@ NumColors(lua_State *L)
  *          8x8 jpeg blocks, and these should not be counted.  It is desirable
  *          to obtain a clean image by quantizing this noise away.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -20175,7 +20178,7 @@ NumSignificantGrayColors(lua_State *L)
  *      (2) If all occupied octcubes are to count, set %mincount == 1.
  *          Setting %minfract == 0.0 is taken to mean the same thing.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -20202,7 +20205,7 @@ NumberOccupiedOctcubes(lua_State *L)
  * Leptonica's Notes:
  *      (1) Input NULL for &ncolors to prevent computation and return value.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa * on the Lua stack
  */
 static int
@@ -20277,7 +20280,7 @@ OctcubeHistogram(lua_State *L)
  *          compared to the generation of the colormapped dest pix,
  *          so one would not typically use the low-level version.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -20319,7 +20322,7 @@ OctcubeQuantFromCmap(lua_State *L)
  *      (5) Consequently, we have the following constraint on the number
  *          of allowed gray levels: for 4 bpp, 8; for 8 bpp, 192.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -20345,7 +20348,7 @@ OctcubeQuantMixedWithGray(lua_State *L)
  *        Leptonica also provides color quantization using a modified
  *        form of median cut.  See colorquant2.c for details.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -20396,7 +20399,7 @@ OctreeColorQuant(lua_State *L)
  *          to find color in images that have either very few
  *          intermediate gray pixels or that have many such gray pixels.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -20463,7 +20466,7 @@ OctreeColorQuantGeneral(lua_State *L)
  *          dither, pixOctreeColorQuant() and pixFixedOctcubeQuant256()
  *          usually give better results.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -20484,7 +20487,7 @@ OctreeQuantByPopulation(lua_State *L)
  * Arg #2 is expected to be a l_int32 (maxcolors).
  * Arg #3 is expected to be a l_int32 (subsample).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -20517,7 +20520,7 @@ OctreeQuantNumColors(lua_State *L)
  *          (c) pixOpen(pixd, pixs, ...);
  *      (4) The size of the result is determined by pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -20553,7 +20556,7 @@ Open(lua_State *L)
  *          (c) pixOpenBrick(pixd, pixs, ...);
  *      (6) The size of the result is determined by pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -20599,7 +20602,7 @@ OpenBrick(lua_State *L)
  *      (10) If either linear Sel is not found, this calls
  *           the appropriate decomposible function.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -20650,7 +20653,7 @@ OpenBrickDwa(lua_State *L)
  *          terms, 6 and 6, so that the net result is a dilation
  *          with hsize = 36.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -20705,7 +20708,7 @@ OpenCompBrick(lua_State *L)
  *           terms, 6 and 6, so that the net result is a dilation
  *           with hsize = 36.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -20728,7 +20731,7 @@ OpenCompBrickDwa(lua_State *L)
  * Arg #3 is expected to be a l_int32 (hsize).
  * Arg #4 is expected to be a l_int32 (vsize).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -20765,7 +20768,7 @@ OpenCompBrickExtendDwa(lua_State *L)
  *          (c) pixOpenGeneralized(pixd, pixs, ...);
  *      (5) The size of the result is determined by pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -20790,7 +20793,7 @@ OpenGeneralized(lua_State *L)
  *      (1) Sel is a brick with all elements being hits
  *      (2) If hsize = vsize = 1, just returns a copy.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -20817,7 +20820,7 @@ OpenGray(lua_State *L)
  *      (3) It would be nice not to add a border, but it is required
  *          to get the same results as for the general case.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -20848,7 +20851,7 @@ OpenGray3(lua_State *L)
  *      (4) Optional output of intermediate confidence results and
  *          the rotation performed on pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 3 l_float32 (%upconf, %leftconf) and l_int32 (%rotation) on the Lua stack
  */
 static int
@@ -20923,7 +20926,7 @@ OrientCorrect(lua_State *L)
  *          in which case neither upconf nor leftconf will be 0.0.
  *      (7) Uses rasterop implementation of HMT.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -20958,7 +20961,7 @@ OrientDetect(lua_State *L)
  *          be generated by a simple executable; see prog/flipselgen.c.
  *      (3) This runs about 2.5 times faster than the pixOrientDetect().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -21005,7 +21008,7 @@ OrientDetectDwa(lua_State *L)
  *          global threshold can be used (for text or line-art) and the
  *          value it should have.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -21058,7 +21061,7 @@ OtsuAdaptiveThreshold(lua_State *L)
  *            bgval = 255
  *            smoothx, smoothy = 2
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -21094,7 +21097,7 @@ OtsuThreshOnBackgroundNorm(lua_State *L)
  *          the resulting image.  Thus in computing the centroid,
  *          black pixels have weight 255, and white pixels have weight 0.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -21129,7 +21132,7 @@ PadToCenterCentroid(lua_State *L)
  *          To force RGB output, use pixConvertTo8(pixs, FALSE)
  *          before calling any of these paint and draw functions.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -21155,7 +21158,7 @@ PaintBoxa(lua_State *L)
  *      (2) We use up to 254 different colors for painting the regions.
  *      (3) If boxes overlap, the later ones paint over earlier ones.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -21227,7 +21230,7 @@ PaintBoxaRandom(lua_State *L)
  *          blending can also be used outside of the component, but near the
  *          edge, to blur the transition between painted and original pixels.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -21287,7 +21290,7 @@ PaintSelfThroughMask(lua_State *L)
  *          This is not the case, because the entrance is always the
  *          same and the compiler can correctly predict the jump.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -21315,7 +21318,7 @@ PaintThroughMask(lua_State *L)
  *      (2) Removes existing colormaps and clips the pta to the input %pixs.
  *      (3) If the image is RGB, three separate plots are generated.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -21342,7 +21345,7 @@ PlotAlongPta(lua_State *L)
  *      (1) This handles some common pre-processing operations,
  *          where the page segmentation algorithm takes a 1 bpp image.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -21363,7 +21366,7 @@ Prepare1bpp(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a luaL_Stream io handle (stream).
  *
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -21385,7 +21388,7 @@ PrintStreamInfo(lua_State *L)
  * Arg #3 is expected to be a l_int32 (method).
  * Arg #5 is expected to be a l_int32 (debugflag).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Sarray * on the Lua stack
  */
 static int
@@ -21414,7 +21417,7 @@ ProcessBarcodes(lua_State *L)
  *      (1) Brings in either black or white pixels from the boundary
  *      (2) Removes any existing colormap, if necessary, before transforming
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -21436,7 +21439,7 @@ Projective(lua_State *L)
  * Arg #2 is expected to be a l_uint32 (colorval).
  * Arg #3 and following is expected to be a vector of l_float32 (vc)
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -21458,7 +21461,7 @@ ProjectiveColor(lua_State *L)
  * Arg #2 is expected to be a l_uint8 (grayval).
  * Arg #3 and following is expected to be a vector of l_float32 (vc)
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -21485,7 +21488,7 @@ ProjectiveGray(lua_State *L)
  *      (1) Brings in either black or white pixels from the boundary
  *      (2) Removes any existing colormap, if necessary, before transforming
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -21508,7 +21511,7 @@ ProjectivePta(lua_State *L)
  * Arg #3 is expected to be a Pta* (ptas).
  * Arg #4 is expected to be a l_uint32 (colorval).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -21531,7 +21534,7 @@ ProjectivePtaColor(lua_State *L)
  * Arg #3 is expected to be a Pta* (ptas).
  * Arg #4 is expected to be a l_uint8 (grayval).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -21586,7 +21589,7 @@ ProjectivePtaGray(lua_State *L)
  *          (b) softens the edges by weakening the aliasing there.
  *          Use l_setAlphaMaskBorder() to change these values.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -21617,7 +21620,7 @@ ProjectivePtaWithAlpha(lua_State *L)
  *          somewhat slower pixProjective().  See that function
  *          for relative timings between sampled and interpolated.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -21648,7 +21651,7 @@ ProjectiveSampled(lua_State *L)
  *          somewhat slower pixProjectivePta().  See that
  *          function for relative timings between sampled and interpolated.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -21689,7 +21692,7 @@ ProjectiveSampledPta(lua_State *L)
  *      (5) This is for quadratic shear.  For uniform (linear) shear,
  *          use the standard shear operators.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -21718,7 +21721,7 @@ QuadraticVShear(lua_State *L)
  * Leptonica's Notes:
  *      (1) See pixQuadraticVShear() for details.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -21746,7 +21749,7 @@ QuadraticVShearLI(lua_State *L)
  * Leptonica's Notes:
  *      (1) See pixQuadraticVShear() for details.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -21774,7 +21777,7 @@ QuadraticVShearSampled(lua_State *L)
  *          the mean values at its level.  Level 0 has a
  *          single value; level 1 has 4 values; level 2 has 16; etc.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -21804,7 +21807,7 @@ QuadtreeMean(lua_State *L)
  *          each containing at the respective levels the variance
  *          and root variance values.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -21842,7 +21845,7 @@ QuadtreeVariance(lua_State *L)
  *      (4) If the cmap has color and pixs is grayscale, the color is
  *          removed from the cmap before quantizing pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -21877,7 +21880,7 @@ QuantFromCmap(lua_State *L)
  *          important, you should use %octlevel = 4.
  *      (4) If the image already has a colormap, it returns a clone.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -21928,7 +21931,7 @@ QuantizeIfFewColors(lua_State *L)
  *                    nx = 3         ny = 3
  *          Other examples can be found in prog/warptest.c.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -21973,7 +21976,7 @@ RandomHarmonicWarp(lua_State *L)
  *          It determines how the rank ordering is done.
  *      (4) Typical input values might be %size = 5, %nbins = 10.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return nbins integers on the Lua stack (carray[])
  */
 static int
@@ -21998,7 +22001,7 @@ RankBinByStrip(lua_State *L)
  *     (1) The time is O(n) in the number of pixels and runs about
  *         50 Mpixels/sec on a 3 GHz machine.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -22028,7 +22031,7 @@ RankColumnTransform(lua_State *L)
  *          (1-rank)*(wf*hf-1) pixels have an equal or greater value.
  *      (2) See notes in pixRankFilterGray() for further details.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -22069,7 +22072,7 @@ RankFilter(lua_State *L)
  *      (6) Uses row-major or column-major incremental updates to the
  *          histograms depending on whether hf > wf or hv <= wf, rsp.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -22103,7 +22106,7 @@ RankFilterGray(lua_State *L)
  *      (2) Apply gray rank filtering to each component independently.
  *      (3) See notes in pixRankFilterGray() for further details.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -22135,7 +22138,7 @@ RankFilterRGB(lua_State *L)
  *          for the simple rank filtering operation by approximately
  *          the square of the scaling factor.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -22180,7 +22183,7 @@ RankFilterWithScaling(lua_State *L)
  *  Failure of the test in either direction results in failure
  *  of the test.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -22214,7 +22217,7 @@ RankHaustest(lua_State *L)
  *     (1) The time is O(n) in the number of pixels and runs about
  *         100 Mpixels/sec on a 3 GHz machine.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -22363,7 +22366,7 @@ RankRowTransform(lua_State *L)
  *  in the second; and one of the remaining 2 pairs can go the the third.
  *  There is a total of 4*3*2 = 24 ways these pairs can be permuted.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -22397,7 +22400,7 @@ Rasterop(lua_State *L)
  *      ~ the operation clips to the smallest pix; if the width or height
  *        of pixd is larger than pixs, some pixels in pixd will be unchanged
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -22428,7 +22431,7 @@ RasteropFullImage(lua_State *L)
  *      (3) If a colormap exists, the nearest color to white or black
  *          is brought in.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -22452,7 +22455,7 @@ RasteropHip(lua_State *L)
  * Arg #3 is expected to be a l_int32 (vshift).
  * Arg #4 is expected to be a string descibing black or white (incolor).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -22484,7 +22487,7 @@ RasteropIP(lua_State *L)
  *      (3) If a colormap exists, the nearest color to white or black
  *          is brought in.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -22508,7 +22511,7 @@ RasteropVip(lua_State *L)
  * Leptonica's Notes:
  *      (1) See at top of file for supported formats.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -22527,7 +22530,7 @@ Read(lua_State *L)
  * Arg #2 is expected to be a l_int32 (method).
  * Arg #3 is expected to be a l_int32 (debugflag).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa * on the Lua stack
  */
 static int
@@ -22549,7 +22552,7 @@ ReadBarcodeWidths(lua_State *L)
  * Arg #3 is expected to be a l_int32 (method).
  * Arg #5 is expected to be a l_int32 (debugflag).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Sarray * on the Lua stack
  */
 static int
@@ -22594,7 +22597,7 @@ ReadBarcodes(lua_State *L)
  *                // do something with pix
  *            } while (offset != 0);
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -22619,7 +22622,7 @@ ReadFromMultipageTiff(lua_State *L)
  *          For bmp and gif, we cheat and read the entire file into a pix,
  *          from which we extract the "header" information.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -22661,7 +22664,7 @@ ReadHeader(lua_State *L)
  *      (3) findFileFormatBuffer() requires up to 8 bytes to decide on
  *          the format, which we require.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -22712,7 +22715,7 @@ ReadHeaderMem(lua_State *L)
  *      (4) See convertSegmentedPagesToPS() in src/psio1.c for an
  *          example of usage.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -22762,7 +22765,7 @@ ReadIndexed(lua_State *L)
  *           spp = 4  ==>  rgba                [32 bpp rgba]
  *      (6) The %hint parameter is reserved for future use.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -22808,7 +22811,7 @@ ReadJp2k(lua_State *L)
  *            * L_JPEG_FAIL_ON_BAD_DATA
  *          Default (0) is to do neither.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -22842,7 +22845,7 @@ ReadJpeg(lua_State *L)
  *          fact the data must contain the entire compressed string for
  *          the image.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pixa* on the Lua stack
  */
 static int
@@ -22860,7 +22863,7 @@ ReadMem(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a lstring (str).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -22892,7 +22895,7 @@ ReadMemBmp(lua_State *L)
  *                // do something with pix
  *            } while (offset != 0);
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -22922,7 +22925,7 @@ ReadMemFromMultipageTiff(lua_State *L)
  *         runtime extension fmemopen() because libgif doesn't have a file
  *         stream interface.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -22952,7 +22955,7 @@ ReadMemGif(lua_State *L)
  *          stream interface is no longer supported in openjpeg.
  *      (2) See pixReadJp2k() for usage.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -22984,7 +22987,7 @@ ReadMemJp2k(lua_State *L)
  *          given in the enum in imageio.h.
  *      (3) See pixReadJpeg() for usage.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -23012,7 +23015,7 @@ ReadMemJpeg(lua_State *L)
  * Leptonica's Notes:
  *      (1) See pixReastreamPng().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -23034,7 +23037,7 @@ ReadMemPng(lua_State *L)
  * Leptonica's Notes:
  *      (1) The %size byte of %data must be a null character.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -23053,7 +23056,7 @@ ReadMemPnm(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a lstring (str).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -23083,7 +23086,7 @@ ReadMemSpix(lua_State *L)
  *      (4) Tiff directory overhead is linear in the input page number.
  *          If reading many images, use pixReadMemFromMultipageTiff().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -23114,7 +23117,7 @@ ReadMemTiff(lua_State *L)
  *          functions at the lowest level (which is good!).  And, in
  *          any event, fmemopen() doesn't work with l_binaryReadStream().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -23136,7 +23139,7 @@ ReadMemWebP(lua_State *L)
  * Leptonica's Notes:
  *      (1) The hint only applies to jpeg.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -23159,7 +23162,7 @@ ReadStream(lua_State *L)
  *          http://en.wikipedia.org/wiki/BMP_file_format
  *          http://www.fortunecity.com/skyscraper/windows/364/bmpffrmt.html
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -23176,7 +23179,7 @@ ReadStreamBmp(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a luaL_Stream* (stream).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -23200,7 +23203,7 @@ ReadStreamGif(lua_State *L)
  * Leptonica's Notes:
  *      (1) See pixReadJp2k() for usage.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -23227,7 +23230,7 @@ ReadStreamJp2k(lua_State *L)
  * Leptonica's Notes:
  *      (1) The jpeg comment, if it exists, is not stored in the pix.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -23273,7 +23276,7 @@ ReadStreamJpeg(lua_State *L)
  *          but I could not get it to work properly for the successive
  *          png reads that are required by pixaReadStream().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -23290,7 +23293,7 @@ ReadStreamPng(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a luaL_Stream* (stream).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -23316,7 +23319,7 @@ ReadStreamPnm(lua_State *L)
  *      (1) If called from pixReadStream(), the stream is positioned
  *          at the beginning of the file.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -23339,7 +23342,7 @@ ReadStreamSpix(lua_State *L)
  *          TIFF reading works. You are supposed to keep trying until
  *          it stops working.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -23357,7 +23360,7 @@ ReadStreamTiff(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a luaL_Stream* (stream).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -23382,7 +23385,7 @@ ReadStreamWebP(lua_State *L)
  *          TIFF reading works. You are supposed to keep trying until
  *          it stops working.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -23405,7 +23408,7 @@ ReadTiff(lua_State *L)
  *      (1) The hint is not binding, but may be used to optimize jpeg decoding.
  *          Use 0 for no hinting.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -23433,7 +23436,7 @@ ReadWithHint(lua_State *L)
  *               0 1 2 3 4 5 6 7
  *          which is done with an 8-bit table generated by makeSubsampleTab2x().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -23464,7 +23467,7 @@ ReduceBinary2(lua_State *L)
  *          in the 2x subsampling process, subsampled, as described
  *          above in pixReduceBinary2().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -23493,7 +23496,7 @@ ReduceRankBinary2(lua_State *L)
  *      (1) This performs up to four cascaded 2x rank reductions.
  *      (2) Use level = 0 to truncate the cascade.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -23517,7 +23520,7 @@ ReduceRankBinaryCascade(lua_State *L)
  * Leptonica's Notes:
  *      (1) This is a wrapper on pixAlphaBlendUniform()
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -23535,7 +23538,7 @@ RemoveAlpha(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (npix).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -23558,7 +23561,7 @@ RemoveBorder(lua_State *L)
  * Leptonica's Notes:
  *      (1) This removes all fg components touching the border.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -23580,7 +23583,7 @@ RemoveBorderConnComps(lua_State *L)
  * Arg #4 is expected to be a l_int32 (top).
  * Arg #5 is expected to be a l_int32 (bottom).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* (pixd) on the Lua stack
  */
 static int
@@ -23610,7 +23613,7 @@ RemoveBorderGeneral(lua_State *L)
  *      (2) Returns clone if no pixels requested removed, or the target
  *          sizes are larger than the image.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* (pixd) on the Lua stack
  */
 static int
@@ -23646,7 +23649,7 @@ RemoveBorderToSize(lua_State *L)
  *           * 3 spp, if the alpha values are all 255 (opaque), or
  *           * 4 spp (preserving the alpha), if any alpha values are not 255.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -23671,7 +23674,7 @@ RemoveColormap(lua_State *L)
  *          a clone or a copy if pixs does not have a colormap.
  *      (2) See pixRemoveColormap().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -23704,7 +23707,7 @@ RemoveColormapGeneral(lua_State *L)
  *        (the appropriately dilated version of) pixp, with the center
  *        of the Sel used to align pixp with pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -23741,7 +23744,7 @@ RemoveMatchedPattern(lua_State *L)
  *          because pixLocalExtrema() typically finds local minima
  *          at the border.  Use %bordersize >= 2 to remove these.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -23768,7 +23771,7 @@ RemoveSeededComponents(lua_State *L)
  *      (3) Unusued colors are removed from the colormap, and the
  *          image pixels are re-numbered.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -23791,7 +23794,7 @@ RemoveUnusedColors(lua_State *L)
  *      (1) This complements pixAddWithIndicator().   Here, the selected
  *          components are set subtracted from pixs.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -23813,7 +23816,7 @@ RemoveWithIndicator(lua_State *L)
  * Arg #3 is expected to be a l_int32 (width).
  * Arg #4 is expected to be a l_int32 (op).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -23838,7 +23841,7 @@ RenderBox(lua_State *L)
  * Arg #5 is expected to be a l_uint8 (gval).
  * Arg #6 is expected to be a l_uint8 (bval).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -23866,7 +23869,7 @@ RenderBoxArb(lua_State *L)
  * Arg #6 is expected to be a l_uint8 (bval).
  * Arg #7 is expected to be a l_float32 (fract).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -23892,7 +23895,7 @@ RenderBoxBlend(lua_State *L)
  * Arg #3 is expected to be a l_int32 (width).
  * Arg #4 is expected to be a l_int32 (op).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -23917,7 +23920,7 @@ RenderBoxa(lua_State *L)
  * Arg #5 is expected to be a l_uint8 (gval).
  * Arg #6 is expected to be a l_uint8 (bval).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -23946,7 +23949,7 @@ RenderBoxaArb(lua_State *L)
  * Arg #7 is expected to be a l_float32 (fract).
  * Arg #8 is expected to be a l_int32 (removedups).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -23978,7 +23981,7 @@ RenderBoxaBlend(lua_State *L)
  *          lines, or a copy of the input pixs with the contour lines
  *          superposed.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -24004,7 +24007,7 @@ RenderContours(lua_State *L)
  * Arg #6 is expected to be a l_uint8 (gval).
  * Arg #7 is expected to be a l_uint8 (bval).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -24033,7 +24036,7 @@ RenderGridArb(lua_State *L)
  * Arg #6 is expected to be a l_int32 (outline).
  * Arg #7 is expected to be a l_int32 (op).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -24064,7 +24067,7 @@ RenderHashBox(lua_State *L)
  * Arg #8 is expected to be a l_int32 (gval).
  * Arg #9 is expected to be a l_int32 (bval).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -24099,7 +24102,7 @@ RenderHashBoxArb(lua_State *L)
  * Arg #9 is expected to be a l_int32 (gval).
  * Arg #10 is expected to be a l_int32 (bval).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -24132,7 +24135,7 @@ RenderHashBoxBlend(lua_State *L)
  * Arg #6 is expected to be a l_int32 (outline).
  * Arg #7 is expected to be a l_int32 (op).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -24163,7 +24166,7 @@ RenderHashBoxa(lua_State *L)
  * Arg #8 is expected to be a l_int32 (gval).
  * Arg #9 is expected to be a l_int32 (bval).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -24198,7 +24201,7 @@ RenderHashBoxaArb(lua_State *L)
  * Arg #9 is expected to be a l_int32 (gval).
  * Arg #10 is expected to be a l_int32 (bval).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -24240,7 +24243,7 @@ RenderHashBoxaBlend(lua_State *L)
  *          through a mask %pixm onto %pix.  The mask origin is
  *          translated by (%x,%y) relative to the origin of %pix.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -24274,7 +24277,7 @@ RenderHashMaskArb(lua_State *L)
  * Arg #6 is expected to be a l_int32 (width).
  * Arg #7 is expected to be a l_int32 (op).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -24305,7 +24308,7 @@ RenderLine(lua_State *L)
  * Arg #8 is expected to be a l_uint8 (gval).
  * Arg #9 is expected to be a l_uint8 (bval).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -24339,7 +24342,7 @@ RenderLineArb(lua_State *L)
  * Arg #9 is expected to be a l_uint8 (bval).
  * Arg #10 is expected to be a l_float32 (fract).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -24376,7 +24379,7 @@ RenderLineBlend(lua_State *L)
  *          already 32 bpp.  It then draws the plot on the pix.
  *      (3) See makePlotPtaFromNumaGen() for more details.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -24413,7 +24416,7 @@ RenderPlotFromNuma(lua_State *L)
  *          already 32 bpp.  It then draws the plot on the pix.
  *      (3) See makePlotPtaFromNumaGen() for other input parameters.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -24447,7 +24450,7 @@ RenderPlotFromNumaGen(lua_State *L)
  *      (2) The rendered line is 4-connected, so that an interior or
  *          exterior 8-c.c. flood fill operation works properly.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -24477,7 +24480,7 @@ RenderPolygon(lua_State *L)
  * Leptonica's Notes:
  *      This renders a closed contour.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -24507,7 +24510,7 @@ RenderPolyline(lua_State *L)
  * Leptonica's Notes:
  *      This renders a closed contour.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -24538,7 +24541,7 @@ RenderPolylineArb(lua_State *L)
  * Arg #8 is expected to be a l_int32 (closeflag).
  * Arg #9 is expected to be a l_int32 (removedups).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -24575,7 +24578,7 @@ RenderPolylineBlend(lua_State *L)
  *          clipping for functions such as pixRenderLine(),
  *          pixRenderBox() and pixRenderBoxa(), that call pixRenderPta().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -24609,7 +24612,7 @@ RenderPta(lua_State *L)
  *          ~ d = 32: use the input rgb value
  *      (4) This function clips the rendering to the pix.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -24638,7 +24641,7 @@ RenderPtaArb(lua_State *L)
  * Leptonica's Notes:
  *      (1) This function clips the rendering to the pix.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -24678,7 +24681,7 @@ RenderPtaBlend(lua_State *L)
  *      (5) The rendered pixels replace the input pixels.  They will
  *          be clipped silently to the input pix.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -24708,7 +24711,7 @@ RenderRandomCmapPtaa(lua_State *L)
  *          copied into the new buffer.
  *      (2) On failure to allocate, pixd is unchanged.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -24742,7 +24745,7 @@ ResizeImageData(lua_State *L)
  *          than the dimension of pixs, replicate the outer row and
  *          column of pixels in pixs into pixd.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -24792,7 +24795,7 @@ ResizeToMatch(lua_State *L)
  *      (6) The reversal profile is simply the number of reversals
  *          in a row or column, vs the row or column index.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa * on the Lua stack
  */
 static int
@@ -24838,7 +24841,7 @@ ReversalProfile(lua_State *L)
  *          stop at the maximum required size, which is a square
  *          with side = sqrt(w*w + h*h).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -24875,7 +24878,7 @@ Rotate(lua_State *L)
  *          (b) pixRotate180(pixs, pixs);
  *          (c) pixRotate180(pixd, pixs);
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -24911,7 +24914,7 @@ Rotate180(lua_State *L)
  *      (6) If the image has an alpha layer, it is rotated separately by
  *          two shears.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -24956,7 +24959,7 @@ Rotate2Shear(lua_State *L)
  *          an implementation, can be found in Graphics Gems, p. 179,
  *          edited by Andrew Glassner, published by Academic Press, 1990.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -24983,7 +24986,7 @@ Rotate3Shear(lua_State *L)
  *          either cw or ccw, returning a new pix.
  *      (2) The direction must be either 1 (cw) or -1 (ccw).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -25008,7 +25011,7 @@ Rotate90(lua_State *L)
  *      (2) A positive angle gives a clockwise rotation.
  *      (3) Brings in either black or white pixels from the boundary.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -25034,7 +25037,7 @@ RotateAM(lua_State *L)
  *      (2) A positive angle gives a clockwise rotation.
  *      (3) Specify the color to be brought in from outside the image.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -25060,7 +25063,7 @@ RotateAMColor(lua_State *L)
  *      (2) A positive angle gives a clockwise rotation.
  *      (3) Specify the color to be brought in from outside the image.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -25092,7 +25095,7 @@ RotateAMColorCorner(lua_State *L)
  *      (5) For some reason it shifts the image center.
  *          No attempt is made to rotate the alpha component.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -25118,7 +25121,7 @@ RotateAMColorFast(lua_State *L)
  *      (2) A positive angle gives a clockwise rotation.
  *      (3) Brings in either black or white pixels from the boundary.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -25144,7 +25147,7 @@ RotateAMCorner(lua_State *L)
  *      (2) A positive angle gives a clockwise rotation.
  *      (3) Specify the grayvalue to be brought in from outside the image.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -25170,7 +25173,7 @@ RotateAMGray(lua_State *L)
  *      (2) A positive angle gives a clockwise rotation.
  *      (3) Specify the grayvalue to be brought in from outside the image.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -25206,7 +25209,7 @@ RotateAMGrayCorner(lua_State *L)
  *          are magically removed.
  *      (3) This operation is about 5x slower than rotation by sampling.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -25235,7 +25238,7 @@ RotateBinaryNice(lua_State *L)
  *          from outside the image.
  *      (3) Colormaps are retained.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -25257,7 +25260,7 @@ RotateBySampling(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (quads).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -25288,7 +25291,7 @@ RotateOrth(lua_State *L)
  *          a warning because you should probably be using another method
  *          (either sampling or area mapping)
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -25311,7 +25314,7 @@ RotateShear(lua_State *L)
  * Arg #2 is expected to be a l_float32 (angle).
  * Arg #3 is expected to be a string descibing black or white (incolor).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -25332,7 +25335,7 @@ RotateShearCenter(lua_State *L)
  * Arg #2 is expected to be a l_float32 (angle).
  * Arg #3 is expected to be a string descibing black or white (incolor).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -25371,7 +25374,7 @@ RotateShearCenterIP(lua_State *L)
  *      (6) The pix cannot be colormapped, because the in-place operation
  *          only blits in 0 or 1 bits, not an arbitrary colormap index.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -25431,7 +25434,7 @@ RotateShearIP(lua_State *L)
  *          This has the side-effect of producing artifacts in the very
  *          dark regions.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -25462,7 +25465,7 @@ RotateWithAlpha(lua_State *L)
  *             pixVarianceByRow()
  *             pixGetRowStats()
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 6 Numa* on the Lua stack (mean, median, mode, modecount, var, rootvar)
  */
 static int
@@ -25495,7 +25498,7 @@ RowStats(lua_State *L)
  * Arg #3 is expected to be a l_int32 (direction).
  * Arg #4 is expected to be a l_int32 (maxsize).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa * on the Lua stack
  */
 static int
@@ -25529,7 +25532,7 @@ RunHistogramMorph(lua_State *L)
  *      (4) To convert for maximum dynamic range, either linear or
  *          log, use pixMaxDynamicRange().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -25575,7 +25578,7 @@ RunlengthTransform(lua_State *L)
  *          it should be chosen.  Typical values for k are between
  *          0.2 and 0.5.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -25624,7 +25627,7 @@ SauvolaBinarize(lua_State *L)
  *              t = m * (1 - k * (1 - s / 128))
  *          See pixSauvolaBinarize() for details.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -25678,7 +25681,7 @@ SauvolaBinarizeTiled(lua_State *L)
  *          threshold, we take
  *            s = sqrt(ms - mv * mv)
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -25705,7 +25708,7 @@ SauvolaGetThreshold(lua_State *L)
  * Arg #5 is expected to be a l_int32 (space).
  * Arg #6 is expected to be a l_int32 (dp).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -25757,7 +25760,7 @@ SaveTiled(lua_State *L)
  *          the boxa).  The bottom variable is stored in the input format
  *          field, which is the only field available for storing an int.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -25808,7 +25811,7 @@ SaveTiledOutline(lua_State *L)
  *          text will vary.
  *      (7) See pixSaveTiledOutline() for other implementation details.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -25836,7 +25839,7 @@ SaveTiledWithText(lua_State *L)
  * Arg #2 is expected to be a l_float32 (scalex).
  * Arg #3 is expected to be a l_float32 (scaley).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -25861,7 +25864,7 @@ Scale(lua_State *L)
  * Leptonica's Notes:
  *      (1) This scales the alpha component of pixs and inserts into pixd.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -25903,7 +25906,7 @@ ScaleAndTransferAlpha(lua_State *L)
  *          possible, ending with a reduction with a scale factor larger
  *          than 0.5.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -25939,7 +25942,7 @@ ScaleAreaMap(lua_State *L)
  *          general area map scaling function, for the special cases
  *          of 2x, 4x, 8x and 16x reduction.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -25967,7 +25970,7 @@ ScaleAreaMap2(lua_State *L)
  *             (in general, anisotropically) to that size.
  *          * It is an error to set both %wd and %hd to 0.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -25993,7 +25996,7 @@ ScaleAreaMapToSize(lua_State *L)
  *          filtering.  As a result, aliasing will occur for
  *          subsampling (scalex and scaley < 1.0).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26018,7 +26021,7 @@ ScaleBinary(lua_State *L)
  *          isotropic integer reduction.
  *      (2) If %factor == 1, returns a copy.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26044,7 +26047,7 @@ ScaleByIntSampling(lua_State *L)
  *          subsampling (%scalex and/or %scaley < 1.0).
  *      (2) If %scalex == 1.0 and %scaley == 1.0, returns a copy.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26074,7 +26077,7 @@ ScaleBySampling(lua_State *L)
  *             (in general, anisotropically) to that size.
  *           ~ It is an error to set both %wd and %hd to 0.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26102,7 +26105,7 @@ ScaleBySamplingToSize(lua_State *L)
  *      (2) The speed on intel hardware is about
  *          80 * 10^6 dest-pixels/sec/GHz.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26130,7 +26133,7 @@ ScaleColor2xLI(lua_State *L)
  *          in analogy to scaleColor4xLILow(), and I leave this as
  *          an exercise for someone who really needs it.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26163,7 +26166,7 @@ ScaleColor4xLI(lua_State *L)
  *          is about 10 * 10^6 dest-pixels/sec/GHz.  (The special 2x
  *          case runs at about 80 * 10^6 dest-pixels/sec/GHz.)
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26202,7 +26205,7 @@ ScaleColorLI(lua_State *L)
  *          call this function with %sharpfract = 0.0, and follow this
  *          with a call to pixUnsharpMasking() with your chosen parameters.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26230,7 +26233,7 @@ ScaleGeneral(lua_State *L)
  *      (2) The speed on intel hardware is about
  *          100 * 10^6 dest-pixels/sec/GHz
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26257,7 +26260,7 @@ ScaleGray2xLI(lua_State *L)
  *            Two are filled with each 2xLI row operation; the third is
  *            needed because the upscale and dithering ops are out of sync.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26280,7 +26283,7 @@ ScaleGray2xLIDither(lua_State *L)
  *          followed by thresholding to binary.
  *      (2) Buffers are used to avoid making a large grayscale image.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26305,7 +26308,7 @@ ScaleGray2xLIThresh(lua_State *L)
  *      (2) The speed on intel hardware is about
  *          160 * 10^6 dest-pixels/sec/GHz.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26337,7 +26340,7 @@ ScaleGray4xLI(lua_State *L)
  *          a linear interpolation to a large grayscale image, followed
  *          by error-diffusion dithering to binary.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26364,7 +26367,7 @@ ScaleGray4xLIDither(lua_State *L)
  *          a linear interpolation to a large grayscale image, followed
  *          by thresholding to binary.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26384,7 +26387,7 @@ ScaleGray4xLIThresh(lua_State *L)
  * Arg #2 is expected to be a l_float32 (scalex).
  * Arg #3 is expected to be a l_float32 (scaley).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26418,7 +26421,7 @@ ScaleGrayLI(lua_State *L)
  *      (4) For the special case of downscaling by 2x in both directions,
  *          pixScaleGrayMinMax2() is about 2x more efficient.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26456,7 +26459,7 @@ ScaleGrayMinMax(lua_State *L)
  *      (4) This runs at about 70 MPix/sec/GHz of source data for
  *          erosion and dilation.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26488,7 +26491,7 @@ ScaleGrayMinMax2(lua_State *L)
  *          which runs at about 70 MPix/sec/GHz of source data.
  *          For rank 2 and 3, this runs 3x slower, at about 25 MPix/sec/GHz.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26514,7 +26517,7 @@ ScaleGrayRank2(lua_State *L)
  *      (1) This performs up to four cascaded 2x rank reductions.
  *      (2) Use level = 0 to truncate the cascade.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26544,7 +26547,7 @@ ScaleGrayRankCascade(lua_State *L)
  *          generating a downsized binary image from a higher resolution
  *          gray image.  This would typically be used for image analysis.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26579,7 +26582,7 @@ ScaleGrayToBinaryFast(lua_State *L)
  *      (4) It dispatches to much faster implementations for
  *          the special cases of 2x and 4x expansion.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26605,7 +26608,7 @@ ScaleLI(lua_State *L)
  *      (2) This function suffers from aliasing effects that are
  *          easily seen in document images.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26634,7 +26637,7 @@ ScaleMipmap(lua_State *L)
  *          RGB image.  This would typically be used for image analysis.
  *      (3) It uses the green channel to represent the RGB pixel intensity.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26656,7 +26659,7 @@ ScaleRGBToBinaryFast(lua_State *L)
  * Arg #3 is expected to be a l_float32 (gwt).
  * Arg #4 is expected to be a l_float32 (bwt).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26686,7 +26689,7 @@ ScaleRGBToGray2(lua_State *L)
  *          RGB image.  This would typically be used for image analysis.
  *      (3) The standard color byte order (RGBA) is assumed.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26707,7 +26710,7 @@ ScaleRGBToGrayFast(lua_State *L)
  * Arg #2 is expected to be a l_float32 (xscale).
  * Arg #3 is expected to be a l_float32 (yscale).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -26749,7 +26752,7 @@ ScaleResolution(lua_State *L)
  *          the scale factor, because the convolution kernel is adjusted
  *          so that each source pixel is summed approximately once.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26779,7 +26782,7 @@ ScaleSmooth(lua_State *L)
  *             (in general, anisotropically) to that size.
  *          * It is an error to set both %wd and %hd to 0.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26855,7 +26858,7 @@ ScaleSmoothToSize(lua_State *L)
  *      (7) For reductions greater than 16x, it's reasonable to use
  *          scaleToGray16() followed by further grayscale downscaling.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26873,7 +26876,7 @@ ScaleToGray(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26890,7 +26893,7 @@ ScaleToGray16(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26913,7 +26916,7 @@ ScaleToGray2(lua_State *L)
  *          in about 10 cycles.
  *      (2) The width of pixd is truncated is truncated to a factor of 8.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26933,7 +26936,7 @@ ScaleToGray3(lua_State *L)
  * Leptonica's Notes:
  *      (1) The width of pixd is truncated is truncated to a factor of 2.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26953,7 +26956,7 @@ ScaleToGray4(lua_State *L)
  * Leptonica's Notes:
  *      (1) The width of pixd is truncated is truncated to a factor of 8.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -26970,7 +26973,7 @@ ScaleToGray6(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -27000,7 +27003,7 @@ ScaleToGray8(lua_State *L)
  *          scale factors < 0.0625, both do a 16x scale-to-gray, followed
  *          by further grayscale reduction.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -27040,7 +27043,7 @@ ScaleToGrayFast(lua_State *L)
  *  on the lower-res image.  Consequently, this method should NOT be used
  *  for generating reduced images, scale-to-gray or otherwise.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -27068,7 +27071,7 @@ ScaleToGrayMipmap(lua_State *L)
  *             (in general, anisotropically) to that size.
  *          * It is an error to set both %wd and %hd to 0.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -27089,7 +27092,7 @@ ScaleToSize(lua_State *L)
  * Arg #2 is expected to be a l_int32 (delw).
  * Arg #3 is expected to be a l_int32 (delh).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -27144,7 +27147,7 @@ ScaleToSizeRel(lua_State *L)
  *          This has the side-effect of producing artifacts in the very
  *          dark regions.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -27185,7 +27188,7 @@ ScaleWithAlpha(lua_State *L)
  *      (4) The thresholds must be at least 1, and the low threshold
  *          cannot be larger than the high threshold.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -27218,7 +27221,7 @@ ScanForEdge(lua_State *L)
  *          Caller must check the return value!
  *      (2) Use %box == NULL to scan from edge of pixs
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -27274,7 +27277,7 @@ ScanForForeground(lua_State *L)
  *          along a minimum path.  There may be several equal length
  *          minimum paths, any one of which can be chosen this way.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pta * on the Lua stack
  */
 static int
@@ -27302,7 +27305,7 @@ SearchBinaryMaze(lua_State *L)
  * Arg #4 is expected to be a l_int32 (xf).
  * Arg #5 is expected to be a l_int32 (yf).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pta * on the Lua stack
  */
 static int
@@ -27334,7 +27337,7 @@ SearchGrayMaze(lua_State *L)
  *      (1) This removes the component from pixs with a fg pixel at (x,y).
  *      (2) See pixSeedfill4() and pixSeedfill8() for details.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -27365,7 +27368,7 @@ Seedfill(lua_State *L)
  *          The seed pixel at (x,y) must initially be ON.
  *      (3) Reference: see pixSeedFill4BB()
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -27409,7 +27412,7 @@ Seedfill4(lua_State *L)
  *          stack for reuse.  It should be noted that the
  *          overhead in the function calls (vs. macros) is negligible.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Box * on the Lua stack
  */
 static int
@@ -27439,7 +27442,7 @@ Seedfill4BB(lua_State *L)
  *          The seed pixel at (x,y) must initially be ON.
  *      (3) Reference: see pixSeedFill8BB()
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -27476,7 +27479,7 @@ Seedfill8(lua_State *L)
  *          the leak checks are changed for 8 connectivity.
  *          See comments on pixSeedfill4BB() for more details.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Box * on the Lua stack
  */
 static int
@@ -27504,7 +27507,7 @@ Seedfill8BB(lua_State *L)
  *      (1) This is the high-level interface to Paul Heckbert's
  *          stack-based seedfill algorithm.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Box * on the Lua stack
  */
 static int
@@ -27547,7 +27550,7 @@ SeedfillBB(lua_State *L)
  *          the clipping is handled by the low-level function
  *          seedfillBinaryLow().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -27591,7 +27594,7 @@ SeedfillBinary(lua_State *L)
  *          How this might use the constraints of separate xmax and ymax
  *          is not clear.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -27629,7 +27632,7 @@ SeedfillBinaryRestricted(lua_State *L)
  *            analysis: applications and efficient algorithms, IEEE Transactions
  *            on  Image Processing, vol. 2, no. 2, pp. 176-201, 1993.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -27671,7 +27674,7 @@ SeedfillGray(lua_State *L)
  *          to raise (lighten) the basins.  We construct the seed
  *          (a.k.a marker) image from pixb, pixm and %delta.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -27710,7 +27713,7 @@ SeedfillGrayBasin(lua_State *L)
  *          and where the implementation uses pixSeedfillGray() by
  *          inverting both the seed and mask.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -27744,7 +27747,7 @@ SeedfillGrayInv(lua_State *L)
  *          where each pixel is a fixed amount smaller than the
  *          corresponding mask pixel.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -27779,7 +27782,7 @@ SeedfillGrayInvSimple(lua_State *L)
  *            analysis: applications and efficient algorithms, IEEE Transactions
  *            on  Image Processing, vol. 2, no. 2, pp. 176-201, 1993.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -27808,7 +27811,7 @@ SeedfillGraySimple(lua_State *L)
  *        pixSeedfillBinary().
  *    (2) We use a 3x3 brick SEL for 8-cc filling and a 3x3 plus SEL for 4-cc.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -27860,7 +27863,7 @@ SeedfillMorph(lua_State *L)
  *          for 4-connectivity where the L1 distance is computed from
  *          steps in N,S,E and W directions (no diagonals).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -27892,7 +27895,7 @@ Seedspread(lua_State *L)
  *          with less than the threshold fraction of foreground, and
  *          L_SELECT_IF_GT or L_SELECT_IF_GTE to remove them.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -27930,7 +27933,7 @@ SelectByAreaFraction(lua_State *L)
  *          boundary components, and L_SELECT_IF_GT or L_SELECT_IF_GTE
  *          to remove them.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -27967,7 +27970,7 @@ SelectByPerimSizeRatio(lua_State *L)
  *      (4) Use L_SELECT_IF_LT or L_SELECT_IF_LTE to save the thicker
  *          components, and L_SELECT_IF_GT or L_SELECT_IF_GTE to remove them.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -28007,7 +28010,7 @@ SelectByPerimToAreaRatio(lua_State *L)
  *          To keep large components, use relation = L_SELECT_IF_GT or
  *          L_SELECT_IF_GTE.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -28045,7 +28048,7 @@ SelectBySize(lua_State *L)
  *          with less than the threshold ratio, and
  *          L_SELECT_IF_GT or L_SELECT_IF_GTE to remove them.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -28068,7 +28071,7 @@ SelectByWidthHeightRatio(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -28105,7 +28108,7 @@ SelectDefaultPdfEncoding(lua_State *L)
  *          and location.
  *      (4) See boxSelectLargeULBox() for implementation details.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Box * on the Lua stack
  */
 static int
@@ -28136,7 +28139,7 @@ SelectLargeULComp(lua_State *L)
  *          fastest to select one of them using a special seedfill
  *          operation.  Not yet implemented.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -28181,7 +28184,7 @@ SelectMinInConnComp(lua_State *L)
  *          that square; and v.v.
  *      (3) The generated masks can be used as markers for further operations.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -28207,7 +28210,7 @@ SelectedLocalExtrema(lua_State *L)
  * Arg #3 is expected to be a l_int32 (minw).
  * Arg #4 is expected to be a l_int32 (minh).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -28241,7 +28244,7 @@ SelectiveConnCompFill(lua_State *L)
  *                                   = 4 * wpl * h
  *            rdata     (rdatasize)
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -28268,7 +28271,7 @@ SerializeToMemory(lua_State *L)
  *          maximum value supported by the colormap: 2^d - 1.  However, this
  *          color may not be defined, because the colormap may not be full.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolan on the Lua stack
  */
 static int
@@ -28285,7 +28288,7 @@ SetAll(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a l_uint32 (val).
  *
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -28315,7 +28318,7 @@ SetAllArbitrary(lua_State *L)
  *          is room.  If the colormap is full, it finds the closest color in
  *          L2 distance of components.  This index is written to all pixels.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -28342,7 +28345,7 @@ SetAllGray(lua_State *L)
  *          the remainder which renders from pixs.
  *      (2) All alpha component bits in pixs are overwritten.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -28359,7 +28362,7 @@ SetAlphaOverWhite(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -28384,7 +28387,7 @@ SetBlack(lua_State *L)
  *          is full, it finds the closest color in intensity.
  *          This index is written to all pixels.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -28403,7 +28406,7 @@ SetBlackOrWhite(lua_State *L)
  * Arg #2 is expected to be a Boxa* (boxa).
  * Arg #3 is expected to be a l_int32 (op).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -28424,7 +28427,7 @@ SetBlackOrWhiteBoxa(lua_State *L)
  * Arg #2 is expected to be a l_int32 (dist).
  * Arg #3 is expected to be a l_uint32 (val).
  *
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -28459,7 +28462,7 @@ SetBorderRingVal(lua_State *L)
  *          to the appropriate number of least significant bits.
  *      (4) The code is easily generalized for 2 or 4 bpp.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -28487,7 +28490,7 @@ SetBorderVal(lua_State *L)
  *          To get full resolution output in the chroma channels for
  *          jpeg writing, call this with %sampling == 0.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -28512,7 +28515,7 @@ SetChromaSampling(lua_State *L)
  *          Because colormaps are not ref counted, it is important that
  *          the new colormap does not belong to any other pix.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -28535,7 +28538,7 @@ SetColormap(lua_State *L)
  *      (1) For example, this can be used to set the alpha component to opaque:
  *              pixSetComponentArbitrary(pix, L_ALPHA_CHANNEL, 255)
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -28554,7 +28557,7 @@ SetComponentArbitrary(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a Lua array table (h) of array tables (wpl).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -28578,7 +28581,7 @@ SetData(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -28598,7 +28601,7 @@ SetDepth(lua_State *L)
  * Arg #3 is expected to be a lua_Integer (height).
  * Arg #4 is expected to be a lua_Integer (depth).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean result true or false
  */
 static int
@@ -28617,7 +28620,7 @@ SetDimensions(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -28642,7 +28645,7 @@ SetHeight(lua_State *L)
  *          maximum value supported by the colormap: 2^d - 1.  However, this
  *          color may not be defined, because the colormap may not be full.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -28668,7 +28671,7 @@ SetInRect(lua_State *L)
  *          rect to the color at the index equal to val.  Be sure that
  *          this index exists in the colormap and that it is the intended one!
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -28687,7 +28690,7 @@ SetInRectArbitrary(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a string with the input format name (format).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -28716,7 +28719,7 @@ SetInputFormat(lua_State *L)
  *      (2) If contrast (pixel difference) detection is expected to fail,
  *          caller should check return value.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -28758,7 +28761,7 @@ SetLowContrast(lua_State *L)
  *      (7) Implementation details: see comments in pixPaintThroughMask()
  *          for when we use rasterop to do the painting.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -28794,7 +28797,7 @@ SetMasked(lua_State *L)
  *          it is added if possible; an error is returned if the
  *          colormap is already full.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -28839,7 +28842,7 @@ SetMaskedCmap(lua_State *L)
  *          image rasterops, rather than pixel peeking in pixm and poking
  *          in pixd.  It's somewhat baroque, but I found it amusing.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -28871,7 +28874,7 @@ SetMaskedGeneral(lua_State *L)
  *      (3) The general pixRasterop() is used for an in-place operation here
  *          because there is no overlap between the src and dest rectangles.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -28906,7 +28909,7 @@ SetMirroredBorder(lua_State *L)
  *      (3) For grayscale or color images, use PIX_SET for white
  *          and PIX_CLR for black.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -28947,7 +28950,7 @@ SetOrClearBorder(lua_State *L)
  *          and because setting the pad bits is cheap, the pad bits are
  *          set to 0 before writing these compressed files.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -28977,7 +28980,7 @@ SetPadBits(lua_State *L)
  *          band of raster lines.
  *      (3) For 32 bpp pix, there are no pad bits, so this is a no-op.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -29007,7 +29010,7 @@ SetPadBitsBand(lua_State *L)
  *            pixel value, and any (invalid) higher order bits are discarded.
  *      (2) See pixGetPixel() for information on performance.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -29028,7 +29031,7 @@ SetPixel(lua_State *L)
  * Arg #2 is expected to be a l_int32 (col).
  * Arg #3 is expected to be an array table of lua_Numbers for each row of pixd (tblvect).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack (result)
  */
 static int
@@ -29064,7 +29067,7 @@ SetPixelColumn(lua_State *L)
  *      (2) The two images are registered to the UL corner; the sizes
  *          need not be the same, but a warning is issued if they differ.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -29087,7 +29090,7 @@ SetRGBComponent(lua_State *L)
  * Arg #5 is expected to be a l_int32 (gval).
  * Arg #6 is expected to be a l_int32 (bval).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -29111,7 +29114,7 @@ SetRGBPixel(lua_State *L)
  * Arg #2 is expected to be a lua_Integer (xres).
  * Arg #3 is expected to be a lua_Integer (yres).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean result true or false
  */
 static int
@@ -29150,7 +29153,7 @@ SetResolution(lua_State *L)
  *          a 3-level 2 bpp image, while leaving light pixels outside
  *          this region unchanged.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -29191,7 +29194,7 @@ SetSelectCmap(lua_State *L)
  *          otherwise, it is added to the colormap.  If the colormap
  *          is full, an error is returned.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -29217,7 +29220,7 @@ SetSelectMaskedCmap(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (special).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -29234,7 +29237,7 @@ SetSpecial(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -29260,7 +29263,7 @@ SetSpp(lua_State *L)
  *          artifacts in the thickening step is added before thinning.
  *      (3) %connectivity == 8 usually gives a slightly smoother result.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -29285,7 +29288,7 @@ SetStrokeWidth(lua_State *L)
  *      (1) This removes any existing textstring and puts a copy of
  *          the input textstring there.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -29324,7 +29327,7 @@ SetText(lua_State *L)
  *      (3) If there is a colormap, this does the best it can to use
  *          the requested color, or something similar to it.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -29370,7 +29373,7 @@ SetTextblock(lua_State *L)
  *      (3) If there is a colormap, this does the best it can to use
  *          the requested color, or something similar to it.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -29441,7 +29444,7 @@ SetTextline(lua_State *L)
  *          For rendering as a 3 component RGB image over a uniform
  *          background of arbitrary color, use pixAlphaBlendUniform().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -29459,7 +29462,7 @@ SetUnderTransparency(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -29475,7 +29478,7 @@ SetWhite(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -29492,7 +29495,7 @@ SetWidth(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -29509,7 +29512,7 @@ SetWpl(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -29526,7 +29529,7 @@ SetXRes(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -29556,7 +29559,7 @@ SetYRes(lua_State *L)
  *      (2) If you use the defined constants in zlib.h instead of the
  *          compression integers given above, you must include zlib.h.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -29590,7 +29593,7 @@ SetZlibCompression(lua_State *L)
  *              }
  *              pixCleanupByteProcessing(pix, lineptrs);
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_uint8 ** on the Lua stack
  */
 static int
@@ -29615,7 +29618,7 @@ SetupByteProcessing(lua_State *L)
  * Arg #3 is expected to be a l_int32 (shiftx).
  * Arg #3 is expected to be a l_int32 (shifty).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -29668,7 +29671,7 @@ ShiftAndTransferAlpha(lua_State *L)
  *          A dark foreground can be colored by using srcval = 0x0
  *          and choosing a target foreground color for dstval.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -29699,7 +29702,7 @@ ShiftByComponent(lua_State *L)
  *          smaller when more terms are used, even though the phases
  *          are random.  See, for example, prog/warptest.c.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -29739,7 +29742,7 @@ SimpleCaptcha(lua_State *L)
  *      (4) See also pixColorSegment() for a method of quantizing the
  *          colors to generate regions of similar color.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -29759,7 +29762,7 @@ SimpleColorQuantize(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -29788,7 +29791,7 @@ SizesEqual(lua_State *L)
  *          there are a relatively small number of components.  It will
  *          be inefficient if used where there are many small components.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -29820,7 +29823,7 @@ SmoothConnectedRegions(lua_State *L)
  *      (4) All pixels within 'diff' of 'srcval', componentwise,
  *          will be changed to 'dstval'.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -29854,7 +29857,7 @@ SnapColor(lua_State *L)
  *      (4) All colors within 'diff' of 'srcval', componentwise,
  *          will be changed to 'dstval'.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -29890,7 +29893,7 @@ SnapColorCmap(lua_State *L)
  *          the loop.
  *      (4) This runs at about 45 Mpix/sec on a 3 GHz processor.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -29969,7 +29972,7 @@ SobelEdgeFilter(lua_State *L)
  *                selected, they are returned as a single final rectangle;
  *                otherwise, they are ignored.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Boxa * on the Lua stack
  */
 static int
@@ -30001,7 +30004,7 @@ SplitComponentIntoBoxa(lua_State *L)
  *          minimima in the vertical pixel projection profile, after a
  *          large vertical closing has been applied to the component.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Boxa * on the Lua stack
  */
 static int
@@ -30029,7 +30032,7 @@ SplitComponentWithProfile(lua_State *L)
  *      (1) See numaSplitDistribution() for details on the underlying
  *          method of choosing a threshold.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 3 integers on the Lua stack (thresh, fgbal, bgval)
  */
 static int
@@ -30080,7 +30083,7 @@ SplitDistributionFgBg(lua_State *L)
  *          box for anything left after the maximum number of allowed
  *          rectangle is extracted.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Boxa * on the Lua stack
  */
 static int
@@ -30113,7 +30116,7 @@ SplitIntoBoxa(lua_State *L)
  *      (3) The returned pixa includes the boxes from which the
  *          (possibly split) components are extracted.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -30161,7 +30164,7 @@ SplitIntoCharacters(lua_State *L)
  *          Use of green and blue from %pix1 in the red channel,
  *          instead of red, tends to fix that problem.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -30202,7 +30205,7 @@ StereoFromPair(lua_State *L)
  *          the nearest src pixel.  Otherwise, we use linear interpolation
  *          between pairs of sampled pixels.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -30231,7 +30234,7 @@ StretchHorizontal(lua_State *L)
  * Leptonica's Notes:
  *      (1) See pixStretchHorizontal() for details.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -30259,7 +30262,7 @@ StretchHorizontalLI(lua_State *L)
  * Leptonica's Notes:
  *      (1) See pixStretchHorizontal() for details.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -30301,7 +30304,7 @@ StretchHorizontalSampled(lua_State *L)
  *               8          22.5     {0, 22.5, 45, 67.5, 90, 112.5, 135, 157.5}
  *      (5) Runtime scales linearly with (nangles - 2).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -30336,7 +30339,7 @@ StrokeWidthTransform(lua_State *L)
  *          and the inner one does a reasonable job running along
  *          each 4-connected coutour.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pta * on the Lua stack
  */
 static int
@@ -30368,7 +30371,7 @@ SubsampleBoundaryPixels(lua_State *L)
  *          (d) pixd != pixs1  (src1 - src2) --> input pixd
  *      (6) pixs2 must be different from both pixd and pixs1.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -30416,7 +30419,7 @@ SubtractGray(lua_State *L)
  *            pixDestroy(&pix3);  // holds what was in pix2  [1] --> [0]
  * \endcode
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -30451,7 +30454,7 @@ SwapAndDestroy(lua_State *L)
  *          to pixels in pixs under the fg of pixm.
  *      (5) For 32 bpp, this does not save the alpha channel.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -30478,7 +30481,7 @@ TRCMap(lua_State *L)
  *          If there are no fg pixels, it will return %canclip = 1.
  *          Check the output of the subsequent call to pixClipToForeground().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -30534,7 +30537,7 @@ TestClipToForeground(lua_State *L)
  *      (6) If RGB, the maximum difference between pixel components is
  *          saved in the histogram.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -30597,7 +30600,7 @@ TestForSimilarity(lua_State *L)
  *             Pix *pix = pixThinConnectedBySet(pixs, L_THIN_FG, sela, 0);
  *          using set 1 for 4-c.c. and set 5 for 8-c.c operations.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -30637,7 +30640,7 @@ ThinConnected(lua_State *L)
  *          (in this case, with four sequential thinning operations, one
  *          from each of four directions).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -30678,7 +30681,7 @@ ThinConnectedBySet(lua_State *L)
  *      (5) Typically you should not use make a colormap for 1 bpp dest.
  *      (6) This is not dithering.  Each pixel is treated independently.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -30739,7 +30742,7 @@ Threshold8(lua_State *L)
  *          has significant variation and/or bleedthrough), this returns 1,
  *          which the caller should check.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -30769,7 +30772,7 @@ ThresholdByConnComp(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 factor.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack (result)
  */
 static int
@@ -30826,7 +30829,7 @@ ThresholdForFgBg(lua_State *L)
  *          unequally-spaced bins is to first transform the 8 bpp pixs
  *          using pixGammaTRC(), and follow this with pixThresholdTo4bpp().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -30860,7 +30863,7 @@ ThresholdGrayArb(lua_State *L)
  *      (4) If you don't want the thresholding to be equally spaced,
  *          first transform the input 8 bpp src using pixGammaTRC().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -30887,7 +30890,7 @@ ThresholdOn8bpp(lua_State *L)
  *          the 2 images) than using pixCountPixels(), which counts all
  *          pixels before returning.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -30938,7 +30941,7 @@ ThresholdPixelSum(lua_State *L)
  *          images are too large.  See pixOtsuAdaptiveThreshold() for
  *          an example of this.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -31006,7 +31009,7 @@ ThresholdSpreadNorm(lua_State *L)
  *          quantization to 4 levels will remove the jpeg ringing in the
  *          background near character edges.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -31063,7 +31066,7 @@ ThresholdTo2bpp(lua_State *L)
  *          of text.  This filtering is partly responsible for the improved
  *          compression.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -31091,7 +31094,7 @@ ThresholdTo4bpp(lua_State *L)
  *          pix is all zeros (bg).
  *
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -31118,7 +31121,7 @@ ThresholdToBinary(lua_State *L)
  *    ~ if setval < threshval, sets pixels with a value <= threshval to setval
  *    ~ if setval == threshval, no-op
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -31159,7 +31162,7 @@ ThresholdToValue(lua_State *L)
  *      (4) The overlap must not be larger than the width or height of
  *          the leftmost or topmost tile(s).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 PixTiling * on the Lua stack
  */
 static int
@@ -31181,7 +31184,7 @@ TilingCreate(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 void on the Lua stack
  */
 static int
@@ -31198,7 +31201,7 @@ TilingDestroy(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixTiling* (pt).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -31220,7 +31223,7 @@ TilingGetCount(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixTiling* (pt).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -31244,7 +31247,7 @@ TilingGetSize(lua_State *L)
  * Arg #2 is expected to be a l_int32 (i).
  * Arg #3 is expected to be a l_int32 (j).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -31270,7 +31273,7 @@ TilingGetTile(lua_State *L)
  *          stripped off.  This tells the paint operation not
  *          to strip the added boundary pixels when painting.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -31291,7 +31294,7 @@ TilingNoStripOnPaint(lua_State *L)
  * Arg #4 is expected to be a Pix* (pixs).
  * Arg #5 is expected to be a PixTiling* (pt).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -31323,7 +31326,7 @@ TilingPaintTile(lua_State *L)
  *          The L_TOPHAT_WHITE tophat can be accomplished by doing a
  *          L_TOPHAT_BLACK tophat on the inverse, or v.v.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -31388,7 +31391,7 @@ Tophat(lua_State *L)
  *              never destroy the input pix, because the calling function
  *              maintains an unchanged handle to it.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -31424,7 +31427,7 @@ TransferAllData(lua_State *L)
  *      (2) If an existing pixd is not the same size as pixs, the
  *          image data will be reallocated.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -31465,7 +31468,7 @@ Translate(lua_State *L)
  *          It is about 30% faster than Sobel, and the results are
  *          similar.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -31485,7 +31488,7 @@ TwoSidedEdgeFilter(lua_State *L)
  * Arg #2 is expected to be a Sela* (sela).
  * Arg #3 is expected to be a l_int32 (type).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -31510,7 +31513,7 @@ UnionOfMorphOps(lua_State *L)
  *      (1) This function calls special cases of pixConvert1To*(),
  *          for 2, 4, 8, 16 and 32 bpp destinations.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -31538,7 +31541,7 @@ UnpackBinary(lua_State *L)
  *          range:  0.2 < fract < 0.7
  *      (3) Returns a clone if no sharpening is requested.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -31587,7 +31590,7 @@ UnsharpMasking(lua_State *L)
  *          convolution separably and then compose with the original pix.
  *      (6) Returns a clone if no sharpening is requested.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -31617,7 +31620,7 @@ UnsharpMaskingFast(lua_State *L)
  *          0.2 < fract < 0.7
  *      (3) Returns a clone if no sharpening is requested.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -31644,7 +31647,7 @@ UnsharpMaskingGray(lua_State *L)
  *          in pixUnsharpMaskingFast().
  *      (2) Returns a clone if no sharpening is requested.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -31671,7 +31674,7 @@ UnsharpMaskingGray1D(lua_State *L)
  *      (2) The lowpass filter is implemented separably.
  *      (3) Returns a clone if no sharpening is requested.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -31698,7 +31701,7 @@ UnsharpMaskingGray2D(lua_State *L)
  *          in pixUnsharpMaskingFast().
  *      (2) Returns a clone if no sharpening is requested.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -31730,7 +31733,7 @@ UnsharpMaskingGrayFast(lua_State *L)
  *          assuming that the text is either rightside-up or upside-down
  *          and not rotated at a 90 degree angle.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -31766,7 +31769,7 @@ UpDownDetect(lua_State *L)
  *          assuming that the text is either rightside-up or upside-down
  *          and not rotated at a 90 degree angle.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -31817,7 +31820,7 @@ UpDownDetectDwa(lua_State *L)
  *          150 and 300 ppi, and an 8x reduction on a 150 ppi image
  *          is going too far -- components will get merged.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -31846,7 +31849,7 @@ UpDownDetectGeneral(lua_State *L)
  * Leptonica's Notes:
  *      (1) See the notes in pixUpDownDetectGeneral() for usage.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_float32 (%conf) on the Lua stack
  */
 static int
@@ -31878,7 +31881,7 @@ UpDownDetectGeneralDwa(lua_State *L)
  *          situation where it is required to know if the colormap
  *          has color entries that are actually used in the image.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -31928,7 +31931,7 @@ UsesCmapColor(lua_State *L)
  *          not permitted to be within MIN_DIFF_FROM_HALF_PI radians
  *          from either -pi/2 or pi/2.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -31957,7 +31960,7 @@ VShear(lua_State *L)
  *      (2) This does a vertical shear about the center, with (+) shear
  *          pushing increasingly downward (+y) with increasing x.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -31985,7 +31988,7 @@ VShearCenter(lua_State *L)
  *      (2) This does a vertical shear about the UL corner, with (+) shear
  *          pushing increasingly downward (+y) with increasing x.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -32016,7 +32019,7 @@ VShearCorner(lua_State *L)
  *      (4) Does a vertical full-band shear about the line with (+) shear
  *          pushing increasingly downward (+y) with increasing x.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -32052,7 +32055,7 @@ VShearIP(lua_State *L)
  *      (4) The angle is brought into the range [-pi/2 + del, pi/2 - del],
  *          where del == MIN_DIFF_FROM_HALF_PI.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -32077,7 +32080,7 @@ VShearLI(lua_State *L)
  *      (1) If the pixel in pixs is less than the corresponding pixel
  *          in pixg, the dest will be 1; otherwise it will be 0.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -32102,7 +32105,7 @@ VarThresholdToBinary(lua_State *L)
  *      (2) We are actually computing the RMS deviation in each row.
  *          This is the square root of the variance.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa* on the Lua stack
  */
 static int
@@ -32127,7 +32130,7 @@ VarianceByColumn(lua_State *L)
  *      (2) We are actually computing the RMS deviation in each row.
  *          This is the square root of the variance.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa* on the Lua stack
  */
 static int
@@ -32146,7 +32149,7 @@ VarianceByRow(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is an optional Box* (box).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Numa* on the Lua stack
  */
 static int
@@ -32176,7 +32179,7 @@ VarianceInRect(lua_State *L)
  *          square root of the variance within a rectangle in O(1),
  *          independent of the size of the rectangle.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -32210,7 +32213,7 @@ VarianceInRectangle(lua_State *L)
  *         (2) %dscale < 0, scale to abs(dscale) * 100%
  *         (3) otherwise scale to dscale
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 int
@@ -32300,7 +32303,7 @@ View(lua_State *L)
  *            pixSetAllArbitrary(pixg, 128);
  *            pixd = pixBlendWithGrayMask(pixrs, pixc, pixg, 0, 0);
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -32344,7 +32347,7 @@ WarpStereoscopic(lua_State *L)
  *          the image boundary, and runs in a time that is independent
  *          of the size of the convolution kernel.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -32389,7 +32392,7 @@ WindowedMean(lua_State *L)
  *          the image boundary, and runs in a time that is independent
  *          of the size of the convolution kernel.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix * on the Lua stack
  */
 static int
@@ -32435,7 +32438,7 @@ WindowedMeanSquare(lua_State *L)
  *          the image boundary, and runs in a time that is independent
  *          of the size of the convolution kernel.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 4 2 Pix* and 2 FPix* on the Lua stack
  */
 static int
@@ -32477,7 +32480,7 @@ WindowedStats(lua_State *L)
  *            ~ for both, use fpixDisplayMaxDynamicRange().
  *            ~ for rms deviation, simply convert the output fpix to pix,
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 2 FPix* on the Lua stack
  */
 static int
@@ -32515,7 +32518,7 @@ WindowedVariance(lua_State *L)
  *          to align the variance values with the pixel coordinate.
  *      (4) The square root of the variance is the RMS deviation from the mean.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -32549,7 +32552,7 @@ WindowedVarianceOnLine(lua_State *L)
  *      (1) Returns a pruned set of word boxes.
  *      (2) See pixWordMaskByDilation().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -32597,7 +32600,7 @@ WordBoxesByDilation(lua_State *L)
  *          where the initial number of c.c. has been reduced by some
  *          fraction (we use a 70% reduction).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -32633,7 +32636,7 @@ WordMaskByDilation(lua_State *L)
  *      (3) The default jpeg quality is 75.  For some other value,
  *          Use l_jpegSetQuality().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -32652,7 +32655,7 @@ Write(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a string (filename).
  * Arg #2 is expected to be a Pix* (pix).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -32678,7 +32681,7 @@ WriteAutoFormat(lua_State *L)
  *      (2) The global variable LeptDebugOK defaults to 0, and can be set
  *          or cleared by the function setLeptDebugOK().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -32704,7 +32707,7 @@ WriteDebug(lua_State *L)
  *      (2) The last two args are ignored except for requests for jpeg files.
  *      (3) The jpeg default quality is 75.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -32743,7 +32746,7 @@ WriteImpliedFormat(lua_State *L)
  *      (3) The %hint parameter is not yet in use.
  *      (4) For now, we only support 1 "layer" for quality.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -32767,7 +32770,7 @@ WriteJp2k(lua_State *L)
  * Arg #3 is expected to be a l_int32 (quality).
  * Arg #4 is expected to be a l_int32 (progressive).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean the Lua stack
  */
 static int
@@ -32796,7 +32799,7 @@ WriteJpeg(lua_State *L)
  *      (3) The default jpeg quality is 75.  For some other value,
  *          Use l_jpegSetQuality().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 lstring (%data, %size) on the Lua stack
  */
 static int
@@ -32830,7 +32833,7 @@ WriteMem(lua_State *L)
  *          the ones used for colormaps in leptonica.  This allows
  *          a simple memcpy for bmp output.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 lstring (%fdata, %fsize) on the Lua stack
  */
 static int
@@ -32854,7 +32857,7 @@ WriteMemBmp(lua_State *L)
  * Leptonica's Notes:
  *      (1) See comments in pixReadMemGif()
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 lstring (%data, %size) on the Lua stack
  */
 static int
@@ -32883,7 +32886,7 @@ WriteMemGif(lua_State *L)
  *      (1) See pixWriteJp2k() for usage.  This version writes to
  *          memory instead of to a file stream.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 lstring (%data, %size) on the Lua stack
  */
 static int
@@ -32914,7 +32917,7 @@ WriteMemJp2k(lua_State *L)
  *      (1) See pixWriteStreamJpeg() for usage.  This version writes to
  *          memory instead of to a file stream.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 lstring (%data, %size) on the Lua stack
  */
 static int
@@ -32945,7 +32948,7 @@ WriteMemJpeg(lua_State *L)
  *      (2) This is just a wrapper for pixWriteStringPS(), which
  *          writes uncompressed image data to memory.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 lstring (%data, %size) on the Lua stack
  */
 static int
@@ -32973,7 +32976,7 @@ WriteMemPS(lua_State *L)
  *      (1) See pixWriteStreamPnm() for usage.  This version writes to
  *          memory instead of to a file stream.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 lstring (%data, %size) on the Lua stack
  */
 static int
@@ -33002,7 +33005,7 @@ WriteMemPam(lua_State *L)
  *          JPEG encoding for 8 bpp (no cmap) and 32 bpp, and FLATE
  *          encoding for everything else.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 lstring (%data, %nbytes) on the Lua stack
  */
 static int
@@ -33029,7 +33032,7 @@ WriteMemPdf(lua_State *L)
  * Leptonica's Notes:
  *      (1) See pixWriteStreamPng()
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 lstring (%filedata, %filesize) on the Lua stack
  */
 static int
@@ -33055,7 +33058,7 @@ WriteMemPng(lua_State *L)
  *      (1) See pixWriteStreamPnm() for usage.  This version writes to
  *          memory instead of to a file stream.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 lstring (%data, %size) on the Lua stack
  */
 static int
@@ -33076,7 +33079,7 @@ WriteMemPnm(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a Pix* (pix).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 lstring (%data, %size) on the Lua stack
  */
 static int
@@ -33098,7 +33101,7 @@ WriteMemSpix(lua_State *L)
  * Arg #1 is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (comptype).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 lstring (%data, %size) on the Lua stack
  */
 static int
@@ -33125,7 +33128,7 @@ WriteMemTiff(lua_State *L)
  * Arg #5 is expected to be a Sarray* (satypes).
  * Arg #6 is expected to be a Numa* (nasizes).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 lstring (%data, %size) on the Lua stack
  */
 static int
@@ -33161,7 +33164,7 @@ WriteMemTiffCustom(lua_State *L)
  *          WebPEncodeRGBA() then removes the alpha chunk when encoding,
  *          setting the internal header field has_alpha to 0.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 lstring (%encdata, %encsize) on the Lua stack
  */
 static int
@@ -33188,7 +33191,7 @@ WriteMemWebP(lua_State *L)
  * Arg #4 is expected to be a l_int32 (pageno).
  * Arg #5 is expected to be a string (fileout).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -33217,7 +33220,7 @@ WriteMixedToPS(lua_State *L)
  *      (3) The bounding box is sized for fitting the image to an
  *          8.5 x 11.0 inch page.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -33240,7 +33243,7 @@ WritePSEmbed(lua_State *L)
  *      (1) Special version for writing png with a specified gamma.
  *          When using pixWrite(), no field is given for gamma.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -33264,7 +33267,7 @@ WritePng(lua_State *L)
  * Arg #6 is expected to be a l_int32 (pageno).
  * Arg #7 is expected to be a string (fileout).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -33288,7 +33291,7 @@ WriteSegmentedPageToPS(lua_State *L)
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * Arg #3 is expected to be a string with the input format name (format).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -33307,7 +33310,7 @@ WriteStream(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -33325,7 +33328,7 @@ WriteStreamAsciiPnm(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -33348,7 +33351,7 @@ WriteStreamBmp(lua_State *L)
  *          this quantizes the colors and writes out 8 bpp.
  *          If the pix is 16 bpp grayscale, it converts to 8 bpp first.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -33375,7 +33378,7 @@ WriteStreamGif(lua_State *L)
  *      (2) For an encoder with more encoding options, see, e.g.,
  *    https://github.com/OpenJPEG/openjpeg/blob/master/tests/test_tile_encoder.c
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -33421,7 +33424,7 @@ WriteStreamJp2k(lua_State *L)
  *          a higher resolution one (with more quantization levels)
  *          for luminosity and a lower resolution one for the chromas.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -33450,7 +33453,7 @@ WriteStreamJpeg(lua_State *L)
  *          a bounding box.
  *      (2) For details on use of parameters, see pixWriteStringPS().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -33476,7 +33479,7 @@ WriteStreamPS(lua_State *L)
  *      (2) 24 bpp rgb are not supported in leptonica, but this will
  *          write them out as a packed array of bytes (3 to a pixel).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -33502,7 +33505,7 @@ WriteStreamPam(lua_State *L)
  *          JPEG encoding for 8 bpp (no cmap) and 32 bpp, and FLATE
  *          encoding for everything else.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -33586,7 +33589,7 @@ WriteStreamPdf(lua_State *L)
  *          identified, and the colormapped image with alpha is converted
  *          to a 4 spp rgba image.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -33613,7 +33616,7 @@ WriteStreamPng(lua_State *L)
  *      (2) 24 bpp rgb are not supported in leptonica, but this will
  *          write them out as a packed array of bytes (3 to a pixel).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -33631,7 +33634,7 @@ WriteStreamPnm(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -33664,7 +33667,7 @@ WriteStreamSpix(lua_State *L)
  *          than uncompressed!)  If a binary image has dithered
  *          regions, it is usually better to compress with png.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -33685,7 +33688,7 @@ WriteStreamTiff(lua_State *L)
  * Arg #3 is expected to be a l_int32 (comptype).
  * Arg #4 is expected to be a string (modestr).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -33707,7 +33710,7 @@ WriteStreamTiffWA(lua_State *L)
  * Arg #3 is expected to be a l_int32 (quality).
  * Arg #4 is expected to be a l_int32 (lossless).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -33759,7 +33762,7 @@ WriteStreamWebP(lua_State *L)
  *               (Hint: 1.0 US cup = 0.75 UK cup + 0.2 US gill;
  *                      1.0 US gill = 24.0 US teaspoons)
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 string (%str) on the Lua stack
  */
 static int
@@ -33792,7 +33795,7 @@ WriteStringPS(lua_State *L)
  *          and the time required for each image increases linearly
  *          with the number of images in the file.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -33818,7 +33821,7 @@ WriteTiff(lua_State *L)
  * Arg #7 is expected to be a Sarray* (satypes).
  * Arg #8 is expected to be a Numa* (nasizes).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -33847,7 +33850,7 @@ WriteTiffCustom(lua_State *L)
  * Leptonica's Notes:
  *      (1) Special top-level function allowing specification of quality.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -33874,7 +33877,7 @@ WriteWebP(lua_State *L)
  *      (4) For a colormapped image, pixel values are 0.  The colormap
  *          is ignored.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -33891,7 +33894,7 @@ Zero(lua_State *L)
 /**
  * \brief Check Lua stack at index %arg for udata of class Pix*.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Pix* contained in the user data
  */
@@ -33904,7 +33907,7 @@ ll_check_Pix(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Check Lua stack at index %arg for udata of class Pix* and take it.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Pix* contained in the user data
  */
@@ -33924,7 +33927,7 @@ ll_take_Pix(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Take a Pix* from a global variable %name.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param name of the global variable
  * \return pointer to the Amap* contained in the user data
  */
@@ -33939,7 +33942,7 @@ ll_get_global_Pix(const char *_fun, lua_State *L, const char *name)
 /**
  * \brief Optionally expect a Pix* at index %arg on the Lua stack.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Pix* contained in the user data
  */
@@ -33953,7 +33956,7 @@ ll_opt_Pix(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push PIX to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param pix pointer to the PIX
  * \return 1 Pix* on the Lua stack
  */
@@ -33966,7 +33969,7 @@ ll_push_Pix(const char *_fun, lua_State *L, Pix *pix)
 }
 /**
  * \brief Create and push a new Pix*.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 int
@@ -34038,7 +34041,7 @@ ll_new_Pix(lua_State *L)
 }
 /**
  * \brief Register the Pix methods and functions in the Pix meta table.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 table on the Lua stack
  */
 int

@@ -66,22 +66,19 @@
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Amap* (amap).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 for nothing on the Lua stack
  */
 static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    Amap **pamap = ll_check_udata<Amap>(_fun, L, 1, TNAME);
-    Amap *amap = *pamap;
-    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d\n", _fun,
+    Amap *amap = ll_take_udata<Amap>(_fun, L, 1, TNAME);
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %d\n", _fun,
         TNAME,
-        "pamap", reinterpret_cast<void *>(pamap),
         "amap", reinterpret_cast<void *>(amap),
         "size", l_asetSize(amap));
     l_amapDestroy(&amap);
-    *pamap = nullptr;
     return 0;
 }
 
@@ -90,7 +87,7 @@ Destroy(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Amap* (amap).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -109,7 +106,7 @@ Size(lua_State *L)
  * Arg #2 is expected to be a key (int, uint or float).
  * Arg #3 is expected to be a value (int, uint or float).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -161,7 +158,7 @@ Insert(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Amap* (amap).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 string on the Lua stack
  */
 static int
@@ -225,7 +222,7 @@ toString(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string describing the key type (int,uint,float).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Amap* on the Lua stack
  */
 static int
@@ -243,7 +240,7 @@ Create(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Amap* (amap).
  * Arg #2 is expected to be a key (int, uint or float).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -280,7 +277,7 @@ Delete(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Amap* (amap).
  * Arg #2 is expected to be a key (int, uint or float).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 value on the Lua stack (either lua_Integer or lua_Number)
  */
 static int
@@ -325,7 +322,7 @@ Find(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Amap* (amap).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 light user data on the Lua stack
  */
 static int
@@ -343,7 +340,7 @@ GetFirst(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Amap* (amap).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 light user data on the Lua stack
  */
 static int
@@ -361,7 +358,7 @@ GetLast(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a AmapNode* (node).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 light user data on the Lua stack
  */
 static int
@@ -380,7 +377,7 @@ GetNext(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a AmapNode* (node).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 light user data on the Lua stack
  */
 static int
@@ -397,7 +394,7 @@ GetPrev(lua_State *L)
 /**
  * \brief Check Lua stack at index %arg for udata of class Amap*.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Amap* contained in the user data
  */
@@ -410,7 +407,7 @@ ll_check_Amap(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Check Lua stack at index %arg for udata of class Amap* and take it.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Amap* contained in the user data
  */
@@ -430,7 +427,7 @@ ll_take_Amap(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Optionally expect a Amap* at index %arg on the Lua stack.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Amap* contained in the user data
  */
@@ -445,7 +442,7 @@ ll_opt_Amap(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Take a Amap* from a global variable %name.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param name of the global variable
  * \return pointer to the Amap* contained in the user data
  */
@@ -460,7 +457,7 @@ ll_get_global_Amap(const char *_fun, lua_State *L, const char *name)
 /**
  * \brief Push Amap user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param amap pointer to the Amap
  * \return 1 Amap* on the Lua stack
  */
@@ -476,7 +473,7 @@ ll_push_Amap(const char *_fun, lua_State *L, Amap *amap)
  * <pre>
  * Arg #1 is expected to be a key type name (int, uint, or float).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Amap* on the Lua stack
  */
 int
@@ -506,7 +503,7 @@ ll_new_Amap(lua_State *L)
 
 /**
  * \brief Register the Amap methods and functions in the Amap* meta table.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 table on the Lua stack
  */
 int

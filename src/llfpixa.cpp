@@ -53,22 +53,19 @@
  *      (1) Decrements the ref count and, if 0, destroys the fpixa.
  *      (2) Always nulls the input ptr.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 for nothing on the Lua stack
  */
 static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    FPixa **pfpixa = ll_check_udata<FPixa>(_fun, L, 1, TNAME);
-    FPixa *fpixa = *pfpixa;
-    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d\n", _fun,
+    FPixa *fpixa = ll_take_udata<FPixa>(_fun, L, 1, TNAME);
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %d\n", _fun,
         TNAME,
-        "pfpixa", reinterpret_cast<void *>(pfpixa),
         "fpixa", reinterpret_cast<void *>(fpixa),
         "count", fpixaGetCount(fpixa));
     fpixaDestroy(&fpixa);
-    *pfpixa = nullptr;
     return 0;
 }
 
@@ -77,7 +74,7 @@ Destroy(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPixa* (fpixa).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -95,7 +92,7 @@ GetCount(lua_State *L)
  * Arg #2 is expected to be a FPix* (fpix).
  * Arg #3 is expected to be a l_int32 (copyflag).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -114,7 +111,7 @@ AddFPix(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a FPixa* (fpixa).
  * Arg #2 is expected to be a l_int32 (delta).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -134,7 +131,7 @@ ChangeRefcount(lua_State *L)
  * Leptonica's Notes:
  *      (1) The lab image is stored in three fpix.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 FPixa* on the Lua stack
  */
 static int
@@ -155,7 +152,7 @@ ConvertLABToRGB(lua_State *L)
  *      (1) The input [l,a,b] and output [x,y,z] values are stored as
  *          float values, each set in three fpix.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 FPixa* on the Lua stack
  */
 static int
@@ -183,7 +180,7 @@ ConvertLABToXYZ(lua_State *L)
  *             http://www.brucelindbloom.com/
  *             http://en.wikipedia.org/wiki/Lab_color_space
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 FPixa* on the Lua stack
  */
 static int
@@ -205,7 +202,7 @@ ConvertXYZToLAB(lua_State *L)
  *      (2) For values of xyz that are out of gamut for rgb, the rgb
  *          components are set to the closest valid color.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -229,7 +226,7 @@ ConvertXYZToRGB(lua_State *L)
  *        ~ L_CLONE gives a new ref-counted handle to the input fpixa
  *        ~ L_COPY_CLONE makes a new fpixa with clones of all fpix
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 FPixa* on the Lua stack
  */
 static int
@@ -247,7 +244,7 @@ Copy(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a l_int32 (n).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 FPixa* on the Lua stack
  */
 static int
@@ -272,7 +269,7 @@ Create(lua_State *L)
  *          function displays 8 bpp pix clipped to 255, so the image
  *          pixels will mostly be 255 (white).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -292,7 +289,7 @@ DisplayQuadtree(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a FPixa* (fpixa).
  * Arg #2 is expected to be a l_int32 (idx).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -320,7 +317,7 @@ GetData(lua_State *L)
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a l_int32 (accesstype).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 FPix* on the Lua stack
  */
 static int
@@ -340,7 +337,7 @@ GetFPix(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a FPixa* (fpixa).
  * Arg #2 is expected to be a l_int32 (idx).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 2 integers (%w, %h) on the Lua stack
  */
 static int
@@ -366,7 +363,7 @@ GetFPixDimensions(lua_State *L)
  * Arg #3 is expected to be a l_int32 (x).
  * Arg #4 is expected to be a l_int32 (y).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_float32 (%val) on the Lua stack
  */
 static int
@@ -392,7 +389,7 @@ GetPixel(lua_State *L)
  * Arg #4 is expected to be a l_int32 (y).
  * Arg #5 is expected to be a l_float32 (val).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -410,7 +407,7 @@ SetPixel(lua_State *L)
 /**
  * \brief Check Lua stack at index (%arg) for udata of class FPixa*.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the FPixa* contained in the user data
  */
@@ -423,7 +420,7 @@ ll_check_FPixa(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Check Lua stack at index %arg for udata of class FPixa* and take it.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the FPixa* contained in the user data
  */
@@ -443,7 +440,7 @@ ll_take_FPixa(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Take a FPixa* from a global variable %name.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param name of the global variable
  * \return pointer to the Amap* contained in the user data
  */
@@ -458,7 +455,7 @@ ll_get_global_FPixa(const char *_fun, lua_State *L, const char *name)
 /**
  * \brief Optionally expect a FPixa* at index (%arg) on the Lua stack.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the FPixa* contained in the user data
  */
@@ -473,7 +470,7 @@ ll_opt_FPixa(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push FPixa* to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param cd pointer to the L_FPixa
  * \return 1 FPixa* on the Lua stack
  */
@@ -487,7 +484,7 @@ ll_push_FPixa(const char *_fun, lua_State *L, FPixa *cd)
 
 /**
  * \brief Create and push a new FPixa*.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 FPixa* on the Lua stack
  */
 int
@@ -509,7 +506,7 @@ ll_new_FPixa(lua_State *L)
 
 /**
  * \brief Register the FPixa methods and functions in the FPixa meta table.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 table on the Lua stack
  */
 int

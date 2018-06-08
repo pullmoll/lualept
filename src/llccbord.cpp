@@ -46,7 +46,7 @@
 
 /**
  * \brief toString.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 string on the Lua stack
  */
 static int
@@ -91,21 +91,18 @@ toString(lua_State* L)
 /**
  * \brief Destroy a CCBord* (%ccbord).
  *
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 for nothing on the Lua stack
  */
 static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    CCBord **pccb = ll_check_udata<CCBord>(_fun, L, 1, TNAME);
-    CCBord *ccb = *pccb;
-    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p\n", _fun,
+    CCBord *ccb = ll_take_udata<CCBord>(_fun, L, 1, TNAME);
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p\n", _fun,
         TNAME,
-        "pccb", reinterpret_cast<void *>(pccb),
         "ccb", reinterpret_cast<void *>(ccb));
     ccbDestroy(&ccb);
-    *pccb = nullptr;
     return 0;
 }
 
@@ -114,7 +111,7 @@ Destroy(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a Pix* (pixs).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 CCBord* on the Lua stack
  */
 static int
@@ -129,7 +126,7 @@ Create(lua_State *L)
 /**
  * \brief Check Lua stack at index (%arg) for udata of class CCBord*.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the CCBord* contained in the user data
  */
@@ -142,7 +139,7 @@ ll_check_CCBord(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Check Lua stack at index %arg for udata of class CCBord* and take it.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the CCBord* contained in the user data
  */
@@ -162,7 +159,7 @@ ll_take_CCBord(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Take a CCBord* from a global variable %name.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param name of the global variable
  * \return pointer to the Amap* contained in the user data
  */
@@ -177,7 +174,7 @@ ll_get_global_CCBord(const char *_fun, lua_State *L, const char *name)
 /**
  * \brief Optionally expect a CCBord* at index (%arg) on the Lua stack.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the CCBord* contained in the user data
  */
@@ -192,7 +189,7 @@ ll_opt_CCBord(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push CCBord* to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param cd pointer to the L_CCBord
  * \return 1 CCBord* on the Lua stack
  */
@@ -206,7 +203,7 @@ ll_push_CCBord(const char *_fun, lua_State *L, CCBord *cd)
 
 /**
  * \brief Create and push a new CCBord*.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 CCBord* on the Lua stack
  */
 int
@@ -237,7 +234,7 @@ ll_new_CCBord(lua_State *L)
 
 /**
  * \brief Register the CCBord methods and functions in the CCBord meta table.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 table on the Lua stack
  */
 int

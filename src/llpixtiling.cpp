@@ -49,25 +49,18 @@
  * <pre>
  * Arg #1 is expected to be a l_int32 (freeflag).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 void on the Lua stack
  */
 static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    PixTiling **ppt = ll_check_udata<PixTiling>(_fun, L, 1, TNAME);
-    PixTiling *pt = *ppt;
-    l_int32 nx, ny;
-    pixTilingGetCount(pt, &nx, &ny);
-    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d, %s = %d\n", _fun,
+    PixTiling *pt = ll_take_udata<PixTiling>(_fun, L, 1, TNAME);
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p\n", _fun,
         TNAME,
-        "ppt", reinterpret_cast<void *>(ppt),
-        "pt", reinterpret_cast<void *>(pt),
-        "nx", nx,
-        "ny", ny);
+        "pt", reinterpret_cast<void *>(pt));
     pixTilingDestroy(&pt);
-    *ppt = nullptr;
     return 0;
 }
 
@@ -76,7 +69,7 @@ Destroy(lua_State *L)
  * <pre>
  * Arg #1 (i.e. stackf) is expected to be a PixTiling* (lstack).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -117,7 +110,7 @@ GetCount(lua_State *L)
  *      (4) The overlap must not be larger than the width or height of
  *          the leftmost or topmost tile(s).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 PixTiling * on the Lua stack
  */
 static int
@@ -138,7 +131,7 @@ Create(lua_State *L)
 /**
  * \brief Check Lua stack at index (%arg) for udata of class PixTiling*.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the PixTiling* contained in the user data
  */
@@ -151,7 +144,7 @@ ll_check_PixTiling(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Check Lua stack at index %arg for udata of class PixTiling* and take it.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the PixTiling* contained in the user data
  */
@@ -171,7 +164,7 @@ ll_take_PixTiling(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Take a PixTiling* from a global variable %name.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param name of the global variable
  * \return pointer to the Amap* contained in the user data
  */
@@ -186,7 +179,7 @@ ll_get_global_PixTiling(const char *_fun, lua_State *L, const char *name)
 /**
  * \brief Optionally expect a PixTiling* at index (%arg) on the Lua stack.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the PixTiling* contained in the user data
  */
@@ -200,7 +193,7 @@ ll_opt_PixTiling(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push PixTiling* to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param cd pointer to the L_PixTiling
  * \return 1 PixTiling* on the Lua stack
  */
@@ -218,7 +211,7 @@ ll_push_PixTiling(const char *_fun, lua_State *L, PixTiling *cd)
  * Arg #1 is expected to be a string (dir).
  * Arg #2 is expected to be a l_int32 (fontsize).
  *
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 PixTiling* on the Lua stack
  */
 int
@@ -241,7 +234,7 @@ ll_new_PixTiling(lua_State *L)
 
 /**
  * \brief Register the PixTiling methods and functions in the PixTiling meta table.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 table on the Lua stack
  */
 int

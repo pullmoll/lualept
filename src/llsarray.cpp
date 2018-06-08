@@ -53,27 +53,24 @@
  *      (1) Decrements the ref count and, if 0, destroys the sarray.
  *      (2) Always nulls the input ptr.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 on the Lua stack
  */
 static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    Sarray **psa = ll_check_udata<Sarray>(_fun, L, 1, TNAME);
-    Sarray *sa = *psa;
-    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p\n", _fun,
+    Sarray *sa = ll_take_udata<Sarray>(_fun, L, 1, TNAME);
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p\n", _fun,
         TNAME,
-        "psa", reinterpret_cast<void *>(psa),
         "sa", reinterpret_cast<void *>(sa));
     sarrayDestroy(&sa);
-    *psa = nullptr;
     return 0;
 }
 
 /**
  * \brief Printable string for a Sarray*.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 string on the Lua stack
  */
 static int
@@ -104,7 +101,7 @@ toString(lua_State* L)
  * <pre>
  * Arg #1 is expected to be a l_int32 (n).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Sarray* on the Lua stack
  */
 static int
@@ -127,7 +124,7 @@ Create(lua_State *L)
  *      (1) See usage comments at the top of this file.  L_INSERT is
  *          equivalent to L_NOCOPY.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 on the Lua stack
  */
 static int
@@ -148,7 +145,7 @@ AddString(lua_State *L)
  * Arg #2 is expected to be a string (filename).
  *
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 on the Lua stack
  */
 static int
@@ -174,7 +171,7 @@ Append(lua_State *L)
  *      (2) The [start ... end] range is truncated if necessary.
  *      (3) Use end == -1 to append to the end of sa2.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 on the Lua stack
  */
 static int
@@ -194,7 +191,7 @@ AppendRange(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Sarray* (sa).
  * Arg #2 is expected to be a l_int32 (delta).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 on the Lua stack
  */
 static int
@@ -212,7 +209,7 @@ ChangeRefcount(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Sarray* (sa).
  *
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 on the Lua stack
  */
 static int
@@ -229,7 +226,7 @@ Clear(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Sarray* (sa).
  *
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -249,7 +246,7 @@ Clone(lua_State *L)
  * Arg #3 is expected to be a l_float32 (ypts).
  * Arg #4 is expected to be a const char* (fileout).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 on the Lua stack
  */
 static int
@@ -271,7 +268,7 @@ ConvertFilesFittedToPS(lua_State *L)
  * Arg #2 is expected to be a l_int32 (res).
  * Arg #3 is expected to be a const char* (fileout).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 on the Lua stack
  */
 static int
@@ -292,7 +289,7 @@ ConvertFilesToPS(lua_State *L)
  * Arg #2 is expected to be a l_int32 (linesize).
  *
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -311,7 +308,7 @@ ConvertWordsToLines(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Sarray* (sa).
  *
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -330,7 +327,7 @@ Copy(lua_State *L)
  * Arg #2 is expected to be a string (initstr).
  *
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -356,7 +353,7 @@ CreateInitialized(lua_State *L)
  *          in a new sarray.
  *      (2) The newline characters are removed from each substring.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -378,7 +375,7 @@ CreateLinesFromString(lua_State *L)
  *      (1) This finds the number of word substrings, creates an sarray
  *          of this size, and puts copies of each substring into the sarray.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -409,7 +406,7 @@ CreateWordsFromString(lua_State *L)
  *          again to the bucket, we traverse the bucket (dna), using the
  *          index into sa to check if %str has been found before.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -432,7 +429,7 @@ FindStringByHash(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a l_int32 (n).
  *
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -449,7 +446,7 @@ GenerateIntegers(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sarray* (sa).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 3 on the Lua stack
  */
 static int
@@ -466,7 +463,7 @@ TableArray(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Sarray* (sa).
  *
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 on the Lua stack
  */
 static int
@@ -483,7 +480,7 @@ GetCount(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sarray* (sa).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 on the Lua stack
  */
 static int
@@ -506,7 +503,7 @@ GetRefcount(lua_State *L)
  *      (2) To get a pointer to the string itself, use L_NOCOPY.
  *          To get a copy of the string, use L_COPY.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -535,7 +532,7 @@ GetString(lua_State *L)
  *          sure only one instance of each string is put into the output sarray.
  *          This is O(mlogn), {m,n} = sizes of {smaller,larger} input arrays.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -558,7 +555,7 @@ IntersectionByAset(lua_State *L)
  *      (1) This is faster than sarrayIntersectionByAset(), because the
  *          bucket lookup is O(n).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -580,7 +577,7 @@ IntersectionByHash(lua_State *L)
  * Leptonica's Notes:
  *      (1) Copies of the strings in sarray2 are added to sarray1.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 on the Lua stack
  */
 static int
@@ -608,7 +605,7 @@ Join(lua_State *L)
  *          is used for the keystring in matching.  This allows the
  *          key and val strings to have white space (e.g., multiple words).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 on the Lua stack
  */
 static int
@@ -637,7 +634,7 @@ LookupCSKV(lua_State *L)
  *          are being sequenced in parallel, and it is necessary to
  *          find a valid string at each index.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 on the Lua stack
  */
 static int
@@ -680,7 +677,7 @@ PadToSameSize(lua_State *L)
  *                    "--", 0))
  *                 fprintf(stderr, "start = %d, end = %d\n", actstart, end);
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 3 on the Lua stack
  */
 static int
@@ -707,7 +704,7 @@ ParseRange(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a const char* (filename).
  *
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -726,7 +723,7 @@ Read(lua_State *L)
  * Arg #2 is expected to be a size_t (size).
  *
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -752,7 +749,7 @@ ReadMem(lua_State *L)
  *          the entire string, as determined by its size, we are
  *          not affected by any number of embedded newlines.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -777,7 +774,7 @@ ReadStream(lua_State *L)
  *          built, first do a find; if not found, add the key to the
  *          set and add the string to the output sarray.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -806,7 +803,7 @@ RemoveDupsByAset(lua_State *L)
  *          bucket lookup is O(n), although there is a double-loop
  *          lookup within the dna in each bucket.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 2 on the Lua stack
  */
 static int
@@ -830,7 +827,7 @@ RemoveDupsByHash(lua_State *L)
  * Arg #2 is expected to be a l_int32 (index).
  *
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -858,7 +855,7 @@ RemoveString(lua_State *L)
  *          never any holes (null ptrs) in the ptr array up to the
  *          current count.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 on the Lua stack
  */
 static int
@@ -885,7 +882,7 @@ ReplaceString(lua_State *L)
  *          in the index set [first ... last].  Use %last == 0 to get all
  *          strings from %first to the last string in the sarray.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -911,7 +908,7 @@ SelectByRange(lua_State *L)
  *          a match to the substring anywhere within each filename.
  *      (2) If substr == NULL, returns a copy of the sarray.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -936,7 +933,7 @@ SelectBySubstring(lua_State *L)
  *      (2) Shell sort, modified from K&R, 2nd edition, p.62.
  *          Slow but simple O(n logn) sort.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -957,7 +954,7 @@ Sort(lua_State *L)
  * Arg #2 is expected to be a Numa* (naindex).
  *
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -977,7 +974,7 @@ SortByIndex(lua_State *L)
  * Arg #2 is expected to be a const char* (str).
  * Arg #3 is expected to be a const char* (separators).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 on the Lua stack
  */
 static int
@@ -1007,7 +1004,7 @@ SplitString(lua_State *L)
  *                     strcat(dest, sarrayGetString(sa, i, L_NOCOPY));
  *          Do you see why?
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -1038,7 +1035,7 @@ ToString(lua_State *L)
  *      (3) If the sarray is empty, this returns a string with just
  *          the character corresponding to %addnlflag.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -1069,7 +1066,7 @@ ToStringRange(lua_State *L)
  *          a find; if not found, add the key to the set and add the string
  *          to the output sarray.  This is O(nlogn).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -1089,7 +1086,7 @@ UnionByAset(lua_State *L)
  * Arg #2 is expected to be a Sarray* (sa).
  *
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 on the Lua stack
  */
 static int
@@ -1110,7 +1107,7 @@ Write(lua_State *L)
  * Leptonica's Notes:
  *      (1) Serializes a sarray in memory and puts the result in a buffer.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 lstring on the Lua stack
  */
 static int
@@ -1136,7 +1133,7 @@ WriteMem(lua_State *L)
  *      (1) This appends a '\n' to each string, which is stripped
  *          off by sarrayReadStream().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 on the Lua stack
  */
 static int
@@ -1152,7 +1149,7 @@ WriteStream(lua_State *L)
 /**
  * \brief Check Lua stack at index %arg for udata of class Sarray*.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Sarray* contained in the user data
  */
@@ -1165,7 +1162,7 @@ ll_check_Sarray(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Check Lua stack at index %arg for udata of class Sarray* and take it.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Sarray* contained in the user data
  */
@@ -1185,7 +1182,7 @@ ll_take_Sarray(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Take a Sarray* from a global variable %name.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param name of the global variable
  * \return pointer to the Amap* contained in the user data
  */
@@ -1200,7 +1197,7 @@ ll_get_global_Sarray(const char *_fun, lua_State *L, const char *name)
 /**
  * \brief Optionally expect a LL_DLLIST at index %arg on the Lua stack.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Sarray* contained in the user data
  */
@@ -1215,7 +1212,7 @@ ll_opt_Sarray(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push Sarray user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param sa pointer to the Sarray
  * \return 1 Sarray* on the Lua stack
  */
@@ -1229,7 +1226,7 @@ ll_push_Sarray(const char *_fun, lua_State *L, Sarray *sa)
 
 /**
  * \brief Create and push a new Sarray*.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Sarray* on the Lua stack
  */
 int
@@ -1268,7 +1265,7 @@ ll_new_Sarray(lua_State *L)
 
 /**
  * \brief Register the BMF methods and functions in the TNAME meta table.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 table on the Lua stack
  */
 int

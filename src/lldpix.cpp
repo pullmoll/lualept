@@ -48,28 +48,25 @@
 /**
  * \brief Destroy a DPix*.
  *
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 for nothing on the Lua stack
  */
 static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    DPix **pdpix = ll_check_udata<DPix>(_fun, L, 1, TNAME);
-    DPix *dpix = *pdpix;
-    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p, %s = %d\n", _fun,
+    DPix *dpix = ll_take_udata<DPix>(_fun, L, 1, TNAME);
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %d\n", _fun,
         TNAME,
-        "pboxa", reinterpret_cast<void *>(pdpix),
-        "boxa", reinterpret_cast<void *>(dpix),
+        "dpix", reinterpret_cast<void *>(dpix),
         "refcount", dpixGetRefcount(dpix));
     dpixDestroy(&dpix);
-    *pdpix = nullptr;
     return 0;
 }
 
 /**
  * \brief Printable string for a DPix*.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 string on the Lua stack
  */
 static int
@@ -77,32 +74,34 @@ toString(lua_State* L)
 {
     LL_FUNC("toString");
     char str[256];
-    DPix *pix = ll_check_DPix(_fun, L, 1);
+    DPix *dpix = ll_check_DPix(_fun, L, 1);
     luaL_Buffer B;
     void *data;
     l_int32 w, h, wpl, refcnt, xres, yres;
     long size;
 
     luaL_buffinit(L, &B);
-    if (!pix) {
+    if (!dpix) {
         luaL_addstring(&B, "nil");
+    } else if (dpixGetDimensions(dpix, &w, &h)) {
+            luaL_addstring(&B, "invalid");
     } else {
-        if (dpixGetDimensions(pix, &w, &h)) {
-            snprintf(str, sizeof(str), "invalid");
-        } else {
-            wpl = dpixGetWpl(pix);
-            size = static_cast<long>(sizeof(l_float64)) * wpl * h;
-            data = dpixGetData(pix);
-            refcnt = dpixGetRefcount(pix);
-            dpixGetResolution(pix, &xres, &yres);
-            snprintf(str, sizeof(str),
-                     TNAME ": %p\n"
-                     "    width = %d, height = %d, wpl = %d\n"
-                     "    data = %p, size = %#" PRIx64 "\n"
-                     "    xres = %d, yres = %d, refcount = %d",
-                     reinterpret_cast<void *>(pix),
-                     w, h, wpl, data, size, xres, yres, refcnt);
-        }
+        wpl = dpixGetWpl(dpix);
+        size = static_cast<long>(sizeof(l_float64)) * wpl * h;
+        data = dpixGetData(dpix);
+        refcnt = dpixGetRefcount(dpix);
+        dpixGetResolution(dpix, &xres, &yres);
+
+        snprintf(str, sizeof(str), TNAME ": %p\n", reinterpret_cast<void *>(dpix));
+        luaL_addstring(&B, str);
+
+        snprintf(str, sizeof(str), "    width = %d, height = %d, wpl = %d\n", w, h, wpl);
+        luaL_addstring(&B, str);
+
+        snprintf(str, sizeof(str), "    data = %p, size = %#" PRIx64 "\n", data, size);
+        luaL_addstring(&B, str);
+
+        snprintf(str, sizeof(str), "    xres = %d, yres = %d, refcount = %d", xres, yres, refcnt);
         luaL_addstring(&B, str);
     }
     luaL_pushresult(&B);
@@ -122,7 +121,7 @@ toString(lua_State* L)
  *          and also to add a constant to each pixel.  Multiplication
  *          is done first.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -141,7 +140,7 @@ AddMultConstant(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a DPix* (dpix).
  * Arg #2 is expected to be a l_int32 (delta).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -161,7 +160,7 @@ ChangeRefcount(lua_State *L)
  * Leptonica's Notes:
  *      (1) See pixClone() for definition and usage.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 DPix* on the Lua stack
  */
 static int
@@ -178,7 +177,7 @@ Clone(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DPix* (dpix).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 FPix* on the Lua stack
  */
 static int
@@ -210,7 +209,7 @@ ConvertToFPix(lua_State *L)
  *          the maximum value represented at the outdepth of 8, 16
  *          or 32 bits.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -251,7 +250,7 @@ ConvertToPix(lua_State *L)
  *      (4) This operation, like all others that may involve a pre-existing
  *          dpixd, will side-effect any existing clones of dpixd.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -270,7 +269,7 @@ Copy(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a DPix* (dpixd).
  * Arg #2 is expected to be a DPix* (dpixs).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -293,7 +292,7 @@ CopyResolution(lua_State *L)
  *          allocated and initialized to 0.
  *      (2) The number of pixels must be less than 2^28.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 DPix* on the Lua stack
  */
 static int
@@ -316,7 +315,7 @@ Create(lua_State *L)
  *          data array allocated and initialized to 0.
  *      (2) Copies the resolution.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -344,7 +343,7 @@ CreateTemplate(lua_State *L)
  *          a new dpix is made.  If not in-place, caller must catch
  *          the returned pointer.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -362,7 +361,7 @@ EndianByteSwap(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DPix* (dpix).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 2D table array of l_float64 on the Lua stack
  */
 static int
@@ -382,7 +381,7 @@ GetData(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DPix* (dpix).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 2 l_int32 (%w, %h) on the Lua stack
  */
 static int
@@ -404,7 +403,7 @@ GetDimensions(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DPix* (dpix).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 3 value (%maxval) and coordinates (%xmaxloc, %ymaxloc) on the Lua stack
  */
 static int
@@ -428,7 +427,7 @@ GetMax(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DPix* (dpix).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 3 value (%minval) and coordinates (%xminloc, %yminloc) on the Lua stack
  */
 static int
@@ -454,7 +453,7 @@ GetMin(lua_State *L)
  * Arg #2 is expected to be a l_int32 (x).
  * Arg #3 is expected to be a l_int32 (y).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_float64 on the Lua stack
  */
 static int
@@ -475,7 +474,7 @@ GetPixel(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DPix* (dpix).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 on the Lua stack
  */
 static int
@@ -491,7 +490,7 @@ GetRefcount(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DPix* (dpix).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 2 on the Lua stack
  */
 static int
@@ -513,7 +512,7 @@ GetResolution(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DPix* (dpix).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 on the Lua stack
  */
 static int
@@ -544,7 +543,7 @@ GetWpl(lua_State *L)
  *          * dpixd != dpixs1: (src1 + src2) --> input dpixd
  *      (4) dpixs2 must be different from both dpixd and dpixs1.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 DPix* on the Lua stack
  */
 static int
@@ -565,7 +564,7 @@ LinearCombination(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string (filename).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -582,7 +581,7 @@ Read(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a lstring (str).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -601,7 +600,7 @@ ReadMem(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a luaL_Stream* (stream).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -619,7 +618,7 @@ ReadStream(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a DPix* (dpixd).
  * Arg #2 is expected to be a DPix* (dpixs).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 on the Lua stack
  */
 static int
@@ -649,7 +648,7 @@ ResizeImageData(lua_State *L)
  *          throwing out all the interpolated pixels, we regain the
  *          original low resolution dpix.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -668,7 +667,7 @@ ScaleByInteger(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a DPix* (dpix).
  * Arg #2 is expected to be a l_float64 (inval).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -685,7 +684,7 @@ SetAllArbitrary(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DPix* (dpix).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 2D table array of l_float64 on the Lua stack
  */
 static int
@@ -715,7 +714,7 @@ SetData(lua_State *L)
  * Arg #2 is expected to be a l_int32 (w).
  * Arg #3 is expected to be a l_int32 (h).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -736,7 +735,7 @@ SetDimensions(lua_State *L)
  * Arg #3 is expected to be a l_int32 (y).
  * Arg #4 is expected to be a l_float64 (val).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -757,7 +756,7 @@ SetPixel(lua_State *L)
  * Arg #2 is expected to be a l_int32 (xres).
  * Arg #3 is expected to be a l_int32 (yres).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -776,7 +775,7 @@ SetResolution(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a DPix* (dpix).
  * Arg #2 is expected to be a l_int32 (wpl).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -794,7 +793,7 @@ SetWpl(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a DPix* (dpix).
  * Arg #2 is expected to be a string (filename).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -814,7 +813,7 @@ Write(lua_State *L)
  * Leptonica's Notes:
  *      (1) Serializes a dpix in memory and puts the result in a buffer.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 2 on the Lua stack
  */
 static int
@@ -836,7 +835,7 @@ WriteMem(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a DPix* (dpix).
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -851,7 +850,7 @@ WriteStream(lua_State *L)
 /**
  * \brief Check Lua stack at index (%arg) for udata of class DPix*.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the DPix* contained in the user data
  */
@@ -864,7 +863,7 @@ ll_check_DPix(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Check Lua stack at index %arg for udata of class DPix* and take it.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the DPix* contained in the user data
  */
@@ -884,7 +883,7 @@ ll_take_DPix(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Take a DPix* from a global variable %name.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param name of the global variable
  * \return pointer to the Amap* contained in the user data
  */
@@ -899,7 +898,7 @@ ll_get_global_DPix(const char *_fun, lua_State *L, const char *name)
 /**
  * \brief Optionally expect a DPix* at index (%arg) on the Lua stack.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the DPix* contained in the user data
  */
@@ -914,7 +913,7 @@ ll_opt_DPix(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push DPix* to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param cd pointer to the L_DPix
  * \return 1 DPix* on the Lua stack
  */
@@ -928,7 +927,7 @@ ll_push_DPix(const char *_fun, lua_State *L, DPix *cd)
 
 /**
  * \brief Create and push a new DPix*.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 DPix* on the Lua stack
  */
 int
@@ -990,7 +989,7 @@ ll_new_DPix(lua_State *L)
 
 /**
  * \brief Register the DPix methods and functions in the DPix meta table.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 table on the Lua stack
  */
 int

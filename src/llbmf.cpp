@@ -47,21 +47,18 @@
 /**
  * \brief Destroy a Bmf*.
  *
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 for nothing on the Lua stack
  */
 static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    L_Bmf **pbmf = ll_check_udata<L_Bmf>(_fun, L, 1, TNAME);
-    L_Bmf *bmf = *pbmf;
-    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p\n", _fun,
+    L_Bmf *bmf = ll_take_udata<L_Bmf>(_fun, L, 1, TNAME);
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p\n", _fun,
         TNAME,
-        "pbmf", reinterpret_cast<void *>(pbmf),
         "bmf", reinterpret_cast<void *>(bmf));
     bmfDestroy(&bmf);
-    *pbmf = nullptr;
     return 0;
 }
 
@@ -71,7 +68,7 @@ Destroy(lua_State *L)
  * Arg #1 is expected to be a string (dir).
  * Arg #2 is expected to be a l_int32 (fontsize).
  *
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Bmf* on the Lua stack
  */
 static int
@@ -90,7 +87,7 @@ Create(lua_State *L)
  * Arg #1 is expected to be a Bmf* (bmf).
  * Arg #2 is expected to be a character (chr).
  *
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -114,7 +111,7 @@ GetBaseline(lua_State *L)
  * Arg #3 is expected to be a l_int32 (maxw).
  * Arg #4 is an optional l_int32 (firstident).
  *
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer (h) plus a table of strings on the Lua stack
  */
 static int
@@ -139,7 +136,7 @@ GetLineStrings(lua_State *L)
  * Arg #1 is expected to be a Bmf* (bmf).
  * Arg #2 is expected to be a character (chr).
  *
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -158,7 +155,7 @@ GetPix(lua_State *L)
  * Arg #1 is expected to be a Bmf* (bmf).
  * Arg #2 is expected to be a string (str).
  *
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -180,7 +177,7 @@ GetStringWidth(lua_State *L)
  * Arg #1 is expected to be a Bmf* (bmf).
  * Arg #2 is expected to be a character (chr).
  *
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 integer on the Lua stack
  */
 static int
@@ -199,7 +196,7 @@ GetWidth(lua_State *L)
 /**
  * \brief Check Lua stack at index %arg for udata of class Bmf*.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Bmf* contained in the user data
  */
@@ -212,7 +209,7 @@ ll_check_Bmf(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Check Lua stack at index %arg for udata of class Bmf* and take it.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Bmf* contained in the user data
  */
@@ -232,7 +229,7 @@ ll_take_Bmf(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Take a Bmf* from a global variable %name.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param name of the global variable
  * \return pointer to the Amap* contained in the user data
  */
@@ -247,7 +244,7 @@ ll_get_global_Bmf(const char *_fun, lua_State *L, const char *name)
 /**
  * \brief Optionally expect a LL_DLLIST at index %arg on the Lua stack.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Bmf* contained in the user data
  */
@@ -261,7 +258,7 @@ ll_opt_Bmf(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push BMF user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param bmf pointer to the L_Bmf
  * \return 1 Bmf* on the Lua stack
  */
@@ -274,7 +271,7 @@ ll_push_Bmf(const char *_fun, lua_State *L, L_Bmf *bmf)
 }
 /**
  * \brief Create and push a new Bmf*.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Bmf* on the Lua stack
  */
 int
@@ -295,7 +292,7 @@ ll_new_Bmf(lua_State *L)
 }
 /**
  * \brief Register the BMF methods and functions in the TNAME meta table.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 table on the Lua stack
  */
 int

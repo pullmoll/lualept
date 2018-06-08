@@ -53,50 +53,47 @@
  * Leptonica's Notes:
  *      (1) Destroys the byte array in the dnahash and then the dnahash;
  *          then nulls the contents of the input ptr.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 on the Lua stack
  */
 static int
 Destroy(lua_State *L)
 {
-        LL_FUNC("Destroy");
-        DnaHash **pbb = ll_check_udata<DnaHash>(_fun, L, 1, TNAME);
-        DnaHash *bb = *pbb;
-        DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p\n", _fun,
-            TNAME,
-            "pbb", reinterpret_cast<void *>(pbb),
-            "bb", reinterpret_cast<void *>(bb));
-        l_dnaHashDestroy(&bb);
-        *pbb = nullptr;
-        return 0;
+    LL_FUNC("Destroy");
+    DnaHash *bb = ll_take_udata<DnaHash>(_fun, L, 1, TNAME);
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p\n", _fun,
+        TNAME,
+        "bb", reinterpret_cast<void *>(bb));
+    l_dnaHashDestroy(&bb);
+    return 0;
 }
 
 /**
  * \brief Printable string for a DnaHash*.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 string on the Lua stack
  */
 static int
 toString(lua_State* L)
 {
-        LL_FUNC("toString");
-        char str[256];
-        DnaHash *dh = ll_check_DnaHash(_fun, L, 1);
-        luaL_Buffer B;
+    LL_FUNC("toString");
+    char str[256];
+    DnaHash *dh = ll_check_DnaHash(_fun, L, 1);
+    luaL_Buffer B;
 
-        luaL_buffinit(L, &B);
-        if (!dh) {
-                luaL_addstring(&B, "nil");
-        } else {
-                snprintf(str, sizeof(str), TNAME ": %p\n", reinterpret_cast<void *>(dh));
-                luaL_addstring(&B, str);
-                snprintf(str, sizeof(str), "    nbuckets = 0x%x, initsize = 0x%x, dna = %p",
-                         dh->nbuckets, dh->initsize,
-                         reinterpret_cast<void *>(dh->dna));
-                luaL_addstring(&B, str);
-        }
-        luaL_pushresult(&B);
-        return 1;
+    luaL_buffinit(L, &B);
+    if (!dh) {
+        luaL_addstring(&B, "nil");
+    } else {
+        snprintf(str, sizeof(str), TNAME ": %p\n", reinterpret_cast<void *>(dh));
+        luaL_addstring(&B, str);
+        snprintf(str, sizeof(str), "    nbuckets = 0x%x, initsize = 0x%x, dna = %p",
+                 dh->nbuckets, dh->initsize,
+                 reinterpret_cast<void *>(dh->dna));
+        luaL_addstring(&B, str);
+    }
+    luaL_pushresult(&B);
+    return 1;
 }
 
 
@@ -112,36 +109,36 @@ toString(lua_State* L)
  *          the given size.  If a buffer address is given,
  *          it then reads the number of bytes into the byte array.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 DnaHash* on the Lua stack
  */
 static int
 Create(lua_State *L)
 {
-        LL_FUNC("Create");
-        l_int32 nbuckets = ll_opt_l_int32(_fun, L, 5);
-        l_int32 initsize = ll_opt_l_int32(_fun, L, 10);
-        DnaHash *result = l_dnaHashCreate(nbuckets, initsize);
-        return ll_push_DnaHash(_fun, L, result);
+    LL_FUNC("Create");
+    l_int32 nbuckets = ll_opt_l_int32(_fun, L, 5);
+    l_int32 initsize = ll_opt_l_int32(_fun, L, 10);
+    DnaHash *result = l_dnaHashCreate(nbuckets, initsize);
+    return ll_push_DnaHash(_fun, L, result);
 }
 
 /**
  * \brief Check Lua stack at index %arg for udata of class DnaHash*.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the DnaHash* contained in the user data
  */
 DnaHash *
 ll_check_DnaHash(const char *_fun, lua_State *L, int arg)
 {
-        return *ll_check_udata<DnaHash>(_fun, L, arg, TNAME);
+    return *ll_check_udata<DnaHash>(_fun, L, arg, TNAME);
 }
 
 /**
  * \brief Check Lua stack at index %arg for udata of class DnaHash* and take it.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the DnaHash* contained in the user data
  */
@@ -161,7 +158,7 @@ ll_take_DnaHash(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Take a DnaHash* from a global variable %name.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param name of the global variable
  * \return pointer to the Amap* contained in the user data
  */
@@ -176,85 +173,85 @@ ll_get_global_DnaHash(const char *_fun, lua_State *L, const char *name)
 /**
  * \brief Optionally expect a LL_DLLIST at index %arg on the Lua stack.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the DnaHash* contained in the user data
  */
 DnaHash *
 ll_opt_DnaHash(const char *_fun, lua_State *L, int arg)
 {
-        if (!ll_isudata(_fun, L, arg, TNAME))
-                return nullptr;
-        return ll_check_DnaHash(_fun, L, arg);
+    if (!ll_isudata(_fun, L, arg, TNAME))
+        return nullptr;
+    return ll_check_DnaHash(_fun, L, arg);
 }
 
 /**
  * \brief Push DnaHash user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param dh pointer to the DnaHash
  * \return 1 DnaHash* on the Lua stack
  */
 int
 ll_push_DnaHash(const char *_fun, lua_State *L, DnaHash *dh)
 {
-        if (!dh)
-                return ll_push_nil(L);
-        return ll_push_udata(_fun, L, TNAME, dh);
+    if (!dh)
+        return ll_push_nil(L);
+    return ll_push_udata(_fun, L, TNAME, dh);
 }
 
 /**
  * \brief Create and push a new DnaHash*.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 DnaHash* on the Lua stack
  */
 int
 ll_new_DnaHash(lua_State *L)
 {
-        FUNC("ll_new_DnaHash");
-        DnaHash *dh = nullptr;
-        l_int32 nbuckets = 5;
-        l_int32 initsize = 10;
+    FUNC("ll_new_DnaHash");
+    DnaHash *dh = nullptr;
+    l_int32 nbuckets = 5;
+    l_int32 initsize = 10;
 
-        if (ll_isinteger(_fun, L, 1)) {
-                nbuckets = ll_opt_l_int32(_fun, L, nbuckets);
-                initsize = ll_opt_l_int32(_fun, L, initsize);
-                DBG(LOG_NEW_PARAM, "%s: create for %s = %d, %s = %d\n", _fun,
-                        "nbuckets", nbuckets,
-                        "initsize", initsize);
-                dh = l_dnaHashCreate(nbuckets, initsize);
-        }
+    if (ll_isinteger(_fun, L, 1)) {
+        nbuckets = ll_opt_l_int32(_fun, L, nbuckets);
+        initsize = ll_opt_l_int32(_fun, L, initsize);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d, %s = %d\n", _fun,
+            "nbuckets", nbuckets,
+            "initsize", initsize);
+        dh = l_dnaHashCreate(nbuckets, initsize);
+    }
 
-        if (!dh) {
-                DBG(LOG_NEW_PARAM, "%s: create for %s = %d, %s = %d\n", _fun,
-                        "nbuckets", nbuckets,
-                        "initsize", initsize);
-                dh = l_dnaHashCreate(nbuckets, initsize);
-        }
+    if (!dh) {
+        DBG(LOG_NEW_PARAM, "%s: create for %s = %d, %s = %d\n", _fun,
+            "nbuckets", nbuckets,
+            "initsize", initsize);
+        dh = l_dnaHashCreate(nbuckets, initsize);
+    }
 
-        DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
-            TNAME, reinterpret_cast<void *>(dh));
-        return ll_push_DnaHash(_fun, L, dh);
+    DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
+        TNAME, reinterpret_cast<void *>(dh));
+    return ll_push_DnaHash(_fun, L, dh);
 }
 
 /**
  * \brief Register the DnaHash methods and functions in the TNAME meta table.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 table on the Lua stack
  */
 int
 ll_open_DnaHash(lua_State *L)
 {
-        static const luaL_Reg methods[] = {
-                {"__gc",                Destroy},
-                {"__new",               ll_new_DnaHash},
-                {"__tostring",          toString},
-                {"Create",              Create},
-                {"Destroy",             Destroy},
-                LUA_SENTINEL
-        };
-        LO_FUNC(TNAME);
-        ll_set_global_cfunct(_fun, L, TNAME, ll_new_DnaHash);
-        ll_register_class(_fun, L, TNAME, methods);
-        return 1;
+    static const luaL_Reg methods[] = {
+        {"__gc",                Destroy},
+        {"__new",               ll_new_DnaHash},
+        {"__tostring",          toString},
+        {"Create",              Create},
+        {"Destroy",             Destroy},
+        LUA_SENTINEL
+    };
+    LO_FUNC(TNAME);
+    ll_set_global_cfunct(_fun, L, TNAME, ll_new_DnaHash);
+    ll_register_class(_fun, L, TNAME, methods);
+    return 1;
 }

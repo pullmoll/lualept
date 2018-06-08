@@ -339,8 +339,12 @@ end
 -- \param arg argument #
 -- \return string with call to function to retrieve vtype
 --
-function initer(vtype, arg, name)
+function initer(vtype, arg, fname)
 	if vtype:match("%*$") then
+		if fname:match("Destroy") then
+			local ptype = vtype:match("[A-Za-z]+")
+			return "ll_take_udata<" .. ptype .. ">(_fun, L, " .. arg .. ", TNAME)"
+		end
 		return "nullptr"
 	end
 	return "0"
@@ -429,6 +433,7 @@ function result_name(rtype, names)
 				PixColormap	= "cmap",
 				Pta		= "pta",
 				Ptaa		= "ptaa",
+				Rbtree		= "rbt",
 				Sarray		= "sa",
 				Sel		= "sel",
 				Sela		= "sela",
@@ -522,6 +527,7 @@ function parse(fd, str)
 				L_DNAA		= "Dnaa",
 				L_KERNEL	= "Kernel",
 				L_PDF_DATA	= "PdfData",
+				L_RBTREE	= "Rbtree",
 				L_STACK		= "Stack",
 				L_STRCODE	= "StrCode",
 				L_WALLTIMER	= "WallTimer",
@@ -611,7 +617,7 @@ function parse(fd, str)
 			vtype = vtype:sub(1,-2)			-- strip 2nd asterisk
 			name = name:sub(2,-1)			-- strip leading "p" from the name
 			refs[name] = true
-			get = initer(vtype)
+			get = initer(vtype, argi, fname)
 		elseif vtype:match("%*$") and			-- vtype ends with "*" and
 			name:match("^p") and (			-- name starts with a "p" and
 			vtype:match("^l_int.*%*")		-- vtype is a "l_int*"
@@ -623,7 +629,7 @@ function parse(fd, str)
 			vtype = vtype:sub(1,-2)	.. " "		-- strip asterisk and append a space
 			name = name:sub(2,-1)			-- strip leading "p" from the name
 			refs[name] = true
-			get = initer(vtype)
+			get = initer(vtype, argi, fname)
 		else
 			get = getter(vtype, argi, name)
 			argi = argi + 1

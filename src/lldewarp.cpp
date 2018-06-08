@@ -49,27 +49,24 @@
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dewarp* (dew).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 for nothing on the Lua stack
  */
 static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    Dewarp **pdew = ll_check_udata<Dewarp>(_fun, L, 1, TNAME);
-    Dewarp *dew = *pdew;
-    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p\n", _fun,
+    Dewarp *dew = ll_take_udata<Dewarp>(_fun, L, 1, TNAME);
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p\n", _fun,
         TNAME,
-        "pdew", reinterpret_cast<void *>(pdew),
         "dew", reinterpret_cast<void *>(dew));
     dewarpDestroy(&dew);
-    *pdew = nullptr;
     return 0;
 }
 
 /**
  * \brief Printable string for a Dewarp*.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 string on the Lua stack
  */
 static int
@@ -187,7 +184,7 @@ toString(lua_State *L)
  *          and horizontal disparity arrays are both built from ruled lines.
  *          See notes there.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -246,7 +243,7 @@ BuildLineModel(lua_State *L)
  *          disparity array is used to left- and right-align the
  *          longest textlines.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -269,7 +266,7 @@ BuildPageModel(lua_State *L)
  *          the even pages are usually on the left.  Disparity arrays
  *          built for even pages should only be applied to even pages.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Dewarp* on the Lua stack
  */
 static int
@@ -296,7 +293,7 @@ Create(lua_State *L)
  *          the reference page is the closest page with a disparity model
  *          to this page.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Dewarp* on the Lua stack
  */
 static int
@@ -327,7 +324,7 @@ CreateRef(lua_State *L)
  *          so the 'y' value is horizontal distance across the image width.
  *      (5) Debug output goes to /tmp/lept/dewmod/ for collection into a pdf.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -374,7 +371,7 @@ FindHorizDisparity(lua_State *L)
  *          or are fully contained within it.
  *      (6) Debug output goes to /tmp/lept/dewmod/ for collection into a pdf.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -413,7 +410,7 @@ FindHorizSlopeDisparity(lua_State *L)
  *      (5) Pix debug output goes to /tmp/dewvert/ for collection into
  *          a pdf.  Non-pix debug output goes to /tmp.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -438,7 +435,7 @@ FindVertDisparity(lua_State *L)
  *          It doesn't matter because we will fit a quadratic to the
  *          points that we do have.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Ptaa* on the Lua stack
  */
 static int
@@ -461,7 +458,7 @@ GetTextlineCenters(lua_State *L)
  *          It keeps the subsampled disparity array(s), so the full
  *          resolution arrays can be reconstructed.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -499,7 +496,7 @@ Minimize(lua_State *L)
  *              again using (x,y) to determine the extension in the
  *              four directions.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -518,7 +515,7 @@ PopulateFullRes(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string (filename).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Dewarp* on the Lua stack
  */
 static int
@@ -536,7 +533,7 @@ Read(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a const (l_uint8 *data).
  * Arg #2 is expected to be a size_t (size).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Dewarp* on the Lua stack
  */
 static int
@@ -544,9 +541,7 @@ ReadMem(lua_State *L)
 {
     LL_FUNC("ReadMem");
     size_t size;
-    const char *str = ll_check_lstring(_fun, L, 1, &size);
-    /* XXX: deconstify */
-    l_uint8 *data = reinterpret_cast<l_uint8 *>(reinterpret_cast<l_intptr_t>(str));
+    const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &size);
     Dewarp *dew = dewarpReadMem(data, size);
     return ll_push_Dewarp(_fun, L, dew);
 }
@@ -565,7 +560,7 @@ ReadMem(lua_State *L)
  *          that they are (a) the same for each page and (b) the same
  *          as the values used to create the dewarpa.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Dewarp* on the Lua stack
  */
 static int
@@ -585,7 +580,7 @@ ReadStream(lua_State *L)
  * Arg #3 is expected to be a l_float32 (fract).
  * Arg #4 is expected to be a boolean (debugflag).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Ptaa* on the Lua stack
  */
 static int
@@ -606,7 +601,7 @@ RemoveShortLines(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dewarp* (dew).
  * Arg #2 is expected to be a string (filename).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -626,7 +621,7 @@ Write(lua_State *L)
  * Leptonica's Notes:
  *      (1) Serializes a dewarp in memory and puts the result in a buffer.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 l_int32 on the Lua stack
  */
 static int
@@ -654,7 +649,7 @@ WriteMem(lua_State *L)
  *          vertical disparity array, which means that no model has
  *          been built for this page.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -669,7 +664,7 @@ WriteStream(lua_State *L)
 /**
  * \brief Check Lua stack at index %arg for udata of class LL_DEWARP.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Dewarp* contained in the user data
  */
@@ -682,7 +677,7 @@ ll_check_Dewarp(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Check Lua stack at index %arg for udata of class Dewarp* and take it.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Dewarp* contained in the user data
  */
@@ -702,7 +697,7 @@ ll_take_Dewarp(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Take a Dewarp* from a global variable %name.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param name of the global variable
  * \return pointer to the Amap* contained in the user data
  */
@@ -717,7 +712,7 @@ ll_get_global_Dewarp(const char *_fun, lua_State *L, const char *name)
 /**
  * \brief Optionally expect a LL_DEWARP at index %arg on the Lua stack.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Dewarp* contained in the user data
  */
@@ -732,7 +727,7 @@ ll_opt_Dewarp(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push Dewarp* user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param dew pointer to the Dewarp
  * \return 1 Dewarp* on the Lua stack
  */
@@ -746,7 +741,7 @@ ll_push_Dewarp(const char *_fun, lua_State *L, Dewarp *dew)
 
 /**
  * \brief Create and push a new Dewarp*.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Dewarp* on the Lua stack
  */
 int
@@ -809,7 +804,7 @@ ll_new_Dewarp(lua_State *L)
 
 /**
  * \brief Register the Dewarp* methods and functions in the LL_DEWARP meta table.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 table on the Lua stack
  */
 int

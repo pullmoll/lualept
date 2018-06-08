@@ -49,27 +49,24 @@
  * <pre>
  * Arg #1 is expected to be a l_int32 (freeflag).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 0 nothing on the Lua stack
  */
 static int
 Destroy(lua_State *L)
 {
     LL_FUNC("Destroy");
-    Kernel **pkel = ll_check_udata<Kernel>(_fun, L, 1, TNAME);
-    Kernel *kel = *pkel;
-    DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %p\n", _fun,
+    Kernel *kel = ll_take_udata<Kernel>(_fun, L, 1, TNAME);
+    DBG(LOG_DESTROY, "%s: '%s' %s = %p\n", _fun,
         TNAME,
-        "pkel", reinterpret_cast<void *>(pkel),
         "kel", reinterpret_cast<void *>(kel));
     kernelDestroy(&kel);
-    *pkel = nullptr;
     return 0;
 }
 
 /**
  * \brief Printable string for a Pix*.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 string on the Lua stack
  */
 static int
@@ -123,7 +120,7 @@ toString(lua_State* L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Kernel* (kels).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -147,7 +144,7 @@ Copy(lua_State *L)
  *          assigned.
  *      (2) The number of kernel elements must be less than 2^29.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Kernel* on the Lua stack
  */
 static int
@@ -192,7 +189,7 @@ Create(lua_State *L)
  *                    20     50.9  18.4
  * \endcode
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Kernel* on the Lua stack
  */
 static int
@@ -214,7 +211,7 @@ CreateFromFile(lua_State *L)
  * Leptonica's Notes:
  *      (1) The origin must be positive and within the dimensions of the pix.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Kernel* on the Lua stack
  */
 static int
@@ -249,7 +246,7 @@ CreateFromPix(lua_State *L)
  *                  " 70  140   70 "
  *                  " 20   50   20 ";
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Kernel* on the Lua stack
  */
 static int
@@ -286,7 +283,7 @@ CreateFromString(lua_State *L)
  *          the computation time is independent of the size of the
  *          2D content kernel.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Pix* on the Lua stack
  */
 static int
@@ -307,7 +304,7 @@ DisplayInPix(lua_State *L)
  * Arg #2 is expected to be a l_int32 (row).
  * Arg #3 is expected to be a l_int32 (col).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 number on the Lua stack
  */
 static int
@@ -329,7 +326,7 @@ GetElement(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Kernel* (kel).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 2 numbers on the Lua stack
  */
 static int
@@ -351,7 +348,7 @@ GetMinMax(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Kernel* (kel).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 4 integers on the Lua stack
  */
 static int
@@ -377,7 +374,7 @@ GetParameters(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Kernel* (kel).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 number on the Lua stack
  */
 static int
@@ -416,7 +413,7 @@ GetSum(lua_State *L)
  *      (6) Because the kernel is a null sum, it must be invoked without
  *          normalization in pixConvolve().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -448,7 +445,7 @@ MakeDoGKernel(lua_State *L)
  *          cx = width / 2 places the origin at the exact center.
  *      (3) This returns a normalized kernel.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -480,7 +477,7 @@ MakeFlatKernel(lua_State *L)
  *          kernel elements = 1.0), use 1.0 for max (or any number that's
  *          not too small or too large).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -515,7 +512,7 @@ MakeGaussianKernel(lua_State *L)
  *          accurate, when compared to using the full kernel in
  *          makeGaussianKernel().
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 2 on the Lua stack
  */
 static int
@@ -544,7 +541,7 @@ MakeGaussianKernelSep(lua_State *L)
  *      (1) For convolution, the kernel is spatially inverted before
  *          a "correlation" operation is done between the kernel and the image.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Kernel* on the Lua stack
  */
 static int
@@ -567,7 +564,7 @@ Invert(lua_State *L)
  *          try to calculate the normalized kernel.  Instead,
  *          return a copy of the input kernel, with a warning.
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -585,7 +582,7 @@ Normalize(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a string (fname).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -602,7 +599,7 @@ Read(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a luaL_Stream* (stream).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 on the Lua stack
  */
 static int
@@ -622,7 +619,7 @@ ReadStream(lua_State *L)
  * Arg #3 is expected to be a l_int32 (col).
  * Arg #4 is expected to be a l_float32 (val).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -643,7 +640,7 @@ SetElement(lua_State *L)
  * Arg #2 is expected to be a l_int32 (cy).
  * Arg #3 is expected to be a l_int32 (cx).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -662,7 +659,7 @@ SetOrigin(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Kernel* (kel).
  * Arg #2 is expected to be a string (fname).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -680,7 +677,7 @@ Write(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Kernel* (kel).
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * </pre>
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 boolean on the Lua stack
  */
 static int
@@ -695,7 +692,7 @@ WriteStream(lua_State *L)
 /**
  * \brief Check Lua stack at index (%arg) for udata of class Kernel*.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Kernel* contained in the user data
  */
@@ -708,7 +705,7 @@ ll_check_Kernel(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Check Lua stack at index %arg for udata of class Kernel* and take it.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Kernel* contained in the user data
  */
@@ -728,7 +725,7 @@ ll_take_Kernel(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Take a Kernel* from a global variable %name.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param name of the global variable
  * \return pointer to the Amap* contained in the user data
  */
@@ -743,7 +740,7 @@ ll_get_global_Kernel(const char *_fun, lua_State *L, const char *name)
 /**
  * \brief Optionally expect a Kernel* at index (%arg) on the Lua stack.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param arg index where to find the user data (usually 1)
  * \return pointer to the Kernel* contained in the user data
  */
@@ -758,7 +755,7 @@ ll_opt_Kernel(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push Kernel* to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \param cd pointer to the L_Kernel
  * \return 1 Kernel* on the Lua stack
  */
@@ -772,7 +769,7 @@ ll_push_Kernel(const char *_fun, lua_State *L, Kernel *cd)
 
 /**
  * \brief Create and push a new Kernel*.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 Kernel* on the Lua stack
  */
 int
@@ -846,7 +843,7 @@ ll_new_Kernel(lua_State *L)
 
 /**
  * \brief Register the Kernel methods and functions in the Kernel meta table.
- * \param L pointer to the lua_State
+ * \param L Lua state
  * \return 1 table on the Lua stack
  */
 int
