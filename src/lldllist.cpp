@@ -141,7 +141,7 @@ AddToHead(lua_State *L)
 {
     LL_FUNC("AddToHead");
     DLList *head = ll_check_DLList(_fun, L, 1);
-    void *data = reinterpret_cast<void *>(reinterpret_cast<intptr_t>(lua_topointer(L, 2)));
+    void *data = lua_touserdata(L, 2);
     return ll_push_boolean(_fun, L, 0 == listAddToHead(&head, data));
 }
 
@@ -173,7 +173,7 @@ AddToTail(lua_State *L)
     LL_FUNC("AddToTail");
     DLList *head = ll_check_DLList(_fun, L, 1);
     DLList *tail = nullptr;
-    void *data = reinterpret_cast<void *>(reinterpret_cast<intptr_t>(lua_topointer(L, 2)));
+    void *data = lua_touserdata(L, 2);
     ll_push_boolean(_fun, L, 0 == listAddToTail(&head, &tail, data));
     lua_pushlightuserdata(L, tail);
     return 2;
@@ -218,7 +218,7 @@ FindElement(lua_State *L)
 {
     LL_FUNC("FindElement");
     DLList *head = ll_check_DLList(_fun, L, 1);
-    void *data = reinterpret_cast<void *>(reinterpret_cast<intptr_t>(lua_topointer(L, 2)));
+    void *data = lua_touserdata(L, 2);
     DLList *elem = listFindElement(head, data);
     lua_pushlightuserdata(L, elem);
     return 1;
@@ -271,7 +271,7 @@ InsertAfter(lua_State *L)
     LL_FUNC("InsertAfter");
     DLList *head = ll_check_DLList(_fun, L, 1);
     DLList *elem = ll_check_DLList(_fun, L, 2);
-    void *data = reinterpret_cast<void *>(reinterpret_cast<intptr_t>(lua_topointer(L, 3)));
+    void *data = lua_touserdata(L, 3);
     return ll_push_boolean(_fun, L, 0 == listInsertAfter(&head, elem, data));
 }
 
@@ -303,7 +303,7 @@ InsertBefore(lua_State *L)
     LL_FUNC("InsertBefore");
     DLList *head = ll_check_DLList(_fun, L, 1);
     DLList *elem = ll_check_DLList(_fun, L, 2);
-    void *data = reinterpret_cast<void *>(reinterpret_cast<intptr_t>(lua_topointer(L, 3)));
+    void *data = lua_touserdata(L, 3);
     return ll_push_boolean(_fun, L, 0 == listInsertBefore(&head, elem, data));
 }
 

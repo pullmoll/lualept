@@ -13738,9 +13738,7 @@ FlipFHMTGen(lua_State *L)
     LL_FUNC("FlipFHMTGen");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
-    const char *name = ll_check_string(_fun, L, 3);
-    /* XXX: deconstify */
-    char *selname = reinterpret_cast<char *>(reinterpret_cast<l_intptr_t>(name));
+    const char *selname = ll_check_string(_fun, L, 3);
     Pix *pix = pixFlipFHMTGen(pixd, pixs, selname);
     return ll_push_Pix(_fun, L, pix);
 }

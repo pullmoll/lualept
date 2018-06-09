@@ -48,66 +48,171 @@ extern "C" {
 /** Local type definition of lua_State to avoid including lua.h here */
 typedef struct lua_State lua_State;
 
-#define LL_BOOLEAN      "l_ok"          /*!< Lua variable of type boolean */
-#define LL_INT8         "l_int8"        /*!< Lua variable of type integer; range l_int8 */
-#define LL_UINT8        "l_uint8"       /*!< Lua variable of type integer; range l_uint8 */
-#define LL_INT16        "l_int16"       /*!< Lua variable of type integer; range l_int16 */
-#define LL_UINT16       "l_uint16"      /*!< Lua variable of type integer; range l_uint16 */
-#define LL_INT32        "l_int32"       /*!< Lua variable of type integer; range l_int32 */
-#define LL_UINT32       "l_uint32"      /*!< Lua variable of type integer; range l_uint32 */
-#define LL_INT64        "l_int64"       /*!< Lua variable of type integer; range l_int64 */
-#define LL_UINT64       "l_uint64"      /*!< Lua variable of type integer; range l_uint64 */
-#define LL_FLOAT32      "l_int64"       /*!< Lua variable of type number; range l_float32 */
-#define LL_FLOAT64      "l_uint64"      /*!< Lua variable of type number; range l_float64 */
-#define	LL_AMAP		"Amap"          /*!< Lua class: Amap (key / value pairs) */
-#define	LL_ASET		"Aset"          /*!< Lua class: Aset (key set) */
-#define	LL_BBUFFER	"Bbuffer"       /*!< Lua class: Bbuffer (byte buffer) */
-#define	LL_BMF		"Bmf"           /*!< Lua class: Bmf (Bitmap font) */
-#define	LL_BYTEA        "Bytea"         /*!< Lua class: Bytea (array of bytes) */
-#define	LL_BOX		"Box"           /*!< Lua class: Box (quad l_int32 for x,y,w,h) */
-#define	LL_BOXA		"Boxa"          /*!< Lua class: Boxa (array of Box) */
-#define	LL_BOXAA	"Boxaa"         /*!< Lua class: Boxaa (array of Boxa) */
-#define	LL_COMPDATA     "CompData"      /*!< Lua class: CompData */
-#define	LL_CCBORD       "CCBord"        /*!< Lua class: CCBord */
-#define	LL_CCBORDA      "CCBorda"       /*!< Lua class: CCBorda (array of CCBord) */
-#define	LL_DEWARP       "Dewarp"        /*!< Lua class: Dewarp */
-#define	LL_DEWARPA      "Dewarpa"       /*!< Lua class: Dewarpa (array of Dewarp) */
-#define	LL_DLLIST	"Dllist"        /*!< Lua class: DLList */
-#define	LL_DNA		"Dna"           /*!< Lua class: array of doubles (l_float64, equiv. to lua_Number) */
-#define	LL_DNAA		"Dnaa"          /*!< Lua class: Dnaa (array of Dna) */
-#define LL_DNAHASH      "DnaHash"       /*!< Lua class: DnaHash */
-#define	LL_DPIX		"DPix"          /*!< Lua class: DPix */
-#define	LL_FPIX		"FPix"          /*!< Lua class: FPix */
-#define	LL_FPIXA	"FPixa"         /*!< Lua class: FPixa (array of FPix) */
-#define	LL_KERNEL       "Kernel"        /*!< Lua class: Kernel */
-#define	LL_NUMA		"Numa"          /*!< Lua class: Numa array of floats (l_float32) */
-#define	LL_NUMAA	"Numaa"         /*!< Lua class: Numaa (array of Numa) */
-#define	LL_PDFDATA      "PdfData"       /*!< Lua class: PdfData */
-#define	LL_PIX		"Pix"           /*!< Lua class: Pix (pixels and meta data) */
-#define	LL_PIXA		"Pixa"          /*!< Lua class: Pixa (array of Pix) */
-#define	LL_PIXAA        "Pixaa"         /*!< Lua class: Pixaa (array of Pixa) */
-#define	LL_PIXCMAP	"PixColormap"   /*!< Lua class: PixColormap (color map) */
-#define	LL_PIXTILING	"PixTiling"     /*!< Lua class: PixTiling */
-#define	LL_PIXCOMP      "PixComp"       /*!< Lua class: PixComp (compressed Pix) */
-#define	LL_PIXACOMP     "PixaComp"      /*!< Lua class: PixaComp (array of PixComp) */
-#define	LL_PTA		"Pta"           /*!< Lua class: Pta (array of points, i.e. pair of l_float32) */
-#define	LL_PTAA		"Ptaa"          /*!< Lua class: Ptaa (array of Pta) */
-#define	LL_RBTNODE      "RbtreeNode"    /*!< Lua class: RbtreeNode (Amap and Aset nodes) */
-#define	LL_RBTREE       "Rbtree"	/*!< Lua class: Rbtree (Amap and Aset base) */
-#define	LL_SARRAY	"Sarray"        /*!< Lua class: Sarray (array of strings) */
-#define	LL_SEL		"Sel"           /*!< Lua class: Sel */
-#define	LL_SELA		"Sela"          /*!< Lua class: array of Sel */
-#define	LL_STACK        "Stack"         /*!< Lua class: Stack */
-#define	LL_WSHED        "WShed"         /*!< Lua class: Stack */
 
+typedef L_AMAP              Amap;           /*!< Local type name for L_AMAP */
+typedef L_AMAP_NODE         AmapNode;       /*!< Local type name for L_AMAP_NODE */
+typedef L_ASET              Aset;           /*!< Local type name for L_ASET */
+typedef L_ASET_NODE         AsetNode;       /*!< Local type name for L_ASET_NODE */
+typedef L_BBUFFER           ByteBuffer;     /*!< Local type name for L_BBUFFER */
+typedef L_BMF               Bmf;            /*!< Local type name for L_BMF */
+typedef L_BYTEA             Bytea;          /*!< Local type name for L_BYTEA */
+typedef L_DEWARP            Dewarp;         /*!< Local type name for L_DEWAP */
+typedef L_DEWARPA           Dewarpa;        /*!< Local type name for L_DEWARPA */
+typedef DoubleLinkedList    DLList;         /*!< Local type name for L_DLLIST */
+typedef L_DNA               Dna;            /*!< Local type name for L_DNA */
+typedef L_DNAA              Dnaa;           /*!< Local type name for L_DNAA */
+typedef L_DNAHASH           DnaHash;        /*!< Local type name for L_DNAHASH */
+typedef L_KERNEL            Kernel;         /*!< Local type name for L_KERNEL */
+typedef L_COMP_DATA         CompData;       /*!< Local type name for L_COMP_DATA */
+typedef L_PDF_DATA          PdfData;        /*!< Local type name for L_PDF_DATA */
+typedef L_RBTREE	    Rbtree;         /*!< Local type name for L_RBTREE */
+typedef L_RBTREE_NODE       RbtreeNode;     /*!< Local type name for L_RBTREE_NODE */
+typedef L_STACK             Stack;          /*!< Local type name for L_STACK */
+typedef L_WSHED             WShed;          /*!< Local type name for L_WSched */
+
+/**
+ * Enumeration of types supported in the set / get global variable functions
+ */
+typedef enum {
+    ll_invalid,
+    ll_boolean,
+    ll_int8,
+    ll_uint8,
+    ll_int16,
+    ll_uint16,
+    ll_int32,
+    ll_uint32,
+    ll_int64,
+    ll_uint64,
+    ll_float32,
+    ll_float64,
+    ll_pchars,
+    ll_pbytes,
+    ll_amap,
+    ll_aset,
+    ll_bbuffer,
+    ll_bmf,
+    ll_bytea,
+    ll_box,
+    ll_boxa,
+    ll_boxaa,
+    ll_compdata,
+    ll_ccbord,
+    ll_ccborda,
+    ll_dewarp,
+    ll_dewarpa,
+    ll_dllist,
+    ll_dna,
+    ll_dnaa,
+    ll_dnahash,
+    ll_dpix,
+    ll_fpix,
+    ll_fpixa,
+    ll_kernel,
+    ll_numa,
+    ll_numaa,
+    ll_pdfdata,
+    ll_pix,
+    ll_pixa,
+    ll_pixaa,
+    ll_pixcmap,
+    ll_pixtiling,
+    ll_pixcomp,
+    ll_pixacomp,
+    ll_pta,
+    ll_ptaa,
+    ll_rbtnode,
+    ll_rbtree,
+    ll_sarray,
+    ll_sel,
+    ll_sela,
+    ll_stack,
+    ll_wshed
+}   ll_type_e;
+
+/**
+ * The ll_bytes_s structure is used to point to an array of
+ * unsigned char (bytes) and defining its size.
+ * This indirection type is used for "byte strings", i.e.
+ * strings which may contain the '\0' character.
+ */
+typedef struct ll_bytes_s {
+    l_uint8    *data;
+    size_t      size;
+}   ll_bytes_t;
+
+/**
+ * The structure ll_global_var_s is used to define global
+ * variables to set before and get after the script is run.
+ */
 typedef struct ll_global_var_s {
-    const char *type;       /*!< Type is one of LL_... macros */
+    ll_type_e   type;       /*!< Type is one value from the ll_type_e enumeration */
     const char *name;       /*!< Variable name when executing the Lua script */
-    void *ptr;              /*!< Pointer to the variable */
+
+    /*! union of pointers to all supported types */
+    union {
+        void         *pptr;                 /*!< generic input pointer to variable */
+        bool         *pb;                   /*!< input pointer to a bool */
+        l_int8       *pi8;                  /*!< input pointer to a l_int8 */
+        l_uint8      *pu8;                  /*!< input pointer to a l_uint8 */
+        l_int16      *pi16;                 /*!< input pointer to a l_int16 */
+        l_uint16     *pu16;                 /*!< input pointer to a l_uint16 */
+        l_int32      *pi32;                 /*!< input pointer to a l_int32 */
+        l_uint32     *pu32;                 /*!< input pointer to a l_uint32 */
+        l_int64      *pi64;                 /*!< input pointer to a l_int64 */
+        l_uint64     *pu64;                 /*!< input pointer to a l_uint64 */
+        l_float32    *pf32;                 /*!< input pointer to a l_float32 */
+        l_float64    *pf64;                 /*!< input pointer to a l_float64 */
+        char        **pchars;               /*!< pointer to a char array */
+        ll_bytes_t   *pbytes;               /*!< pointer to a ll_bytes_t (pointer to data and size) */
+        Amap        **pamap;                /*!< input pointer to a Amap */
+        Aset        **paset;                /*!< input pointer to a Aset */
+        Bmf         **pbmf;                 /*!< input pointer to a Bmf */
+        Box         **pbox;                 /*!< input pointer to a Box */
+        Boxa        **pboxa;                /*!< input pointer to a Boxa */
+        Boxaa       **pboxaa;               /*!< input pointer to a Boxaa */
+        ByteBuffer  **pbb;                  /*!< input pointer to a ByteBuffer */
+        Bytea       **pbytea;               /*!< input pointer to a Bytea */
+        CompData    **pcid;                 /*!< input pointer to a CompData */
+        CCBord      **pccb;                 /*!< input pointer to a CCBord */
+        CCBorda     **pccba;                /*!< input pointer to a CCBorda */
+        Dewarp      **pdew;                 /*!< input pointer to a Dewarp */
+        Dewarpa     **pdewa;                /*!< input pointer to a Dewarpa */
+        DLList      **plist;                /*!< input pointer to a DLList */
+        Dna         **pda;                  /*!< input pointer to a Dna */
+        Dnaa        **pdaa;                 /*!< input pointer to a Dnaa */
+        DnaHash     **pdah;                 /*!< input pointer to a DnaHash */
+        DPix        **pdpix;                /*!< input pointer to a DPix */
+        FPix        **pfpix;                /*!< input pointer to a FPix */
+        FPixa       **pfpixa;               /*!< input pointer to a FPixa */
+        Kernel      **pkel;                 /*!< input pointer to a Kernel */
+        Numa        **pna;                  /*!< input pointer to a Numa */
+        Numaa       **pnaa;                 /*!< input pointer to a Numaa */
+        PdfData     **ppdd;                 /*!< input pointer to a PdfData */
+        Pix         **ppix;                 /*!< input pointer to a Pix */
+        Pixa        **ppixa;                /*!< input pointer to a Pixa */
+        Pixaa       **ppixaa;               /*!< input pointer to a Pixaa */
+        PixColormap **pcmap;                /*!< input pointer to a PixColormap */
+        PixTiling   **ppixt;                /*!< input pointer to a PixTiling */
+        PixComp     **ppixc;                /*!< input pointer to a PixComp */
+        PixaComp    **ppixac;               /*!< input pointer to a PixaComp */
+        Pta         **ppta;                 /*!< input pointer to a Pta */
+        Ptaa        **pptaa;                /*!< input pointer to a Ptaa */
+        Rbtree      **ptree;                /*!< input pointer to a Rbtree (head) */
+        RbtreeNode  **pnode;                /*!< input pointer to a RbtreeNode */
+        Sarray      **psa;                  /*!< input pointer to a Sarray */
+        Sel         **psel;                 /*!< input pointer to a Sel */
+        Sela        **psela;                /*!< input pointer to a Sela */
+        Stack       **pstack;               /*!< input pointer to a Stack */
+        WShed       **pwshed;               /*!< input pointer to a WShed */
+    }   u;
 }   ll_global_var_t;
 
+/** Use this macro to initialize one entry in a ll_global_var_t array */
+#define LL_GLOBAL(type, name, ptr) {type, name, {ptr}}
+
 /** Use this sentinel as the last entry in an array of ll_global_var_t */
-#define LL_SENTINEL {NULL, NULL, NULL}
+#define LL_SENTINEL {ll_invalid, nullptr, {nullptr}}
 
 LUALEPT_DLL extern int ll_open_Amap(lua_State *L);
 LUALEPT_DLL extern int ll_open_Aset(lua_State *L);
@@ -149,7 +254,7 @@ LUALEPT_DLL extern int ll_open_Stack(lua_State *L);
 LUALEPT_DLL extern int ll_open_WShed(lua_State *L);
 
 LUALEPT_DLL extern int luaopen_lualept(lua_State *L);
-LUALEPT_DLL extern int ll_run(const char* filename, const char* script, ll_global_var_t* set_vars, ll_global_var_t* get_vars);
+LUALEPT_DLL extern int ll_run(const char* filename, const char* script, ll_global_var_t *set_vars, ll_global_var_t *get_vars);
 
 #if defined(_MSC_VER)
 LEPT_DLL extern int LeptMsgSeverity;

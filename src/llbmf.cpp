@@ -68,6 +68,14 @@ Destroy(lua_State *L)
  * Arg #1 is expected to be a string (dir).
  * Arg #2 is expected to be a l_int32 (fontsize).
  *
+ * Leptonica's Notes:
+ *      (1) If %dir == null, this generates the font bitmaps from a
+ *          compiled string.
+ *      (2) Otherwise, this tries to read a pre-computed pixa file with the
+ *          95 ascii chars in it.  If the file is not found, it then
+ *          attempts to generate the pixa and associated baseline
+ *          data from a tiff image containing all the characters.  If
+ *          that fails, it uses the compiled string.
  * \param L Lua state
  * \return 1 Bmf* on the Lua stack
  */
@@ -75,7 +83,7 @@ static int
 Create(lua_State *L)
 {
     LL_FUNC("Create");
-    const char* dir = ll_isstring(_fun, L, 1) ? ll_check_string(_fun, L, 1) : ".";
+    const char* dir = ll_opt_string(_fun, L, 1);
     l_int32 fontsize = ll_opt_l_int32(_fun, L, 2, 6);
     L_Bmf *bmf = bmfCreate(dir, fontsize);
     return ll_push_Bmf(_fun, L, bmf);
@@ -125,8 +133,7 @@ GetLineStrings(lua_State *L)
     l_int32 h = 0;
     Sarray *sa = bmfGetLineStrings(bmf, str, maxw, firstident, &h);
     ll_push_l_int32(_fun, L, h);
-    ll_pack_Sarray(_fun, L, sa);
-    sarrayDestroy(&sa);
+    ll_push_Sarray(_fun, L, sa);
     return 2;
 }
 
@@ -191,6 +198,28 @@ GetWidth(lua_State *L)
         return ll_push_nil(L);
     ll_push_l_int32(_fun, L, w);
     return 1;
+}
+
+/**
+ * \brief GetWordWidths() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Bmf* (bmf).
+ * Arg #2 is expected to be a const char* (textstr).
+ * Arg #3 is expected to be a Sarray* (sa).
+ *
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+GetWordWidths(lua_State *L)
+{
+    LL_FUNC("GetWordWidths");
+    Bmf *bmf = ll_check_Bmf(_fun, L, 1);
+    const char *textstr = ll_check_string(_fun, L, 2);
+    Sarray *sa = ll_unpack_Sarray(_fun, L, 3, nullptr);
+    Numa *na = bmfGetWordWidths(bmf, textstr, sa);
+    return ll_push_Numa(_fun, L, na);
 }
 
 /**
@@ -273,6 +302,7 @@ ll_open_Bmf(lua_State *L)
         {"GetPix",              GetPix},
         {"GetStringWidth",      GetStringWidth},
         {"GetWidth",            GetWidth},
+        {"GetWordWidths",       GetWordWidths},
         LUA_SENTINEL
     };
     LO_FUNC(TNAME);

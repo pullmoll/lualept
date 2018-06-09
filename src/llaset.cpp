@@ -339,8 +339,7 @@ static int
 GetNext(lua_State *L)
 {
     LL_FUNC("GetNext");
-    /* XXX: deconstify */
-    AsetNode *node = reinterpret_cast<AsetNode *>(reinterpret_cast<l_intptr_t>(lua_topointer(L, 2)));
+    AsetNode *node = reinterpret_cast<AsetNode *>(lua_touserdata(L, 2));
     AsetNode *next = l_asetGetNext(node);
     lua_pushlightuserdata(L, next);
     return 1;
@@ -359,7 +358,7 @@ GetPrev(lua_State *L)
 {
     LL_FUNC("GetPrev");
     /* XXX: deconstify */
-    AsetNode *node = reinterpret_cast<AsetNode *>(reinterpret_cast<l_intptr_t>(lua_topointer(L, 2)));
+    AsetNode *node = reinterpret_cast<AsetNode *>(lua_touserdata(L, 2));
     AsetNode *prev = l_asetGetPrev(node);
     lua_pushlightuserdata(L, prev);
     return 1;

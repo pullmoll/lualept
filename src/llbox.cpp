@@ -302,7 +302,7 @@ Clone(lua_State *L)
  *      (1) We're re-using the SORT enum for these comparisons.
  * </pre>
  * \param L Lua state
- * \return 1 integer on the Lua stack (-1, 0, +1)
+ * \return 1 string on the Lua stack
  */
 static int
 CompareSize(lua_State *L)
@@ -314,7 +314,7 @@ CompareSize(lua_State *L)
     l_int32 rel = 0;
     if (boxCompareSize(box1, box2, type, &rel))
         return ll_push_nil(L);
-    ll_push_l_int32(_fun, L, rel);
+    ll_push_string(_fun, L, ll_string_relation(rel));
     return 1;
 }
 
@@ -723,7 +723,7 @@ PrintStreamInfo(lua_State *L)
 {
     LL_FUNC("PrintStreamInfo");
     Box *box = ll_check_Box(_fun, L, 1);
-    luaL_Stream *stream = reinterpret_cast<luaL_Stream *>(luaL_checkudata(L, 2, LUA_FILEHANDLE));
+    luaL_Stream *stream = ll_check_stream(_fun, L, 2);
     return ll_push_boolean(_fun, L, 0 == boxPrintStreamInfo(stream->f, box));
 }
 
@@ -929,14 +929,14 @@ Transform(lua_State *L)
  * \brief Ordered transform a Box* (%boxs) by shifting, scaling, and rotation..
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
- * Arg #2 is expected to be a string describing the transform order (order).
- * Arg #3 is an optional l_int32 (shiftx).
- * Arg #4 is an optional l_int32 (shifty).
- * Arg #5 is an optional l_float32 (scalex).
- * Arg #6 is an optional l_float32 (scaley).
- * Arg #7 is an optional l_int32 (xcen).
- * Arg #8 is an optional l_int32 (ycen).
- * Arg #9 is an optional l_float32 (angle).
+ * Arg #2 is an optional l_int32 (shiftx).
+ * Arg #3 is an optional l_int32 (shifty).
+ * Arg #4 is an optional l_float32 (scalex).
+ * Arg #5 is an optional l_float32 (scaley).
+ * Arg #6 is an optional l_int32 (xcen).
+ * Arg #7 is an optional l_int32 (ycen).
+ * Arg #8 is an optional l_float32 (angle).
+ * Arg #9 is an optional string describing the transform order (order).
  *
  * Leptonica's Notes:
  *      (1) This allows a sequence of linear transforms, composed of
@@ -986,14 +986,14 @@ TransformOrdered(lua_State *L)
     Box *boxs = ll_check_Box(_fun, L, 1);
     l_float32 xc, yc;
     l_int32 ok = boxGetCenter(boxs, &xc, &yc);
-    l_int32 order = ll_check_trans_order(_fun, L, 2, L_TR_SC_RO);
-    l_int32 shiftx = ll_opt_l_int32(_fun, L, 3, 0);
-    l_int32 shifty = ll_opt_l_int32(_fun, L, 4, 0);
-    l_float32 scalex = ll_opt_l_float32(_fun, L, 5, 1.0f);
-    l_float32 scaley = ll_opt_l_float32(_fun, L, 6, 1.0f);
-    l_int32 xcen = ll_opt_l_int32(_fun, L, 7, ok ? static_cast<l_int32>(xc) : 0);
-    l_int32 ycen = ll_opt_l_int32(_fun, L, 8, ok ? static_cast<l_int32>(yc) : 0);
-    l_float32 angle = ll_opt_l_float32(_fun, L, 9, 0.0f);
+    l_int32 shiftx = ll_opt_l_int32(_fun, L, 2, 0);
+    l_int32 shifty = ll_opt_l_int32(_fun, L, 3, 0);
+    l_float32 scalex = ll_opt_l_float32(_fun, L, 4, 1.0f);
+    l_float32 scaley = ll_opt_l_float32(_fun, L, 5, 1.0f);
+    l_int32 xcen = ll_opt_l_int32(_fun, L, 6, ok ? static_cast<l_int32>(xc) : 0);
+    l_int32 ycen = ll_opt_l_int32(_fun, L, 7, ok ? static_cast<l_int32>(yc) : 0);
+    l_float32 angle = ll_opt_l_float32(_fun, L, 8, 0.0f);
+    l_int32 order = ll_check_trans_order(_fun, L, 9, L_TR_SC_RO);
     Box *box = boxTransformOrdered(boxs, shiftx, shifty, scalex, scaley, xcen, ycen, angle, order);
     return ll_push_Box(_fun, L, box);
 }
@@ -1051,6 +1051,7 @@ ll_new_Box(lua_State *L)
 {
     FUNC("ll_new_Box");
     Box *box = nullptr;
+    l_int32 x = 0, y = 0, w = 0, h = 0;
 
     if (ll_isudata(_fun, L, 1, LL_BOX)) {
         Box *boxs = ll_opt_Box(_fun, L, 1);
@@ -1062,17 +1063,17 @@ ll_new_Box(lua_State *L)
     }
 
     if (!box && ll_isinteger(_fun, L, 1)) {
-        l_int32 x = ll_opt_l_int32(_fun, L, 1, 0);
-        l_int32 y = ll_opt_l_int32(_fun, L, 2, 0);
-        l_int32 w = ll_opt_l_int32(_fun, L, 3, 1);
-        l_int32 h = ll_opt_l_int32(_fun, L, 4, 1);
+        x = ll_opt_l_int32(_fun, L, 1, 0);
+        y = ll_opt_l_int32(_fun, L, 2, 0);
+        w = ll_opt_l_int32(_fun, L, 3, 1);
+        h = ll_opt_l_int32(_fun, L, 4, 1);
         DBG(LOG_NEW_PARAM, "%s: create for %s = %d, %s = %d, %s = %d, %s = %d\n", _fun,
             "x", x, "y", y, "w", w, "h", h);
-        box = boxCreate(x,y,w,h);
+        box = boxCreate(x, y, w, h);
     }
 
     if (!box) {
-        l_int32 x = 0, y = 0, w = 0, h = 0;
+        x = y = w = h = 0;
         DBG(LOG_NEW_PARAM, "%s: create for %s = %d, %s = %d, %s = %d, %s = %d\n", _fun,
             "x", x, "y", y, "w", w, "h", h);
         box = boxCreate(x, y, w, h);

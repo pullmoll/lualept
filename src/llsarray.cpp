@@ -80,6 +80,7 @@ toString(lua_State* L)
     char str[256];
     Sarray *sa = ll_check_Sarray(_fun, L, 1);
     luaL_Buffer B;
+    l_int32 i;
 
     luaL_buffinit(L, &B);
     if (!sa) {
@@ -87,9 +88,13 @@ toString(lua_State* L)
     } else {
         snprintf(str, sizeof(str), TNAME ": %p\n", reinterpret_cast<void *>(sa));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    nalloc = 0x%x, n = 0x%x, refcount = %d",
+        snprintf(str, sizeof(str), "    nalloc = %d, n = %d, refcount = %d\n",
                  sa->nalloc, sa->n, sa->refcount);
         luaL_addstring(&B, str);
+        for (i = 0; i < sarrayGetCount(sa); i++) {
+            snprintf(str, sizeof(str), "    %-3d '%s'\n", i + 1, sarrayGetString(sa, i, L_NOCOPY));
+            luaL_addstring(&B, str);
+        }
     }
     luaL_pushresult(&B);
     return 1;

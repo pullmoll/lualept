@@ -1,16 +1,17 @@
 require "lua/tools"
 
 header("Bmf")
-local dir = "fonts";
-local bmf = Bmf(dir, 8);
+local bmf = Bmf(nil, 6);
 print(pad("bmf"), bmf)
 local chr = string.byte('x')
 print(pad("bmf:GetWidth("..chr..")"), bmf:GetWidth(chr))
 local l = {}
-local h, t = bmf:GetLineStrings("This is just a simple test to see how bmf:GetLineStrings() works out.", 240, 0)
-print(pad("bmf:GetLineStrings(...)"), h, #t, t, tbl(t))
+local h, sa = bmf:GetLineStrings("This is just a simple test to see how bmf:GetLineStrings() works out.", 240, 0)
+print(pad("h, sa = bmf:GetLineStrings(...)"), h, #sa, sa)
+local t = sa:TableArray()
+print(pad("t = sa:TableArray()"), h, #t, t, tbl(t))
 
-local str = "English text here: Name."
+local str = "Some funny name is: Mississippi."
 local pixa = Pixa(#str)
 local boxa = Boxa(#str)
 local d = 2
@@ -29,15 +30,17 @@ for i = 1, #str do
 	if ph > h then
 		h = ph
 	end
-	pixa:AddPix(pix)
+	pixa:AddPix(pix:ConvertTo8())
 end
 
-local pix = Pix(w, h + d)
+local pix = Pix(w, h + d, 8)
+pix:SetAll()
 for i = 1, #pixa do
 	local pixs = pixa:GetPix(i)
 	local sx,sy,sw,sh = boxa:GetBoxGeometry(i)
-	pix:Rasterop(sx, sy, sw, sh, "src&!dst", pixs, 0, 0)
+	pix:Rasterop(sx, sy, sw, sh, "mask", pixs, 0, 0)
 end
+pix = pix:AddBorder(4,0xc0)
 pix:View()
 
 header()

@@ -35,7 +35,7 @@
  * \file llamap.cpp
  * \class Amap
  *
- * A map of keys and values of type l_int64, l_uint64 or l_float64.
+ * A map of key and value tuples of type l_int64, l_uint64 or l_float64.
  *
  * It is comparable with a Lua table array and is used in Leptonica for
  * situations where there may be holes in the key space.
@@ -365,8 +365,7 @@ static int
 GetNext(lua_State *L)
 {
     LL_FUNC("GetNext");
-    /* XXX: deconstify */
-    AmapNode *node = reinterpret_cast<AmapNode *>(reinterpret_cast<l_intptr_t>(lua_topointer(L, 2)));
+    AmapNode *node = reinterpret_cast<AmapNode *>(lua_touserdata(L, 2));
     AmapNode *next = l_amapGetNext(node);
     lua_pushlightuserdata(L, next);
     return 1;
@@ -384,8 +383,7 @@ static int
 GetPrev(lua_State *L)
 {
     LL_FUNC("GetPrev");
-    /* XXX: deconstify */
-    AmapNode *node = reinterpret_cast<AmapNode *>(reinterpret_cast<l_intptr_t>(lua_topointer(L, 2)));
+    AmapNode *node = reinterpret_cast<AmapNode *>(lua_touserdata(L, 2));
     AmapNode *prev = l_amapGetPrev(node);
     lua_pushlightuserdata(L, prev);
     return 1;

@@ -115,11 +115,8 @@ static int
 Create(lua_State *L)
 {
     LL_FUNC("Create");
-    size_t size = 0;
-    const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &size);
-    l_int32 nalloc = ll_opt_l_int32(_fun, L, 2, static_cast<l_int32>(size));
-    /* XXX: deconstify */
-    l_uint8 *indata = reinterpret_cast<l_uint8 *>(reinterpret_cast<l_intptr_t>(data));
+    l_int32 nalloc = 0;
+    const l_uint8 *indata = ll_check_lbytes(_fun, L, 1, &nalloc);
     ByteBuffer *result = bbufferCreate(indata, nalloc);
     return ll_push_ByteBuffer(_fun, L, result);
 }
@@ -191,10 +188,10 @@ Read(lua_State *L)
 {
     LL_FUNC("Read");
     ByteBuffer *bb = ll_check_ByteBuffer(_fun, L, 1);
-    const l_uint8 *data = ll_check_lbytes(_fun, L, 2);
+    l_int32 nbytes = 0;
+    const l_uint8 *data = ll_check_lbytes(_fun, L, 2, &nbytes);
     /* XXX: deconstify */
     l_uint8 *src = reinterpret_cast<l_uint8 *>(reinterpret_cast<l_intptr_t>(data));
-    l_int32 nbytes = ll_check_l_int32(_fun, L, 3);
     l_ok result = bbufferRead(bb, src, nbytes);
     return ll_push_boolean(_fun, L, 0 == result);
 }

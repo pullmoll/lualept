@@ -66,7 +66,6 @@ typedef unsigned int uintptr_t;
     #define LUALEPT_DLL
   #endif
 #else  /* non-Windows specifics */
-  #include <stdint.h>
   #define LUALEPT_DLL
 #endif  /* _WIN32 */
 

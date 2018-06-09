@@ -204,9 +204,7 @@ CreateFromColorPix(lua_State *L)
 {
     LL_FUNC("CreateFromColorPix");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    const char *name = ll_check_string(_fun, L, 2);
-    /* XXX: deconstify */
-    char *selname = reinterpret_cast<char *>(reinterpret_cast<l_intptr_t>(name));
+    const char *selname = ll_check_string(_fun, L, 2);
     Sel *sel = selCreateFromColorPix(pixs, selname);
     return ll_push_Sel(_fun, L, sel);
 }

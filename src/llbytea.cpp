@@ -117,9 +117,7 @@ AppendData(lua_State *L)
     LL_FUNC("AppendData");
     Bytea *ba = ll_check_Bytea(_fun, L, 1);
     size_t newbytes = 0;
-    const l_uint8 *data = ll_check_lbytes(_fun, L, 2, &newbytes);
-    /* XXX: deconstify */
-    l_uint8 *newdata = reinterpret_cast<l_uint8 *>(reinterpret_cast<l_intptr_t>(data));
+    const l_uint8 *newdata = ll_check_lbytes(_fun, L, 2, &newbytes);
     l_ok ok = l_byteaAppendData(ba, newdata, newbytes);
     return ll_push_boolean(_fun, L, 0 == ok);
 }
@@ -139,9 +137,7 @@ AppendString(lua_State *L)
 {
     LL_FUNC("AppendString");
     Bytea *ba = ll_check_Bytea(_fun, L, 1);
-    const char *cstr = ll_check_string(_fun, L, 2);
-    /* XXX: deconstify */
-    char *str = reinterpret_cast<char *>(reinterpret_cast<l_intptr_t>(cstr));
+    const char *str = ll_check_string(_fun, L, 2);
     l_ok ok = l_byteaAppendString(ba, str);
     return ll_push_boolean(_fun, L, 0 == ok);
 }
@@ -207,11 +203,8 @@ FindEachSequence(lua_State *L)
 {
     LL_FUNC("FindEachSequence");
     Bytea *ba = ll_check_Bytea(_fun, L, 1);
-    size_t size = 0;
-    const l_uint8 *data = ll_check_lbytes(_fun, L, 2, &size);
-    /* XXX: deconstify */
-    l_uint8 *sequence = reinterpret_cast<l_uint8 *>(reinterpret_cast<l_intptr_t>(data));
-    l_int32 seqlen = static_cast<l_int32>(size);
+    size_t seqlen = 0;
+    const l_uint8 *sequence = ll_check_lbytes(_fun, L, 2, &seqlen);
     Dna *da = nullptr;
     if (l_byteaFindEachSequence(ba, sequence, seqlen, &da))
         return ll_push_nil(L);
@@ -273,9 +266,7 @@ InitFromMem(lua_State *L)
 {
     LL_FUNC("InitFromMem");
     size_t size = 0;
-    const l_uint8 *cdata = ll_check_lbytes(_fun, L, 1);
-    /* XXX: deconstify */
-    l_uint8 *data = reinterpret_cast<l_uint8 *>(reinterpret_cast<l_intptr_t>(cdata));
+    const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &size);
     Bytea *ba = l_byteaInitFromMem(data, size);
     return ll_push_Bytea(_fun, L, ba);
 }

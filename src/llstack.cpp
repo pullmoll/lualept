@@ -108,9 +108,7 @@ Add(lua_State *L)
 {
     LL_FUNC("Add");
     Stack *lstack = ll_check_Stack(_fun, L, 1);
-    const void *data = lua_topointer(L, 2);
-    /* XXX: deconstify */
-    void *item = reinterpret_cast<void *>(reinterpret_cast<l_intptr_t>(data));
+    void *item = ll_take_udata<void>(_fun, L, 2, "*");
     l_int32 result = lstackAdd(lstack, item);
     return ll_push_l_int32(_fun, L, result);
 }
