@@ -7,8 +7,8 @@ local res = io.popen("mkdir " .. tmpdir)
 print("mkdir " .. tmpdir, res:read("*a"))
 res.close()
 
--- LuaLept:DebugOn("udata", "array")
--- print(pad("LuaLept:Debug()"), LuaLept:Debug())
+LuaLept:DebugOn("udata", "array")
+print(pad("LuaLept:Debug()"), LuaLept:Debug())
 print(pad("LuaLept:Version()"), LuaLept:Version())
 print(pad("LuaLept:Version('Lua')"), LuaLept:Version('Lua'))
 print(pad("LuaLept:Version('Leptonica')"), LuaLept:Version('Leptonica'))
@@ -34,9 +34,15 @@ local pix = Pix(4,4,32)
 pix:SetAllArbitrary("Medium Violet Red")
 pix:SetPixel(1, 1, "Blue")
 pix:SetPixel(2, 2, "Yellow")
-pix:View("4x4 32bpp",0,0,64.0)
 
+local pixc = PixComp(pix);
+print (pad("pixc = PixComp(pix)"), pixc)
+local rootname = tmpdir .. "/pixc"
+local ok = pixc:WriteFile(rootname)
+print (pad("pixcWriteFile(" .. rootname ..")"), pixc)
+
+pix:View("4x4 32bpp",0,0,64.0)
 bytes = "The quick brown \0\1\2\3 fox jumps over the lazy dog! 1234567890? - ryryryry\0\0\x00"
 ok = true
 
-print(bs)
+hex_dump(bytes)

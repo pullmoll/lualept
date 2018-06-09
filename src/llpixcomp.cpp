@@ -63,7 +63,7 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Printable string for a PixColormap*.
+ * \brief Printable string for a PixComp*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmaps).
  * </pre>
@@ -79,7 +79,6 @@ toString(lua_State *L)
     luaL_Buffer B;
     l_int32 w, h, d;
     l_int32 xres, yres, comptype, cmapflag;
-    void *data;
 
     luaL_buffinit(L, &B);
 
@@ -106,7 +105,7 @@ toString(lua_State *L)
 
         snprintf(str, LL_STRBUFF,
                  "    data = %p, size = %#" PRIx64 "\n",
-                 data, pixc->size);
+                 reinterpret_cast<void *>(pixc->data), pixc->size);
         luaL_addstring(&B, str);
 
         snprintf(str, LL_STRBUFF,
@@ -304,8 +303,8 @@ GetParameters(lua_State *L)
 /**
  * \brief WriteFile() brief comment goes here.
  * <pre>
- * Arg #1 (i.e. self) is expected to be a const char* (rootname).
- * Arg #2 is expected to be a PixaComp* (pixc).
+ * Arg #1 (i.e. self) is expected to be a PixaComp* (pixc).
+ * Arg #2 is expected to be a const char* (rootname).
  *
  * Leptonica's Notes:
  *      (1) The compressed data is written to file, and the filename is
@@ -318,8 +317,8 @@ static int
 WriteFile(lua_State *L)
 {
     LL_FUNC("WriteFile");
-    const char *rootname = ll_check_string(_fun, L, 1);
-    PixComp *pixc = ll_check_PixComp(_fun, L, 2);
+    PixComp *pixc = ll_check_PixComp(_fun, L, 1);
+    const char *rootname = ll_check_string(_fun, L, 2);
     l_ok ok = pixcompWriteFile(rootname, pixc);
     return ll_push_boolean(_fun, L, 0 == ok);
 }
@@ -449,6 +448,8 @@ ll_open_PixComp(lua_State *L)
         {"DetermineFormat",     DetermineFormat},
         {"GetDimensions",       GetDimensions},
         {"GetParameters",       GetParameters},
+        {"WriteFile",           WriteFile},
+        {"WriteStreamInfo",     WriteStreamInfo},
         LUA_SENTINEL
     };
     LO_FUNC(TNAME);

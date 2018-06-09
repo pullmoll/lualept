@@ -65,7 +65,7 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Printable string for a PixColormap*.
+ * \brief Printable string for a PixTiling*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmaps).
  * </pre>

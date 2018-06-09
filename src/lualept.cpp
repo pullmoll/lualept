@@ -2811,7 +2811,7 @@ ll_get_all_globals(const char *_fun, lua_State *L, const ll_global_var_t *vars)
 #define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
- * \brief Enable a debug flag
+ * \brief Enable a debug flag.
  *
  * \param L Lua state
  * \return 0 for nothing on the Lua stack
@@ -2836,7 +2836,7 @@ DebugOn(lua_State *L)
 }
 
 /**
- * \brief Disable a debug flag
+ * \brief Disable a debug flag.
  *
  * \param L Lua state
  * \return 0 for nothing on the Lua stack
@@ -2861,23 +2861,29 @@ DebugOff(lua_State *L)
 }
 
 /**
- * \brief Disable a debug flag
- *
+ * \brief Return enabled debug options as strings.
  * \param L Lua state
- * \return 0 for nothing on the Lua stack
+ * \return n (0 .. 32) strings on the Lua stack
  */
 static int
 Debug(lua_State *L)
 {
     LL_FUNC("Debug");
-    luaL_Buffer B;
-
-    luaL_buffinit(L, &B);
 #if defined(LUALEPT_DEBUG) && (LUALEPT_DEBUG > 0)
-    luaL_addstring(&B, ll_string_debug(dbg_enabled));
+    const char *debug = ll_string_debug(dbg_enabled);
+    Sarray *sa = sarrayCreate(1);
+    l_int32 i, n;
+    sarraySplitString(sa, debug, "|");
+    n = sarrayGetCount(sa);
+    for (i = 0; i < n; i++) {
+        const char *str = sarrayGetString(sa, i, L_NOCOPY);
+        lua_pushstring(L, str);
+    }
+    sarrayDestroy(&sa);
+    return n;
+#else
+    return ll_push_nil(L);
 #endif
-    luaL_pushresult(&B);
-    return 1;
 }
 
 /**
