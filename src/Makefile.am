@@ -8,6 +8,7 @@ liblualept_la_CFLAGS = $(LEPT_CFLAGS) $(LUA_CFLAGS) $(SDL2_CFLAGS)
 liblualept_la_LIBADD = $(LEPT_LIBS) $(LUA_LIBS) $(SDL2_LIBS)
 liblualept_la_SOURCES = \
 	lualept.cpp \
+	lualept-flags.cpp \
 	lualept-sdl2.cpp \
 	lualept.h \
 	modules.h \

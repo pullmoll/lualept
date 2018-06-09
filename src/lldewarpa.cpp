@@ -74,7 +74,7 @@ static int
 toString(lua_State *L)
 {
     LL_FUNC("toString");
-    char str[256];
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
     Dewarpa *dewa = ll_check_Dewarpa(_fun, L, 1);
     luaL_Buffer B;
 
@@ -82,13 +82,50 @@ toString(lua_State *L)
     if (!dewa) {
         luaL_addstring(&B, "nil");
     } else {
-        snprintf(str, sizeof(str),
+        snprintf(str, LL_STRBUFF,
                  TNAME ": %p\n",
                  reinterpret_cast<void *>(dewa));
+        luaL_addstring(&B, str);
         /* TODO: more info */
+        snprintf(str, LL_STRBUFF, "    nalloc            :  %d\n", dewa->nalloc);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "    maxpage           :  %d\n", dewa->maxpage);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "    dewarp            :  " LL_DEWARP "** %p\n", reinterpret_cast<void *>(dewa->dewarp));
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "    dewarpcache       :  " LL_DEWARP "** %p\n", reinterpret_cast<void *>(dewa->dewarpcache));
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "    namodels          :  " LL_NUMA "* %p\n", reinterpret_cast<void *>(dewa->namodels));
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "    napages           :  " LL_NUMA "* %p\n", reinterpret_cast<void *>(dewa->napages));
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "    redfactor         :  %d\n", dewa->redfactor);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "    sampling          :  %d\n", dewa->sampling);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "    minlines          :  %d\n", dewa->minlines);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "    maxdist           :  %d\n", dewa->maxdist);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "    max_linecurv      :  %d\n", dewa->max_linecurv);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "    min_diff_linecurv :  %d\n", dewa->min_diff_linecurv);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "    max_diff_linecurv :  %d\n", dewa->max_diff_linecurv);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "    max_edgeslope     :  %d\n", dewa->max_edgeslope);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "    max_diff_edgecurv :  %d\n", dewa->max_diff_edgecurv);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "    useboth           :  %d\n", dewa->useboth);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "    check_columns     :  %d\n", dewa->check_columns);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "    modelsready       :  %d\n", dewa->modelsready);
         luaL_addstring(&B, str);
     }
     luaL_pushresult(&B);
+    ll_free(str);
     return 1;
 }
 

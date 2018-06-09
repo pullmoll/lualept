@@ -63,6 +63,114 @@ Destroy(lua_State *L)
 }
 
 /**
+ * \brief Printable string for a PixColormap*.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmaps).
+ * </pre>
+ * \param L Lua state
+ * \return 1 string on the Lua stack
+ */
+static int
+toString(lua_State *L)
+{
+    LL_FUNC("toString");
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
+    PixComp *pixc = ll_check_PixComp(_fun, L, 1);
+    luaL_Buffer B;
+    l_int32 w, h, d;
+    l_int32 xres, yres, comptype, cmapflag;
+    void *data;
+
+    luaL_buffinit(L, &B);
+
+    if (!pixc) {
+        luaL_addstring(&B, "nil");
+    } else if (pixcompGetDimensions(pixc, &w, &h, &d)) {
+        luaL_addstring(&B, "invalid");
+    } else {
+        pixcompGetParameters(pixc, &xres, &yres, &comptype, &cmapflag);
+        snprintf(str, LL_STRBUFF,
+                 TNAME ": %p",
+                 reinterpret_cast<void *>(pixc));
+        luaL_addstring(&B, str);
+
+        snprintf(str, LL_STRBUFF,
+                 "    width = %d, height = %d, depth = %d\n",
+                 w, h, d);
+        luaL_addstring(&B, str);
+
+        snprintf(str, LL_STRBUFF,
+                 "    compression = %s\n",
+                 ll_string_compression(comptype));
+        luaL_addstring(&B, str);
+
+        snprintf(str, LL_STRBUFF,
+                 "    data = %p, size = %#" PRIx64 "\n",
+                 data, pixc->size);
+        luaL_addstring(&B, str);
+
+        snprintf(str, LL_STRBUFF,
+                 "    %scolormap\n", cmapflag ? "" : "no ");
+        luaL_addstring(&B, str);
+
+        if (pixc->text) {
+            snprintf(str, LL_STRBUFF,
+                     "    text: %s", pixc->text);
+        } else {
+            snprintf(str, LL_STRBUFF,
+                     "    no text");
+        }
+        luaL_addstring(&B, str);
+    }
+    luaL_pushresult(&B);
+    ll_free(str);
+    return 1;
+}
+
+/**
+ * \brief Copy() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a PixComp* (pixcs).
+ *
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+Copy(lua_State *L)
+{
+    LL_FUNC("Copy");
+    PixComp *pixcs = ll_check_PixComp(_fun, L, 1);
+    PixComp *pixc = pixcompCopy(pixcs);
+    return ll_push_PixComp(_fun, L, pixc);
+}
+
+/**
+ * \brief CreateFromFile() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a const char* (filename).
+ * Arg #2 is expected to be a l_int32 (comptype).
+ *
+ * Leptonica's Notes:
+ *      (1) Use %comptype == IFF_DEFAULT to have the compression
+ *          type automatically determined.
+ *      (2) If the comptype is invalid for this file, the default will
+ *          be substituted.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+CreateFromFile(lua_State *L)
+{
+    LL_FUNC("CreateFromFile");
+    const char *filename = ll_check_string(_fun, L, 1);
+    l_int32 comptype = ll_check_compression(_fun, L, 2);
+    PixComp *pixc = pixcompCreateFromFile(filename, comptype);
+    return ll_push_PixComp(_fun, L, pixc);
+}
+
+/**
  * \brief Create a new PixComp*.
  *
  * Arg #1 is expected to be a l_int32 (width).
@@ -79,6 +187,163 @@ CreateFromPix(lua_State *L)
     l_int32 comptype = ll_check_compression(_fun, L, 2, 1);
     PixComp *pixcomp = pixcompCreateFromPix(pix, comptype);
     return ll_push_PixComp(_fun, L, pixcomp);
+}
+
+/**
+ * \brief CreateFromString() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a lstring (data, size).
+ *
+ * Leptonica's Notes:
+ *      (1) This works when the compressed string is png, jpeg or tiffg4.
+ *      (2) The copyflag determines if the data in the new Pixcomp is
+ *          a copy of the input data.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+CreateFromString(lua_State *L)
+{
+    LL_FUNC("CreateFromString");
+    size_t size = 0;
+    const l_uint8 *cdata = ll_check_lbytes(_fun, L, 1, &size);
+    l_int32 copyflag = L_INSERT;
+    l_uint8 *data = ll_malloc<l_uint8>(_fun, L, size);
+    PixComp *pixc = nullptr;
+    memcpy(data, cdata, size);
+    pixc = pixcompCreateFromString(data, size, copyflag);
+    return ll_push_PixComp(_fun, L, pixc);
+}
+
+/**
+ * \brief DetermineFormat() brief comment goes here.
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (comptype).
+ * Arg #2 is expected to be a l_int32 (d).
+ * Arg #3 is expected to be a l_int32 (cmapflag).
+ *
+ * Leptonica's Notes:
+ *      (1) This determines the best format for a pix, given both
+ *          the request (%comptype) and the image characteristics.
+ *      (2) If %comptype == IFF_DEFAULT, this does not necessarily result
+ *          in png encoding.  Instead, it returns one of the three formats
+ *          that is both valid and most likely to give best compression.
+ *      (3) If the pix cannot be compressed by the input value of
+ *          %comptype, this selects IFF_PNG, which can compress all pix.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+DetermineFormat(lua_State *L)
+{
+    LL_FUNC("DetermineFormat");
+    l_int32 comptype = ll_check_l_int32(_fun, L, 1);
+    l_int32 d = ll_check_l_int32(_fun, L, 2);
+    l_int32 cmapflag = ll_check_l_int32(_fun, L, 3);
+    l_int32 format = 0;
+    if (pixcompDetermineFormat(comptype, d, cmapflag, &format))
+        return ll_push_nil(L);
+    ll_push_string(_fun, L, ll_string_input_format(format));
+    return 1;
+}
+
+/**
+ * \brief GetDimensions() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a PixComp* (pixc).
+ *
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 3 on the Lua stack
+ */
+static int
+GetDimensions(lua_State *L)
+{
+    LL_FUNC("GetDimensions");
+    PixComp *pixc = ll_check_PixComp(_fun, L, 1);
+    l_int32 w = 0;
+    l_int32 h = 0;
+    l_int32 d = 0;
+    if (pixcompGetDimensions(pixc, &w, &h, &d))
+        return ll_push_nil(L);
+    ll_push_l_int32(_fun, L, w);
+    ll_push_l_int32(_fun, L, h);
+    ll_push_l_int32(_fun, L, d);
+    return 3;
+}
+
+/**
+ * \brief GetParameters() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a PixComp* (pixc).
+ *
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 4 on the Lua stack
+ */
+static int
+GetParameters(lua_State *L)
+{
+    LL_FUNC("GetParameters");
+    PixComp *pixc = ll_check_PixComp(_fun, L, 1);
+    l_int32 xres = 0;
+    l_int32 yres = 0;
+    l_int32 comptype = 0;
+    l_int32 cmapflag = 0;
+    if (pixcompGetParameters(pixc, &xres, &yres, &comptype, &cmapflag))
+        return ll_push_nil(L);
+    ll_push_l_int32(_fun, L, xres);
+    ll_push_l_int32(_fun, L, yres);
+    ll_push_l_int32(_fun, L, comptype);
+    ll_push_l_int32(_fun, L, cmapflag);
+    return 4;
+}
+
+/**
+ * \brief WriteFile() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a const char* (rootname).
+ * Arg #2 is expected to be a PixaComp* (pixc).
+ *
+ * Leptonica's Notes:
+ *      (1) The compressed data is written to file, and the filename is
+ *          generated by appending the format extension to %rootname.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 0 on the Lua stack
+ */
+static int
+WriteFile(lua_State *L)
+{
+    LL_FUNC("WriteFile");
+    const char *rootname = ll_check_string(_fun, L, 1);
+    PixComp *pixc = ll_check_PixComp(_fun, L, 2);
+    l_ok ok = pixcompWriteFile(rootname, pixc);
+    return ll_push_boolean(_fun, L, 0 == ok);
+}
+
+/**
+ * \brief WriteStreamInfo() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a PixaComp* (pixc).
+ * Arg #2 is expected to be a luaL_Stream* (stream->f).
+ * Arg #3 is expected to be a const char* (text).
+ *
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 0 on the Lua stack
+ */
+static int
+WriteStreamInfo(lua_State *L)
+{
+    LL_FUNC("WriteStreamInfo");
+    PixComp *pixc = ll_check_PixComp(_fun, L, 1);
+    luaL_Stream *stream = ll_check_stream(_fun, L, 2);
+    const char *text = ll_opt_string(_fun, L, 3, "");
+    l_ok ok = pixcompWriteStreamInfo(stream->f, pixc, text);
+    return ll_push_boolean(_fun, L, 0 == ok);
 }
 
 /**
@@ -174,9 +439,16 @@ ll_open_PixComp(lua_State *L)
 {
     static const luaL_Reg methods[] = {
         {"__gc",                Destroy},
-        {"__new",               ll_new_PixComp},    /* PixComp() */
+        {"__new",               ll_new_PixComp},
+        {"__tostring",          toString},
+        {"Copy",                Copy},
+        {"CreateFromFile",      CreateFromFile},
         {"CreateFromPix",       CreateFromPix},
+        {"CreateFromString",    CreateFromString},
         {"Destroy",             Destroy},
+        {"DetermineFormat",     DetermineFormat},
+        {"GetDimensions",       GetDimensions},
+        {"GetParameters",       GetParameters},
         LUA_SENTINEL
     };
     LO_FUNC(TNAME);

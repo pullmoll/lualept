@@ -176,6 +176,44 @@ enum dbg_enable_flags {
 #define ARRAYSIZE(t) (sizeof(t)/sizeof(t[0]))
 #endif
 
+#define LL_STRBUFF  256
+
+#if defined(HAVE_STRCASECMP)
+#define ll_strcasecmp strcasecmp
+#elif defined(HAVE_STRICMP)
+#define ll_strcasecmp stricmp
+#else
+/**
+ * \brief Our own version of strcasecmp(3).
+ * \param dst first string
+ * \param src second string
+ * \return -1 if dst < src, +1 if dst > str, 0 otherwise
+ */
+inline int
+ll_strcasecmp(const char* dst, const char* src)
+{
+    unsigned long lend, lens;
+    int d;
+
+    if (!dst || nullptr == src)
+        return 0;
+    lend = strlen(dst);
+    lens = strlen(src);
+    if (lend < lens)
+        return -1;
+    if (lend > lens)
+        return +1;
+    while (lend--) {
+        d = toupper(*dst++) - toupper(*src++);
+        if (d < 0)
+            return -1;
+        if (d > 0)
+            return +1;
+    }
+    return 0;
+}
+#endif
+
 #if defined(LUALEPT_DEBUG) && (LUALEPT_DEBUG > 0)
 extern void dbg(int enable, const char* format, ...)
 #if defined(__GNUC__)
@@ -461,7 +499,7 @@ extern size_t           ll_opt_size_t(const char *_fun, lua_State *L, int arg, s
  *  lualept string Leptonica enumeration value lookup functions
  */
 
-extern int              ll_list_tbl_options(lua_State *L, const lept_enum *tbl, size_t len, const char *msg = nullptr);
+extern int              ll_list_tbl_options(const char *_fun, lua_State *L, const lept_enum *tbl, size_t len, const char *msg = nullptr);
 extern const char*      ll_string_tbl(l_int32 value, const lept_enum *tbl, size_t len);
 extern l_int32          ll_check_tbl(const char *_fun, lua_State *L, int arg, l_int32 def, const lept_enum *tbl, size_t len);
 

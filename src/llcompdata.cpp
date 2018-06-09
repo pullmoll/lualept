@@ -76,7 +76,7 @@ static int
 toString(lua_State *L)
 {
     LL_FUNC("toString");
-    char str[256];
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
     CompData *cid = ll_check_CompData(_fun, L, 1);
     luaL_Buffer B;
 
@@ -84,42 +84,43 @@ toString(lua_State *L)
     if (!cid) {
         luaL_addstring(&B, "nil");
     } else {
-        snprintf(str, sizeof(str), TNAME ": %p\n", reinterpret_cast<void *>(cid));
+        snprintf(str, LL_STRBUFF, TNAME ": %p\n", reinterpret_cast<void *>(cid));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    type          : %s\n", ll_string_encoding(cid->type));
+        snprintf(str, LL_STRBUFF, "    type          : %s\n", ll_string_encoding(cid->type));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    datacomp      : %p\n", reinterpret_cast<void *>(cid->datacomp));
+        snprintf(str, LL_STRBUFF, "    datacomp      : %p\n", reinterpret_cast<void *>(cid->datacomp));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    nbytescomp    : %" PRIu64 "\n", static_cast<l_uintptr_t>(cid->nbytescomp));
+        snprintf(str, LL_STRBUFF, "    nbytescomp    : %" PRIu64 "\n", static_cast<l_uintptr_t>(cid->nbytescomp));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    data85        : %p\n", reinterpret_cast<void *>(cid->data85));
+        snprintf(str, LL_STRBUFF, "    data85        : %p\n", reinterpret_cast<void *>(cid->data85));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    nbytes85      : %" PRIu64 "\n", static_cast<l_uintptr_t>(cid->nbytes85));
+        snprintf(str, LL_STRBUFF, "    nbytes85      : %" PRIu64 "\n", static_cast<l_uintptr_t>(cid->nbytes85));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    cmapdata85    : %p\n", reinterpret_cast<void *>(cid->cmapdata85));
+        snprintf(str, LL_STRBUFF, "    cmapdata85    : %p\n", reinterpret_cast<void *>(cid->cmapdata85));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    cmapdatahex   : %p\n", reinterpret_cast<void *>(cid->cmapdatahex));
+        snprintf(str, LL_STRBUFF, "    cmapdatahex   : %p\n", reinterpret_cast<void *>(cid->cmapdatahex));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    ncolors       : %d\n", cid->ncolors);
+        snprintf(str, LL_STRBUFF, "    ncolors       : %d\n", cid->ncolors);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    w             : %d\n", cid->w);
+        snprintf(str, LL_STRBUFF, "    w             : %d\n", cid->w);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    h             : %d\n", cid->h);
+        snprintf(str, LL_STRBUFF, "    h             : %d\n", cid->h);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    bps           : %d\n", cid->bps);
+        snprintf(str, LL_STRBUFF, "    bps           : %d\n", cid->bps);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    spp           : %d\n", cid->spp);
+        snprintf(str, LL_STRBUFF, "    spp           : %d\n", cid->spp);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    minisblack    : %d\n", cid->minisblack);
+        snprintf(str, LL_STRBUFF, "    minisblack    : %d\n", cid->minisblack);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    predictor     : %d\n", cid->predictor);
+        snprintf(str, LL_STRBUFF, "    predictor     : %d\n", cid->predictor);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    nbytes        : %" PRIu64 "\n", static_cast<l_uintptr_t>(cid->nbytes));
+        snprintf(str, LL_STRBUFF, "    nbytes        : %" PRIu64 "\n", static_cast<l_uintptr_t>(cid->nbytes));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    res           : %d\n", cid->res);
+        snprintf(str, LL_STRBUFF, "    res           : %d\n", cid->res);
         luaL_addstring(&B, str);
     }
     luaL_pushresult(&B);
+    ll_free(str);
     return 1;
 }
 

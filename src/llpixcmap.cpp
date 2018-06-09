@@ -112,7 +112,7 @@ static int
 toString(lua_State *L)
 {
     LL_FUNC("toString");
-    char str[256];
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
     luaL_Buffer B;
     luaL_buffinit(L, &B);
@@ -121,18 +121,19 @@ toString(lua_State *L)
     if (!cmap) {
         luaL_addstring(&B, "nil");
     } else {
-        snprintf(str, sizeof(str),
+        snprintf(str, LL_STRBUFF,
                  TNAME ": %p",
                  reinterpret_cast<void *>(cmap));
         luaL_addstring(&B, str);
         for (i = 0; i < pixcmapGetCount(cmap); i++) {
             pixcmapGetRGBA(cmap, i, &r, &g, &b, &a);
-            snprintf(str, sizeof(str), "\n    %d = { r = %d, g = %d, b = %d, a = %d }",
+            snprintf(str, LL_STRBUFF, "\n    %-3d = { r = %-3d, g = %-3d, b = %-3d, a = %-3d }",
                      i + 1, r, g, b, a);
             luaL_addstring(&B, str);
         }
     }
     luaL_pushresult(&B);
+    ll_free(str);
     return 1;
 }
 

@@ -165,7 +165,7 @@ static int
 toString(lua_State *L)
 {
     LL_FUNC("toString");
-    char str[256];
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
     Amap *amap = ll_check_Amap(_fun, L, 1);
     AmapNode *node = nullptr;
     luaL_Buffer B;
@@ -175,7 +175,7 @@ toString(lua_State *L)
     if (!amap) {
         luaL_addstring(&B, "nil");
     } else {
-        snprintf(str, sizeof(str), TNAME ": %p [%d: %s]",
+        snprintf(str, LL_STRBUFF, TNAME ": %p [%d: %s]",
                  reinterpret_cast<void *>(amap),
                  amap->keytype,
                  ll_string_keytype(amap->keytype));
@@ -190,22 +190,22 @@ toString(lua_State *L)
             }
             switch (amap->keytype) {
             case L_INT_TYPE:
-                snprintf(str, sizeof(str), "    %" PRId64 " = %" PRId64,
+                snprintf(str, LL_STRBUFF, "    %" PRId64 " = %" PRId64,
                          static_cast<intptr_t>(node->key.itype),
                          static_cast<intptr_t>(node->value.itype));
                 break;
             case L_UINT_TYPE:
-                snprintf(str, sizeof(str), "    %" PRIu64 " = %" PRIu64,
+                snprintf(str, LL_STRBUFF, "    %" PRIu64 " = %" PRIu64,
                          static_cast<uintptr_t>(node->key.itype),
                          static_cast<uintptr_t>(node->value.itype));
                 break;
             case L_FLOAT_TYPE:
-                snprintf(str, sizeof(str), "    %g = %g",
+                snprintf(str, LL_STRBUFF, "    %g = %g",
                          node->key.ftype,
                          node->value.ftype);
                 break;
             default:
-                snprintf(str, sizeof(str), "    %p = %p",
+                snprintf(str, LL_STRBUFF, "    %p = %p",
                          node->key.ptype,
                          node->value.ptype);
             }
@@ -214,6 +214,7 @@ toString(lua_State *L)
         }
     }
     luaL_pushresult(&B);
+    ll_free(str);
     return 1;
 }
 

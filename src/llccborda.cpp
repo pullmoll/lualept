@@ -35,7 +35,7 @@
  * \file llccborda.cpp
  * \class CCBorda
  *
- * An array of CCBord.
+ * An array of %CCBord.
  */
 
 /** Set TNAME to the class name used in this source file */
@@ -64,6 +64,45 @@ Destroy(lua_State *L)
 }
 
 /**
+ * \brief Printable string for a CCBorda* (%ccba).
+ * \param L Lua state
+ * \return 1 string on the Lua stack
+ */
+static int
+toString(lua_State* L)
+{
+    LL_FUNC("toString");
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
+    CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
+    luaL_Buffer B;
+
+    luaL_buffinit(L, &B);
+    if (!ccba) {
+        luaL_addstring(&B, "nil");
+    } else {
+        snprintf(str, LL_STRBUFF,
+                TNAME ": %p\n",
+                reinterpret_cast<void *>(ccba));
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "    pix           : " LL_PIX "* %p\n", reinterpret_cast<void *>(ccba->pix));
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "    w             : %d\n", ccba->w);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "    h             : %d\n", ccba->h);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "    n             : %d\n", ccba->n);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "    nalloc        : %d\n", ccba->nalloc);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "    ccb           : " LL_CCBORD "* %p\n", reinterpret_cast<void *>(ccba->ccb));
+        luaL_addstring(&B, str);
+    }
+    luaL_pushresult(&B);
+    ll_free(str);
+    return 1;
+}
+
+/**
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
@@ -77,24 +116,6 @@ GetCount(lua_State *L)
     LL_FUNC("GetCount");
     CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
     return ll_push_l_int32(_fun, L, ccbaGetCount(ccba));
-}
-
-/**
- * \brief Add the CCBord* (%ccb) to the CCBorda* (%ccba).
- * <pre>
- * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
- * Arg #2 is expected to be a CCBord* (ccb).
- * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
- */
-static int
-AddCcb(lua_State *L)
-{
-    LL_FUNC("AddCcb");
-    CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
-    CCBord *ccb = ll_check_CCBord(_fun, L, 2);
-    return ll_push_boolean(_fun, L, 0 == ccbaAddCcb(ccba, ccb));
 }
 
 /**
@@ -114,6 +135,24 @@ Create(lua_State *L)
     l_int32 n = ll_opt_l_int32(_fun, L, 2, 1);
     CCBorda *ccba = ccbaCreate(pixs, n);
     return ll_push_CCBorda(_fun, L, ccba);
+}
+
+/**
+ * \brief Add the CCBord* (%ccb) to the CCBorda* (%ccba).
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
+ * Arg #2 is expected to be a CCBord* (ccb).
+ * </pre>
+ * \param L Lua state
+ * \return 1 boolean on the Lua stack
+ */
+static int
+AddCcb(lua_State *L)
+{
+    LL_FUNC("AddCcb");
+    CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
+    CCBord *ccb = ll_check_CCBord(_fun, L, 2);
+    return ll_push_boolean(_fun, L, 0 == ccbaAddCcb(ccba, ccb));
 }
 
 /**
@@ -631,6 +670,7 @@ ll_open_CCBorda(lua_State *L)
         {"__gc",                    Destroy},
         {"__new",                   ll_new_CCBorda},
         {"__len",                   GetCount},
+        {"__tostring",              toString},
         {"AddCcb",                  AddCcb},
         {"Create",                  Create},
         {"Destroy",                 Destroy},

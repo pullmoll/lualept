@@ -30,6 +30,12 @@ print(pad("global box"), box)
 --require "lua/fpix"
 --require "lua/dpix"
 
+local pix = Pix(4,4,32)
+pix:SetAllArbitrary("Medium Violet Red")
+pix:SetPixel(1, 1, "Blue")
+pix:SetPixel(2, 2, "Yellow")
+pix:View("4x4 32bpp",0,0,64.0)
+
 bytes = "The quick brown \0\1\2\3 fox jumps over the lazy dog! 1234567890? - ryryryry\0\0\x00"
 ok = true
 

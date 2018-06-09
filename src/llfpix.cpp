@@ -81,7 +81,7 @@ static int
 toString(lua_State* L)
 {
     LL_FUNC("toString");
-    char str[256];
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
     FPix *fpix = ll_check_FPix(_fun, L, 1);
     luaL_Buffer B;
     void *data;
@@ -100,19 +100,24 @@ toString(lua_State* L)
         refcnt = fpixGetRefcount(fpix);
         fpixGetResolution(fpix, &xres, &yres);
 
-        snprintf(str, sizeof(str), TNAME ": %p\n", reinterpret_cast<void *>(fpix));
+        snprintf(str, LL_STRBUFF,
+                 TNAME ": %p\n", reinterpret_cast<void *>(fpix));
         luaL_addstring(&B, str);
 
-        snprintf(str, sizeof(str), "    width = %d, height = %d, wpl = %d\n", w, h, wpl);
+        snprintf(str, LL_STRBUFF,
+                 "    width = %d, height = %d, wpl = %d\n", w, h, wpl);
         luaL_addstring(&B, str);
 
-        snprintf(str, sizeof(str), "    data = %p, size = %#" PRIx64 "\n", data, size);
+        snprintf(str, LL_STRBUFF,
+                 "    data = %p, size = %#" PRIx64 "\n", data, size);
         luaL_addstring(&B, str);
 
-        snprintf(str, sizeof(str), "    xres = %d, yres = %d, refcount = %d", xres, yres, refcnt);
+        snprintf(str, LL_STRBUFF,
+                 "    xres = %d, yres = %d, refcount = %d", xres, yres, refcnt);
         luaL_addstring(&B, str);
     }
     luaL_pushresult(&B);
+    ll_free(str);
     return 1;
 }
 

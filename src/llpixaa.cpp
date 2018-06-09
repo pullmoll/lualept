@@ -88,6 +88,46 @@ GetCount(lua_State *L)
 }
 
 /**
+ * \brief Printable string for a Pixaa*.
+ * \param L Lua state
+ * \return 1 string on the Lua stack
+ */
+static int
+toString(lua_State* L)
+{
+    LL_FUNC("toString");
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
+    Pixaa *pixaa = ll_check_Pixaa(_fun, L, 1);
+    luaL_Buffer B;
+
+    luaL_buffinit(L, &B);
+    if (!pixaa) {
+        luaL_addstring(&B, "nil");
+    } else {
+        snprintf(str, LL_STRBUFF,
+                 TNAME ": %p\n", reinterpret_cast<void *>(pixaa));
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF,
+                 "    n = %d, nalloc = %d\n",
+                 pixaa->n, pixaa->nalloc);
+        luaL_addstring(&B, str);
+
+        snprintf(str, LL_STRBUFF,
+                 "    " LL_PIXA "** = %p\n",
+                 reinterpret_cast<void *>(pixaa->pixa));
+        luaL_addstring(&B, str);
+
+        snprintf(str, LL_STRBUFF,
+                 "    " LL_BOXA "* = %p",
+                 reinterpret_cast<void *>(pixaa->boxa));
+        luaL_addstring(&B, str);
+    }
+    luaL_pushresult(&B);
+    ll_free(str);
+    return 1;
+}
+
+/**
  * \brief Add a Box* to a Pixaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
@@ -673,6 +713,7 @@ ll_open_Pixaa(lua_State *L)
         {"__gc",                Destroy},
         {"__new",               ll_new_Pixaa},
         {"__len",               GetCount},
+        {"__tostring",          toString},
         {"AddBox",              AddBox},
         {"AddPix",              AddPix},
         {"AddPixa",		AddPixa},

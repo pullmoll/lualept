@@ -65,7 +65,7 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Printable string for a Pix*.
+ * \brief Printable string for a Kernel*.
  * \param L Lua state
  * \return 1 string on the Lua stack
  */
@@ -73,12 +73,12 @@ static int
 toString(lua_State* L)
 {
     LL_FUNC("toString");
-    char str[256];
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
     Kernel *kel = ll_check_Kernel(_fun, L, 1);
     l_int32 sy, sx, cy, cx, y, x;
     l_float32 sum;
     l_float32 val;
-    int len;
+    int len = 0;
     luaL_Buffer B;
 
     luaL_buffinit(L, &B);
@@ -86,10 +86,10 @@ toString(lua_State* L)
         luaL_addstring(&B, "nil");
     } else {
         if (kernelGetParameters(kel, &sy, &sx, &cy, &cx)) {
-            snprintf(str, sizeof(str), "invalid");
+            snprintf(str, LL_STRBUFF, "invalid");
         } else {
             kernelGetSum(kel, &sum);
-            snprintf(str, sizeof(str),
+            snprintf(str, LL_STRBUFF,
                      TNAME ": %p\n"
                      "    sy = %d, sx = %d, cy = %d, cx = %d, sum = %g\n",
                      reinterpret_cast<void *>(kel),
@@ -102,16 +102,17 @@ toString(lua_State* L)
             luaL_addstring(&B, "    ");
             for (x = 0; x < sx; x++) {
                 if (x > 0) {
-                    snprintf(str, sizeof(str), " %*s", 10 - len, "");
+                    snprintf(str, LL_STRBUFF, " %*s", 10 - len, "");
                     luaL_addstring(&B, str);
                 }
                 kernelGetElement(kel, y, x, &val);
-                len = snprintf(str, sizeof(str), "%.6g", static_cast<double>(val));
+                len = snprintf(str, LL_STRBUFF, "%.6g", static_cast<double>(val));
                 luaL_addstring(&B, str);
             }
         }
     }
     luaL_pushresult(&B);
+    ll_free(str);
     return 1;
 }
 

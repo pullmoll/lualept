@@ -152,7 +152,7 @@ static int
 toString(lua_State *L)
 {
     LL_FUNC("toString");
-    char str[256];
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
     Aset *aset = ll_check_Aset(_fun, L, 1);
     AsetNode *node = nullptr;
     luaL_Buffer B;
@@ -162,7 +162,7 @@ toString(lua_State *L)
     if (!aset) {
         luaL_addstring(&B, "nil");
     } else {
-        snprintf(str, sizeof(str), "Aset: %p [%d: %s]",
+        snprintf(str, LL_STRBUFF, TNAME ": %p [%d: %s]",
                  reinterpret_cast<void *>(aset),
                  aset->keytype,
                  ll_string_keytype(aset->keytype));
@@ -177,19 +177,19 @@ toString(lua_State *L)
             }
             switch (aset->keytype) {
             case L_INT_TYPE:
-                snprintf(str, sizeof(str), "    %" PRId64,
+                snprintf(str, LL_STRBUFF, "    %" PRId64,
                          static_cast<l_intptr_t>(node->key.itype));
                 break;
             case L_UINT_TYPE:
-                snprintf(str, sizeof(str), "    %" PRIu64,
+                snprintf(str, LL_STRBUFF, "    %" PRIu64,
                          static_cast<l_uintptr_t>(node->key.itype));
                 break;
             case L_FLOAT_TYPE:
-                snprintf(str, sizeof(str), "    %g",
+                snprintf(str, LL_STRBUFF, "    %g",
                          node->key.ftype);
                 break;
             default:
-                snprintf(str, sizeof(str), "    %p",
+                snprintf(str, LL_STRBUFF, "    %p",
                          node->key.ptype);
             }
             luaL_addstring(&B, str);

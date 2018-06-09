@@ -98,7 +98,7 @@ static int
 toString(lua_State *L)
 {
     LL_FUNC("toString");
-    char str[256];
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
     DLList *head = ll_check_DLList(_fun, L, 1);
     DLList *elem;
     luaL_Buffer B;
@@ -107,10 +107,11 @@ toString(lua_State *L)
     if (!head) {
         luaL_addstring(&B, "nil");
     } else {
-        snprintf(str, sizeof(str), TNAME ": %p", reinterpret_cast<void *>(head));
+        snprintf(str, LL_STRBUFF,
+                 TNAME ": %p", reinterpret_cast<void *>(head));
         luaL_addstring(&B, str);
         L_BEGIN_LIST_FORWARD(head, elem)
-            snprintf(str, sizeof(str),
+            snprintf(str, LL_STRBUFF,
                      "\n    %p = %p",
                      reinterpret_cast<void *>(elem),
                      elem->data);
@@ -118,6 +119,7 @@ toString(lua_State *L)
         L_END_LIST
     }
     luaL_pushresult(&B);
+    ll_free(str);
     return 1;
 }
 

@@ -87,6 +87,46 @@ GetCount(lua_State *L)
 }
 
 /**
+ * \brief Printable string for a Pixa*.
+ * \param L Lua state
+ * \return 1 string on the Lua stack
+ */
+static int
+toString(lua_State* L)
+{
+    LL_FUNC("toString");
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
+    Pixa *pixa = ll_check_Pixa(_fun, L, 1);
+    luaL_Buffer B;
+
+    luaL_buffinit(L, &B);
+    if (!pixa) {
+        luaL_addstring(&B, "nil");
+    } else {
+        snprintf(str, LL_STRBUFF,
+                 TNAME ": %p\n", reinterpret_cast<void *>(pixa));
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF,
+                 "    n = %d, nalloc = %d, refcount = %d\n",
+                 pixa->n, pixa->nalloc, pixa->refcount);
+        luaL_addstring(&B, str);
+
+        snprintf(str, LL_STRBUFF,
+                 "    " LL_PIX "** = %p\n",
+                 reinterpret_cast<void *>(pixa->pix));
+        luaL_addstring(&B, str);
+
+        snprintf(str, LL_STRBUFF,
+                 "    " LL_BOXA "* = %p",
+                 reinterpret_cast<void *>(pixa->boxa));
+        luaL_addstring(&B, str);
+    }
+    luaL_pushresult(&B);
+    ll_free(str);
+    return 1;
+}
+
+/**
  * \brief Add a Pix* (%pix) to a Pixa* (%pixa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa*.
@@ -797,6 +837,7 @@ ll_open_Pixa(lua_State *L)
         {"__gc",                    Destroy},
         {"__new",                   ll_new_Pixa},
         {"__len",                   GetCount},
+        {"__tostring",              toString},
         {"AddPix",                  AddPix},
         {"Clear",                   Clear},
         {"Copy",                    Copy},

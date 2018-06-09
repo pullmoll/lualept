@@ -116,7 +116,7 @@ static int
 toString(lua_State *L)
 {
     LL_FUNC("toString");
-    char str[256];
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
     Numa *da = ll_check_Numa(_fun, L, 1);
     luaL_Buffer B;
     l_int32 i;
@@ -126,16 +126,19 @@ toString(lua_State *L)
     if (!da) {
         luaL_addstring(&B, "nil");
     } else {
-        snprintf(str, sizeof(str), TNAME ": %p", reinterpret_cast<void *>(da));
+        snprintf(str, LL_STRBUFF,
+                 TNAME ": %p", reinterpret_cast<void *>(da));
         luaL_addstring(&B, str);
         for (i = 0; i < numaGetCount(da); i++) {
             numaGetFValue(da, i, &val);
-            snprintf(str, sizeof(str), "\n    %d = %.8g",
+            snprintf(str, LL_STRBUFF,
+                     "\n    %d = %.8g",
                      i+1, static_cast<double>(val));
             luaL_addstring(&B, str);
         }
     }
     luaL_pushresult(&B);
+    ll_free(str);
     return 1;
 }
 

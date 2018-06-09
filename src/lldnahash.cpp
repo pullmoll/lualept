@@ -77,7 +77,7 @@ static int
 toString(lua_State* L)
 {
     LL_FUNC("toString");
-    char str[256];
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
     DnaHash *dh = ll_check_DnaHash(_fun, L, 1);
     luaL_Buffer B;
 
@@ -85,14 +85,17 @@ toString(lua_State* L)
     if (!dh) {
         luaL_addstring(&B, "nil");
     } else {
-        snprintf(str, sizeof(str), TNAME ": %p\n", reinterpret_cast<void *>(dh));
+        snprintf(str, LL_STRBUFF,
+                 TNAME ": %p\n", reinterpret_cast<void *>(dh));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    nbuckets = 0x%x, initsize = 0x%x, dna = %p",
+        snprintf(str, LL_STRBUFF,
+                 "    nbuckets = 0x%x, initsize = 0x%x, dna = %p",
                  dh->nbuckets, dh->initsize,
                  reinterpret_cast<void *>(dh->dna));
         luaL_addstring(&B, str);
     }
     luaL_pushresult(&B);
+    ll_free(str);
     return 1;
 }
 

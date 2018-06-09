@@ -64,6 +64,46 @@ Destroy(lua_State *L)
 }
 
 /**
+ * \brief Printable string for a PixaComp*.
+ * \param L Lua state
+ * \return 1 string on the Lua stack
+ */
+static int
+toString(lua_State* L)
+{
+    LL_FUNC("toString");
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
+    PixaComp *pixac = ll_check_PixaComp(_fun, L, 1);
+    luaL_Buffer B;
+
+    luaL_buffinit(L, &B);
+    if (!pixac) {
+        luaL_addstring(&B, "nil");
+    } else {
+        snprintf(str, LL_STRBUFF,
+                 TNAME ": %p\n", reinterpret_cast<void *>(pixac));
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF,
+                 "    n = %d, nalloc = %d, offset = %d\n",
+                 pixac->n, pixac->nalloc, pixac->offset);
+        luaL_addstring(&B, str);
+
+        snprintf(str, LL_STRBUFF,
+                 "    " LL_PIXCOMP "** = %p\n",
+                 reinterpret_cast<void *>(pixac->pixc));
+        luaL_addstring(&B, str);
+
+        snprintf(str, LL_STRBUFF,
+                 "    " LL_BOXA "* = %p",
+                 reinterpret_cast<void *>(pixac->boxa));
+        luaL_addstring(&B, str);
+    }
+    luaL_pushresult(&B);
+    ll_free(str);
+    return 1;
+}
+
+/**
  * \brief Create a new PixaComp*.
  * <pre>
  * Arg #1 is expected to be a l_int32 (n).
@@ -162,6 +202,7 @@ ll_open_PixaComp(lua_State *L)
     static const luaL_Reg methods[] = {
         {"__gc",                Destroy},
         {"__new",               ll_new_PixaComp},
+        {"__tostring",          toString},
         {"Create",              Create},
         {"Destroy",             Destroy},
         LUA_SENTINEL

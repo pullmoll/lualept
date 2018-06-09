@@ -65,6 +65,52 @@ Destroy(lua_State *L)
 }
 
 /**
+ * \brief Printable string for a PixColormap*.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a PixColormap* (cmaps).
+ * </pre>
+ * \param L Lua state
+ * \return 1 string on the Lua stack
+ */
+static int
+toString(lua_State *L)
+{
+    LL_FUNC("toString");
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
+    PixTiling *pixt = ll_check_PixTiling(_fun, L, 1);
+    luaL_Buffer B;
+
+    luaL_buffinit(L, &B);
+
+    if (!pixt) {
+        luaL_addstring(&B, "nil");
+    } else {
+        snprintf(str, LL_STRBUFF,
+                 TNAME ": %p",
+                 reinterpret_cast<void *>(pixt));
+        luaL_addstring(&B, str);
+
+        snprintf(str, LL_STRBUFF,
+                 "    " LL_PIX "*: %p\n",
+                 reinterpret_cast<void *>(pixt->pix));
+        luaL_addstring(&B, str);
+
+        snprintf(str, LL_STRBUFF,
+                 "    nx = %d, ny = %d, w = %d, h = %d\n",
+                 pixt->nx, pixt->ny, pixt->w, pixt->h);
+        luaL_addstring(&B, str);
+
+        snprintf(str, LL_STRBUFF,
+                 "    xoverlap = %d, yoverlap = %d, strip = %d\n",
+                 pixt->xoverlap, pixt->yoverlap, pixt->strip);
+        luaL_addstring(&B, str);
+    }
+    luaL_pushresult(&B);
+    ll_free(str);
+    return 1;
+}
+
+/**
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. stackf) is expected to be a PixTiling* (lstack).
@@ -81,7 +127,7 @@ GetCount(lua_State *L)
     l_int32 ny = 0;
     if (pixTilingGetCount(pt, &nx, &ny))
         return ll_push_nil(L);
-    return ll_push_l_int32(_fun, L, nx) + ll_push_l_int32(_fun, L, ny);
+    return ll_push_l_int32(_fun, L, nx * ny);
 }
 
 /**
@@ -126,6 +172,124 @@ Create(lua_State *L)
     l_int32 yoverlap = ll_check_l_int32(_fun, L, 7);
     PixTiling *pixt = pixTilingCreate(pixs, nx, ny, w, h, xoverlap, yoverlap);
     return ll_push_PixTiling (_fun, L, pixt);
+}
+
+/**
+ * \brief GetCount() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a PixTiling* (pt).
+ *
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 2 on the Lua stack
+ */
+static int
+GetCountXY(lua_State *L)
+{
+    LL_FUNC("GetCountXY");
+    PixTiling *pt = ll_check_PixTiling(_fun, L, 1);
+    l_int32 nx = 0;
+    l_int32 ny = 0;
+    if (pixTilingGetCount(pt, &nx, &ny))
+        return ll_push_nil(L);
+    ll_push_l_int32(_fun, L, nx);
+    ll_push_l_int32(_fun, L, ny);
+    return 2;
+}
+
+/**
+ * \brief GetSize() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a PixTiling* (pt).
+ *
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 2 on the Lua stack
+ */
+static int
+GetSize(lua_State *L)
+{
+    LL_FUNC("GetSize");
+    PixTiling *pt = ll_check_PixTiling(_fun, L, 1);
+    l_int32 w = 0;
+    l_int32 h = 0;
+    if (pixTilingGetSize(pt, &w, &h))
+        return ll_push_nil(L);
+    ll_push_l_int32(_fun, L, w);
+    ll_push_l_int32(_fun, L, h);
+    return 2;
+}
+
+/**
+ * \brief GetTile() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a PixTiling* (pt).
+ * Arg #2 is expected to be an index (i).
+ * Arg #3 is expected to be an index (j).
+ *
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+GetTile(lua_State *L)
+{
+    LL_FUNC("GetTile");
+    PixTiling *pt = ll_check_PixTiling(_fun, L, 1);
+    l_int32 i = ll_check_index(_fun, L, 2);
+    l_int32 j = ll_check_index(_fun, L, 3);
+    Pix *pix = pixTilingGetTile(pt, i, j);
+    return ll_push_Pix(_fun, L, pix);
+}
+
+/**
+ * \brief NoStripOnPaint() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a PixTiling* (pt).
+ *
+ * Leptonica's Notes:
+ *      (1) The default for paint is to strip out the overlap pixels
+ *          that are added by pixTilingGetTile().  However, some
+ *          operations will generate an image with these pixels
+ *          stripped off.  This tells the paint operation not
+ *          to strip the added boundary pixels when painting.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 0 on the Lua stack
+ */
+static int
+NoStripOnPaint(lua_State *L)
+{
+    LL_FUNC("NoStripOnPaint");
+    PixTiling *pt = ll_check_PixTiling(_fun, L, 1);
+    l_ok ok = pixTilingNoStripOnPaint(pt);
+    return ll_push_boolean(_fun, L, 0 == ok);
+}
+
+/**
+ * \brief PaintTile() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a PixTiling* (pt).
+ * Arg #2 is expected to be a l_int32 (i).
+ * Arg #3 is expected to be a l_int32 (j).
+ * Arg #4 is expected to be a Pix* (pixd).
+ * Arg #5 is expected to be a Pix* (pixs).
+ *
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 0 on the Lua stack
+ */
+static int
+PaintTile(lua_State *L)
+{
+    LL_FUNC("PaintTile");
+    PixTiling *pt = ll_check_PixTiling(_fun, L, 1);
+    l_int32 i = ll_check_l_int32(_fun, L, 2);
+    l_int32 j = ll_check_l_int32(_fun, L, 3);
+    Pix *pixd = ll_check_Pix(_fun, L, 4);
+    Pix *pixs = ll_check_Pix(_fun, L, 5);
+    l_ok ok = pixTilingPaintTile(pixd, i, j, pixs, pt);
+    return ll_push_boolean(_fun, L, 0 == ok);
 }
 
 /**
@@ -209,8 +373,14 @@ ll_open_PixTiling(lua_State *L)
         {"__gc",                Destroy},
         {"__new",               ll_new_PixTiling},
         {"__len",               GetCount},
+        {"__tostring",          toString},
         {"Create",              Create},
         {"Destroy",             Destroy},
+        {"GetCount",            GetCountXY},
+        {"GetSize",             GetSize},
+        {"GetTile",             GetTile},
+        {"NoStripOnPaint",      NoStripOnPaint},
+        {"PaintTile",           PaintTile},         /* same as Pix.PaintTile() with arguments swapped */
         LUA_SENTINEL
     };
     LO_FUNC(TNAME);

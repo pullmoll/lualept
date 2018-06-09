@@ -78,7 +78,7 @@ static int
 toString(lua_State *L)
 {
     LL_FUNC("toString");
-    char str[256];
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
     Box *box = ll_check_Box(_fun, L, 1);
     luaL_Buffer B;
     l_int32 x, y, w, h;
@@ -87,14 +87,14 @@ toString(lua_State *L)
     if (!box) {
         luaL_addstring(&B, "nil");
     } else {
-        snprintf(str, sizeof(str),
+        snprintf(str, LL_STRBUFF,
                  TNAME ": %p\n",
                  reinterpret_cast<void *>(box));
         luaL_addstring(&B, str);
         if (boxGetGeometry(box, &x, &y, &w, &h)) {
-            snprintf(str, sizeof(str), "invalid");
+            snprintf(str, LL_STRBUFF, "invalid");
         } else {
-            snprintf(str, sizeof(str), "    %s = %d, %s = %d, %s = %d, %s = %d, %s = %d",
+            snprintf(str, LL_STRBUFF, "    %s = %d, %s = %d, %s = %d, %s = %d, %s = %d",
                      "x", x,
                      "y", y,
                      "w", w,
@@ -104,6 +104,7 @@ toString(lua_State *L)
         luaL_addstring(&B, str);
     }
     luaL_pushresult(&B);
+    ll_free(str);
     return 1;
 }
 

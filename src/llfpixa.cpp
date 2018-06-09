@@ -86,6 +86,40 @@ GetCount(lua_State *L)
 }
 
 /**
+ * \brief Printable string for a FPixa* (%fpixa).
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a FPix* (fpixs).
+ * </pre>
+ * \param L Lua state
+ * \return 1 string on the Lua stack
+ */
+static int
+toString(lua_State* L)
+{
+    LL_FUNC("toString");
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
+    FPixa *fpixa = ll_check_FPixa(_fun, L, 1);
+    luaL_Buffer B;
+
+    luaL_buffinit(L, &B);
+    if (!fpixa) {
+        luaL_addstring(&B, "nil");
+    } else {
+        snprintf(str, LL_STRBUFF,
+                 TNAME ": %p\n", reinterpret_cast<void *>(fpixa));
+        luaL_addstring(&B, str);
+
+        snprintf(str, LL_STRBUFF,
+                 "    n = %d, nalloc = %d, refcount = %d\n",
+                 fpixa->n, fpixa->nalloc, fpixa->refcount);
+        luaL_addstring(&B, str);
+    }
+    luaL_pushresult(&B);
+    ll_free(str);
+    return 1;
+}
+
+/**
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a FPixa* (fpixa).

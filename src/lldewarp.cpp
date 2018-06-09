@@ -73,7 +73,7 @@ static int
 toString(lua_State *L)
 {
     LL_FUNC("toString");
-    char str[256];
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
     Dewarp *dew = ll_check_Dewarp(_fun, L, 1);
     luaL_Buffer B;
 
@@ -81,81 +81,82 @@ toString(lua_State *L)
     if (!dew) {
         luaL_addstring(&B, "nil");
     } else {
-        snprintf(str, sizeof(str),
+        snprintf(str, LL_STRBUFF,
                  TNAME ": %p\n",
                  reinterpret_cast<void *>(dew));
         luaL_addstring(&B, str);
         /* TODO: more info */
-        snprintf(str, sizeof(str), "    dewa (parent) : " LL_DEWARPA "* %p\n", reinterpret_cast<void *>(dew->dewa));
+        snprintf(str, LL_STRBUFF, "    dewa (parent) : " LL_DEWARPA "* %p\n", reinterpret_cast<void *>(dew->dewa));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    pixs          : " LL_PIX "* %p\n", reinterpret_cast<void *>(dew->pixs));
+        snprintf(str, LL_STRBUFF, "    pixs          : " LL_PIX "* %p\n", reinterpret_cast<void *>(dew->pixs));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    sampvdispar   : " LL_FPIX "* %p\n", reinterpret_cast<void *>(dew->sampvdispar));
+        snprintf(str, LL_STRBUFF, "    sampvdispar   : " LL_FPIX "* %p\n", reinterpret_cast<void *>(dew->sampvdispar));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    samphdispar   : " LL_FPIX "* %p\n", reinterpret_cast<void *>(dew->samphdispar));
+        snprintf(str, LL_STRBUFF, "    samphdispar   : " LL_FPIX "* %p\n", reinterpret_cast<void *>(dew->samphdispar));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    sampydispar   : " LL_FPIX "* %p\n", reinterpret_cast<void *>(dew->sampydispar));
+        snprintf(str, LL_STRBUFF, "    sampydispar   : " LL_FPIX "* %p\n", reinterpret_cast<void *>(dew->sampydispar));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    fullvdispar   : " LL_FPIX "* %p\n", reinterpret_cast<void *>(dew->fullvdispar));
+        snprintf(str, LL_STRBUFF, "    fullvdispar   : " LL_FPIX "* %p\n", reinterpret_cast<void *>(dew->fullvdispar));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    fullhdispar   : " LL_FPIX "* %p\n", reinterpret_cast<void *>(dew->fullhdispar));
+        snprintf(str, LL_STRBUFF, "    fullhdispar   : " LL_FPIX "* %p\n", reinterpret_cast<void *>(dew->fullhdispar));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    fullydispar   : " LL_FPIX "* %p\n", reinterpret_cast<void *>(dew->fullydispar));
+        snprintf(str, LL_STRBUFF, "    fullydispar   : " LL_FPIX "* %p\n", reinterpret_cast<void *>(dew->fullydispar));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    namidys       : " LL_NUMA "* %p\n", reinterpret_cast<void *>(dew->namidys));
+        snprintf(str, LL_STRBUFF, "    namidys       : " LL_NUMA "* %p\n", reinterpret_cast<void *>(dew->namidys));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    nacurves      : " LL_NUMA "* %p\n", reinterpret_cast<void *>(dew->nacurves));
+        snprintf(str, LL_STRBUFF, "    nacurves      : " LL_NUMA "* %p\n", reinterpret_cast<void *>(dew->nacurves));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    w             :  %d\n", dew->w);
+        snprintf(str, LL_STRBUFF, "    w             :  %d\n", dew->w);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    h             :  %d\n", dew->h);
+        snprintf(str, LL_STRBUFF, "    h             :  %d\n", dew->h);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    pageno        :  %d\n", dew->pageno);
+        snprintf(str, LL_STRBUFF, "    pageno        :  %d\n", dew->pageno);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    sampling      :  %d\n", dew->sampling);
+        snprintf(str, LL_STRBUFF, "    sampling      :  %d\n", dew->sampling);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    redfactor     :  %d\n", dew->redfactor);
+        snprintf(str, LL_STRBUFF, "    redfactor     :  %d\n", dew->redfactor);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    minlines      :  %d\n", dew->minlines);
+        snprintf(str, LL_STRBUFF, "    minlines      :  %d\n", dew->minlines);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    nlines        :  %d\n", dew->nlines);
+        snprintf(str, LL_STRBUFF, "    nlines        :  %d\n", dew->nlines);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    mincurv       :  %d\n", dew->mincurv);
+        snprintf(str, LL_STRBUFF, "    mincurv       :  %d\n", dew->mincurv);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    maxcurv       :  %d\n", dew->maxcurv);
+        snprintf(str, LL_STRBUFF, "    maxcurv       :  %d\n", dew->maxcurv);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    leftslope     :  %d\n", dew->leftslope);
+        snprintf(str, LL_STRBUFF, "    leftslope     :  %d\n", dew->leftslope);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    rightslope    :  %d\n", dew->rightslope);
+        snprintf(str, LL_STRBUFF, "    rightslope    :  %d\n", dew->rightslope);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    leftcurv      :  %d\n", dew->leftcurv);
+        snprintf(str, LL_STRBUFF, "    leftcurv      :  %d\n", dew->leftcurv);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    rightcurv     :  %d\n", dew->rightcurv);
+        snprintf(str, LL_STRBUFF, "    rightcurv     :  %d\n", dew->rightcurv);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    nx            :  %d\n", dew->nx);
+        snprintf(str, LL_STRBUFF, "    nx            :  %d\n", dew->nx);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    ny            :  %d\n", dew->ny);
+        snprintf(str, LL_STRBUFF, "    ny            :  %d\n", dew->ny);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    hasref        :  %d\n", dew->hasref);
+        snprintf(str, LL_STRBUFF, "    hasref        :  %d\n", dew->hasref);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    refpage       :  %d\n", dew->refpage);
+        snprintf(str, LL_STRBUFF, "    refpage       :  %d\n", dew->refpage);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    vsuccess      :  %d\n", dew->vsuccess);
+        snprintf(str, LL_STRBUFF, "    vsuccess      :  %d\n", dew->vsuccess);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    hsuccess      :  %d\n", dew->hsuccess);
+        snprintf(str, LL_STRBUFF, "    hsuccess      :  %d\n", dew->hsuccess);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    ysuccess      :  %d\n", dew->ysuccess);
+        snprintf(str, LL_STRBUFF, "    ysuccess      :  %d\n", dew->ysuccess);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    vvalid        :  %d\n", dew->vvalid);
+        snprintf(str, LL_STRBUFF, "    vvalid        :  %d\n", dew->vvalid);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    hvalid        :  %d\n", dew->hvalid);
+        snprintf(str, LL_STRBUFF, "    hvalid        :  %d\n", dew->hvalid);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    skip_horiz    :  %d\n", dew->skip_horiz);
+        snprintf(str, LL_STRBUFF, "    skip_horiz    :  %d\n", dew->skip_horiz);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    debug         :  %d\n", dew->debug);
+        snprintf(str, LL_STRBUFF, "    debug         :  %d\n", dew->debug);
         luaL_addstring(&B, str);
     }
     luaL_pushresult(&B);
+    ll_free(str);
     return 1;
 }
 

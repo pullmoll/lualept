@@ -281,7 +281,7 @@ static int
 toString(lua_State* L)
 {
     LL_FUNC("toString");
-    char str[256];
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
     Pix *pix = ll_check_Pix(_fun, L, 1);
     luaL_Buffer B;
     const char* format = nullptr;
@@ -307,19 +307,24 @@ toString(lua_State* L)
             refcnt = pixGetRefcount(pix);
             format = ll_string_input_format(pixGetInputFormat(pix));
 
-            snprintf(str, sizeof(str), TNAME ": %p\n", reinterpret_cast<void *>(pix));
+            snprintf(str, LL_STRBUFF,
+                     TNAME ": %p\n", reinterpret_cast<void *>(pix));
             luaL_addstring(&B, str);
 
-            snprintf(str, sizeof(str), "    width = %d, height = %d, depth = %d, spp = %d\n", w, h, d, spp);
+            snprintf(str, LL_STRBUFF,
+                     "    width = %d, height = %d, depth = %d, spp = %d\n", w, h, d, spp);
             luaL_addstring(&B, str);
 
-            snprintf(str, sizeof(str), "    wpl = %d, data = %p, size = %#" PRIx64 "\n", wpl, data, size);
+            snprintf(str, LL_STRBUFF,
+                     "    wpl = %d, data = %p, size = %#" PRIx64 "\n", wpl, data, size);
             luaL_addstring(&B, str);
 
-            snprintf(str, sizeof(str), "    xres = %d, yres = %d, refcount = %d\n", xres, yres, refcnt);
+            snprintf(str, LL_STRBUFF,
+                     "    xres = %d, yres = %d, refcount = %d\n", xres, yres, refcnt);
             luaL_addstring(&B, str);
 
-            snprintf(str, sizeof(str), "    format = %s\n", format);
+            snprintf(str, LL_STRBUFF,
+                     "    format = %s\n", format);
             luaL_addstring(&B, str);
         }
 
@@ -327,24 +332,26 @@ toString(lua_State* L)
         if (cmap) {
             ccnt = pixcmapGetCount(cmap);
             ctot = pixcmapGetFreeCount(cmap) + ccnt;
-            snprintf(str, sizeof(str),
+            snprintf(str, LL_STRBUFF,
                      "    colormap: %d of %d colors\n", ccnt, ctot);
         } else {
-            snprintf(str, sizeof(str),
+            snprintf(str, LL_STRBUFF,
                      "    no colormap\n");
         }
         luaL_addstring(&B, str);
 
         text = pixGetText(pix);
         if (text) {
-            snprintf(str, sizeof(str),
+            snprintf(str, LL_STRBUFF,
                      "    text: %s", text);
         } else {
-            snprintf(str, sizeof(str), "    no text");
+            snprintf(str, LL_STRBUFF,
+                     "    no text");
         }
         luaL_addstring(&B, str);
     }
     luaL_pushresult(&B);
+    ll_free(str);
     return 1;
 }
 
