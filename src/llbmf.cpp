@@ -67,7 +67,7 @@ Destroy(lua_State *L)
  *
  * Arg #1 is expected to be a string (dir).
  * Arg #2 is expected to be a l_int32 (fontsize).
- *
+ * <pre>
  * Leptonica's Notes:
  *      (1) If %dir == null, this generates the font bitmaps from a
  *          compiled string.
@@ -76,6 +76,7 @@ Destroy(lua_State *L)
  *          attempts to generate the pixa and associated baseline
  *          data from a tiff image containing all the characters.  If
  *          that fails, it uses the compiled string.
+ * </pre>
  * \param L Lua state
  * \return 1 Bmf* on the Lua stack
  */
