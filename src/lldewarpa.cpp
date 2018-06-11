@@ -683,7 +683,7 @@ SetCheckColumns(lua_State *L)
  * Arg #7 is expected to be a l_int32 (max_edgeslope).
  *
  * Leptonica's Notes:
- *      (1) Approximating the line by a quadratic, the coefficent
+ *      (1) Approximating the line by a quadratic, the coefficient
  *          of the quadratic term is the curvature, and distance
  *          units are in pixels (of course).  The curvature is very
  *          small, so we multiply by 10^6 and express the constraints
