@@ -503,6 +503,45 @@ GetSelnames(lua_State *L)
 }
 
 /**
+ * \brief MakeThinSets() brief comment goes here.
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (index).
+ * Arg #2 is expected to be a boolean (debug).
+ *
+ * Leptonica's Notes:
+ *      (1) These are specific sets of HMTs to be used in parallel for
+ *          for thinning from each of four directions.
+ *      (2) The sets are indexed as follows:
+ *          For thinning (e.g., run to completion):
+ *              index = 1     sel_4_1, sel_4_2, sel_4_3
+ *              index = 2     sel_4_1, sel_4_5, sel_4_6
+ *              index = 3     sel_4_1, sel_4_7, sel_4_7_rot
+ *              index = 4     sel_48_1, sel_48_1_rot, sel_48_2
+ *              index = 5     sel_8_2, sel_8_3, sel_8_5, sel_8_6
+ *              index = 6     sel_8_2, sel_8_3, sel_48_2
+ *              index = 7     sel_8_1, sel_8_5, sel_8_6
+ *              index = 8     sel_8_2, sel_8_3, sel_8_8, sel_8_9
+ *              index = 9     sel_8_5, sel_8_6, sel_8_7, sel_8_7_rot
+ *          For thickening (e.g., just a few iterations):
+ *              index = 10    sel_4_2, sel_4_3
+ *              index = 11    sel_8_4
+ *      (3) For a very smooth skeleton, use set 1 for 4 connected and
+ *          set 5 for 8 connected thins.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+MakeThinSets(lua_State *L)
+{
+    LL_FUNC("MakeThinSets");
+    l_int32 index = ll_check_index(_fun, L, 1);
+    l_int32 debug = ll_opt_boolean(_fun, L, 2);
+    Sela *sela = selaMakeThinSets(index, debug);
+    return ll_push_Sela(_fun, L, sela);
+}
+
+/**
  * \brief Read a Sela* from an external file.
  * <pre>
  * Arg #1 is expected to be a string containing the filename.
@@ -621,45 +660,6 @@ GetCombName(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
- * <pre>
- * Arg #1 (i.e. self) is expected to be a l_int32 (index).
- * Arg #2 is expected to be a l_int32 (debug).
- *
- * Leptonica's Notes:
- *      (1) These are specific sets of HMTs to be used in parallel for
- *          for thinning from each of four directions.
- *      (2) The sets are indexed as follows:
- *          For thinning (e.g., run to completion):
- *              index = 1     sel_4_1, sel_4_2, sel_4_3
- *              index = 2     sel_4_1, sel_4_5, sel_4_6
- *              index = 3     sel_4_1, sel_4_7, sel_4_7_rot
- *              index = 4     sel_48_1, sel_48_1_rot, sel_48_2
- *              index = 5     sel_8_2, sel_8_3, sel_8_5, sel_8_6
- *              index = 6     sel_8_2, sel_8_3, sel_48_2
- *              index = 7     sel_8_1, sel_8_5, sel_8_6
- *              index = 8     sel_8_2, sel_8_3, sel_8_8, sel_8_9
- *              index = 9     sel_8_5, sel_8_6, sel_8_7, sel_8_7_rot
- *          For thickening (e.g., just a few iterations):
- *              index = 10    sel_4_2, sel_4_3
- *              index = 11    sel_8_4
- *      (3) For a very smooth skeleton, use set 1 for 4 connected and
- *          set 5 for 8 connected thins.
- * </pre>
- * \param L Lua state
- * \return 1 Sela * on the Lua stack
- */
-static int
-MakeThinSets(lua_State *L)
-{
-    LL_FUNC("MakeThinSets");
-    l_int32 index = ll_check_l_int32(_fun, L, 1);
-    l_int32 debug = ll_opt_boolean(_fun, L, 2, FALSE);
-    Sela *sela = selaMakeThinSets(index, debug);
-    return ll_push_Sela(_fun, L, sela);
-}
-
-/**
  * \brief Check Lua stack at index %arg for udata of class Sela*.
  * \param _fun calling function's name
  * \param L Lua state
@@ -769,16 +769,13 @@ ll_open_Sela(lua_State *L)
         {"__new",               ll_new_Sela},
         {"__len",               GetCount},
         {"__tostring",          toString},
-        {"Thin4and8cc",         Thin4and8cc},
-        {"Thin4cc",             Thin4cc},
-        {"Thin8cc",             Thin8cc},
         {"AddBasic",            AddBasic},
         {"AddCrossJunctions",   AddCrossJunctions},
         {"AddDwaCombs",         AddDwaCombs},
         {"AddDwaLinear",        AddDwaLinear},
         {"AddHitMiss",          AddHitMiss},
-        {"AddTJunctions",       AddTJunctions},
         {"AddSel",              AddSel},
+        {"AddTJunctions",       AddTJunctions},
         {"Create",              Create},
         {"CreateFromFile",      CreateFromFile},
         {"Destroy",             Destroy},
@@ -789,6 +786,9 @@ ll_open_Sela(lua_State *L)
         {"GetSelnames",         GetSelnames},
         {"Read",                Read},
         {"ReadStream",          ReadStream},
+        {"Thin4and8cc",         Thin4and8cc},
+        {"Thin4cc",             Thin4cc},
+        {"Thin8cc",             Thin8cc},
         {"Write",               Write},
         {"WriteStream",         WriteStream},
         LUA_SENTINEL

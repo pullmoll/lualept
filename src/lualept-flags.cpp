@@ -168,9 +168,15 @@ static const lept_enum tbl_debug[] = {
     TBL_ENTRY("string",         LOG_PUSH_STRING | LOG_CHECK_STRING),
     TBL_ENTRY("push-string",    LOG_PUSH_STRING),
     TBL_ENTRY("check-string",   LOG_CHECK_STRING),
+    TBL_ENTRY("cfunction",      LOG_PUSH_CFUNCTION | LOG_CHECK_CFUNCTION),
+    TBL_ENTRY("push-cfunction", LOG_PUSH_CFUNCTION),
+    TBL_ENTRY("check-cfunction",LOG_CHECK_CFUNCTION),
     TBL_ENTRY("udata",          LOG_PUSH_UDATA | LOG_CHECK_UDATA),
     TBL_ENTRY("push-udata",     LOG_PUSH_UDATA),
     TBL_ENTRY("check-udata",    LOG_CHECK_UDATA),
+    TBL_ENTRY("ludata",         LOG_PUSH_LUDATA | LOG_CHECK_LUDATA),
+    TBL_ENTRY("push-ludata",    LOG_PUSH_LUDATA),
+    TBL_ENTRY("check-ludata",   LOG_CHECK_LUDATA),
     TBL_ENTRY("array",          LOG_PUSH_ARRAY | LOG_CHECK_ARRAY),
     TBL_ENTRY("push-array",     LOG_PUSH_ARRAY),
     TBL_ENTRY("check-array",    LOG_CHECK_ARRAY),
@@ -210,9 +216,9 @@ ll_string_debug(l_int32 flag)
             continue;
         flag &= ~bit;
         if (dst > str) {
-            dst += snprintf(dst, sizeof(str) - (size_t(dst - str)), "|");
+            dst += snprintf(dst, sizeof(str) - static_cast<size_t>(dst - str), "|");
         }
-        dst += snprintf(dst, sizeof(str) - (size_t(dst - str)), "%s", e->key);
+        dst += snprintf(dst, sizeof(str) - static_cast<size_t>(dst - str), "%s", e->key);
     }
     return str;
 }

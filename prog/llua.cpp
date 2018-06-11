@@ -55,6 +55,12 @@ char printable(l_uint8 ch)
 void hexdump(ll_bytes_t *bytes)
 {
     size_t i, j;
+
+    if (nullptr == bytes)
+        return;
+    if (0 == bytes->size)
+        return;
+
     for (i = 0; i < bytes->size; i++) {
         if (0 == i % 16)
             printf("%04lx: ", i);

@@ -116,10 +116,14 @@ enum dbg_enable_flags {
     LOG_CHECK_STRING    = (1<<12),  /*!< log checking for strings */
     LOG_PUSH_TABLE      = (1<<13),  /*!< log pushing tables */
     LOG_CHECK_TABLE     = (1<<14),  /*!< log checking for tables */
-    LOG_PUSH_UDATA      = (1<<15),  /*!< log pushing user data */
-    LOG_CHECK_UDATA     = (1<<16),  /*!< log checking for use data */
-    LOG_PUSH_ARRAY      = (1<<17),  /*!< log pushing table arrays */
-    LOG_CHECK_ARRAY     = (1<<18),  /*!< log checking for table arrays */
+    LOG_PUSH_CFUNCTION  = (1<<15),  /*!< log pushing C functions */
+    LOG_CHECK_CFUNCTION = (1<<16),  /*!< log checking for C functions */
+    LOG_PUSH_UDATA      = (1<<17),  /*!< log pushing user data */
+    LOG_CHECK_UDATA     = (1<<18),  /*!< log checking for user data */
+    LOG_PUSH_LUDATA     = (1<<19),  /*!< log pushing light user data */
+    LOG_CHECK_LUDATA    = (1<<20),  /*!< log checking for light user data */
+    LOG_PUSH_ARRAY      = (1<<21),  /*!< log pushing table arrays */
+    LOG_CHECK_ARRAY     = (1<<22),  /*!< log checking for table arrays */
     LOG_SDL2            = (1<<30)   /*!< log SDL2 display code */
 };
 

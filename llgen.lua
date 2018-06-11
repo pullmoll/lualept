@@ -535,6 +535,7 @@ function parse(fd, str)
 				L_RBTREE	= "Rbtree",
 				L_STACK		= "Stack",
 				L_STRCODE	= "StrCode",
+				L_TIMER		= "Timer",
 				L_WALLTIMER	= "WallTimer",
 				L_WSHED		= "WShed",
 				NUMA		= "Numa",

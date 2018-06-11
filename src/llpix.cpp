@@ -8025,7 +8025,7 @@ ConvertToPdf(lua_State *L)
     const char *title = ll_check_string(_fun, L, 8);
     PdfData *lpd = ll_opt_PdfData(_fun, L, 9);
     l_int32 position = ll_check_position(_fun, L, 10, 0);
-    if (pixConvertToPdf(pix, type, quality, fileout, x, y, res, title, &lpd, position))
+    if (pixConvertToPdf(pix, type, quality, fileout, x, y, res, title, position ? &lpd : nullptr, position))
         return ll_push_nil(L);
     ll_push_PdfData(_fun, L, lpd);
     return 1;

@@ -69,7 +69,9 @@ typedef L_QUEUE             Queue;          /*!< Local type name for L_QUEUE */
 typedef L_RBTREE	    Rbtree;         /*!< Local type name for L_RBTREE */
 typedef L_RBTREE_NODE       RbtreeNode;     /*!< Local type name for L_RBTREE_NODE */
 typedef L_STACK             Stack;          /*!< Local type name for L_STACK */
-typedef L_WSHED             WShed;          /*!< Local type name for L_WSched */
+typedef void*               Timer;          /*!< Local type name for L_TIMER */
+typedef L_WALLTIMER         WallTimer;      /*!< Local type name for L_WALLTIMER */
+typedef L_WSHED             WShed;          /*!< Local type name for L_WSHED */
 
 /**
  * Enumeration of types supported in the set / get global variable functions

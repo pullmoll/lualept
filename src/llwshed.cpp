@@ -317,10 +317,10 @@ ll_open_WShed(lua_State *L)
         {"__gc",                Destroy},
         {"__new",               ll_new_WShed},
         {"__tostring",          toString},
-        {"Create",              Create},
-        {"Destroy",             Destroy},
         {"Apply",               Apply},
         {"Basins",              Basins},
+        {"Create",              Create},
+        {"Destroy",             Destroy},
         {"RenderColors",        RenderColors},
         {"RenderFill",          RenderFill},
         LUA_SENTINEL

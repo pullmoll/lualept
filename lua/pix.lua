@@ -123,5 +123,5 @@ pix3:View()
 print(pad("pix3"), pix3)
 local ok = pix3:Write(tmpdir .. "/carray.tiff", "lzw")
 
-local data, pdf = pix3:ConvertToPdf("jpg", 75, tmpdir .. "/carray.pdf", 0, 0, 300, "A PixColormap array")
+local data, pdf = pix3:ConvertToPdf("jpg", 75, tmpdir .. "/carray.pdf", 0, 0, 150, "A PixColormap array")
 print(pad("pix3:ConvertToPdf(...)"), pdf)

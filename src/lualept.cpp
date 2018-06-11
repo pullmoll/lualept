@@ -208,11 +208,12 @@ ll_ludata(const char *_fun, lua_State *L, int arg)
 {
     void *ptr = lua_islightuserdata(L, arg) ? lua_touserdata(L, arg) : nullptr;
     UNUSED(_fun);
+    DBG(LOG_CHECK_LUDATA, "%s: ptr = %p\n", _fun, ptr);
     return ptr;
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata with %tname.
+ * \brief Check Lua stack at index %arg for user data with %tname.
  * \param _fun calling function's name
  * \param L Lua state
  * \param arg argument index
@@ -248,7 +249,8 @@ int
 ll_isnumber(const char *_fun, lua_State *L, int arg)
 {
     int res = lua_isnumber(L, arg);
-    DBG(LOG_CHECK_INTEGER, "%s: res=%s\n", _fun, res ? "TRUE" : "FALSE");
+    UNUSED(_fun);
+    DBG(LOG_CHECK_NUMBER, "%s: res=%s\n", _fun, res ? "TRUE" : "FALSE");
     return res;
 }
 
@@ -263,6 +265,7 @@ int
 ll_isstring(const char *_fun, lua_State *L, int arg)
 {
     int res = lua_isstring(L, arg);
+    UNUSED(_fun);
     DBG(LOG_CHECK_STRING, "%s: res=%s\n", _fun, res ? "TRUE" : "FALSE");
     return res;
 }
@@ -277,7 +280,8 @@ ll_isstring(const char *_fun, lua_State *L, int arg)
 int
 ll_iscfunction(const char *_fun, lua_State *L, int arg)
 {
-    int res = lua_isstring(L, arg);
+    int res = lua_iscfunction(L, arg);
+    UNUSED(_fun);
     DBG(LOG_CHECK_STRING, "%s: res=%s\n", _fun, res ? "TRUE" : "FALSE");
     return res;
 }
@@ -293,6 +297,7 @@ int
 ll_isinteger(const char *_fun, lua_State *L, int arg)
 {
     int res = lua_isinteger(L, arg);
+    UNUSED(_fun);
     DBG(LOG_CHECK_INTEGER, "%s: res=%s\n", _fun, res ? "TRUE" : "FALSE");
     return res;
 }
@@ -3241,6 +3246,180 @@ MaxComponent(lua_State *L)
 }
 
 /**
+ * \brief CheckForChars() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a const char* (src).
+ * Arg #2 is expected to be a const char* (chars).
+ *
+ * Leptonica's Notes:
+ *      (1) This can be used to sanitize an operation by checking for
+ *          special characters that don't belong in a string.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+CheckForChars(lua_State *L)
+{
+    LL_FUNC("CheckForChars");
+    const char *src = ll_check_string(_fun, L, 1);
+    const char *chars = ll_check_string(_fun, L, 2);
+    l_int32 found = 0;
+    if (stringCheckForChars(src, chars, &found))
+        return ll_push_nil(L);
+    ll_push_l_int32(_fun, L, found);
+    return 1;
+}
+/**
+ * \brief SetLeptDebugOK() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a l_int32 (allow).
+ *
+ * <pre>
+ * Leptonica's Notes:
+ *      (1) This sets or clears the global variable LeptDebugOK, to
+ *          control writing files in a temp directory with names that
+ *          are compiled in.
+ *      (2) The default in the library distribution is 0.  Call with
+ *          %allow = 1 for development and debugging.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+SetLeptDebugOK(lua_State *L)
+{
+    LL_FUNC("SetLeptDebugOK");
+    l_int32 allow = ll_opt_boolean(_fun, L, 1, TRUE);
+    setLeptDebugOK(allow);
+    return 0;
+}
+
+/**
+ * \brief SetMsgSeverity() brief comment goes here.
+ * <pre>
+ * Arg #1 is expected to be a l_int32 (newsev).
+ *
+ * Leptonica's Notes:
+ *      (1) setMsgSeverity() allows the user to specify the desired
+ *          message severity threshold.  Messages of equal or greater
+ *          severity will be output.  The previous message severity is
+ *          returned when the new severity is set.
+ *      (2) If L_SEVERITY_EXTERNAL is passed, then the severity will be
+ *          obtained from the LEPT_MSG_SEVERITY environment variable.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 0 on the Lua stack
+ */
+static int
+SetMsgSeverity(lua_State *L)
+{
+    LL_FUNC("SetMsgSeverity");
+    l_int32 newsev = ll_check_l_int32(_fun, L, 1);
+    l_int32 result = setMsgSeverity(newsev);
+    return ll_push_l_int32(_fun, L, result);
+}
+
+/**
+ * \brief SplitPathAtDirectory() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a const char* (pathname).
+ * Arg #2 is expected to be a char** (pdir).
+ * Arg #3 is expected to be a char** (ptail).
+ *
+ * Leptonica's Notes:
+ *      (1) If you only want the tail, input null for the root directory ptr.
+ *      (2) If you only want the root directory name, input null for the
+ *          tail ptr.
+ *      (3) This function makes decisions based only on the lexical
+ *          structure of the input.  Examples:
+ *            /usr/tmp/abc  -->  dir: /usr/tmp/       tail: abc
+ *            /usr/tmp/     -->  dir: /usr/tmp/       tail: [empty string]
+ *            /usr/tmp      -->  dir: /usr/           tail: tmp
+ *            abc           -->  dir: [empty string]  tail: abc
+ *      (4) The input can have either forward (unix) or backward (win)
+ *          slash separators.  The output has unix separators.
+ *          Note that Win32 pathname functions generally accept both
+ *          slash forms, but the windows command line interpreter
+ *          only accepts backward slashes, because forward slashes are
+ *          used to demarcate switches (vs. dashes in unix).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 0 on the Lua stack
+ */
+static int
+SplitPathAtDirectory(lua_State *L)
+{
+    LL_FUNC("SplitPathAtDirectory");
+    const char *pathname = ll_check_string(_fun, L, 1);
+    char *dir = nullptr;
+    char *tail = nullptr;
+    if (splitPathAtDirectory(pathname, &dir, &tail))
+        return ll_push_nil(L);
+    ll_push_string(_fun, L, dir);
+    ll_push_string(_fun, L, tail);
+    return 2;
+}
+
+/**
+ * \brief SplitPathAtExtension() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a const char* (pathname).
+ *
+ * Leptonica's Notes:
+ *      (1) If you only want the extension, input null for the basename ptr.
+ *      (2) If you only want the basename without extension, input null
+ *          for the extension ptr.
+ *      (3) This function makes decisions based only on the lexical
+ *          structure of the input.  Examples:
+ *            /usr/tmp/abc.jpg  -->  basename: /usr/tmp/abc    ext: .jpg
+ *            /usr/tmp/.jpg     -->  basename: /usr/tmp/       ext: .jpg
+ *            /usr/tmp.jpg/     -->  basename: /usr/tmp.jpg/   ext: [empty str]
+ *            ./.jpg            -->  basename: ./              ext: .jpg
+ *      (4) The input can have either forward (unix) or backward (win)
+ *          slash separators.  The output has unix separators.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 0 on the Lua stack
+ */
+static int
+SplitPathAtExtension(lua_State *L)
+{
+    LL_FUNC("SplitPathAtExtension");
+    const char *pathname = ll_check_string(_fun, L, 1);
+    char *basename = nullptr;
+    char *extension = nullptr;
+    if (splitPathAtExtension(pathname, &basename, &extension))
+        return ll_push_nil(L);
+    ll_push_string(_fun, L, basename);
+    ll_push_string(_fun, L, extension);
+    return 2;
+}
+
+/**
+ * \brief SplitStringToParagraphs() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a char* (textstr).
+ * Arg #2 is expected to be a l_int32 (splitflag).
+ *
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+SplitStringToParagraphs(lua_State *L)
+{
+    LL_FUNC("SplitStringToParagraphs");
+    const char *str = ll_check_string(_fun, L, 1);
+    size_t size = str ? strlen(str) : 0;
+    l_int32 splitflag = ll_check_l_int32(_fun, L, 2);
+    char *textstr = ll_calloc<char>(_fun, L, size + 1);
+    Sarray *sa = splitStringToParagraphs(textstr, splitflag);
+    ll_free(textstr);
+    return ll_pack_Sarray(_fun, L, sa);
+}
+
+/**
  * \brief Compress() brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a lstring (%data, %nin).
@@ -3364,6 +3543,12 @@ luaopen_lualept(lua_State *L)
         {"MinMaxComponent",         MinMaxComponent},
         {"MinComponent",            MinComponent},   /* alias without 2nd parameter */
         {"MaxComponent",            MaxComponent},   /* alias without 2nd parameter */
+        {"CheckForChars",           CheckForChars},
+        {"SetLeptDebugOK",          SetLeptDebugOK},
+        {"SetMsgSeverity",          SetMsgSeverity},
+        {"SplitPathAtDirectory",    SplitPathAtDirectory},
+        {"SplitPathAtExtension",    SplitPathAtExtension},
+        {"SplitStringToParagraphs", SplitStringToParagraphs},
         {"Compress",                Compress},
         {"Uncompress",              Uncompress},
         LUA_SENTINEL

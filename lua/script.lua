@@ -3,8 +3,10 @@ require "lua/tools"
 header("Main program")
 print("Hello, world!")
 
+---[[[
 local pdffile = tmpdir .. "/multi.pdf"
 local pos = "first"
+local title = "Converted JPEG"
 local pdd = nil
 local xp = 0
 local yp = 0
@@ -12,18 +14,18 @@ local res = 150
 
 for i = 2, #arg do
 	local base = basename(arg[i])
-	local pix = Pix(arg[i])
 	if i == #arg then
 		pos = "last"
 	end
 	print(arg[i], pos)
-	if ppd == nil then
-		ppd = pix:ConvertToPdf("jpeg", 90, pdffile, xp, yp, res, base, nil, pos)
+	if pos == "first" then
+		ppd = Pix(arg[i]):ConvertToPdf("jpeg", 90, pdffile, xp, yp, res, title, nil, pos)
 	else
-		pix:ConvertToPdf("jpeg", 90, pdffile, xp, yp, res, base, ppd, pos)
+		ppd = Pix(arg[i]):ConvertToPdf("jpeg", 90, pdffile, xp, yp, res, title, ppd, pos)
 	end
 	pos = "next"
 end
+--]]
 
 local res = io.popen("mkdir " .. tmpdir)
 print("mkdir " .. tmpdir, res:read("*a"))
@@ -38,19 +40,19 @@ print(pad("LuaLept:Version('Leptonica')"), LuaLept:Version('Leptonica'))
 print(pad("global sa"), sa)
 print(pad("global box"), box)
 
---require "lua/aset"
---require "lua/amap"
---require "lua/bbuffer"
---require "lua/bmf"
---require "lua/box"
---require "lua/pta"
---require "lua/numa"
---require "lua/dna"
---require "lua/pix"
---require "lua/pix2"
---require "lua/pix3"
---require "lua/fpix"
---require "lua/dpix"
+require "lua/aset"
+require "lua/amap"
+require "lua/bbuffer"
+require "lua/bmf"
+require "lua/box"
+require "lua/pta"
+require "lua/numa"
+require "lua/dna"
+require "lua/pix"
+require "lua/pix2"
+require "lua/pix3"
+require "lua/fpix"
+require "lua/dpix"
 
 local pix = Pix(4,4,32)
 pix:SetAllArbitrary("Medium Violet Red")
@@ -63,7 +65,6 @@ local rootname = tmpdir .. "/pixc"
 local ok = pixc:WriteFile(rootname)
 print (pad("pixcWriteFile(" .. rootname ..")"), pixc)
 
-pix:View("4x4 32bpp",0,0,64.0)
 bytes = "The quick brown \0\1\2\3 fox jumps over the lazy dog! 1234567890? - ryryryry\0\0\x00"
 ok = true
 
