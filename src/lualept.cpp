@@ -3411,7 +3411,7 @@ ll_run(const char *name, const char *script, ll_global_var_t *set_vars, ll_globa
     lua_newtable(L);
     for (i = 1; i < argc; i++) {
         lua_pushstring(L, argv[i]);
-        lua_rawseti(L, -2, i+1);
+        lua_rawseti(L, -2, i);
     }
     lua_setglobal(L, "arg");
 
