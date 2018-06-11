@@ -49,10 +49,6 @@
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DnaHash* (dnahash).
  * </pre>
- *
- * Leptonica's Notes:
- *      (1) Destroys the byte array in the dnahash and then the dnahash;
- *          then nulls the contents of the input ptr.
  * \param L Lua state
  * \return 0 on the Lua stack
  */
@@ -70,6 +66,9 @@ Destroy(lua_State *L)
 
 /**
  * \brief Printable string for a DnaHash*.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a DnaHash* (dnahash).
+ * </pre>
  * \param L Lua state
  * \return 1 string on the Lua stack
  */
@@ -107,10 +106,7 @@ toString(lua_State* L)
  * Arg #2 is expected to be a l_int32 (nalloc).
  *
  * Leptonica's Notes:
- *      (1) If a buffer address is given, you should read all the data in.
- *      (2) Allocates a dnahash with associated byte array of
- *          the given size.  If a buffer address is given,
- *          it then reads the number of bytes into the byte array.
+ *      (1) Actual dna are created only as required by l_dnaHashAdd()
  * </pre>
  * \param L Lua state
  * \return 1 DnaHash* on the Lua stack
