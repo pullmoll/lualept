@@ -107,7 +107,7 @@ int main(int argc, char **argv)
         LL_SENTINEL
     };
     l_int32 x, y, w, h, d;
-    int res;
+    int i, res;
 
     progname = strrchr(argv[0], '\\');
     if (!progname)
@@ -137,7 +137,7 @@ int main(int argc, char **argv)
     /* Create the Box* box_in */
     i_box = boxCreate(40, 40, 320, 240);
 
-    res = ll_run(filename, nullptr, set_vars, get_vars);
+    res = ll_run(filename, nullptr, set_vars, get_vars, argc, argv);
     printf("%s: %s returned %d\n", progname, "ll_RunScript(script)", res);
 
     printf("%s: Pix* i_pix = %p\n", progname, reinterpret_cast<void *>(i_pix));
