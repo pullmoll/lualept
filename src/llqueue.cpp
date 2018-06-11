@@ -48,6 +48,17 @@
  * \brief Destroy a Queue* (%lqueue).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Queue* (lqueue).
+ *
+ * Leptonica's Notes:
+ *      (1) If freeflag is TRUE, frees each struct in the array.
+ *      (2) If freeflag is FALSE but there are elements on the array,
+ *          gives a warning and destroys the array.  This will
+ *          cause a memory leak of all the items that were on the queue.
+ *          So if the items require their own destroy function, they
+ *          must be destroyed before the queue.  The same applies to the
+ *          auxiliary stack, if it is used.
+ *      (3) To destroy the L_Queue, we destroy the ptr array, then
+ *          the lqueue, and then null the contents of the input ptr.
  * </pre>
  * \param L Lua state
  * \return 1 void on the Lua stack
@@ -89,6 +100,14 @@ GetCount(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Queue* (lqueue).
  * Arg #2 is expected to be a light user data (item).
+ *
+ * Leptonica's Notes:
+ *      (1) The algorithm is as follows.  If the queue is populated
+ *          to the end of the allocated array, shift all ptrs toward
+ *          the beginning of the array, so that the head of the queue
+ *          is at the beginning of the array.  Then, if the array is
+ *          more than 0.75 full, realloc with double the array size.
+ *          Finally, add the item to the tail of the queue.
  * </pre>
  * \param L Lua state
  * \return 1 l_int32 on the Lua stack
@@ -107,6 +126,9 @@ Add(lua_State *L)
  * \brief Create a Queue* (%lqueue) of size (%nalloc).
  * <pre>
  * Arg #1 is expected to be a l_int32 (nalloc).
+ *
+ * Leptonica's Notes:
+ *      (1) Allocates a ptr array of given size, and initializes counters.
  * </pre>
  * \param L Lua state
  * \return 1 Queue * on the Lua stack
@@ -124,6 +146,10 @@ Create(lua_State *L)
  * \brief Remove top item from the Queue* (%lqueue)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Queue* (stack).
+ *
+ * Leptonica's Notes:
+ *      (1) If this is the last item on the queue, so that the queue
+ *          becomes empty, nhead is reset to the beginning of the array.
  * </pre>
  * \param L Lua state
  * \return 1 light user data on the Lua stack
