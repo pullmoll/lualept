@@ -58,7 +58,10 @@ Destroy(lua_State *L)
     DBG(LOG_DESTROY, "%s: '%s' %s = %p\n", _fun,
         TNAME,
         "pd", reinterpret_cast<void *>(pd));
-    ll_free(pd);
+    /*
+     * PDF data is destructed internally by
+     * static void pdfdataDestroy(L_PDF_DATA  **plpd)
+     */
     return 0;
 }
 
@@ -185,7 +188,7 @@ ConvertToPdf(lua_State *L)
 {
     LL_FUNC("ConvertToPdf");
     const char *filein = ll_check_string(_fun, L, 1);
-    l_int32 type = ll_check_l_int32(_fun, L, 2);
+    l_int32 type = ll_check_encoding(_fun, L, 2);
     l_int32 quality = ll_check_l_int32(_fun, L, 3);
     const char *fileout = ll_check_string(_fun, L, 4);
     l_int32 x = ll_check_l_int32(_fun, L, 5);
@@ -193,7 +196,7 @@ ConvertToPdf(lua_State *L)
     l_int32 res = ll_check_l_int32(_fun, L, 7);
     const char *title = ll_check_string(_fun, L, 8);
     PdfData *lpd = nullptr;
-    l_int32 position = ll_check_position(_fun, L, 9, L_FIRST_IMAGE);
+    l_int32 position = ll_check_position(_fun, L, 9);
     if (convertToPdf(filein, type, quality, fileout, x, y, res, title, &lpd, position))
         return ll_push_nil(L);
     ll_push_PdfData(_fun, L, lpd);
@@ -220,7 +223,7 @@ ConvertToPdfData(lua_State *L)
 {
     LL_FUNC("ConvertToPdfData");
     const char *filein = ll_check_string(_fun, L, 1);
-    l_int32 type = ll_check_l_int32(_fun, L, 2);
+    l_int32 type = ll_check_encoding(_fun, L, 2);
     l_int32 quality = ll_check_l_int32(_fun, L, 3);
     l_int32 x = ll_check_l_int32(_fun, L, 4);
     l_int32 y = ll_check_l_int32(_fun, L, 5);
@@ -258,7 +261,7 @@ ConvertToPdfDataSegmented(lua_State *L)
     LL_FUNC("ConvertToPdfDataSegmented");
     const char *filein = ll_check_string(_fun, L, 1);
     l_int32 res = ll_check_l_int32(_fun, L, 2);
-    l_int32 type = ll_check_l_int32(_fun, L, 3);
+    l_int32 type = ll_check_encoding(_fun, L, 3);
     l_int32 thresh = ll_check_l_int32(_fun, L, 4);
     Boxa *boxa = ll_check_Boxa(_fun, L, 5);
     l_int32 quality = ll_check_l_int32(_fun, L, 6);

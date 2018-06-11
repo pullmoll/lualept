@@ -8016,7 +8016,7 @@ ConvertToPdf(lua_State *L)
 {
     LL_FUNC("ConvertToPdf");
     Pix *pix = ll_check_Pix(_fun, L, 1);
-    l_int32 type = ll_check_compression(_fun, L, 2, IFF_DEFAULT);
+    l_int32 type = ll_check_encoding(_fun, L, 2);
     l_int32 quality = ll_check_l_int32(_fun, L, 3);
     const char *fileout = ll_check_string(_fun, L, 4);
     l_int32 x = ll_check_l_int32(_fun, L, 5);
@@ -8058,7 +8058,7 @@ ConvertToPdfData(lua_State *L)
 {
     LL_FUNC("ConvertToPdfData");
     Pix *pix = ll_check_Pix(_fun, L, 1);
-    l_int32 type = ll_check_l_int32(_fun, L, 2);
+    l_int32 type = ll_check_encoding(_fun, L, 2);
     l_int32 quality = ll_check_l_int32(_fun, L, 3);
     l_int32 x = ll_check_l_int32(_fun, L, 4);
     l_int32 y = ll_check_l_int32(_fun, L, 5);
@@ -8099,14 +8099,14 @@ ConvertToPdfDataSegmented(lua_State *L)
     LL_FUNC("ConvertToPdfDataSegmented");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 res = ll_check_l_int32(_fun, L, 2);
-    l_int32 type = ll_check_l_int32(_fun, L, 3);
+    l_int32 type = ll_check_encoding(_fun, L, 3);
     l_int32 thresh = ll_check_l_int32(_fun, L, 4);
     Boxa *boxa = ll_check_Boxa(_fun, L, 5);
     l_int32 quality = ll_check_l_int32(_fun, L, 6);
     l_float32 scalefactor = ll_check_l_float32(_fun, L, 7);
     const char *title = ll_check_string(_fun, L, 8);
-    l_uint8 *data = nullptr;
     size_t nbytes = 0;
+    l_uint8 *data = nullptr;
     if (pixConvertToPdfDataSegmented(pixs, res, type, thresh, boxa, quality, scalefactor, title, &data, &nbytes))
         return ll_push_nil(L);
     ll_push_bytes(_fun, L, data, nbytes);
@@ -8138,7 +8138,7 @@ ConvertToPdfSegmented(lua_State *L)
     LL_FUNC("ConvertToPdfSegmented");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 res = ll_check_l_int32(_fun, L, 2);
-    l_int32 type = ll_check_l_int32(_fun, L, 3);
+    l_int32 type = ll_check_encoding(_fun, L, 3);
     l_int32 thresh = ll_check_l_int32(_fun, L, 4);
     Boxa *boxa = ll_check_Boxa(_fun, L, 5);
     l_int32 quality = ll_check_l_int32(_fun, L, 6);

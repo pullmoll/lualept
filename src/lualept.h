@@ -65,6 +65,7 @@ typedef L_DNAHASH           DnaHash;        /*!< Local type name for L_DNAHASH *
 typedef L_KERNEL            Kernel;         /*!< Local type name for L_KERNEL */
 typedef L_COMP_DATA         CompData;       /*!< Local type name for L_COMP_DATA */
 typedef L_PDF_DATA          PdfData;        /*!< Local type name for L_PDF_DATA */
+typedef L_QUEUE             Queue;          /*!< Local type name for L_QUEUE */
 typedef L_RBTREE	    Rbtree;         /*!< Local type name for L_RBTREE */
 typedef L_RBTREE_NODE       RbtreeNode;     /*!< Local type name for L_RBTREE_NODE */
 typedef L_STACK             Stack;          /*!< Local type name for L_STACK */
@@ -121,6 +122,7 @@ typedef enum {
     ll_pixacomp,
     ll_pta,
     ll_ptaa,
+    ll_queue,
     ll_rbtnode,
     ll_rbtree,
     ll_sarray,
@@ -198,6 +200,7 @@ typedef struct ll_global_var_s {
         PixaComp    **ppixac;               /*!< input pointer to a PixaComp */
         Pta         **ppta;                 /*!< input pointer to a Pta */
         Ptaa        **pptaa;                /*!< input pointer to a Ptaa */
+        Queue       **pqueue;               /*!< input pointer to a Queue */
         Rbtree      **ptree;                /*!< input pointer to a Rbtree (head) */
         RbtreeNode  **pnode;                /*!< input pointer to a RbtreeNode */
         Sarray      **psa;                  /*!< input pointer to a Sarray */
@@ -249,6 +252,7 @@ LUALEPT_DLL extern int ll_open_Sela(lua_State *L);
 LUALEPT_DLL extern int ll_open_Kernel(lua_State *L);
 LUALEPT_DLL extern int ll_open_CompData(lua_State *L);
 LUALEPT_DLL extern int ll_open_PdfData(lua_State *L);
+LUALEPT_DLL extern int ll_open_Queue(lua_State *L);
 LUALEPT_DLL extern int ll_open_Sarray(lua_State *L);
 LUALEPT_DLL extern int ll_open_Stack(lua_State *L);
 LUALEPT_DLL extern int ll_open_WShed(lua_State *L);

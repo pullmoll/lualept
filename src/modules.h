@@ -85,6 +85,7 @@
 #define	LL_PIXACOMP     "PixaComp"      /*!< Lua class: PixaComp (array of PixComp) */
 #define	LL_PTA		"Pta"           /*!< Lua class: Pta (array of points, i.e. pair of l_float32) */
 #define	LL_PTAA		"Ptaa"          /*!< Lua class: Ptaa (array of Pta) */
+#define	LL_QUEUE        "Queue"         /*!< Lua class: Queue */
 #define	LL_RBTNODE      "RbtreeNode"    /*!< Lua class: RbtreeNode (Amap and Aset nodes) */
 #define	LL_RBTREE       "Rbtree"	/*!< Lua class: Rbtree (Amap and Aset base) */
 #define	LL_SARRAY	"Sarray"        /*!< Lua class: Sarray (array of strings) */
@@ -844,6 +845,12 @@ extern PdfData        * ll_check_PdfData(const char *_fun, lua_State *L, int arg
 extern PdfData        * ll_opt_PdfData(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_PdfData(const char *_fun, lua_State *L, PdfData *pdfdata);
 extern int              ll_new_PdfData(lua_State *L);
+
+/* llqueue.cpp */
+extern Queue          * ll_check_Queue(const char *_fun, lua_State *L, int arg);
+extern Queue          * ll_opt_Queue(const char *_fun, lua_State *L, int arg);
+extern int              ll_push_Queue(const char *_fun, lua_State *L, Queue *queue);
+extern int              ll_new_Queue(lua_State *L);
 
 /* llsarray.cpp */
 extern Sarray         * ll_check_Sarray(const char *_fun, lua_State *L, int arg);

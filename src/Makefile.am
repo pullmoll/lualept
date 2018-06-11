@@ -45,6 +45,7 @@ liblualept_la_SOURCES = \
 	llpixtiling.cpp \
 	llpta.cpp \
 	llptaa.cpp \
+	llqueue.cpp \
 	llsarray.cpp \
 	llsel.cpp \
 	llsela.cpp \

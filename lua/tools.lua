@@ -31,6 +31,10 @@ function tbl(t)
 	return str
 end
 
+function basename(s)
+	return s:gsub(".*/([^/]+)$", "%1")
+end
+
 function hex_dump(buf)
 	for i = 1, math.ceil(#buf/16) * 16 do
 		if (i-1) % 16 == 0 then

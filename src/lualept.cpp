@@ -2315,9 +2315,21 @@ ll_set_all_globals(const char *_fun, lua_State *L, const ll_global_var_t *vars)
             lua_setglobal(L, var->name);
             break;
 
+        case ll_queue:
+            ll_push_Queue(_fun, L, *var->u.pqueue);
+            *var->u.pqueue = nullptr;
+            lua_setglobal(L, var->name);
+            break;
+
         case ll_rbtnode:
             lua_pushlightuserdata(L, *var->u.pnode);
             *var->u.pnode = nullptr;
+            lua_setglobal(L, var->name);
+            break;
+
+        case ll_rbtree:
+            lua_pushlightuserdata(L, *var->u.ptree);
+            *var->u.ptree = nullptr;
             lua_setglobal(L, var->name);
             break;
 
@@ -2748,8 +2760,28 @@ ll_get_all_globals(const char *_fun, lua_State *L, const ll_global_var_t *vars)
             }
             break;
 
+        case ll_queue:
+            if (LUA_TUSERDATA == lua_getglobal(L, var->name)) {
+                *var->u.pqueue = ll_take_udata<Queue>(_fun, L, -1, ll_typestr(var->type));
+            } else {
+                *var->u.pqueue = nullptr;
+            }
+            break;
+
         case ll_rbtnode:
-            *reinterpret_cast<void **>(var->u.pptr) = nullptr;
+            if (LUA_TUSERDATA == lua_getglobal(L, var->name)) {
+                *var->u.pnode = ll_check_ludata<RbtreeNode>(_fun, L, -1);
+            } else {
+                *var->u.pnode = nullptr;
+            }
+            break;
+
+        case ll_rbtree:
+            if (LUA_TUSERDATA == lua_getglobal(L, var->name)) {
+                *var->u.ptree = ll_check_ludata<Rbtree>(_fun, L, -1);
+            } else {
+                *var->u.ptree = nullptr;
+            }
             break;
 
         case ll_sarray:

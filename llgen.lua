@@ -531,6 +531,7 @@ function parse(fd, str)
 				L_DNAA		= "Dnaa",
 				L_KERNEL	= "Kernel",
 				L_PDF_DATA	= "PdfData",
+				L_QUEUE		= "Queue",
 				L_RBTREE	= "Rbtree",
 				L_STACK		= "Stack",
 				L_STRCODE	= "StrCode",

@@ -6,15 +6,22 @@ print("Hello, world!")
 local pdffile = tmpdir .. "/multi.pdf"
 local pos = "first"
 local pdd = nil
+local xp = 0
+local yp = 0
+local res = 150
 
-for i = 3, #arg do
+for i = 2, #arg do
+	local base = basename(arg[i])
 	local pix = Pix(arg[i])
 	if i == #arg then
 		pos = "last"
 	end
 	print(arg[i], pos)
-	pdd = pix:ConvertToPdf("png", 50, pdffile, 0, 0, 150, arg[i], pdd, pos)
-	pix:Destroy()
+	if ppd == nil then
+		ppd = pix:ConvertToPdf("jpeg", 90, pdffile, xp, yp, res, base, nil, pos)
+	else
+		pix:ConvertToPdf("jpeg", 90, pdffile, xp, yp, res, base, ppd, pos)
+	end
 	pos = "next"
 end
 
