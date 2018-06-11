@@ -9266,7 +9266,7 @@ CreateHeader(lua_State *L)
  * No Arg creates a 1x1 1bpp uninitialized Pix*.
  *
  * Leptonica's Notes:
- *      (1) Must set pad bits to avoid reading unitialized data, because
+ *      (1) Must set pad bits to avoid reading uninitialized data, because
  *          some optimized routines (e.g., pixConnComp()) read from pad bits.
  * </pre>
  * \param L Lua state
@@ -11936,7 +11936,7 @@ FMorphopGen_2(lua_State *L)
  *          need not be the same size.
  *      (2) Each pixel in pixb is multiplied by 'factor' divided by 255, and
  *          clipped to the range [0 ... 1].  This gives the fade fraction
- *          to be appied to pixs.  Fade either to white (L_BLEND_TO_WHITE)
+ *          to be applied to pixs.  Fade either to white (L_BLEND_TO_WHITE)
  *          or to black (L_BLEND_TO_BLACK).
  * </pre>
  * \param L Lua state
@@ -14590,7 +14590,7 @@ GenerateSelRandom(lua_State *L)
  *        line.  As another example, if you have 7 added pixels and a
  *        distance of 2, you can use a runlength up to 5 to guarantee
  *        that the miss element is recorded.  We give a warning if the
- *        contraint does not guarantee a miss element outside the
+ *        constraint does not guarantee a miss element outside the
  *        image proper.
  *    (5) The input pix, as extended by the extra pixels on selected sides,
  *        can optionally be returned.  For debugging, call
@@ -21007,7 +21007,7 @@ OrientDetectDwa(lua_State *L)
  *          that use background normalization with other techniques.
  *      (3) Sauvola binarization computes a local threshold based on
  *          the local average and square average.  It takes two constants:
- *          the window size for the measurment at each pixel and a
+ *          the window size for the measurement at each pixel and a
  *          parameter that determines the amount of normalized local
  *          standard deviation to subtract from the local average value.
  *      (4) pixThresholdByCC() uses the numbers of 4 and 8 connected
@@ -32430,10 +32430,10 @@ WindowedMeanSquare(lua_State *L)
  *          added and the border pixels are removed from the output images.
  *      (3) These statistical measures over the pixels in the
  *          rectangular window are:
- *            ~ average value: [p]  (%pixm)
- *            ~ average squared value: <p*p> (%pixms)
- *            ~ variance: [(p - [p])*(p - [p])] = [p*p] - [p]*[p]  (%fpixv)
- *            ~ square-root of variance: (%fpixrv)
+ *            ~ average value: [p]  (pixm)
+ *            ~ average squared value: [p*p] (pixms)
+ *            ~ variance: [(p - [p])*(p - [p])] = [p*p] - [p]*[p]  (pixv)
+ *            ~ square-root of variance: (pixrv)
  *          where the brackets [ .. ] indicate that the average value is
  *          to be taken over the window.
  *      (4) Note that the variance is just the mean square difference from
