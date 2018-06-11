@@ -196,6 +196,10 @@ end
 -- \return string with prefix stripped
 --
 function strip_ftype(str)
+	local p, s = str:match("^(pixTiling)(.*)")
+	if p ~= nil then
+		return s
+	end
 	local p, s = str:match("^([%l_]+)(.*)")
 	local prefixes = {
 		amap		= true,
@@ -537,8 +541,8 @@ function parse(fd, str)
 				PIX		= "Pix",
 				PIXA		= "Pixa",
 				PIXAA		= "Pixaa",
-				PIXCOMP		= "PixComp",
-				PIXACOMP	= "PixaComp",
+				PIXAC		= "PixaComp",
+				PIXC		= "PixComp",
 				PIXCMAP		= "PixColormap",
 				PIXTILING	= "PixTiling",
 				PTA		= "Pta",
@@ -644,10 +648,11 @@ function parse(fd, str)
 		argc = argc + 1
 	end
 
+	local lname = strip_ftype(fname)	-- name without Leptonica prefix
 	-- create the function's Doxygen comment
 	local func = {
 		'/**',
-		' * \\brief ' .. strip_ftype(fname) .. '() brief comment goes here.',
+		' * \\brief ' .. lname .. '() brief comment goes here.',
 		' * <pre>'
 		}
 
@@ -697,9 +702,9 @@ function parse(fd, str)
 
 	-- append the function body
 	func[#func+1] = 'static int'
-	func[#func+1] = strip_ftype(fname) .. '(lua_State *L)'
+	func[#func+1] = lname .. '(lua_State *L)'
 	func[#func+1] = '{'
-	func[#func+1] = '    LL_FUNC("' .. strip_ftype(fname) .. '");'
+	func[#func+1] = '    LL_FUNC("' .. lname .. '");'
 	for i = 1, #vars do
 		local name = names[i]
 		if refs[name] == nil then
@@ -725,7 +730,7 @@ function parse(fd, str)
 			func[#func+1] = '    ' .. fname .. '(' .. params(types, names, refs) .. ');'
 		else
 			-- the function returns some other type
-			func[#func+1] = '    ' .. rtype .. ' ' ..rname .. ' = ' ..
+			func[#func+1] = '    ' .. rtype .. ' ' .. rname .. ' = ' ..
 				fname .. '(' .. params(types, names, refs) .. ');'
 			func[#func+1] = '    ' .. pusher(rtype, rname, true) .. ';'
 		end
@@ -733,12 +738,14 @@ function parse(fd, str)
 			local name = names[i]
 			if refs[name] ~= nil then
 				local vtype = types[i]
-				-- handle pushing a vector of 6 floats
 				if vtype:match("l_float32%s*%*") and name:match("p?vci?") then
+					-- handle pushing a vector of 6 floats
 					for j = 0, 5 do
 						func[#func+1] = '    ' .. pusher(vtype, name .. '[' .. j .. ']', false) .. ';'
 					end
 					retn = 6
+				elseif lname == "Destroy" then
+					retn = 0
 				else
 					func[#func+1] = '    ' .. pusher(vtype, name, false) .. ';'
 				end
