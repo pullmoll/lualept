@@ -48,11 +48,11 @@
  * \brief Destroy() brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a ByteBuffer* (bbuffer).
- * </pre>
  *
  * Leptonica's Notes:
  *      (1) Destroys the byte array in the bbuffer and then the bbuffer;
  *          then nulls the contents of the input ptr.
+ * </pre>
  * \param L Lua state
  * \return 0 on the Lua stack
  */
