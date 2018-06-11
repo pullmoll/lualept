@@ -3,6 +3,21 @@ require "lua/tools"
 header("Main program")
 print("Hello, world!")
 
+local pdffile = tmpdir .. "/multi.pdf"
+local pos = "first"
+local pdd = nil
+
+for i = 3, #arg do
+	local pix = Pix(arg[i])
+	if i == #arg then
+		pos = "last"
+	end
+	print(arg[i], pos)
+	pdd = pix:ConvertToPdf("png", 50, pdffile, 0, 0, 150, arg[i], pdd, pos)
+	pix:Destroy()
+	pos = "next"
+end
+
 local res = io.popen("mkdir " .. tmpdir)
 print("mkdir " .. tmpdir, res:read("*a"))
 res.close()
