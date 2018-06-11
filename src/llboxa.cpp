@@ -45,9 +45,9 @@
 #define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
- * \brief Destroy a Boxa*.
+ * \brief Destroy a Boxa* (%ba).
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Boxa*.
+ * Arg #1 (i.e. self) is expected to be a Boxa* (ba).
  *
  * Leptonica's Notes:
  *      (1) Decrements the ref count and, if 0, destroys the boxa.
@@ -70,9 +70,9 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Get count for a Boxa*.
+ * \brief Get count for a Boxa* (%boxa).
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Boxa*.
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * </pre>
  * \param L Lua state
  * \return 1 integer on the Lua stack
@@ -124,10 +124,11 @@ toString(lua_State *L)
 }
 
 /**
- * \brief Add a Box* to a Boxa*.
+ * \brief Add a Box* (%box) to a Boxa* (%boxa).
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Boxa*.
- * Arg #2 is expected to be a Box*.
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
+ * Arg #2 is expected to be a Box* (box).
+ * Arg #3 is expected to be a string describing the access mode (flag).
  * </pre>
  * \param L Lua state
  * \return 1 boolean on the Lua stack
@@ -144,11 +145,16 @@ AddBox(lua_State *L)
 
 /**
  * \brief Adjust height of boxes changing (%sides) in a Boxa* (%boxas) to a (%target).
+ *
+ * If %boxad is nil, a new Boxa* is created.
+ * If %boxad == %boxas, the operation is in place.
+ * Otherwise %boxad is set to the result.
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
- * Arg #2 is expected to be a string describing the side (sides).
- * Arg #3 is expected to be a l_int32 (target).
- * Arg #4 is expected to be a l_int32 (thresh).
+ * Arg #1 (i.e. self) is expected to be a Boxa* (boxad).
+ * Arg #2 is expected to be a Boxa* (boxas).
+ * Arg #3 is expected to be a string describing the side(s) to adjust (sides).
+ * Arg #4 is expected to be a index (target).
+ * Arg #5 is expected to be a l_int32 (thresh).
  * </pre>
  * \param L Lua state
  * \return 1 Boxa* on the Lua stack
@@ -157,12 +163,13 @@ static int
 AdjustHeightToTarget(lua_State *L)
 {
     LL_FUNC("AdjustHeightToTarget");
-    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
-    l_int32 sides = ll_check_adjust_sides(_fun, L, 2, 0);
-    l_int32 target = ll_opt_l_int32(_fun, L, 3, 0);
-    l_int32 thresh = ll_opt_l_int32(_fun, L, 4, 0);
-    Boxa *boxad = boxaAdjustWidthToTarget(nullptr, boxas, sides, target, thresh);
-    ll_push_Boxa(_fun, L, boxad);
+    Boxa *boxad = ll_opt_Boxa(_fun, L, 1);
+    Boxa *boxas = ll_check_Boxa(_fun, L, 2);
+    l_int32 sides = ll_check_adjust_sides(_fun, L, 3, 0);
+    l_int32 target = ll_check_index(_fun, L, 4, boxaGetCount(boxas));
+    l_int32 thresh = ll_opt_l_int32(_fun, L, 5, 0);
+    Boxa *boxa = boxaAdjustWidthToTarget(boxad, boxas, sides, target, thresh);
+    ll_push_Boxa(_fun, L, boxa);
     return 1;
 }
 

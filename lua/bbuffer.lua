@@ -7,7 +7,7 @@ header("Bbuffer")
 local bb = Bbuffer("\x00\x01\x02\x03\x04\x05")
 print(pad("bb"), bb)
 local fd = io.open("lua/bbuffer.lua", "rb")
-bb:ReadStream(fd, 512)
+bb:ReadStream(fd)
 fd:close()
 print(pad("bb:ReadStream(fd, 512)"), bb)
 

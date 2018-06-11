@@ -35,7 +35,7 @@
  * \file llbbuffer.cpp
  * \class ByteBuffer
  *
- * A byte buffer.
+ * Asynchronous reading and writing of data from / to a memory array of bytes.
  */
 
 /** Set TNAME to the class name used in this source file */
@@ -98,7 +98,7 @@ toString(lua_State* L)
 
 
 /**
- * \brief Create() brief comment goes here.
+ * \brief Create a new ByteBuffer* (%bb).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a lstring (data).
  * Arg #2 is expected to be a l_int32 (nalloc).
@@ -118,12 +118,12 @@ Create(lua_State *L)
     LL_FUNC("Create");
     l_int32 nalloc = 0;
     const l_uint8 *indata = ll_check_lbytes(_fun, L, 1, &nalloc);
-    ByteBuffer *result = bbufferCreate(indata, nalloc);
-    return ll_push_ByteBuffer(_fun, L, result);
+    ByteBuffer *bb = bbufferCreate(indata, nalloc);
+    return ll_push_ByteBuffer(_fun, L, bb);
 }
 
 /**
- * \brief DestroyAndSaveData() brief comment goes here.
+ * \brief Destroy a ByteBuffer* (%bb) and save its data (%bytes, %nbytes).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a ByteBuffer* (bb).
  *
@@ -145,7 +145,7 @@ DestroyAndSaveData(lua_State *L)
 }
 
 /**
- * \brief ExtendArray() brief comment goes here.
+ * \brief Extend the array of a ByteBuffer* (%bb)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a ByteBuffer* (bb).
  * Arg #2 is expected to be a l_int32 (nbytes).
@@ -167,7 +167,7 @@ ExtendArray(lua_State *L)
 }
 
 /**
- * \brief Read() brief comment goes here.
+ * \brief Read a ByteBuffer* (%bb) from memory (%data, %nbytes).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a ByteBuffer* (bb).
  * Arg #2 is expected to be a lstring (data).
@@ -198,12 +198,11 @@ Read(lua_State *L)
 }
 
 /**
- * \brief ReadStream() brief comment goes here.
+ * \brief Read a ByteBuffer* (%bb) from a Lua io stream (%stream).
+ * Read all data from %stream from the current position until its end.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a ByteBuffer* (bb).
  * Arg #2 is expected to be a luaL_Stream* (stream).
- * Arg #3 is expected to be a l_int32 (nbytes).
- *
  * </pre>
  * \param L Lua state
  * \return 0 on the Lua stack
@@ -214,27 +213,31 @@ ReadStream(lua_State *L)
     LL_FUNC("ReadStream");
     ByteBuffer *bb = ll_check_ByteBuffer(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    l_int32 nbytes = ll_check_l_int32(_fun, L, 3);
-    l_ok result = bbufferReadStream(bb, stream->f, nbytes);
-    return ll_push_boolean(_fun, L, 0 == result);
+    l_int32 nbytes = 0;
+    long pos = ftell(stream->f);
+    if (fseek(stream->f, 0, SEEK_END))
+        return ll_push_boolean(_fun, L, FALSE);
+    nbytes = static_cast<l_int32>(ftell(stream->f) - pos);
+    fseek(stream->f, pos, SEEK_SET);
+    return ll_push_boolean(_fun, L, 0 == bbufferReadStream(bb, stream->f, nbytes));
 }
 
 /**
- * \brief Write() brief comment goes here.
+ * \brief Write ByteBuffer* (%bb) data to a lstring (%dest, %nout).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a ByteBuffer* (bb).
  * Arg #2 is expected to be a size_t (nbytes).
  *
  * </pre>
  * \param L Lua state
- * \return 1 on the Lua stack
+ * \return 1 lstring (%bytes, %nout) on the Lua stack
  */
 static int
 Write(lua_State *L)
 {
     LL_FUNC("Write");
     ByteBuffer *bb = ll_check_ByteBuffer(_fun, L, 1);
-    size_t nbytes = ll_check_l_uint64(_fun, L, 2);
+    size_t nbytes = ll_check_size_t(_fun, L, 2);
     l_uint8 *dest = ll_calloc<l_uint8>(_fun, L, nbytes);
     size_t nout = 0;
     if (bbufferWrite(bb, dest, nbytes, &nout))
@@ -244,7 +247,7 @@ Write(lua_State *L)
 }
 
 /**
- * \brief WriteStream() brief comment goes here.
+ * \brief Write a number of bytes from ByteBuffer* (%bb) to a Lua io stream (%stream).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a ByteBuffer* (bb).
  * Arg #2 is expected to be a luaL_Stream* (stream).
@@ -252,7 +255,7 @@ Write(lua_State *L)
  *
  * </pre>
  * \param L Lua state
- * \return 1 on the Lua stack
+ * \return 1 size_t (%nout) on the Lua stack
  */
 static int
 WriteStream(lua_State *L)
@@ -260,11 +263,11 @@ WriteStream(lua_State *L)
     LL_FUNC("WriteStream");
     ByteBuffer *bb = ll_check_ByteBuffer(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    size_t nbytes = ll_check_l_uint64(_fun, L, 3);
+    size_t nbytes = ll_check_size_t(_fun, L, 3);
     size_t nout = 0;
     if (bbufferWriteStream(bb, stream->f, nbytes, &nout))
         return ll_push_nil(L);
-    ll_push_l_uint64(_fun, L, nout);
+    ll_push_size_t(_fun, L, nout);
     return 1;
 }
 

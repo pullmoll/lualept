@@ -45,9 +45,9 @@
 #define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
- * \brief Destroy a Box*.
+ * \brief Destroy a Box* (%box).
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Box* (boxs).
+ * Arg #1 (i.e. self) is expected to be a Box* (box).
  *
  * Leptonica's Notes:
  *      (1) Decrements the ref count and, if 0, destroys the box.
@@ -70,7 +70,7 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Printable string for a Box*.
+ * \brief Printable string for a Box* (%box).
  * \param L Lua state
  * \return 1 string on the Lua stack
  */
@@ -132,11 +132,12 @@ Equal(lua_State *L)
 /**
  * \brief Adjust sides of a Box* (%boxs).
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Box* (box).
- * Arg #2 is expected to be a l_int32 (delleft).
- * Arg #3 is expected to be a l_int32 (delright).
- * Arg #4 is expected to be a l_int32 (deltop).
- * Arg #5 is expected to be a l_int32 (delbot).
+ * Arg #1 (i.e. self) is expected to be a Box* (boxd).
+ * Arg #2 (i.e. self) is expected to be a Box* (boxs).
+ * Arg #3 is expected to be a l_int32 (delleft).
+ * Arg #4 is expected to be a l_int32 (delright).
+ * Arg #5 is expected to be a l_int32 (deltop).
+ * Arg #6 is expected to be a l_int32 (delbot).
  *
  * Leptonica's Notes:
  *      (1) Set boxd == NULL to get new box; boxd == boxs for in-place;
@@ -156,13 +157,14 @@ static int
 AdjustSides(lua_State *L)
 {
     LL_FUNC("AdjustSides");
-    Box *boxs = ll_check_Box(_fun, L, 1);
-    l_int32 delleft = ll_opt_l_int32(_fun, L, 2, 0);
-    l_int32 delright = ll_opt_l_int32(_fun, L, 3, 0);
-    l_int32 deltop = ll_opt_l_int32(_fun, L, 4, 0);
-    l_int32 delbot = ll_opt_l_int32(_fun, L, 5, 0);
-    Box *boxd = boxAdjustSides(nullptr, boxs, delleft, delright, deltop, delbot);
-    ll_push_Box(_fun, L, boxd);
+    Box *boxd = ll_opt_Box(_fun, L, 1);
+    Box *boxs = ll_check_Box(_fun, L, 2);
+    l_int32 delleft = ll_opt_l_int32(_fun, L, 3, 0);
+    l_int32 delright = ll_opt_l_int32(_fun, L, 4, 0);
+    l_int32 deltop = ll_opt_l_int32(_fun, L, 5, 0);
+    l_int32 delbot = ll_opt_l_int32(_fun, L, 6, 0);
+    Box *box = boxAdjustSides(boxd, boxs, delleft, delright, deltop, delbot);
+    ll_push_Box(_fun, L, box);
     return 1;
 }
 
@@ -208,7 +210,7 @@ ChangeRefcount(lua_State *L)
 }
 
 /**
- * \brief Clip a Box* (%boxs) rectangle to width and height (%wi,%hi).
+ * \brief Clip a Box* (%boxs) rectangle to width and height (%wi, %hi).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * Arg #2 is expected to be a l_int32 (wi).
@@ -249,7 +251,7 @@ ClipToRectangle(lua_State *L)
  *                     ....
  * </pre>
  * \param L Lua state
- * \return 6 integers on the Lua stack (xstart,ystart,xend,yend,bw,bh)
+ * \return 6 integers on the Lua stack (%xstart, %ystart, %xend, %yend, %bw, %bh)
  */
 static int
 ClipToRectangleParams(lua_State *L)
@@ -341,7 +343,7 @@ Contains(lua_State *L)
 }
 
 /**
- * \brief Check if a Box* (%box) contains a point (%x,%y).
+ * \brief Check if a Box* (%box) contains a point (%x, %y).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box).
  * Arg #2 is expected to be a l_float32 (x).
@@ -571,7 +573,7 @@ GetSideLocations(lua_State *L)
  *      (2) Represent a vertical line by one with a large but finite slope.
  * </pre>
  * \param L Lua state
- * \return 5 integers on the Lua stack (x1, y1, x2, y2, n)
+ * \return 5 integers on the Lua stack (%x1, %y1, %x2, %y2, %n)
  */
 static int
 IntersectByLine(lua_State *L)
@@ -815,7 +817,7 @@ SeparationDistance(lua_State *L)
 }
 
 /**
- * \brief Set the BOX geometry.
+ * \brief Set the Box* (%box) geometry.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * Arg #2 is expected to be a lua_Integer (x).
@@ -839,9 +841,9 @@ SetGeometry(lua_State *L)
 }
 
 /**
- * \brief Set the BOX side locations (left, right, top, bottom).
+ * \brief Set the Box* (%box) side locations (%l, %r, %t, %b).
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Box* (boxs).
+ * Arg #1 (i.e. self) is expected to be a Box* (box).
  * Arg #2 is expected to be a lua_Integer (l).
  * Arg #3 is expected to be a lua_Integer (r).
  * Arg #4 is expected to be a lua_Integer (t).
@@ -1098,6 +1100,8 @@ ll_open_Box(lua_State *L)
         {"__new",                   ll_new_Box},
         {"__tostring",              toString},
         {"__eq",                    Equal},
+        {"__band",                  OverlapRegion},     /* box = box1 and box2 */
+        {"__bor",                   BoundingRegion},    /* box = box1 or box2 */
         {"AdjustSides",             AdjustSides},
         {"BoundingRegion",          BoundingRegion},
         {"ChangeRefcount",          ChangeRefcount},
