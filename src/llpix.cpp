@@ -31082,7 +31082,7 @@ ThresholdTo4bpp(lua_State *L)
     LL_FUNC("ThresholdTo4bpp");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 nlevels = ll_check_l_int32(_fun, L, 2);
-    l_int32 cmapflag = ll_opt_boolean_fun, L, 3);
+    l_int32 cmapflag = ll_opt_boolean(_fun, L, 3);
     Pix *pix = pixThresholdTo4bpp(pixs, nlevels, cmapflag);
     return ll_push_Pix(_fun, L, pix);
 }
