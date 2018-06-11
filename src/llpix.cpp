@@ -7998,7 +7998,8 @@ ConvertToFPix(lua_State *L)
  * Arg #6 is expected to be a l_int32 (y).
  * Arg #7 is expected to be a l_int32 (res).
  * Arg #8 is expected to be a string (title).
- * Arg #9 is expected to be a string describing the position (position).
+ * Arg #9 is expected to be a PdfData (pdd).
+ * Arg #10 is expected to be a string describing the position (position).
  *
  * Leptonica's Notes:
  *      (1) If %res == 0 and the input resolution field is 0,
@@ -8022,9 +8023,9 @@ ConvertToPdf(lua_State *L)
     l_int32 y = ll_check_l_int32(_fun, L, 6);
     l_int32 res = ll_check_l_int32(_fun, L, 7);
     const char *title = ll_check_string(_fun, L, 8);
-    l_int32 position = ll_check_position(_fun, L, 9, 0);
-    PdfData *lpd = nullptr;
-    if (pixConvertToPdf(pix, type, quality, fileout, x, y, res, title, position ? &lpd : nullptr, position))
+    PdfData *lpd = ll_opt_PdfData(_fun, L, 9);
+    l_int32 position = ll_check_position(_fun, L, 10, 0);
+    if (pixConvertToPdf(pix, type, quality, fileout, x, y, res, title, &lpd, position))
         return ll_push_nil(L);
     ll_push_PdfData(_fun, L, lpd);
     return 1;

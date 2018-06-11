@@ -36,7 +36,7 @@
 #include "lualept.h"
 
 #if !defined(LUALEPT_DEBUG)
-#define LUALEPT_DEBUG 1     /*!< set to 1 to enable debugging */
+#define LUALEPT_DEBUG 0     /*!< set to 1 to enable debugging */
 #endif
 
 #define LL_BOOLEAN      "l_ok"          /*!< Lua variable of type boolean */

@@ -3385,11 +3385,12 @@ luaopen_lualept(lua_State *L)
  * \return 0 on success, or 1 on error
  */
 int
-ll_run(const char *name, const char *script, ll_global_var_t *set_vars, ll_global_var_t *get_vars)
+ll_run(const char *name, const char *script, ll_global_var_t *set_vars, ll_global_var_t *get_vars,
+       int argc, char** argv)
 {
     FUNC("ll_run");
     lua_State *L;
-    int res;
+    int i, res;
 
     /* Disable Leptonica debugging (pixDisplay ...) */
     setLeptDebugOK(FALSE);
@@ -3405,6 +3406,14 @@ ll_run(const char *name, const char *script, ll_global_var_t *set_vars, ll_globa
 
     /* Set any global variables */
     ll_set_all_globals(_fun, L, set_vars);
+
+
+    lua_newtable(L);
+    for (i = 1; i < argc; i++) {
+        lua_pushstring(L, argv[i]);
+        lua_rawseti(L, -2, i+1);
+    }
+    lua_setglobal(L, "arg");
 
     if (nullptr == script) {
         /* load from a file %name */

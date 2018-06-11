@@ -582,7 +582,6 @@ ll_string_component(l_int32 component)
 static const lept_enum tbl_compression[] = {
     TBL_ENTRY("default",        IFF_DEFAULT),
     TBL_ENTRY("def",            IFF_DEFAULT),
-    TBL_ENTRY("def",            IFF_DEFAULT),
     TBL_ENTRY("d",              IFF_DEFAULT),
     TBL_ENTRY("tiff-g4",        IFF_TIFF_G4),
     TBL_ENTRY("g4",             IFF_TIFF_G4),

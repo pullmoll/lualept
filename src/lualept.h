@@ -254,7 +254,11 @@ LUALEPT_DLL extern int ll_open_Stack(lua_State *L);
 LUALEPT_DLL extern int ll_open_WShed(lua_State *L);
 
 LUALEPT_DLL extern int luaopen_lualept(lua_State *L);
-LUALEPT_DLL extern int ll_run(const char* filename, const char* script, ll_global_var_t *set_vars, ll_global_var_t *get_vars);
+LUALEPT_DLL extern int ll_run(const char* filename,
+                              const char* script = nullptr,
+                              ll_global_var_t *set_vars = nullptr,
+                              ll_global_var_t *get_vars = nullptr,
+                              int argc = 0, char** argv = nullptr);
 
 #if defined(_MSC_VER)
 LEPT_DLL extern int LeptMsgSeverity;
