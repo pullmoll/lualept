@@ -324,10 +324,11 @@ ll_new_ByteBuffer(lua_State *L)
     size_t size = 0;
     const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &size);
     l_int32 nbytes = static_cast<l_int32>(size);
-    l_uint8 *indata = reinterpret_cast<l_uint8 *>(reinterpret_cast<l_intptr_t>(data));
+    l_uint8 *indata = ll_malloc<l_uint8>(_fun, L, size);
+    memcpy(indata, data, size);
 
     DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %" PRIu64 "\n", _fun,
-        "lstring", reinterpret_cast<void *>(bbuffer),
+        "lstring", reinterpret_cast<void *>(indata),
         "size", static_cast<l_intptr_t>(size));
     bbuffer = bbufferCreate(indata, nbytes);
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,

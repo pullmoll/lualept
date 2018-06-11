@@ -401,6 +401,7 @@ ll_new_PixComp(lua_State *L)
     Pix* pix = nullptr;
     const char *filename = nullptr;
     const l_uint8 *data = nullptr;
+    l_uint8 *indata = nullptr;
     size_t size = 0;
     l_int32 comptype = IFF_DEFAULT;
     l_int32 copyflag = L_COPY;
@@ -419,10 +420,17 @@ ll_new_PixComp(lua_State *L)
 
     if (!pixcomp && ll_isstring(_fun, L, 1)) {
         data = ll_check_lbytes(_fun, L, 1, &size);
-        /* XXX: deconstify */
-        l_uint8 *data2 = reinterpret_cast<l_uint8 *>(reinterpret_cast<l_intptr_t>(data));
         copyflag = ll_check_access_storage(_fun, L, 2, copyflag);
-        pixcomp = pixcompCreateFromString(data2, size, copyflag);
+        indata = nullptr;
+        if (L_INSERT == copyflag) {
+            /* create a copy of the data */
+            indata = ll_malloc<l_uint8>(_fun, L, size);
+            memcpy(indata, data, size);
+        } else {
+            /* XXX: deconstify */
+            indata = reinterpret_cast<l_uint8 *>(reinterpret_cast<l_intptr_t>(data));
+        }
+        pixcomp = pixcompCreateFromString(indata, size, copyflag);
     }
 
     return ll_push_PixComp(_fun, L, pixcomp);

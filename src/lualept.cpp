@@ -3254,6 +3254,7 @@ Compress(lua_State *L)
     LL_FUNC("Compress");
     size_t nin = 0;
     const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &nin);
+    /* XXX: deconstify */
     l_uint8 *datain = reinterpret_cast<l_uint8 *>(reinterpret_cast<l_intptr_t>(data));
     size_t nout = 0;
     l_uint8 *dataout = zlibCompress(datain, nin, &nout);

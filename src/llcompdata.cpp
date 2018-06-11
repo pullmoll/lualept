@@ -483,9 +483,11 @@ JpegDataMem(lua_State *L)
     size_t nbytes = 0;
     const char *str = ll_check_lstring(_fun, L, 1, &nbytes);
     l_int32 ascii85flag = ll_check_boolean(_fun, L, 2);
-    /* XXX: deconstify */
-    l_uint8* data = reinterpret_cast<l_uint8 *>(reinterpret_cast<l_intptr_t>(str));
-    CompData *cid = l_generateJpegDataMem(data, nbytes, ascii85flag);
+    l_uint8* data = ll_malloc<l_uint8>(_fun, L, nbytes);
+    CompData *cid = nullptr;
+    /* copy to data */
+    memcpy(data, str, nbytes);
+    cid = l_generateJpegDataMem(data, nbytes, ascii85flag);
     return ll_push_CompData(_fun, L, cid);
 }
 

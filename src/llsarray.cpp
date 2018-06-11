@@ -138,9 +138,7 @@ AddString(lua_State *L)
     LL_FUNC("AddString");
     Sarray *sa = ll_check_Sarray(_fun, L, 1);
     const char *str = ll_check_string(_fun, L, 2);
-    char *string = reinterpret_cast<char *>(reinterpret_cast<l_intptr_t>(str));
-    l_int32 copyflag = L_COPY;
-    return ll_push_boolean(_fun, L, 0 == sarrayAddString(sa, string, copyflag));
+    return ll_push_boolean(_fun, L, 0 == sarrayAddString(sa, str, L_COPY));
 }
 
 /**
@@ -340,8 +338,7 @@ CreateInitialized(lua_State *L)
 {
     LL_FUNC("CreateInitialized");
     l_int32 n = ll_check_l_int32(_fun, L, 1);
-    const char *str = ll_check_string(_fun, L, 2);
-    char *initstr = reinterpret_cast<char *>(reinterpret_cast<l_intptr_t>(str));
+    const char *initstr = ll_check_string(_fun, L, 2);
     Sarray *sa = sarrayCreateInitialized(n, initstr);
     return ll_push_Sarray(_fun, L, sa);
 }
@@ -648,8 +645,7 @@ PadToSameSize(lua_State *L)
     LL_FUNC("PadToSameSize");
     Sarray *sa1 = ll_check_Sarray(_fun, L, 1);
     Sarray *sa2 = ll_check_Sarray(_fun, L, 2);
-    const char *str = ll_check_string(_fun, L, 3);
-    char *padstring = reinterpret_cast<char *>(reinterpret_cast<l_intptr_t>(str));
+    const char *padstring = ll_check_string(_fun, L, 3);
     return ll_push_boolean(_fun, L, 0 == sarrayPadToSameSize(sa1, sa2, padstring));
 }
 
@@ -869,7 +865,7 @@ ReplaceString(lua_State *L)
     LL_FUNC("ReplaceString");
     Sarray *sa = ll_check_Sarray(_fun, L, 1);
     l_int32 index = ll_check_index(_fun, L, 2);
-    const char* str = ll_check_string(_fun, L, 3);
+    const char *str = ll_check_string(_fun, L, 3);
     /** XXX: deconstify */
     char *newstr = reinterpret_cast<char *>(reinterpret_cast<l_intptr_t>(str));
     return ll_push_boolean(_fun, L, 0 == sarrayReplaceString(sa, index, newstr, L_COPY));
@@ -1205,7 +1201,6 @@ ll_new_Sarray(lua_State *L)
     FUNC("ll_new_Sarray");
     Sarray *sa = nullptr;
     const char* str = nullptr;
-    char* src = nullptr;
     l_int32 n = 1;
 
     if (ll_istable(_fun, L, 1)) {
@@ -1219,8 +1214,7 @@ ll_new_Sarray(lua_State *L)
         DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
             "const char", reinterpret_cast<const void *>(src));
         sa = sarrayCreate(1);
-        src = reinterpret_cast<char *>(reinterpret_cast<l_intptr_t>(str));
-        sarrayAddString(sa, src, L_COPY);
+        sarrayAddString(sa, str, L_COPY);
     }
 
     if (!sa && ll_isinteger(_fun, L, 1)) {

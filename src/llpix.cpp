@@ -11917,6 +11917,7 @@ FMorphopGen_2(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     l_int32 operation = ll_check_l_int32(_fun, L, 3);
     const char *name = ll_check_string(_fun, L, 4);
+    /* XXX: deconstify */
     char *selname = reinterpret_cast<char *>(reinterpret_cast<l_intptr_t>(name));
     Pix *pix = pixFMorphopGen_2(pixd, pixs, operation, selname);
     return ll_push_Pix(_fun, L, pix);
@@ -14354,7 +14355,7 @@ GenerateMaskByBand32(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_uint32 (refval1).
  * Arg #3 is expected to be a l_uint32 (refval2).
- * Arg #4 is expected to be a boolean (distflag).
+ * Arg #4 is expected to be a string describing the distance method (distflag).
  *
  * Leptonica's Notes:
  *      (1) Generates a 1 bpp mask pixd, the same size as pixs, where
@@ -19012,7 +19013,7 @@ MedianCutHisto(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is expected to be a l_int32 (ditherflag).
+ * Arg #2 is expected to be a boolean (ditherflag).
  *
  * Leptonica's Notes:
  *      (1) Simple interface.  See pixMedianCutQuantGeneral() for
@@ -19026,7 +19027,7 @@ MedianCutQuant(lua_State *L)
 {
     LL_FUNC("MedianCutQuant");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 ditherflag = ll_check_l_int32(_fun, L, 2);
+    l_int32 ditherflag = ll_opt_boolean(_fun, L, 2);
     Pix *pix = pixMedianCutQuant(pixs, ditherflag);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -22793,7 +22794,7 @@ ReadJp2k(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a string (filename).
  * Arg #2 is expected to be a boolean (cmapflag).
  * Arg #3 is expected to be a l_int32 (reduction).
- * Arg #5 is expected to be a l_int32 (hint).
+ * Arg #4 is expected to be a string describing the hint (hint).
  *
  * Leptonica's Notes:
  *      (1) This is a special function for reading jpeg files.
@@ -22827,8 +22828,8 @@ ReadJpeg(lua_State *L)
     const char *filename = ll_check_string(_fun, L, 1);
     l_int32 cmapflag = ll_check_boolean(_fun, L, 2);
     l_int32 reduction = ll_check_l_int32(_fun, L, 3);
+    l_int32 hint = ll_check_hint(_fun, L, 4);
     l_int32 nwarn = 0;
-    l_int32 hint = ll_check_l_int32(_fun, L, 5);
     if (pixReadJpeg(filename, cmapflag, reduction, &nwarn, hint))
         return ll_push_nil(L);
     ll_push_l_int32(_fun, L, nwarn);
@@ -30667,7 +30668,7 @@ ThinConnectedBySet(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (d).
  * Arg #3 is expected to be a l_int32 (nlevels).
- * Arg #4 is expected to be a l_int32 (cmapflag).
+ * Arg #4 is expected to be a boolean (cmapflag).
  *
  * Leptonica's Notes:
  *      (1) This uses, by default, equally spaced "target" values
@@ -30697,7 +30698,7 @@ Threshold8(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 d = ll_check_l_int32(_fun, L, 2);
     l_int32 nlevels = ll_check_l_int32(_fun, L, 3);
-    l_int32 cmapflag = ll_check_l_int32(_fun, L, 4);
+    l_int32 cmapflag = ll_opt_boolean(_fun, L, 4);
     Pix *pix = pixThreshold8(pixs, d, nlevels, cmapflag);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -30712,7 +30713,7 @@ Threshold8(lua_State *L)
  * Arg #5 is expected to be a l_int32 (incr).
  * Arg #6 is expected to be a l_float32 (thresh48).
  * Arg #7 is expected to be a l_float32 (threshdiff).
- * Arg #10 is expected to be a l_int32 (debugflag).
+ * Arg #8 is expected to be a boolean (debugflag).
  *
  * Leptonica's Notes:
  *      (1) This finds a global threshold based on connected components.
@@ -30762,9 +30763,9 @@ ThresholdByConnComp(lua_State *L)
     l_int32 incr = ll_check_l_int32(_fun, L, 5);
     l_float32 thresh48 = ll_check_l_float32(_fun, L, 6);
     l_float32 threshdiff = ll_check_l_float32(_fun, L, 7);
+    l_int32 debugflag = ll_opt_boolean(_fun, L, 8);
     l_int32 globthresh = 0;
     Pix *pixd = nullptr;
-    l_int32 debugflag = ll_check_l_int32(_fun, L, 10);
     if (pixThresholdByConnComp(pixs, pixm, start, end, incr, thresh48, threshdiff, &globthresh, &pixd, debugflag))
         return ll_push_nil(L);
     ll_push_l_int32(_fun, L, globthresh);
@@ -30857,7 +30858,7 @@ ThresholdGrayArb(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (nlevels).
- * Arg #3 is expected to be a l_int32 (cmapflag).
+ * Arg #3 is expected to be a boolean (cmapflag).
  *
  * Leptonica's Notes:
  *      (1) Valid values for nlevels is the set {2,...,256}.
@@ -30878,7 +30879,7 @@ ThresholdOn8bpp(lua_State *L)
     LL_FUNC("ThresholdOn8bpp");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 nlevels = ll_check_l_int32(_fun, L, 2);
-    l_int32 cmapflag = ll_check_l_int32(_fun, L, 3);
+    l_int32 cmapflag = ll_opt_boolean(_fun, L, 3);
     Pix *pix = pixThresholdOn8bpp(pixs, nlevels, cmapflag);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -30979,7 +30980,7 @@ ThresholdSpreadNorm(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (nlevels).
- * Arg #3 is expected to be a l_int32 (cmapflag).
+ * Arg #3 is expected to be a boolean (cmapflag).
  *
  * Leptonica's Notes:
  *      (1) Valid values for nlevels is the set {2, 3, 4}.
@@ -31024,7 +31025,7 @@ ThresholdTo2bpp(lua_State *L)
     LL_FUNC("ThresholdTo2bpp");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 nlevels = ll_check_l_int32(_fun, L, 2);
-    l_int32 cmapflag = ll_check_l_int32(_fun, L, 3);
+    l_int32 cmapflag = ll_opt_boolean(_fun, L, 3);
     Pix *pix = pixThresholdTo2bpp(pixs, nlevels, cmapflag);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -31034,7 +31035,7 @@ ThresholdTo2bpp(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (nlevels).
- * Arg #3 is expected to be a l_int32 (cmapflag).
+ * Arg #3 is expected to be a boolean (cmapflag).
  *
  * Leptonica's Notes:
  *      (1) Valid values for nlevels is the set {2, ... 16}.
@@ -31081,7 +31082,7 @@ ThresholdTo4bpp(lua_State *L)
     LL_FUNC("ThresholdTo4bpp");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 nlevels = ll_check_l_int32(_fun, L, 2);
-    l_int32 cmapflag = ll_check_l_int32(_fun, L, 3);
+    l_int32 cmapflag = ll_opt_boolean_fun, L, 3);
     Pix *pix = pixThresholdTo4bpp(pixs, nlevels, cmapflag);
     return ll_push_Pix(_fun, L, pix);
 }

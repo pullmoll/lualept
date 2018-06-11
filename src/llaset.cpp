@@ -357,7 +357,6 @@ static int
 GetPrev(lua_State *L)
 {
     LL_FUNC("GetPrev");
-    /* XXX: deconstify */
     AsetNode *node = reinterpret_cast<AsetNode *>(lua_touserdata(L, 2));
     AsetNode *prev = l_asetGetPrev(node);
     lua_pushlightuserdata(L, prev);
