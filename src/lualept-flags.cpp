@@ -519,6 +519,104 @@ ll_string_consecutive_skip_by(l_int32 choice)
 }
 
 /**
+ * \brief Table of text orientation names and enumeration values.
+ * <pre>
+ * Text orientation flags.
+ * </pre>
+ */
+static const lept_enum tbl_text_orientation[] = {
+    TBL_ENTRY("text-orient-unknown",    L_TEXT_ORIENT_UNKNOWN),
+    TBL_ENTRY("orient-unknown",         L_TEXT_ORIENT_UNKNOWN),
+    TBL_ENTRY("unknown",                L_TEXT_ORIENT_UNKNOWN),
+    TBL_ENTRY("text-orient-up",         L_TEXT_ORIENT_UP),
+    TBL_ENTRY("orient-up",              L_TEXT_ORIENT_UP),
+    TBL_ENTRY("up",                     L_TEXT_ORIENT_UP),
+    TBL_ENTRY("u",                      L_TEXT_ORIENT_UP),
+    TBL_ENTRY("text-orient-left",       L_TEXT_ORIENT_LEFT),
+    TBL_ENTRY("orient-left",            L_TEXT_ORIENT_LEFT),
+    TBL_ENTRY("left",                   L_TEXT_ORIENT_LEFT),
+    TBL_ENTRY("l",                      L_TEXT_ORIENT_LEFT),
+    TBL_ENTRY("text-orient-down",       L_TEXT_ORIENT_DOWN),
+    TBL_ENTRY("orient-down",            L_TEXT_ORIENT_DOWN),
+    TBL_ENTRY("down",                   L_TEXT_ORIENT_DOWN),
+    TBL_ENTRY("d",                      L_TEXT_ORIENT_DOWN),
+    TBL_ENTRY("text-orient-right",      L_TEXT_ORIENT_RIGHT),
+    TBL_ENTRY("orient-right",           L_TEXT_ORIENT_RIGHT),
+    TBL_ENTRY("right",                  L_TEXT_ORIENT_RIGHT),
+    TBL_ENTRY("r",                      L_TEXT_ORIENT_RIGHT)
+};
+
+/**
+ * \brief Check for a text orientation name as string.
+ * \param _fun calling function's name
+ * \param L Lua state
+ * \param arg index where to find the string
+ * \param def default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_text_orientation(const char *_fun, lua_State *L, int arg, l_int32 def)
+{
+    return ll_check_tbl(_fun, L, arg, def, tbl_text_orientation, ARRAYSIZE(tbl_text_orientation));
+}
+
+/**
+ * \brief Return a string for the text orientation value.
+ * \param orientation enumeration value
+ * \return const string with the name
+ */
+const char*
+ll_string_text_orientation(l_int32 orientation)
+{
+    return ll_string_tbl(orientation, tbl_text_orientation, ARRAYSIZE(tbl_text_orientation));
+}
+
+/**
+ * \brief Table of edge orientation names and enumeration values.
+ * <pre>
+ * Edge orientation flags.
+ * </pre>
+ */
+static const lept_enum tbl_edge_orientation[] = {
+    TBL_ENTRY("horizontal-edges",       L_HORIZONTAL_EDGES),
+    TBL_ENTRY("horizontal",             L_HORIZONTAL_EDGES),
+    TBL_ENTRY("horiz",                  L_HORIZONTAL_EDGES),
+    TBL_ENTRY("h",                      L_HORIZONTAL_EDGES),
+    TBL_ENTRY("vertical-edges",         L_VERTICAL_EDGES),
+    TBL_ENTRY("vertical",               L_VERTICAL_EDGES),
+    TBL_ENTRY("vert",                   L_VERTICAL_EDGES),
+    TBL_ENTRY("v",                      L_VERTICAL_EDGES),
+    TBL_ENTRY("all-edges",              L_ALL_EDGES),
+    TBL_ENTRY("all",                    L_ALL_EDGES),
+    TBL_ENTRY("a",                      L_ALL_EDGES)
+};
+
+/**
+ * \brief Check for a edge orientation name as string.
+ * \param _fun calling function's name
+ * \param L Lua state
+ * \param arg index where to find the string
+ * \param def default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_edge_orientation(const char *_fun, lua_State *L, int arg, l_int32 def)
+{
+    return ll_check_tbl(_fun, L, arg, def, tbl_edge_orientation, ARRAYSIZE(tbl_edge_orientation));
+}
+
+/**
+ * \brief Return a string for the edge orientation value.
+ * \param orientation enumeration value
+ * \return const string with the name
+ */
+const char*
+ll_string_edge_orientation(l_int32 orientation)
+{
+    return ll_string_tbl(orientation, tbl_edge_orientation, ARRAYSIZE(tbl_edge_orientation));
+}
+
+/**
  * \brief Table of color component names and enumeration values.
  * <pre>
  *  Notes:
@@ -787,6 +885,48 @@ const char*
 ll_string_direction(l_int32 dir)
 {
     return ll_string_tbl(dir, tbl_direction, ARRAYSIZE(tbl_direction));
+}
+
+/**
+ * \brief Table of distance names and enumeration values.
+ * <pre>
+ * Line orientation flags.
+ * </pre>
+ */
+static const lept_enum tbl_distance[] = {
+    TBL_ENTRY("manhattan-distance", L_MANHATTAN_DISTANCE),
+    TBL_ENTRY("manhattan",          L_MANHATTAN_DISTANCE),
+    TBL_ENTRY("m",                  L_MANHATTAN_DISTANCE),
+    TBL_ENTRY("l1",                 L_MANHATTAN_DISTANCE),
+    TBL_ENTRY("euclidian-distance", L_EUCLIDEAN_DISTANCE),
+    TBL_ENTRY("euclidian",          L_EUCLIDEAN_DISTANCE),
+    TBL_ENTRY("e",                  L_EUCLIDEAN_DISTANCE),
+    TBL_ENTRY("l2",                 L_EUCLIDEAN_DISTANCE)
+};
+
+/**
+ * \brief Check for a L_XXX_DISTANCE name as string.
+ * \param _fun calling function's name
+ * \param L Lua state
+ * \param arg index where to find the string
+ * \param def default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_distance(const char *_fun, lua_State *L, int arg, l_int32 def)
+{
+    return ll_check_tbl(_fun, L, arg, def, tbl_distance, ARRAYSIZE(tbl_distance));
+}
+
+/**
+ * \brief Return a string for the distance name.
+ * \param dir horizontal or vertical line distance enumeration value
+ * \return const string with the name
+ */
+const char*
+ll_string_distance(l_int32 dir)
+{
+    return ll_string_tbl(dir, tbl_distance, ARRAYSIZE(tbl_distance));
 }
 
 /**
@@ -1716,6 +1856,48 @@ const char*
 ll_string_trans_order(l_int32 order)
 {
     return ll_string_tbl(order, tbl_trans_order, ARRAYSIZE(tbl_trans_order));
+}
+
+/**
+ * \brief Table of include/exclude region by names and enumeration values.
+ * <pre>
+ * Size filter flags.
+ * </pre>
+ */
+static const lept_enum tbl_region[] = {
+    TBL_ENTRY("include-region",         L_INCLUDE_REGION),
+    TBL_ENTRY("include",                L_INCLUDE_REGION),
+    TBL_ENTRY("inc",                    L_INCLUDE_REGION),
+    TBL_ENTRY("i",                      L_INCLUDE_REGION),
+    TBL_ENTRY("exclude-region",         L_EXCLUDE_REGION),
+    TBL_ENTRY("exclude",                L_EXCLUDE_REGION),
+    TBL_ENTRY("exc",                    L_EXCLUDE_REGION),
+    TBL_ENTRY("e",                      L_EXCLUDE_REGION)
+};
+
+/**
+ * \brief Check for a include/exclude region name.
+ * \param _fun calling function's name
+ * \param L Lua state
+ * \param arg index where to find the string
+ * \param def default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_region(const char *_fun, lua_State* L, int arg, l_int32 def)
+{
+    return ll_check_tbl(_fun, L, arg, def, tbl_region, ARRAYSIZE(tbl_region));
+}
+
+/**
+ * \brief Return a string for the include/exclude region.
+ * \param region region value
+ * \return const string with the name
+ */
+const char*
+ll_string_region(l_int32 region)
+{
+    return ll_string_tbl(region, tbl_region, ARRAYSIZE(tbl_region));
 }
 
 /**

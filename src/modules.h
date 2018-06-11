@@ -525,6 +525,12 @@ extern const char     * ll_string_keytype(l_int32 type);
 extern l_int32          ll_check_consecutive_skip_by(const char *_fun, lua_State *L, int arg, l_int32 def = L_CHOOSE_CONSECUTIVE);
 extern const char     * ll_string_consecutive_skip_by(l_int32 choice);
 
+extern l_int32          ll_check_text_orientation(const char *_fun, lua_State *L, int arg, l_int32 def = L_TEXT_ORIENT_UNKNOWN);
+extern const char     * ll_string_text_orientation(l_int32 component);
+
+extern l_int32          ll_check_edge_orientation(const char *_fun, lua_State *L, int arg, l_int32 def = L_HORIZONTAL_EDGES);
+extern const char     * ll_string_edge_orientation(l_int32 component);
+
 extern l_int32          ll_check_component(const char *_fun, lua_State *L, int arg, l_int32 def = COLOR_RED);
 extern const char     * ll_string_component(l_int32 component);
 
@@ -542,6 +548,9 @@ extern const char     * ll_string_getval(l_int32 choice);
 
 extern l_int32          ll_check_direction(const char *_fun, lua_State *L, int arg, l_int32 def = L_HORIZONTAL_LINE);
 extern const char     * ll_string_direction(l_int32 dir);
+
+extern l_int32          ll_check_distance(const char *_fun, lua_State *L, int arg, l_int32 def = L_MANHATTAN_DISTANCE);
+extern const char     * ll_string_distance(l_int32 dir);
 
 extern l_int32          ll_check_set_black_white(const char *_fun, lua_State *L, int arg, l_int32 def = L_SET_WHITE);
 extern const char     * ll_string_set_black_white(l_int32 which);
@@ -596,6 +605,9 @@ extern const char     * ll_string_sort_order(l_int32 order);
 
 extern l_int32          ll_check_trans_order(const char *_fun, lua_State *L, int arg, l_int32 def = L_TR_SC_RO);
 extern const char     * ll_string_trans_order(l_int32 order);
+
+extern l_int32          ll_check_region(const char *_fun, lua_State *L, int arg, l_int32 def = L_INCLUDE_REGION);
+extern const char     * ll_string_region(l_int32 rotation);
 
 extern l_int32          ll_check_relation(const char *_fun, lua_State *L, int arg, l_int32 def = L_SELECT_IF_LT);
 extern const char     * ll_string_relation(l_int32 rotation);

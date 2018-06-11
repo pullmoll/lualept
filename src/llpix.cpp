@@ -2313,7 +2313,7 @@ BackgroundNormSimple(lua_State *L)
  * Arg #5 is expected to be a l_int32 (etransx).
  * Arg #6 is expected to be a l_int32 (etransy).
  * Arg #7 is expected to be a l_int32 (maxshift).
- * Arg #12 is expected to be a l_int32 (debugflag).
+ * Arg #8 is expected to be a boolean (debugflag).
  *
  * Leptonica's Notes:
  *      (1) This maximizes the correlation score between two 1 bpp images,
@@ -2348,11 +2348,11 @@ BestCorrelation(lua_State *L)
     l_int32 etransx = ll_check_l_int32(_fun, L, 5);
     l_int32 etransy = ll_check_l_int32(_fun, L, 6);
     l_int32 maxshift = ll_check_l_int32(_fun, L, 7);
+    l_int32 debugflag = ll_opt_boolean(_fun, L, 8);
     l_int32 tab8 = 0;
     l_int32 delx = 0;
     l_int32 dely = 0;
     l_float32 score = 0;
-    l_int32 debugflag = ll_check_l_int32(_fun, L, 12);
     if (pixBestCorrelation(pix1, pix2, area1, area2, etransx, etransy, maxshift, &tab8, &delx, &dely, &score, debugflag))
         return ll_push_nil(L);
     ll_push_l_int32(_fun, L, tab8);
@@ -5224,7 +5224,7 @@ ColorSegment(lua_State *L)
     l_int32 maxcolors = ll_check_l_int32(_fun, L, 3);
     l_int32 selsize = ll_check_l_int32(_fun, L, 4);
     l_int32 finalcolors = ll_check_l_int32(_fun, L, 5);
-    l_int32 debugflag = ll_check_l_int32(_fun, L, 6);
+    l_int32 debugflag = ll_opt_boolean(_fun, L, 6);
     Pix *pix = pixColorSegment(pixs, maxdist, maxcolors, selsize, finalcolors, debugflag);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -5287,7 +5287,7 @@ ColorSegmentCluster(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 maxdist = ll_check_l_int32(_fun, L, 2);
     l_int32 maxcolors = ll_check_l_int32(_fun, L, 3);
-    l_int32 debugflag = ll_check_l_int32(_fun, L, 4);
+    l_int32 debugflag = ll_opt_boolean(_fun, L, 4);
     Pix *pix = pixColorSegmentCluster(pixs, maxdist, maxcolors, debugflag);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -5379,7 +5379,7 @@ ColorizeGray(lua_State *L)
     LL_FUNC("ColorizeGray");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_uint32 color = ll_check_l_uint32(_fun, L, 2);
-    l_int32 cmapflag = ll_check_boolean(_fun, L, 3);
+    l_int32 cmapflag = ll_opt_boolean(_fun, L, 3);
     Pix *pix = pixColorizeGray(pixs, color, cmapflag);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -5683,7 +5683,7 @@ CompareGray(lua_State *L)
  * Arg #7 is expected to be a l_int32 (factor).
  * Arg #8 is expected to be a l_int32 (nx).
  * Arg #9 is expected to be a l_int32 (ny).
- * Arg #11 is expected to be a l_int32 (debugflag).
+ * Arg #10 is expected to be a boolean (debugflag).
  *
  * Leptonica's Notes:
  *      (1) This function compares two grayscale photo regions.  It can
@@ -5749,8 +5749,8 @@ CompareGrayByHisto(lua_State *L)
     l_int32 factor = ll_check_l_int32(_fun, L, 7);
     l_int32 nx = ll_check_l_int32(_fun, L, 8);
     l_int32 ny = ll_check_l_int32(_fun, L, 9);
+    l_int32 debugflag = ll_opt_boolean(_fun, L, 10);
     l_float32 score = 0;
-    l_int32 debugflag = ll_check_l_int32(_fun, L, 11);
     if (pixCompareGrayByHisto(pix1, pix2, box1, box2, minratio, maxgray, factor, nx, ny, &score, debugflag))
         return ll_push_nil(L);
     ll_push_l_float32(_fun, L, score);
@@ -5822,7 +5822,7 @@ CompareGrayOrRGB(lua_State *L)
  * Arg #6 is expected to be a l_int32 (factor).
  * Arg #7 is expected to be a l_int32 (nx).
  * Arg #8 is expected to be a l_int32 (ny).
- * Arg #10 is expected to be a l_int32 (debugflag).
+ * Arg #9 is expected to be a boolean (debugflag).
  *
  * Leptonica's Notes:
  *      (1) This function compares two grayscale photo regions.  If a
@@ -5876,8 +5876,8 @@ ComparePhotoRegionsByHisto(lua_State *L)
     l_int32 factor = ll_check_l_int32(_fun, L, 6);
     l_int32 nx = ll_check_l_int32(_fun, L, 7);
     l_int32 ny = ll_check_l_int32(_fun, L, 8);
+    l_int32 debugflag = ll_opt_boolean(_fun, L, 9);
     l_float32 score = 0;
-    l_int32 debugflag = ll_check_l_int32(_fun, L, 10);
     if (pixComparePhotoRegionsByHisto(pix1, pix2, box1, box2, minratio, factor, nx, ny, &score, debugflag))
         return ll_push_nil(L);
     ll_push_l_float32(_fun, L, score);
@@ -6004,7 +6004,7 @@ CompareTiled(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix1).
  * Arg #2 is expected to be a Pix* (pix2).
  * Arg #3 is expected to be a l_int32 (thresh).
- * Arg #7 is expected to be a l_int32 (debugflag).
+ * Arg #4 is expected to be a boolean (debugflag).
  *
  * Leptonica's Notes:
  *      (1) This does a coarse-to-fine search for best translational
@@ -6033,10 +6033,10 @@ CompareWithTranslation(lua_State *L)
     Pix *pix1 = ll_check_Pix(_fun, L, 1);
     Pix *pix2 = ll_check_Pix(_fun, L, 2);
     l_int32 thresh = ll_check_l_int32(_fun, L, 3);
+    l_int32 debugflag = ll_opt_boolean(_fun, L, 4);
     l_int32 delx = 0;
     l_int32 dely = 0;
     l_float32 score = 0;
-    l_int32 debugflag = ll_check_l_int32(_fun, L, 7);
     if (pixCompareWithTranslation(pix1, pix2, thresh, &delx, &dely, &score, debugflag))
         return ll_push_nil(L);
     ll_push_l_int32(_fun, L, delx);
@@ -6772,7 +6772,7 @@ Convert2To8(lua_State *L)
     l_uint8 val1 = ll_check_l_uint8(_fun, L, 3);
     l_uint8 val2 = ll_check_l_uint8(_fun, L, 4);
     l_uint8 val3 = ll_check_l_uint8(_fun, L, 5);
-    l_int32 cmapflag = ll_check_boolean(_fun, L, 6);
+    l_int32 cmapflag = ll_opt_boolean(_fun, L, 6);
     return ll_push_Pix(_fun, L, pixConvert2To8(pixs, val0, val1, val2, val3, cmapflag));
 }
 
@@ -6867,7 +6867,7 @@ Convert4To8(lua_State *L)
 {
     LL_FUNC("Convert4To8");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 cmapflag = ll_check_boolean(_fun, L, 2);
+    l_int32 cmapflag = ll_opt_boolean(_fun, L, 2);
     return ll_push_Pix(_fun, L, pixConvert4To8(pixs, cmapflag));
 }
 
@@ -7289,7 +7289,7 @@ ConvertRGBToColormap(lua_State *L)
 {
     LL_FUNC("ConvertRGBToColormap");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 ditherflag = ll_check_boolean(_fun, L, 2);
+    l_int32 ditherflag = ll_opt_boolean(_fun, L, 2);
     Pix *pix = pixConvertRGBToColormap(pixs, ditherflag);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -7876,7 +7876,7 @@ ConvertTo8BySampling(lua_State *L)
     LL_FUNC("ConvertTo8BySampling");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 factor = ll_check_l_int32(_fun, L, 2);
-    l_int32 cmapflag = ll_check_boolean(_fun, L, 3);
+    l_int32 cmapflag = ll_opt_boolean(_fun, L, 3);
     return ll_push_Pix(_fun, L, pixConvertTo8BySampling(pixs, factor, cmapflag));
 }
 
@@ -7905,7 +7905,7 @@ ConvertTo8Colormap(lua_State *L)
 {
     LL_FUNC("ConvertTo8Colormap");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 ditherflag = ll_check_boolean(_fun, L, 2);
+    l_int32 ditherflag = ll_opt_boolean(_fun, L, 2);
     return ll_push_Pix(_fun, L, pixConvertTo8Colormap(pixs, ditherflag));
 }
 
@@ -7933,7 +7933,7 @@ ConvertTo8Or32(lua_State *L)
     LL_FUNC("ConvertTo8Or32");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 copyflag = ll_check_access_storage(_fun, L, 2, L_COPY);
-    l_int32 warnflag = ll_check_boolean(_fun, L, 3);
+    l_int32 warnflag = ll_opt_boolean(_fun, L, 3);
     return ll_push_Pix(_fun, L, pixConvertTo8Or32(pixs, copyflag, warnflag));
 }
 
@@ -8219,7 +8219,7 @@ ConvertYUVToRGB(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Kernel* (kel).
  * Arg #3 is expected to be a l_int32 (outdepth).
- * Arg #4 is expected to be a l_int32 (normflag).
+ * Arg #4 is expected to be a boolean (normflag).
  *
  * Leptonica's Notes:
  *      (1) This gives a convolution with an arbitrary kernel.
@@ -8263,7 +8263,7 @@ Convolve(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Kernel *kel = ll_check_Kernel(_fun, L, 2);
     l_int32 outdepth = ll_check_l_int32(_fun, L, 3);
-    l_int32 normflag = ll_check_l_int32(_fun, L, 4);
+    l_int32 normflag = ll_opt_boolean(_fun, L, 4);
     Pix *pix = pixConvolve(pixs, kel, outdepth, normflag);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -8346,7 +8346,7 @@ ConvolveRGBSep(lua_State *L)
  * Arg #2 is expected to be a Kernel* (kelx).
  * Arg #3 is expected to be a Kernel* (kely).
  * Arg #4 is expected to be a l_int32 (outdepth).
- * Arg #5 is expected to be a l_int32 (normflag).
+ * Arg #5 is expected to be a boolean (normflag).
  *
  * Leptonica's Notes:
  *      (1) This does a convolution with a separable kernel that is
@@ -8390,7 +8390,7 @@ ConvolveSep(lua_State *L)
     Kernel *kelx = ll_check_Kernel(_fun, L, 2);
     Kernel *kely = ll_check_Kernel(_fun, L, 3);
     l_int32 outdepth = ll_check_l_int32(_fun, L, 4);
-    l_int32 normflag = ll_check_l_int32(_fun, L, 5);
+    l_int32 normflag = ll_opt_boolean(_fun, L, 5);
     Pix *pix = pixConvolveSep(pixs, kelx, kely, outdepth, normflag);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -10524,7 +10524,7 @@ DisplayWithTitle(lua_State *L)
     l_int32 x = ll_check_l_int32(_fun, L, 2);
     l_int32 y = ll_check_l_int32(_fun, L, 3);
     const char *title = ll_check_string(_fun, L, 4);
-    l_int32 dispflag = ll_check_boolean(_fun, L, 5);
+    l_int32 dispflag = ll_opt_boolean(_fun, L, 5);
     return ll_push_boolean(_fun, L, 0 == pixDisplayWithTitle(pixs, x, y, title, dispflag));
 }
 
@@ -10623,7 +10623,7 @@ DistanceFunction(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is expected to be a l_int32 (cmapflag).
+ * Arg #2 is expected to be a boolean (cmapflag).
  * </pre>
  * \param L Lua state
  * \return 1 Pix * on the Lua stack
@@ -10633,7 +10633,7 @@ DitherTo2bpp(lua_State *L)
 {
     LL_FUNC("DitherTo2bpp");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 cmapflag = ll_check_l_int32(_fun, L, 2);
+    l_int32 cmapflag = ll_opt_boolean(_fun, L, 2);
     Pix *pix = pixDitherTo2bpp(pixs, cmapflag);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -10644,7 +10644,7 @@ DitherTo2bpp(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (lowerclip).
  * Arg #3 is expected to be a l_int32 (upperclip).
- * Arg #4 is expected to be a l_int32 (cmapflag).
+ * Arg #4 is expected to be a boolean (cmapflag).
  *
  * Leptonica's Notes:
  *      (1) See comments above in pixDitherTo2bpp() for details.
@@ -10663,7 +10663,7 @@ DitherTo2bppSpec(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 lowerclip = ll_check_l_int32(_fun, L, 2);
     l_int32 upperclip = ll_check_l_int32(_fun, L, 3);
-    l_int32 cmapflag = ll_check_l_int32(_fun, L, 4);
+    l_int32 cmapflag = ll_opt_boolean(_fun, L, 4);
     Pix *pix = pixDitherTo2bppSpec(pixs, lowerclip, upperclip, cmapflag);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -11506,7 +11506,7 @@ ExtendByReplication(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (thresh).
- * Arg #3 is expected to be a l_int32 (debugflag).
+ * Arg #3 is expected to be a boolean (debugflag).
  * </pre>
  * \param L Lua state
  * \return 1 Numa * on the Lua stack
@@ -11517,7 +11517,7 @@ ExtractBarcodeCrossings(lua_State *L)
     LL_FUNC("ExtractBarcodeCrossings");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 thresh = ll_check_l_float32(_fun, L, 2);
-    l_int32 debugflag = ll_check_l_int32(_fun, L, 3);
+    l_int32 debugflag = ll_opt_boolean(_fun, L, 3);
     Numa *result = pixExtractBarcodeCrossings(pixs, thresh, debugflag);
     return ll_push_Numa(_fun, L, result);
 }
@@ -11528,7 +11528,7 @@ ExtractBarcodeCrossings(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (thresh).
  * Arg #3 is expected to be a l_float32 (binfract).
- * Arg #6 is expected to be a l_int32 (debugflag).
+ * Arg #4 is expected to be a boolean (debugflag).
  *
  * Leptonica's Notes:
  *     (1) The widths are alternating black/white, starting with black
@@ -11548,9 +11548,9 @@ ExtractBarcodeWidths1(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 thresh = ll_check_l_float32(_fun, L, 2);
     l_float32 binfract = ll_check_l_float32(_fun, L, 3);
+    l_int32 debugflag = ll_opt_boolean(_fun, L, 4);
     Numa *naehist = nullptr;
     Numa *naohist = nullptr;
-    l_int32 debugflag = ll_check_l_int32(_fun, L, 6);
     if (pixExtractBarcodeWidths1(pixs, thresh, binfract, &naehist, &naohist, debugflag))
         return ll_push_nil(L);
     ll_push_Numa(_fun, L, naehist);
@@ -11563,7 +11563,7 @@ ExtractBarcodeWidths1(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (thresh).
- * Arg #5 is expected to be a l_int32 (debugflag).
+ * Arg #3 is expected to be a boolean (debugflag).
  *
  * Leptonica's Notes:
  *      (1) The widths are alternating black/white, starting with black
@@ -11586,9 +11586,9 @@ ExtractBarcodeWidths2(lua_State *L)
     LL_FUNC("ExtractBarcodeWidths2");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 thresh = ll_check_l_float32(_fun, L, 2);
+    l_int32 debugflag = ll_opt_boolean(_fun, L, 3);
     l_float32 width = 0;
     Numa *nac = nullptr;
-    l_int32 debugflag = ll_check_l_int32(_fun, L, 5);
     if (pixExtractBarcodeWidths2(pixs, thresh, &width, &nac, debugflag))
         return ll_push_nil(L);
     ll_push_l_float32(_fun, L, width);
@@ -11600,7 +11600,7 @@ ExtractBarcodeWidths2(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is expected to be a l_int32 (debugflag).
+ * Arg #2 is expected to be a boolean (debugflag).
  * </pre>
  * \param L Lua state
  * \return 1 Pixa * on the Lua stack
@@ -11610,7 +11610,7 @@ ExtractBarcodes(lua_State *L)
 {
     LL_FUNC("ExtractBarcodes");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 debugflag = ll_check_l_int32(_fun, L, 2);
+    l_int32 debugflag = ll_opt_boolean(_fun, L, 2);
     Pixa *result = pixExtractBarcodes(pixs, debugflag);
     return ll_push_Pixa(_fun, L, result);
 }
@@ -13635,7 +13635,7 @@ FindVerticalRuns(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is expected to be a l_int32 (ditherflag).
+ * Arg #2 is expected to be a boolean (ditherflag).
  *
  * Leptonica's Notes:
  *  This simple 1-pass color quantization works by breaking the
@@ -13699,7 +13699,7 @@ FixedOctcubeQuant256(lua_State *L)
 {
     LL_FUNC("FixedOctcubeQuant256");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 ditherflag = ll_check_l_int32(_fun, L, 2);
+    l_int32 ditherflag = ll_opt_boolean(_fun, L, 2);
     Pix *pix = pixFixedOctcubeQuant256(pixs, ditherflag);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -14082,7 +14082,7 @@ GenHalftoneMask(lua_State *L)
  * Arg #4 is expected to be a l_float32 (thresh).
  * Arg #5 is expected to be a l_int32 (nx).
  * Arg #6 is expected to be a l_int32 (ny).
- * Arg #7 is expected to be a l_int32 (debugflag).
+ * Arg #7 is expected to be a boolean (debugflag).
  *
  * Leptonica's Notes:
  *      (1) This crops and converts to 8 bpp if necessary.  It adds a
@@ -14111,7 +14111,7 @@ GenPhotoHistos(lua_State *L)
     l_float32 thresh = ll_check_l_float32(_fun, L, 4);
     l_int32 nx = ll_check_l_int32(_fun, L, 5);
     l_int32 ny = ll_check_l_int32(_fun, L, 6);
-    l_int32 debugflag = ll_check_l_int32(_fun, L, 7);
+    l_int32 debugflag = ll_opt_boolean(_fun, L, 7);
     Numaa *naa = nullptr;
     l_int32 w = 0;
     l_int32 h = 0;
@@ -14354,7 +14354,7 @@ GenerateMaskByBand32(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_uint32 (refval1).
  * Arg #3 is expected to be a l_uint32 (refval2).
- * Arg #4 is expected to be a l_int32 (distflag).
+ * Arg #4 is expected to be a boolean (distflag).
  *
  * Leptonica's Notes:
  *      (1) Generates a 1 bpp mask pixd, the same size as pixs, where
@@ -14376,7 +14376,7 @@ GenerateMaskByDiscr32(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_uint32 refval1 = ll_check_l_uint32(_fun, L, 2);
     l_uint32 refval2 = ll_check_l_uint32(_fun, L, 3);
-    l_int32 distflag = ll_check_l_int32(_fun, L, 4);
+    l_int32 distflag = ll_check_distance(_fun, L, 4);
     Pix *pix = pixGenerateMaskByDiscr32(pixs, refval1, refval2, distflag);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -14386,7 +14386,7 @@ GenerateMaskByDiscr32(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (val).
- * Arg #3 is expected to be a l_int32 (usecmap).
+ * Arg #3 is expected to be a boolean (usecmap).
  *
  * Leptonica's Notes:
  *      (1) %val is the pixel value that we are selecting.  It can be
@@ -14406,7 +14406,7 @@ GenerateMaskByValue(lua_State *L)
     LL_FUNC("GenerateMaskByValue");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 val = ll_check_l_int32(_fun, L, 2);
-    l_int32 usecmap = ll_check_l_int32(_fun, L, 3);
+    l_int32 usecmap = ll_opt_boolean(_fun, L, 3);
     Pix *pix = pixGenerateMaskByValue(pixs, val, usecmap);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -14448,10 +14448,10 @@ GeneratePtaBoundary(lua_State *L)
  * Arg #3 is expected to be a l_int32 (missdist).
  * Arg #4 is expected to be a l_int32 (hitskip).
  * Arg #5 is expected to be a l_int32 (missskip).
- * Arg #6 is expected to be a l_int32 (topflag).
- * Arg #7 is expected to be a l_int32 (botflag).
- * Arg #8 is expected to be a l_int32 (leftflag).
- * Arg #9 is expected to be a l_int32 (rightflag).
+ * Arg #6 is expected to be a boolean (topflag).
+ * Arg #7 is expected to be a boolean (botflag).
+ * Arg #8 is expected to be a boolean (leftflag).
+ * Arg #9 is expected to be a boolean (rightflag).
  *
  * Leptonica's Notes:
  *    (1) All fg elements selected are exactly hitdist pixels away from
@@ -14489,10 +14489,10 @@ GenerateSelBoundary(lua_State *L)
     l_int32 missdist = ll_check_l_int32(_fun, L, 3);
     l_int32 hitskip = ll_check_l_int32(_fun, L, 4);
     l_int32 missskip = ll_check_l_int32(_fun, L, 5);
-    l_int32 topflag = ll_check_l_int32(_fun, L, 6);
-    l_int32 botflag = ll_check_l_int32(_fun, L, 7);
-    l_int32 leftflag = ll_check_l_int32(_fun, L, 8);
-    l_int32 rightflag = ll_check_l_int32(_fun, L, 9);
+    l_int32 topflag = ll_opt_boolean(_fun, L, 6);
+    l_int32 botflag = ll_opt_boolean(_fun, L, 7);
+    l_int32 leftflag = ll_opt_boolean(_fun, L, 8);
+    l_int32 rightflag = ll_opt_boolean(_fun, L, 9);
     Pix *pixe = nullptr;
     if (pixGenerateSelBoundary(pixs, hitdist, missdist, hitskip, missskip, topflag, botflag, leftflag, rightflag, &pixe))
         return ll_push_nil(L);
@@ -17958,7 +17958,7 @@ IntersectionOfMorphOps(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Boxa* (boxaw).
  * Arg #3 is expected to be a Pix* (pixw).
- * Arg #5 is expected to be a l_int32 (debugflag).
+ * Arg #4 is expected to be a boolean (debugflag).
  *
  * Leptonica's Notes:
  *      (1) You can input the bounding boxes for the words in one of
@@ -17990,8 +17990,8 @@ ItalicWords(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Boxa *boxaw = ll_check_Boxa(_fun, L, 2);
     Pix *pixw = ll_check_Pix(_fun, L, 3);
+    l_int32 debugflag = ll_opt_boolean(_fun, L, 4);
     Boxa *boxa = nullptr;
-    l_int32 debugflag = ll_check_l_int32(_fun, L, 5);
     if (pixItalicWords(pixs, boxaw, pixw, &boxa, debugflag))
         return ll_push_nil(L);
     ll_push_Boxa(_fun, L, boxa);
@@ -18510,7 +18510,7 @@ MakeMaskFromVal(lua_State *L)
  * Arg #3 is expected to be a l_int32 (huehw).
  * Arg #4 is expected to be a l_int32 (satcenter).
  * Arg #5 is expected to be a l_int32 (sathw).
- * Arg #6 is expected to be a l_int32 (regionflag).
+ * Arg #6 is expected to be a string describing the region (regionflag).
  *
  * Leptonica's Notes:
  *      (1) The pixels are selected based on the specified ranges of
@@ -18534,7 +18534,7 @@ MakeRangeMaskHS(lua_State *L)
     l_int32 huehw = ll_check_l_int32(_fun, L, 3);
     l_int32 satcenter = ll_check_l_int32(_fun, L, 4);
     l_int32 sathw = ll_check_l_int32(_fun, L, 5);
-    l_int32 regionflag = ll_check_l_int32(_fun, L, 6);
+    l_int32 regionflag = ll_check_region(_fun, L, 6);
     Pix *pix = pixMakeRangeMaskHS(pixs, huecenter, huehw, satcenter, sathw, regionflag);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -18547,7 +18547,7 @@ MakeRangeMaskHS(lua_State *L)
  * Arg #3 is expected to be a l_int32 (huehw).
  * Arg #4 is expected to be a l_int32 (valcenter).
  * Arg #5 is expected to be a l_int32 (valhw).
- * Arg #6 is expected to be a l_int32 (regionflag).
+ * Arg #6 is expected to be a string describing the region (regionflag).
  *
  * Leptonica's Notes:
  *      (1) The pixels are selected based on the specified ranges of
@@ -18571,7 +18571,7 @@ MakeRangeMaskHV(lua_State *L)
     l_int32 huehw = ll_check_l_int32(_fun, L, 3);
     l_int32 valcenter = ll_check_l_int32(_fun, L, 4);
     l_int32 valhw = ll_check_l_int32(_fun, L, 5);
-    l_int32 regionflag = ll_check_l_int32(_fun, L, 6);
+    l_int32 regionflag = ll_check_region(_fun, L, 6);
     Pix *pix = pixMakeRangeMaskHV(pixs, huecenter, huehw, valcenter, valhw, regionflag);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -18584,7 +18584,7 @@ MakeRangeMaskHV(lua_State *L)
  * Arg #3 is expected to be a l_int32 (sathw).
  * Arg #4 is expected to be a l_int32 (valcenter).
  * Arg #5 is expected to be a l_int32 (valhw).
- * Arg #6 is expected to be a l_int32 (regionflag).
+ * Arg #6 is expected to be a string describing the region (regionflag).
  *
  * Leptonica's Notes:
  *      (1) The pixels are selected based on the specified ranges of
@@ -18607,7 +18607,7 @@ MakeRangeMaskSV(lua_State *L)
     l_int32 sathw = ll_check_l_int32(_fun, L, 3);
     l_int32 valcenter = ll_check_l_int32(_fun, L, 4);
     l_int32 valhw = ll_check_l_int32(_fun, L, 5);
-    l_int32 regionflag = ll_check_l_int32(_fun, L, 6);
+    l_int32 regionflag = ll_check_region(_fun, L, 6);
     Pix *pix = pixMakeRangeMaskSV(pixs, satcenter, sathw, valcenter, valhw, regionflag);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -19035,7 +19035,7 @@ MedianCutQuant(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is expected to be a l_int32 (ditherflag).
+ * Arg #2 is expected to be a boolean (ditherflag).
  * Arg #3 is expected to be a l_int32 (outdepth).
  * Arg #4 is expected to be a l_int32 (maxcolors).
  * Arg #5 is expected to be a l_int32 (sigbits).
@@ -19076,7 +19076,7 @@ MedianCutQuantGeneral(lua_State *L)
 {
     LL_FUNC("MedianCutQuantGeneral");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 ditherflag = ll_check_l_int32(_fun, L, 2);
+    l_int32 ditherflag = ll_check_boolean(_fun, L, 2);
     l_int32 outdepth = ll_check_l_int32(_fun, L, 3);
     l_int32 maxcolors = ll_check_l_int32(_fun, L, 4);
     l_int32 sigbits = ll_check_l_int32(_fun, L, 5);
@@ -20348,7 +20348,7 @@ OctcubeQuantMixedWithGray(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (colors).
- * Arg #3 is expected to be a l_int32 (ditherflag).
+ * Arg #3 is expected to be a boolean (ditherflag).
  *
  * Leptonica's Notes:
  *        Leptonica also provides color quantization using a modified
@@ -20363,7 +20363,7 @@ OctreeColorQuant(lua_State *L)
     LL_FUNC("OctreeColorQuant");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 colors = ll_check_l_int32(_fun, L, 2);
-    l_int32 ditherflag = ll_check_l_int32(_fun, L, 3);
+    l_int32 ditherflag = ll_opt_boolean(_fun, L, 3);
     Pix *pix = pixOctreeColorQuant(pixs, colors, ditherflag);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -20373,7 +20373,7 @@ OctreeColorQuant(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (colors).
- * Arg #3 is expected to be a l_int32 (ditherflag).
+ * Arg #3 is expected to be a boolean (ditherflag).
  * Arg #4 is expected to be a l_float32 (validthresh).
  * Arg #5 is expected to be a l_float32 (colorthresh).
  *
@@ -20414,7 +20414,7 @@ OctreeColorQuantGeneral(lua_State *L)
     LL_FUNC("OctreeColorQuantGeneral");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 colors = ll_check_l_int32(_fun, L, 2);
-    l_int32 ditherflag = ll_check_l_int32(_fun, L, 3);
+    l_int32 ditherflag = ll_opt_boolean(_fun, L, 3);
     l_float32 validthresh = ll_check_l_float32(_fun, L, 4);
     l_float32 colorthresh = ll_check_l_float32(_fun, L, 5);
     Pix *pix = pixOctreeColorQuantGeneral(pixs, colors, ditherflag, validthresh, colorthresh);
@@ -20426,7 +20426,7 @@ OctreeColorQuantGeneral(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (level).
- * Arg #3 is expected to be a l_int32 (ditherflag).
+ * Arg #3 is expected to be a boolean (ditherflag).
  *
  * Leptonica's Notes:
  *      (1) This color quantization method works very well without
@@ -20481,7 +20481,7 @@ OctreeQuantByPopulation(lua_State *L)
     LL_FUNC("OctreeQuantByPopulation");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 level = ll_check_l_int32(_fun, L, 2);
-    l_int32 ditherflag = ll_check_l_int32(_fun, L, 3);
+    l_int32 ditherflag = ll_opt_boolean(_fun, L, 3);
     Pix *pix = pixOctreeQuantByPopulation(pixs, level, ditherflag);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -21392,7 +21392,7 @@ PrintStreamInfo(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (format).
  * Arg #3 is expected to be a l_int32 (method).
- * Arg #5 is expected to be a l_int32 (debugflag).
+ * Arg #4 is expected to be a boolean (debugflag).
  * </pre>
  * \param L Lua state
  * \return 1 Sarray * on the Lua stack
@@ -21404,8 +21404,8 @@ ProcessBarcodes(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 format = ll_check_l_int32(_fun, L, 2);
     l_int32 method = ll_check_l_int32(_fun, L, 3);
+    l_int32 debugflag = ll_opt_boolean(_fun, L, 4);
     Sarray *saw = nullptr;
-    l_int32 debugflag = ll_check_l_int32(_fun, L, 5);
     if (pixProcessBarcodes(pixs, format, method, &saw, debugflag))
         return ll_push_nil(L);
     ll_pack_Sarray(_fun, L, saw);
@@ -22534,7 +22534,7 @@ Read(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (method).
- * Arg #3 is expected to be a l_int32 (debugflag).
+ * Arg #3 is expected to be a boolean (debugflag).
  * </pre>
  * \param L Lua state
  * \return 1 Numa * on the Lua stack
@@ -22545,7 +22545,7 @@ ReadBarcodeWidths(lua_State *L)
     LL_FUNC("ReadBarcodeWidths");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 method = ll_check_l_int32(_fun, L, 2);
-    l_int32 debugflag = ll_check_l_int32(_fun, L, 3);
+    l_int32 debugflag = ll_opt_boolean(_fun, L, 3);
     Numa *result = pixReadBarcodeWidths(pixs, method, debugflag);
     return ll_push_Numa(_fun, L, result);
 }
@@ -22556,7 +22556,7 @@ ReadBarcodeWidths(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
  * Arg #2 is expected to be a l_int32 (format).
  * Arg #3 is expected to be a l_int32 (method).
- * Arg #5 is expected to be a l_int32 (debugflag).
+ * Arg #4 is expected to be a boolean (debugflag).
  * </pre>
  * \param L Lua state
  * \return 1 Sarray * on the Lua stack
@@ -22568,8 +22568,8 @@ ReadBarcodes(lua_State *L)
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
     l_int32 format = ll_check_l_int32(_fun, L, 2);
     l_int32 method = ll_check_l_int32(_fun, L, 3);
+    l_int32 debugflag = ll_opt_boolean(_fun, L, 4);
     Sarray *saw = nullptr;
-    l_int32 debugflag = ll_check_l_int32(_fun, L, 5);
     if (pixReadBarcodes(pixa, format, method, &saw, debugflag))
         return ll_push_nil(L);
     ll_pack_Sarray(_fun, L, saw);
@@ -22791,7 +22791,7 @@ ReadJp2k(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a string (filename).
- * Arg #2 is expected to be a l_int32 (cmapflag).
+ * Arg #2 is expected to be a boolean (cmapflag).
  * Arg #3 is expected to be a l_int32 (reduction).
  * Arg #5 is expected to be a l_int32 (hint).
  *
@@ -22825,7 +22825,7 @@ ReadJpeg(lua_State *L)
 {
     LL_FUNC("ReadJpeg");
     const char *filename = ll_check_string(_fun, L, 1);
-    l_int32 cmapflag = ll_check_l_int32(_fun, L, 2);
+    l_int32 cmapflag = ll_check_boolean(_fun, L, 2);
     l_int32 reduction = ll_check_l_int32(_fun, L, 3);
     l_int32 nwarn = 0;
     l_int32 hint = ll_check_l_int32(_fun, L, 5);
@@ -22983,7 +22983,7 @@ ReadMemJp2k(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a lstring (str).
- * Arg #2 is expected to be a l_int32 (cmflag).
+ * Arg #2 is expected to be a boolean (cmflag).
  * Arg #3 is expected to be a l_int32 (reduction).
  * Arg #4 is expected to be a l_int32 (hint).
  *
@@ -23003,7 +23003,7 @@ ReadMemJpeg(lua_State *L)
     size_t size;
     const char *str = ll_check_lstring(_fun, L, 1, &size);
     const l_uint8* data = reinterpret_cast<const l_uint8 *>(str);
-    l_int32 cmflag = ll_check_l_int32(_fun, L, 2);
+    l_int32 cmflag = ll_check_boolean(_fun, L, 2);
     l_int32 reduction = ll_check_l_int32(_fun, L, 3);
     l_int32 hint = ll_check_l_int32(_fun, L, 4);
     l_int32 nwarn = 0;
@@ -23229,7 +23229,7 @@ ReadStreamJp2k(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a luaL_Stream* (stream).
- * Arg #2 is expected to be a l_int32 (cmapflag).
+ * Arg #2 is expected to be a boolean (cmapflag).
  * Arg #3 is expected to be a l_int32 (reduction).
  * Arg #5 is expected to be a l_int32 (hint).
  *
@@ -23244,7 +23244,7 @@ ReadStreamJpeg(lua_State *L)
 {
     LL_FUNC("ReadStreamJpeg");
     luaL_Stream *stream = ll_check_stream(_fun, L, 1);
-    l_int32 cmapflag = ll_check_l_int32(_fun, L, 2);
+    l_int32 cmapflag = ll_check_boolean(_fun, L, 2);
     l_int32 reduction = ll_check_l_int32(_fun, L, 3);
     l_int32 nwarn = 0;
     l_int32 hint = ll_check_l_int32(_fun, L, 5);
@@ -24481,7 +24481,7 @@ RenderPolygon(lua_State *L)
  * Arg #2 is expected to be a Pta* (ptas).
  * Arg #3 is expected to be a l_int32 (width).
  * Arg #4 is expected to be a l_int32 (op).
- * Arg #5 is expected to be a l_int32 (closeflag).
+ * Arg #5 is expected to be a boolean (closeflag).
  *
  * Leptonica's Notes:
  *      This renders a closed contour.
@@ -24497,7 +24497,7 @@ RenderPolyline(lua_State *L)
     Pta *ptas = ll_check_Pta(_fun, L, 2);
     l_int32 width = ll_check_l_int32(_fun, L, 3);
     l_int32 op = ll_check_l_int32(_fun, L, 4);
-    l_int32 closeflag = ll_check_l_int32(_fun, L, 5);
+    l_int32 closeflag = ll_opt_boolean(_fun, L, 5, TRUE);
     l_int32 result = pixRenderPolyline(pix, ptas, width, op, closeflag);
     return ll_push_l_int32(_fun, L, result);
 }
@@ -24511,7 +24511,7 @@ RenderPolyline(lua_State *L)
  * Arg #4 is expected to be a l_uint8 (rval).
  * Arg #5 is expected to be a l_uint8 (gval).
  * Arg #6 is expected to be a l_uint8 (bval).
- * Arg #7 is expected to be a l_int32 (closeflag).
+ * Arg #7 is expected to be a boolean (closeflag).
  *
  * Leptonica's Notes:
  *      This renders a closed contour.
@@ -24529,7 +24529,7 @@ RenderPolylineArb(lua_State *L)
     l_uint8 rval = ll_check_l_uint8(_fun, L, 4);
     l_uint8 gval = ll_check_l_uint8(_fun, L, 5);
     l_uint8 bval = ll_check_l_uint8(_fun, L, 6);
-    l_int32 closeflag = ll_check_l_int32(_fun, L, 7);
+    l_int32 closeflag = ll_opt_boolean(_fun, L, 7, TRUE);
     l_int32 result = pixRenderPolylineArb(pix, ptas, width, rval, gval, bval, closeflag);
     return ll_push_l_int32(_fun, L, result);
 }
@@ -24544,8 +24544,8 @@ RenderPolylineArb(lua_State *L)
  * Arg #5 is expected to be a l_uint8 (gval).
  * Arg #6 is expected to be a l_uint8 (bval).
  * Arg #7 is expected to be a l_float32 (fract).
- * Arg #8 is expected to be a l_int32 (closeflag).
- * Arg #9 is expected to be a l_int32 (removedups).
+ * Arg #8 is expected to be a boolean (closeflag).
+ * Arg #9 is expected to be a boolean (removedups).
  * </pre>
  * \param L Lua state
  * \return 1 l_int32 on the Lua stack
@@ -24561,8 +24561,8 @@ RenderPolylineBlend(lua_State *L)
     l_uint8 gval = ll_check_l_uint8(_fun, L, 5);
     l_uint8 bval = ll_check_l_uint8(_fun, L, 6);
     l_float32 fract = ll_check_l_float32(_fun, L, 7);
-    l_int32 closeflag = ll_check_l_int32(_fun, L, 8);
-    l_int32 removedups = ll_check_l_int32(_fun, L, 9);
+    l_int32 closeflag = ll_opt_boolean(_fun, L, 8);
+    l_int32 removedups = ll_opt_boolean(_fun, L, 9);
     l_int32 result = pixRenderPolylineBlend(pix, ptas, width, rval, gval, bval, fract, closeflag, removedups);
     return ll_push_l_int32(_fun, L, result);
 }
@@ -24669,9 +24669,9 @@ RenderPtaBlend(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a Ptaa* (ptaa).
- * Arg #3 is expected to be a l_int32 (polyflag).
+ * Arg #3 is expected to be a boolean (polyflag).
  * Arg #4 is expected to be a l_int32 (width).
- * Arg #5 is expected to be a l_int32 (closeflag).
+ * Arg #5 is expected to be a boolean (closeflag).
  *
  * Leptonica's Notes:
  *      (1) This is a debugging routine, that displays a set of
@@ -24696,9 +24696,9 @@ RenderRandomCmapPtaa(lua_State *L)
     LL_FUNC("RenderRandomCmapPtaa");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Ptaa *ptaa = ll_check_Ptaa(_fun, L, 2);
-    l_int32 polyflag = ll_check_l_int32(_fun, L, 3);
+    l_int32 polyflag = ll_check_boolean(_fun, L, 3);
     l_int32 width = ll_check_l_int32(_fun, L, 4);
-    l_int32 closeflag = ll_check_l_int32(_fun, L, 5);
+    l_int32 closeflag = ll_check_boolean(_fun, L, 5);
     Pix *pix = pixRenderRandomCmapPtaa(pixs, ptaa, polyflag, width, closeflag);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -27178,7 +27178,7 @@ ScaleWithAlpha(lua_State *L)
  * Arg #4 is expected to be a l_int32 (highthresh).
  * Arg #5 is expected to be a l_int32 (maxwidth).
  * Arg #6 is expected to be a l_int32 (factor).
- * Arg #7 is expected to be a l_int32 (scanflag).
+ * Arg #7 is expected to be a string describing the side to scan from (scanflag).
  *
  * Leptonica's Notes:
  *      (1) If there are no fg pixels, the position is set to 0.
@@ -27207,7 +27207,7 @@ ScanForEdge(lua_State *L)
     l_int32 highthresh = ll_check_l_int32(_fun, L, 4);
     l_int32 maxwidth = ll_check_l_int32(_fun, L, 5);
     l_int32 factor = ll_check_l_int32(_fun, L, 6);
-    l_int32 scanflag = ll_check_l_int32(_fun, L, 7);
+    l_int32 scanflag = ll_check_from_side(_fun, L, 7);
     l_int32 loc = 0;
     if (pixScanForEdge(pixs, box, lowthresh, highthresh, maxwidth, factor, scanflag, &loc))
         return ll_push_nil(L);
@@ -27220,7 +27220,7 @@ ScanForEdge(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Box* (box).
- * Arg #3 is expected to be a l_int32 (scanflag).
+ * Arg #3 is expected to be a string describing the side to scan from (scanflag).
  *
  * Leptonica's Notes:
  *      (1) If there are no fg pixels, the position is set to 0.
@@ -27236,7 +27236,7 @@ ScanForForeground(lua_State *L)
     LL_FUNC("ScanForForeground");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Box *box = ll_check_Box(_fun, L, 2);
-    l_int32 scanflag = ll_check_l_int32(_fun, L, 3);
+    l_int32 scanflag = ll_check_from_side(_fun, L, 3);
     l_int32 loc = 0;
     if (pixScanForForeground(pixs, box, scanflag, &loc))
         return ll_push_nil(L);
@@ -29700,7 +29700,7 @@ ShiftByComponent(lua_State *L)
  * Arg #3 is expected to be a l_int32 (nterms).
  * Arg #4 is expected to be a l_uint32 (seed).
  * Arg #5 is expected to be a l_uint32 (color).
- * Arg #6 is expected to be a l_int32 (cmapflag).
+ * Arg #6 is expected to be a boolean (cmapflag).
  *
  * Leptonica's Notes:
  *      (1) This uses typical default values for generating captchas.
@@ -29720,7 +29720,7 @@ SimpleCaptcha(lua_State *L)
     l_int32 nterms = ll_check_l_int32(_fun, L, 3);
     l_uint32 seed = ll_check_l_uint32(_fun, L, 4);
     l_uint32 color = ll_check_l_uint32(_fun, L, 5);
-    l_int32 cmapflag = ll_check_l_int32(_fun, L, 6);
+    l_int32 cmapflag = ll_opt_boolean(_fun, L, 6);
     Pix *pix = pixSimpleCaptcha(pixs, border, nterms, seed, color, cmapflag);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -29883,7 +29883,7 @@ SnapColorCmap(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is expected to be a l_int32 (orientflag).
+ * Arg #2 is expected to be a string describing the edge orientation (orientflag).
  *
  * Leptonica's Notes:
  *      (1) Invert pixd to see larger gradients as darker (grayscale).
@@ -29907,7 +29907,7 @@ SobelEdgeFilter(lua_State *L)
 {
     LL_FUNC("SobelEdgeFilter");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 orientflag = ll_check_l_int32(_fun, L, 2);
+    l_int32 orientflag = ll_check_edge_orientation(_fun, L, 2);
     Pix *pix = pixSobelEdgeFilter(pixs, orientflag);
     return ll_push_Pix(_fun, L, pix);
 }
@@ -31453,7 +31453,7 @@ Translate(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is expected to be a l_int32 (orientflag).
+ * Arg #2 is expected to be a string describing the edge orientation (orientflag).
  *
  * Leptonica's Notes:
  *      (1) For detecting vertical edges, this considers the
@@ -31482,7 +31482,7 @@ TwoSidedEdgeFilter(lua_State *L)
 {
     LL_FUNC("TwoSidedEdgeFilter");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 orientflag = ll_check_l_int32(_fun, L, 2);
+    l_int32 orientflag = ll_check_edge_orientation(_fun, L, 2);
     Pix *pix = pixTwoSidedEdgeFilter(pixs, orientflag);
     return ll_push_Pix(_fun, L, pix);
 }

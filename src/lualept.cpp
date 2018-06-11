@@ -2046,6 +2046,9 @@ ll_set_all_globals(const char *_fun, lua_State *L, const ll_global_var_t *vars)
 {
     const ll_global_var_t *var;
 
+    if (nullptr == vars)
+        return 0;
+
     for (var = vars; ll_invalid != var->type; var++) {
 
         switch (var->type) {
@@ -2381,6 +2384,9 @@ int
 ll_get_all_globals(const char *_fun, lua_State *L, const ll_global_var_t *vars)
 {
     const ll_global_var_t *var;
+
+    if (nullptr == vars)
+        return 0;
 
     for (var = vars; ll_invalid != var->type; var++) {
 
@@ -3439,13 +3445,14 @@ ll_run(const char *name, const char *script, ll_global_var_t *set_vars, ll_globa
     /* Set any global variables */
     ll_set_all_globals(_fun, L, set_vars);
 
-
-    lua_newtable(L);
-    for (i = 1; i < argc; i++) {
-        lua_pushstring(L, argv[i]);
-        lua_rawseti(L, -2, i);
+    if (argc > 0 && nullptr != argv) {
+        lua_newtable(L);
+        for (i = 1; i < argc; i++) {
+            lua_pushstring(L, argv[i]);
+            lua_rawseti(L, -2, i);
+        }
+        lua_setglobal(L, "arg");
     }
-    lua_setglobal(L, "arg");
 
     if (nullptr == script) {
         /* load from a file %name */
