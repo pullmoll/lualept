@@ -21,8 +21,8 @@ print(pad("#ba"), #ba)
 print(pad("ba"), ba)
 
 -- Insert before the third Box in Boxa
-ba:InsertBox(3, Box(3,4,19,18))
-print("... after ba:InsertBox(3, Box(3,4,19,18))")
+ba:InsertBox(3, Box(3,4,49,38))
+print("... after ba:InsertBox(3, Box(3,4,49,38))")
 print(pad("#ba"), #ba)
 print(pad("ba"), ba)
 
@@ -35,6 +35,10 @@ local b = b:RelocateOneSide(5,'top')
 print(pad("b = b:RelocateOneSide(5,'top')"), b)
 local b = b:Transform(0,0,2.5,2.5)
 print(pad("b = b:Transform(0,0,2.5,2.5)"), b)
+local b = b & ba:GetBox(4)
+print(pad("b = b & ba:GetBox(4)"), b)
+local b = ba:GetBox(3) | ba:GetBox(4)
+print(pad("b = ba:GetBox(3) | ba:GetBox(4)"), b)
 
 -- Get the Box at index 4
 b = ba:GetBox(4)

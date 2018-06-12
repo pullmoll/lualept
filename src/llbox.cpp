@@ -1100,8 +1100,8 @@ ll_open_Box(lua_State *L)
         {"__new",                   ll_new_Box},
         {"__tostring",              toString},
         {"__eq",                    Equal},
-        {"__band",                  OverlapRegion},     /* box = box1 and box2 */
-        {"__bor",                   BoundingRegion},    /* box = box1 or box2 */
+        {"__band",                  OverlapRegion},     /* box = box1 & box2 */
+        {"__bor",                   BoundingRegion},    /* box = box1 | box2 */
         {"AdjustSides",             AdjustSides},
         {"BoundingRegion",          BoundingRegion},
         {"ChangeRefcount",          ChangeRefcount},

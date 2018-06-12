@@ -45,7 +45,7 @@
 #define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
- * \brief Destroy a Boxaa*.
+ * \brief Destroy a Boxaa* (%baa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
  * </pre>
@@ -66,7 +66,7 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Get count for a Boxaa*.
+ * \brief Get count for a Boxaa* (%baa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
  * </pre>
@@ -83,7 +83,7 @@ GetCount(lua_State *L)
 }
 
 /**
- * \brief Printable string for a Boxaa*.
+ * \brief Printable string for a Boxaa* (%baa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
  * </pre>
@@ -95,20 +95,20 @@ toString(lua_State *L)
 {
     LL_FUNC("toString");
     char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
-    Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
+    Boxaa *baa = ll_check_Boxaa(_fun, L, 1);
     luaL_Buffer B;
     l_int32 i, j, x, y, w, h;
 
     luaL_buffinit(L, &B);
-    if (!boxaa) {
+    if (!baa) {
         luaL_addstring(&B, "nil");
     } else {
         snprintf(str, LL_STRBUFF,
                  TNAME ": %p",
-                 reinterpret_cast<void *>(boxaa));
+                 reinterpret_cast<void *>(baa));
         luaL_addstring(&B, str);
-        for (i = 0; i < boxaaGetCount(boxaa); i++) {
-            Boxa *boxa = boxaaGetBoxa(boxaa, i, L_CLONE);
+        for (i = 0; i < boxaaGetCount(baa); i++) {
+            Boxa *boxa = boxaaGetBoxa(baa, i, L_CLONE);
             snprintf(str, LL_STRBUFF,
                      "\n    %d = {", i+1);
             luaL_addstring(&B, str);
@@ -129,7 +129,7 @@ toString(lua_State *L)
 }
 
 /**
- * \brief AddBox() brief comment goes here.
+ * \brief Add a Box* (%box) to the Boxaa* (%baa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
  * Arg #2 is expected to be a l_int32 (index).
@@ -154,10 +154,10 @@ AddBox(lua_State *L)
 }
 
 /**
- * \brief Add a Box* to a Boxaa*.
+ * \brief Add a Boxa* (%ba) to a Boxaa* (%baa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
- * Arg #2 is expected to be a Boxa* user data.
+ * Arg #2 is expected to be a Boxa* (%ba).
  * </pre>
  * \param L Lua state
  * \return 1 boolean on the Lua stack
@@ -166,14 +166,14 @@ static int
 AddBoxa(lua_State *L)
 {
     LL_FUNC("AddBoxa");
-    Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
-    Boxa *boxa = ll_check_Boxa(_fun, L, 2);
+    Boxaa *baa = ll_check_Boxaa(_fun, L, 1);
+    Boxa *ba = ll_check_Boxa(_fun, L, 2);
     l_int32 flag = ll_check_access_storage(_fun, L, 3, L_COPY);
-    return ll_push_boolean(_fun, L, 0 == boxaaAddBoxa(boxaa, boxa, flag));
+    return ll_push_boolean(_fun, L, 0 == boxaaAddBoxa(baa, ba, flag));
 }
 
 /**
- * \brief AlignBox() brief comment goes here.
+ * \brief Align a Boxa* from the Boxaa* (%baa) to a Box* (%box).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
  * Arg #2 is expected to be a Box* (box).
@@ -201,7 +201,7 @@ AlignBox(lua_State *L)
 }
 
 /**
- * \brief Copy a Boxaa*.
+ * \brief Copy a Boxaa* (%baas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baas).
  * Arg #2 is an optional string defining the storage flags (copyflag).
@@ -241,7 +241,7 @@ Create(lua_State *L)
 }
 
 /**
- * \brief Display() brief comment goes here.
+ * \brief Display a Boxaa* (%baa) in a Pix* (%pix) optionally created from a Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
  * Arg #2 is expected to be a Pix* (pixs).
@@ -283,7 +283,7 @@ Display(lua_State *L)
 }
 
 /**
- * \brief Extend a Boxaa*.
+ * \brief Extend a Boxaa* (%baa) array.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
  * </pre>
@@ -294,8 +294,8 @@ static int
 ExtendArray(lua_State *L)
 {
     LL_FUNC("ExtendArray");
-    Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
-    return ll_push_boolean(_fun, L, 0 == boxaaExtendArray(boxaa));
+    Boxaa *baa = ll_check_Boxaa(_fun, L, 1);
+    return ll_push_boolean(_fun, L, 0 == boxaaExtendArray(baa));
 }
 
 /**
@@ -320,11 +320,11 @@ ExtendArrayToSize(lua_State *L)
 }
 
 /**
- * \brief ExtendWithInit() brief comment goes here.
+ * \brief Extend a Boxaa* (%baa) and initialize with Boxa* (%ba).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
  * Arg #2 is expected to be a index (maxindex).
- * Arg #3 is expected to be a Boxa* (boxa).
+ * Arg #3 is expected to be a Boxa* (ba).
  *
  * Leptonica's Notes:
  *      (1) This should be used on an existing boxaa that has been
@@ -341,12 +341,12 @@ ExtendWithInit(lua_State *L)
     LL_FUNC("ExtendWithInit");
     Boxaa *baa = ll_check_Boxaa(_fun, L, 1);
     l_int32 maxindex = ll_check_index(_fun, L, 2);
-    Boxa *boxa = ll_check_Boxa(_fun, L, 3);
-    return ll_push_boolean(_fun, L, 0 == boxaaExtendWithInit(baa, maxindex, boxa));
+    Boxa *ba = ll_check_Boxa(_fun, L, 3);
+    return ll_push_boolean(_fun, L, 0 == boxaaExtendWithInit(baa, maxindex, ba));
 }
 
 /**
- * \brief Aligned flatten the Boxaa* to a Boxa*.
+ * \brief Aligned flatten the Boxaa* (%baa) to a Boxa* (%ba).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxaa* (boxaa).
  * Arg #2 is expected to be a l_int32 (num).
@@ -377,9 +377,9 @@ FlattenAligned(lua_State *L)
 }
 
 /**
- * \brief Flatten the Boxaa* to a Boxa*.
+ * \brief Flatten the Boxaa* (%baa) to a Boxa* (%ba).
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Boxaa* (boxaa).
+ * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
  * Arg #2 is expected to be a string describing the copy flag (copyflag).
  *
  * Leptonica's Notes:
@@ -400,38 +400,38 @@ static int
 FlattenToBoxa(lua_State *L)
 {
     LL_FUNC("FlattenToBoxa");
-    Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
+    Boxaa *baa = ll_check_Boxaa(_fun, L, 1);
     l_int32 copyflag = ll_check_access_storage(_fun, L, 2, L_COPY);
     Numa *naindex = nullptr;
-    Boxa *boxa = boxaaFlattenToBoxa(boxaa, &naindex, copyflag);
-    return ll_push_Boxa(_fun, L, boxa);
+    Boxa *ba = boxaaFlattenToBoxa(baa, &naindex, copyflag);
+    return ll_push_Boxa(_fun, L, ba);
 }
 
 /**
- * \brief Get Box* from a Boxaa* at index %iboxa and %ibox.
+ * \brief Get Box* (%box) from a Boxaa* (%baa) at index %iboxa and %ibox.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
  * Arg #2 is expected to be a l_int32 (iboxa).
- * Arg #2 is expected to be a l_int32 (ibox).
- * Arg #3 is an optional string defining the storage flags (copy, clone)..
+ * Arg #3 is expected to be a l_int32 (ibox).
+ * Arg #4 is an optional string defining the storage flags (copy, clone).
  * </pre>
  * \param L Lua state
- * \return 1 integer on the Lua stack
+ * \return 1 Box* on the Lua stack
  */
 static int
 GetBox(lua_State *L)
 {
     LL_FUNC("GetBox");
-    Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
-    l_int32 iboxa = ll_check_index(_fun, L, 2, boxaaGetCount(boxaa));
+    Boxaa *baa = ll_check_Boxaa(_fun, L, 1);
+    l_int32 iboxa = ll_check_index(_fun, L, 2, boxaaGetCount(baa));
     l_int32 ibox = ll_check_index(_fun, L, 3, INT32_MAX);
     l_int32 flag = ll_check_access_storage(_fun, L, 4, L_COPY);
-    Box *box = boxaaGetBox(boxaa, iboxa, ibox, flag);
+    Box *box = boxaaGetBox(baa, iboxa, ibox, flag);
     return ll_push_Box(_fun, L, box);
 }
 
 /**
- * \brief Copy a Boxaa*.
+ * \brief Get count of boxes in a Boxaa* (%baa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
  * </pre>
@@ -442,34 +442,34 @@ static int
 GetBoxCount(lua_State *L)
 {
     LL_FUNC("GetBoxCount");
-    Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
-    ll_push_l_int32(_fun, L, boxaaGetBoxCount(boxaa));
+    Boxaa *baa = ll_check_Boxaa(_fun, L, 1);
+    ll_push_l_int32(_fun, L, boxaaGetBoxCount(baa));
     return 1;
 }
 
 /**
- * \brief Get Boxa* from a Boxaa* at index %idx.
+ * \brief Get Boxa* (%ba) from a Boxaa* (%baa) at index %idx.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
- * Arg #2 is expected to be a l_int32 (idx).
+ * Arg #2 is expected to be a index (idx).
  * Arg #3 is an optional string defining the storage flags (copy, clone)..
  * </pre>
  * \param L Lua state
- * \return 1 integer on the Lua stack
+ * \return 1 Boxa* (%ba) on the Lua stack
  */
 static int
 GetBoxa(lua_State *L)
 {
     LL_FUNC("GetBoxa");
-    Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
-    l_int32 idx = ll_check_index(_fun, L, 2, boxaaGetCount(boxaa));
+    Boxaa *baa = ll_check_Boxaa(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, boxaaGetCount(baa));
     l_int32 flag = ll_check_access_storage(_fun, L, 3, L_COPY);
-    Boxa *boxa = boxaaGetBoxa(boxaa, idx, flag);
-    return ll_push_Boxa(_fun, L, boxa);
+    Boxa *ba = boxaaGetBoxa(baa, idx, flag);
+    return ll_push_Boxa(_fun, L, ba);
 }
 
 /**
- * \brief GetExtent() brief comment goes here.
+ * \brief Get the extent of boxes in a Boxaa* (%baa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
  *
@@ -482,7 +482,7 @@ GetBoxa(lua_State *L)
  *          to its extent has all fields set to 0 (an invalid box).
  * </pre>
  * \param L Lua state
- * \return 4 on the Lua stack (w, h, Box*, Boxa*)
+ * \return 4 on the Lua stack (%w, %h, %box, %ba)
  */
 static int
 GetExtent(lua_State *L)
@@ -492,21 +492,21 @@ GetExtent(lua_State *L)
     l_int32 w = 0;
     l_int32 h = 0;
     Box *box = nullptr;
-    Boxa *boxa = nullptr;
-    if (boxaaGetExtent(baa, &w, &h, &box, &boxa))
+    Boxa *ba = nullptr;
+    if (boxaaGetExtent(baa, &w, &h, &box, &ba))
         return ll_push_nil(L);
     ll_push_l_int32 (_fun, L, w);
     ll_push_l_int32 (_fun, L, h);
     ll_push_Box (_fun, L, box);
-    ll_push_Boxa (_fun, L, boxa);
+    ll_push_Boxa (_fun, L, ba);
     return 4;
 }
 
 /**
- * \brief InitFull() brief comment goes here.
+ * \brief Filling up initialization of a Boxaa* (%baa) with Boxa* (%ba).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
- * Arg #2 is expected to be a Boxa* (boxa).
+ * Arg #2 is expected to be a Boxa* (ba).
  *
  * Leptonica's Notes:
  *      (1) This initializes a boxaa by filling up the entire boxa ptr array
@@ -536,13 +536,13 @@ InitFull(lua_State *L)
 {
     LL_FUNC("InitFull");
     Boxaa *baa = ll_check_Boxaa(_fun, L, 1);
-    Boxa *boxa = ll_check_Boxa(_fun, L, 2);
-    l_ok result = boxaaInitFull(baa, boxa);
+    Boxa *ba = ll_check_Boxa(_fun, L, 2);
+    l_ok result = boxaaInitFull(baa, ba);
     return ll_push_boolean(_fun, L, 0 == result);
 }
 
 /**
- * \brief Insert the Boxa* in a Boxaa* at index %idx.
+ * \brief Insert the Boxa* (%ba) in a Boxaa* (%baa) at index %idx.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxaa* (baa).
  * Arg #2 is expected to be a l_int32 (idx).
@@ -563,18 +563,18 @@ static int
 InsertBoxa(lua_State *L)
 {
     LL_FUNC("InsertBoxa");
-    Boxaa *boxaa = ll_check_Boxaa(_fun, L, 1);
-    l_int32 idx = ll_check_index(_fun, L, 2, boxaaGetCount(boxaa));
-    Boxa *boxas = ll_check_Boxa(_fun, L, 3);
-    Boxa *boxa = boxaCopy(boxas, L_CLONE);
-    return ll_push_boolean(_fun, L, 0 == boxaaInsertBoxa(boxaa, idx, boxa));
+    Boxaa *baa = ll_check_Boxaa(_fun, L, 1);
+    l_int32 idx = ll_check_index(_fun, L, 2, boxaaGetCount(baa));
+    Boxa *bas = ll_check_Boxa(_fun, L, 3);
+    Boxa *ba = boxaCopy(bas, L_CLONE);
+    return ll_push_boolean(_fun, L, 0 == boxaaInsertBoxa(baa, idx, ba));
 }
 
 /**
- * \brief Join Boxaa* (%boxaas) with Boxa* (%boxaad).
+ * \brief Join Boxaa* (%baas) with Boxa* (%baad).
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Box* (boxaad).
- * Arg #2 is expected to be another Box* (boxaas).
+ * Arg #1 (i.e. self) is expected to be a Box* (baad).
+ * Arg #2 is expected to be another Box* (baas).
  * Arg #3 is an optional l_int32 (istart).
  * Arg #4 is an optional l_int32 (iend).
  *
@@ -591,15 +591,15 @@ static int
 Join(lua_State *L)
 {
     LL_FUNC("Join");
-    Boxaa *boxaad = ll_check_Boxaa(_fun, L, 1);
-    Boxaa *boxaas = ll_check_Boxaa(_fun, L, 2);
+    Boxaa *baad = ll_check_Boxaa(_fun, L, 1);
+    Boxaa *baas = ll_check_Boxaa(_fun, L, 2);
     l_int32 istart = ll_check_index(_fun, L, 3, 1);
-    l_int32 iend = ll_check_index(_fun, L, 3, boxaaGetCount(boxaas));
-    return ll_push_boolean(_fun, L, 0 == boxaaJoin(boxaad, boxaas, istart, iend));
+    l_int32 iend = ll_check_index(_fun, L, 3, boxaaGetCount(baas));
+    return ll_push_boolean(_fun, L, 0 == boxaaJoin(baad, baas, istart, iend));
 }
 
 /**
- * \brief Create a quad tree of regions for width (%w) height (%h) for %nlevels levels.
+ * \brief Create a quad tree Boxaa* (%baa) of regions for width (%w) height (%h) for %nlevels levels.
  * <pre>
  * Arg #1 is expected to be a l_int32 (w).
  * Arg #2 is expected to be a l_int32 (h).
@@ -615,7 +615,7 @@ Join(lua_State *L)
  *          order, with LR (fast scan) and TB (slow scan).
  * </pre>
  * \param L Lua state
- * \return 1 on the Lua stack
+ * \return 1 Boxaa* (%baa) on the Lua stack
  */
 static int
 QuadtreeRegions(lua_State *L)
@@ -624,25 +624,25 @@ QuadtreeRegions(lua_State *L)
     l_int32 w = ll_check_l_int32(_fun, L, 1);
     l_int32 h = ll_check_l_int32(_fun, L, 2);
     l_int32 nlevels = ll_check_l_int32(_fun, L, 3);
-    Boxaa *boxaa = boxaaQuadtreeRegions(w, h, nlevels);
-    return ll_push_Boxaa (_fun, L, boxaa);
+    Boxaa *baa = boxaaQuadtreeRegions(w, h, nlevels);
+    return ll_push_Boxaa(_fun, L, baa);
 }
 
 /**
- * \brief Read a Boxaa* (%boxaa) from a file (%filename).
+ * \brief Read a Boxaa* (%baa) from a file (%filename).
  * <pre>
  * Arg #1 is expected to be a string (filename).
  * </pre>
  * \param L Lua state
- * \return 1 Box* on the Lua stack
+ * \return 1 Boxaa* (%baa) on the Lua stack
  */
 static int
 Read(lua_State *L)
 {
     LL_FUNC("Read");
     const char *filename = ll_check_string(_fun, L, 1);
-    Boxaa *boxaa = boxaaRead(filename);
-    return ll_push_Boxaa(_fun, L, boxaa);
+    Boxaa *baa = boxaaRead(filename);
+    return ll_push_Boxaa(_fun, L, baa);
 }
 
 /**
@@ -663,7 +663,7 @@ Read(lua_State *L)
  *          sorted in increasing order.
  * </pre>
  * \param L Lua state
- * \return 1 on the Lua stack
+ * \return 1 Boxaa* (%baa) on the Lua stack
  */
 static int
 ReadFromFiles(lua_State *L)
@@ -673,8 +673,8 @@ ReadFromFiles(lua_State *L)
     const char *substr = ll_opt_string(_fun, L, 2);
     l_int32 first = ll_opt_l_int32(_fun, L, 3, 0);
     l_int32 nfiles = ll_opt_l_int32(_fun, L, 4, -1);
-    Boxaa *boxaa = boxaaReadFromFiles(dirname, substr, first, nfiles);
-    return ll_push_Boxaa (_fun, L, boxaa);
+    Boxaa *baa = boxaaReadFromFiles(dirname, substr, first, nfiles);
+    return ll_push_Boxaa (_fun, L, baa);
 }
 
 /**
