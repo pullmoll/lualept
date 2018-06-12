@@ -3273,9 +3273,8 @@ CheckForChars(lua_State *L)
 /**
  * \brief SetLeptDebugOK() brief comment goes here.
  * <pre>
- * Arg #1 (i.e. self) is expected to be a l_int32 (allow).
+ * Arg #1 is expected to be a boolean (allow).
  *
- * <pre>
  * Leptonica's Notes:
  *      (1) This sets or clears the global variable LeptDebugOK, to
  *          control writing files in a temp directory with names that
@@ -3606,6 +3605,8 @@ luaopen_lualept(lua_State *L)
  *        using %name as chunk name for debug output
  * \param set_vars optional array of global variable definitions to set.
  * \param get_vars optional array of global variable definitions to get.
+ * \param argc optional argument count
+ * \param argv optional array of argument values
  * \return 0 on success, or 1 on error
  */
 int

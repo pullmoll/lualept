@@ -38,6 +38,7 @@
 
 /**
  * \brief Push a string to the Lua stack listing the table of options.
+ * \param _fun calling function's name
  * \param L Lua state
  * \param tbl table of key/value pairs
  * \param len length of that table
