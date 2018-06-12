@@ -2264,6 +2264,88 @@ ll_string_paint_flags(l_int32 paint_type)
     return ll_string_tbl(paint_type, tbl_paint_flags, ARRAYSIZE(tbl_paint_flags));
 }
 
+/**
+ * \brief Table of coordinate type names and enumeration values.
+ * <pre>
+ * Use in %ccbaStepChainsToPixCoords().
+ * </pre>
+ */
+static const lept_enum tbl_pts_flag[] = {
+    TBL_ENTRY("save-all-pts",       CCB_SAVE_ALL_PTS),
+    TBL_ENTRY("save-all",           CCB_SAVE_ALL_PTS),
+    TBL_ENTRY("all",                CCB_SAVE_ALL_PTS),
+    TBL_ENTRY("a",                  CCB_SAVE_ALL_PTS),
+    TBL_ENTRY("save-turning-ptr",   CCB_SAVE_TURNING_PTS),
+    TBL_ENTRY("save-turning",       CCB_SAVE_TURNING_PTS),
+    TBL_ENTRY("turning",            CCB_SAVE_TURNING_PTS),
+    TBL_ENTRY("t",                  CCB_SAVE_TURNING_PTS)
+};
+
+/**
+ * \brief Check for a points type name.
+ * \param _fun calling function's name
+ * \param L Lua state
+ * \param arg index where to find the string
+ * \param def default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_pts_flag(const char *_fun, lua_State* L, int arg, l_int32 def)
+{
+    return ll_check_tbl(_fun, L, arg, def, tbl_pts_flag, ARRAYSIZE(tbl_pts_flag));
+}
+
+/**
+ * \brief Return a string for coordinate type enumeration value.
+ * \param ptsflag coordinate type value
+ * \return const string with the name
+ */
+const char*
+ll_string_pts_flag(l_int32 ptsflag)
+{
+    return ll_string_tbl(ptsflag, tbl_pts_flag, ARRAYSIZE(tbl_pts_flag));
+}
+
+/**
+ * \brief Table of coordinate type names and enumeration values.
+ * <pre>
+ * Use in %ccbaStepChainsToPixCoords().
+ * </pre>
+ */
+static const lept_enum tbl_coord_type[] = {
+    TBL_ENTRY("local-coords",   CCB_LOCAL_COORDS),
+    TBL_ENTRY("local",          CCB_LOCAL_COORDS),
+    TBL_ENTRY("l",              CCB_LOCAL_COORDS),
+    TBL_ENTRY("global-coords",  CCB_GLOBAL_COORDS),
+    TBL_ENTRY("global",         CCB_GLOBAL_COORDS),
+    TBL_ENTRY("g",              CCB_GLOBAL_COORDS)
+};
+
+/**
+ * \brief Check for a coordinate type name.
+ * \param _fun calling function's name
+ * \param L Lua state
+ * \param arg index where to find the string
+ * \param def default value to return if not specified or unknown
+ * \return storage flag
+ */
+l_int32
+ll_check_coord_type(const char *_fun, lua_State* L, int arg, l_int32 def)
+{
+    return ll_check_tbl(_fun, L, arg, def, tbl_coord_type, ARRAYSIZE(tbl_coord_type));
+}
+
+/**
+ * \brief Return a string for coordinate type enumeration value.
+ * \param coordtype coordinate type value
+ * \return const string with the name
+ */
+const char*
+ll_string_coord_type(l_int32 coordtype)
+{
+    return ll_string_tbl(coordtype, tbl_coord_type, ARRAYSIZE(tbl_coord_type));
+}
+
 static const lept_enum tbl_color_name[] = {
     TBL_ENTRY("Black",                           0x000000),
     TBL_ENTRY("black",                           0x000000),

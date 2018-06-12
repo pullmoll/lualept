@@ -125,6 +125,67 @@ Create(lua_State *L)
 }
 
 /**
+ * \brief Get the hole border from Pix* (%pixs) for CCBord* (%ccb).
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CCBord* (ccb).
+ * Arg #2 is expected to be a Pix* (pixs).
+ * Arg #3 is expected to be a Box* (box).
+ * Arg #4 is expected to be a l_int32 (xs).
+ * Arg #5 is expected to be a l_int32 (ys).
+ *
+ * Leptonica's Notes:
+ *      (1) we trace out hole border on pixs without addition
+ *          of single pixel added border to pixs
+ *      (2) therefore all coordinates are relative within the c.c. (pixs)
+ *      (3) same position tables and stopping condition as for
+ *          exterior borders
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+GetHoleBorder(lua_State *L)
+{
+    LL_FUNC("GetHoleBorder");
+    CCBord *ccb = ll_check_CCBord(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
+    Box *box = ll_check_Box(_fun, L, 3);
+    l_int32 xs = ll_check_l_int32(_fun, L, 4);
+    l_int32 ys = ll_check_l_int32(_fun, L, 5);
+    return ll_push_boolean(_fun, L, 0 == pixGetHoleBorder(ccb, pixs, box, xs, ys));
+}
+
+/**
+ * \brief Get the outer border from Pix* (%pixs) for CCBord* (%ccb).
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CCBord* (ccb).
+ * Arg #2 is expected to be a Pix* (pixs).
+ * Arg #3 is expected to be a Box* (box).
+ *
+ * Leptonica's Notes:
+ *      (1) the border is saved in relative coordinates within
+ *          the c.c. (pixs).  Because the calculation is done
+ *          in pixb with added 1 pixel border, we must subtract
+ *          1 from each pixel value before storing it.
+ *      (2) the stopping condition is that after the first pixel is
+ *          returned to, the next pixel is the second pixel.  Having
+ *          these 2 pixels recur in sequence proves the path is closed,
+ *          and we do not store the second pixel again.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+GetOuterBorder(lua_State *L)
+{
+    LL_FUNC("GetOuterBorder");
+    CCBord *ccb = ll_check_CCBord(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
+    Box *box = ll_check_Box(_fun, L, 3);
+    return ll_push_boolean(_fun, L, 0 == pixGetOuterBorder(ccb, pixs, box));
+}
+
+/**
  * \brief Check Lua stack at index (%arg) for udata of class CCBord*.
  * \param _fun calling function's name
  * \param L Lua state
@@ -212,6 +273,8 @@ ll_open_CCBord(lua_State *L)
         {"__tostring",          toString},
         {"Create",              Create},
         {"Destroy",             Destroy},
+        {"GetHoleBorder",       GetHoleBorder},
+        {"GetOuterBorder",      GetOuterBorder},
         LUA_SENTINEL
     };
     LO_FUNC(TNAME);

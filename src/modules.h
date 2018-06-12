@@ -637,6 +637,12 @@ extern const char     * ll_string_value_flags(l_int32 rotation);
 extern l_int32          ll_check_paint_flags(const char *_fun, lua_State *L, int arg, l_int32 def = L_PAINT_LIGHT);
 extern const char     * ll_string_paint_flags(l_int32 rotation);
 
+extern l_int32          ll_check_pts_flag(const char *_fun, lua_State *L, int arg, l_int32 def = CCB_SAVE_ALL_PTS);
+extern const char     * ll_string_pts_flag(l_int32 rotation);
+
+extern l_int32          ll_check_coord_type(const char *_fun, lua_State *L, int arg, l_int32 def = CCB_LOCAL_COORDS);
+extern const char     * ll_string_coord_type(l_int32 rotation);
+
 extern l_int32          ll_check_color_name(const char *_fun, lua_State *L, int arg, l_int32 def = 0x1000000);
 extern const char     * ll_string_color_name(l_uint32 rotation);
 

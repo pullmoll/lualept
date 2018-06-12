@@ -36,6 +36,98 @@
  * \class CCBorda
  *
  * An array of %CCBord.
+ *
+ * Excerpt from Leptonica's file comment:
+ *
+ *     Border finding is tricky because components can have
+ *     holes, which also need to be traced out.  The outer
+ *     border can be connected with all the hole borders,
+ *     so that there is a single border for each component.
+ *     [Alternatively, the connecting paths can be eliminated if
+ *     you're willing to have a set of borders for each
+ *     component (an exterior border and some number of
+ *     interior ones), with "line to" operations tracing
+ *     out each border and "move to" operations going from
+ *     one border to the next.]
+ *
+ *     Here's the plan.  We get the pix for each connected
+ *     component, and trace its exterior border.  We then
+ *     find the holes (if any) in the pix, and separately
+ *     trace out their borders, all using the same
+ *     border-following rule that has ON pixels on the right
+ *     side of the path.
+ *
+ *     [For svg, we may want to turn each set of borders for a c.c.
+ *     into a closed path.  This can be done by tunnelling
+ *     through the component from the outer border to each of the
+ *     holes, going in and coming out along the same path so
+ *     the connection will be invisible in any rendering
+ *     (display or print) from the outline.  The result is a
+ *     closed path, where the outside border is traversed
+ *     cw and each hole is traversed ccw.  The svg renderer
+ *     is assumed to handle these closed borders properly.]
+ *
+ *     Each border is a closed path that is traversed in such
+ *     a way that the stuff inside the c.c. is on the right
+ *     side of the traveller.  The border of a singly-connected
+ *     component is thus traversed cw, and the border of the
+ *     holes inside a c.c. are traversed ccw.  Suppose we have
+ *     a list of all the borders of each c.c., both the cw and ccw
+ *     traversals.  How do we reconstruct the image?
+ *
+ *   Reconstruction:
+ *
+ *     Method 1.  Topological method using connected components.
+ *     We have closed borders composed of cw border pixels for the
+ *     exterior of c.c. and ccw border pixels for the interior (holes)
+ *     in the c.c.
+ *         (a) Initialize the destination to be OFF.  Then,
+ *             in any order:
+ *         (b) Fill the components within and including the cw borders,
+ *             and sequentially XOR them onto the destination.
+ *         (c) Fill the components within but not including the ccw
+ *             borders and sequentially XOR them onto the destination.
+ *     The components that are XOR'd together can be generated as follows:
+ *         (a) For each closed cw path, use pixFillClosedBorders():
+ *               (1) Turn on the path pixels in a subimage that
+ *                   minimally supports the border.
+ *               (2) Do a 4-connected fill from a seed of 1 pixel width
+ *                   on the border, using the inverted image in (1) as
+ *                   a filling mask.
+ *               (3) Invert the fill result: this gives the component
+ *                   including the exterior cw path, with all holes
+ *                   filled.
+ *         (b) For each closed ccw path (hole):
+ *               (1) Turn on the path pixels in a subimage that minimally
+ *                   supports the path.
+ *               (2) Find a seed pixel on the inside of this path.
+ *               (3) Do a 4-connected fill from this seed pixel, using
+ *                   the inverted image of the path in (1) as a filling
+ *                   mask.
+ *
+ *     ------------------------------------------------------
+ *
+ *     Method 2.  A variant of Method 1.  Topological.
+ *     In Method 1, we treat the exterior border differently from
+ *     the interior (hole) borders.  Here, all borders in a c.c.
+ *     are treated equally:
+ *         (1) Start with a pix with a 1 pixel OFF boundary
+ *             enclosing all the border pixels of the c.c.
+ *             This is the filling mask.
+ *         (2) Make a seed image of the same size as follows:  for
+ *             each border, put one seed pixel OUTSIDE the border
+ *             (where OUTSIDE is determined by the inside/outside
+ *             convention for borders).
+ *         (3) Seedfill into the seed image, filling in the regions
+ *             determined by the filling mask.  The fills are clipped
+ *             by the border pixels.
+ *         (4) Inverting this, we get the c.c. properly filled,
+ *             with the holes empty!
+ *         (5) Rasterop using XOR the filled c.c. (but not the 1
+ *             pixel boundary) into the full dest image.
+ *
+ *     Method 2 is about 1.2x faster than Method 1 on text images,
+ *     and about 2x faster on complex images (e.g., with halftones).
  */
 
 /** Set TNAME to the class name used in this source file */
@@ -45,8 +137,10 @@
 #define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
- * \brief Destroy a CCBorda*.
- *
+ * \brief Destroy a CCBorda* (%ccba).
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
+ * </pre>
  * \param L Lua state
  * \return 0 for nothing on the Lua stack
  */
@@ -65,6 +159,9 @@ Destroy(lua_State *L)
 
 /**
  * \brief Printable string for a CCBorda* (%ccba).
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
+ * </pre>
  * \param L Lua state
  * \return 1 string on the Lua stack
  */
@@ -94,7 +191,7 @@ toString(lua_State* L)
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF, "    nalloc        : %d\n", ccba->nalloc);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "    ccb           : " LL_CCBORD "* %p\n", reinterpret_cast<void *>(ccba->ccb));
+        snprintf(str, LL_STRBUFF, "    ccb           : " LL_CCBORD "** %p\n", reinterpret_cast<void *>(ccba->ccb));
         luaL_addstring(&B, str);
     }
     luaL_pushresult(&B);
@@ -156,7 +253,7 @@ AddCcb(lua_State *L)
 }
 
 /**
- * \brief Display the CCBora* (%ccba) in a Pix* (%pix).
+ * \brief Display the border of CCBorda* (%ccba) in a Pix* (%pix).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  *
@@ -178,7 +275,7 @@ DisplayBorder(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Display local chain point array for CCBorda* (%ccba) with method 1.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  *
@@ -243,7 +340,7 @@ DisplayImage1(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Display local chain point array for CCBorda* (%ccba) with method 2.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  *
@@ -273,7 +370,7 @@ DisplayImage2(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Display the single path border for CCBorda* (%ccba).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  *
@@ -295,9 +392,13 @@ DisplaySPBorder(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Generate global locations for the CCBorda* (%ccba).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
+ *
+ *  Action: this uses the pixel locs in the local ptaa, which are all
+ *          relative to each c.c., to find the global pixel locations,
+ *          and stores them in the global ptaa.
  * </pre>
  * \param L Lua state
  * \return 1 boolean on the Lua stack
@@ -311,7 +412,7 @@ GenerateGlobalLocs(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Generate single path global locations for the CCBorda* (%ccba).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  * Arg #2 is expected to be a l_int32 (ptsflag).
@@ -334,12 +435,12 @@ GenerateSPGlobalLocs(lua_State *L)
 {
     LL_FUNC("GenerateSPGlobalLocs");
     CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
-    l_int32 ptsflag = ll_check_l_int32(_fun, L, 2);
+    l_int32 ptsflag = ll_check_pts_flag(_fun, L, 2);
     return ll_push_boolean(_fun, L, 0 == ccbaGenerateSPGlobalLocs(ccba, ptsflag));
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Generate a single path for CCBorda* (%ccba).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  *
@@ -382,7 +483,7 @@ GenerateSinglePath(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Generate step chains for CCBorda* (%ccba).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  *
@@ -412,10 +513,10 @@ GenerateStepChains(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Get the CCBord* (%ccb) at index (%index) for the CCBorda* (%ccba).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
- * Arg #2 is expected to be a l_int32 (index).
+ * Arg #2 is expected to be a index (index).
  *
  * Leptonica's Notes:
  *      (1) This returns a clone of the ccb; it must be destroyed
@@ -434,7 +535,7 @@ GetCcb(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Read a CCBorda* (%ccba) from an external file (%filename).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a string (filename).
  * </pre>
@@ -446,12 +547,12 @@ Read(lua_State *L)
 {
     LL_FUNC("Read");
     const char *filename = ll_check_string(_fun, L, 1);
-    CCBorda *result = ccbaRead(filename);
-    return ll_push_CCBorda(_fun, L, result);
+    CCBorda *ccba = ccbaRead(filename);
+    return ll_push_CCBorda(_fun, L, ccba);
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Read a CCBorda* (%ccba) from a Lua stream (%stream).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a luaL_Stream* (stream).
  * </pre>
@@ -463,12 +564,12 @@ ReadStream(lua_State *L)
 {
     LL_FUNC("ReadStream");
     luaL_Stream *stream = ll_check_stream(_fun, L, 1);
-    CCBorda *result = ccbaReadStream(stream->f);
-    return ll_push_CCBorda(_fun, L, result);
+    CCBorda *ccba = ccbaReadStream(stream->f);
+    return ll_push_CCBorda(_fun, L, ccba);
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Convert step chains to pixel coordinates for CCBorda* (%ccba).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  * Arg #2 is expected to be a l_int32 (coordtype).
@@ -488,12 +589,12 @@ StepChainsToPixCoords(lua_State *L)
 {
     LL_FUNC("StepChainsToPixCoords");
     CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
-    l_int32 coordtype = ll_check_l_int32(_fun, L, 2);
+    l_int32 coordtype = ll_check_coord_type(_fun, L, 2);
     return ll_push_boolean(_fun, L, 0 == ccbaStepChainsToPixCoords(ccba, coordtype));
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Write the CCBorda* (%ccba) to an external file (%filename).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  * Arg #2 is expected to be a string (filename).
@@ -511,7 +612,7 @@ Write(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Write the CCBorda* (%ccba) as a SVG file (%filename).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  * Arg #2 is expected to be a string (filename).
@@ -529,7 +630,7 @@ WriteSVG(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Write the CCBorda* (%ccba) to a file (%filename) and return a SVG string (%str).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  * Arg #2 is expected to be a string (filename).
@@ -543,18 +644,20 @@ WriteSVGString(lua_State *L)
     LL_FUNC("WriteSVGString");
     CCBorda *ccba = ll_check_CCBorda(_fun, L, 2);
     const char *filename = ll_check_string(_fun, L, 1);
-    char *result = ccbaWriteSVGString(filename, ccba);
-    return ll_push_string(_fun, L, result);
+    char *str = ccbaWriteSVGString(filename, ccba);
+    ll_push_string(_fun, L, str);
+    ll_free(str);
+    return 1;
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Write the CCBorda* (%ccba) to a Lua stream (%stream).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * </pre>
  * \param L Lua state
- * \return 0 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 WriteStream(lua_State *L)
@@ -562,8 +665,7 @@ WriteStream(lua_State *L)
     LL_FUNC("WriteStream");
     CCBorda *ccba = ll_check_CCBorda(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    l_int32 result = ccbaWriteStream(stream->f, ccba);
-    return ll_push_l_int32(_fun, L, result);
+    return ll_push_boolean(_fun, L, ccbaWriteStream(stream->f, ccba));
 }
 
 /**
@@ -650,7 +752,7 @@ ll_new_CCBorda(lua_State *L)
         DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %d\n", _fun,
             LL_PIX, reinterpret_cast<void *>(pix),
             "n", n);
-        ccba = ccbaCreate(nullptr, n);
+        ccba = ccbaCreate(pix, n);
     }
 
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
