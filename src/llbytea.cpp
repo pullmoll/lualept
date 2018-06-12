@@ -63,16 +63,16 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Create() brief comment goes here.
+ * \brief Create a new Bytea* (%ba).
  * <pre>
- * Arg #1 (i.e. self) is expected to be a size_t (nbytes).
+ * Arg #1 is expected to be a size_t (nbytes).
  *
  * Leptonica's Notes:
  *      (1) The allocated array is n + 1 bytes.  This allows room
  *          for null termination.
  * </pre>
  * \param L Lua state
- * \return 1 on the Lua stack
+ * \return 1 Bytea* (%ba) on the Lua stack
  */
 static int
 Create(lua_State *L)
@@ -84,32 +84,32 @@ Create(lua_State *L)
 }
 
 /**
- * \brief GetSize() brief comment goes here.
+ * \brief Get the size of the Bytea* (%ba).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Bytea* (ba).
  *
  * </pre>
  * \param L Lua state
- * \return 1 on the Lua stack
+ * \return 1 size_t on the Lua stack
  */
 static int
 GetSize(lua_State *L)
 {
     LL_FUNC("GetSize");
     Bytea *ba = ll_check_Bytea(_fun, L, 1);
-    size_t result = l_byteaGetSize(ba);
-    return ll_push_size_t(_fun, L, result);
+    size_t size = l_byteaGetSize(ba);
+    return ll_push_size_t(_fun, L, size);
 }
 
 /**
- * \brief AppendData() brief comment goes here.
+ * \brief Append data (%newdata, %newbytes) to the Bytea* (%ba).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Bytea* (ba).
  * Arg #2 is expected to be a lstring (newdata, newbytes).
  *
  * </pre>
  * \param L Lua state
- * \return 0 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 AppendData(lua_State *L)
@@ -118,19 +118,18 @@ AppendData(lua_State *L)
     Bytea *ba = ll_check_Bytea(_fun, L, 1);
     size_t newbytes = 0;
     const l_uint8 *newdata = ll_check_lbytes(_fun, L, 2, &newbytes);
-    l_ok ok = l_byteaAppendData(ba, newdata, newbytes);
-    return ll_push_boolean(_fun, L, 0 == ok);
+    return ll_push_boolean(_fun, L, 0 == l_byteaAppendData(ba, newdata, newbytes));
 }
 
 /**
- * \brief AppendString() brief comment goes here.
+ * \brief Append a string (%str) to the Bytea* (%ba).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Bytea* (ba).
  * Arg #2 is expected to be a char* (str).
  *
  * </pre>
  * \param L Lua state
- * \return 0 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 AppendString(lua_State *L)
@@ -143,7 +142,7 @@ AppendString(lua_State *L)
 }
 
 /**
- * \brief Copy() brief comment goes here.
+ * \brief Copy the Bytea* (%bas) to a new Bytea* (%ba).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Bytea* (bas).
  * Arg #2 is expected to be a l_int32 (copyflag).
@@ -159,13 +158,13 @@ Copy(lua_State *L)
 {
     LL_FUNC("Copy");
     Bytea *bas = ll_check_Bytea(_fun, L, 1);
-    l_int32 copyflag = ll_check_access_storage(_fun, L, 2);
+    l_int32 copyflag = ll_check_access_storage(_fun, L, 2, L_COPY);
     Bytea *ba = l_byteaCopy(bas, copyflag);
     return ll_push_Bytea(_fun, L, ba);
 }
 
 /**
- * \brief CopyData() brief comment goes here.
+ * \brief Copy the data (%data, %size) from a Bytea* (%ba).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Bytea* (ba).
  *
@@ -184,19 +183,20 @@ CopyData(lua_State *L)
     size_t size = 0;
     l_uint8 *data = l_byteaCopyData(ba, &size);
     ll_push_bytes(_fun, L, data, size);
+    ll_free(data);
     return 1;
 }
 
 
 /**
- * \brief FindEachSequence() brief comment goes here.
+ * \brief Find each sequence (%sequence, %seqlen) in the Bytea* (%ba).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Bytea* (ba).
  * Arg #2 is expected to be a lstring (sequence, seqlen).
  *
  * </pre>
  * \param L Lua state
- * \return 1 on the Lua stack
+ * \return 1 Dna* (%da) on the Lua stack
  */
 static int
 FindEachSequence(lua_State *L)
@@ -213,7 +213,7 @@ FindEachSequence(lua_State *L)
 }
 
 /**
- * \brief GetData() brief comment goes here.
+ * \brief Get the data (%data, %size) from a Bytea* (%ba).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Bytea* (ba).
  *
@@ -221,7 +221,7 @@ FindEachSequence(lua_State *L)
  *      (1) The returned ptr is owned by %ba.  Do not free it!
  * </pre>
  * \param L Lua state
- * \return 1 lstring on the Lua stack
+ * \return 1 lstring (%data, %size) on the Lua stack
  */
 static int
 GetData(lua_State *L)
@@ -235,13 +235,13 @@ GetData(lua_State *L)
 }
 
 /**
- * \brief InitFromFile() brief comment goes here.
+ * \brief Initialize the Bytea* (%ba) from a file (%fname).
  * <pre>
- * Arg #1 (i.e. self) is expected to be a const char* (fname).
+ * Arg #1 is expected to be a const char* (fname).
  *
  * </pre>
  * \param L Lua state
- * \return 1 on the Lua stack
+ * \return 1 Bytea* (%ba) on the Lua stack
  */
 static int
 InitFromFile(lua_State *L)
@@ -253,13 +253,13 @@ InitFromFile(lua_State *L)
 }
 
 /**
- * \brief InitFromMem() brief comment goes here.
+ * \brief Initialize the Bytea* (%ba) from memory (%data, %size).
  * <pre>
- * Arg #1 (i.e. self) is expected to be a lstring (data, size).
+ * Arg #1 is expected to be a lstring (data, size).
  *
  * </pre>
  * \param L Lua state
- * \return 1 on the Lua stack
+ * \return 1 Bytea* (%ba) on the Lua stack
  */
 static int
 InitFromMem(lua_State *L)
@@ -272,13 +272,13 @@ InitFromMem(lua_State *L)
 }
 
 /**
- * \brief InitFromStream() brief comment goes here.
+ * \brief Initialize the Bytea* (%ba) from a Lua io stream (%stream).
  * <pre>
- * Arg #1 (i.e. self) is expected to be a luaL_Stream* (stream->f).
+ * Arg #1 is expected to be a luaL_Stream* (stream->f).
  *
  * </pre>
  * \param L Lua state
- * \return 1 on the Lua stack
+ * \return 1 Bytea* (%ba) on the Lua stack
  */
 static int
 InitFromStream(lua_State *L)
@@ -290,7 +290,7 @@ InitFromStream(lua_State *L)
 }
 
 /**
- * \brief Join() brief comment goes here.
+ * \brief Join Bytea* (%ba2) to Bytea* (%ba1).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Bytea* (ba1).
  * Arg #2 is expected to be a Bytea* (ba2).
@@ -299,7 +299,7 @@ InitFromStream(lua_State *L)
  *      (1) It is a no-op, not an error, for %ba2 to be null.
  * </pre>
  * \param L Lua state
- * \return 1 on the Lua stack
+ * \return 1 Bytea* (%ba2) on the Lua stack
  */
 static int
 Join(lua_State *L)
@@ -314,14 +314,14 @@ Join(lua_State *L)
 }
 
 /**
- * \brief Split() brief comment goes here.
+ * \brief Split Bytea* (%ba1) at location (%splitloc) giving a new Bytea* (%ba2).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Bytea* (ba1).
  * Arg #2 is expected to be a size_t (splitloc).
  *
  * </pre>
  * \param L Lua state
- * \return 1 on the Lua stack
+ * \return 1 Bytea* (%ba2) on the Lua stack
  */
 static int
 Split(lua_State *L)
@@ -337,34 +337,33 @@ Split(lua_State *L)
 }
 
 /**
- * \brief Write() brief comment goes here.
+ * \brief Write a Bytea* (%ba) to an external file (%fname).
  * <pre>
- * Arg #1 (i.e. self) is expected to be a const char* (fname).
- * Arg #2 is expected to be a Bytea* (ba).
+ * Arg #1 (i.e. self) is expected to be a Bytea* (ba).
+ * Arg #2 is expected to be a const char* (fname).
  * Arg #3 is expected to be a size_t (startloc).
  * Arg #4 is expected to be a size_t (endloc).
  *
  * </pre>
  * \param L Lua state
- * \return 0 on the Lua stack
+ * \return 1 boolean on the Lua stack
  */
 static int
 Write(lua_State *L)
 {
     LL_FUNC("Write");
-    const char *fname = ll_check_string(_fun, L, 1);
-    Bytea *ba = ll_check_Bytea(_fun, L, 2);
+    Bytea *ba = ll_check_Bytea(_fun, L, 1);
+    const char *fname = ll_check_string(_fun, L, 2);
     size_t startloc = ll_opt_size_t(_fun, L, 3, 0);
     size_t endloc = ll_opt_size_t(_fun, L, 4, l_byteaGetSize(ba) - 1);
-    l_ok ok = l_byteaWrite(fname, ba, startloc, endloc);
-    return ll_push_boolean(_fun, L, 0 == ok);
+    return ll_push_boolean(_fun, L, 0 == l_byteaWrite(fname, ba, startloc, endloc));
 }
 
 /**
- * \brief WriteStream() brief comment goes here.
+ * \brief Write a Bytea* (%ba) to a Lua io stream (%stream).
  * <pre>
- * Arg #1 (i.e. self) is expected to be a luaL_Stream* (stream->f).
- * Arg #2 is expected to be a Bytea* (ba).
+ * Arg #1 (i.e. self) is expected to be a Bytea* (ba).
+ * Arg #2 is expected to be a luaL_Stream* (stream->f).
  * Arg #3 is expected to be a size_t (startloc).
  * Arg #4 is expected to be a size_t (endloc).
  *
@@ -376,8 +375,8 @@ static int
 WriteStream(lua_State *L)
 {
     LL_FUNC("WriteStream");
-    luaL_Stream *stream = ll_check_stream(_fun, L, 1);
-    Bytea *ba = ll_check_Bytea(_fun, L, 2);
+    Bytea *ba = ll_check_Bytea(_fun, L, 1);
+    luaL_Stream *stream = ll_check_stream(_fun, L, 2);
     size_t startloc = ll_opt_size_t(_fun, L, 3, 0);
     size_t endloc = ll_opt_size_t(_fun, L, 4, l_byteaGetSize(ba) - 1);
     l_ok ok = l_byteaWriteStream(stream->f, ba, startloc, endloc);
