@@ -101,20 +101,19 @@ toString(lua_State* L)
         fpixGetResolution(fpix, &xres, &yres);
 
         snprintf(str, LL_STRBUFF,
-                 TNAME ": %p\n", reinterpret_cast<void *>(fpix));
+                 TNAME "*: %p", reinterpret_cast<void *>(fpix));
         luaL_addstring(&B, str);
-
+#if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
         snprintf(str, LL_STRBUFF,
-                 "    width = %d, height = %d, wpl = %d\n", w, h, wpl);
+                 "\n    width = %d, height = %d, wpl = %d", w, h, wpl);
         luaL_addstring(&B, str);
-
         snprintf(str, LL_STRBUFF,
-                 "    data = %p, size = %#" PRIx64 "\n", data, size);
+                 "\n    data = %p, size = %#" PRIx64, data, size);
         luaL_addstring(&B, str);
-
         snprintf(str, LL_STRBUFF,
-                 "    xres = %d, yres = %d, refcount = %d", xres, yres, refcnt);
+                 "\n    xres = %d, yres = %d, refcount = %d", xres, yres, refcnt);
         luaL_addstring(&B, str);
+#endif
     }
     luaL_pushresult(&B);
     ll_free(str);

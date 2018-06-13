@@ -162,7 +162,7 @@ toString(lua_State *L)
     if (!aset) {
         luaL_addstring(&B, "nil");
     } else {
-        snprintf(str, LL_STRBUFF, TNAME ": %p [%d: %s]",
+        snprintf(str, LL_STRBUFF, TNAME "*: %p [%d: %s]",
                  reinterpret_cast<void *>(aset),
                  aset->keytype,
                  ll_string_keytype(aset->keytype));

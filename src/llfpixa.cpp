@@ -106,13 +106,14 @@ toString(lua_State* L)
         luaL_addstring(&B, "nil");
     } else {
         snprintf(str, LL_STRBUFF,
-                 TNAME ": %p\n", reinterpret_cast<void *>(fpixa));
+                 TNAME "*: %p", reinterpret_cast<void *>(fpixa));
         luaL_addstring(&B, str);
-
+#if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
         snprintf(str, LL_STRBUFF,
-                 "    n = %d, nalloc = %d, refcount = %d\n",
+                 "\n    n = %d, nalloc = %d, refcount = %d",
                  fpixa->n, fpixa->nalloc, fpixa->refcount);
         luaL_addstring(&B, str);
+#endif
     }
     luaL_pushresult(&B);
     ll_free(str);
@@ -515,6 +516,7 @@ ll_open_FPixa(lua_State *L)
         {"__gc",                Destroy},
         {"__new",               ll_new_FPixa},
         {"__len",               GetCount},
+        {"__tostring",          toString},
         {"AddFPix",             AddFPix},
         {"ChangeRefcount",      ChangeRefcount},
         {"ConvertLABToRGB",     ConvertLABToRGB},

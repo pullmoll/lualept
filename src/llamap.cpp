@@ -175,7 +175,7 @@ toString(lua_State *L)
     if (!amap) {
         luaL_addstring(&B, "nil");
     } else {
-        snprintf(str, LL_STRBUFF, TNAME ": %p [%d: %s]",
+        snprintf(str, LL_STRBUFF, TNAME "*: %p [%d: %s]",
                  reinterpret_cast<void *>(amap),
                  amap->keytype,
                  ll_string_keytype(amap->keytype));

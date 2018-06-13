@@ -101,22 +101,24 @@ toString(lua_State *L)
     char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     luaL_Buffer B;
-    l_int32 i, x, y, w, h;
+    l_int32 x, y, w, h;
 
     luaL_buffinit(L, &B);
     if (!boxa) {
         luaL_addstring(&B, "nil");
     } else {
         snprintf(str, LL_STRBUFF,
-                 TNAME ": %p",
+                 TNAME "*: %p",
                  reinterpret_cast<void *>(boxa));
         luaL_addstring(&B, str);
-        for (i = 0; i < boxaGetCount(boxa); i++) {
+#if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
+        for (l_int32 i = 0; i < boxaGetCount(boxa); i++) {
             boxaGetBoxGeometry(boxa, i, &x, &y, &w, &h);
             snprintf(str, LL_STRBUFF, "\n    %d = { x = %d, y = %d, w = %d, h = %d }",
                      i+1, x, y, w, h);
             luaL_addstring(&B, str);
         }
+#endif
     }
     luaL_pushresult(&B);
     ll_free(str);

@@ -85,17 +85,18 @@ toString(lua_State* L)
     if (!bb) {
         luaL_addstring(&B, "nil");
     } else {
-        snprintf(str, LL_STRBUFF, TNAME ": %p\n", reinterpret_cast<void *>(bb));
+        snprintf(str, LL_STRBUFF, TNAME "*: %p", reinterpret_cast<void *>(bb));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "    nalloc = 0x%x, n = 0x%x, written = 0x%x",
+#if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
+        snprintf(str, LL_STRBUFF, "\n    nalloc = 0x%x, n = 0x%x, written = 0x%x",
                  bb->nalloc, bb->n, bb->nwritten);
         luaL_addstring(&B, str);
+#endif
     }
     luaL_pushresult(&B);
     ll_free(str);
     return 1;
 }
-
 
 /**
  * \brief Create a new ByteBuffer* (%bb).

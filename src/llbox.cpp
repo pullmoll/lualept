@@ -88,18 +88,14 @@ toString(lua_State *L)
         luaL_addstring(&B, "nil");
     } else {
         snprintf(str, LL_STRBUFF,
-                 TNAME ": %p\n",
+                 TNAME "*: %p",
                  reinterpret_cast<void *>(box));
         luaL_addstring(&B, str);
         if (boxGetGeometry(box, &x, &y, &w, &h)) {
-            snprintf(str, LL_STRBUFF, "invalid");
+            snprintf(str, LL_STRBUFF, "\n    invalid");
         } else {
-            snprintf(str, LL_STRBUFF, "    %s = %d, %s = %d, %s = %d, %s = %d, %s = %d",
-                     "x", x,
-                     "y", y,
-                     "w", w,
-                     "h", h,
-                     "area", w * h);
+            snprintf(str, LL_STRBUFF, "\n    %s = %d, %s = %d, %s = %d, %s = %d, %s = %d",
+                     "x", x, "y", y, "w", w, "h", h, "area", w * h);
         }
         luaL_addstring(&B, str);
     }

@@ -102,6 +102,46 @@ GetSize(lua_State *L)
 }
 
 /**
+ * \brief Printable string for a Bytea*.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Bytea*.
+ * </pre>
+ * \param L Lua state
+ * \return 1 string on the Lua stack
+ */
+static int
+toString(lua_State *L)
+{
+    LL_FUNC("toString");
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
+    Bytea *ba = ll_check_Bytea(_fun, L, 1);
+    luaL_Buffer B;
+
+    luaL_buffinit(L, &B);
+    if (!ba) {
+        luaL_addstring(&B, "nil");
+    } else {
+        snprintf(str, LL_STRBUFF,
+                 TNAME "*: %p",
+                 reinterpret_cast<void *>(ba));
+        luaL_addstring(&B, str);
+#if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
+        snprintf(str, LL_STRBUFF, "\n    nalloc        :  %" PRIu64, static_cast<l_uintptr_t>(ba->nalloc));
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "\n    size          :  %" PRIu64, static_cast<l_uintptr_t>(ba->size));
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "\n    refcount      :  %d", ba->refcount);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "\n    data          :  %p", reinterpret_cast<void *>(ba->data));
+        luaL_addstring(&B, str);
+#endif
+    }
+    luaL_pushresult(&B);
+    ll_free(str);
+    return 1;
+}
+
+/**
  * \brief Append data (%newdata, %newbytes) to the Bytea* (%ba).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Bytea* (ba).
@@ -455,6 +495,7 @@ ll_open_Bytea(lua_State *L)
         {"__gc",                Destroy},
         {"__new",               ll_new_Bytea},
         {"__len",               GetSize},
+        {"__tostring",          toString},
         {"AppendData",          AppendData},
         {"AppendString",        AppendString},
         {"Copy",                Copy},

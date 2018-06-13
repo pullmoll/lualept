@@ -75,7 +75,7 @@ toString(lua_State* L)
     LL_FUNC("toString");
     char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
     Kernel *kel = ll_check_Kernel(_fun, L, 1);
-    l_int32 sy, sx, cy, cx, y, x;
+    l_int32 sy, sx, cy, cx;
     l_float32 sum;
     l_float32 val;
     int len = 0;
@@ -90,17 +90,20 @@ toString(lua_State* L)
         } else {
             kernelGetSum(kel, &sum);
             snprintf(str, LL_STRBUFF,
-                     TNAME ": %p\n"
-                     "    sy = %d, sx = %d, cy = %d, cx = %d, sum = %g\n",
-                     reinterpret_cast<void *>(kel),
+                     TNAME "*: %p",
+                     reinterpret_cast<void *>(kel));
+            luaL_addstring(&B, str);
+             snprintf(str, LL_STRBUFF,
+                     "\n    sy = %d, sx = %d, cy = %d, cx = %d, sum = %g",
                      sy, sx, cy, cx, static_cast<double>(sum));
         }
         luaL_addstring(&B, str);
-        for (y = 0; y < sy; y++) {
+#if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
+        for (l_int32 y = 0; y < sy; y++) {
             if (y > 0)
                 luaL_addstring(&B, "\n");
             luaL_addstring(&B, "    ");
-            for (x = 0; x < sx; x++) {
+            for (l_int32 x = 0; x < sx; x++) {
                 if (x > 0) {
                     snprintf(str, LL_STRBUFF, " %*s", 10 - len, "");
                     luaL_addstring(&B, str);
@@ -110,6 +113,7 @@ toString(lua_State* L)
                 luaL_addstring(&B, str);
             }
         }
+#endif
     }
     luaL_pushresult(&B);
     ll_free(str);

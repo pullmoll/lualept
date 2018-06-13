@@ -85,13 +85,15 @@ toString(lua_State* L)
         luaL_addstring(&B, "nil");
     } else {
         snprintf(str, LL_STRBUFF,
-                 TNAME ": %p\n", reinterpret_cast<void *>(dh));
+                 TNAME "*: %p", reinterpret_cast<void *>(dh));
         luaL_addstring(&B, str);
+#if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
         snprintf(str, LL_STRBUFF,
-                 "    nbuckets = 0x%x, initsize = 0x%x, dna = %p",
+                 "\n    nbuckets = 0x%x, initsize = 0x%x, dna = %p",
                  dh->nbuckets, dh->initsize,
                  reinterpret_cast<void *>(dh->dna));
         luaL_addstring(&B, str);
+#endif
     }
     luaL_pushresult(&B);
     ll_free(str);

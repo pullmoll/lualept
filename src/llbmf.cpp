@@ -63,6 +63,36 @@ Destroy(lua_State *L)
 }
 
 /**
+ * \brief Printable string for a Bmf*.
+ * \param L Lua state
+ * \return 1 string on the Lua stack
+ */
+static int
+toString(lua_State* L)
+{
+    LL_FUNC("toString");
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
+    ByteBuffer *bb = ll_check_ByteBuffer(_fun, L, 1);
+    luaL_Buffer B;
+
+    luaL_buffinit(L, &B);
+    if (!bb) {
+        luaL_addstring(&B, "nil");
+    } else {
+        snprintf(str, LL_STRBUFF, TNAME "*: %p", reinterpret_cast<void *>(bb));
+        luaL_addstring(&B, str);
+#if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
+        snprintf(str, LL_STRBUFF, "\n    nalloc = 0x%x, n = 0x%x, written = 0x%x",
+                 bb->nalloc, bb->n, bb->nwritten);
+        luaL_addstring(&B, str);
+#endif
+    }
+    luaL_pushresult(&B);
+    ll_free(str);
+    return 1;
+}
+
+/**
  * \brief Create a new Bmf*.
  *
  * Arg #1 is expected to be a string (dir).
@@ -296,6 +326,7 @@ ll_open_Bmf(lua_State *L)
     static const luaL_Reg methods[] = {
         {"__gc",                Destroy},
         {"__new",               ll_new_Bmf},
+        {"__tostring",          toString},
         {"Create",              Create},
         {"Destroy",             Destroy},
         {"GetBaseline",         GetBaseline},

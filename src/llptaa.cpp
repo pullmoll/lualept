@@ -100,6 +100,60 @@ GetCount(lua_State *L)
 }
 
 /**
+ * \brief Printable string for a Pta* (%pta).
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pta* user data.
+ * </pre>
+ * \param L Lua state
+ * \return 1 string on the Lua stack
+ */
+static int
+toString(lua_State *L)
+{
+    LL_FUNC("toString");
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
+    Ptaa *ptaa = ll_check_Ptaa(_fun, L, 1);
+    luaL_Buffer B;
+
+    luaL_buffinit(L, &B);
+    if (!ptaa) {
+        luaL_addstring(&B, "nil");
+    } else {
+        snprintf(str, LL_STRBUFF,
+                 TNAME "*: %p",
+                 reinterpret_cast<void *>(ptaa));
+        luaL_addstring(&B, str);
+#if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
+        for (l_int32 i = 0; i < ptaaGetCount(ptaa); i++) {
+            Pta* pta = ptaaGetPta(ptaa, i, L_CLONE);
+            snprintf(str, LL_STRBUFF,
+                    "\n    %d:",
+                    i+1);
+            luaL_addstring(&B, str);
+            for (l_int32 j = 0; j < ptaGetCount(pta); j++) {
+                l_float32 px, py;
+                if (ptaGetPt(pta, i, &px, &py)) {
+                    snprintf(str, LL_STRBUFF,
+                             "\n        %d: <invalid>",
+                             j+1);
+                } else {
+                    snprintf(str, sizeof(str),
+                             "\n        %d: %s = %g, %s = %g",
+                             j+1,
+                             "px", static_cast<double>(px),
+                             "py", static_cast<double>(py));
+                }
+                luaL_addstring(&B, str);
+            }
+        }
+#endif
+    }
+    luaL_pushresult(&B);
+    ll_free(str);
+    return 1;
+}
+
+/**
  * \brief Get the Pta* in the Ptaa* at index %idx.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Ptaa* user data.
@@ -402,6 +456,7 @@ ll_open_Ptaa(lua_State *L)
         {"__gc",        Destroy},
         {"__new",       ll_new_Ptaa},
         {"__len",       GetCount},
+        {"__tostring",  toString},
         {"AddPta",      AddPta},
         {"Create",      Create},
         {"GetPt",       GetPt},

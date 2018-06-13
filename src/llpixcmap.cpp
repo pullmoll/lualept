@@ -122,15 +122,17 @@ toString(lua_State *L)
         luaL_addstring(&B, "nil");
     } else {
         snprintf(str, LL_STRBUFF,
-                 TNAME ": %p",
+                 TNAME "*: %p",
                  reinterpret_cast<void *>(cmap));
         luaL_addstring(&B, str);
+#if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
         for (i = 0; i < pixcmapGetCount(cmap); i++) {
             pixcmapGetRGBA(cmap, i, &r, &g, &b, &a);
             snprintf(str, LL_STRBUFF, "\n    %-3d = { r = %-3d, g = %-3d, b = %-3d, a = %-3d }",
                      i + 1, r, g, b, a);
             luaL_addstring(&B, str);
         }
+#endif
     }
     luaL_pushresult(&B);
     ll_free(str);

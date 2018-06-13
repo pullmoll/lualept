@@ -97,7 +97,6 @@ toString(lua_State *L)
     char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
     Numaa *naa = ll_check_Numaa(_fun, L, 1);
     luaL_Buffer B;
-    l_int32 i, j;
     l_float32 val;
 
     luaL_buffinit(L, &B);
@@ -105,14 +104,15 @@ toString(lua_State *L)
         luaL_addstring(&B, "nil");
     } else {
         snprintf(str, LL_STRBUFF,
-                 TNAME ": %p", reinterpret_cast<void *>(naa));
+                 TNAME "*: %p", reinterpret_cast<void *>(naa));
         luaL_addstring(&B, str);
-        for (i = 0; i < numaaGetCount(naa); i++) {
+#if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
+        for (l_int32 i = 0; i < numaaGetCount(naa); i++) {
             Numa *na = numaaGetNuma(naa, i, L_CLONE);
             snprintf(str, LL_STRBUFF,
                      "\n    %d = {", i+1);
             luaL_addstring(&B, str);
-            for (j = 0; j < numaGetCount(na); j++) {
+            for (l_int32 j = 0; j < numaGetCount(na); j++) {
                 numaGetFValue(na, j, &val);
                 snprintf(str, LL_STRBUFF,
                          "\n        %d = %.8g", j+1, val);
@@ -121,6 +121,7 @@ toString(lua_State *L)
             luaL_addstring(&B, "\n    }");
             numaDestroy(&na);
         }
+#endif
     }
     luaL_pushresult(&B);
     ll_free(str);

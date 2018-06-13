@@ -108,15 +108,19 @@ toString(lua_State *L)
         luaL_addstring(&B, "nil");
     } else {
         snprintf(str, LL_STRBUFF,
-                 TNAME ": %p", reinterpret_cast<void *>(head));
+                 TNAME "*: %p", reinterpret_cast<void *>(head));
         luaL_addstring(&B, str);
+#if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
         L_BEGIN_LIST_FORWARD(head, elem)
             snprintf(str, LL_STRBUFF,
-                     "\n    %p = %p",
+                     "\n    %p: %s = %p, %s = %p, %s = %p",
                      reinterpret_cast<void *>(elem),
-                     elem->data);
+                     "prev", reinterpret_cast<void *>(elem->prev),
+                     "next", reinterpret_cast<void *>(elem->next),
+                     "data", elem->data);
             luaL_addstring(&B, str);
         L_END_LIST
+#endif
     }
     luaL_pushresult(&B);
     ll_free(str);

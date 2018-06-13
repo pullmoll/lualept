@@ -308,23 +308,23 @@ toString(lua_State* L)
             format = ll_string_input_format(pixGetInputFormat(pix));
 
             snprintf(str, LL_STRBUFF,
-                     TNAME ": %p\n", reinterpret_cast<void *>(pix));
+                     TNAME "*: %p", reinterpret_cast<void *>(pix));
             luaL_addstring(&B, str);
 
             snprintf(str, LL_STRBUFF,
-                     "    width = %d, height = %d, depth = %d, spp = %d\n", w, h, d, spp);
+                     "\n    width = %d, height = %d, depth = %d, spp = %d", w, h, d, spp);
             luaL_addstring(&B, str);
 
             snprintf(str, LL_STRBUFF,
-                     "    wpl = %d, data = %p, size = %#" PRIx64 "\n", wpl, data, size);
+                     "\n    wpl = %d, data = %p, size = %#" PRIx64, wpl, data, size);
             luaL_addstring(&B, str);
 
             snprintf(str, LL_STRBUFF,
-                     "    xres = %d, yres = %d, refcount = %d\n", xres, yres, refcnt);
+                     "\n    xres = %d, yres = %d, refcount = %d", xres, yres, refcnt);
             luaL_addstring(&B, str);
 
             snprintf(str, LL_STRBUFF,
-                     "    format = %s\n", format);
+                     "\n    format = %s", format);
             luaL_addstring(&B, str);
         }
 
@@ -333,20 +333,20 @@ toString(lua_State* L)
             ccnt = pixcmapGetCount(cmap);
             ctot = pixcmapGetFreeCount(cmap) + ccnt;
             snprintf(str, LL_STRBUFF,
-                     "    colormap: %d of %d colors\n", ccnt, ctot);
+                     "\n    colormap: %d of %d colors", ccnt, ctot);
         } else {
             snprintf(str, LL_STRBUFF,
-                     "    no colormap\n");
+                     "\n    no colormap");
         }
         luaL_addstring(&B, str);
 
         text = pixGetText(pix);
         if (text) {
             snprintf(str, LL_STRBUFF,
-                     "    text: %s", text);
+                     "\n    text: %s", text);
         } else {
             snprintf(str, LL_STRBUFF,
-                     "    no text");
+                     "\n    no text");
         }
         luaL_addstring(&B, str);
     }

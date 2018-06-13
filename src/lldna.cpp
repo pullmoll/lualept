@@ -125,7 +125,6 @@ toString(lua_State *L)
     char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
     Dna *da = ll_check_Dna(_fun, L, 1);
     luaL_Buffer B;
-    l_int32 i;
     l_float64 val;
 
     luaL_buffinit(L, &B);
@@ -133,15 +132,17 @@ toString(lua_State *L)
         luaL_addstring(&B, "nil");
     } else {
         snprintf(str, LL_STRBUFF,
-                 TNAME ": %p",
+                 TNAME "*: %p",
                  reinterpret_cast<void *>(da));
         luaL_addstring(&B, str);
-        for (i = 0; i < l_dnaGetCount(da); i++) {
+#if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
+        for (l_int32 i = 0; i < l_dnaGetCount(da); i++) {
             l_dnaGetDValue(da, i, &val);
             snprintf(str, LL_STRBUFF,
                      "\n    %d = %.15g", i+1, val);
             luaL_addstring(&B, str);
         }
+#endif
     }
     luaL_pushresult(&B);
     ll_free(str);

@@ -94,7 +94,7 @@ static int
 toString(lua_State *L)
 {
     LL_FUNC("toString");
-    char str[256];
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
     Sela *sela = ll_check_Sela(_fun, L, 1);
     luaL_Buffer B;
 
@@ -102,12 +102,13 @@ toString(lua_State *L)
     if (!sela) {
         luaL_addstring(&B, "nil");
     } else {
-        snprintf(str, sizeof(str),
-                 TNAME ": %p\n",
+        snprintf(str, LL_STRBUFF,
+                 TNAME "*: %p",
                  reinterpret_cast<void *>(sela));
         luaL_addstring(&B, str);
     }
     luaL_pushresult(&B);
+    ll_free(str);
     return 1;
 }
 

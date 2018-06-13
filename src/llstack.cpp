@@ -95,6 +95,36 @@ GetCount(lua_State *L)
 }
 
 /**
+ * \brief Printable string for a Sela*.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Sela* user data.
+ * </pre>
+ * \param L Lua state
+ * \return 1 string on the Lua stack
+ */
+static int
+toString(lua_State *L)
+{
+    LL_FUNC("toString");
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
+    Stack *stack = ll_check_Stack(_fun, L, 1);
+    luaL_Buffer B;
+
+    luaL_buffinit(L, &B);
+    if (!stack) {
+        luaL_addstring(&B, "nil");
+    } else {
+        snprintf(str, LL_STRBUFF,
+                 TNAME "*: %p",
+                 reinterpret_cast<void *>(stack));
+        luaL_addstring(&B, str);
+    }
+    luaL_pushresult(&B);
+    ll_free(str);
+    return 1;
+}
+
+/**
  * \brief Add an item (%data) to the Stack* (%lstack).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Stack* (lstack).
@@ -255,6 +285,7 @@ ll_open_Stack(lua_State *L)
         {"__gc",                Destroy},
         {"__new",               ll_new_Stack},
         {"__len",               GetCount},
+        {"__tostring",          toString},
         {"Add",                 Add},
         {"Create",              Create},
         {"Destroy",             Destroy},

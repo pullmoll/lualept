@@ -104,22 +104,22 @@ toString(lua_State* L)
         luaL_addstring(&B, "nil");
     } else {
         snprintf(str, LL_STRBUFF,
-                 TNAME ": %p\n", reinterpret_cast<void *>(pixa));
+                 TNAME "*: %p", reinterpret_cast<void *>(pixa));
         luaL_addstring(&B, str);
+#if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
         snprintf(str, LL_STRBUFF,
-                 "    n = %d, nalloc = %d, refcount = %d\n",
+                 "\n    n = %d, nalloc = %d, refcount = %d",
                  pixa->n, pixa->nalloc, pixa->refcount);
         luaL_addstring(&B, str);
-
         snprintf(str, LL_STRBUFF,
-                 "    " LL_PIX "** = %p\n",
+                 "\n    " LL_PIX "** = %p",
                  reinterpret_cast<void *>(pixa->pix));
         luaL_addstring(&B, str);
-
         snprintf(str, LL_STRBUFF,
-                 "    " LL_BOXA "* = %p",
+                 "\n    " LL_BOXA "* = %p",
                  reinterpret_cast<void *>(pixa->boxa));
         luaL_addstring(&B, str);
+#endif
     }
     luaL_pushresult(&B);
     ll_free(str);

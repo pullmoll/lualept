@@ -130,9 +130,10 @@ toString(lua_State *L)
         luaL_addstring(&B, "nil");
     } else {
         snprintf(str, LL_STRBUFF,
-                 TNAME ": %p",
+                 TNAME "*: %p",
                  reinterpret_cast<void *>(daa));
         luaL_addstring(&B, str);
+#if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
         for (i = 0; i < l_dnaaGetCount(daa); i++) {
             L_Dna *da = l_dnaaGetDna(daa, i, L_CLONE);
             snprintf(str, LL_STRBUFF,
@@ -146,6 +147,7 @@ toString(lua_State *L)
             luaL_addstring(&B, "\n    }");
             l_dnaDestroy(&da);
         }
+#endif
     }
     luaL_pushresult(&B);
     ll_free(str);

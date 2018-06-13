@@ -89,37 +89,34 @@ toString(lua_State *L)
     } else {
         pixcompGetParameters(pixc, &xres, &yres, &comptype, &cmapflag);
         snprintf(str, LL_STRBUFF,
-                 TNAME ": %p",
+                 TNAME "*: %p",
                  reinterpret_cast<void *>(pixc));
         luaL_addstring(&B, str);
-
+#if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
         snprintf(str, LL_STRBUFF,
-                 "    width = %d, height = %d, depth = %d\n",
+                 "\n    width = %d, height = %d, depth = %d",
                  w, h, d);
         luaL_addstring(&B, str);
-
         snprintf(str, LL_STRBUFF,
-                 "    compression = %s\n",
+                 "\n    compression = %s",
                  ll_string_compression(comptype));
         luaL_addstring(&B, str);
-
         snprintf(str, LL_STRBUFF,
-                 "    data = %p, size = %#" PRIx64 "\n",
+                 "\n    data = %p, size = %#" PRIx64,
                  reinterpret_cast<void *>(pixc->data), pixc->size);
         luaL_addstring(&B, str);
-
         snprintf(str, LL_STRBUFF,
-                 "    %scolormap\n", cmapflag ? "" : "no ");
+                 "\n    %scolormap\n", cmapflag ? "" : "no ");
         luaL_addstring(&B, str);
-
         if (pixc->text) {
             snprintf(str, LL_STRBUFF,
-                     "    text: %s", pixc->text);
+                     "\n    text: %s", pixc->text);
         } else {
             snprintf(str, LL_STRBUFF,
-                     "    no text");
+                     "\n    no text");
         }
         luaL_addstring(&B, str);
+#endif
     }
     luaL_pushresult(&B);
     ll_free(str);

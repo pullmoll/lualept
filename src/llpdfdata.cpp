@@ -99,68 +99,70 @@ toString(lua_State *L)
         luaL_addstring(&B, "nil");
     } else {
         snprintf(str, LL_STRBUFF,
-                 TNAME ": %p\n", reinterpret_cast<void *>(pdd));
+                 TNAME "*: %p", reinterpret_cast<void *>(pdd));
+        luaL_addstring(&B, str);
+#if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
+        snprintf(str, LL_STRBUFF,
+                 "\n    title             : %s", pdd->title ? pdd->title : "<none>");
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "    title             : %s\n", pdd->title ? pdd->title : "<none>");
+                 "\n    n                 : %d", pdd->n);
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "    n                 : %d\n", pdd->n);
+                 "\n    ncmap             : %d", pdd->ncmap);
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "    ncmap             : %d\n", pdd->ncmap);
+                 "\n    cida              : %p", reinterpret_cast<void *>(pdd->cida));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "    cida              : %p\n", reinterpret_cast<void *>(pdd->cida));
+                 "\n    id                : %s", pdd->id ? pdd->id : "<none>");
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "    id                : %s\n", pdd->id ? pdd->id : "<none>");
+                 "\n    catalog string    : %s", pdd->obj1 ? pdd->obj1 : "<none>");
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "    catalog string    : %s\n", pdd->obj1 ? pdd->obj1 : "<none>");
+                 "\n    metadata string   : %s", pdd->obj2 ? pdd->obj2 : "<none>");
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "    metadata string   : %s\n", pdd->obj2 ? pdd->obj2 : "<none>");
+                 "\n    pages string      : %s", pdd->obj3 ? pdd->obj3 : "<none>");
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "    pages string      : %s\n", pdd->obj3 ? pdd->obj3 : "<none>");
+                 "\n    page string       : %s", pdd->obj4 ? pdd->obj4 : "<none>");
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "    page string       : %s\n", pdd->obj4 ? pdd->obj4 : "<none>");
+                 "\n    content string    : %s", pdd->obj5 ? pdd->obj5 : "<none>");
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "    content string    : %s\n", pdd->obj5 ? pdd->obj5 : "<none>");
+                 "\n    poststream        : %p", reinterpret_cast<void *>(pdd->poststream));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "    poststream        : %p\n", reinterpret_cast<void *>(pdd->poststream));
+                 "\n    trailer           : %p", reinterpret_cast<void *>(pdd->trailer));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "    trailer           : %p\n", reinterpret_cast<void *>(pdd->trailer));
+                 "\n    xy                : " LL_PTA "* %p", reinterpret_cast<void *>(pdd->xy));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "    xy                : " LL_PTA "* %p\n", reinterpret_cast<void *>(pdd->xy));
+                 "\n    wh                : " LL_PTA "* %p", reinterpret_cast<void *>(pdd->wh));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "    wh                : " LL_PTA "* %p\n", reinterpret_cast<void *>(pdd->wh));
+                 "\n    mediabox          : " LL_BOX "* %p", reinterpret_cast<void *>(pdd->mediabox));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "    mediabox          : " LL_BOX "* %p\n", reinterpret_cast<void *>(pdd->mediabox));
+                 "\n    saprex            : " LL_SARRAY "* %p", reinterpret_cast<void *>(pdd->saprex));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "    saprex            : " LL_SARRAY "* %p\n", reinterpret_cast<void *>(pdd->saprex));
+                 "\n    sacmap            : " LL_SARRAY "* %p", reinterpret_cast<void *>(pdd->sacmap));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "    sacmap            : " LL_SARRAY "* %p\n", reinterpret_cast<void *>(pdd->sacmap));
+                 "\n    objsize           : " LL_DNA "* %p", reinterpret_cast<void *>(pdd->objsize));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "    objsize           : " LL_DNA "* %p\n", reinterpret_cast<void *>(pdd->objsize));
+                 "\n    objloc            : " LL_DNA "* %p", reinterpret_cast<void *>(pdd->objloc));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "    objloc            : " LL_DNA "* %p\n", reinterpret_cast<void *>(pdd->objloc));
+                 "\n    xrefloc           : %d", pdd->xrefloc);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF,
-                 "    xrefloc           : %d\n", pdd->xrefloc);
-        luaL_addstring(&B, str);
+#endif
     }
     luaL_pushresult(&B);
     ll_free(str);

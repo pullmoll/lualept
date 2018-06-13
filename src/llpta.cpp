@@ -105,7 +105,7 @@ GetCount(lua_State *L)
 }
 
 /**
- * \brief Printable string for a Box*.
+ * \brief Printable string for a Pta* (%pta).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
  * </pre>
@@ -116,30 +116,38 @@ static int
 toString(lua_State *L)
 {
     LL_FUNC("toString");
-    char str[256];
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
     Pta *pta = ll_check_Pta(_fun, L, 1);
     luaL_Buffer B;
-    l_int32 i;
-    l_float32 px, py;
 
     luaL_buffinit(L, &B);
     if (!pta) {
         luaL_addstring(&B, "nil");
     } else {
-        luaL_addchar(&B, '{');
-        for (i = 0; i < ptaGetCount(pta); i++) {
+        snprintf(str, LL_STRBUFF,
+                 TNAME "*: %p",
+                 reinterpret_cast<void *>(pta));
+        luaL_addstring(&B, str);
+#if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
+        for (l_int32 i = 0; i < ptaGetCount(pta); i++) {
+            l_float32 px, py;
             if (ptaGetPt(pta, i, &px, &py)) {
-                snprintf(str, sizeof(str), "{nil}");
+                snprintf(str, LL_STRBUFF,
+                         "\n    %d: <invalid>",
+                         i+1);
             } else {
-                snprintf(str, sizeof(str), "{%g,%g}", (lua_Number)px, (lua_Number)py);
+                snprintf(str, sizeof(str),
+                         "\n    %d: %s = %g, %s = %g",
+                         i + 1,
+                         "px", static_cast<double>(px),
+                         "py", static_cast<double>(py));
             }
-            if (i > 0)
-                luaL_addchar(&B, ',');
             luaL_addstring(&B, str);
         }
-        luaL_addchar(&B, '}');
+#endif
     }
     luaL_pushresult(&B);
+    ll_free(str);
     return 1;
 }
 

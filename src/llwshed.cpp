@@ -73,7 +73,7 @@ static int
 toString(lua_State* L)
 {
     LL_FUNC("toString");
-    char str[256];
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
     WShed *ws = ll_check_WShed(_fun, L, 1);
     luaL_Buffer B;
 
@@ -81,52 +81,78 @@ toString(lua_State* L)
     if (!ws) {
         luaL_addstring(&B, "nil");
     } else {
-        snprintf(str, sizeof(str), TNAME ": %p\n", reinterpret_cast<void *>(ws));
+        snprintf(str, LL_STRBUFF,
+                 TNAME "*: %p",
+                 reinterpret_cast<void *>(ws));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    pixs              : %s* %p\n", LL_PIX, reinterpret_cast<void *>(ws->pixs));
+#if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
+        snprintf(str, LL_STRBUFF,
+                 "\n    pixs              : %s* %p", LL_PIX, reinterpret_cast<void *>(ws->pixs));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    pixm              : %s* %p\n", LL_PIX, reinterpret_cast<void *>(ws->pixm));
+        snprintf(str, LL_STRBUFF,
+                 "\n    pixm              : %s* %p", LL_PIX, reinterpret_cast<void *>(ws->pixm));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    mindepth          : %d\n", ws->mindepth);
+        snprintf(str, LL_STRBUFF,
+                 "\n    mindepth          : %d", ws->mindepth);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    pixlab            : %s* %p\n", LL_PIX, reinterpret_cast<void *>(ws->pixlab));
+        snprintf(str, LL_STRBUFF,
+                 "\n    pixlab            : %s* %p", LL_PIX, reinterpret_cast<void *>(ws->pixlab));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    pixt              : %s* %p\n", LL_PIX, reinterpret_cast<void *>(ws->pixt));
+        snprintf(str, LL_STRBUFF,
+                 "\n    pixt              : %s* %p", LL_PIX, reinterpret_cast<void *>(ws->pixt));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    lines8            : %s* %p\n", "void*", reinterpret_cast<void *>(ws->lines8));
+        snprintf(str, LL_STRBUFF,
+                 "\n    lines8            : %s* %p", "void*", reinterpret_cast<void *>(ws->lines8));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    linem1            : %s* %p\n", "void*", reinterpret_cast<void *>(ws->linem1));
+        snprintf(str, LL_STRBUFF,
+                 "\n    linem1            : %s* %p", "void*", reinterpret_cast<void *>(ws->linem1));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    linelab32         : %s* %p\n", "void*", reinterpret_cast<void *>(ws->linelab32));
+        snprintf(str, LL_STRBUFF,
+                 "\n    linelab32         : %s* %p", "void*", reinterpret_cast<void *>(ws->linelab32));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    linet1            : %s* %p\n", "void*", reinterpret_cast<void *>(ws->linet1));
+        snprintf(str, LL_STRBUFF,
+                 "\n    linet1            : %s* %p", "void*", reinterpret_cast<void *>(ws->linet1));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    pixad             : %s* %p\n", LL_PIXA, reinterpret_cast<void *>(ws->pixad));
+        snprintf(str, LL_STRBUFF,
+                 "\n    pixad             : %s* %p", LL_PIXA, reinterpret_cast<void *>(ws->pixad));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    ptas              : %s* %p\n", LL_PTA, reinterpret_cast<void *>(ws->ptas));
+        snprintf(str, LL_STRBUFF,
+                 "\n    ptas              : %s* %p", LL_PTA, reinterpret_cast<void *>(ws->ptas));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    nasi              : %s* %p\n", LL_NUMA, reinterpret_cast<void *>(ws->nasi));
+        snprintf(str, LL_STRBUFF,
+                 "\n    nasi              : %s* %p", LL_NUMA, reinterpret_cast<void *>(ws->nasi));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    nash              : %s* %p\n", LL_NUMA, reinterpret_cast<void *>(ws->nash));
+        snprintf(str, LL_STRBUFF,
+                 "\n    nash              : %s* %p", LL_NUMA, reinterpret_cast<void *>(ws->nash));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    namh              : %s* %p\n", LL_NUMA, reinterpret_cast<void *>(ws->namh));
+        snprintf(str, LL_STRBUFF,
+                 "\n    namh              : %s* %p", LL_NUMA, reinterpret_cast<void *>(ws->namh));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    nalevels          : %s* %p\n", LL_NUMA, reinterpret_cast<void *>(ws->nalevels));
+        snprintf(str, LL_STRBUFF,
+                 "\n    nalevels          : %s* %p", LL_NUMA, reinterpret_cast<void *>(ws->nalevels));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    nseeds            : %d\n", ws->nseeds);
+        snprintf(str, LL_STRBUFF,
+                 "\n    nseeds            : %d", ws->nseeds);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    nother            : %d\n", ws->nother);
+        snprintf(str, LL_STRBUFF,
+                 "\n    nother            : %d", ws->nother);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    lut               : %s* %p\n", "l_int32", reinterpret_cast<void *>(ws->lut));
+        snprintf(str, LL_STRBUFF,
+                 "\n    lut               : %s* %p", "l_int32", reinterpret_cast<void *>(ws->lut));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    links             : %s* %p\n", LL_NUMA, reinterpret_cast<void *>(ws->links));
+        snprintf(str, LL_STRBUFF,
+                 "\n    links             : %s* %p", LL_NUMA, reinterpret_cast<void *>(ws->links));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    arraysize         : %d\n", ws->arraysize);
+        snprintf(str, LL_STRBUFF,
+                 "\n    arraysize         : %d", ws->arraysize);
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    debug             : %d\n", ws->debug);
+        snprintf(str, LL_STRBUFF,
+                 "\n    debug             : %d", ws->debug);
         luaL_addstring(&B, str);
+#endif
     }
     luaL_pushresult(&B);
+    ll_free(str);
     return 1;
 }
 

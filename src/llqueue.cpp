@@ -96,6 +96,53 @@ GetCount(lua_State *L)
 }
 
 /**
+ * \brief Printable string for a Queue* (%queue).
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Queue* user data.
+ * </pre>
+ * \param L Lua state
+ * \return 1 string on the Lua stack
+ */
+static int
+toString(lua_State *L)
+{
+    LL_FUNC("toString");
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
+    Queue *queue = ll_check_Queue(_fun, L, 1);
+    luaL_Buffer B;
+
+    luaL_buffinit(L, &B);
+    if (!queue) {
+        luaL_addstring(&B, "nil");
+    } else {
+        snprintf(str, LL_STRBUFF,
+                 TNAME "*: %p",
+                 reinterpret_cast<void *>(queue));
+        luaL_addstring(&B, str);
+#if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
+        snprintf(str, LL_STRBUFF,
+                 "\n    nalloc            : %d", queue->nalloc);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF,
+                 "\n    nhead             : %d", queue->nhead);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF,
+                 "\n    nelem             : %d", queue->nelem);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF,
+                 "\n    array             : void** %p", reinterpret_cast<void *>(queue->array));
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF,
+                 "\n    stack             : " LL_STACK "* %p", reinterpret_cast<void *>(queue->stack));
+        luaL_addstring(&B, str);
+#endif
+    }
+    luaL_pushresult(&B);
+    ll_free(str);
+    return 1;
+}
+
+/**
  * \brief Add an item (%data) to the Queue* (%lqueue).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Queue* (lqueue).
@@ -271,6 +318,7 @@ ll_open_Queue(lua_State *L)
         {"__gc",                Destroy},
         {"__new",               ll_new_Queue},
         {"__len",               GetCount},
+        {"__tostring",          toString},
         {"Add",                 Add},
         {"Create",              Create},
         {"Destroy",             Destroy},

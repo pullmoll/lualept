@@ -77,26 +77,33 @@ static int
 toString(lua_State* L)
 {
     LL_FUNC("toString");
-    char str[256];
+    char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
     Sarray *sa = ll_check_Sarray(_fun, L, 1);
     luaL_Buffer B;
-    l_int32 i;
 
     luaL_buffinit(L, &B);
     if (!sa) {
         luaL_addstring(&B, "nil");
     } else {
-        snprintf(str, sizeof(str), TNAME ": %p\n", reinterpret_cast<void *>(sa));
+        snprintf(str, LL_STRBUFF,
+                 TNAME "*: %p", reinterpret_cast<void *>(sa));
         luaL_addstring(&B, str);
-        snprintf(str, sizeof(str), "    nalloc = %d, n = %d, refcount = %d\n",
-                 sa->nalloc, sa->n, sa->refcount);
+#if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
+        snprintf(str, LL_STRBUFF,
+                 "\n    %s = %d, %s = %d, %s = %d",
+                 "nalloc", sa->nalloc,
+                 "n", sa->n,
+                 "refcount", sa->refcount);
         luaL_addstring(&B, str);
-        for (i = 0; i < sarrayGetCount(sa); i++) {
-            snprintf(str, sizeof(str), "    %-3d '%s'\n", i + 1, sarrayGetString(sa, i, L_NOCOPY));
+        for (l_int32 i = 0; i < sarrayGetCount(sa); i++) {
+            snprintf(str, LL_STRBUFF,
+                     "\n    %-3d '%s'", i + 1, sarrayGetString(sa, i, L_NOCOPY));
             luaL_addstring(&B, str);
         }
+#endif
     }
     luaL_pushresult(&B);
+    ll_free(str);
     return 1;
 }
 

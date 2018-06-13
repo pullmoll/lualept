@@ -86,24 +86,23 @@ toString(lua_State *L)
         luaL_addstring(&B, "nil");
     } else {
         snprintf(str, LL_STRBUFF,
-                 TNAME ": %p",
+                 TNAME "*: %p",
                  reinterpret_cast<void *>(pixt));
         luaL_addstring(&B, str);
-
+#if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
         snprintf(str, LL_STRBUFF,
-                 "    " LL_PIX "*: %p\n",
+                 "\n    " LL_PIX "*: %p",
                  reinterpret_cast<void *>(pixt->pix));
         luaL_addstring(&B, str);
-
         snprintf(str, LL_STRBUFF,
-                 "    nx = %d, ny = %d, w = %d, h = %d\n",
+                 "\n    nx = %d, ny = %d, w = %d, h = %d",
                  pixt->nx, pixt->ny, pixt->w, pixt->h);
         luaL_addstring(&B, str);
-
         snprintf(str, LL_STRBUFF,
-                 "    xoverlap = %d, yoverlap = %d, strip = %d\n",
+                 "\n    xoverlap = %d, yoverlap = %d, strip = %d",
                  pixt->xoverlap, pixt->yoverlap, pixt->strip);
         luaL_addstring(&B, str);
+#endif
     }
     luaL_pushresult(&B);
     ll_free(str);

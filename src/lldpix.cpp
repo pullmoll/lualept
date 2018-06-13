@@ -86,27 +86,26 @@ toString(lua_State* L)
     } else if (dpixGetDimensions(dpix, &w, &h)) {
             luaL_addstring(&B, "invalid");
     } else {
+
+        snprintf(str, LL_STRBUFF,
+                 TNAME "*: %p", reinterpret_cast<void *>(dpix));
+        luaL_addstring(&B, str);
+#if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
         wpl = dpixGetWpl(dpix);
+        snprintf(str, LL_STRBUFF,
+                 "\n    width = %d, height = %d, wpl = %d", w, h, wpl);
+        luaL_addstring(&B, str);
         size = static_cast<long>(sizeof(l_float64)) * wpl * h;
         data = dpixGetData(dpix);
+        snprintf(str, LL_STRBUFF,
+                 "\n    data = %p, size = %#" PRIx64, data, size);
+        luaL_addstring(&B, str);
         refcnt = dpixGetRefcount(dpix);
         dpixGetResolution(dpix, &xres, &yres);
-
         snprintf(str, LL_STRBUFF,
-                 TNAME ": %p\n", reinterpret_cast<void *>(dpix));
+                 "\n    xres = %d, yres = %d, refcount = %d", xres, yres, refcnt);
         luaL_addstring(&B, str);
-
-        snprintf(str, LL_STRBUFF,
-                 "    width = %d, height = %d, wpl = %d\n", w, h, wpl);
-        luaL_addstring(&B, str);
-
-        snprintf(str, LL_STRBUFF,
-                 "    data = %p, size = %#" PRIx64 "\n", data, size);
-        luaL_addstring(&B, str);
-
-        snprintf(str, LL_STRBUFF,
-                 "    xres = %d, yres = %d, refcount = %d", xres, yres, refcnt);
-        luaL_addstring(&B, str);
+#endif
     }
     luaL_pushresult(&B);
     ll_free(str);
