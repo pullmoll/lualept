@@ -90,7 +90,7 @@ GetCount(lua_State *L)
 }
 
 /**
- * \brief Printable string for a DLList*.
+ * \brief Printable string for a DLList* (%head).
  * \param L Lua state
  * \return 1 string on the Lua stack
  */
@@ -167,7 +167,7 @@ AddToHead(lua_State *L)
  *               will be found and updated.
  * </pre>
  * \param L Lua state
- * \return 2 for boolean and light userdata (tail) on the Lua stack
+ * \return 2 for boolean and light userdata (%tail) on the Lua stack
  */
 static int
 AddToTail(lua_State *L)
@@ -213,7 +213,7 @@ Create(lua_State *L)
  *          but if rules aren't there to be broken, why have them?
  * </pre>
  * \param L Lua state
- * \return 1 light userdata (elem) on the Lua stack
+ * \return 1 light userdata (%elem) on the Lua stack
  */
 static int
 FindElement(lua_State *L)
@@ -232,7 +232,7 @@ FindElement(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a DLList* (head).
  * </pre>
  * \param L Lua state
- * \return 1 light userdata (tail) on the Lua stack
+ * \return 1 light userdata (%tail) on the Lua stack
  */
 static int
 FindTail(lua_State *L)
@@ -245,7 +245,7 @@ FindTail(lua_State *L)
 }
 
 /**
- * \brief Insert data after a DLList* (%elem) into an DLList* (%head).
+ * \brief Insert data (%data) after a DLList* (%elem) into an DLList* (%head).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DLList* (head).
  * Arg #2 is expected to be a DLList* (elem).
@@ -278,7 +278,7 @@ InsertAfter(lua_State *L)
 }
 
 /**
- * \brief Insert data before a DLList* (%elem) into an DLList* (%head).
+ * \brief Insert data (%data) before a DLList* (%elem) into an DLList* (%head).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DLList* (head).
  * Arg #2 is expected to be a DLList* (elem).
@@ -344,7 +344,7 @@ Join(lua_State *L)
  *             pix = (Pix *)listRemoveElement(&head, elem);
  * </pre>
  * \param L Lua state
- * \return 1 light userdata (data) on the Lua stack
+ * \return 1 light userdata (%data) on the Lua stack
  */
 static int
 RemoveElement(lua_State *L)
@@ -358,7 +358,7 @@ RemoveElement(lua_State *L)
 }
 
 /**
- * \brief Remove an element from the head of a DLList* (%head).
+ * \brief Remove an element (%data) from the head of a DLList* (%head).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DLList* (head).
  *
@@ -369,7 +369,7 @@ RemoveElement(lua_State *L)
  *            pix = (Pix *)listRemoveFromHead(&head);
  * </pre>
  * \param L Lua state
- * \return 1 light userdata (data) on the Lua stack
+ * \return 1 light userdata (%data) on the Lua stack
  */
 static int
 RemoveFromHead(lua_State *L)
@@ -382,7 +382,7 @@ RemoveFromHead(lua_State *L)
 }
 
 /**
- * \brief Remove an element from the tail of a DLList* (%head).
+ * \brief Remove an element (%data) from the tail of a DLList* (%head).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DLList* (head).
  *
@@ -400,7 +400,7 @@ RemoveFromHead(lua_State *L)
  *            pix = (Pix *)listRemoveFromTail(&head, &tail);
  * </pre>
  * \param L Lua state
- * \return 2 for light userdata (data, tail) on the Lua stack
+ * \return 2 for light userdata (%data, %tail) on the Lua stack
  */
 static int
 RemoveFromTail(lua_State *L)

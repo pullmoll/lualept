@@ -45,7 +45,7 @@
 #define LL_FUNC(x) FUNC(TNAME "." x)
 
 /**
- * \brief Destroy a Dna*.
+ * \brief Destroy a Dna* (%da).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  *
@@ -71,7 +71,7 @@ Destroy(lua_State *L)
 }
 
 /**
- * \brief Get the number of numbers stored in the Dna*.
+ * \brief Get the number of numbers stored in the Dna* (%da).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * </pre>
@@ -88,7 +88,7 @@ GetCount(lua_State *L)
 }
 
 /**
- * \brief Replace one number to the Dna* at the given index %idx.
+ * \brief Replace one number to the Dna* (%da) at the given index (%idx).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * Arg #2 is expected to be a l_int32 (idx).
@@ -111,7 +111,7 @@ ReplaceNumber(lua_State *L)
 }
 
 /**
- * \brief Printable string for a Dna*.
+ * \brief Printable string for a Dna* (%da).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * </pre>
@@ -149,7 +149,7 @@ toString(lua_State *L)
 }
 
 /**
- * \brief Add one number to the Dna*.
+ * \brief Add one number to the Dna* (%da).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * Arg #2 is expected to be a lua_Number to add to the array.
@@ -170,12 +170,12 @@ AddNumber(lua_State *L)
 }
 
 /**
- * \brief Clone a Dna*.
+ * \brief Clone a Dna* (%das).
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Dna* (da).
+ * Arg #1 (i.e. self) is expected to be a Dna* (das).
  * </pre>
  * \param L Lua state
- * \return 1 DNA* on the Lua stack
+ * \return 1 Dna* (%da) on the Lua stack
  */
 static int
 Clone(lua_State *L)
@@ -187,15 +187,15 @@ Clone(lua_State *L)
 }
 
 /**
- * \brief Copy a Dna*.
+ * \brief Copy a Dna* (%das).
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Dna* (da).
+ * Arg #1 (i.e. self) is expected to be a Dna* (das).
  *
  * Leptonica's Notes:
  *      (1) This removes unused ptrs above da->n.
  * </pre>
  * \param L Lua state
- * \return 1 DNA* on the Lua stack
+ * \return 1 Dna* (%da) on the Lua stack
  */
 static int
 Copy(lua_State *L)
@@ -207,7 +207,7 @@ Copy(lua_State *L)
 }
 
 /**
- * \brief Copy the parameters of the Dna*.
+ * \brief Copy the parameters of the Dna* (%das) to another Dna* (%dad).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* user data (destination).
  * Arg #2 is expected to be another Dna* user data (source).
@@ -225,12 +225,12 @@ CopyParameters(lua_State *L)
 }
 
 /**
- * \brief Create a new Dna*.
+ * \brief Create a new Dna* (%da).
  * <pre>
  * Arg #1 is expected to be a l_int32 (n).
  * </pre>
  * \param L Lua state
- * \return 1 DNA* on the Lua stack
+ * \return 1 Dna* (%da) on the Lua stack
  */
 static int
 Create(lua_State *L)
@@ -242,7 +242,7 @@ Create(lua_State *L)
 }
 
 /**
- * \brief Set the number of stored numbes in the Dna* to zero.
+ * \brief Set the number of numbers stored in the Dna* (%da) to zero.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  *
@@ -263,12 +263,12 @@ Empty(lua_State *L)
 }
 
 /**
- * \brief Create a new Dna* from an array table of numbers.
+ * \brief Create a new Dna* (%da) from an array table of numbers.
  * <pre>
  * Arg #1 is expected to be a table (tbl).
  * </pre>
  * \param L Lua state
- * \return 1 Numa* on the Lua stack
+ * \return 1 Dna* (%da) on the Lua stack
  */
 static int
 FromArray(lua_State *L)
@@ -286,7 +286,7 @@ FromArray(lua_State *L)
 }
 
 /**
- * \brief Get the Dna* as table of lua_Number.
+ * \brief Get the Dna* (%da) as table of lua_Number.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  *
@@ -303,7 +303,7 @@ FromArray(lua_State *L)
  *          is another way to insure full initialization.
  * </pre>
  * \param L Lua state
- * \return 1 DNA* on the Lua stack
+ * \return 1 table array on the Lua stack
  */
 static int
 GetDArray(lua_State *L)
@@ -318,7 +318,7 @@ GetDArray(lua_State *L)
 }
 
 /**
- * \brief Get the l_float64 from the Dna* at index %idx.
+ * \brief Get the l_float64 from the Dna* (%da) at index (%idx).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * Arg #2 is expected to be a l_int32 (idx).
@@ -328,23 +328,23 @@ GetDArray(lua_State *L)
  *          decide if a 0.0 in the returned ival is valid.
  * </pre>
  * \param L Lua state
- * \return 1 integer on the Lua stack
+ * \return 1 number on the Lua stack
  */
 static int
 GetDValue(lua_State *L)
 {
     LL_FUNC("GetDValue");
     Dna *da = ll_check_Dna(_fun, L, 1);
-    l_int32 index = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
+    l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
     l_float64 val = 0;
-    if (l_dnaGetDValue(da, index, &val))
+    if (l_dnaGetDValue(da, idx, &val))
         return ll_push_nil(L);
     ll_push_l_float64(_fun, L, val);
     return 1;
 }
 
 /**
- * \brief Get the Dna* as a table of lua_Integer.
+ * \brief Get the Dna* (%da) as a table of lua_Integer.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  *
@@ -360,7 +360,7 @@ GetDValue(lua_State *L)
  *          on an array of size 256.
  * </pre>
  * \param L Lua state
- * \return 1 DNA* on the Lua stack
+ * \return 1 table array on the Lua stack
  */
 static int
 GetIArray(lua_State *L)
@@ -375,10 +375,10 @@ GetIArray(lua_State *L)
 }
 
 /**
- * \brief Get the l_int32 from the Dna* at index %idx.
+ * \brief Get one integer from the Dna* (%da) at index (%idx).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
- * Arg #2 is expected to be a l_int32 (idx).
+ * Arg #2 is expected to be a index (idx).
  *
  * Leptonica's Notes:
  *      (1) Caller may need to check the function return value to
@@ -406,7 +406,7 @@ GetIValue(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * </pre>
  * \param L Lua state
- * \return 2 for Dna* starx and deltax
+ * \return 2 numbers on the Lua stack (%startx, %deltax)
  */
 static int
 GetParameters(lua_State *L)
@@ -423,7 +423,7 @@ GetParameters(lua_State *L)
 }
 
 /**
- * \brief Insert one number to the Dna* at the given index %idx.
+ * \brief Insert one number to the Dna* (%da) at the given index (%idx).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * Arg #2 is expected to be a l_int32 (idx).
@@ -445,16 +445,12 @@ InsertNumber(lua_State *L)
     LL_FUNC("InsertNumber");
     Dna *da = ll_check_Dna(_fun, L, 1);
     l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
-    int isnumber = 0;
-    lua_Number val = lua_tonumberx(L, 3, &isnumber);
-    if (!isnumber)
-        return ll_push_nil(L);
-    return ll_push_boolean(_fun, L, 0 == l_dnaInsertNumber(da, idx, val) ? TRUE : FALSE);
-    return 1;
+    l_float64 val = ll_check_l_float64(_fun, L, 3);
+    return ll_push_boolean(_fun, L, 0 == l_dnaInsertNumber(da, idx, val));
 }
 
 /**
- * \brief Read a Dna* (%dna) from a file (%filename).
+ * \brief Read a Dna* (%da) from a file (%filename).
  * <pre>
  * Arg #1 is expected to be a string (filename).
  * </pre>
@@ -466,12 +462,12 @@ Read(lua_State *L)
 {
     LL_FUNC("Read");
     const char *filename = ll_check_string(_fun, L, 1);
-    Dna *dna = l_dnaRead(filename);
-    return ll_push_Dna(_fun, L, dna);
+    Dna *da = l_dnaRead(filename);
+    return ll_push_Dna(_fun, L, da);
 }
 
 /**
- * \brief Read a Dna* (%dna) from a stream (%stream).
+ * \brief Read a Dna* (%da) from a Lua io stream (%stream).
  * <pre>
  * Arg #1 is expected to be a luaL_Stream* (stream).
  *
@@ -486,12 +482,12 @@ ReadStream(lua_State *L)
 {
     LL_FUNC("ReadStream");
     luaL_Stream *stream = ll_check_stream(_fun, L, 1);
-    Dna *dna = l_dnaReadStream(stream->f);
-    return ll_push_Dna(_fun, L, dna);
+    Dna *da = l_dnaReadStream(stream->f);
+    return ll_push_Dna(_fun, L, da);
 }
 
 /**
- * \brief Remove one number to the Dna* at the given index %idx.
+ * \brief Remove one number to the Dna* (%da) at the given index (%idx).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * Arg #2 is expected to be a l_int32 (idx).
@@ -514,7 +510,7 @@ RemoveNumber(lua_State *L)
 }
 
 /**
- * \brief Set the number of stored numbers in the Dna*, i.e. resize Dna*.
+ * \brief Set the number of numbers stored in the Dna* (%da), i.e. resize Dna*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * Arg #2 is expected to be a l_int32 (n).
@@ -539,7 +535,7 @@ SetCount(lua_State *L)
 }
 
 /**
- * \brief Set the parameters of the Dna*.
+ * \brief Set the parameters (%startx, %deltax) of the Dna* (%da).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * Arg #2 is expected to be a l_float64 (startx).
@@ -559,7 +555,7 @@ SetParameters(lua_State *L)
 }
 
 /**
- * \brief Set the value for the Dna* at the given index %idx.
+ * \brief Set the value for the Dna* (%da) at the given index (%idx).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * Arg #2 is expected to be a l_int32 (idx).
@@ -579,7 +575,7 @@ SetValue(lua_State *L)
 }
 
 /**
- * \brief Add a difference to the value for the Dna* (%da) at the given index (%idx).
+ * \brief Add a difference (%diff) to the value for the Dna* (%da) at the given index (%idx).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * Arg #2 is expected to be a l_int32 (idx).
@@ -617,7 +613,7 @@ Write(lua_State *L)
 }
 
 /**
- * \brief Write a Dna* (%da) to a stream (%stream).
+ * \brief Write a Dna* (%da) to a Lua io stream (%stream).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * Arg #2 is expected to be a luaL_Stream* (stream).
