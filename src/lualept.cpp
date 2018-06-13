@@ -3582,14 +3582,15 @@ luaopen_lualept(lua_State *L)
     ll_open_Numaa(L);
     ll_open_PdfData(L);
     ll_open_Pix(L);
+    ll_open_Pixa(L);
+    ll_open_Pixaa(L);
     ll_open_PixColormap(L);
     ll_open_PixComp(L);
-    ll_open_PixTiling(L);
-    ll_open_Pixa(L);
     ll_open_PixaComp(L);
-    ll_open_Pixaa(L);
+    ll_open_PixTiling(L);
     ll_open_Pta(L);
     ll_open_Ptaa(L);
+    ll_open_Queue(L);
     ll_open_Sarray(L);
     ll_open_Sel(L);
     ll_open_Sela(L);

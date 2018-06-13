@@ -1216,19 +1216,21 @@ ll_new_Sarray(lua_State *L)
         sa = ll_unpack_Sarray(_fun, L, 1, nullptr);
     }
 
-    if (ll_isstring(_fun, L, 1)) {
-        str = ll_check_string(_fun, L, 1);
-        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
-            "const char", reinterpret_cast<const void *>(src));
-        sa = sarrayCreate(1);
-        sarrayAddString(sa, str, L_COPY);
-    }
-
     if (!sa && ll_isinteger(_fun, L, 1)) {
+        n = ll_check_l_int32(_fun, L, 1);
         DBG(LOG_NEW_PARAM, "%s: create for %s = %d\n", _fun,
             "n", n);
         sa = sarrayCreate(n);
     }
+
+    if (ll_isstring(_fun, L, 1)) {
+        str = ll_check_string(_fun, L, 1);
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+            "const char", reinterpret_cast<const void *>(str));
+        sa = sarrayCreate(1);
+        sarrayAddString(sa, str, L_COPY);
+    }
+
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
         TNAME, reinterpret_cast<void *>(sa));
     return ll_push_Sarray(_fun, L, sa);
@@ -1246,6 +1248,7 @@ ll_open_Sarray(lua_State *L)
         {"__gc",                    Destroy},
         {"__new",                   ll_new_Sarray},
         {"__len",                   GetCount},
+        {"__newindex",              ReplaceString},
         {"__tostring",              toString},
         {"AddString",               AddString},
         {"Append",                  Append},

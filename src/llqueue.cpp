@@ -81,7 +81,7 @@ Destroy(lua_State *L)
 /**
  * \brief Get the number of items on the Queue* (%lqueue).
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Queue* (lqueue).
+ * Arg #1 (i.e. self) is expected to be a Queue* (lq).
  * </pre>
  * \param L Lua state
  * \return 1 l_int32 on the Lua stack
@@ -90,8 +90,8 @@ static int
 GetCount(lua_State *L)
 {
     LL_FUNC("GetCount");
-    Queue *queue = ll_check_Queue(_fun, L, 1);
-    l_int32 result = lqueueGetCount(queue);
+    Queue *lq = ll_check_Queue(_fun, L, 1);
+    l_int32 result = lqueueGetCount(lq);
     return ll_push_l_int32(_fun, L, result);
 }
 
@@ -108,32 +108,32 @@ toString(lua_State *L)
 {
     LL_FUNC("toString");
     char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
-    Queue *queue = ll_check_Queue(_fun, L, 1);
+    Queue *lq = ll_check_Queue(_fun, L, 1);
     luaL_Buffer B;
 
     luaL_buffinit(L, &B);
-    if (!queue) {
+    if (!lq) {
         luaL_addstring(&B, "nil");
     } else {
         snprintf(str, LL_STRBUFF,
                  TNAME "*: %p",
-                 reinterpret_cast<void *>(queue));
+                 reinterpret_cast<void *>(lq));
         luaL_addstring(&B, str);
 #if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
         snprintf(str, LL_STRBUFF,
-                 "\n    nalloc            : %d", queue->nalloc);
+                 "\n    nalloc            : %d", lq->nalloc);
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    nhead             : %d", queue->nhead);
+                 "\n    nhead             : %d", lq->nhead);
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    nelem             : %d", queue->nelem);
+                 "\n    nelem             : %d", lq->nelem);
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    array             : void** %p", reinterpret_cast<void *>(queue->array));
+                 "\n    array             : void** %p", reinterpret_cast<void *>(lq->array));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    stack             : " LL_STACK "* %p", reinterpret_cast<void *>(queue->stack));
+                 "\n    stack             : " LL_STACK "* %p", reinterpret_cast<void *>(lq->stack));
         luaL_addstring(&B, str);
 #endif
     }
@@ -143,9 +143,9 @@ toString(lua_State *L)
 }
 
 /**
- * \brief Add an item (%data) to the Queue* (%lqueue).
+ * \brief Add an item (%data) to the Queue* (%lq).
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Queue* (lqueue).
+ * Arg #1 (i.e. self) is expected to be a Queue* (lq).
  * Arg #2 is expected to be a light user data (item).
  *
  * Leptonica's Notes:
@@ -163,14 +163,14 @@ static int
 Add(lua_State *L)
 {
     LL_FUNC("Add");
-    Queue *lqueue = ll_check_Queue(_fun, L, 1);
+    Queue *lq = ll_check_Queue(_fun, L, 1);
     void *item = ll_take_udata<void>(_fun, L, 2, "*");
-    l_int32 result = lqueueAdd(lqueue, item);
+    l_int32 result = lqueueAdd(lq, item);
     return ll_push_l_int32(_fun, L, result);
 }
 
 /**
- * \brief Create a Queue* (%lqueue) of size (%nalloc).
+ * \brief Create a Queue* (%lq) of size (%nalloc).
  * <pre>
  * Arg #1 is expected to be a l_int32 (nalloc).
  *
@@ -185,14 +185,14 @@ Create(lua_State *L)
 {
     LL_FUNC("Create");
     l_int32 nalloc = ll_check_l_int32(_fun, L, 1);
-    Queue *result = lqueueCreate(nalloc);
-    return ll_push_Queue(_fun, L, result);
+    Queue *lq = lqueueCreate(nalloc);
+    return ll_push_Queue(_fun, L, lq);
 }
 
 /**
- * \brief Remove top item from the Queue* (%lqueue)
+ * \brief Remove top item from the Queue* (%lq)
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Queue* (stack).
+ * Arg #1 (i.e. self) is expected to be a Queue* (lq).
  *
  * Leptonica's Notes:
  *      (1) If this is the last item on the queue, so that the queue
@@ -205,16 +205,16 @@ static int
 Remove(lua_State *L)
 {
     LL_FUNC("Remove");
-    Queue *lqueue = ll_check_Queue(_fun, L, 1);
-    void *data = lqueueRemove(lqueue);
+    Queue *lq = ll_check_Queue(_fun, L, 1);
+    void *data = lqueueRemove(lq);
     lua_pushlightuserdata(L, data);
     return 1;
 }
 
 /**
- * \brief Print a Queue* (%lqueue) to a luaL_Stream* (%stream).
+ * \brief Print a Queue* (%lq) to a luaL_Stream* (%stream).
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Queue* (lqueue).
+ * Arg #1 (i.e. self) is expected to be a Queue* (lq).
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * </pre>
  * \param L Lua state
@@ -224,9 +224,9 @@ static int
 Print(lua_State *L)
 {
     LL_FUNC("Print");
-    Queue *lqueue = ll_check_Queue(_fun, L, 1);
+    Queue *lq = ll_check_Queue(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    return ll_push_boolean(_fun, L, 0 == lqueuePrint(stream->f, lqueue));
+    return ll_push_boolean(_fun, L, 0 == lqueuePrint(stream->f, lq));
 }
 
 /**
