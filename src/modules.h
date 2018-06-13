@@ -196,7 +196,7 @@ enum dbg_enable_flags {
  * \brief Our own version of strcasecmp(3).
  * \param dst first string
  * \param src second string
- * \return -1 if dst < src, +1 if dst > str, 0 otherwise
+ * \return -1 if dst < src, +1 if dst > str, 0 otherwise.
  */
 inline int
 ll_strcasecmp(const char* dst, const char* src)
@@ -298,7 +298,7 @@ extern void **ll_udata(const char *_fun, lua_State* L, int arg, const char *tnam
  * \brief Cast the result of LEPT_MALLOC() to the given type.
  * T is the typename of the result pointer
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param size size of the memory block
  * \result memory allocated and cast to T*
  */
@@ -317,7 +317,7 @@ ll_malloc(const char* _fun, lua_State *L, size_t size)
  * \brief Cast the result of LEPT_CALLOC() to the given type.
  * T is the typename of the result pointer
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param nmemb number of members
  * \param size size of one member
  * \result memory allocated, zeroed and cast to T*
@@ -346,7 +346,7 @@ ll_calloc(const char* _fun, lua_State *L, l_int32 nmemb, l_int32 size)
  * \brief Cast the result of LEPT_CALLOC() to the given type.
  * T is the typename of the result pointer
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param nmemb number of members
  * \result memory allocated, zeroed and cast to T*
  */
@@ -374,10 +374,10 @@ ll_calloc(const char* _fun, lua_State *L, l_int32 nmemb)
  * \brief Check Lua stack at index %arg for user data with type name %tname.
  * T is the typename of the expected return value.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg argument index
  * \param tname tname of the expected udata
- * \return pointer to the udata
+ * \return pointer to the udata.
  */
 template<typename T> T **
 ll_check_udata(const char *_fun, lua_State *L, int arg, const char* tname)
@@ -391,10 +391,10 @@ ll_check_udata(const char *_fun, lua_State *L, int arg, const char* tname)
  * This version takes ownership of the pointer contained in the
  * user data and stores a nullptr there.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg argument index
  * \param tname tname of the expected udata
- * \return pointer to the T contained in the udata
+ * \return pointer to the T contained in the udata.
  */
 template<typename T> T *
 ll_take_udata(const char *_fun, lua_State *L, int arg, const char* tname)
@@ -413,9 +413,9 @@ ll_take_udata(const char *_fun, lua_State *L, int arg, const char* tname)
  * \brief Check Lua stack at index %arg for light user data.
  * T is the typename of the return value.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg argument index
- * \return pointer to the udata
+ * \return pointer to the udata.
  */
 template<typename T> T *
 ll_check_ludata(const char *_fun, lua_State *L, int arg)

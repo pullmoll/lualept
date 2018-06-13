@@ -49,8 +49,8 @@
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sela* user data.
  * </pre>
- * \param L Lua state
- * \return 0 for nothing on the Lua stack
+ * \param L Lua state.
+ * \return 0 for nothing on the Lua stack.
  */
 static int
 Destroy(lua_State *L)
@@ -70,8 +70,8 @@ Destroy(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sela* (sela).
  * </pre>
- * \param L Lua state
- * \return 1 l_int32 on the Lua stack
+ * \param L Lua state.
+ * \return 1 l_int32 on the Lua stack.
  */
 static int
 GetCount(lua_State *L)
@@ -87,8 +87,8 @@ GetCount(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sela* user data.
  * </pre>
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 toString(lua_State *L)
@@ -117,8 +117,8 @@ toString(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sela* (selas).
  * </pre>
- * \param L Lua state
- * \return 1 Sela* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sela* on the Lua stack.
  */
 static int
 Thin4and8cc(lua_State *L)
@@ -134,8 +134,8 @@ Thin4and8cc(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sela* (sela).
  * </pre>
- * \param L Lua state
- * \return 1 Sela* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sela* on the Lua stack.
  */
 static int
 Thin4cc(lua_State *L)
@@ -151,8 +151,8 @@ Thin4cc(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sela* (sela).
  * </pre>
- * \param L Lua state
- * \return 1 Sela* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sela* on the Lua stack.
  */
 static int
 Thin8cc(lua_State *L)
@@ -175,8 +175,8 @@ Thin8cc(lua_State *L)
  *            ~ square brick sels up to size 10
  *            ~ 4 diagonal sels
  * </pre>
- * \param L Lua state
- * \return 1 Sela* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sela* on the Lua stack.
  */
 static int
 AddBasic(lua_State *L)
@@ -210,8 +210,8 @@ AddBasic(lua_State *L)
  *          than %mdist.  Try values of (%hlsize, %mdist) such as
  *          (6,5), (7,6), (8,7), (9,7), etc.
  * </pre>
- * \param L Lua state
- * \return 1 Sela* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sela* on the Lua stack.
  */
 static int
 AddCrossJunctions(lua_State *L)
@@ -237,8 +237,8 @@ AddCrossJunctions(lua_State *L)
  *          up to 63 pixels in length, which are the sizes over
  *          which dwa code can be generated.
  * </pre>
- * \param L Lua state
- * \return 1 Sela * on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sela * on the Lua stack.
  */
 static int
 AddDwaCombs(lua_State *L)
@@ -259,8 +259,8 @@ AddDwaCombs(lua_State *L)
  *          2 to 63 pixels in length, which are the sizes over
  *          which dwa code can be generated.
  * </pre>
- * \param L Lua state
- * \return 1 Sela * on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sela * on the Lua stack.
  */
 static int
 AddDwaLinear(lua_State *L)
@@ -276,8 +276,8 @@ AddDwaLinear(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sela* (sela).
  * </pre>
- * \param L Lua state
- * \return 1 Sela * on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sela * on the Lua stack.
  */
 static int
 AddHitMiss(lua_State *L)
@@ -306,8 +306,8 @@ AddHitMiss(lua_State *L)
  *          than %mdist.  Try values of (%hlsize, %mdist) such as
  *          (6,5), (7,6), (8,7), (9,7), etc.
  * </pre>
- * \param L Lua state
- * \return 1 Sela * on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sela * on the Lua stack.
  */
 static int
 AddTJunctions(lua_State *L)
@@ -336,8 +336,8 @@ AddTJunctions(lua_State *L)
  *          the input name if necessary.  You can input NULL for
  *          selname if the sel already has a name.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 AddSel(lua_State *L)
@@ -355,8 +355,8 @@ AddSel(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a l_int32 (n).
  * </pre>
- * \param L Lua state
- * \return 1 Sela* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sela* on the Lua stack.
  */
 static int
 Create(lua_State *L)
@@ -395,8 +395,8 @@ Create(lua_State *L)
  *                    "   x "
  *                    "    x"
  * </pre>
- * \param L Lua state
- * \return 1 Sela * on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sela * on the Lua stack.
  */
 static int
 CreateFromFile(lua_State *L)
@@ -422,8 +422,8 @@ CreateFromFile(lua_State *L)
  *      (3) This gives the nicest results when all sels in the sela
  *          are the same size.
  * </pre>
- * \param L Lua state
- * \return 1 Pix * on the Lua stack
+ * \param L Lua state.
+ * \return 1 Pix * on the Lua stack.
  */
 static int
 DisplayInPix(lua_State *L)
@@ -444,8 +444,8 @@ DisplayInPix(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Sela* (sela).
  * Arg #2 is expected to be a string (name).
  * </pre>
- * \param L Lua state
- * \return 2 integer (%idx) and Sel* (%sel) on the Lua stack
+ * \param L Lua state.
+ * \return 2 integer (%idx) and Sel* (%sel) on the Lua stack.
  */
 static int
 FindSelByName(lua_State *L)
@@ -472,8 +472,8 @@ FindSelByName(lua_State *L)
  *      (1) This returns a ptr to the sel, not a copy, so the caller
  *          must not destroy it!
  * </pre>
- * \param L Lua state
- * \return 1 Sel * on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sel * on the Lua stack.
  */
 static int
 GetSel(lua_State *L)
@@ -489,8 +489,8 @@ GetSel(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sela* (sela).
  * </pre>
- * \param L Lua state
- * \return 1 Sarray * on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sarray * on the Lua stack.
  */
 static int
 GetSelnames(lua_State *L)
@@ -530,7 +530,7 @@ GetSelnames(lua_State *L)
  *          set 5 for 8 connected thins.
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 on the Lua stack
+ * \return 1 on the Lua stack.
  */
 static int
 MakeThinSets(lua_State *L)
@@ -547,8 +547,8 @@ MakeThinSets(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string containing the filename.
  * </pre>
- * \param L Lua state
- * \return 1 Selaa* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Selaa* on the Lua stack.
  */
 static int
 Read(lua_State *L)
@@ -564,8 +564,8 @@ Read(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a luaL_Stream* (stream).
  * </pre>
- * \param L Lua state
- * \return 1 Selaa* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Selaa* on the Lua stack.
  */
 static int
 ReadStream(lua_State *L)
@@ -582,8 +582,8 @@ ReadStream(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Selaa* user data.
  * Arg #2 is expected to be string containing the filename.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 Write(lua_State *L)
@@ -600,8 +600,8 @@ Write(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Selaa* user data.
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 WriteStream(lua_State *L)
@@ -619,8 +619,8 @@ WriteStream(lua_State *L)
  * Arg #2 is expected to be a l_int32 (hsize).
  * Arg #3 is expected to be a l_int32 (vsize).
  * </pre>
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 GetBrickName(lua_State *L)
@@ -645,8 +645,8 @@ GetBrickName(lua_State *L)
  *      (1) Combs are by definition 1-dimensional, either horiz or vert.
  *      (2) Use this with comb Sels; e.g., from selaAddDwaCombs().
  * </pre>
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 GetCombName(lua_State *L)
@@ -661,11 +661,11 @@ GetCombName(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class Sela*.
+ * \brief Check Lua stack at index %arg for user data of class Sela*.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the Sela* contained in the user data
+ * \return pointer to the Sela* contained in the user data.
  */
 Sela *
 ll_check_Sela(const char *_fun, lua_State *L, int arg)
@@ -676,9 +676,9 @@ ll_check_Sela(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Optionally expect a Sela* at index %arg on the Lua stack.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the Sela* contained in the user data
+ * \return pointer to the Sela* contained in the user data.
  */
 Sela *
 ll_opt_Sela(const char *_fun, lua_State *L, int arg)
@@ -691,9 +691,9 @@ ll_opt_Sela(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push PTA user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param sela pointer to the PTA
- * \return 1 Sela* on the Lua stack
+ * \return 1 Sela* on the Lua stack.
  */
 int
 ll_push_Sela(const char *_fun, lua_State *L, Sela *sela)
@@ -705,8 +705,8 @@ ll_push_Sela(const char *_fun, lua_State *L, Sela *sela)
 
 /**
  * \brief Create and push a new Sela*.
- * \param L Lua state
- * \return 1 Sela* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sela* on the Lua stack.
  */
 int
 ll_new_Sela(lua_State *L)
@@ -759,8 +759,8 @@ ll_new_Sela(lua_State *L)
 
 /**
  * \brief Register the PTA methods and functions in the Sela meta table.
- * \param L Lua state
- * \return 1 table on the Lua stack
+ * \param L Lua state.
+ * \return 1 table on the Lua stack.
  */
 int
 ll_open_Sela(lua_State *L)

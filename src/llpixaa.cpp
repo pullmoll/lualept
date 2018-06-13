@@ -49,8 +49,8 @@
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * </pre>
- * \param L Lua state
- * \return 0 for nothing on the Lua stack
+ * \param L Lua state.
+ * \return 0 for nothing on the Lua stack.
  */
 static int
 Destroy(lua_State *L)
@@ -73,8 +73,8 @@ Destroy(lua_State *L)
  * Leptonica's Notes:
  *      (1) If paa is empty, a returned na will also be empty.
  * </pre>
- * \param L Lua state
- * \return 2 integer (count) and Numa* (na) the Lua stack
+ * \param L Lua state.
+ * \return 2 integer (count) and Numa* (na) the Lua stack.
  */
 static int
 GetCount(lua_State *L)
@@ -89,8 +89,8 @@ GetCount(lua_State *L)
 
 /**
  * \brief Printable string for a Pixaa*.
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 toString(lua_State* L)
@@ -138,8 +138,8 @@ toString(lua_State* L)
  *      (1) The box can be used, for example, to hold the support region
  *          of a pixa that is being added to the pixaa.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 AddBox(lua_State *L)
@@ -160,8 +160,8 @@ AddBox(lua_State *L)
  * Arg #4 is expected to be a Box* user data (box).
  * Arg #5 is optionally a string defining the copyflag.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 AddPix(lua_State *L)
@@ -182,8 +182,8 @@ AddPix(lua_State *L)
  * Arg #2 is expected to be a Pixa* user data.
  * Arg #3 is optionally a string defining the copyflag.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 AddPixa(lua_State *L)
@@ -204,8 +204,8 @@ AddPixa(lua_State *L)
  *      (1) This destroys all pixa in the pixaa, and nulls the ptrs
  *          in the pixa ptr array.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 Clear(lua_State *L)
@@ -234,8 +234,8 @@ Clear(lua_State *L)
  *          be used to get the absolute position of the textlines on
  *          the page.
  * </pre>
- * \param L Lua state
- * \return 1 Pixaa* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Pixaa* on the Lua stack.
  */
 static int
 Create(lua_State *L)
@@ -263,8 +263,8 @@ Create(lua_State *L)
  *          aggregating pix[0], pix[n], pix[2*n], etc.
  *      (3) The copyflag specifies if each new pix is a copy or a clone.
  * </pre>
- * \param L Lua state
- * \return 1 Pixaa* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Pixaa* on the Lua stack.
  */
 static int
 CreateFromPixa(lua_State *L)
@@ -283,8 +283,8 @@ CreateFromPixa(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 ExtendArray(lua_State *L)
@@ -304,8 +304,8 @@ ExtendArray(lua_State *L)
  *      (1) L_COPY returns a copy; L_CLONE returns a new reference to the boxa.
  *      (2) In both cases, invoke boxaDestroy() on the returned boxa.
  * </pre>
- * \param L Lua state
- * \return 1: Boxa* on the Lua stack , or 0 on error
+ * \param L Lua state.
+ * \return 1: Boxa* on the Lua stack , or 0 on error.
  */
 static int
 GetBoxa(lua_State *L)
@@ -334,8 +334,8 @@ GetBoxa(lua_State *L)
  *          and box
  *      (4) In all cases, you must invoke pixaDestroy() on the returned pixa
  * </pre>
- * \param L Lua state
- * \return 1: Pixa* on the Lua stack , or 0 on error
+ * \param L Lua state.
+ * \return 1: Pixa* on the Lua stack , or 0 on error.
  */
 static int
 GetPixa(lua_State *L)
@@ -361,8 +361,8 @@ GetPixa(lua_State *L)
  *      (2) istart < 0 is taken to mean 'read from the start' (istart = 0)
  *      (3) iend < 0 means 'read to the end'
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 Join(lua_State *L)
@@ -384,8 +384,8 @@ Join(lua_State *L)
  *      (1) The pix are stored in the file as png.
  *          If the png library is not linked, this will fail.
  * </pre>
- * \param L Lua state
- * \return 1 Pixaa* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Pixaa* on the Lua stack.
  */
 static int
 Read(lua_State *L)
@@ -413,8 +413,8 @@ Read(lua_State *L)
  *          a contiguous set of files, that have been lexically
  *          sorted in increasing order.
  * </pre>
- * \param L Lua state
- * \return 1 Pixaa* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Pixaa* on the Lua stack.
  */
 static int
 ReadFromFiles(lua_State *L)
@@ -442,8 +442,8 @@ ReadFromFiles(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string (data).
  * </pre>
- * \param L Lua state
- * \return 1 Pixaa* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Pixaa* on the Lua stack.
  */
 static int
 ReadMem(lua_State *L)
@@ -464,8 +464,8 @@ ReadMem(lua_State *L)
  *      (1) The pix are stored in the file as png.
  *          If the png library is not linked, this will fail.
  * </pre>
- * \param L Lua state
- * \return 1 Pixaa* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Pixaa* on the Lua stack.
  */
 static int
 ReadStream(lua_State *L)
@@ -490,8 +490,8 @@ ReadStream(lua_State *L)
  *      (2) No other pixa in the array are affected.
  *      (3) The index must be within the allowed set.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 ReplacePixa(lua_State *L)
@@ -513,8 +513,8 @@ ReplacePixa(lua_State *L)
  *          has any pix within it, destroys all pixa above that index,
  *          and resets the count.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 Truncate(lua_State *L)
@@ -534,8 +534,8 @@ Truncate(lua_State *L)
  *      (1) The pix are stored in the file as png.
  *          If the png library is not linked, this will fail.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 Write(lua_State *L)
@@ -554,8 +554,8 @@ Write(lua_State *L)
  * Leptonica's Notes:
  *      (1) Serializes a pixaa in memory and puts the result in a buffer.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 WriteMem(lua_State *L)
@@ -581,8 +581,8 @@ WriteMem(lua_State *L)
  *      (1) The pix are stored in the file as png.
  *          If the png library is not linked, this will fail.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 WriteStream(lua_State *L)
@@ -594,11 +594,11 @@ WriteStream(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class Pixaa*.
+ * \brief Check Lua stack at index %arg for user data of class Pixaa*.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the Pixaa* contained in the user data
+ * \return pointer to the Pixaa* contained in the user data.
  */
 Pixaa *
 ll_check_Pixaa(const char *_fun, lua_State *L, int arg)
@@ -609,9 +609,9 @@ ll_check_Pixaa(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Optionally expect a Pixaa* at index %arg on the Lua stack.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the Pixaa* contained in the user data
+ * \return pointer to the Pixaa* contained in the user data.
  */
 Pixaa *
 ll_opt_Pixaa(const char *_fun, lua_State *L, int arg)
@@ -624,9 +624,9 @@ ll_opt_Pixaa(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push Pixaa* user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param pixaa pointer to the PIXAA
- * \return 1 Pixaa* on the Lua stack
+ * \return 1 Pixaa* on the Lua stack.
  */
 int
 ll_push_Pixaa(const char *_fun, lua_State *L, Pixaa *pixaa)
@@ -638,8 +638,8 @@ ll_push_Pixaa(const char *_fun, lua_State *L, Pixaa *pixaa)
 
 /**
  * \brief Create a new Pixaa*.
- * \param L Lua state
- * \return 1 Pixaa* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Pixaa* on the Lua stack.
  */
 int
 ll_new_Pixaa(lua_State *L)
@@ -703,8 +703,8 @@ ll_new_Pixaa(lua_State *L)
 
 /**
  * \brief Register the PIX methods and functions in the LL_PIX meta table.
- * \param L Lua state
- * \return 1 table on the Lua stack
+ * \param L Lua state.
+ * \return 1 table on the Lua stack.
  */
 int
 ll_open_Pixaa(lua_State *L)

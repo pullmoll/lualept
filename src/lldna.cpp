@@ -53,8 +53,8 @@
  *      (1) Decrements the ref count and, if 0, destroys the l_dna.
  *      (2) Always nulls the input ptr.
  * </pre>
- * \param L Lua state
- * \return 0 for nothing on the Lua stack
+ * \param L Lua state.
+ * \return 0 for nothing on the Lua stack.
  */
 static int
 Destroy(lua_State *L)
@@ -75,8 +75,8 @@ Destroy(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * </pre>
- * \param L Lua state
- * \return 1 integer on the Lua stack
+ * \param L Lua state.
+ * \return 1 integer on the Lua stack.
  */
 static int
 GetCount(lua_State *L)
@@ -94,8 +94,8 @@ GetCount(lua_State *L)
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a lua_Number to use to replace.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 ReplaceNumber(lua_State *L)
@@ -115,8 +115,8 @@ ReplaceNumber(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * </pre>
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 toString(lua_State *L)
@@ -155,8 +155,8 @@ toString(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * Arg #2 is expected to be a lua_Number to add to the array.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 AddNumber(lua_State *L)
@@ -175,8 +175,8 @@ AddNumber(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (das).
  * </pre>
- * \param L Lua state
- * \return 1 Dna* (%da) on the Lua stack
+ * \param L Lua state.
+ * \return 1 Dna* (%da) on the Lua stack.
  */
 static int
 Clone(lua_State *L)
@@ -195,8 +195,8 @@ Clone(lua_State *L)
  * Leptonica's Notes:
  *      (1) This removes unused ptrs above da->n.
  * </pre>
- * \param L Lua state
- * \return 1 Dna* (%da) on the Lua stack
+ * \param L Lua state.
+ * \return 1 Dna* (%da) on the Lua stack.
  */
 static int
 Copy(lua_State *L)
@@ -213,8 +213,8 @@ Copy(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dna* user data (destination).
  * Arg #2 is expected to be another Dna* user data (source).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 CopyParameters(lua_State *L)
@@ -230,8 +230,8 @@ CopyParameters(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a l_int32 (n).
  * </pre>
- * \param L Lua state
- * \return 1 Dna* (%da) on the Lua stack
+ * \param L Lua state.
+ * \return 1 Dna* (%da) on the Lua stack.
  */
 static int
 Create(lua_State *L)
@@ -252,8 +252,8 @@ Create(lua_State *L)
  *          It just clears the number of stored numbers, so that
  *          the array appears to be empty.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 Empty(lua_State *L)
@@ -268,8 +268,8 @@ Empty(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a table (tbl).
  * </pre>
- * \param L Lua state
- * \return 1 Dna* (%da) on the Lua stack
+ * \param L Lua state.
+ * \return 1 Dna* (%da) on the Lua stack.
  */
 static int
 FromArray(lua_State *L)
@@ -303,8 +303,8 @@ FromArray(lua_State *L)
  *          BEFORE calling this function.  Creating with l_dnaMakeConstant()
  *          is another way to insure full initialization.
  * </pre>
- * \param L Lua state
- * \return 1 table array on the Lua stack
+ * \param L Lua state.
+ * \return 1 table array on the Lua stack.
  */
 static int
 GetDArray(lua_State *L)
@@ -328,8 +328,8 @@ GetDArray(lua_State *L)
  *      (1) Caller may need to check the function return value to
  *          decide if a 0.0 in the returned ival is valid.
  * </pre>
- * \param L Lua state
- * \return 1 number on the Lua stack
+ * \param L Lua state.
+ * \return 1 number on the Lua stack.
  */
 static int
 GetDValue(lua_State *L)
@@ -360,8 +360,8 @@ GetDValue(lua_State *L)
  *          calling accessors on the l_dna.  It is typically used
  *          on an array of size 256.
  * </pre>
- * \param L Lua state
- * \return 1 table array on the Lua stack
+ * \param L Lua state.
+ * \return 1 table array on the Lua stack.
  */
 static int
 GetIArray(lua_State *L)
@@ -385,8 +385,8 @@ GetIArray(lua_State *L)
  *      (1) Caller may need to check the function return value to
  *          decide if a 0 in the returned ival is valid.
  * </pre>
- * \param L Lua state
- * \return 1 integer on the Lua stack
+ * \param L Lua state.
+ * \return 1 integer on the Lua stack.
  */
 static int
 GetIValue(lua_State *L)
@@ -406,8 +406,8 @@ GetIValue(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * </pre>
- * \param L Lua state
- * \return 2 numbers on the Lua stack (%startx, %deltax)
+ * \param L Lua state.
+ * \return 2 numbers on the Lua stack (%startx, %deltax).
  */
 static int
 GetParameters(lua_State *L)
@@ -437,8 +437,8 @@ GetParameters(lua_State *L)
  *          because the function is O(n).
  *
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 InsertNumber(lua_State *L)
@@ -455,8 +455,8 @@ InsertNumber(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string (filename).
  * </pre>
- * \param L Lua state
- * \return 1 Box* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Box* on the Lua stack.
  */
 static int
 Read(lua_State *L)
@@ -475,8 +475,8 @@ Read(lua_State *L)
  * Leptonica's Notes:
  *      (1) fscanf takes %lf to read a double; fprintf takes %f to write it.
  * </pre>
- * \param L Lua state
- * \return 1 Box* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Box* on the Lua stack.
  */
 static int
 ReadStream(lua_State *L)
@@ -498,8 +498,8 @@ ReadStream(lua_State *L)
  *      (2) It should not be used repeatedly on large arrays,
  *          because the function is O(n).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 RemoveNumber(lua_State *L)
@@ -523,8 +523,8 @@ RemoveNumber(lua_State *L)
  *          to a size da->nalloc = newcount.
  *      (3) All the previously unused values in da are set to 0.0.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 SetCount(lua_State *L)
@@ -542,8 +542,8 @@ SetCount(lua_State *L)
  * Arg #2 is expected to be a l_float64 (startx).
  * Arg #3 is expected to be a l_float64 (deltax).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 SetParameters(lua_State *L)
@@ -562,8 +562,8 @@ SetParameters(lua_State *L)
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a lua_Number to set in the array.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 SetValue(lua_State *L)
@@ -582,8 +582,8 @@ SetValue(lua_State *L)
  * Arg #2 is expected to be a l_int32 (idx).
  * Arg #3 is expected to be a l_float64 (diff).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 ShiftValue(lua_State *L)
@@ -601,8 +601,8 @@ ShiftValue(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * Arg #2 is expected to be a string (filename).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 Write(lua_State *L)
@@ -619,8 +619,8 @@ Write(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dna* (da).
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 WriteStream(lua_State *L)
@@ -632,11 +632,11 @@ WriteStream(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class Dna*.
+ * \brief Check Lua stack at index %arg for user data of class Dna*.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the Dna* contained in the user data
+ * \return pointer to the Dna* contained in the user data.
  */
 Dna *
 ll_check_Dna(const char *_fun, lua_State *L, int arg)
@@ -647,9 +647,9 @@ ll_check_Dna(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Optionally expect a Dna* at index %arg on the Lua stack.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the Dna* contained in the user data
+ * \return pointer to the Dna* contained in the user data.
  */
 Dna *
 ll_opt_Dna(const char *_fun, lua_State *L, int arg)
@@ -662,9 +662,9 @@ ll_opt_Dna(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push DNA user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param da pointer to the L_DNA
- * \return 1 DNA* on the Lua stack
+ * \return 1 DNA* on the Lua stack.
  */
 int
 ll_push_Dna(const char *_fun, lua_State *L, Dna *da)
@@ -676,8 +676,8 @@ ll_push_Dna(const char *_fun, lua_State *L, Dna *da)
 
 /**
  * \brief Create and push a new DNA*.
- * \param L Lua state
- * \return 1 DNA* on the Lua stack
+ * \param L Lua state.
+ * \return 1 DNA* on the Lua stack.
  */
 int
 ll_new_Dna(lua_State *L)
@@ -727,8 +727,8 @@ ll_new_Dna(lua_State *L)
 
 /**
  * \brief Register the L_DNA methods and functions in the LL_L_DNA meta table.
- * \param L Lua state
- * \return 1 table on the Lua stack
+ * \param L Lua state.
+ * \return 1 table on the Lua stack.
  */
 int
 ll_open_Dna(lua_State *L)

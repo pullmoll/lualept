@@ -305,7 +305,7 @@ ChangeScale(SDL_Window * window, float scale, int & swidth, int & sheight, const
  * \param cmap pointer to the PixColormap
  * \param firstcolor first color index (usually 0)
  * \param ncolors number of colors (2, 16, 256)
- * \return pointer to allocated SDL_Palette
+ * \return pointer to allocated SDL_Palette.
  */
 static void
 FillGrays(SDL_Palette* palette, int ncolors, int firstcolor = 0)
@@ -347,7 +347,7 @@ FillGrays(SDL_Palette* palette, int ncolors, int firstcolor = 0)
  * \param cmap pointer to the PixColormap
  * \param firstcolor first color index (usually 0)
  * \param ncolors number of colors (2, 16, 256)
- * \return pointer to allocated SDL_Palette
+ * \return pointer to allocated SDL_Palette.
  */
 static void
 FillColors(SDL_Palette* palette, PixColormap *cmap, int ncolors, int firstcolor = 0)
@@ -399,7 +399,7 @@ FillColors(SDL_Palette* palette, PixColormap *cmap, int ncolors, int firstcolor 
  * \param x position on screen; <= 0 means undefinied
  * \param y position on screen; <= 0 means undefinied
  * \param scale initial scaling factor, or 0.0f to auto select
- * \return TRUE on success, or FALSE on error
+ * \return TRUE on success, or FALSE on error.
  */
 int
 ViewSDL2(Pix* pix, const char* title, int x0, int y0, float dscale)

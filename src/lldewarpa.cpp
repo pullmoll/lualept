@@ -49,8 +49,8 @@
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Dewarpa* (dewa).
  * </pre>
- * \param L Lua state
- * \return 1 void on the Lua stack
+ * \param L Lua state.
+ * \return 1 void on the Lua stack.
  */
 static int
 Destroy(lua_State *L)
@@ -67,8 +67,8 @@ Destroy(lua_State *L)
 
 /**
  * \brief Printable string for a Dewarpa*.
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 toString(lua_State *L)
@@ -169,8 +169,8 @@ toString(lua_State *L)
  *          as well as the full resolution disparity arrays.  Together,
  *          these hold approximately 16 bytes for each pixel in pixs.
  * </pre>
- * \param L Lua state
- * \return 1 Pix* (%pixd) on the Lua stack
+ * \param L Lua state.
+ * \return 1 Pix* (%pixd) on the Lua stack.
  */
 static int
 ApplyDisparity(lua_State *L)
@@ -212,8 +212,8 @@ ApplyDisparity(lua_State *L)
  *          If the full res disparity array(s) are missing, they are remade.
  *      (4) If an error occurs, a copy of the input boxa is returned.
  * </pre>
- * \param L Lua state
- * \return 1 Boxa* (%boxad) on the Lua stack
+ * \param L Lua state.
+ * \return 1 Boxa* (%boxad) on the Lua stack.
  */
 static int
 ApplyDisparityBoxa(lua_State *L)
@@ -261,8 +261,8 @@ ApplyDisparityBoxa(lua_State *L)
  *          a ref model.
  *      (6) The ptr array is expanded as necessary to accommodate page images.
  * </pre>
- * \param L Lua state
- * \return 1 Dewarpa* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Dewarpa* on the Lua stack.
  */
 static int
 Create(lua_State *L)
@@ -304,8 +304,8 @@ Create(lua_State *L)
  *          the pixacomp; the ref models are made for pages of the
  *          same parity within %maxdist of the nearest direct model.
  * </pre>
- * \param L Lua state
- * \return 1 Dewarpa * on the Lua stack
+ * \param L Lua state.
+ * \return 1 Dewarpa * on the Lua stack.
  */
 static int
 CreateFromPixacomp(lua_State *L)
@@ -326,8 +326,8 @@ CreateFromPixacomp(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dewarpa* (dewa).
  * Arg #2 is expected to be a l_int32 (pageno).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 DestroyDewarp(lua_State *L)
@@ -344,8 +344,8 @@ DestroyDewarp(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dewarpa* (dewa).
  * Arg #2 is expected to be a l_int32 (index).
  * </pre>
- * \param L Lua state
- * \return 1 Dewarp * on the Lua stack
+ * \param L Lua state.
+ * \return 1 Dewarp * on the Lua stack.
  */
 static int
 GetDewarp(lua_State *L)
@@ -363,8 +363,8 @@ GetDewarp(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dewarpa* (dewa).
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 Info(lua_State *L)
@@ -391,8 +391,8 @@ Info(lua_State *L)
  *          the dewarp can be added anywhere, even beyond the initial
  *          allocation.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 InsertDewarp(lua_State *L)
@@ -439,8 +439,8 @@ InsertDewarp(lua_State *L)
  *          is reset to 0, you should first call dewarpaRestoreModels()
  *          to bring real models from the cache back to the primary array.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 InsertRefModels(lua_State *L)
@@ -465,8 +465,8 @@ InsertRefModels(lua_State *L)
  *          It can be called at any time.
  *      (2) It is called by the dewarpa serializer before writing.
  * </pre>
- * \param L Lua state
- * \return 1 l_int32 on the Lua stack
+ * \param L Lua state.
+ * \return 1 l_int32 on the Lua stack.
  */
 static int
 ListPages(lua_State *L)
@@ -504,8 +504,8 @@ ListPages(lua_State *L)
  *      (7) This calls dewarpaTestForValidModel(); it ignores the vvalid
  *          and hvalid fields.
  * </pre>
- * \param L Lua state
- * \return 6 integers on the Lua stack
+ * \param L Lua state.
+ * \return 6 integers on the Lua stack.
  */
 static int
 ModelStats(lua_State *L)
@@ -538,8 +538,8 @@ ModelStats(lua_State *L)
  * Leptonica's Notes:
  *      (1) This tests if a model has been built, not if it is valid.
  * </pre>
- * \param L Lua state
- * \return 2 l_int32 (%vsuccess, %hsuccess) on the Lua stack
+ * \param L Lua state.
+ * \return 2 l_int32 (%vsuccess, %hsuccess) on the Lua stack.
  */
 static int
 ModelStatus(lua_State *L)
@@ -561,8 +561,8 @@ ModelStatus(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string (filename).
  * </pre>
- * \param L Lua state
- * \return 1 Dewarpa * on the Lua stack
+ * \param L Lua state.
+ * \return 1 Dewarpa * on the Lua stack.
  */
 static int
 Read(lua_State *L)
@@ -579,8 +579,8 @@ Read(lua_State *L)
  * Arg #1 is expected to be a lstring (str).
  * Arg #2 is expected to be a size_t (size).
  * </pre>
- * \param L Lua state
- * \return 1 Dewarpa * on the Lua stack
+ * \param L Lua state.
+ * \return 1 Dewarpa * on the Lua stack.
  */
 static int
 ReadMem(lua_State *L)
@@ -603,8 +603,8 @@ ReadMem(lua_State *L)
  *          contained.
  *      (2) Reference pages are added in after readback.
  * </pre>
- * \param L Lua state
- * \return 1 Dewarpa* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Dewarpa* on the Lua stack.
  */
 static int
 ReadStream(lua_State *L)
@@ -628,8 +628,8 @@ ReadStream(lua_State *L)
  *      (2) After this is done, we still need to recompute and insert
  *          the reference models before dewa->modelsready is true.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 RestoreModels(lua_State *L)
@@ -660,8 +660,8 @@ RestoreModels(lua_State *L)
  *           - check_columns = 0 (FALSE)
  *
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 SetCheckColumns(lua_State *L)
@@ -712,8 +712,8 @@ SetCheckColumns(lua_State *L)
  *      (5) A model having a left or right edge curvature larger than
  *          about 100 micro-units should probably not be used.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 SetCurvatures(lua_State *L)
@@ -740,8 +740,8 @@ SetCurvatures(lua_State *L)
  * Leptonica's Notes:
  *      (1) This sets the maxdist field.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 SetMaxDistance(lua_State *L)
@@ -772,8 +772,8 @@ SetMaxDistance(lua_State *L)
  *          an invalid dewarp model, it must be done before calling
  *          dewarpaInsertRefModels().
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 SetValidModels(lua_State *L)
@@ -797,8 +797,8 @@ SetValidModels(lua_State *L)
  *      (1) Generates a pdf of contour plots of the disparity arrays.
  *      (2) This only shows actual models; not ref models
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 ShowArrays(lua_State *L)
@@ -822,8 +822,8 @@ ShowArrays(lua_State *L)
  *          that have "references" to nearby pages with valid models).
  *          These references were generated by dewarpaInsertRefModels(dewa).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 StripRefModels(lua_State *L)
@@ -845,8 +845,8 @@ StripRefModels(lua_State *L)
  *          Note that a model with only a vertical disparity array will
  *          always be valid.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 UseBothArrays(lua_State *L)
@@ -863,8 +863,8 @@ UseBothArrays(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dewarpa* (dewa).
  * Arg #2 is expected to be a string (filename).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 Write(lua_State *L)
@@ -883,8 +883,8 @@ Write(lua_State *L)
  * Leptonica's Notes:
  *      (1) Serializes a dewarpa in memory and puts the result in a buffer.
  * </pre>
- * \param L Lua state
- * \return 1 l_int32 on the Lua stack
+ * \param L Lua state.
+ * \return 1 l_int32 on the Lua stack.
  */
 static int
 WriteMem(lua_State *L)
@@ -906,8 +906,8 @@ WriteMem(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Dewarpa* (dewa).
  * Arg #2 is expected to be a luaL_Stream* (%stream).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 WriteStream(lua_State *L)
@@ -919,11 +919,11 @@ WriteStream(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class Dewarpa*.
+ * \brief Check Lua stack at index %arg for user data of class Dewarpa*.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the Dewarpa* contained in the user data
+ * \return pointer to the Dewarpa* contained in the user data.
  */
 Dewarpa *
 ll_check_Dewarpa(const char *_fun, lua_State *L, int arg)
@@ -934,9 +934,9 @@ ll_check_Dewarpa(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Optionally expect a Dewarpa* at index %arg on the Lua stack.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the Dewarpa* contained in the user data
+ * \return pointer to the Dewarpa* contained in the user data.
  */
 Dewarpa *
 ll_opt_Dewarpa(const char *_fun, lua_State *L, int arg)
@@ -948,9 +948,9 @@ ll_opt_Dewarpa(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push Dewarpa* user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param dew pointer to the Dewarpa
- * \return 1 Dewarpa* on the Lua stack
+ * \return 1 Dewarpa* on the Lua stack.
  */
 int
 ll_push_Dewarpa(const char *_fun, lua_State *L, Dewarpa *dew)
@@ -962,8 +962,8 @@ ll_push_Dewarpa(const char *_fun, lua_State *L, Dewarpa *dew)
 
 /**
  * \brief Create and push a new Dewarpa*.
- * \param L Lua state
- * \return 1 Dewarpa* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Dewarpa* on the Lua stack.
  */
 int
 ll_new_Dewarpa(lua_State *L)
@@ -1031,8 +1031,8 @@ ll_new_Dewarpa(lua_State *L)
 
 /**
  * \brief Register the Dewarpa* methods and functions in the LL_DEWARP meta table.
- * \param L Lua state
- * \return 1 table on the Lua stack
+ * \param L Lua state.
+ * \return 1 table on the Lua stack.
  */
 int
 ll_open_Dewarpa(lua_State *L)

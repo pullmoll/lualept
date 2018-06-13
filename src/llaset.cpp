@@ -66,8 +66,8 @@
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Aset* (aset).
  * </pre>
- * \param L Lua state
- * \return 0 for nothing on the Lua stack
+ * \param L Lua state.
+ * \return 0 for nothing on the Lua stack.
  */
 static int
 Destroy(lua_State *L)
@@ -87,8 +87,8 @@ Destroy(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Aset* (aset).
  * </pre>
- * \param L Lua state
- * \return 1 Aset* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Aset* on the Lua stack.
  */
 static int
 Size(lua_State *L)
@@ -108,8 +108,8 @@ Size(lua_State *L)
  *
  * Note: if Arg #3 is false or nil, the node is deleted instead of inserted.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 Insert(lua_State *L)
@@ -145,8 +145,8 @@ Insert(lua_State *L)
 
 /**
  * \brief Printable string for a Aset*.
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 toString(lua_State *L)
@@ -205,8 +205,8 @@ toString(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string describing the key type (int,uint,float).
  * </pre>
- * \param L Lua state
- * \return 1 Aset* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Aset* on the Lua stack.
  */
 static int
 Create(lua_State *L)
@@ -223,8 +223,8 @@ Create(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Aset* (aset).
  * Arg #2 is expected to be a key (int, uint or float).
  *
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 Delete(lua_State *L)
@@ -259,8 +259,8 @@ Delete(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Aset* (aset).
  * Arg #2 is expected to be a key (int, uint or float).
  *
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 Find(lua_State *L)
@@ -296,8 +296,8 @@ Find(lua_State *L)
  *
  * Arg #1 (i.e. self) is expected to be a Aset* (aset).
  *
- * \param L Lua state
- * \return 1 light user data on the Lua stack
+ * \param L Lua state.
+ * \return 1 light user data on the Lua stack.
  */
 static int
 GetFirst(lua_State *L)
@@ -314,8 +314,8 @@ GetFirst(lua_State *L)
  *
  * Arg #1 (i.e. self) is expected to be a Aset* (aset).
  *
- * \param L Lua state
- * \return 1 light user data on the Lua stack
+ * \param L Lua state.
+ * \return 1 light user data on the Lua stack.
  */
 static int
 GetLast(lua_State *L)
@@ -332,8 +332,8 @@ GetLast(lua_State *L)
  *
  * Arg #1 is expected to be a AsetNode* (node).
  *
- * \param L Lua state
- * \return 1 light user data on the Lua stack
+ * \param L Lua state.
+ * \return 1 light user data on the Lua stack.
  */
 static int
 GetNext(lua_State *L)
@@ -350,8 +350,8 @@ GetNext(lua_State *L)
  *
  * Arg #1 (i.e. self) is expected to be a AsetNode* (node).
  *
- * \param L Lua state
- * \return 1 light user data on the Lua stack
+ * \param L Lua state.
+ * \return 1 light user data on the Lua stack.
  */
 static int
 GetPrev(lua_State *L)
@@ -364,11 +364,11 @@ GetPrev(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class Aset.
+ * \brief Check Lua stack at index %arg for user data of class Aset.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the Aset* contained in the user data
+ * \return pointer to the Aset* contained in the user data.
  */
 Aset *
 ll_check_Aset(const char *_fun, lua_State *L, int arg)
@@ -379,9 +379,9 @@ ll_check_Aset(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Optionally expect a Aset* at index %arg on the Lua stack.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the Aset* contained in the user data
+ * \return pointer to the Aset* contained in the user data.
  */
 Aset *
 ll_opt_Aset(const char *_fun, lua_State *L, int arg)
@@ -393,9 +393,9 @@ ll_opt_Aset(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push ASET user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param aset pointer to the ASET
- * \return 1 Aset* on the Lua stack
+ * \return 1 Aset* on the Lua stack.
  */
 int
 ll_push_Aset(const char *_fun, lua_State *L, Aset *aset)
@@ -407,8 +407,8 @@ ll_push_Aset(const char *_fun, lua_State *L, Aset *aset)
 
 /**
  * \brief Create and push a new Aset*.
- * \param L Lua state
- * \return 1 Aset* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Aset* on the Lua stack.
  */
 int
 ll_new_Aset(lua_State *L)
@@ -436,8 +436,8 @@ ll_new_Aset(lua_State *L)
 }
 /**
  * \brief Register the ASET methods and functions in the Aset meta table.
- * \param L Lua state
- * \return 1 table on the Lua stack
+ * \param L Lua state.
+ * \return 1 table on the Lua stack.
  */
 int
 ll_open_Aset(lua_State *L)

@@ -56,8 +56,8 @@
  *      (2) listDestroy() will give a warning message for each data
  *          ptr that is not NULL.
  * </pre>
- * \param L Lua state
- * \return 0 for nothing on the Lua stack
+ * \param L Lua state.
+ * \return 0 for nothing on the Lua stack.
  */
 static int
 Destroy(lua_State *L)
@@ -77,8 +77,8 @@ Destroy(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a DLList* (head)
  * </pre>
- * \param L Lua state
- * \return 1 integer on the Lua stack
+ * \param L Lua state.
+ * \return 1 integer on the Lua stack.
  */
 static int
 GetCount(lua_State *L)
@@ -91,8 +91,8 @@ GetCount(lua_State *L)
 
 /**
  * \brief Printable string for a DLList* (%head).
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 toString(lua_State *L)
@@ -139,8 +139,8 @@ toString(lua_State *L)
  *      (2) When consing from NULL, be sure to initialize head to NULL
  *          before calling this function.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 AddToHead(lua_State *L)
@@ -170,8 +170,8 @@ AddToHead(lua_State *L)
  *           (b) when tail == NULL for an existing list, the tail
  *               will be found and updated.
  * </pre>
- * \param L Lua state
- * \return 2 for boolean and light userdata (%tail) on the Lua stack
+ * \param L Lua state.
+ * \return 2 for boolean and light userdata (%tail) on the Lua stack.
  */
 static int
 AddToTail(lua_State *L)
@@ -190,8 +190,8 @@ AddToTail(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string describing the key type (int,uint,float).
  * </pre>
- * \param L Lua state
- * \return 1 DLList* on the Lua stack
+ * \param L Lua state.
+ * \return 1 DLList* on the Lua stack.
  */
 static int
 Create(lua_State *L)
@@ -216,8 +216,8 @@ Create(lua_State *L)
  *          function is owned by that function and must be destroyed,
  *          but if rules aren't there to be broken, why have them?
  * </pre>
- * \param L Lua state
- * \return 1 light userdata (%elem) on the Lua stack
+ * \param L Lua state.
+ * \return 1 light userdata (%elem) on the Lua stack.
  */
 static int
 FindElement(lua_State *L)
@@ -235,8 +235,8 @@ FindElement(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DLList* (head).
  * </pre>
- * \param L Lua state
- * \return 1 light userdata (%tail) on the Lua stack
+ * \param L Lua state.
+ * \return 1 light userdata (%tail) on the Lua stack.
  */
 static int
 FindTail(lua_State *L)
@@ -268,8 +268,8 @@ FindTail(lua_State *L)
  *            L_END_LIST
  * \endcode
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 InsertAfter(lua_State *L)
@@ -300,8 +300,8 @@ InsertAfter(lua_State *L)
  *            L_END_LIST
  * \endcode
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 InsertBefore(lua_State *L)
@@ -323,8 +323,8 @@ InsertBefore(lua_State *L)
  *      (1) The concatenated list is returned with head1 as the new head.
  *      (2) Both input ptrs must exist, though either can have the value NULL.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 Join(lua_State *L)
@@ -347,8 +347,8 @@ Join(lua_State *L)
  *          but in ANSI C++, it is necessary to do the cast:
  *             pix = (Pix *)listRemoveElement(&head, elem);
  * </pre>
- * \param L Lua state
- * \return 1 light userdata (%data) on the Lua stack
+ * \param L Lua state.
+ * \return 1 light userdata (%data) on the Lua stack.
  */
 static int
 RemoveElement(lua_State *L)
@@ -372,8 +372,8 @@ RemoveElement(lua_State *L)
  *          but in ANSI C++, it is necessary to do the cast; e.g.,
  *            pix = (Pix *)listRemoveFromHead(&head);
  * </pre>
- * \param L Lua state
- * \return 1 light userdata (%data) on the Lua stack
+ * \param L Lua state.
+ * \return 1 light userdata (%data) on the Lua stack.
  */
 static int
 RemoveFromHead(lua_State *L)
@@ -403,8 +403,8 @@ RemoveFromHead(lua_State *L)
  *          but in ANSI C++, it is necessary to do the cast; e.g.,
  *            pix = (Pix *)listRemoveFromTail(&head, &tail);
  * </pre>
- * \param L Lua state
- * \return 2 for light userdata (%data, %tail) on the Lua stack
+ * \param L Lua state.
+ * \return 2 for light userdata (%data, %tail) on the Lua stack.
  */
 static int
 RemoveFromTail(lua_State *L)
@@ -426,8 +426,8 @@ RemoveFromTail(lua_State *L)
  * Leptonica's Notes:
  *      (1) This reverses the list in-place.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 Reverse(lua_State *L)
@@ -438,11 +438,11 @@ Reverse(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class DLList.
+ * \brief Check Lua stack at index %arg for user data of class DLList.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the DLList* contained in the user data
+ * \return pointer to the DLList* contained in the user data.
  */
 DLList *
 ll_check_DLList(const char *_fun, lua_State *L, int arg)
@@ -453,9 +453,9 @@ ll_check_DLList(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Optionally expect a DLList* at index %arg on the Lua stack.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the DLList* contained in the user data
+ * \return pointer to the DLList* contained in the user data.
  */
 DLList *
 ll_opt_DLList(const char *_fun, lua_State *L, int arg)
@@ -468,9 +468,9 @@ ll_opt_DLList(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push DLLIST user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param head pointer to the DLLIST
- * \return 1 DLList* on the Lua stack
+ * \return 1 DLList* on the Lua stack.
  */
 int
 ll_push_DLList(const char *_fun, lua_State *L, DLList *head)
@@ -481,8 +481,8 @@ ll_push_DLList(const char *_fun, lua_State *L, DLList *head)
 }
 /**
  * \brief Create and push a new DLList*.
- * \param L Lua state
- * \return 1 DLList* on the Lua stack
+ * \param L Lua state.
+ * \return 1 DLList* on the Lua stack.
  */
 int
 ll_new_DLList(lua_State *L)
@@ -497,8 +497,8 @@ ll_new_DLList(lua_State *L)
 
 /**
  * \brief Register the DLLIST methods and functions in the DLList meta table.
- * \param L Lua state
- * \return 1 table on the Lua stack
+ * \param L Lua state.
+ * \return 1 table on the Lua stack.
  */
 int
 ll_open_DLList(lua_State *L)

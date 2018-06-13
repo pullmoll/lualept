@@ -49,8 +49,8 @@
  * <pre>
  * Arg #1 is expected to be a l_int32 (freeflag).
  * </pre>
- * \param L Lua state
- * \return 1 void on the Lua stack
+ * \param L Lua state.
+ * \return 1 void on the Lua stack.
  */
 static int
 Destroy(lua_State *L)
@@ -69,8 +69,8 @@ Destroy(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmaps).
  * </pre>
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 toString(lua_State *L)
@@ -114,8 +114,8 @@ toString(lua_State *L)
  * <pre>
  * Arg #1 (i.e. stackf) is expected to be a PixTiling* (lstack).
  * </pre>
- * \param L Lua state
- * \return 1 l_int32 on the Lua stack
+ * \param L Lua state.
+ * \return 1 l_int32 on the Lua stack.
  */
 static int
 GetCount(lua_State *L)
@@ -155,8 +155,8 @@ GetCount(lua_State *L)
  *      (4) The overlap must not be larger than the width or height of
  *          the leftmost or topmost tile(s).
  * </pre>
- * \param L Lua state
- * \return 1 PixTiling * on the Lua stack
+ * \param L Lua state.
+ * \return 1 PixTiling * on the Lua stack.
  */
 static int
 Create(lua_State *L)
@@ -180,7 +180,7 @@ Create(lua_State *L)
  *
  * </pre>
  * \param L pointer to the lua_State
- * \return 2 on the Lua stack
+ * \return 2 on the Lua stack.
  */
 static int
 GetCountXY(lua_State *L)
@@ -203,7 +203,7 @@ GetCountXY(lua_State *L)
  *
  * </pre>
  * \param L pointer to the lua_State
- * \return 2 on the Lua stack
+ * \return 2 on the Lua stack.
  */
 static int
 GetSize(lua_State *L)
@@ -228,7 +228,7 @@ GetSize(lua_State *L)
  *
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 on the Lua stack
+ * \return 1 on the Lua stack.
  */
 static int
 GetTile(lua_State *L)
@@ -254,7 +254,7 @@ GetTile(lua_State *L)
  *          to strip the added boundary pixels when painting.
  * </pre>
  * \param L pointer to the lua_State
- * \return 0 on the Lua stack
+ * \return 0 on the Lua stack.
  */
 static int
 NoStripOnPaint(lua_State *L)
@@ -276,7 +276,7 @@ NoStripOnPaint(lua_State *L)
  *
  * </pre>
  * \param L pointer to the lua_State
- * \return 0 on the Lua stack
+ * \return 0 on the Lua stack.
  */
 static int
 PaintTile(lua_State *L)
@@ -292,11 +292,11 @@ PaintTile(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index (%arg) for udata of class PixTiling*.
+ * \brief Check Lua stack at index (%arg) for user data of class PixTiling*.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the PixTiling* contained in the user data
+ * \return pointer to the PixTiling* contained in the user data.
  */
 PixTiling *
 ll_check_PixTiling(const char *_fun, lua_State *L, int arg)
@@ -307,9 +307,9 @@ ll_check_PixTiling(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Optionally expect a PixTiling* at index (%arg) on the Lua stack.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the PixTiling* contained in the user data
+ * \return pointer to the PixTiling* contained in the user data.
  */
 PixTiling *
 ll_opt_PixTiling(const char *_fun, lua_State *L, int arg)
@@ -321,9 +321,9 @@ ll_opt_PixTiling(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push PixTiling* to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param cd pointer to the L_PixTiling
- * \return 1 PixTiling* on the Lua stack
+ * \return 1 PixTiling* on the Lua stack.
  */
 int
 ll_push_PixTiling(const char *_fun, lua_State *L, PixTiling *cd)
@@ -339,8 +339,8 @@ ll_push_PixTiling(const char *_fun, lua_State *L, PixTiling *cd)
  * Arg #1 is expected to be a string (dir).
  * Arg #2 is expected to be a l_int32 (fontsize).
  *
- * \param L Lua state
- * \return 1 PixTiling* on the Lua stack
+ * \param L Lua state.
+ * \return 1 PixTiling* on the Lua stack.
  */
 int
 ll_new_PixTiling(lua_State *L)
@@ -362,8 +362,8 @@ ll_new_PixTiling(lua_State *L)
 
 /**
  * \brief Register the PixTiling methods and functions in the PixTiling meta table.
- * \param L Lua state
- * \return 1 table on the Lua stack
+ * \param L Lua state.
+ * \return 1 table on the Lua stack.
  */
 int
 ll_open_PixTiling(lua_State *L)

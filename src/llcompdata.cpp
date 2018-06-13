@@ -49,8 +49,8 @@
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CompData* (cid).
  * </pre>
- * \param L Lua state
- * \return 0 for nothing on the Lua stack
+ * \param L Lua state.
+ * \return 0 for nothing on the Lua stack.
  */
 static int
 Destroy(lua_State *L)
@@ -69,8 +69,8 @@ Destroy(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sel* (sel).
  * </pre>
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 toString(lua_State *L)
@@ -137,8 +137,8 @@ toString(lua_State *L)
  *      (1) Caller must not destroy the cid.  It is absorbed in the
  *          lpd and destroyed by this function.
  * </pre>
- * \param L Lua state
- * \return 1 lstring on the Lua stack
+ * \param L Lua state.
+ * \return 1 lstring on the Lua stack.
  */
 static int
 ConvertToPdfData(lua_State *L)
@@ -162,8 +162,8 @@ ConvertToPdfData(lua_State *L)
  * Arg #3 is expected to be a l_int32 (quality).
  * Arg #4 is expected to be a l_int32 (ascii85).
  * </pre>
- * \param L Lua state
- * \return 1 on the Lua stack
+ * \param L Lua state.
+ * \return 1 on the Lua stack.
  */
 static int
 Create(lua_State *L)
@@ -187,8 +187,8 @@ Create(lua_State *L)
  * Arg #2 is expected to be a Pix* (pix).
  * Arg #3 is expected to be a l_int32 (quality).
  * </pre>
- * \param L Lua state
- * \return 1 on the Lua stack
+ * \param L Lua state.
+ * \return 1 on the Lua stack.
  */
 static int
 CreateForPdf(lua_State *L)
@@ -219,8 +219,8 @@ CreateForPdf(lua_State *L)
  *           ~ 0 for binary data (not permitted in PostScript)
  *           ~ 1 for ascii85 (5 for 4) encoded binary data
  * </pre>
- * \param L Lua state
- * \return 1 CompData* on the Lua stack
+ * \param L Lua state.
+ * \return 1 CompData* on the Lua stack.
  */
 static int
 FlateData(lua_State *L)
@@ -247,8 +247,8 @@ FlateData(lua_State *L)
  *      (3) If transcoding is required, this will not have to read from
  *          file if you also input a pix.
  * </pre>
- * \param L Lua state
- * \return 1 CompData* on the Lua stack
+ * \param L Lua state.
+ * \return 1 CompData* on the Lua stack.
  */
 static int
 FlateDataPdf(lua_State *L)
@@ -272,8 +272,8 @@ FlateDataPdf(lua_State *L)
  *           ~ 1 for ascii85 (5 for 4) encoded binary data
  *             (not permitted in pdf)
  * </pre>
- * \param L Lua state
- * \return 1 CompData* on the Lua stack
+ * \param L Lua state.
+ * \return 1 CompData* on the Lua stack.
  */
 static int
 G4Data(lua_State *L)
@@ -293,8 +293,8 @@ G4Data(lua_State *L)
  * Arg #3 is expected to be a l_int32 (quality).
  * Arg #4 is expected to be a l_int32 (ascii85).
  * </pre>
- * \param L Lua state
- * \return 1 CompData* on the Lua stack
+ * \param L Lua state.
+ * \return 1 CompData* on the Lua stack.
  */
 static int
 Generate(lua_State *L)
@@ -323,8 +323,8 @@ Generate(lua_State *L)
  *           ~ 0 for binary data (not permitted in PostScript)
  *           ~ 1 for ascii85 (5 for 4) encoded binary data
  * </pre>
- * \param L Lua state
- * \return 1 CompData* on the Lua stack
+ * \param L Lua state.
+ * \return 1 CompData* on the Lua stack.
  */
 static int
 GenerateCIData(lua_State *L)
@@ -352,8 +352,8 @@ GenerateCIData(lua_State *L)
  * Arg #7 is expected to be a l_int32 (pageno).
  * Arg #8 is expected to be a l_int32 (endpage).
  * </pre>
- * \param L Lua state
- * \return 1 lstring on the Lua stack
+ * \param L Lua state.
+ * \return 1 lstring on the Lua stack.
  */
 static int
 GenerateFlatePS(lua_State *L)
@@ -386,8 +386,8 @@ GenerateFlatePS(lua_State *L)
  * Arg #8 is expected to be a l_int32 (pageno).
  * Arg #9 is expected to be a l_int32 (endpage).
  * </pre>
- * \param L Lua state
- * \return 1 lstring on the Lua stack
+ * \param L Lua state.
+ * \return 1 lstring on the Lua stack.
  */
 static int
 GenerateG4PS(lua_State *L)
@@ -420,8 +420,8 @@ GenerateG4PS(lua_State *L)
  * Arg #7 is expected to be a l_int32 (pageno).
  * Arg #8 is expected to be a l_int32 (endpage).
  * </pre>
- * \param L Lua state
- * \return 1 lstring on the Lua stack
+ * \param L Lua state.
+ * \return 1 lstring on the Lua stack.
  */
 static int
 GenerateJpegPS(lua_State *L)
@@ -454,8 +454,8 @@ GenerateJpegPS(lua_State *L)
  *      (2) Do not free the data.  l_generateJpegDataMem() will free
  *          the data if it does not use ascii encoding.
  * </pre>
- * \param L Lua state
- * \return 1 CompData* on the Lua stack
+ * \param L Lua state.
+ * \return 1 CompData* on the Lua stack.
  */
 static int
 JpegData(lua_State *L)
@@ -476,8 +476,8 @@ JpegData(lua_State *L)
  * Leptonica's Notes:
  *      (1) See l_generateJpegData().
  * </pre>
- * \param L Lua state
- * \return 1 CompData* on the Lua stack
+ * \param L Lua state.
+ * \return 1 CompData* on the Lua stack.
  */
 static int
 JpegDataMem(lua_State *L)
@@ -495,11 +495,11 @@ JpegDataMem(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class CompData.
+ * \brief Check Lua stack at index %arg for user data of class CompData.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the CompData* contained in the user data
+ * \return pointer to the CompData* contained in the user data.
  */
 CompData *
 ll_check_CompData(const char *_fun, lua_State *L, int arg)
@@ -510,9 +510,9 @@ ll_check_CompData(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Optionally expect a LL_DLLIST at index %arg on the Lua stack.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the CompData* contained in the user data
+ * \return pointer to the CompData* contained in the user data.
  */
 CompData *
 ll_opt_CompData(const char *_fun, lua_State *L, int arg)
@@ -525,9 +525,9 @@ ll_opt_CompData(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push BMF user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param cdata pointer to the L_CompData
- * \return 1 CompData* on the Lua stack
+ * \return 1 CompData* on the Lua stack.
  */
 int
 ll_push_CompData(const char *_fun, lua_State *L, CompData *cdata)
@@ -539,8 +539,8 @@ ll_push_CompData(const char *_fun, lua_State *L, CompData *cdata)
 
 /**
  * \brief Generate and push a new CompData*.
- * \param L Lua state
- * \return 1 CompData* on the Lua stack
+ * \param L Lua state.
+ * \return 1 CompData* on the Lua stack.
  */
 int
 ll_new_CompData(lua_State *L)
@@ -571,8 +571,8 @@ ll_new_CompData(lua_State *L)
 
 /**
  * \brief Register the CompData methods and functions in the CompData meta table.
- * \param L Lua state
- * \return 1 table on the Lua stack
+ * \param L Lua state.
+ * \return 1 table on the Lua stack.
  */
 int
 ll_open_CompData(lua_State *L)

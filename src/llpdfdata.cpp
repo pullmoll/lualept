@@ -47,8 +47,8 @@
 /**
  * \brief Destroy a PdfData*.
  *
- * \param L Lua state
- * \return 0 for nothing on the Lua stack
+ * \param L Lua state.
+ * \return 0 for nothing on the Lua stack.
  */
 static int
 Destroy(lua_State *L)
@@ -67,8 +67,8 @@ Destroy(lua_State *L)
 
 /**
  * \brief Create a new PdfData*.
- * \param L Lua state
- * \return 1 PdfData* on the Lua stack
+ * \param L Lua state.
+ * \return 1 PdfData* on the Lua stack.
  */
 static int
 Create(lua_State *L)
@@ -83,8 +83,8 @@ Create(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sel* (sel).
  * </pre>
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 toString(lua_State *L)
@@ -182,8 +182,8 @@ toString(lua_State *L)
  * Arg #8 is expected to be a string (title).
  * Arg #9 is expected to be a l_int32 (position).
  * </pre>
- * \param L Lua state
- * \return 1 on the Lua stack
+ * \param L Lua state.
+ * \return 1 on the Lua stack.
  */
 static int
 ConvertToPdf(lua_State *L)
@@ -217,8 +217,8 @@ ConvertToPdf(lua_State *L)
  * Arg #7 is expected to be a string (title).
  * Arg #8 is expected to be a l_int32 (position).
  * </pre>
- * \param L Lua state
- * \return 2 lstring (%data, %nbytes) and PdfData* (%lpd) on the Lua stack
+ * \param L Lua state.
+ * \return 2 lstring (%data, %nbytes) and PdfData* (%lpd) on the Lua stack.
  */
 static int
 ConvertToPdfData(lua_State *L)
@@ -254,8 +254,8 @@ ConvertToPdfData(lua_State *L)
  * Arg #7 is expected to be a l_float32 (scalefactor).
  * Arg #8 is expected to be a string (title).
  * </pre>
- * \param L Lua state
- * \return 1 lstring (%data, %nbytes) on the Lua stack
+ * \param L Lua state.
+ * \return 1 lstring (%data, %nbytes) on the Lua stack.
  */
 static int
 ConvertToPdfDataSegmented(lua_State *L)
@@ -285,8 +285,8 @@ ConvertToPdfDataSegmented(lua_State *L)
  * Arg #3 is expected to be a string (title).
  * Arg #4 is expected to be a string (fileout).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 ConvertUnscaledFilesToPdf(lua_State *L)
@@ -305,8 +305,8 @@ ConvertUnscaledFilesToPdf(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a string (fname).
  * Arg #2 is expected to be a string (title).
  * </pre>
- * \param L Lua state
- * \return 1 lstring (%data, %nbytes) on the Lua stack
+ * \param L Lua state.
+ * \return 1 lstring (%data, %nbytes) on the Lua stack.
  */
 static int
 ConvertUnscaledToPdfData(lua_State *L)
@@ -324,11 +324,11 @@ ConvertUnscaledToPdfData(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class PdfData.
+ * \brief Check Lua stack at index %arg for user data of class PdfData.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the PdfData* contained in the user data
+ * \return pointer to the PdfData* contained in the user data.
  */
 PdfData *
 ll_check_PdfData(const char *_fun, lua_State *L, int arg)
@@ -339,9 +339,9 @@ ll_check_PdfData(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Optionally expect a LL_DLLIST at index %arg on the Lua stack.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the PdfData* contained in the user data
+ * \return pointer to the PdfData* contained in the user data.
  */
 PdfData *
 ll_opt_PdfData(const char *_fun, lua_State *L, int arg)
@@ -354,9 +354,9 @@ ll_opt_PdfData(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push BMF user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param cd pointer to the L_PdfData
- * \return 1 PdfData* on the Lua stack
+ * \return 1 PdfData* on the Lua stack.
  */
 int
 ll_push_PdfData(const char *_fun, lua_State *L, PdfData *cd)
@@ -367,8 +367,8 @@ ll_push_PdfData(const char *_fun, lua_State *L, PdfData *cd)
 }
 /**
  * \brief Create and push a new PdfData*.
- * \param L Lua state
- * \return 1 PdfData* on the Lua stack
+ * \param L Lua state.
+ * \return 1 PdfData* on the Lua stack.
  */
 int
 ll_new_PdfData(lua_State *L)
@@ -380,8 +380,8 @@ ll_new_PdfData(lua_State *L)
 
 /**
  * \brief Register the PdfData methods and functions in the PdfData meta table.
- * \param L Lua state
- * \return 1 table on the Lua stack
+ * \param L Lua state.
+ * \return 1 table on the Lua stack.
  */
 int
 ll_open_PdfData(lua_State *L)

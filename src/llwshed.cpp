@@ -49,8 +49,8 @@
  * <pre>
  * Arg #1 (i.e. self) is expected to be a WShed* (wshed).
  * </pre>
- * \param L Lua state
- * \return 0 on the Lua stack
+ * \param L Lua state.
+ * \return 0 on the Lua stack.
  */
 static int
 Destroy(lua_State *L)
@@ -66,8 +66,8 @@ Destroy(lua_State *L)
 
 /**
  * \brief Printable string for a WShed*.
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 toString(lua_State* L)
@@ -161,8 +161,8 @@ toString(lua_State* L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a WShed* (wshed).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 Apply(lua_State *L)
@@ -177,8 +177,8 @@ Apply(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a WShed* (wshed).
  * </pre>
- * \param L Lua state
- * \return 2 Pixa* (%pixa) and Numa* (%nalevels) on the Lua stack
+ * \param L Lua state.
+ * \return 2 Pixa* (%pixa) and Numa* (%nalevels) on the Lua stack.
  */
 static int
 Basins(lua_State *L)
@@ -214,8 +214,8 @@ Basins(lua_State *L)
  *          It will either be incorporated in another watershed or
  *          eliminated.
  * </pre>
- * \param L Lua state
- * \return 1 WShed* on the Lua stack
+ * \param L Lua state.
+ * \return 1 WShed* on the Lua stack.
  */
 static int
 Create(lua_State *L)
@@ -234,8 +234,8 @@ Create(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a WShed* (wshed).
  * </pre>
- * \param L Lua state
- * \return 1 Pix* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Pix* on the Lua stack.
  */
 static int
 RenderColors(lua_State *L)
@@ -252,8 +252,8 @@ RenderColors(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a WShed* (wshed).
  *
  * </pre>
- * \param L Lua state
- * \return 1 Pix* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Pix* on the Lua stack.
  */
 static int
 RenderFill(lua_State *L)
@@ -265,11 +265,11 @@ RenderFill(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class WShed*.
+ * \brief Check Lua stack at index %arg for user data of class WShed*.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the WShed* contained in the user data
+ * \return pointer to the WShed* contained in the user data.
  */
 WShed *
 ll_check_WShed(const char *_fun, lua_State *L, int arg)
@@ -280,9 +280,9 @@ ll_check_WShed(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Optionally expect a LL_DLLIST at index %arg on the Lua stack.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the WShed* contained in the user data
+ * \return pointer to the WShed* contained in the user data.
  */
 WShed *
 ll_opt_WShed(const char *_fun, lua_State *L, int arg)
@@ -294,9 +294,9 @@ ll_opt_WShed(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push BMF user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param ws pointer to the WShed
- * \return 1 WShed* on the Lua stack
+ * \return 1 WShed* on the Lua stack.
  */
 int
 ll_push_WShed(const char *_fun, lua_State *L, WShed *ws)
@@ -307,8 +307,8 @@ ll_push_WShed(const char *_fun, lua_State *L, WShed *ws)
 }
 /**
  * \brief Create and push a new WShed*.
- * \param L Lua state
- * \return 1 WShed* on the Lua stack
+ * \param L Lua state.
+ * \return 1 WShed* on the Lua stack.
  */
 int
 ll_new_WShed(lua_State *L)
@@ -333,8 +333,8 @@ ll_new_WShed(lua_State *L)
 
 /**
  * \brief Register the WShed methods and functions in the TNAME meta table.
- * \param L Lua state
- * \return 1 table on the Lua stack
+ * \param L Lua state.
+ * \return 1 table on the Lua stack.
  */
 int
 ll_open_WShed(lua_State *L)

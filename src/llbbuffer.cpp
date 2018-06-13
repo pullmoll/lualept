@@ -53,8 +53,8 @@
  *      (1) Destroys the byte array in the bbuffer and then the bbuffer;
  *          then nulls the contents of the input ptr.
  * </pre>
- * \param L Lua state
- * \return 0 on the Lua stack
+ * \param L Lua state.
+ * \return 0 on the Lua stack.
  */
 static int
 Destroy(lua_State *L)
@@ -70,8 +70,8 @@ Destroy(lua_State *L)
 
 /**
  * \brief Printable string for a ByteBuffer*.
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 toString(lua_State* L)
@@ -110,8 +110,8 @@ toString(lua_State* L)
  *          the given size.  If a buffer address is given,
  *          it then reads the number of bytes into the byte array.
  * </pre>
- * \param L Lua state
- * \return 1 ByteBuffer* on the Lua stack
+ * \param L Lua state.
+ * \return 1 ByteBuffer* on the Lua stack.
  */
 static int
 Create(lua_State *L)
@@ -131,8 +131,8 @@ Create(lua_State *L)
  * Leptonica's Notes:
  *      (1) Copies data to newly allocated array; then destroys the bbuffer.
  * </pre>
- * \param L Lua state
- * \return 1 lstring on the Lua stack
+ * \param L Lua state.
+ * \return 1 lstring on the Lua stack.
  */
 static int
 DestroyAndSaveData(lua_State *L)
@@ -155,8 +155,8 @@ DestroyAndSaveData(lua_State *L)
  *      (1) reallocNew() copies all bb->nalloc bytes, even though
  *          only bb->n are data.
  * </pre>
- * \param L Lua state
- * \return 0 on the Lua stack
+ * \param L Lua state.
+ * \return 0 on the Lua stack.
  */
 static int
 ExtendArray(lua_State *L)
@@ -182,8 +182,8 @@ ExtendArray(lua_State *L)
  *          efficient, this is simpler than making a special case
  *          of reallocNew().
  * </pre>
- * \param L Lua state
- * \return 0 on the Lua stack
+ * \param L Lua state.
+ * \return 0 on the Lua stack.
  */
 static int
 Read(lua_State *L)
@@ -205,8 +205,8 @@ Read(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a ByteBuffer* (bb).
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * </pre>
- * \param L Lua state
- * \return 0 on the Lua stack
+ * \param L Lua state.
+ * \return 0 on the Lua stack.
  */
 static int
 ReadStream(lua_State *L)
@@ -230,8 +230,8 @@ ReadStream(lua_State *L)
  * Arg #2 is expected to be a size_t (nbytes).
  *
  * </pre>
- * \param L Lua state
- * \return 1 lstring (%bytes, %nout) on the Lua stack
+ * \param L Lua state.
+ * \return 1 lstring (%bytes, %nout) on the Lua stack.
  */
 static int
 Write(lua_State *L)
@@ -255,8 +255,8 @@ Write(lua_State *L)
  * Arg #3 is expected to be a size_t (nbytes).
  *
  * </pre>
- * \param L Lua state
- * \return 1 size_t (%nout) on the Lua stack
+ * \param L Lua state.
+ * \return 1 size_t (%nout) on the Lua stack.
  */
 static int
 WriteStream(lua_State *L)
@@ -273,11 +273,11 @@ WriteStream(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class ByteBuffer*.
+ * \brief Check Lua stack at index %arg for user data of class ByteBuffer*.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the ByteBuffer* contained in the user data
+ * \return pointer to the ByteBuffer* contained in the user data.
  */
 ByteBuffer *
 ll_check_ByteBuffer(const char *_fun, lua_State *L, int arg)
@@ -288,9 +288,9 @@ ll_check_ByteBuffer(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Optionally expect a LL_DLLIST at index %arg on the Lua stack.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the ByteBuffer* contained in the user data
+ * \return pointer to the ByteBuffer* contained in the user data.
  */
 ByteBuffer *
 ll_opt_ByteBuffer(const char *_fun, lua_State *L, int arg)
@@ -303,9 +303,9 @@ ll_opt_ByteBuffer(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push BMF user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param bb pointer to the ByteBuffer
- * \return 1 ByteBuffer* on the Lua stack
+ * \return 1 ByteBuffer* on the Lua stack.
  */
 int
 ll_push_ByteBuffer(const char *_fun, lua_State *L, ByteBuffer *bb)
@@ -317,8 +317,8 @@ ll_push_ByteBuffer(const char *_fun, lua_State *L, ByteBuffer *bb)
 
 /**
  * \brief Create and push a new ByteBuffer*.
- * \param L Lua state
- * \return 1 ByteBuffer* on the Lua stack
+ * \param L Lua state.
+ * \return 1 ByteBuffer* on the Lua stack.
  */
 int
 ll_new_ByteBuffer(lua_State *L)
@@ -342,8 +342,8 @@ ll_new_ByteBuffer(lua_State *L)
 
 /**
  * \brief Register the BMF methods and functions in the TNAME meta table.
- * \param L Lua state
- * \return 1 table on the Lua stack
+ * \param L Lua state.
+ * \return 1 table on the Lua stack.
  */
 int
 ll_open_ByteBuffer(lua_State *L)

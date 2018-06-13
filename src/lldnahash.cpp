@@ -49,8 +49,8 @@
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DnaHash* (dnahash).
  * </pre>
- * \param L Lua state
- * \return 0 on the Lua stack
+ * \param L Lua state.
+ * \return 0 on the Lua stack.
  */
 static int
 Destroy(lua_State *L)
@@ -69,8 +69,8 @@ Destroy(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a DnaHash* (dnahash).
  * </pre>
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 toString(lua_State* L)
@@ -102,16 +102,16 @@ toString(lua_State* L)
 
 
 /**
- * \brief Create() brief comment goes here.
+ * \brief Create a new DnaHash* (%dh)
  * <pre>
- * Arg #1 (i.e. self) is expected to be a lstring (data).
- * Arg #2 is expected to be a l_int32 (nalloc).
+ * Arg #1 is expected to be a l_int32 (nbuckets).
+ * Arg #2 is expected to be a l_int32 (initsize).
  *
  * Leptonica's Notes:
  *      (1) Actual dna are created only as required by l_dnaHashAdd()
  * </pre>
- * \param L Lua state
- * \return 1 DnaHash* on the Lua stack
+ * \param L Lua state.
+ * \return 1 DnaHash* on the Lua stack.
  */
 static int
 Create(lua_State *L)
@@ -119,16 +119,16 @@ Create(lua_State *L)
     LL_FUNC("Create");
     l_int32 nbuckets = ll_opt_l_int32(_fun, L, 5);
     l_int32 initsize = ll_opt_l_int32(_fun, L, 10);
-    DnaHash *result = l_dnaHashCreate(nbuckets, initsize);
-    return ll_push_DnaHash(_fun, L, result);
+    DnaHash *dh = l_dnaHashCreate(nbuckets, initsize);
+    return ll_push_DnaHash(_fun, L, dh);
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class DnaHash*.
+ * \brief Check Lua stack at index %arg for user data of class DnaHash*.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the DnaHash* contained in the user data
+ * \return pointer to the DnaHash* contained in the user data.
  */
 DnaHash *
 ll_check_DnaHash(const char *_fun, lua_State *L, int arg)
@@ -139,9 +139,9 @@ ll_check_DnaHash(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Optionally expect a LL_DLLIST at index %arg on the Lua stack.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the DnaHash* contained in the user data
+ * \return pointer to the DnaHash* contained in the user data.
  */
 DnaHash *
 ll_opt_DnaHash(const char *_fun, lua_State *L, int arg)
@@ -154,9 +154,9 @@ ll_opt_DnaHash(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push DnaHash user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param dh pointer to the DnaHash
- * \return 1 DnaHash* on the Lua stack
+ * \return 1 DnaHash* on the Lua stack.
  */
 int
 ll_push_DnaHash(const char *_fun, lua_State *L, DnaHash *dh)
@@ -168,8 +168,8 @@ ll_push_DnaHash(const char *_fun, lua_State *L, DnaHash *dh)
 
 /**
  * \brief Create and push a new DnaHash*.
- * \param L Lua state
- * \return 1 DnaHash* on the Lua stack
+ * \param L Lua state.
+ * \return 1 DnaHash* on the Lua stack.
  */
 int
 ll_new_DnaHash(lua_State *L)
@@ -202,8 +202,8 @@ ll_new_DnaHash(lua_State *L)
 
 /**
  * \brief Register the DnaHash methods and functions in the TNAME meta table.
- * \param L Lua state
- * \return 1 table on the Lua stack
+ * \param L Lua state.
+ * \return 1 table on the Lua stack.
  */
 int
 ll_open_DnaHash(lua_State *L)

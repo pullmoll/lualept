@@ -39,9 +39,9 @@ int LeptMsgSeverity = 0;
 #endif
 
 /**
- * @brief Return a printable character for byte ch
- * @param ch unsigned character
- * @return printable (ASCII) character
+ * \brief Return a printable character for byte ch
+ * \param ch unsigned character
+ * \return printable (ASCII) character
  */
 char printable(l_uint8 ch)
 {
@@ -49,8 +49,8 @@ char printable(l_uint8 ch)
 }
 
 /**
- * @brief Quick and dirty hexdump of a byte array
- * @param bytes pointer to ll_bytes_t
+ * \brief Quick and dirty hexdump of a byte array
+ * \param bytes pointer to ll_bytes_t
  */
 void hexdump(ll_bytes_t *bytes)
 {

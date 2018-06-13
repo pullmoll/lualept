@@ -53,8 +53,8 @@
  *      (1) Decrements the ref count and, if 0, destroys the box.
  *      (2) Always nulls the input ptr.
  * </pre>
- * \param L Lua state
- * \return 0 for nothing on the Lua stack
+ * \param L Lua state.
+ * \return 0 for nothing on the Lua stack.
  */
 static int
 Destroy(lua_State *L)
@@ -71,8 +71,8 @@ Destroy(lua_State *L)
 
 /**
  * \brief Printable string for a Box* (%box).
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 toString(lua_State *L)
@@ -110,8 +110,8 @@ toString(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Box* (box1).
  * Arg #2 is expected to be another Box* (box2).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 Equal(lua_State *L)
@@ -146,8 +146,8 @@ Equal(lua_State *L)
  *      (4) For example, to expand in-place by 20 pixels on each side, use
  *             boxAdjustSides(box, box, -20, 20, -20, 20);
  * </pre>
- * \param L Lua state
- * \return 1 Box* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Box* on the Lua stack.
  */
 static int
 AdjustSides(lua_State *L)
@@ -173,8 +173,8 @@ AdjustSides(lua_State *L)
  * Leptonica's Notes:
  *      (1) This is the geometric union of the two rectangles.
  * </pre>
- * \param L Lua state
- * \return 1 Box* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Box* on the Lua stack.
  */
 static int
 BoundingRegion(lua_State *L)
@@ -193,8 +193,8 @@ BoundingRegion(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * Arg #2 (i.e. self) is expected to be a l_int32 (delta).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the stack
+ * \param L Lua state.
+ * \return 1 boolean on the stack.
  */
 static int
 ChangeRefcount(lua_State *L)
@@ -217,8 +217,8 @@ ChangeRefcount(lua_State *L)
  *          The clipping rectangle is assumed to have a UL corner at (0, 0),
  *          and a LR corner at (wi - 1, hi - 1).
  * </pre>
- * \param L Lua state
- * \return 1 Box* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Box* on the Lua stack.
  */
 static int
 ClipToRectangle(lua_State *L)
@@ -246,8 +246,8 @@ ClipToRectangle(lua_State *L)
  *                 for (j = xstart; j < xend; j++ {
  *                     ....
  * </pre>
- * \param L Lua state
- * \return 6 integers on the Lua stack (%xstart, %ystart, %xend, %yend, %bw, %bh)
+ * \param L Lua state.
+ * \return 6 integers on the Lua stack (%xstart, %ystart, %xend, %yend, %bw, %bh).
  */
 static int
 ClipToRectangleParams(lua_State *L)
@@ -278,8 +278,8 @@ ClipToRectangleParams(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * </pre>
- * \param L Lua state
- * \return 1 Box* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Box* on the Lua stack.
  */
 static int
 Clone(lua_State *L)
@@ -300,8 +300,8 @@ Clone(lua_State *L)
  * Leptonica's Notes:
  *      (1) We're re-using the SORT enum for these comparisons.
  * </pre>
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 CompareSize(lua_State *L)
@@ -323,8 +323,8 @@ CompareSize(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Box* (box1).
  * Arg #2 is expected to be another Box* (box2).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 Contains(lua_State *L)
@@ -345,8 +345,8 @@ Contains(lua_State *L)
  * Arg #2 is expected to be a l_float32 (x).
  * Arg #3 is expected to be a l_float32 (y).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 ContainsPt(lua_State *L)
@@ -371,8 +371,8 @@ ContainsPt(lua_State *L)
  *      (1) If ncorners == 2, we select the UL and LR corners.
  *          Otherwise we save all 4 corners in this order: UL, UR, LL, LR.
  * </pre>
- * \param L Lua state
- * \return 1 Box* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Box* on the Lua stack.
  */
 static int
 ConvertToPta(lua_State *L)
@@ -389,8 +389,8 @@ ConvertToPta(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * </pre>
- * \param L Lua state
- * \return 1 Box* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Box* on the Lua stack.
  */
 static int
 Copy(lua_State *L)
@@ -423,8 +423,8 @@ Copy(lua_State *L)
  *      (3) If you want to create only valid boxes, use boxCreateValid(),
  *          which returns NULL if either w or h is 0.
  * </pre>
- * \param L Lua state
- * \return 1 Box* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Box* on the Lua stack.
  */
 static int
 Create(lua_State *L)
@@ -449,8 +449,8 @@ Create(lua_State *L)
  * Leptonica's Notes:
  *      (1) This returns NULL if either w = 0 or h = 0.
  * </pre>
- * \param L Lua state
- * \return 1 Box* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Box* on the Lua stack.
  */
 static int
 CreateValid(lua_State *L)
@@ -472,8 +472,8 @@ CreateValid(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (box).
  * </pre>
- * \param L Lua state
- * \return 2 numbers on the Lua stack (%cx, %cy)
+ * \param L Lua state.
+ * \return 2 numbers on the Lua stack (%cx, %cy).
  */
 static int
 GetCenter(lua_State *L)
@@ -494,8 +494,8 @@ GetCenter(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * </pre>
- * \param L Lua state
- * \return 4 for four integers (or nil on error) on the stack
+ * \param L Lua state.
+ * \return 4 for four integers (or nil on error) on the stack.
  */
 static int
 GetGeometry(lua_State *L)
@@ -517,8 +517,8 @@ GetGeometry(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * </pre>
- * \param L Lua state
- * \return 1 integers (or nil on error) on the stack
+ * \param L Lua state.
+ * \return 1 integers (or nil on error) on the stack.
  */
 static int
 GetRefcount(lua_State *L)
@@ -537,8 +537,8 @@ GetRefcount(lua_State *L)
  * Leptonica's Notes:
  *      (1) All returned values are within the box.
  * </pre>
- * \param L Lua state
- * \return 4 for four integers (or nil on error) on the stack
+ * \param L Lua state.
+ * \return 4 for four integers (or nil on error) on the stack.
  */
 static int
 GetSideLocations(lua_State *L)
@@ -568,8 +568,8 @@ GetSideLocations(lua_State *L)
  *          coordinates are returned in (x1, y1).
  *      (2) Represent a vertical line by one with a large but finite slope.
  * </pre>
- * \param L Lua state
- * \return 5 integers on the Lua stack (%x1, %y1, %x2, %y2, %n)
+ * \param L Lua state.
+ * \return 5 integers on the Lua stack (%x1, %y1, %x2, %y2, %n).
  */
 static int
 IntersectByLine(lua_State *L)
@@ -600,8 +600,8 @@ IntersectByLine(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Box* (box1).
  * Arg #2 is expected to be another Box* (box2).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 Intersects(lua_State *L)
@@ -620,8 +620,8 @@ Intersects(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Box* (boxs).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 IsValid(lua_State *L)
@@ -640,8 +640,8 @@ IsValid(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Box* (box1).
  * Arg #2 is expected to be another Box* (box2).
  * </pre>
- * \param L Lua state
- * \return 1 integer on the Lua stack
+ * \param L Lua state.
+ * \return 1 integer on the Lua stack.
  */
 static int
 OverlapArea(lua_State *L)
@@ -666,8 +666,8 @@ OverlapArea(lua_State *L)
  *      (1) The result depends on the order of the input boxes,
  *          because the overlap is taken as a fraction of box2.
  * </pre>
- * \param L Lua state
- * \return 1 number on the Lua stack
+ * \param L Lua state.
+ * \return 1 number on the Lua stack.
  */
 static int
 OverlapFraction(lua_State *L)
@@ -690,8 +690,8 @@ OverlapFraction(lua_State *L)
  * Leptonica's Notes:
  *      (1) This is the geometric intersection of the two rectangles.
  * </pre>
- * \param L Lua state
- * \return 1 Box* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Box* on the Lua stack.
  */
 static int
 OverlapRegion(lua_State *L)
@@ -714,8 +714,8 @@ OverlapRegion(lua_State *L)
  *      (1) This outputs debug info.  Use serialization functions to
  *          write to file if you want to read the data back.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 PrintStreamInfo(lua_State *L)
@@ -739,8 +739,8 @@ PrintStreamInfo(lua_State *L)
  *               boxRelocateOneSide(boxs, boxs, ...);          // in-place
  *               boxRelocateOneSide(boxd, boxs, ...);          // other
  * </pre>
- * \param L Lua state
- * \return 1 Box* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Box* on the Lua stack.
  */
 static int
 RelocateOneSide(lua_State *L)
@@ -767,8 +767,8 @@ RelocateOneSide(lua_State *L)
  *      (2) After rotation, the rotated box is always measured with
  *          respect to the UL corner of the image.
  * </pre>
- * \param L Lua state
- * \return 1 Box* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Box* on the Lua stack.
  */
 static int
 RotateOrth(lua_State *L)
@@ -794,8 +794,8 @@ RotateOrth(lua_State *L)
  *          in common, the separation is 0.  If the boxes overlap by
  *          a distance d, the returned separation is -d.
  * </pre>
- * \param L Lua state
- * \return 2 integers on the Lua stack
+ * \param L Lua state.
+ * \return 2 integers on the Lua stack.
  */
 static int
 SeparationDistance(lua_State *L)
@@ -821,8 +821,8 @@ SeparationDistance(lua_State *L)
  * Arg #4 is expected to be a lua_Integer (w).
  * Arg #5 is expected to be a lua_Integer (h).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 SetGeometry(lua_State *L)
@@ -845,8 +845,8 @@ SetGeometry(lua_State *L)
  * Arg #4 is expected to be a lua_Integer (t).
  * Arg #5 is expected to be a lua_Integer (b).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 SetSideLocations(lua_State *L)
@@ -875,8 +875,8 @@ SetSideLocations(lua_State *L)
  *          between the locations of the left (etc) sides.  If any side
  *          pairs differ by more than this amount, the boxes are not similar.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 Similar(lua_State *L)
@@ -907,8 +907,8 @@ Similar(lua_State *L)
  *      (1) This is a very simple function that first shifts, then scales.
  *      (2) If the box is invalid, a new invalid box is returned.
  * </pre>
- * \param L Lua state
- * \return 1 Box* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Box* on the Lua stack.
  */
 static int
 Transform(lua_State *L)
@@ -975,8 +975,8 @@ Transform(lua_State *L)
  *          computed from the actual clipping due to translation
  *          of the image origin.
  * </pre>
- * \param L Lua state
- * \return 1 Box* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Box* on the Lua stack.
  */
 static int
 TransformOrdered(lua_State *L)
@@ -998,11 +998,11 @@ TransformOrdered(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class Box*.
+ * \brief Check Lua stack at index %arg for user data of class Box*.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the Box* contained in the user data
+ * \return pointer to the Box* contained in the user data.
  */
 Box *
 ll_check_Box(const char *_fun, lua_State *L, int arg)
@@ -1013,9 +1013,9 @@ ll_check_Box(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Optionally expect a Box* at index %arg on the Lua stack.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the Box* contained in the user data
+ * \return pointer to the Box* contained in the user data.
  */
 Box *
 ll_opt_Box(const char *_fun, lua_State *L, int arg)
@@ -1028,9 +1028,9 @@ ll_opt_Box(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push Box* user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param box pointer to the BOX
- * \return 1 Box* on the Lua stack
+ * \return 1 Box* on the Lua stack.
  */
 int
 ll_push_Box(const char *_fun, lua_State *L, Box *box)
@@ -1042,8 +1042,8 @@ ll_push_Box(const char *_fun, lua_State *L, Box *box)
 
 /**
  * \brief Create and push a new Box*.
- * \param L Lua state
- * \return 1 Box* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Box* on the Lua stack.
  */
 int
 ll_new_Box(lua_State *L)
@@ -1085,8 +1085,8 @@ ll_new_Box(lua_State *L)
 
 /**
  * \brief Register the Box* methods and functions in the Box meta table.
- * \param L Lua state
- * \return 1 table on the Lua stack
+ * \param L Lua state.
+ * \return 1 table on the Lua stack.
  */
 int
 ll_open_Box(lua_State *L)

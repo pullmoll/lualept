@@ -46,8 +46,8 @@
 
 /**
  * \brief toString.
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 toString(lua_State* L)
@@ -94,8 +94,8 @@ toString(lua_State* L)
 /**
  * \brief Destroy a CCBord* (%ccbord).
  *
- * \param L Lua state
- * \return 0 for nothing on the Lua stack
+ * \param L Lua state.
+ * \return 0 for nothing on the Lua stack.
  */
 static int
 Destroy(lua_State *L)
@@ -114,8 +114,8 @@ Destroy(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a Pix* (pixs).
  * </pre>
- * \param L Lua state
- * \return 1 CCBord* on the Lua stack
+ * \param L Lua state.
+ * \return 1 CCBord* on the Lua stack.
  */
 static int
 Create(lua_State *L)
@@ -143,7 +143,7 @@ Create(lua_State *L)
  *          exterior borders
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 boolean on the Lua stack
+ * \return 1 boolean on the Lua stack.
  */
 static int
 GetHoleBorder(lua_State *L)
@@ -175,7 +175,7 @@ GetHoleBorder(lua_State *L)
  *          and we do not store the second pixel again.
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 boolean on the Lua stack
+ * \return 1 boolean on the Lua stack.
  */
 static int
 GetOuterBorder(lua_State *L)
@@ -188,11 +188,11 @@ GetOuterBorder(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index (%arg) for udata of class CCBord*.
+ * \brief Check Lua stack at index (%arg) for user data of class CCBord*.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the CCBord* contained in the user data
+ * \return pointer to the CCBord* contained in the user data.
  */
 CCBord *
 ll_check_CCBord(const char *_fun, lua_State *L, int arg)
@@ -203,9 +203,9 @@ ll_check_CCBord(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Optionally expect a CCBord* at index (%arg) on the Lua stack.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the CCBord* contained in the user data
+ * \return pointer to the CCBord* contained in the user data.
  */
 CCBord *
 ll_opt_CCBord(const char *_fun, lua_State *L, int arg)
@@ -218,9 +218,9 @@ ll_opt_CCBord(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push CCBord* to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param cd pointer to the L_CCBord
- * \return 1 CCBord* on the Lua stack
+ * \return 1 CCBord* on the Lua stack.
  */
 int
 ll_push_CCBord(const char *_fun, lua_State *L, CCBord *cd)
@@ -232,8 +232,8 @@ ll_push_CCBord(const char *_fun, lua_State *L, CCBord *cd)
 
 /**
  * \brief Create and push a new CCBord*.
- * \param L Lua state
- * \return 1 CCBord* on the Lua stack
+ * \param L Lua state.
+ * \return 1 CCBord* on the Lua stack.
  */
 int
 ll_new_CCBord(lua_State *L)
@@ -263,8 +263,8 @@ ll_new_CCBord(lua_State *L)
 
 /**
  * \brief Register the CCBord methods and functions in the CCBord meta table.
- * \param L Lua state
- * \return 1 table on the Lua stack
+ * \param L Lua state.
+ * \return 1 table on the Lua stack.
  */
 int
 ll_open_CCBord(lua_State *L)

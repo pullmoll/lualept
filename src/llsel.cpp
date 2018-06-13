@@ -52,8 +52,8 @@
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sel* (sel).
  * </pre>
- * \param L Lua state
- * \return 0 for nothing on the Lua stack
+ * \param L Lua state.
+ * \return 0 for nothing on the Lua stack.
  */
 static int
 Destroy(lua_State *L)
@@ -72,8 +72,8 @@ Destroy(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sel* (sel).
  * </pre>
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 toString(lua_State *L)
@@ -102,8 +102,8 @@ toString(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sel* (sel).
  * </pre>
- * \param L Lua state
- * \return 1 Sel* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sel* on the Lua stack.
  */
 static int
 Copy(lua_State *L)
@@ -127,8 +127,8 @@ Copy(lua_State *L)
  *          assigned.  If a text name is not assigned here, it will
  *          be needed later when the sel is put into a sela.
  * </pre>
- * \param L Lua state
- * \return 1 Sel* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sel* on the Lua stack.
  */
 static int
 Create(lua_State *L)
@@ -148,8 +148,8 @@ Create(lua_State *L)
  * Leptonica's Notes:
  *      (1) This is a rectangular sel of all hits, misses or don't cares.
  * </pre>
- * \param L Lua state
- * \return 1 Sel * on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sel * on the Lua stack.
  */
 static int
 CreateBrick(lua_State *L)
@@ -177,8 +177,8 @@ CreateBrick(lua_State *L)
  *      (2) In use, this is complemented by a brick sel of size %factor1,
  *          Both brick and comb sels are made by selectComposableSels().
  * </pre>
- * \param L Lua state
- * \return 1 Sel * on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sel * on the Lua stack.
  */
 static int
 CreateComb(lua_State *L)
@@ -197,8 +197,8 @@ CreateComb(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a char* (selname).
  * </pre>
- * \param L Lua state
- * \return 1 Sel * on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sel * on the Lua stack.
  */
 static int
 CreateFromColorPix(lua_State *L)
@@ -221,8 +221,8 @@ CreateFromColorPix(lua_State *L)
  * Leptonica's Notes:
  *      (1) The origin must be positive.
  * </pre>
- * \param L Lua state
- * \return 1 Sel * on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sel * on the Lua stack.
  */
 static int
 CreateFromPix(lua_State *L)
@@ -247,8 +247,8 @@ CreateFromPix(lua_State *L)
  * Leptonica's Notes:
  *      (1) The origin and all points in the pta must be positive.
  * </pre>
- * \param L Lua state
- * \return 1 Sel * on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sel * on the Lua stack.
  */
 static int
 CreateFromPta(lua_State *L)
@@ -289,8 +289,8 @@ CreateFromPta(lua_State *L)
  *                                           "xxxxx";
  * \endcode
  * </pre>
- * \param L Lua state
- * \return 1 Sel * on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sel * on the Lua stack.
  */
 static int
 CreateFromString(lua_State *L)
@@ -319,8 +319,8 @@ CreateFromString(lua_State *L)
  *          ~ miss (black ring; inner radius is radius2)
  *          ~ origin (cross, XORed with whatever is there)
  * </pre>
- * \param L Lua state
- * \return 1 Pix * on the Lua stack
+ * \param L Lua state.
+ * \return 1 Pix * on the Lua stack.
  */
 static int
 DisplayInPix(lua_State *L)
@@ -343,8 +343,8 @@ DisplayInPix(lua_State *L)
  *        For example, when j < cx, the shift of the image
  *        is +x to the cx.  This is a positive xp shift.
  * </pre>
- * \param L Lua state
- * \return 4 integers on the Lua stack
+ * \param L Lua state.
+ * \return 4 integers on the Lua stack.
  */
 static int
 FindMaxTranslations(lua_State *L)
@@ -371,8 +371,8 @@ FindMaxTranslations(lua_State *L)
  * Arg #2 is expected to be a l_int32 (row).
  * Arg #3 is expected to be a l_int32 (col).
  * </pre>
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 GetElement(lua_State *L)
@@ -393,8 +393,8 @@ GetElement(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sel* (sel).
  * </pre>
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 GetName(lua_State *L)
@@ -412,8 +412,8 @@ GetName(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sel* (sel).
  * </pre>
- * \param L Lua state
- * \return 1 l_int32 on the Lua stack
+ * \param L Lua state.
+ * \return 1 l_int32 on the Lua stack.
  */
 static int
 GetParameters(lua_State *L)
@@ -438,8 +438,8 @@ GetParameters(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Sel* (sel).
  * </pre>
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 GetTypeAtOrigin(lua_State *L)
@@ -469,8 +469,8 @@ GetTypeAtOrigin(lua_State *L)
  *          them out with selaWrite().  They can then be read in
  *          with selaRead().
  * </pre>
- * \param L Lua state
- * \return 1 char * on the Lua stack
+ * \param L Lua state.
+ * \return 1 char * on the Lua stack.
  */
 static int
 PrintToString(lua_State *L)
@@ -488,8 +488,8 @@ PrintToString(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string containing the filename.
  * </pre>
- * \param L Lua state
- * \return 1 Sela* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sela* on the Lua stack.
  */
 static int
 Read(lua_State *L)
@@ -505,8 +505,8 @@ Read(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string (data).
  * </pre>
- * \param L Lua state
- * \return 1 Sela* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sela* on the Lua stack.
  */
 static int
 ReadFromColorImage(lua_State *L)
@@ -522,8 +522,8 @@ ReadFromColorImage(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a luaL_Stream* (stream).
  * </pre>
- * \param L Lua state
- * \return 1 Sel* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sel* on the Lua stack.
  */
 static int
 ReadStream(lua_State *L)
@@ -540,8 +540,8 @@ ReadStream(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Sel* (sels).
  * Arg #2 is expected to be a l_int32 (quads).
  * </pre>
- * \param L Lua state
- * \return 1 Sel* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sel* on the Lua stack.
  */
 static int
 RotateOrth(lua_State *L)
@@ -559,8 +559,8 @@ RotateOrth(lua_State *L)
  * Arg #1 is expected to be a l_int32 (size).
  * Arg #2 is expected to be a l_int32 (direction).
  * </pre>
- * \param L Lua state
- * \return 2 Sel* (%sel1, %sel2) on the Lua stack
+ * \param L Lua state.
+ * \return 2 Sel* (%sel1, %sel2) on the Lua stack.
  */
 static int
 SelectComposableSels(lua_State *L)
@@ -582,8 +582,8 @@ SelectComposableSels(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a l_int32 (size).
  * </pre>
- * \param L Lua state
- * \return 2 integers on the Lua stack
+ * \param L Lua state.
+ * \return 2 integers on the Lua stack.
  */
 static int
 SelectComposableSizes(lua_State *L)
@@ -613,8 +613,8 @@ SelectComposableSizes(lua_State *L)
  *          (and the type of operation) determine the actual
  *          direction of the rasterop.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 SetElement(lua_State *L)
@@ -637,8 +637,8 @@ SetElement(lua_State *L)
  *      (1) Always frees the existing sel name, if defined.
  *      (2) If name is not defined, just clears any existing sel name.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 SetName(lua_State *L)
@@ -656,8 +656,8 @@ SetName(lua_State *L)
  * Arg #2 is expected to be a l_int32 (cy).
  * Arg #3 is expected to be a l_int32 (cx).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 SetOrigin(lua_State *L)
@@ -675,8 +675,8 @@ SetOrigin(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Sela* user data.
  * Arg #2 is expected to be string containing the filename.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 Write(lua_State *L)
@@ -693,8 +693,8 @@ Write(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Sela* user data.
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 WriteStream(lua_State *L)
@@ -706,11 +706,11 @@ WriteStream(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class Sel*.
+ * \brief Check Lua stack at index %arg for user data of class Sel*.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the Sel* contained in the user data
+ * \return pointer to the Sel* contained in the user data.
  */
 Sel *
 ll_check_Sel(const char *_fun, lua_State *L, int arg)
@@ -721,9 +721,9 @@ ll_check_Sel(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Optionally expect a Sel* at index %arg on the Lua stack.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the Sel* contained in the user data
+ * \return pointer to the Sel* contained in the user data.
  */
 Sel *
 ll_opt_Sel(const char *_fun, lua_State *L, int arg)
@@ -736,9 +736,9 @@ ll_opt_Sel(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push PTA user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param sel pointer to the PTA
- * \return 1 Sel* on the Lua stack
+ * \return 1 Sel* on the Lua stack.
  */
 int
 ll_push_Sel(const char *_fun, lua_State *L, Sel *sel)
@@ -749,8 +749,8 @@ ll_push_Sel(const char *_fun, lua_State *L, Sel *sel)
 }
 /**
  * \brief Create and push a new Sel*.
- * \param L Lua state
- * \return 1 Sel* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Sel* on the Lua stack.
  */
 int
 ll_new_Sel(lua_State *L)
@@ -822,8 +822,8 @@ ll_new_Sel(lua_State *L)
 }
 /**
  * \brief Register the PTA methods and functions in the Sel* meta table.
- * \param L Lua state
- * \return 1 table on the Lua stack
+ * \param L Lua state.
+ * \return 1 table on the Lua stack.
  */
 int
 ll_open_Sel(lua_State *L)

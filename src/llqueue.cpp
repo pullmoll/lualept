@@ -60,8 +60,8 @@
  *      (3) To destroy the L_Queue, we destroy the ptr array, then
  *          the lqueue, and then null the contents of the input ptr.
  * </pre>
- * \param L Lua state
- * \return 1 void on the Lua stack
+ * \param L Lua state.
+ * \return 1 void on the Lua stack.
  */
 static int
 Destroy(lua_State *L)
@@ -83,8 +83,8 @@ Destroy(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Queue* (lq).
  * </pre>
- * \param L Lua state
- * \return 1 l_int32 on the Lua stack
+ * \param L Lua state.
+ * \return 1 l_int32 on the Lua stack.
  */
 static int
 GetCount(lua_State *L)
@@ -100,8 +100,8 @@ GetCount(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Queue* user data.
  * </pre>
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 toString(lua_State *L)
@@ -156,8 +156,8 @@ toString(lua_State *L)
  *          more than 0.75 full, realloc with double the array size.
  *          Finally, add the item to the tail of the queue.
  * </pre>
- * \param L Lua state
- * \return 1 l_int32 on the Lua stack
+ * \param L Lua state.
+ * \return 1 l_int32 on the Lua stack.
  */
 static int
 Add(lua_State *L)
@@ -177,8 +177,8 @@ Add(lua_State *L)
  * Leptonica's Notes:
  *      (1) Allocates a ptr array of given size, and initializes counters.
  * </pre>
- * \param L Lua state
- * \return 1 Queue * on the Lua stack
+ * \param L Lua state.
+ * \return 1 Queue * on the Lua stack.
  */
 static int
 Create(lua_State *L)
@@ -198,8 +198,8 @@ Create(lua_State *L)
  *      (1) If this is the last item on the queue, so that the queue
  *          becomes empty, nhead is reset to the beginning of the array.
  * </pre>
- * \param L Lua state
- * \return 1 light user data on the Lua stack
+ * \param L Lua state.
+ * \return 1 light user data on the Lua stack.
  */
 static int
 Remove(lua_State *L)
@@ -217,8 +217,8 @@ Remove(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Queue* (lq).
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 Print(lua_State *L)
@@ -230,11 +230,11 @@ Print(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index (%arg) for udata of class Queue*.
+ * \brief Check Lua stack at index (%arg) for user data of class Queue*.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the Queue* contained in the user data
+ * \return pointer to the Queue* contained in the user data.
  */
 Queue *
 ll_check_Queue(const char *_fun, lua_State *L, int arg)
@@ -245,9 +245,9 @@ ll_check_Queue(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Optionally expect a Queue* at index (%arg) on the Lua stack.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the Queue* contained in the user data
+ * \return pointer to the Queue* contained in the user data.
  */
 Queue *
 ll_opt_Queue(const char *_fun, lua_State *L, int arg)
@@ -260,9 +260,9 @@ ll_opt_Queue(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push Queue* to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param cd pointer to the L_Queue
- * \return 1 Queue* on the Lua stack
+ * \return 1 Queue* on the Lua stack.
  */
 int
 ll_push_Queue(const char *_fun, lua_State *L, Queue *cd)
@@ -278,8 +278,8 @@ ll_push_Queue(const char *_fun, lua_State *L, Queue *cd)
  * Arg #1 is expected to be a string (dir).
  * Arg #2 is expected to be a l_int32 (fontsize).
  *
- * \param L Lua state
- * \return 1 Queue* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Queue* on the Lua stack.
  */
 int
 ll_new_Queue(lua_State *L)
@@ -308,8 +308,8 @@ ll_new_Queue(lua_State *L)
 
 /**
  * \brief Register the Queue methods and functions in the Queue meta table.
- * \param L Lua state
- * \return 1 table on the Lua stack
+ * \param L Lua state.
+ * \return 1 table on the Lua stack.
  */
 int
 ll_open_Queue(lua_State *L)

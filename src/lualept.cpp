@@ -109,7 +109,7 @@ int LeptMsgSeverity = 0;
 /**
  * \brief Poor man's toupper(3).
  * \param ch ASCII character
- * \return upper case value for ch
+ * \return upper case value for ch.
  */
 static __inline int toupper(const int ch) { return (ch >= 'a' && ch <= 'z') ? ch - 'a' + 'A' : ch; }
 #endif
@@ -124,7 +124,7 @@ static int dbg_enabled = LOG_REGISTER | LOG_SDL2 | LOG_NEW_CLASS | LOG_NEW_PARAM
 
 /**
  * \brief Return a time stamp for the current date and time
- * \return Temporary string with date and time
+ * \return Temporary string with date and time.
  */
 static const char*
 timestamp(void)
@@ -181,7 +181,7 @@ dbg(int enable, const char* format, ...)
 /**
  * \brief Die when memory allocation fails.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param format format string followed by parameters
  */
 void
@@ -199,9 +199,9 @@ die(const char* _fun, lua_State *L, const char *format, ...)
 /**
  * \brief Check Lua stack at index %arg for light user data.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg argument index
- * \return pointer to the udata
+ * \return pointer to the udata.
  */
 void *
 ll_ludata(const char *_fun, lua_State *L, int arg)
@@ -215,10 +215,10 @@ ll_ludata(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Check Lua stack at index %arg for user data with %tname.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg argument index
  * \param tname tname of the expected udata
- * \return pointer to the udata
+ * \return pointer to the udata.
  */
 void **
 ll_udata(const char *_fun, lua_State *L, int arg, const char* tname)
@@ -241,9 +241,9 @@ ll_udata(const char *_fun, lua_State *L, int arg, const char* tname)
 /**
  * \brief Test if Lua stack at index %arg is a number.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg argument index
- * \return TRUE if there is a number at %arg, FALSE otherwise
+ * \return TRUE if there is a number at %arg, FALSE otherwise.
  */
 int
 ll_isnumber(const char *_fun, lua_State *L, int arg)
@@ -257,9 +257,9 @@ ll_isnumber(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Test if Lua stack at index %arg is a string.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg argument index
- * \return TRUE if there is a string at %arg, FALSE otherwise
+ * \return TRUE if there is a string at %arg, FALSE otherwise.
  */
 int
 ll_isstring(const char *_fun, lua_State *L, int arg)
@@ -273,9 +273,9 @@ ll_isstring(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Test if Lua stack at index %arg is a C function.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg argument index
- * \return TRUE if there is a C function at %arg, FALSE otherwise
+ * \return TRUE if there is a C function at %arg, FALSE otherwise.
  */
 int
 ll_iscfunction(const char *_fun, lua_State *L, int arg)
@@ -289,9 +289,9 @@ ll_iscfunction(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Test if Lua stack at index %arg is an integer.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg argument index
- * \return TRUE if there is an integer at %arg, FALSE otherwise
+ * \return TRUE if there is an integer at %arg, FALSE otherwise.
  */
 int
 ll_isinteger(const char *_fun, lua_State *L, int arg)
@@ -305,9 +305,9 @@ ll_isinteger(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Test if Lua stack at index %arg is a table.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg argument index
- * \return TRUE if there is udata of type tname at %arg, FALSE otherwise
+ * \return TRUE if there is udata of type tname at %arg, FALSE otherwise.
  */
 int
 ll_istable(const char *_fun, lua_State *L, int arg)
@@ -320,10 +320,10 @@ ll_istable(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Test if Lua stack at index %arg is udata of type %tname.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg argument index
  * \param tname tname to check for
- * \return TRUE if there is udata of type tname at %arg, FALSE otherwise
+ * \return TRUE if there is udata of type tname at %arg, FALSE otherwise.
  */
 int
 ll_isudata(const char *_fun, lua_State *L, int arg, const char* tname)
@@ -347,7 +347,7 @@ ll_free(void *ptr)
 /**
  * Register a luaL_Reg table of methods using a metatable
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param tname table name for the udata
  * \param methods pointer to an array of luaL_Reg
  */
@@ -376,10 +376,10 @@ ll_register_class(const char *_fun, lua_State *L, const char *tname, const luaL_
 /**
  * \brief Create a global lua_CFunction (%cfunct) with name (%tname)
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param tname table name for the udata
  * \param cfunct lua_Cfunction to register
- * \return 0 for nothing on the Lua stack
+ * \return 0 for nothing on the Lua stack.
  */
 int
 ll_set_global_cfunct(const char *_fun, lua_State *L, const char* tname, lua_CFunction cfunct)
@@ -394,10 +394,10 @@ ll_set_global_cfunct(const char *_fun, lua_State *L, const char* tname, lua_CFun
 /**
  * \brief Create a global table with name (%tname)
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param tname table name for the udata
  * \param cfunct C function which creates a table on the Lua stack
- * \return 0 for nothing on the Lua stack
+ * \return 0 for nothing on the Lua stack.
  */
 int
 ll_set_global_table(const char *_fun, lua_State *L, const char* tname, lua_CFunction cfunct)
@@ -412,10 +412,10 @@ ll_set_global_table(const char *_fun, lua_State *L, const char* tname, lua_CFunc
 /**
  * \brief Push user data %udata to the Lua stack and set its meta table %name.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param name tname for the udata
  * \param udata pointer to the udata
- * \return 1 table on the stack
+ * \return 1 table on the stack.
  */
 int
 ll_push_udata(const char *_fun, lua_State *L, const char* name, void *udata)
@@ -434,8 +434,8 @@ ll_push_udata(const char *_fun, lua_State *L, const char* name, void *udata)
 
 /**
  * \brief Push nil to the Lua stack and return 1.
- * \param L Lua state
- * \return 1 nil on the Lua stack
+ * \param L Lua state.
+ * \return 1 nil on the Lua stack.
  */
 int
 ll_push_nil(lua_State *L)
@@ -447,9 +447,9 @@ ll_push_nil(lua_State *L)
 /**
  * \brief Push boolean (%b) to the Lua stack and return 1.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param b boolean value TRUE or FALSE
- * \return 1 boolean on the Lua stack
+ * \return 1 boolean on the Lua stack.
  */
 int
 ll_push_boolean(const char* _fun, lua_State *L, bool b)
@@ -463,9 +463,9 @@ ll_push_boolean(const char* _fun, lua_State *L, bool b)
 /**
  * \brief Push l_uint8 (%val) to the Lua stack and return 1.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param val l_uint8 value
- * \return 1 boolean on the Lua stack
+ * \return 1 boolean on the Lua stack.
  */
 int
 ll_push_l_int8(const char* _fun, lua_State *L, l_int8 val)
@@ -479,9 +479,9 @@ ll_push_l_int8(const char* _fun, lua_State *L, l_int8 val)
 /**
  * \brief Push l_uint8 (%val) to the Lua stack and return 1.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param val l_uint8 value
- * \return 1 boolean on the Lua stack
+ * \return 1 boolean on the Lua stack.
  */
 int
 ll_push_l_uint8(const char* _fun, lua_State *L, l_uint8 val)
@@ -495,9 +495,9 @@ ll_push_l_uint8(const char* _fun, lua_State *L, l_uint8 val)
 /**
  * \brief Push l_int16 (%val) to the Lua stack and return 1.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param val l_uint16 value
- * \return 1 boolean on the Lua stack
+ * \return 1 boolean on the Lua stack.
  */
 int
 ll_push_l_int16(const char* _fun, lua_State *L, l_int16 val)
@@ -511,9 +511,9 @@ ll_push_l_int16(const char* _fun, lua_State *L, l_int16 val)
 /**
  * \brief Push l_uint16 (%val) to the Lua stack and return 1.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param val l_uint16 value
- * \return 1 boolean on the Lua stack
+ * \return 1 boolean on the Lua stack.
  */
 int
 ll_push_l_uint16(const char* _fun, lua_State *L, l_uint16 val)
@@ -527,9 +527,9 @@ ll_push_l_uint16(const char* _fun, lua_State *L, l_uint16 val)
 /**
  * \brief Push l_int32 (%val) to the Lua stack and return 1.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param val l_int32 value
- * \return 1 boolean on the Lua stack
+ * \return 1 boolean on the Lua stack.
  */
 int
 ll_push_l_int32(const char* _fun, lua_State *L, l_int32 val)
@@ -543,9 +543,9 @@ ll_push_l_int32(const char* _fun, lua_State *L, l_int32 val)
 /**
  * \brief Push l_uint32 (%val) to the Lua stack and return 1.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param val l_uint32 value
- * \return 1 boolean on the Lua stack
+ * \return 1 boolean on the Lua stack.
  */
 int
 ll_push_l_uint32(const char* _fun, lua_State *L, l_uint32 val)
@@ -559,9 +559,9 @@ ll_push_l_uint32(const char* _fun, lua_State *L, l_uint32 val)
 /**
  * \brief Push l_int64 (%val) to the Lua stack and return 1.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param val l_int64 value
- * \return 1 boolean on the Lua stack
+ * \return 1 boolean on the Lua stack.
  */
 int
 ll_push_l_int64(const char* _fun, lua_State *L, l_int64 val)
@@ -575,9 +575,9 @@ ll_push_l_int64(const char* _fun, lua_State *L, l_int64 val)
 /**
  * \brief Push l_uint64 (%val) to the Lua stack and return 1.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param val l_uint64 value
- * \return 1 boolean on the Lua stack
+ * \return 1 boolean on the Lua stack.
  */
 int
 ll_push_l_uint64(const char* _fun, lua_State *L, l_uint64 val)
@@ -592,9 +592,9 @@ ll_push_l_uint64(const char* _fun, lua_State *L, l_uint64 val)
 /**
  * \brief Push size_t (%val) to the Lua stack and return 1.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param size size_t value
- * \return 1 boolean on the Lua stack
+ * \return 1 boolean on the Lua stack.
  */
 int
 ll_push_size_t(const char* _fun, lua_State *L, size_t size)
@@ -609,9 +609,9 @@ ll_push_size_t(const char* _fun, lua_State *L, size_t size)
 /**
  * \brief Push l_float32 (%val) to the Lua stack and return 1.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param val l_float32 value
- * \return 1 boolean on the Lua stack
+ * \return 1 boolean on the Lua stack.
  */
 int
 ll_push_l_float32(const char* _fun, lua_State *L, l_float32 val)
@@ -626,9 +626,9 @@ ll_push_l_float32(const char* _fun, lua_State *L, l_float32 val)
 /**
  * \brief Push l_float64 (%val) to the Lua stack and return 1.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param val l_float64 value
- * \return 1 boolean on the Lua stack
+ * \return 1 boolean on the Lua stack.
  */
 int
 ll_push_l_float64(const char* _fun, lua_State *L, l_float64 val)
@@ -642,9 +642,9 @@ ll_push_l_float64(const char* _fun, lua_State *L, l_float64 val)
 /**
  * \brief Push string (%str) to the Lua stack and return 1.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param str string value
- * \return 1 boolean on the Lua stack
+ * \return 1 boolean on the Lua stack.
  */
 int
 ll_push_string(const char* _fun, lua_State *L, const char* str)
@@ -660,10 +660,10 @@ ll_push_string(const char* _fun, lua_State *L, const char* str)
 /**
  * \brief Push lstring (%str) to the Lua stack and return 1.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param str lstring value
  * \param len lstring length
- * \return 1 boolean on the Lua stack
+ * \return 1 boolean on the Lua stack.
  */
 int
 ll_push_lstring(const char* _fun, lua_State *L, const char* str, size_t len)
@@ -679,10 +679,10 @@ ll_push_lstring(const char* _fun, lua_State *L, const char* str, size_t len)
 /**
  * \brief Push bytes (%data, %nbytes) as lstring to the Lua stack, free %data and return 1.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param data lstring value (array of bytes)
  * \param nbytes lstring length
- * \return 1 boolean on the Lua stack
+ * \return 1 boolean on the Lua stack.
  */
 int
 ll_push_bytes(const char* _fun, lua_State *L, l_uint8* data, size_t nbytes)
@@ -699,10 +699,10 @@ ll_push_bytes(const char* _fun, lua_State *L, l_uint8* data, size_t nbytes)
 /**
  * \brief Push a l_int32 array (%ia) to the Lua stack and return 1.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param iarray pointer to the l_int32 array
  * \param n number of values in the array
- * \return 1 table on the stack
+ * \return 1 table on the stack.
  */
 int
 ll_pack_Iarray(const char* _fun, lua_State *L, const l_int32 *iarray, l_int32 n)
@@ -724,10 +724,10 @@ ll_pack_Iarray(const char* _fun, lua_State *L, const l_int32 *iarray, l_int32 n)
 /**
  * \brief Push a l_uint32 array (%ua) to the Lua stack and return 1.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param uarray pointer to the l_uint32 array
  * \param n number of values in the array
- * \return 1 table on the stack
+ * \return 1 table on the stack.
  */
 int
 ll_pack_Uarray(const char* _fun, lua_State *L, const l_uint32 *uarray, l_int32 n)
@@ -749,11 +749,11 @@ ll_pack_Uarray(const char* _fun, lua_State *L, const l_uint32 *uarray, l_int32 n
 /**
  * \brief Push a l_uint32 2D array (%data) to the Lua stack and return 1.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param data pointer to the l_uint32 array
  * \param wpl number of words in the row
  * \param h number of rows
- * \return 1 table containing (h) tables of (wpl) words on the stack
+ * \return 1 table containing (h) tables of (wpl) words on the stack.
  */
 int
 ll_pack_Uarray_2d(const char* _fun, lua_State *L, const l_uint32 *data, l_int32 wpl, l_int32 h)
@@ -774,10 +774,10 @@ ll_pack_Uarray_2d(const char* _fun, lua_State *L, const l_uint32 *data, l_int32 
 /**
  * \brief Push a l_float32 array (%fa) to the Lua stack and return 1.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param farray pointer to the l_float32 array
  * \param n number of values in the array
- * \return 1 table on the stack
+ * \return 1 table on the stack.
  */
 int
 ll_pack_Farray(const char* _fun, lua_State *L, const l_float32 *farray, l_int32 n)
@@ -799,11 +799,11 @@ ll_pack_Farray(const char* _fun, lua_State *L, const l_float32 *farray, l_int32 
 /**
  * \brief Push a l_float32 2D array (%data) to the Lua stack and return 1.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param data pointer to the l_float32 array
  * \param wpl number of words in the row
  * \param h number of rows
- * \return 1 table containing (h) tables of (wpl) numbers on the stack
+ * \return 1 table containing (h) tables of (wpl) numbers on the stack.
  */
 int
 ll_pack_Farray_2d(const char* _fun, lua_State *L, const l_float32 *data, l_int32 wpl, l_int32 h)
@@ -824,10 +824,10 @@ ll_pack_Farray_2d(const char* _fun, lua_State *L, const l_float32 *data, l_int32
 /**
  * \brief Push a l_float64 array (%da) to the Lua stack and return 1.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param darray pointer to the l_float32 array
  * \param n number of values in the array
- * \return 1 table on the stack
+ * \return 1 table on the stack.
  */
 int
 ll_pack_Darray(const char* _fun, lua_State *L, const l_float64 *darray, l_int32 n)
@@ -849,11 +849,11 @@ ll_pack_Darray(const char* _fun, lua_State *L, const l_float64 *darray, l_int32 
 /**
  * \brief Push a l_float64 2D array (%data) to the Lua stack and return 1.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param data pointer to the l_float32 array
  * \param wpl number of words in the row
  * \param h number of rows
- * \return 1 table containing (h) tables of (wpl) numbers on the stack
+ * \return 1 table containing (h) tables of (wpl) numbers on the stack.
  */
 int
 ll_pack_Darray_2d(const char* _fun, lua_State *L, const l_float64 *data, l_int32 wpl, l_int32 h)
@@ -874,9 +874,9 @@ ll_pack_Darray_2d(const char* _fun, lua_State *L, const l_float64 *data, l_int32
 /**
  * \brief Push a string array Sarray* (%sa) to the Lua stack and return 1.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param sa pointer to the Sarray
- * \return 1 table on the stack
+ * \return 1 table on the stack.
  */
 int
 ll_pack_Sarray(const char* _fun, lua_State *L, Sarray *sa)
@@ -900,10 +900,10 @@ ll_pack_Sarray(const char* _fun, lua_State *L, Sarray *sa)
 /**
  * \brief Unpack an array of lua_Integer from the Lua stack as l_int32*.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the table
  * \param plen pointer to a l_int32 receiving the size of the array
- * \return allocated array l_int32* with *pn entries
+ * \return allocated array l_int32* with *pn entries.
  */
 l_int32 *
 ll_unpack_Iarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
@@ -940,10 +940,10 @@ ll_unpack_Iarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
 /**
  * \brief Unpack an array of lua_Integer from the Lua stack as l_uint32*.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the table
  * \param plen pointer to a l_int32 receiving the size of the array
- * \return allocated array l_uint32* with *pn entries
+ * \return allocated array l_uint32* with *pn entries.
  */
 l_uint32 *
 ll_unpack_Uarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
@@ -980,12 +980,12 @@ ll_unpack_Uarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
 /**
  * \brief Unpack an array of of arrays from the Lua stack as l_uint32* data.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the table
  * \param data pointer to a array of %wpl * %h * l_uint32
  * \param wpl words per line (inner array)
  * \param h height of the array (outer array)
- * \return pointer %data
+ * \return pointer %data.
  */
 l_uint32 *
 ll_unpack_Uarray_2d(const char *_fun, lua_State *L, int arg, l_uint32* data, l_int32 wpl, l_int32 h)
@@ -1026,10 +1026,10 @@ ll_unpack_Uarray_2d(const char *_fun, lua_State *L, int arg, l_uint32* data, l_i
 /**
  * \brief Unpack an array of lua_Integer from the Lua stack.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the table
  * \param plen pointer to a l_int32 receiving the size of the array
- * \return allocated array l_uint32* with *pn entries
+ * \return allocated array l_uint32* with *pn entries.
  */
 l_float32 *
 ll_unpack_Farray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
@@ -1066,12 +1066,12 @@ ll_unpack_Farray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
 /**
  * \brief Unpack an array of of arrays from the Lua stack as l_float32* data.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the table
  * \param data pointer to a array of %wpl * %h * l_float32
  * \param wpl words per line (inner array)
  * \param h height of the array (outer array)
- * \return pointer %data
+ * \return pointer %data.
  */
 l_float32 *
 ll_unpack_Farray_2d(const char *_fun, lua_State *L, int arg, l_float32* data, l_int32 wpl, l_int32 h)
@@ -1122,11 +1122,11 @@ ll_unpack_Farray_2d(const char *_fun, lua_State *L, int arg, l_float32* data, l_
  * starting at %arg.
  *
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the table
  * \param w width of the matrix (inner array)
  * \param h height of the matrix (outer array)
- * \return pointer %data, which must be free()d by the caller
+ * \return pointer %data, which must be free()d by the caller.
  */
 l_float32 *
 ll_unpack_Matrix(const char *_fun, lua_State *L, int arg, l_int32 w, l_int32 h)
@@ -1185,10 +1185,10 @@ ll_unpack_Matrix(const char *_fun, lua_State *L, int arg, l_int32 w, l_int32 h)
 /**
  * \brief Unpack an array of lua_Number from the Lua stack as l_float64*.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the table
  * \param plen pointer to a l_int32 receiving the size of the array
- * \return allocated array l_uint32* with *pn entries
+ * \return allocated array l_uint32* with *pn entries.
  */
 l_float64 *
 ll_unpack_Darray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
@@ -1225,12 +1225,12 @@ ll_unpack_Darray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
 /**
  * \brief Unpack an array of of arrays from the Lua stack as l_float64* data.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the table
  * \param data pointer to a array of %wpl / 2 * %h * l_float64
  * \param wpl words per line (inner array)
  * \param h height of the array (outer array)
- * \return pointer %data
+ * \return pointer %data.
  */
 l_float64 *
 ll_unpack_Darray_2d(const char *_fun, lua_State *L, int arg, l_float64* data, l_int32 wpl, l_int32 h)
@@ -1271,10 +1271,10 @@ ll_unpack_Darray_2d(const char *_fun, lua_State *L, int arg, l_float64* data, l_
 /**
  * \brief Unpack an array of lua_Integer from the Lua stack as Sarray*.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the table
  * \param plen pointer to a l_int32 receiving the size of the array
- * \return allocated array l_uint32* with *pn entries
+ * \return allocated array l_uint32* with *pn entries.
  */
 Sarray *
 ll_unpack_Sarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
@@ -1316,10 +1316,10 @@ ll_unpack_Sarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
 /**
  * \brief Check if an argument is a lua_Integer in the range of 0 < index <= imax.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the integer
  * \param imax maximum index value (for the 1-based value)
- * \return l_int32 for the integer; lua_error if out of bounds
+ * \return l_int32 for the integer; lua_error if out of bounds.
  */
 l_int32
 ll_check_index(const char *_fun, lua_State *L, int arg, l_int32 imax)
@@ -1337,10 +1337,10 @@ ll_check_index(const char *_fun, lua_State *L, int arg, l_int32 imax)
 /**
  * \brief Check if an argument (%arg) is a color or pixel index.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the integer
  * \param pix [optional] pointer to a Pix*.
- * \return color or pixel index
+ * \return color or pixel index.
  */
 l_uint32
 ll_check_color_index(const char *_fun, lua_State *L, int arg, Pix* pix)
@@ -1379,9 +1379,9 @@ ll_check_color_index(const char *_fun, lua_State *L, int arg, Pix* pix)
 /**
  * \brief Check if an argument is a lua_Integer in the range of char.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the integer
- * \return char for the integer; lua_error if out of bounds
+ * \return char for the integer; lua_error if out of bounds.
  */
 char
 ll_check_char(const char *_fun, lua_State *L, int arg)
@@ -1399,9 +1399,9 @@ ll_check_char(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Check if an argument is a string.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the string
- * \return l_int32 for the integer; lua_error if out of bounds
+ * \return l_int32 for the integer; lua_error if out of bounds.
  */
 const char *
 ll_check_string(const char *_fun, lua_State *L, int arg)
@@ -1419,10 +1419,10 @@ ll_check_string(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Return an argument string, if it is one.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the string
  * \param def default string to return, if no argument;
- * \return l_int32 for the integer; lua_error if out of bounds
+ * \return l_int32 for the integer; lua_error if out of bounds.
  */
 const char *
 ll_opt_string(const char *_fun, lua_State *L, int arg, const char *def)
@@ -1435,10 +1435,10 @@ ll_opt_string(const char *_fun, lua_State *L, int arg, const char *def)
 /**
  * \brief Optional argument string
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the string
  * \param plen optional pointer to a size_t where to store the string length
- * \return l_int32 for the integer; lua_error if out of bounds
+ * \return l_int32 for the integer; lua_error if out of bounds.
  */
 const char *
 ll_check_lstring(const char *_fun, lua_State *L, int arg, size_t *plen)
@@ -1459,10 +1459,10 @@ ll_check_lstring(const char *_fun, lua_State *L, int arg, size_t *plen)
 /**
  * \brief Check if an argument is a string and return its length.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the string
  * \param plen optional pointer to a size_t where to store the string length
- * \return l_int32 for the integer; lua_error if out of bounds
+ * \return l_int32 for the integer; lua_error if out of bounds.
  */
 const l_uint8 *
 ll_check_lbytes(const char *_fun, lua_State *L, int arg, size_t *plen)
@@ -1474,10 +1474,10 @@ ll_check_lbytes(const char *_fun, lua_State *L, int arg, size_t *plen)
 /**
  * \brief Check if an argument is a string and return its length.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the string
  * \param plen optional pointer to a l_int32 where to store the string length
- * \return l_int32 for the integer; lua_error if out of bounds
+ * \return l_int32 for the integer; lua_error if out of bounds.
  */
 const l_uint8 *
 ll_check_lbytes(const char *_fun, lua_State *L, int arg, l_int32 *plen)
@@ -1492,9 +1492,9 @@ ll_check_lbytes(const char *_fun, lua_State *L, int arg, l_int32 *plen)
 /**
  * \brief Return an user data argument (%arg) as luaL_Stream*.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the integer
- * \return pointer to luaL_Stream or error
+ * \return pointer to luaL_Stream or error.
  */
 luaL_Stream *
 ll_check_stream(const char *_fun, lua_State *L, int arg)
@@ -1511,9 +1511,9 @@ ll_check_stream(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Return an user data argument (%arg) as luaL_Stream*, if it is one.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the integer
- * \return pointer to luaL_Stream or error
+ * \return pointer to luaL_Stream or error.
  */
 luaL_Stream *
 ll_opt_stream(const char *_fun, lua_State *L, int arg)
@@ -1526,9 +1526,9 @@ ll_opt_stream(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Check if an argument is a boolean.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the integer
- * \return l_int32 for the boolean (1 = true, 0 = false); lua_error if out of bounds
+ * \return l_int32 for the boolean (1 = true, 0 = false); lua_error if out of bounds.
  */
 l_int32
 ll_check_boolean(const char *_fun, lua_State *L, int arg)
@@ -1544,9 +1544,9 @@ ll_check_boolean(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Check if an argument is a lua_Integer in the range of l_uint8.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the integer
- * \return l_uint8 for the integer; lua_error if out of bounds
+ * \return l_uint8 for the integer; lua_error if out of bounds.
  */
 l_uint8
 ll_check_l_uint8(const char *_fun, lua_State *L, int arg)
@@ -1564,10 +1564,10 @@ ll_check_l_uint8(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Return an argument lua_Integer in the range of l_uint8 or the default.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the integer
  * \param def default value
- * \return l_uint8 for the integer; lua_error if out of bounds
+ * \return l_uint8 for the integer; lua_error if out of bounds.
  */
 l_uint8
 ll_opt_l_uint8(const char *_fun, lua_State *L, int arg, l_uint8 def)
@@ -1585,9 +1585,9 @@ ll_opt_l_uint8(const char *_fun, lua_State *L, int arg, l_uint8 def)
 /**
  * \brief Check if an argument is a lua_Integer in the range of l_uint16.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the integer
- * \return l_uint16 for the integer; lua_error if out of bounds
+ * \return l_uint16 for the integer; lua_error if out of bounds.
  */
 l_uint16
 ll_check_l_uint16(const char *_fun, lua_State *L, int arg)
@@ -1605,10 +1605,10 @@ ll_check_l_uint16(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Return an argument lua_Integer in the range of l_uint16 or the default.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the integer
  * \param def default value
- * \return l_uint16 for the integer; lua_error if out of bounds
+ * \return l_uint16 for the integer; lua_error if out of bounds.
  */
 l_uint16
 ll_opt_l_uint16(const char *_fun, lua_State *L, int arg, l_uint16 def)
@@ -1626,10 +1626,10 @@ ll_opt_l_uint16(const char *_fun, lua_State *L, int arg, l_uint16 def)
 /**
  * \brief Check if an argument is a boolean, or return the default.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the integer
  * \param def default value
- * \return l_int32 for the boolean (1 = true, 0 = false); lua_error if out of bounds
+ * \return l_int32 for the boolean (1 = true, 0 = false); lua_error if out of bounds.
  */
 l_int32
 ll_opt_boolean(const char *_fun, lua_State *L, int arg, int def)
@@ -1646,9 +1646,9 @@ ll_opt_boolean(const char *_fun, lua_State *L, int arg, int def)
 /**
  * \brief Check if an argument is a lua_Integer in the range of l_int32.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the integer
- * \return l_int32 for the integer; lua_error if out of bounds
+ * \return l_int32 for the integer; lua_error if out of bounds.
  */
 l_int32
 ll_check_l_int32(const char *_fun, lua_State *L, int arg)
@@ -1666,10 +1666,10 @@ ll_check_l_int32(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Return an argument lua_Integer in the range of l_int32 or the default.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the integer
  * \param def default value
- * \return l_int32 for the integer; lua_error if out of bounds
+ * \return l_int32 for the integer; lua_error if out of bounds.
  */
 l_int32
 ll_opt_l_int32(const char *_fun, lua_State *L, int arg, l_int32 def)
@@ -1687,9 +1687,9 @@ ll_opt_l_int32(const char *_fun, lua_State *L, int arg, l_int32 def)
 /**
  * \brief Check if an argument is a lua_Integer in the range of l_uint32.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the integer
- * \return l_uint32 for the integer; lua_error if out of bounds
+ * \return l_uint32 for the integer; lua_error if out of bounds.
  */
 l_uint32
 ll_check_l_uint32(const char *_fun, lua_State *L, int arg)
@@ -1707,10 +1707,10 @@ ll_check_l_uint32(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Return an argument lua_Integer in the range of l_uint32 or the default.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the integer
  * \param def default value
- * \return l_uint32 for the integer; lua_error if out of bounds
+ * \return l_uint32 for the integer; lua_error if out of bounds.
  */
 l_uint32
 ll_opt_l_uint32(const char *_fun, lua_State *L, int arg, l_uint32 def)
@@ -1728,9 +1728,9 @@ ll_opt_l_uint32(const char *_fun, lua_State *L, int arg, l_uint32 def)
 /**
  * \brief Check if an argument is a lua_Integer in the range of l_int64.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the integer
- * \return l_int64 for the integer; lua_error if out of bounds
+ * \return l_int64 for the integer; lua_error if out of bounds.
  */
 l_int64
 ll_check_l_int64(const char *_fun, lua_State *L, int arg)
@@ -1749,10 +1749,10 @@ ll_check_l_int64(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Return an argument lua_Integer in the range of l_int64 or the default.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the integer
  * \param def default value
- * \return l_int64 for the integer; lua_error if out of bounds
+ * \return l_int64 for the integer; lua_error if out of bounds.
  */
 l_int64
 ll_opt_l_int64(const char *_fun, lua_State *L, int arg, l_int64 def)
@@ -1771,9 +1771,9 @@ ll_opt_l_int64(const char *_fun, lua_State *L, int arg, l_int64 def)
 /**
  * \brief Check if an argument is a lua_Integer in the range of l_uint64.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the integer
- * \return l_uint64 for the integer; lua_error if out of bounds
+ * \return l_uint64 for the integer; lua_error if out of bounds.
  */
 l_uint64
 ll_check_l_uint64(const char *_fun, lua_State *L, int arg)
@@ -1793,10 +1793,10 @@ ll_check_l_uint64(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Return an argument lua_Integer in the range of l_uint64 or the default.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the integer
  * \param def default value
- * \return l_uint64 for the integer; lua_error if out of bounds
+ * \return l_uint64 for the integer; lua_error if out of bounds.
  */
 l_uint64
 ll_opt_l_uint64(const char *_fun, lua_State *L, int arg, l_uint64 def)
@@ -1816,9 +1816,9 @@ ll_opt_l_uint64(const char *_fun, lua_State *L, int arg, l_uint64 def)
 /**
  * \brief Check if an argument is a lua_Number in the range of l_float32.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the integer
- * \return l_float32 for the number; lua_error if out of bounds
+ * \return l_float32 for the number; lua_error if out of bounds.
  */
 l_float32
 ll_check_l_float32(const char *_fun, lua_State *L, int arg)
@@ -1840,10 +1840,10 @@ ll_check_l_float32(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Return an argument lua_Integer in the range of l_float32 or the default.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the integer
  * \param def default value
- * \return l_float32 for the number; lua_error if out of bounds
+ * \return l_float32 for the number; lua_error if out of bounds.
  */
 l_float32
 ll_opt_l_float32(const char *_fun, lua_State *L, int arg, l_float32 def)
@@ -1865,9 +1865,9 @@ ll_opt_l_float32(const char *_fun, lua_State *L, int arg, l_float32 def)
 /**
  * \brief Check if an argument is a lua_Number in the range of l_float64.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the integer
- * \return l_float64 for the number; lua_error if out of bounds
+ * \return l_float64 for the number; lua_error if out of bounds.
  */
 l_float64
 ll_check_l_float64(const char *_fun, lua_State *L, int arg)
@@ -1880,10 +1880,10 @@ ll_check_l_float64(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Return an argument lua_Integer in the range of l_float64 or the default.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the integer
  * \param def default value
- * \return l_float64 for the number; lua_error if out of bounds
+ * \return l_float64 for the number; lua_error if out of bounds.
  */
 l_float64
 ll_opt_l_float64(const char *_fun, lua_State *L, int arg, l_float64 def)
@@ -1900,10 +1900,10 @@ ll_opt_l_float64(const char *_fun, lua_State *L, int arg, l_float64 def)
  * or as 6 arguments at %arg, %arg+1, ..., %arg+5
  *
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the integer
  * \param n number of values expected in the vector
- * \return pointer to n times l_float32; caller must free
+ * \return pointer to n times l_float32; caller must free.
  */
 l_float32 *
 ll_check_vector(const char *_fun, lua_State *L, int arg, int n)
@@ -1927,9 +1927,9 @@ ll_check_vector(const char *_fun, lua_State *L, int arg, int n)
 /**
  * \brief Check if an argument is a lua_Integer in the range of size_t.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the integer
- * \return size_t for the integer; lua_error if out of bounds
+ * \return size_t for the integer; lua_error if out of bounds.
  */
 size_t
 ll_check_size_t(const char *_fun, lua_State *L, int arg)
@@ -1947,10 +1947,10 @@ ll_check_size_t(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Return an argument lua_Integer in the range of size_t or the default.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the integer
  * \param def default value
- * \return size_t for the integer; lua_error if out of bounds
+ * \return size_t for the integer; lua_error if out of bounds.
  */
 size_t
 ll_opt_size_t(const char *_fun, lua_State *L, int arg, size_t def)
@@ -2026,7 +2026,7 @@ static const ll_type_t types[] = {
 /**
  * \brief Check if %type is a known lualept type and return its name.
  * \param type one of ll_type_e values
- * \return const string pointer
+ * \return const string pointer.
  */
 static const char *
 ll_typestr(ll_type_e type)
@@ -2042,9 +2042,9 @@ ll_typestr(ll_type_e type)
 /**
  * \brief Set all global variables defined in %vars.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param vars pointer to the ll_global_var_t array
- * \return 0 on success, or die on error
+ * \return 0 on success, or die on error.
  */
 int
 ll_set_all_globals(const char *_fun, lua_State *L, const ll_global_var_t *vars)
@@ -2381,9 +2381,9 @@ ll_set_all_globals(const char *_fun, lua_State *L, const ll_global_var_t *vars)
 /**
  * \brief Get all global variables defined in %vars.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param vars pointer to the ll_global_var_t array
- * \return 0 on success, or die on error
+ * \return 0 on success, or die on error.
  */
 int
 ll_get_all_globals(const char *_fun, lua_State *L, const ll_global_var_t *vars)
@@ -2856,8 +2856,8 @@ ll_get_all_globals(const char *_fun, lua_State *L, const ll_global_var_t *vars)
 /**
  * \brief Enable a debug flag.
  *
- * \param L Lua state
- * \return 0 for nothing on the Lua stack
+ * \param L Lua state.
+ * \return 0 for nothing on the Lua stack.
  */
 static int
 DebugOn(lua_State *L)
@@ -2881,8 +2881,8 @@ DebugOn(lua_State *L)
 /**
  * \brief Disable a debug flag.
  *
- * \param L Lua state
- * \return 0 for nothing on the Lua stack
+ * \param L Lua state.
+ * \return 0 for nothing on the Lua stack.
  */
 static int
 DebugOff(lua_State *L)
@@ -2905,8 +2905,8 @@ DebugOff(lua_State *L)
 
 /**
  * \brief Return enabled debug options as strings.
- * \param L Lua state
- * \return n (0 .. 32) strings on the Lua stack
+ * \param L Lua state.
+ * \return n (0 .. 32) strings on the Lua stack.
  */
 static int
 Debug(lua_State *L)
@@ -2932,8 +2932,8 @@ Debug(lua_State *L)
 /**
  * \brief Create a a LuaLept*.
  *
- * \param L Lua state
- * \return 0 for nothing on the Lua stack
+ * \param L Lua state.
+ * \return 0 for nothing on the Lua stack.
  */
 static int
 Create(lua_State *L)
@@ -2945,8 +2945,8 @@ Create(lua_State *L)
 /**
  * \brief Destroy a LuaLept*.
  *
- * \param L Lua state
- * \return 0 for nothing on the Lua stack
+ * \param L Lua state.
+ * \return 0 for nothing on the Lua stack.
  */
 static int
 Destroy(lua_State *L)
@@ -2964,8 +2964,8 @@ Destroy(lua_State *L)
  * \brief Return the a version number.
  * Arg #1 (i.e. self) is expected to be a LuaLept* (ll)
  * Arg #2 is expected to be a string describing the version of which library to return (which)
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 Version(lua_State *L)
@@ -2992,8 +2992,8 @@ Version(lua_State *L)
  * Arg #2 is expected to be a l_int32 (gval).
  * Arg #3 is expected to be a l_int32 (bval).
  *
- * \param L Lua state
- * \return 1 Pix* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Pix* on the Lua stack.
  */
 static int
 ComposeRGB(lua_State *L)
@@ -3017,8 +3017,8 @@ ComposeRGB(lua_State *L)
  * Arg #3 is expected to be a l_int32 (bval).
  * Arg #4 is expected to be a l_int32 (aval).
  *
- * \param L Lua state
- * \return 1 Pix* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Pix* on the Lua stack.
  */
 static int
 ComposeRGBA(lua_State *L)
@@ -3043,8 +3043,8 @@ ComposeRGBA(lua_State *L)
  * Arg #3 is expected to be a l_int32 (bval).
  * Arg #4 is expected to be a l_int32 (aval).
  *
- * \param L Lua state
- * \return 1 Pix* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Pix* on the Lua stack.
  */
 static int
 Color(lua_State *L)
@@ -3086,8 +3086,8 @@ Color(lua_State *L)
  *
  * Arg #1 is expected to be a string (filename).
  *
- * \param L Lua state
- * \return 1 Pix* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Pix* on the Lua stack.
  */
 static int
 ToRGB(lua_State *L)
@@ -3109,8 +3109,8 @@ ToRGB(lua_State *L)
  *
  * Arg #1 is expected to be a string (filename).
  *
- * \param L Lua state
- * \return 1 Pix* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Pix* on the Lua stack.
  */
 static int
 ToRGBA(lua_State *L)
@@ -3139,8 +3139,8 @@ ToRGBA(lua_State *L)
  *      (2) The table is typically used for quantizing 2, 4 and 8 bpp
  *          grayscale src pix, and generating a colormapped dest pix.
  * </pre>
- * \param L Lua state
- * \return 1 on the Lua stack
+ * \param L Lua state.
+ * \return 1 on the Lua stack.
  */
 static int
 MakeGrayQuantIndexTable(lua_State *L)
@@ -3172,8 +3172,8 @@ MakeGrayQuantIndexTable(lua_State *L)
  *          output colormap for the number of bins.  The number
  *          of bins must not exceed 2^outdepth.
  * </pre>
- * \param L Lua state
- * \return 2 on the Lua stack
+ * \param L Lua state.
+ * \return 2 on the Lua stack.
  */
 static int
 MakeGrayQuantTableArb(lua_State *L)
@@ -3196,8 +3196,8 @@ MakeGrayQuantTableArb(lua_State *L)
  * Arg #1 is expected to be a l_uint32 (pixel).
  * Arg #2 is expected to be a string (min or max).
  *
- * \param L Lua state
- * \return 1 Pix* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Pix* on the Lua stack.
  */
 static int
 MinMaxComponent(lua_State *L)
@@ -3215,8 +3215,8 @@ MinMaxComponent(lua_State *L)
  * Arg #1 is expected to be a l_uint32 (pixel).
  * Arg #2 is expected to be a string (min or max).
  *
- * \param L Lua state
- * \return 1 Pix* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Pix* on the Lua stack.
  */
 static int
 MinComponent(lua_State *L)
@@ -3233,8 +3233,8 @@ MinComponent(lua_State *L)
  * Arg #1 is expected to be a l_uint32 (pixel).
  * Arg #2 is expected to be a string (min or max).
  *
- * \param L Lua state
- * \return 1 Pix* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Pix* on the Lua stack.
  */
 static int
 MaxComponent(lua_State *L)
@@ -3256,7 +3256,7 @@ MaxComponent(lua_State *L)
  *          special characters that don't belong in a string.
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 on the Lua stack
+ * \return 1 on the Lua stack.
  */
 static int
 CheckForChars(lua_State *L)
@@ -3283,7 +3283,7 @@ CheckForChars(lua_State *L)
  *          %allow = 1 for development and debugging.
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 on the Lua stack
+ * \return 1 on the Lua stack.
  */
 static int
 SetLeptDebugOK(lua_State *L)
@@ -3308,7 +3308,7 @@ SetLeptDebugOK(lua_State *L)
  *          obtained from the LEPT_MSG_SEVERITY environment variable.
  * </pre>
  * \param L pointer to the lua_State
- * \return 0 on the Lua stack
+ * \return 0 on the Lua stack.
  */
 static int
 SetMsgSeverity(lua_State *L)
@@ -3344,7 +3344,7 @@ SetMsgSeverity(lua_State *L)
  *          used to demarcate switches (vs. dashes in unix).
  * </pre>
  * \param L pointer to the lua_State
- * \return 0 on the Lua stack
+ * \return 0 on the Lua stack.
  */
 static int
 SplitPathAtDirectory(lua_State *L)
@@ -3379,7 +3379,7 @@ SplitPathAtDirectory(lua_State *L)
  *          slash separators.  The output has unix separators.
  * </pre>
  * \param L pointer to the lua_State
- * \return 0 on the Lua stack
+ * \return 0 on the Lua stack.
  */
 static int
 SplitPathAtExtension(lua_State *L)
@@ -3403,7 +3403,7 @@ SplitPathAtExtension(lua_State *L)
  *
  * </pre>
  * \param L pointer to the lua_State
- * \return 1 on the Lua stack
+ * \return 1 on the Lua stack.
  */
 static int
 SplitStringToParagraphs(lua_State *L)
@@ -3423,8 +3423,8 @@ SplitStringToParagraphs(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a lstring (%data, %nin).
  * </pre>
- * \param L Lua state
- * \return 1 lstring on the Lua stack
+ * \param L Lua state.
+ * \return 1 lstring on the Lua stack.
  */
 static int
 Compress(lua_State *L)
@@ -3444,8 +3444,8 @@ Compress(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a lstring (%data, %nin).
  * </pre>
- * \param L Lua state
- * \return 1 lstring on the Lua stack
+ * \param L Lua state.
+ * \return 1 lstring on the Lua stack.
  */
 static int
 Uncompress(lua_State *L)
@@ -3461,11 +3461,11 @@ Uncompress(lua_State *L)
 
 
 /**
- * \brief Check Lua stack at index %arg for udata of class lualept.
+ * \brief Check Lua stack at index %arg for user data of class lualept.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the LEPT contained in the user data
+ * \return pointer to the LEPT contained in the user data.
  */
 LuaLept *
 ll_check_lualept(const char *_fun, lua_State *L, int arg)
@@ -3476,9 +3476,9 @@ ll_check_lualept(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push LEPT* to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param ll pointer to the LEPT
- * \return 1 LEPT* on the Lua stack
+ * \return 1 LEPT* on the Lua stack.
  */
 int
 ll_push_lualept(const char *_fun, lua_State *L, LuaLept *ll)
@@ -3490,8 +3490,8 @@ ll_push_lualept(const char *_fun, lua_State *L, LuaLept *ll)
 
 /**
  * \brief Create a new LuaLept*.
- * \param L Lua state
- * \return 1 LEPT* on the Lua stack
+ * \param L Lua state.
+ * \return 1 LEPT* on the Lua stack.
  */
 int
 ll_new_lualept(lua_State *L)
@@ -3516,8 +3516,8 @@ ll_new_lualept(lua_State *L)
 
 /**
  * \brief Register the BOX methods and functions in the LL_BOX meta table.
- * \param L Lua state
- * \return 1 table on the Lua stack
+ * \param L Lua state.
+ * \return 1 table on the Lua stack.
  */
 int
 luaopen_lualept(lua_State *L)
@@ -3608,7 +3608,7 @@ luaopen_lualept(lua_State *L)
  * \param get_vars optional array of global variable definitions to get.
  * \param argc optional argument count
  * \param argv optional array of argument values
- * \return 0 on success, or 1 on error
+ * \return 0 on success, or 1 on error.
  */
 int
 ll_run(const char *name, const char *script, ll_global_var_t *set_vars, ll_global_var_t *get_vars,

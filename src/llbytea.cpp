@@ -47,8 +47,8 @@
 /**
  * \brief Destroy a Bytea*.
  *
- * \param L Lua state
- * \return 0 for nothing on the Lua stack
+ * \param L Lua state.
+ * \return 0 for nothing on the Lua stack.
  */
 static int
 Destroy(lua_State *L)
@@ -71,8 +71,8 @@ Destroy(lua_State *L)
  *      (1) The allocated array is n + 1 bytes.  This allows room
  *          for null termination.
  * </pre>
- * \param L Lua state
- * \return 1 Bytea* (%ba) on the Lua stack
+ * \param L Lua state.
+ * \return 1 Bytea* (%ba) on the Lua stack.
  */
 static int
 Create(lua_State *L)
@@ -89,8 +89,8 @@ Create(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Bytea* (ba).
  *
  * </pre>
- * \param L Lua state
- * \return 1 size_t on the Lua stack
+ * \param L Lua state.
+ * \return 1 size_t on the Lua stack.
  */
 static int
 GetSize(lua_State *L)
@@ -106,8 +106,8 @@ GetSize(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Bytea*.
  * </pre>
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 toString(lua_State *L)
@@ -148,8 +148,8 @@ toString(lua_State *L)
  * Arg #2 is expected to be a lstring (newdata, newbytes).
  *
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 AppendData(lua_State *L)
@@ -168,8 +168,8 @@ AppendData(lua_State *L)
  * Arg #2 is expected to be a char* (str).
  *
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 AppendString(lua_State *L)
@@ -190,8 +190,8 @@ AppendString(lua_State *L)
  * Leptonica's Notes:
  *      (1) If cloning, up the refcount and return a ptr to %bas.
  * </pre>
- * \param L Lua state
- * \return 1 on the Lua stack
+ * \param L Lua state.
+ * \return 1 on the Lua stack.
  */
 static int
 Copy(lua_State *L)
@@ -212,8 +212,8 @@ Copy(lua_State *L)
  *      (1) The returned data is owned by the caller.  The input %ba
  *          still owns the original data array.
  * </pre>
- * \param L Lua state
- * \return 1 lstring on the Lua stack
+ * \param L Lua state.
+ * \return 1 lstring on the Lua stack.
  */
 static int
 CopyData(lua_State *L)
@@ -235,8 +235,8 @@ CopyData(lua_State *L)
  * Arg #2 is expected to be a lstring (sequence, seqlen).
  *
  * </pre>
- * \param L Lua state
- * \return 1 Dna* (%da) on the Lua stack
+ * \param L Lua state.
+ * \return 1 Dna* (%da) on the Lua stack.
  */
 static int
 FindEachSequence(lua_State *L)
@@ -260,8 +260,8 @@ FindEachSequence(lua_State *L)
  * Leptonica's Notes:
  *      (1) The returned ptr is owned by %ba.  Do not free it!
  * </pre>
- * \param L Lua state
- * \return 1 lstring (%data, %size) on the Lua stack
+ * \param L Lua state.
+ * \return 1 lstring (%data, %size) on the Lua stack.
  */
 static int
 GetData(lua_State *L)
@@ -280,8 +280,8 @@ GetData(lua_State *L)
  * Arg #1 is expected to be a const char* (fname).
  *
  * </pre>
- * \param L Lua state
- * \return 1 Bytea* (%ba) on the Lua stack
+ * \param L Lua state.
+ * \return 1 Bytea* (%ba) on the Lua stack.
  */
 static int
 InitFromFile(lua_State *L)
@@ -298,8 +298,8 @@ InitFromFile(lua_State *L)
  * Arg #1 is expected to be a lstring (data, size).
  *
  * </pre>
- * \param L Lua state
- * \return 1 Bytea* (%ba) on the Lua stack
+ * \param L Lua state.
+ * \return 1 Bytea* (%ba) on the Lua stack.
  */
 static int
 InitFromMem(lua_State *L)
@@ -317,8 +317,8 @@ InitFromMem(lua_State *L)
  * Arg #1 is expected to be a luaL_Stream* (stream->f).
  *
  * </pre>
- * \param L Lua state
- * \return 1 Bytea* (%ba) on the Lua stack
+ * \param L Lua state.
+ * \return 1 Bytea* (%ba) on the Lua stack.
  */
 static int
 InitFromStream(lua_State *L)
@@ -338,8 +338,8 @@ InitFromStream(lua_State *L)
  * Leptonica's Notes:
  *      (1) It is a no-op, not an error, for %ba2 to be null.
  * </pre>
- * \param L Lua state
- * \return 1 Bytea* (%ba2) on the Lua stack
+ * \param L Lua state.
+ * \return 1 Bytea* (%ba2) on the Lua stack.
  */
 static int
 Join(lua_State *L)
@@ -360,8 +360,8 @@ Join(lua_State *L)
  * Arg #2 is expected to be a size_t (splitloc).
  *
  * </pre>
- * \param L Lua state
- * \return 1 Bytea* (%ba2) on the Lua stack
+ * \param L Lua state.
+ * \return 1 Bytea* (%ba2) on the Lua stack.
  */
 static int
 Split(lua_State *L)
@@ -385,8 +385,8 @@ Split(lua_State *L)
  * Arg #4 is expected to be a size_t (endloc).
  *
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 Write(lua_State *L)
@@ -408,8 +408,8 @@ Write(lua_State *L)
  * Arg #4 is expected to be a size_t (endloc).
  *
  * </pre>
- * \param L Lua state
- * \return 0 on the Lua stack
+ * \param L Lua state.
+ * \return 0 on the Lua stack.
  */
 static int
 WriteStream(lua_State *L)
@@ -424,11 +424,11 @@ WriteStream(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class Bytea*.
+ * \brief Check Lua stack at index %arg for user data of class Bytea*.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the Bytea* contained in the user data
+ * \return pointer to the Bytea* contained in the user data.
  */
 L_Bytea *
 ll_check_Bytea(const char *_fun, lua_State *L, int arg)
@@ -439,9 +439,9 @@ ll_check_Bytea(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Optionally expect a LL_DLLIST at index %arg on the Lua stack.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the Bytea* contained in the user data
+ * \return pointer to the Bytea* contained in the user data.
  */
 L_Bytea *
 ll_opt_Bytea(const char *_fun, lua_State *L, int arg)
@@ -453,9 +453,9 @@ ll_opt_Bytea(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push Bytea* user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param bmf pointer to the L_Bytea
- * \return 1 Bytea* on the Lua stack
+ * \return 1 Bytea* on the Lua stack.
  */
 int
 ll_push_Bytea(const char *_fun, lua_State *L, L_Bytea *bmf)
@@ -466,8 +466,8 @@ ll_push_Bytea(const char *_fun, lua_State *L, L_Bytea *bmf)
 }
 /**
  * \brief Create and push a new Bytea*.
- * \param L Lua state
- * \return 1 Bytea* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Bytea* on the Lua stack.
  */
 int
 ll_new_Bytea(lua_State *L)
@@ -485,8 +485,8 @@ ll_new_Bytea(lua_State *L)
 }
 /**
  * \brief Register the Bytea methods and functions in the TNAME meta table.
- * \param L Lua state
- * \return 1 table on the Lua stack
+ * \param L Lua state.
+ * \return 1 table on the Lua stack.
  */
 int
 ll_open_Bytea(lua_State *L)

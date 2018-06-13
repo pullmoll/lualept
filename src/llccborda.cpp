@@ -141,8 +141,8 @@
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  * </pre>
- * \param L Lua state
- * \return 0 for nothing on the Lua stack
+ * \param L Lua state.
+ * \return 0 for nothing on the Lua stack.
  */
 static int
 Destroy(lua_State *L)
@@ -162,8 +162,8 @@ Destroy(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  * </pre>
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 toString(lua_State* L)
@@ -206,8 +206,8 @@ toString(lua_State* L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  * </pre>
- * \param L Lua state
- * \return 1 integer on the Lua stack
+ * \param L Lua state.
+ * \return 1 integer on the Lua stack.
  */
 static int
 GetCount(lua_State *L)
@@ -223,8 +223,8 @@ GetCount(lua_State *L)
  * Arg #1 is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (n).
  * </pre>
- * \param L Lua state
- * \return 1 CCBorda* on the Lua stack
+ * \param L Lua state.
+ * \return 1 CCBorda* on the Lua stack.
  */
 static int
 Create(lua_State *L)
@@ -242,8 +242,8 @@ Create(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  * Arg #2 is expected to be a CCBord* (ccb).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 AddCcb(lua_State *L)
@@ -264,8 +264,8 @@ AddCcb(lua_State *L)
  *          global coordinates, and must be computed in advance
  *          by calling ccbaGenerateGlobalLocs().
  * </pre>
- * \param L Lua state
- * \return 1 on the Lua stack
+ * \param L Lua state.
+ * \return 1 on the Lua stack.
  */
 static int
 DisplayBorder(lua_State *L)
@@ -329,8 +329,8 @@ DisplayBorder(lua_State *L)
  *
  *  You then successively XOR these interior filled components, in any order.
  * </pre>
- * \param L Lua state
- * \return 1 on the Lua stack
+ * \param L Lua state.
+ * \return 1 on the Lua stack.
  */
 static int
 DisplayImage1(lua_State *L)
@@ -359,8 +359,8 @@ DisplayImage1(lua_State *L)
  *          It is preferred to Method 1 because it is between 1.2x and 2x
  *          faster than Method 1.
  * </pre>
- * \param L Lua state
- * \return 1 on the Lua stack
+ * \param L Lua state.
+ * \return 1 on the Lua stack.
  */
 static int
 DisplayImage2(lua_State *L)
@@ -381,8 +381,8 @@ DisplayImage2(lua_State *L)
  *          global coordinates, one path per c.c., and must
  *          be computed in advance by calling ccbaGenerateSPGlobalLocs().
  * </pre>
- * \param L Lua state
- * \return 1 on the Lua stack
+ * \param L Lua state.
+ * \return 1 on the Lua stack.
  */
 static int
 DisplaySPBorder(lua_State *L)
@@ -402,8 +402,8 @@ DisplaySPBorder(lua_State *L)
  *          relative to each c.c., to find the global pixel locations,
  *          and stores them in the global ptaa.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 GenerateGlobalLocs(lua_State *L)
@@ -429,8 +429,8 @@ GenerateGlobalLocs(lua_State *L)
  *          valid svg file and is typically about half the size
  *          when all border points are listed.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 GenerateSPGlobalLocs(lua_State *L)
@@ -473,8 +473,8 @@ GenerateSPGlobalLocs(lua_State *L)
  *          point in the pta, we do its cut path and hole border.
  *          The single path is saved in the ccb.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 GenerateSinglePath(lua_State *L)
@@ -503,8 +503,8 @@ GenerateSinglePath(lua_State *L)
  *          of the current pixel at (cx, cy).  It is easily found by
  *          indexing into a 2-d 3x3 array (dirtab).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 GenerateStepChains(lua_State *L)
@@ -523,8 +523,8 @@ GenerateStepChains(lua_State *L)
  * Leptonica's Notes:
  *      (1) This returns a clone of the ccb; it must be destroyed
  * </pre>
- * \param L Lua state
- * \return 1 CCBord* on the Lua stack
+ * \param L Lua state.
+ * \return 1 CCBord* on the Lua stack.
  */
 static int
 GetCcb(lua_State *L)
@@ -541,8 +541,8 @@ GetCcb(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a string (filename).
  * </pre>
- * \param L Lua state
- * \return 1 CCBorda* on the Lua stack
+ * \param L Lua state.
+ * \return 1 CCBorda* on the Lua stack.
  */
 static int
 Read(lua_State *L)
@@ -558,8 +558,8 @@ Read(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a luaL_Stream* (stream).
  * </pre>
- * \param L Lua state
- * \return 1 CCBorda* on the Lua stack
+ * \param L Lua state.
+ * \return 1 CCBorda* on the Lua stack.
  */
 static int
 ReadStream(lua_State *L)
@@ -583,8 +583,8 @@ ReadStream(lua_State *L)
  *          either global or local.  For the latter, the
  *          pixel locations are relative to the c.c.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 StepChainsToPixCoords(lua_State *L)
@@ -601,8 +601,8 @@ StepChainsToPixCoords(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  * Arg #2 is expected to be a string (filename).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 Write(lua_State *L)
@@ -619,8 +619,8 @@ Write(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  * Arg #2 is expected to be a string (filename).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 WriteSVG(lua_State *L)
@@ -637,8 +637,8 @@ WriteSVG(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  * Arg #2 is expected to be a string (filename).
  * </pre>
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 WriteSVGString(lua_State *L)
@@ -658,8 +658,8 @@ WriteSVGString(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a CCBorda* (ccba).
  * Arg #2 is expected to be a luaL_Stream* (stream).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 WriteStream(lua_State *L)
@@ -671,11 +671,11 @@ WriteStream(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index (%arg) for udata of class CCBorda.
+ * \brief Check Lua stack at index (%arg) for user data of class CCBorda.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the CCBorda* contained in the user data
+ * \return pointer to the CCBorda* contained in the user data.
  */
 CCBorda *
 ll_check_CCBorda(const char *_fun, lua_State *L, int arg)
@@ -686,9 +686,9 @@ ll_check_CCBorda(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Optionally expect a CCBorda* at index (%arg) on the Lua stack.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the CCBorda* contained in the user data
+ * \return pointer to the CCBorda* contained in the user data.
  */
 CCBorda *
 ll_opt_CCBorda(const char *_fun, lua_State *L, int arg)
@@ -701,9 +701,9 @@ ll_opt_CCBorda(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push CCBorda* to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param cd pointer to the L_CCBorda
- * \return 1 CCBorda* on the Lua stack
+ * \return 1 CCBorda* on the Lua stack.
  */
 int
 ll_push_CCBorda(const char *_fun, lua_State *L, CCBorda *cd)
@@ -715,8 +715,8 @@ ll_push_CCBorda(const char *_fun, lua_State *L, CCBorda *cd)
 
 /**
  * \brief Create and push a new CCBorda*.
- * \param L Lua state
- * \return 1 CCBorda* on the Lua stack
+ * \param L Lua state.
+ * \return 1 CCBorda* on the Lua stack.
  */
 int
 ll_new_CCBorda(lua_State *L)
@@ -764,8 +764,8 @@ ll_new_CCBorda(lua_State *L)
 
 /**
  * \brief Register the CCBorda methods and functions in the CCBorda meta table.
- * \param L Lua state
- * \return 1 table on the Lua stack
+ * \param L Lua state.
+ * \return 1 table on the Lua stack.
  */
 int
 ll_open_CCBorda(lua_State *L)

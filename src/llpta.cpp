@@ -53,8 +53,8 @@
  *      (1) Decrements the ref count and, if 0, destroys the pta.
  *      (2) Always nulls the input ptr.
  * </pre>
- * \param L Lua state
- * \return 0 for nothing on the Lua stack
+ * \param L Lua state.
+ * \return 0 for nothing on the Lua stack.
  */
 static int
 Destroy(lua_State *L)
@@ -75,8 +75,8 @@ Destroy(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a l_int32 (n).
  * </pre>
- * \param L Lua state
- * \return 1 Pta* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Pta* on the Lua stack.
  */
 static int
 Create(lua_State *L)
@@ -92,8 +92,8 @@ Create(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
  * </pre>
- * \param L Lua state
- * \return 1 integer on the Lua stack
+ * \param L Lua state.
+ * \return 1 integer on the Lua stack.
  */
 static int
 GetCount(lua_State *L)
@@ -109,8 +109,8 @@ GetCount(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
  * </pre>
- * \param L Lua state
- * \return 1 string on the Lua stack
+ * \param L Lua state.
+ * \return 1 string on the Lua stack.
  */
 static int
 toString(lua_State *L)
@@ -158,8 +158,8 @@ toString(lua_State *L)
  * Arg #2 is expected to be a l_float32 (x).
  * Arg #3 is expected to be a l_float32 (y).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 AddPt(lua_State *L)
@@ -176,8 +176,8 @@ AddPt(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
  * </pre>
- * \param L Lua state
- * \return 1 Pta* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Pta* on the Lua stack.
  */
 static int
 Clone(lua_State *L)
@@ -197,8 +197,8 @@ Clone(lua_State *L)
  *      (1) For 2 corners, the order of the 2 points is UL, LR.
  *          For 4 corners, the order of points is UL, UR, LL, LR.
  * </pre>
- * \param L Lua state
- * \return 2 for two Numa* on the Lua stack, or 0 in case of error
+ * \param L Lua state.
+ * \return 2 for two Numa* on the Lua stack, or 0 in case of error.
  */
 static int
 ConvertToBox(lua_State *L)
@@ -214,8 +214,8 @@ ConvertToBox(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
  * </pre>
- * \param L Lua state
- * \return 1 Pta* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Pta* on the Lua stack.
  */
 static int
 Copy(lua_State *L)
@@ -233,8 +233,8 @@ Copy(lua_State *L)
  * Arg #2 is expected to be a l_int32 (istart).
  * Arg #3 is expected to be a l_int32 (uend).
  * </pre>
- * \param L Lua state
- * \return 1 Pta* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Pta* on the Lua stack.
  */
 static int
 CopyRange(lua_State *L)
@@ -255,8 +255,8 @@ CopyRange(lua_State *L)
  * Leptonica's Notes:
  *      This only resets the Pta::n field, for reuse
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 Empty(lua_State *L)
@@ -274,8 +274,8 @@ Empty(lua_State *L)
  * Leptonica's Notes:
  *      (1) This copies the internal arrays into new Numas.
  * </pre>
- * \param L Lua state
- * \return 2 for two Numa* on the Lua stack, or 0 in case of error
+ * \param L Lua state.
+ * \return 2 for two Numa* on the Lua stack, or 0 in case of error.
  */
 static int
 GetArrays(lua_State *L)
@@ -295,8 +295,8 @@ GetArrays(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
  * Arg #2 is expected to be a l_int32 (idx).
  * </pre>
- * \param L Lua state
- * \return 1 integer on the Lua stack
+ * \param L Lua state.
+ * \return 1 integer on the Lua stack.
  */
 static int
 GetIPt(lua_State *L)
@@ -319,8 +319,8 @@ GetIPt(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pta* user data.
  * Arg #2 is expected to be a l_int32 (idx).
  * </pre>
- * \param L Lua state
- * \return 1 integer on the Lua stack
+ * \param L Lua state.
+ * \return 1 integer on the Lua stack.
  */
 static int
 GetPt(lua_State *L)
@@ -345,8 +345,8 @@ GetPt(lua_State *L)
  * Arg #3 is expected to be a l_int32 (x).
  * Arg #4 is expected to be a l_int32 (y).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 InsertPt(lua_State *L)
@@ -364,8 +364,8 @@ InsertPt(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string containing the filename.
  * </pre>
- * \param L Lua state
- * \return 1 Ptaa* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Ptaa* on the Lua stack.
  */
 static int
 Read(lua_State *L)
@@ -381,8 +381,8 @@ Read(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a string (data).
  * </pre>
- * \param L Lua state
- * \return 1 Ptaa* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Ptaa* on the Lua stack.
  */
 static int
 ReadMem(lua_State *L)
@@ -399,8 +399,8 @@ ReadMem(lua_State *L)
  * <pre>
  * Arg #1 is expected to be a luaL_Stream* (stream).
  * </pre>
- * \param L Lua state
- * \return 1 Ptaa* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Ptaa* on the Lua stack.
  */
 static int
 ReadStream(lua_State *L)
@@ -422,8 +422,8 @@ ReadStream(lua_State *L)
  *      (2) It should not be used repeatedly on large arrays,
  *          because the function is O(n).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 RemovePt(lua_State *L)
@@ -442,8 +442,8 @@ RemovePt(lua_State *L)
  * Arg #3 is expected to be a l_float32 (x).
  * Arg #4 is expected to be a l_float32 (y).
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 SetPt(lua_State *L)
@@ -464,8 +464,8 @@ SetPt(lua_State *L)
  * Arg #3 is an optional boolean (type)
  *
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 Write(lua_State *L)
@@ -486,8 +486,8 @@ Write(lua_State *L)
  * Leptonica's Notes:
  *      (1) Serializes a pta in memory and puts the result in a buffer.
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 WriteMem(lua_State *L)
@@ -512,8 +512,8 @@ WriteMem(lua_State *L)
  * Arg #3 is an optional boolean (type)
  *
  * </pre>
- * \param L Lua state
- * \return 1 boolean on the Lua stack
+ * \param L Lua state.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 WriteStream(lua_State *L)
@@ -526,11 +526,11 @@ WriteStream(lua_State *L)
 }
 
 /**
- * \brief Check Lua stack at index %arg for udata of class Pta*.
+ * \brief Check Lua stack at index %arg for user data of class Pta*.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the Pta* contained in the user data
+ * \return pointer to the Pta* contained in the user data.
  */
 Pta *
 ll_check_Pta(const char *_fun, lua_State *L, int arg)
@@ -541,9 +541,9 @@ ll_check_Pta(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Optionally expect a Pta* at index %arg on the Lua stack.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param arg index where to find the user data (usually 1)
- * \return pointer to the Pta* contained in the user data
+ * \return pointer to the Pta* contained in the user data.
  */
 Pta *
 ll_opt_Pta(const char *_fun, lua_State *L, int arg)
@@ -556,9 +556,9 @@ ll_opt_Pta(const char *_fun, lua_State *L, int arg)
 /**
  * \brief Push PTA user data to the Lua stack and set its meta table.
  * \param _fun calling function's name
- * \param L Lua state
+ * \param L Lua state.
  * \param pta pointer to the PTA
- * \return 1 Pta* on the Lua stack
+ * \return 1 Pta* on the Lua stack.
  */
 int
 ll_push_Pta(const char *_fun, lua_State *L, Pta *pta)
@@ -570,8 +570,8 @@ ll_push_Pta(const char *_fun, lua_State *L, Pta *pta)
 
 /**
  * \brief Create and push a new Pta*.
- * \param L Lua state
- * \return 1 Pta* on the Lua stack
+ * \param L Lua state.
+ * \return 1 Pta* on the Lua stack.
  */
 int
 ll_new_Pta(lua_State *L)
@@ -584,8 +584,8 @@ ll_new_Pta(lua_State *L)
 
 /**
  * \brief Register the Pta methods and functions in the Pta meta table.
- * \param L Lua state
- * \return 1 table on the Lua stack
+ * \param L Lua state.
+ * \return 1 table on the Lua stack.
  */
 int
 ll_open_Pta(lua_State *L)
