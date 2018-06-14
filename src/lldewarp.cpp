@@ -86,73 +86,107 @@ toString(lua_State *L)
                  reinterpret_cast<void *>(dew));
         luaL_addstring(&B, str);
 #if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
-        snprintf(str, LL_STRBUFF, "\n    dewa (parent) : " LL_DEWARPA "* %p", reinterpret_cast<void *>(dew->dewa));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %s* %p",
+                 "dewa (parent)", LL_DEWARPA, reinterpret_cast<void *>(dew->dewa));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    pixs          : " LL_PIX "* %p", reinterpret_cast<void *>(dew->pixs));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %s* %p",
+                 "pixs", LL_PIX, reinterpret_cast<void *>(dew->pixs));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    sampvdispar   : " LL_FPIX "* %p", reinterpret_cast<void *>(dew->sampvdispar));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %s* %p",
+                 "sampvdispar", LL_FPIX, reinterpret_cast<void *>(dew->sampvdispar));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    samphdispar   : " LL_FPIX "* %p", reinterpret_cast<void *>(dew->samphdispar));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %s* %p",
+                 "samphdispar", LL_FPIX, reinterpret_cast<void *>(dew->samphdispar));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    sampydispar   : " LL_FPIX "* %p", reinterpret_cast<void *>(dew->sampydispar));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %s* %p",
+                 "sampydispar", LL_FPIX, reinterpret_cast<void *>(dew->sampydispar));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    fullvdispar   : " LL_FPIX "* %p", reinterpret_cast<void *>(dew->fullvdispar));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %s* %p",
+                 "fullvdispar", LL_FPIX, reinterpret_cast<void *>(dew->fullvdispar));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    fullhdispar   : " LL_FPIX "* %p", reinterpret_cast<void *>(dew->fullhdispar));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %s* %p",
+                 "fullhdispar", LL_FPIX, reinterpret_cast<void *>(dew->fullhdispar));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    fullydispar   : " LL_FPIX "* %p", reinterpret_cast<void *>(dew->fullydispar));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %s* %p",
+                 "fullydispar", LL_FPIX, reinterpret_cast<void *>(dew->fullydispar));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    namidys       : " LL_NUMA "* %p", reinterpret_cast<void *>(dew->namidys));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %s* %p",
+                 "namidys", LL_NUMA, reinterpret_cast<void *>(dew->namidys));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    nacurves      : " LL_NUMA "* %p", reinterpret_cast<void *>(dew->nacurves));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %s* %p",
+                 "nacurves", LL_NUMA, reinterpret_cast<void *>(dew->nacurves));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    w             :  %d", dew->w);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "w", dew->w);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    h             :  %d", dew->h);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "h", dew->h);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    pageno        :  %d", dew->pageno);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "pageno", dew->pageno);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    sampling      :  %d", dew->sampling);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "sampling", dew->sampling);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    redfactor     :  %d", dew->redfactor);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "redfactor", dew->redfactor);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    minlines      :  %d", dew->minlines);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "minlines", dew->minlines);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    nlines        :  %d", dew->nlines);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "nlines", dew->nlines);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    mincurv       :  %d", dew->mincurv);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "mincurv", dew->mincurv);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    maxcurv       :  %d", dew->maxcurv);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "maxcurv", dew->maxcurv);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    leftslope     :  %d", dew->leftslope);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "leftslope", dew->leftslope);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    rightslope    :  %d", dew->rightslope);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "rightslope", dew->rightslope);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    leftcurv      :  %d", dew->leftcurv);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "leftcurv", dew->leftcurv);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    rightcurv     :  %d", dew->rightcurv);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "rightcurv", dew->rightcurv);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    nx            :  %d", dew->nx);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "nx", dew->nx);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    ny            :  %d", dew->ny);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "ny", dew->ny);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    hasref        :  %d", dew->hasref);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "hasref", dew->hasref);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    refpage       :  %d", dew->refpage);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "refpage", dew->refpage);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    vsuccess      :  %d", dew->vsuccess);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "vsuccess", dew->vsuccess);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    hsuccess      :  %d", dew->hsuccess);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "hsuccess", dew->hsuccess);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    ysuccess      :  %d", dew->ysuccess);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "ysuccess", dew->ysuccess);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    vvalid        :  %d", dew->vvalid);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "vvalid", dew->vvalid);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    hvalid        :  %d", dew->hvalid);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "hvalid", dew->hvalid);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    skip_horiz    :  %d", dew->skip_horiz);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "skip_horiz", dew->skip_horiz);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    debug         :  %d", dew->debug);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "debug", dew->debug);
         luaL_addstring(&B, str);
 #endif
     }

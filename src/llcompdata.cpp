@@ -88,37 +88,53 @@ toString(lua_State *L)
                  TNAME "*: %p", reinterpret_cast<void *>(cid));
         luaL_addstring(&B, str);
 #if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
-        snprintf(str, LL_STRBUFF, "\n    type          : %s", ll_string_encoding(cid->type));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %s",
+                 "type", ll_string_encoding(cid->type));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    datacomp      : %p", reinterpret_cast<void *>(cid->datacomp));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %p",
+                 "datacomp", reinterpret_cast<void *>(cid->datacomp));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    nbytescomp    : %" PRIu64, static_cast<l_uintptr_t>(cid->nbytescomp));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %" PRIu64,
+                 "nbytescomp", static_cast<l_uintptr_t>(cid->nbytescomp));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    data85        : %p", reinterpret_cast<void *>(cid->data85));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %p",
+                 "data85", reinterpret_cast<void *>(cid->data85));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    nbytes85      : %" PRIu64, static_cast<l_uintptr_t>(cid->nbytes85));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %" PRIu64,
+                 "nbytes85", static_cast<l_uintptr_t>(cid->nbytes85));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    cmapdata85    : %p", reinterpret_cast<void *>(cid->cmapdata85));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %p",
+                 "cmapdata85", reinterpret_cast<void *>(cid->cmapdata85));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    cmapdatahex   : %p", reinterpret_cast<void *>(cid->cmapdatahex));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %p",
+                 "cmapdatahex", reinterpret_cast<void *>(cid->cmapdatahex));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    ncolors       : %d", cid->ncolors);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "ncolors", cid->ncolors);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    w             : %d", cid->w);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "w", cid->w);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    h             : %d", cid->h);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "h", cid->h);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    bps           : %d", cid->bps);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "bps", cid->bps);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    spp           : %d", cid->spp);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "spp", cid->spp);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    minisblack    : %d", cid->minisblack);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "minisblack", cid->minisblack);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    predictor     : %d", cid->predictor);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "predictor", cid->predictor);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    nbytes        : %" PRIu64, static_cast<l_uintptr_t>(cid->nbytes));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %" PRIu64,
+                 "nbytes", static_cast<l_uintptr_t>(cid->nbytes));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    res           : %d", cid->res);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "res", cid->res);
         luaL_addstring(&B, str);
 #endif
     }

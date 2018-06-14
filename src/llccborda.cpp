@@ -182,17 +182,23 @@ toString(lua_State* L)
                 reinterpret_cast<void *>(ccba));
         luaL_addstring(&B, str);
 #if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
-        snprintf(str, LL_STRBUFF, "\n    pix           : " LL_PIX "* %p", reinterpret_cast<void *>(ccba->pix));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %s* %p",
+                 "pix", LL_PIX, reinterpret_cast<void *>(ccba->pix));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    w             : %d", ccba->w);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "w", ccba->w);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    h             : %d", ccba->h);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "h", ccba->h);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    n             : %d", ccba->n);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "n", ccba->n);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    nalloc        : %d", ccba->nalloc);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "nalloc", ccba->nalloc);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    ccb           : " LL_CCBORD "** %p", reinterpret_cast<void *>(ccba->ccb));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %s** %p",
+                 "ccb", LL_CCBORD, reinterpret_cast<void *>(ccba->ccb));
         luaL_addstring(&B, str);
 #endif
     }

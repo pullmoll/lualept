@@ -66,23 +66,32 @@ toString(lua_State* L)
                 reinterpret_cast<void *>(ccb));
         luaL_addstring(&B, str);
 #if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
-        snprintf(str, LL_STRBUFF, "\n    pix           : " LL_PIX "* %p", reinterpret_cast<void *>(ccb->pix));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %s* %p",
+                 "pix", LL_PIX, reinterpret_cast<void *>(ccb->pix));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    boxa          : " LL_BOXA "* %p", reinterpret_cast<void *>(ccb->boxa));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %s* %p",
+                 "boxa", LL_BOXA, reinterpret_cast<void *>(ccb->boxa));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    start         : " LL_PTA "* %p", reinterpret_cast<void *>(ccb->start));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %s* %p",
+                 "start", LL_PTA, reinterpret_cast<void *>(ccb->start));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    refcount      : %d", ccb->refcount);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "refcount", ccb->refcount);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    local         : " LL_PTAA "* %p", reinterpret_cast<void *>(ccb->local));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %s* %p",
+                 "local", LL_PTAA, reinterpret_cast<void *>(ccb->local));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    global        : " LL_PTAA "* %p", reinterpret_cast<void *>(ccb->global));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %s* %p",
+                 "global", LL_PTAA, reinterpret_cast<void *>(ccb->global));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    step          : " LL_NUMAA "* %p", reinterpret_cast<void *>(ccb->step));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %s* %p",
+                 "step", LL_NUMAA, reinterpret_cast<void *>(ccb->step));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    splocal       : " LL_PTA "* %p", reinterpret_cast<void *>(ccb->splocal));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %s* %p",
+                 "splocal", LL_PTA, reinterpret_cast<void *>(ccb->splocal));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    spglobal      : " LL_PTA "* %p", reinterpret_cast<void *>(ccb->spglobal));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %s* %p",
+                 "spglobal", LL_PTA, reinterpret_cast<void *>(ccb->spglobal));
         luaL_addstring(&B, str);
 #endif
     }

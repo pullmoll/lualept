@@ -101,7 +101,6 @@ toString(lua_State *L)
     char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
     Boxa *boxa = ll_check_Boxa(_fun, L, 1);
     luaL_Buffer B;
-    l_int32 x, y, w, h;
 
     luaL_buffinit(L, &B);
     if (!boxa) {
@@ -113,6 +112,7 @@ toString(lua_State *L)
         luaL_addstring(&B, str);
 #if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
         for (l_int32 i = 0; i < boxaGetCount(boxa); i++) {
+            l_int32 x, y, w, h;
             boxaGetBoxGeometry(boxa, i, &x, &y, &w, &h);
             snprintf(str, LL_STRBUFF, "\n    %d = { x = %d, y = %d, w = %d, h = %d }",
                      i+1, x, y, w, h);

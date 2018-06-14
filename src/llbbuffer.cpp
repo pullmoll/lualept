@@ -88,8 +88,10 @@ toString(lua_State* L)
         snprintf(str, LL_STRBUFF, TNAME "*: %p", reinterpret_cast<void *>(bb));
         luaL_addstring(&B, str);
 #if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
-        snprintf(str, LL_STRBUFF, "\n    nalloc = 0x%x, n = 0x%x, written = 0x%x",
-                 bb->nalloc, bb->n, bb->nwritten);
+        snprintf(str, LL_STRBUFF, "\n    %s = 0x%x, %s = 0x%x, %s = 0x%x",
+                 "nalloc", bb->nalloc,
+                 "n", bb->n,
+                 "nwritten", bb->nwritten);
         luaL_addstring(&B, str);
 #endif
     }
@@ -326,15 +328,25 @@ ll_new_ByteBuffer(lua_State *L)
     FUNC("ll_new_ByteBuffer");
     ByteBuffer *bbuffer = nullptr;
     size_t size = 0;
-    const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &size);
-    l_int32 nbytes = static_cast<l_int32>(size);
-    l_uint8 *indata = ll_malloc<l_uint8>(_fun, L, size);
-    memcpy(indata, data, size);
+    const l_uint8 *indata = nullptr;
+    l_int32 nbytes = 0;
 
-    DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %" PRIu64 "\n", _fun,
-        "lstring", reinterpret_cast<void *>(indata),
-        "size", static_cast<l_intptr_t>(size));
-    bbuffer = bbufferCreate(indata, nbytes);
+    if (ll_isstring(_fun, L, 1)) {
+        indata = ll_check_lbytes(_fun, L, 1, &size);
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %" PRIu64 "\n", _fun,
+            "indata", reinterpret_cast<const void *>(indata),
+            "size", static_cast<l_intptr_t>(size));
+        nbytes = static_cast<l_int32>(size);
+        bbuffer = bbufferCreate(indata, nbytes);
+    }
+
+    if (!bbuffer) {
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %" PRIu64 "\n", _fun,
+            "indata", reinterpret_cast<const void *>(indata),
+            "size", static_cast<l_intptr_t>(size));
+        bbuffer = bbufferCreate(indata, nbytes);
+    }
+
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
         TNAME, reinterpret_cast<void *>(bbuffer));
     return ll_push_ByteBuffer(_fun, L, bbuffer);

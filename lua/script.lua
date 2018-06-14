@@ -42,9 +42,9 @@ print(pad("global box"), box)
 
 -- require "lua/aset"
 -- require "lua/amap"
-require "lua/bbuffer"
--- require "lua/bmf"
-require "lua/box"
+-- require "lua/bbuffer"
+require "lua/bmf"
+-- require "lua/box"
 -- require "lua/pta"
 -- require "lua/numa"
 -- require "lua/dna"
@@ -54,7 +54,7 @@ require "lua/box"
 -- require "lua/fpix"
 -- require "lua/dpix"
 
---[[
+---[[
 local pix = Pix(4,4,32)
 pix:SetAllArbitrary("Medium Violet Red")
 pix:SetPixel(1, 1, "Blue")

@@ -98,17 +98,25 @@ toString(lua_State* L)
 #if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
         wpl = dpixGetWpl(dpix);
         snprintf(str, LL_STRBUFF,
-                 "\n    width = %d, height = %d, wpl = %d", w, h, wpl);
+                 "\n    %s = %d, %s = %d, %s = %d",
+                 "width", w,
+                 "height", h,
+                 "wpl", wpl);
         luaL_addstring(&B, str);
         size = static_cast<long>(sizeof(l_float64)) * wpl * h;
         data = dpixGetData(dpix);
         snprintf(str, LL_STRBUFF,
-                 "\n    data = %p, size = %#" PRIx64, data, size);
+                 "\n    %s = %p, %s = %#" PRIx64,
+                 "data", data,
+                 "size", size);
         luaL_addstring(&B, str);
         refcnt = dpixGetRefcount(dpix);
         dpixGetResolution(dpix, &xres, &yres);
         snprintf(str, LL_STRBUFF,
-                 "\n    xres = %d, yres = %d, refcount = %d", xres, yres, refcnt);
+                 "\n    %s = %d, %s = %d, %s = %d",
+                 "xres", xres,
+                 "yres", yres,
+                 "refcnt", refcnt);
         luaL_addstring(&B, str);
 #endif
     }

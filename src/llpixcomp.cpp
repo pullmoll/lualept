@@ -106,7 +106,7 @@ toString(lua_State *L)
                  reinterpret_cast<void *>(pixc->data), pixc->size);
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    %scolormap\n", cmapflag ? "" : "no ");
+                 "\n    %scolormap", cmapflag ? "" : "no ");
         luaL_addstring(&B, str);
         if (pixc->text) {
             snprintf(str, LL_STRBUFF,

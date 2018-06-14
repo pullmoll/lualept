@@ -72,18 +72,54 @@ toString(lua_State* L)
 {
     LL_FUNC("toString");
     char *str = ll_calloc<char>(_fun, L, LL_STRBUFF);
-    ByteBuffer *bb = ll_check_ByteBuffer(_fun, L, 1);
+    Bmf *bmf = ll_check_Bmf(_fun, L, 1);
     luaL_Buffer B;
 
     luaL_buffinit(L, &B);
-    if (!bb) {
+    if (!bmf) {
         luaL_addstring(&B, "nil");
     } else {
-        snprintf(str, LL_STRBUFF, TNAME "*: %p", reinterpret_cast<void *>(bb));
+        snprintf(str, LL_STRBUFF, TNAME "*: %p", reinterpret_cast<void *>(bmf));
         luaL_addstring(&B, str);
 #if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
-        snprintf(str, LL_STRBUFF, "\n    nalloc = 0x%x, n = 0x%x, written = 0x%x",
-                 bb->nalloc, bb->n, bb->nwritten);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %s* %p",
+                 "pixa", LL_PIXA, reinterpret_cast<void *>(bmf->pixa));
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "size", bmf->size);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: '%s'",
+                 "directory", bmf->directory);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "baseline1", bmf->baseline1);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "baseline2", bmf->baseline2);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "baseline3", bmf->baseline3);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "lineheight", bmf->lineheight);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "kernwidth", bmf->kernwidth);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "spacewidth", bmf->spacewidth);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "vertlinesep", bmf->vertlinesep);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %s* %p",
+                 "fonttab", "l_int32", reinterpret_cast<void *>(bmf->fonttab));
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %s* %p",
+                 "baselinetab", "l_int32", reinterpret_cast<void *>(bmf->baselinetab));
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %s* %p",
+                 "widthtab", "l_int32", reinterpret_cast<void *>(bmf->widthtab));
         luaL_addstring(&B, str);
 #endif
     }
@@ -303,14 +339,28 @@ int
 ll_new_Bmf(lua_State *L)
 {
     FUNC("ll_new_Bmf");
-    const char* dir = ll_isstring(_fun, L, 1) ? ll_check_string(_fun, L, 1) : ".";
-    l_int32 fontsize = ll_opt_l_int32(_fun, L, 2, 6);
+    const char* dir = nullptr;
+    l_int32 fontsize = 6;
     L_Bmf *bmf = nullptr;
 
-    DBG(LOG_NEW_PARAM, "%s: create for %s = '%s', %s = %d\n", _fun,
-        "dir", dir,
-        "fontsize", fontsize);
-    bmf = bmfCreate(dir, fontsize);
+    if (ll_isstring(_fun, L, 1)) {
+        dir = ll_check_string(_fun, L, 1);
+        fontsize = ll_opt_l_int32(_fun, L, 2, 6);
+        DBG(LOG_NEW_PARAM, "%s: create for %s = '%s', %s = %d\n", _fun,
+            "dir", dir,
+            "fontsize", fontsize);
+        bmf = bmfCreate(dir, fontsize);
+    }
+
+    if (!bmf) {
+        dir = nullptr;
+        fontsize = 6;
+        DBG(LOG_NEW_PARAM, "%s: create for %s = '%s', %s = %d\n", _fun,
+            "dir", dir,
+            "fontsize", fontsize);
+        bmf = bmfCreate(dir, fontsize);
+    }
+
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
         TNAME, reinterpret_cast<void *>(bmf));
     return ll_push_Bmf(_fun, L, bmf);

@@ -1054,11 +1054,9 @@ ll_new_Box(lua_State *L)
 
     if (ll_isudata(_fun, L, 1, LL_BOX)) {
         Box *boxs = ll_opt_Box(_fun, L, 1);
-        if (boxs) {
-            DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
-                TNAME, reinterpret_cast<void *>(boxs));
-            box = boxCopy(boxs);
-        }
+        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+            TNAME, reinterpret_cast<void *>(boxs));
+        box = boxCopy(boxs);
     }
 
     if (!box && ll_isinteger(_fun, L, 1)) {

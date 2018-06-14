@@ -1,7 +1,7 @@
 require "lua/tools"
 
 header("Bmf")
-local bmf = Bmf(nil, 6);
+local bmf = Bmf("fonts", 6);
 print(pad("bmf"), bmf)
 local chr = string.byte('x')
 print(pad("bmf:GetWidth("..chr..")"), bmf:GetWidth(chr))

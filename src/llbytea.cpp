@@ -126,13 +126,17 @@ toString(lua_State *L)
                  reinterpret_cast<void *>(ba));
         luaL_addstring(&B, str);
 #if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
-        snprintf(str, LL_STRBUFF, "\n    nalloc        :  %" PRIu64, static_cast<l_uintptr_t>(ba->nalloc));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %" PRIu64,
+                 "nalloc", static_cast<l_uintptr_t>(ba->nalloc));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    size          :  %" PRIu64, static_cast<l_uintptr_t>(ba->size));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %" PRIu64,
+                 "size", static_cast<l_uintptr_t>(ba->size));
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    refcount      :  %d", ba->refcount);
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+                 "refcount", ba->refcount);
         luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    data          :  %p", reinterpret_cast<void *>(ba->data));
+        snprintf(str, LL_STRBUFF, "\n    %-14s: %s* %p",
+                 "data", "void", reinterpret_cast<void *>(ba->data));
         luaL_addstring(&B, str);
 #endif
     }
