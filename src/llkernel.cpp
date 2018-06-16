@@ -100,9 +100,7 @@ toString(lua_State* L)
         luaL_addstring(&B, str);
 #if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
         for (l_int32 y = 0; y < sy; y++) {
-            if (y > 0)
-                luaL_addstring(&B, "\n");
-            luaL_addstring(&B, "    ");
+            luaL_addstring(&B, "\n    ");
             for (l_int32 x = 0; x < sx; x++) {
                 if (x > 0) {
                     snprintf(str, LL_STRBUFF, " %*s", 10 - len, "");

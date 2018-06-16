@@ -126,6 +126,18 @@ toString(lua_State *L)
                  reinterpret_cast<void *>(cmap));
         luaL_addstring(&B, str);
 #if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
+        snprintf(str, LL_STRBUFF,
+                 "\n    %-14s: %d",
+                 "depth", cmap->depth);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF,
+                 "\n    %-14s: %d",
+                 "nalloc", cmap->nalloc);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF,
+                 "\n    %-14s: %d",
+                 "n", cmap->n);
+        luaL_addstring(&B, str);
         for (i = 0; i < pixcmapGetCount(cmap); i++) {
             pixcmapGetRGBA(cmap, i, &r, &g, &b, &a);
             snprintf(str, LL_STRBUFF, "\n    %-3d = { r = %-3d, g = %-3d, b = %-3d, a = %-3d }",

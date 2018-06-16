@@ -109,16 +109,19 @@ toString(lua_State* L)
         luaL_addstring(&B, str);
 #if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
         snprintf(str, LL_STRBUFF,
-                 "\n    n = %d, nalloc = %d",
-                 pixaa->n, pixaa->nalloc);
+                 "\n    %-14s: %d",
+                 "n", pixaa->n);
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    " LL_PIXA "** = %p",
-                 reinterpret_cast<void *>(pixaa->pixa));
+                 "\n    %-14s: %d",
+                 "nalloc", pixaa->nalloc);
+        snprintf(str, LL_STRBUFF,
+                 "\n    %-14s: %s** %p",
+                 "pix", LL_PIXA, reinterpret_cast<void *>(pixaa->pixa));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    " LL_BOXA "* = %p",
-                 reinterpret_cast<void *>(pixaa->boxa));
+                 "\n    %-14s: %s* %p",
+                 "boxa", LL_BOXA, reinterpret_cast<void *>(pixaa->boxa));
         luaL_addstring(&B, str);
 #endif
     }

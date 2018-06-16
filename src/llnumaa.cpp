@@ -115,7 +115,8 @@ toString(lua_State *L)
             for (l_int32 j = 0; j < numaGetCount(na); j++) {
                 numaGetFValue(na, j, &val);
                 snprintf(str, LL_STRBUFF,
-                         "\n        %d = %.8g", j+1, val);
+                         "\n        %d = %.8g",
+                         j+1, static_cast<double>(val));
                 luaL_addstring(&B, str);
             }
             luaL_addstring(&B, "\n    }");
