@@ -1,5 +1,5 @@
 AC_PREREQ([2.50])
-AC_INIT([lualept], [0.2.0])
+AC_INIT([lualept], [1.0.0])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_HEADERS([src/config.h:config/config.h.in])
 AC_CONFIG_SRCDIR([src/lualept.cpp])
@@ -29,7 +29,7 @@ PKG_CHECK_MODULES([LEPT], [lept >= 1.76.0])
 PKG_CHECK_MODULES([LUA],  [lua5.3 >= 5.3.0])
 
 # Optionally link -lSDL2 to support internal Pix display
-AC_ARG_WITH([sdl2], AS_HELP_STRING([--with-sdl2=no], [Disable building the SDL2 Pix viewer.]))
+AC_ARG_WITH([sdl2], AS_HELP_STRING([--with-sdl2=no], [Disable building the internal SDL2 viewer.]))
 if test "x$with_sdl2" != "xno"; then
 	PKG_CHECK_MODULES([SDL2], [sdl2 >= 2.0.0],
 		[AC_DEFINE([HAVE_SDL2], [1], [Define to 1 if you have the <SDL2/SDL.h> header file.])])

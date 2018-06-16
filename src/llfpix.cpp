@@ -732,7 +732,7 @@ GetData(lua_State *L)
     l_int32 w = 0;
     l_int32 h = 0;
     if (fpixGetDimensions(fpix, &w, &h))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     l_float32 *farray = fpixGetData(fpix);
     return ll_pack_Farray_2d(_fun, L, farray, wpl, h);
 }
@@ -753,7 +753,7 @@ GetDimensions(lua_State *L)
     l_int32 w = 0;
     l_int32 h = 0;
     if (fpixGetDimensions(fpix, &w, &h))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, w);
     ll_push_l_int32(_fun, L, h);
     return 2;
@@ -776,7 +776,7 @@ GetMax(lua_State *L)
     l_int32 xmaxloc = 0;
     l_int32 ymaxloc = 0;
     if (fpixGetMax(fpix, &maxval, &xmaxloc, &ymaxloc))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, maxval);
     ll_push_l_int32(_fun, L, xmaxloc);
     ll_push_l_int32(_fun, L, ymaxloc);
@@ -800,7 +800,7 @@ GetMin(lua_State *L)
     l_int32 xminloc = 0;
     l_int32 yminloc = 0;
     if (fpixGetMin(fpix, &minval, &xminloc, &yminloc))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, minval);
     ll_push_l_int32(_fun, L, xminloc);
     ll_push_l_int32(_fun, L, yminloc);
@@ -826,7 +826,7 @@ GetPixel(lua_State *L)
     l_int32 y = ll_check_l_int32(_fun, L, 3);
     l_float32 val = 0;
     if (fpixGetPixel(fpix, x, y, &val))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_l_float32(_fun, L, val);
 }
 
@@ -862,7 +862,7 @@ GetResolution(lua_State *L)
     l_int32 xres = 0;
     l_int32 yres = 0;
     if (fpixGetResolution(fpix, &xres, &yres))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, xres);
     ll_push_l_int32(_fun, L, yres);
     return 2;
@@ -1307,12 +1307,11 @@ SetData(lua_State *L)
     FPix *fpix = ll_check_FPix(_fun, L, 1);
     l_int32 w, h;
     l_int32 wpl = fpixGetWpl(fpix);
-    l_float32* data = nullptr;
     if (fpixGetDimensions(fpix, &w, &h))
-        return ll_push_nil(L);
-    data = ll_calloc<l_float32>(_fun, L, h * wpl);
-    if (!ll_unpack_Farray_2d(_fun, L, 2, data, wpl, h))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
+    l_float32* data = ll_unpack_Farray_2d(_fun, L, 2, wpl, h);
+    if (nullptr == data)
+        return ll_push_nil(_fun, L);
     ll_push_boolean(_fun, L, 0 == fpixSetData(fpix, data));
     ll_free(data);
     return 1;
@@ -1458,7 +1457,7 @@ WriteMem(lua_State *L)
     l_uint8 *data = nullptr;
     size_t size = 0;
     if (fpixWriteMem(&data, &size, fpix))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_bytes(_fun, L, data, size);
     return 1;
 }
@@ -1521,7 +1520,7 @@ int
 ll_push_FPix(const char *_fun, lua_State *L, FPix *cd)
 {
     if (!cd)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, cd);
 }
 

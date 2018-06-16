@@ -110,24 +110,25 @@ enum dbg_enable_flags {
     LOG_NEW_CLASS       = (1<< 2),  /*!< log ll_new_<ClassName> class creation */
     LOG_DESTROY         = (1<< 3),  /*!< log class destruction */
     LOG_TAKE            = (1<< 4),  /*!< log ll_take_udata calls */
-    LOG_PUSH_BOOLEAN    = (1<< 5),  /*!< log pushing booleans */
-    LOG_CHECK_BOOLEAN   = (1<< 6),  /*!< log checking for booleans */
-    LOG_PUSH_INTEGER    = (1<< 7),  /*!< log pushing integers */
-    LOG_CHECK_INTEGER   = (1<< 8),  /*!< log checking for integers */
-    LOG_PUSH_NUMBER     = (1<< 9),  /*!< log pushing numbers */
-    LOG_CHECK_NUMBER    = (1<<10),  /*!< log checking for numbers */
-    LOG_PUSH_STRING     = (1<<11),  /*!< log pushing strings */
-    LOG_CHECK_STRING    = (1<<12),  /*!< log checking for strings */
-    LOG_PUSH_TABLE      = (1<<13),  /*!< log pushing tables */
-    LOG_CHECK_TABLE     = (1<<14),  /*!< log checking for tables */
-    LOG_PUSH_CFUNCTION  = (1<<15),  /*!< log pushing C functions */
-    LOG_CHECK_CFUNCTION = (1<<16),  /*!< log checking for C functions */
-    LOG_PUSH_UDATA      = (1<<17),  /*!< log pushing user data */
-    LOG_CHECK_UDATA     = (1<<18),  /*!< log checking for user data */
-    LOG_PUSH_LUDATA     = (1<<19),  /*!< log pushing light user data */
-    LOG_CHECK_LUDATA    = (1<<20),  /*!< log checking for light user data */
-    LOG_PUSH_ARRAY      = (1<<21),  /*!< log pushing table arrays */
-    LOG_CHECK_ARRAY     = (1<<22),  /*!< log checking for table arrays */
+    LOG_PUSH_NIL        = (1<< 5),  /*!< log pushing nil */
+    LOG_PUSH_BOOLEAN    = (1<< 6),  /*!< log pushing booleans */
+    LOG_CHECK_BOOLEAN   = (1<< 7),  /*!< log checking for booleans */
+    LOG_PUSH_INTEGER    = (1<< 8),  /*!< log pushing integers */
+    LOG_CHECK_INTEGER   = (1<< 9),  /*!< log checking for integers */
+    LOG_PUSH_NUMBER     = (1<<10),  /*!< log pushing numbers */
+    LOG_CHECK_NUMBER    = (1<<11),  /*!< log checking for numbers */
+    LOG_PUSH_STRING     = (1<<12),  /*!< log pushing strings */
+    LOG_CHECK_STRING    = (1<<13),  /*!< log checking for strings */
+    LOG_PUSH_TABLE      = (1<<14),  /*!< log pushing tables */
+    LOG_CHECK_TABLE     = (1<<15),  /*!< log checking for tables */
+    LOG_PUSH_CFUNCTION  = (1<<16),  /*!< log pushing C functions */
+    LOG_CHECK_CFUNCTION = (1<<17),  /*!< log checking for C functions */
+    LOG_PUSH_UDATA      = (1<<18),  /*!< log pushing user data */
+    LOG_CHECK_UDATA     = (1<<19),  /*!< log checking for user data */
+    LOG_PUSH_LUDATA     = (1<<20),  /*!< log pushing light user data */
+    LOG_CHECK_LUDATA    = (1<<21),  /*!< log checking for light user data */
+    LOG_PUSH_ARRAY      = (1<<22),  /*!< log pushing table arrays */
+    LOG_CHECK_ARRAY     = (1<<23),  /*!< log checking for table arrays */
     LOG_SDL2            = (1<<30)   /*!< log SDL2 display code */
 };
 
@@ -436,7 +437,7 @@ extern int              ll_register_class(const char *_fun, lua_State *L, const 
 extern int              ll_set_global_cfunct(const char *_fun, lua_State *L, const char* tname, lua_CFunction cfunct);
 extern int              ll_set_global_table(const char *_fun, lua_State *L, const char* tname);
 extern int              ll_push_udata(const char *_fun, lua_State *L, const char *name, void *udata);
-extern int              ll_push_nil(lua_State *L);
+extern int              ll_push_nil(const char *_fun, lua_State *L);
 extern int              ll_push_boolean(const char* _fun, lua_State *L, bool b);
 extern int              ll_push_l_int8(const char *_fun, lua_State *L, l_int8 val);
 extern int              ll_push_l_uint8(const char *_fun, lua_State *L, l_uint8 val);
@@ -464,12 +465,12 @@ extern int              ll_pack_Sarray(const char* _fun, lua_State *L, Sarray *s
 
 extern l_int32        * ll_unpack_Iarray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
 extern l_uint32       * ll_unpack_Uarray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
-extern l_uint32       * ll_unpack_Uarray_2d(const char *_fun, lua_State *L, int arg, l_uint32 *data, l_int32 wpl, l_int32 h);
+extern l_uint32       * ll_unpack_Uarray_2d(const char *_fun, lua_State *L, int arg, l_int32 wpl, l_int32 h);
 extern l_float32      * ll_unpack_Farray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
-extern l_float32      * ll_unpack_Farray_2d(const char *_fun, lua_State *L, int arg, l_float32 *data, l_int32 wpl, l_int32 h);
+extern l_float32      * ll_unpack_Farray_2d(const char *_fun, lua_State *L, int arg, l_int32 wpl, l_int32 h);
 extern l_float32      * ll_unpack_Matrix(const char *_fun, lua_State *L, int arg, int w, int h);
 extern l_float64      * ll_unpack_Darray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
-extern l_float64      * ll_unpack_Darray_2d(const char *_fun, lua_State *L, int arg, l_float64 *data, l_int32 wpl, l_int32 h);
+extern l_float64      * ll_unpack_Darray_2d(const char *_fun, lua_State *L, int arg, l_int32 wpl, l_int32 h);
 extern Sarray         * ll_unpack_Sarray(const char *_fun, lua_State *L, int arg, l_int32 *pn);
 
 extern l_int32          ll_check_index(const char *_fun, lua_State *L, int arg, l_int32 imax = INT32_MAX);

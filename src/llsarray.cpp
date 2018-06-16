@@ -90,9 +90,15 @@ toString(lua_State* L)
         luaL_addstring(&B, str);
 #if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
         snprintf(str, LL_STRBUFF,
-                 "\n    %s = %d, %s = %d, %s = %d",
-                 "nalloc", sa->nalloc,
-                 "n", sa->n,
+                 "\n    %-14s: %d",
+                 "nalloc", sa->nalloc);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF,
+                 "\n    %-14s: %d",
+                 "n", sa->n);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF,
+                 "\n    %-14s: %d",
                  "refcount", sa->refcount);
         luaL_addstring(&B, str);
         for (l_int32 i = 0; i < sarrayGetCount(sa); i++) {
@@ -427,7 +433,7 @@ FindStringByHash(lua_State *L)
     const char *str = ll_check_string(_fun, L, 3);
     l_int32 index = 0;
     if (sarrayFindStringByHash(sa, dahash, str, &index))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32 (_fun, L, index);
     return 1;
 }
@@ -625,7 +631,7 @@ LookupCSKV(lua_State *L)
     const char *keystring = ll_check_string(_fun, L, 2);
     char *valstring = nullptr;
     if (sarrayLookupCSKV(sa, keystring, &valstring))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_string(_fun, L, valstring);
 }
 
@@ -822,7 +828,7 @@ RemoveDupsByHash(lua_State *L)
     Sarray *sad = nullptr;
     DnaHash *dahash = nullptr;
     if (sarrayRemoveDupsByHash(sas, &sad, &dahash))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_Sarray(_fun, L, sad);
     ll_push_DnaHash (_fun, L, dahash);
     return 2;
@@ -1126,7 +1132,7 @@ WriteMem(lua_State *L)
     l_uint8 *data = nullptr;
     size_t size = 0;
     if (sarrayWriteMem(&data, &size, sa))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_bytes(_fun, L, data, size);
     return 1;
 }
@@ -1193,7 +1199,7 @@ int
 ll_push_Sarray(const char *_fun, lua_State *L, Sarray *sa)
 {
     if (!sa)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, sa);
 }
 

@@ -197,7 +197,7 @@ AlignBox(lua_State *L)
     l_int32 delta = ll_check_l_int32(_fun, L, 3);
     l_int32 index = 0;
     if (boxaaAlignBox(baa, box, delta, &index))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32 (_fun, L, index);
     return 1;
 }
@@ -496,7 +496,7 @@ GetExtent(lua_State *L)
     Box *box = nullptr;
     Boxa *ba = nullptr;
     if (boxaaGetExtent(baa, &w, &h, &box, &ba))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32 (_fun, L, w);
     ll_push_l_int32 (_fun, L, h);
     ll_push_Box (_fun, L, box);
@@ -811,7 +811,7 @@ SizeRange(lua_State *L)
     l_int32 maxw = 0;
     l_int32 maxh = 0;
     if (boxaaSizeRange(baa, &minw, &minh, &maxw, &maxh))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32 (_fun, L, minw);
     ll_push_l_int32 (_fun, L, minh);
     ll_push_l_int32 (_fun, L, maxw);
@@ -904,7 +904,7 @@ WriteMem(lua_State *L)
     l_uint8 *data = nullptr;
     size_t size = 0;
     if (boxaaWriteMem(&data, &size, boxaa))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     lua_pushlstring(L, reinterpret_cast<const char *>(data), size);
     ll_free(data);
     return 1;
@@ -967,7 +967,7 @@ int
 ll_push_Boxaa(const char *_fun, lua_State *L, Boxaa *boxaa)
 {
     if (!boxaa)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, boxaa);
 }
 /**

@@ -167,7 +167,7 @@ int
 ll_push_PixaComp(const char *_fun, lua_State *L, PixaComp *pixacomp)
 {
     if (!pixacomp)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, pixacomp);
 }
 

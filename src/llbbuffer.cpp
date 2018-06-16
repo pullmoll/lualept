@@ -244,7 +244,7 @@ Write(lua_State *L)
     l_uint8 *dest = ll_calloc<l_uint8>(_fun, L, nbytes);
     size_t nout = 0;
     if (bbufferWrite(bb, dest, nbytes, &nout))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_bytes(_fun, L, dest, nout);
     return 1;
 }
@@ -269,7 +269,7 @@ WriteStream(lua_State *L)
     size_t nbytes = ll_check_size_t(_fun, L, 3);
     size_t nout = 0;
     if (bbufferWriteStream(bb, stream->f, nbytes, &nout))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_size_t(_fun, L, nout);
     return 1;
 }
@@ -313,7 +313,7 @@ int
 ll_push_ByteBuffer(const char *_fun, lua_State *L, ByteBuffer *bb)
 {
     if (!bb)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, bb);
 }
 

@@ -251,7 +251,7 @@ FindEachSequence(lua_State *L)
     const l_uint8 *sequence = ll_check_lbytes(_fun, L, 2, &seqlen);
     Dna *da = nullptr;
     if (l_byteaFindEachSequence(ba, sequence, seqlen, &da))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_Dna(_fun, L, da);
     return 1;
 }
@@ -352,7 +352,7 @@ Join(lua_State *L)
     Bytea *ba1 = ll_check_Bytea(_fun, L, 1);
     Bytea *ba2 = ll_opt_Bytea(_fun, L, 2);
     if (l_byteaJoin(ba1, &ba2))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_Bytea(_fun, L, ba2);
     return 1;
 }
@@ -375,7 +375,7 @@ Split(lua_State *L)
     size_t splitloc = ll_check_size_t(_fun, L, 2);
     Bytea *ba2 = nullptr;
     if (l_byteaSplit(ba1, splitloc, &ba2))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_Bytea(_fun, L, ba2);
     return 1;
 }
@@ -465,7 +465,7 @@ int
 ll_push_Bytea(const char *_fun, lua_State *L, L_Bytea *bmf)
 {
     if (!bmf)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, bmf);
 }
 /**

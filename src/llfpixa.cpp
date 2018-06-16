@@ -339,7 +339,7 @@ GetData(lua_State *L)
     l_int32 h = 0;
     l_float32 *farray = nullptr;
     if (fpixaGetFPixDimensions(fpixa, idx, &w, &h))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     farray = fpixaGetData(fpixa, idx);
     fpixDestroy(&fpix);
     return ll_pack_Farray_2d(_fun, L, farray, wpl, h);
@@ -384,7 +384,7 @@ GetFPixDimensions(lua_State *L)
     l_int32 w = 0;
     l_int32 h = 0;
     if (fpixaGetFPixDimensions(fpixa, idx, &w, &h))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, w);
     ll_push_l_int32(_fun, L, h);
     return 2;
@@ -411,7 +411,7 @@ GetPixel(lua_State *L)
     l_int32 y = ll_check_l_int32(_fun, L, 4);
     l_float32 val = 0;
     if (fpixaGetPixel(fpixa, idx, x, y, &val))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_l_float32(_fun, L, val);
 }
 
@@ -478,7 +478,7 @@ int
 ll_push_FPixa(const char *_fun, lua_State *L, FPixa *cd)
 {
     if (!cd)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, cd);
 }
 
@@ -501,7 +501,7 @@ ll_new_FPixa(lua_State *L)
         FPixa *fpixa = fpixaCreate(n);
         return ll_push_FPixa(_fun, L, fpixa);
     }
-    return ll_push_nil(L);
+    return ll_push_nil(_fun, L);
 }
 
 /**

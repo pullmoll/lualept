@@ -220,7 +220,7 @@ ConvertToPdf(lua_State *L)
     PdfData *lpd = nullptr;
     l_int32 position = ll_check_position(_fun, L, 9);
     if (convertToPdf(filein, type, quality, fileout, x, y, res, title, &lpd, position))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_PdfData(_fun, L, lpd);
     return 1;
 }
@@ -256,7 +256,7 @@ ConvertToPdfData(lua_State *L)
     PdfData *lpd = nullptr;
     l_int32 position = ll_check_l_int32(_fun, L, 8);
     if (convertToPdfData(filein, type, quality, &data, &nbytes, x, y, res, title, &lpd, position))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_bytes(_fun, L, data, nbytes);
     ll_push_PdfData(_fun, L, lpd);
     return 2;
@@ -292,7 +292,7 @@ ConvertToPdfDataSegmented(lua_State *L)
     l_uint8 *data = nullptr;
     size_t nbytes = 0;
     if (convertToPdfDataSegmented(filein, res, type, thresh, boxa, quality, scalefactor, title, &data, &nbytes))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_bytes(_fun, L, data, nbytes);
     return 1;
 }
@@ -337,7 +337,7 @@ ConvertUnscaledToPdfData(lua_State *L)
     l_uint8 *data = nullptr;
     size_t nbytes = 0;
     if (convertUnscaledToPdfData(fname, title, &data, &nbytes))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_bytes(_fun, L, data, nbytes);
     ll_free(data);
     return 1;
@@ -382,7 +382,7 @@ int
 ll_push_PdfData(const char *_fun, lua_State *L, PdfData *cd)
 {
     if (!cd)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, cd);
 }
 /**

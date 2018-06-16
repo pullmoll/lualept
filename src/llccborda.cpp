@@ -715,7 +715,7 @@ int
 ll_push_CCBorda(const char *_fun, lua_State *L, CCBorda *cd)
 {
     if (!cd)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, cd);
 }
 

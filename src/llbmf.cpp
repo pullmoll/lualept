@@ -173,7 +173,7 @@ GetBaseline(lua_State *L)
     char chr = ll_check_char(_fun, L, 2);
     l_int32 baseline = 0;
     if (bmfGetBaseline(bmf, chr, &baseline))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, baseline);
     return 1;
 }
@@ -240,7 +240,7 @@ GetStringWidth(lua_State *L)
     const char* str = ll_check_string(_fun, L, 2);
     l_int32 w;
     if (bmfGetStringWidth(bmf, str, &w))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, w);
     return 1;
 }
@@ -262,7 +262,7 @@ GetWidth(lua_State *L)
     char chr = ll_check_char(_fun, L, 2);
     l_int32 w = 0;
     if (bmfGetWidth(bmf, chr, &w))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, w);
     return 1;
 }
@@ -327,7 +327,7 @@ int
 ll_push_Bmf(const char *_fun, lua_State *L, L_Bmf *bmf)
 {
     if (!bmf)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, bmf);
 }
 /**

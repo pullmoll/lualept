@@ -476,7 +476,7 @@ int
 ll_push_DLList(const char *_fun, lua_State *L, DLList *head)
 {
     if (!head)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, head);
 }
 /**

@@ -193,7 +193,7 @@ GetPt(lua_State *L)
     l_float32 x;
     l_float32 y;
     if (ptaaGetPt(ptaa, ipta, ipt, &x, &y))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, x);
     ll_push_l_float32(_fun, L, y);
     return 2;
@@ -360,7 +360,7 @@ WriteMem(lua_State *L)
     l_uint8 *data = nullptr;
     size_t size = 0;
     if (ptaaWriteMem(&data, &size, ptaa, type))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     lua_pushlstring(L, reinterpret_cast<const char *>(data), size);
     ll_free(data);
     return 1;
@@ -426,7 +426,7 @@ int
 ll_push_Ptaa(const char *_fun, lua_State *L, Ptaa *ptaa)
 {
     if (!ptaa)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, ptaa);
 }
 

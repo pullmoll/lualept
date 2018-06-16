@@ -157,6 +157,7 @@ static const lept_enum tbl_debug[] = {
     TBL_ENTRY("new-class",      LOG_NEW_CLASS),
     TBL_ENTRY("destroy",        LOG_DESTROY),
     TBL_ENTRY("take",           LOG_TAKE),
+    TBL_ENTRY("push-nil",       LOG_PUSH_NIL),
     TBL_ENTRY("boolean",        LOG_PUSH_BOOLEAN | LOG_CHECK_BOOLEAN),
     TBL_ENTRY("push-boolean",   LOG_PUSH_BOOLEAN),
     TBL_ENTRY("check-boolean",  LOG_CHECK_BOOLEAN),

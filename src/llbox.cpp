@@ -121,7 +121,7 @@ Equal(lua_State *L)
     Box *box2 = ll_check_Box(_fun, L, 2);
     l_int32 same = FALSE;
     if (boxEqual(box1, box2, &same))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_boolean(_fun, L, same);
 }
 
@@ -263,7 +263,7 @@ ClipToRectangleParams(lua_State *L)
     l_int32 bw = 0;
     l_int32 bh = 0;
     if (boxClipToRectangleParams(boxs, w, h, &xstart, &ystart, &xend, &yend, &bw, &bh))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, xstart);
     ll_push_l_int32(_fun, L, ystart);
     ll_push_l_int32(_fun, L, xend);
@@ -312,7 +312,7 @@ CompareSize(lua_State *L)
     l_int32 type = ll_check_sort_by(_fun, L, 3, L_SORT_BY_WIDTH);
     l_int32 rel = 0;
     if (boxCompareSize(box1, box2, type, &rel))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_string(_fun, L, ll_string_relation(rel));
     return 1;
 }
@@ -334,7 +334,7 @@ Contains(lua_State *L)
     Box *box2 = ll_check_Box(_fun, L, 2);
     l_int32 contains = 0;
     if (boxContains(box1, box2, &contains))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_boolean(_fun, L, contains);
 }
 
@@ -357,7 +357,7 @@ ContainsPt(lua_State *L)
     l_float32 y = ll_check_l_float32(_fun, L, 3);
     l_int32 contains = FALSE;
     if (boxContainsPt(box, x, y, &contains))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_boolean(_fun, L, contains);
 }
 
@@ -483,7 +483,7 @@ GetCenter(lua_State *L)
     l_float32 cx = 0.0f;
     l_float32 cy = 0.0f;
     if (boxGetCenter(box, &cx, &cy))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, cx);
     ll_push_l_float32(_fun, L, cy);
     return 2;
@@ -504,7 +504,7 @@ GetGeometry(lua_State *L)
     Box *box = ll_check_Box(_fun, L, 1);
     l_int32 x, y, w, h;
     if (boxGetGeometry(box, &x, &y, &w, &h))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, x);
     ll_push_l_int32(_fun, L, y);
     ll_push_l_int32(_fun, L, w);
@@ -547,7 +547,7 @@ GetSideLocations(lua_State *L)
     Box *box = ll_check_Box(_fun, L, 1);
     l_int32 l, r, t, b;
     if (boxGetSideLocations(box, &l, &r, &t, &b))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, l);
     ll_push_l_int32(_fun, L, r);
     ll_push_l_int32(_fun, L, t);
@@ -585,7 +585,7 @@ IntersectByLine(lua_State *L)
     l_int32 y2 = 0;
     l_int32 n = 0;
     if (boxIntersectByLine(box, x, y, slope, &x1, &y1, &x2, &y2, &n))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, x1);
     ll_push_l_int32(_fun, L, y1);
     ll_push_l_int32(_fun, L, x2);
@@ -611,7 +611,7 @@ Intersects(lua_State *L)
     Box *box2 = ll_check_Box(_fun, L, 2);
     l_int32 intersects = 0;
     if (boxIntersects(box1, box2, &intersects))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_boolean(_fun, L, intersects);
 }
 
@@ -630,7 +630,7 @@ IsValid(lua_State *L)
     Box *box = ll_check_Box(_fun, L, 1);
     l_int32 valid = 0;
     if (boxIsValid(box, &valid))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_boolean(_fun, L, valid);
 }
 
@@ -651,7 +651,7 @@ OverlapArea(lua_State *L)
     Box *box2 = ll_check_Box(_fun, L, 2);
     l_int32 area = 0.0f;
     if (boxOverlapArea(box1, box2, &area))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, area);
     return 1;
 }
@@ -677,7 +677,7 @@ OverlapFraction(lua_State *L)
     Box *box2 = ll_check_Box(_fun, L, 2);
     l_float32 fract = 0.0f;
     if (boxOverlapFraction(box1, box2, &fract))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_l_float32(_fun, L, fract);
 }
 
@@ -806,7 +806,7 @@ SeparationDistance(lua_State *L)
     l_int32 h_sep = 0;
     l_int32 v_sep = 0;
     if (boxSeparationDistance(box1, box2, &h_sep, &v_sep))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, h_sep);
     ll_push_l_int32(_fun, L, v_sep);
     return 2;
@@ -890,7 +890,7 @@ Similar(lua_State *L)
     l_int32 botdiff = ll_opt_l_int32(_fun, L, 6, topdiff);
     l_int32 similar = FALSE;
     if (boxSimilar(box1, box2, leftdiff, rightdiff, topdiff, botdiff, &similar))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_boolean(_fun, L, similar);
 }
 
@@ -1036,7 +1036,7 @@ int
 ll_push_Box(const char *_fun, lua_State *L, Box *box)
 {
     if (!box)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, box);
 }
 

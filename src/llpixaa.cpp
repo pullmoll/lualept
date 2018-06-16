@@ -568,7 +568,7 @@ WriteMem(lua_State *L)
     l_uint8 *data = nullptr;
     size_t size = 0;
     if (pixaaWriteMem(&data, &size, pixaa))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     lua_pushlstring(L, reinterpret_cast<const char *>(data), size);
     ll_free(data);
     return 1;
@@ -635,7 +635,7 @@ int
 ll_push_Pixaa(const char *_fun, lua_State *L, Pixaa *pixaa)
 {
     if (!pixaa)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, pixaa);
 }
 

@@ -356,7 +356,7 @@ FindMaxTranslations(lua_State *L)
     l_int32 xn = 0;
     l_int32 yn = 0;
     if (selFindMaxTranslations(sel, &xp, &yp, &xn, &yn))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, xp);
     ll_push_l_int32(_fun, L, yp);
     ll_push_l_int32(_fun, L, xn);
@@ -383,7 +383,7 @@ GetElement(lua_State *L)
     l_int32 col = ll_check_l_int32(_fun, L, 3);
     l_int32 type = SEL_DONT_CARE;
     if (selGetElement(sel, row, col, &type))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     lua_pushstring(L, ll_string_sel(type));
     return 1;
 }
@@ -425,7 +425,7 @@ GetParameters(lua_State *L)
     l_int32 cy = 0;
     l_int32 cx = 0;
     if (selGetParameters(sel, &sy, &sx, &cy, &cx))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, sy);
     ll_push_l_int32(_fun, L, sx);
     ll_push_l_int32(_fun, L, cy);
@@ -448,7 +448,7 @@ GetTypeAtOrigin(lua_State *L)
     Sel *sel = ll_check_Sel(_fun, L, 1);
     l_int32 type = SEL_DONT_CARE;
     if (selGetTypeAtOrigin(sel, &type))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     lua_pushstring(L, ll_string_sel(type));
     return 1;
 }
@@ -571,7 +571,7 @@ SelectComposableSels(lua_State *L)
     Sel *sel1 = nullptr;
     Sel *sel2 = nullptr;
     if (selectComposableSels(size, direction, &sel1, &sel2))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_Sel(_fun, L, sel1);
     ll_push_Sel(_fun, L, sel2);
     return 2;
@@ -593,7 +593,7 @@ SelectComposableSizes(lua_State *L)
     l_int32 factor1 = 0;
     l_int32 factor2 = 0;
     if (selectComposableSizes(size, &factor1, &factor2))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, factor1);
     ll_push_l_int32(_fun, L, factor2);
     return 2;
@@ -744,7 +744,7 @@ int
 ll_push_Sel(const char *_fun, lua_State *L, Sel *sel)
 {
     if (!sel)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, sel);
 }
 /**

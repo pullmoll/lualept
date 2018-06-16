@@ -203,7 +203,7 @@ ApplyDisparity(lua_State *L)
     const char *debugfile = ll_check_string(_fun, L, 7);
     Pix *pixd = nullptr;
     if (dewarpaApplyDisparity(dewa, pageno, pixs, grayin, x, y, &pixd, debugfile))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_Pix(_fun, L, pixd);
 }
 
@@ -247,7 +247,7 @@ ApplyDisparityBoxa(lua_State *L)
     const char *debugfile = ll_check_string(_fun, L, 8);
     Boxa *boxad = nullptr;
     if (dewarpaApplyDisparityBoxa(dewa, pageno, pixs, boxas, mapdir, x, y, &boxad, debugfile))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_Boxa(_fun, L, boxad);
 }
 
@@ -537,7 +537,7 @@ ModelStats(lua_State *L)
     l_int32 nhvalid = 0;
     l_int32 nref = 0;
     if (dewarpaModelStats(dewa, &nnone, &nvsuccess, &nvvalid, &nhsuccess, &nhvalid, &nref))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, nnone);
     ll_push_l_int32(_fun, L, nvsuccess);
     ll_push_l_int32(_fun, L, nvvalid);
@@ -568,7 +568,7 @@ ModelStatus(lua_State *L)
     l_int32 vsuccess = 0;
     l_int32 hsuccess = 0;
     if (dewarpaModelStatus(dewa, pageno, &vsuccess, &hsuccess))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, vsuccess);
     ll_push_l_int32(_fun, L, hsuccess);
     return 2;
@@ -912,7 +912,7 @@ WriteMem(lua_State *L)
     size_t size = 0;
     l_uint8 *data = nullptr;
     if (dewarpaWriteMem(&data, &size, dewa))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     lua_pushlstring(L, reinterpret_cast<const char *>(data), size);
     ll_free(data);
     return 1;
@@ -974,7 +974,7 @@ int
 ll_push_Dewarpa(const char *_fun, lua_State *L, Dewarpa *dew)
 {
     if (!dew)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, dew);
 }
 

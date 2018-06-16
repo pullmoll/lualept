@@ -456,7 +456,7 @@ FindSelByName(lua_State *L)
     l_int32 idx = 0;
     Sel *sel = nullptr;
     if (selaFindSelByName(sela, name, &idx, &sel))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, idx + 1);
     ll_push_Sel(_fun, L, sel);
     return 2;
@@ -699,7 +699,7 @@ int
 ll_push_Sela(const char *_fun, lua_State *L, Sela *sela)
 {
     if (!sela)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, sela);
 }
 

@@ -298,7 +298,7 @@ FromArray(lua_State *L)
     l_float32 *tbl = ll_unpack_Farray(_fun, L, 1, &n);
     Numa* na = numaCreate(n);
     if (!na)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     for (i = 0; i < n; i++)
         numaAddNumber(na, tbl[i]);
     ll_free(tbl);
@@ -358,7 +358,7 @@ GetFValue(lua_State *L)
     l_int32 idx = ll_check_index(_fun, L, 2, numaGetCount(na));
     l_float32 val;
     if (numaGetFValue(na, idx, &val))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, val);
     return 1;
 }
@@ -415,7 +415,7 @@ GetIValue(lua_State *L)
     l_int32 idx = ll_check_index(_fun, L, 2, numaGetCount(na));
     l_int32 val;
     if (numaGetIValue(na, idx, &val))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, val);
     return 1;
 }
@@ -436,7 +436,7 @@ GetParameters(lua_State *L)
     l_float32 startx = 0;
     l_float32 deltax = 0;
     if (numaGetParameters(na, &startx, &deltax))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, startx);
     ll_push_l_float32(_fun, L, deltax);
     return 2;
@@ -666,7 +666,7 @@ WriteMem(lua_State *L)
     l_uint8 *data = nullptr;
     size_t size = 0;
     if (numaWriteMem(&data, &size, na))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     lua_pushlstring(L, reinterpret_cast<const char *>(data), size);
     ll_free(data);
     return 1;
@@ -729,7 +729,7 @@ int
 ll_push_Numa(const char *_fun, lua_State *L, Numa *na)
 {
     if (!na)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, na);
 }
 

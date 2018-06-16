@@ -286,7 +286,7 @@ Find(lua_State *L)
         break;
     }
     if (!result)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     value = l_asetFind(aset, key);
     return ll_push_boolean(_fun, L, nullptr != value);
 }
@@ -401,7 +401,7 @@ int
 ll_push_Aset(const char *_fun, lua_State *L, Aset *aset)
 {
     if (!aset)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, aset);
 }
 

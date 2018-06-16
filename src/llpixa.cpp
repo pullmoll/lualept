@@ -310,7 +310,7 @@ GetBoxGeometry(lua_State *L)
     l_int32 idx = ll_check_index(_fun, L, 2, pixaGetCount(pixa));
     l_int32 x, y, w, h;
     if (pixaGetBoxGeometry(pixa, idx, &x, &y, &w, &h))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, x);
     ll_push_l_int32(_fun, L, y);
     ll_push_l_int32(_fun, L, w);
@@ -559,7 +559,7 @@ RemovePixAndSave(lua_State *L)
     Pix *pix = nullptr;
     Box *box = nullptr;
     if (pixaRemovePixAndSave(pixa, idx, &pix, &box))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_Pix(_fun, L, pix) + ll_push_Box(_fun, L, box);
 }
 
@@ -653,7 +653,7 @@ WriteMem(lua_State *L)
     l_uint8 *data = nullptr;
     size_t size = 0;
     if (pixaWriteMem(&data, &size, pixa))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     lua_pushlstring(L, reinterpret_cast<const char *>(data), size);
     ll_free(data);
     return 1;
@@ -751,7 +751,7 @@ int
 ll_push_Pixa(const char *_fun, lua_State *L, Pixa *pixa)
 {
     if (!pixa)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, pixa);
 }
 

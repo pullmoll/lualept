@@ -319,7 +319,7 @@ GetElement(lua_State *L)
     l_int32 col = ll_check_l_int32(_fun, L, 3);
     l_float32 val = 0;
     if (kernelGetElement(kel, row, col, &val))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, val);
     return 1;
 }
@@ -340,7 +340,7 @@ GetMinMax(lua_State *L)
     l_float32 min = 0;
     l_float32 max = 0;
     if (kernelGetMinMax(kel, &min, &max))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, min);
     ll_push_l_float32(_fun, L, max);
     return 2;
@@ -364,7 +364,7 @@ GetParameters(lua_State *L)
     l_int32 cy = 0;
     l_int32 cx = 0;
     if (kernelGetParameters(kel, &sy, &sx, &cy, &cx))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, sy);
     ll_push_l_int32(_fun, L, sx);
     ll_push_l_int32(_fun, L, cy);
@@ -387,7 +387,7 @@ GetSum(lua_State *L)
     Kernel *kel = ll_check_Kernel(_fun, L, 1);
     l_float32 sum = 0;
     if (kernelGetSum(kel, &sum))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, sum);
     return 1;
 }
@@ -529,7 +529,7 @@ MakeGaussianKernelSep(lua_State *L)
     Kernel *kelx = nullptr;
     Kernel *kely = nullptr;
     if (makeGaussianKernelSep(halfheight, halfwidth, stdev, max, &kelx, &kely))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_Kernel (_fun, L, kelx);
     ll_push_Kernel (_fun, L, kely);
     return 2;
@@ -731,7 +731,7 @@ int
 ll_push_Kernel(const char *_fun, lua_State *L, Kernel *cd)
 {
     if (!cd)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, cd);
 }
 

@@ -121,19 +121,24 @@ toString(lua_State *L)
         luaL_addstring(&B, str);
 #if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
         snprintf(str, LL_STRBUFF,
-                 "\n    nalloc            : %d", lq->nalloc);
+                 "\n    %-14s: %d",
+                 "nalloc", lq->nalloc);
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    nhead             : %d", lq->nhead);
+                 "\n    %-14s: %d",
+                 "nhead", lq->nhead);
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    nelem             : %d", lq->nelem);
+                 "\n    %-14s: %d",
+                 "nelem", lq->nelem);
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    array             : void** %p", reinterpret_cast<void *>(lq->array));
+                 "\n    %-14s: %s** %p",
+                 "array", "void", reinterpret_cast<void *>(lq->array));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    stack             : " LL_STACK "* %p", reinterpret_cast<void *>(lq->stack));
+                 "\n    %-14s: %s* %p",
+                 "array", LL_STACK, reinterpret_cast<void *>(lq->stack));
         luaL_addstring(&B, str);
 #endif
     }
@@ -268,7 +273,7 @@ int
 ll_push_Queue(const char *_fun, lua_State *L, Queue *cd)
 {
     if (!cd)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, cd);
 }
 

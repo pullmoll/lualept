@@ -106,7 +106,7 @@ ReplaceNumber(lua_State *L)
     int isnumber = 0;
     lua_Number val = lua_tonumberx(L, 3, &isnumber);
     if (!isnumber)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_boolean(_fun, L, 0 == l_dnaReplaceNumber(da, idx, val));
 }
 
@@ -166,7 +166,7 @@ AddNumber(lua_State *L)
     int isnumber = 0;
     lua_Number val = lua_tonumberx(L, 2, &isnumber);
     if (!isnumber)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_boolean(_fun, L, 0 == l_dnaAddNumber(da, val));
 }
 
@@ -279,7 +279,7 @@ FromArray(lua_State *L)
     l_float64 *tbl = ll_unpack_Darray(_fun, L, 1, &n);
     Dna* da = l_dnaCreate(n);
     if (!da)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     for (i = 0; i < n; i++)
         l_dnaAddNumber(da, tbl[i]);
     ll_free(tbl);
@@ -339,7 +339,7 @@ GetDValue(lua_State *L)
     l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
     l_float64 val = 0;
     if (l_dnaGetDValue(da, idx, &val))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_float64(_fun, L, val);
     return 1;
 }
@@ -396,7 +396,7 @@ GetIValue(lua_State *L)
     l_int32 idx = ll_check_index(_fun, L, 2, l_dnaGetCount(da));
     l_int32 val;
     if (l_dnaGetIValue(da, idx, &val))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, val);
     return 1;
 }
@@ -417,7 +417,7 @@ GetParameters(lua_State *L)
     l_float64 startx = 0;
     l_float64 deltax = 0;
     if (l_dnaGetParameters(da, &startx, &deltax))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_float64(_fun, L, startx);
     ll_push_l_float64(_fun, L, deltax);
     return 2;
@@ -670,7 +670,7 @@ int
 ll_push_Dna(const char *_fun, lua_State *L, Dna *da)
 {
     if (!da)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, da);
 }
 

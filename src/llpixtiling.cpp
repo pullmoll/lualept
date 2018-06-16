@@ -95,16 +95,31 @@ toString(lua_State *L)
                  "pix",  LL_PIX, reinterpret_cast<void *>(pixt->pix));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    %s = %d, %s = %d, %s = %d, %s = %d",
-                 "nx", pixt->nx,
-                 "ny", pixt->ny,
-                 "w", pixt->w,
+                 "\n    %-14s: %d",
+                 "nx", pixt->nx);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF,
+                 "\n    %-14s: %d",
+                 "ny", pixt->ny);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF,
+                 "\n    %-14s: %d",
+                 "w", pixt->w);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF,
+                 "\n    %-14s: %d",
                  "h", pixt->h);
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    %s = %d, %s = %d, %s = %d",
-                 "xoverlap", pixt->xoverlap,
-                 "yoverlap", pixt->yoverlap,
+                 "\n    %-14s: %d",
+                 "xoverlap", pixt->xoverlap);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF,
+                 "\n    %-14s: %d",
+                 "yoverlap", pixt->yoverlap);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF,
+                 "\n    %-14s: %d",
                  "strip", pixt->strip);
         luaL_addstring(&B, str);
 #endif
@@ -130,7 +145,7 @@ GetCount(lua_State *L)
     l_int32 nx = 0;
     l_int32 ny = 0;
     if (pixTilingGetCount(pt, &nx, &ny))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_l_int32(_fun, L, nx * ny);
 }
 
@@ -195,7 +210,7 @@ GetCountXY(lua_State *L)
     l_int32 nx = 0;
     l_int32 ny = 0;
     if (pixTilingGetCount(pt, &nx, &ny))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, nx);
     ll_push_l_int32(_fun, L, ny);
     return 2;
@@ -218,7 +233,7 @@ GetSize(lua_State *L)
     l_int32 w = 0;
     l_int32 h = 0;
     if (pixTilingGetSize(pt, &w, &h))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, w);
     ll_push_l_int32(_fun, L, h);
     return 2;
@@ -334,7 +349,7 @@ int
 ll_push_PixTiling(const char *_fun, lua_State *L, PixTiling *cd)
 {
     if (!cd)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, cd);
 }
 

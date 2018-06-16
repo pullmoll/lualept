@@ -175,7 +175,7 @@ AddBlackOrWhite(lua_State *L)
     l_int32 color = ll_check_set_black_white(_fun, L, 2, L_SET_BLACK);
     l_int32 idx = 0;
     if (pixcmapAddBlackOrWhite(cmap, color, &idx))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, idx + 1);  /* Lua index is 1-based */
     return 1;
 }
@@ -234,7 +234,7 @@ AddNearestColor(lua_State *L)
     l_int32 idx = 0;
     ll_check_color(_fun, L, 2, &rval, &gval, &bval);
     if (pixcmapAddNearestColor(cmap, rval, gval, bval, &idx))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, idx + 1);  /* Lua index is 1-based */
     return 1;
 }
@@ -268,7 +268,7 @@ AddNewColor(lua_State *L)
     l_int32 idx = 0;
     ll_check_color(_fun, L, 2, &rval, &gval, &bval);
     if (pixcmapAddNewColor(cmap, rval, gval, bval, &idx))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, idx + 1);  /* Lua index is 1-based */
     return 1;
 }
@@ -388,7 +388,7 @@ CountGrayColors(lua_State *L)
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
     l_int32 ngray = 0;
     if (pixcmapCountGrayColors(cmap, &ngray))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, ngray);
     return 1;
 }
@@ -497,7 +497,7 @@ GetColor(lua_State *L)
     l_int32 gval = 0;
     l_int32 bval = 0;
     if (pixcmapGetColor(cmap, idx, &rval, &gval, &bval))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, rval);
     ll_push_l_int32(_fun, L, gval);
     ll_push_l_int32(_fun, L, bval);
@@ -524,7 +524,7 @@ GetColor32(lua_State *L)
     l_int32 idx = ll_check_index(_fun, L, 2, pixcmapGetCount(cmap));
     l_uint32 val32 = 0;
     if (pixcmapGetColor32(cmap, idx, &val32))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_uint32(_fun, L, val32);
     return 1;
 }
@@ -587,7 +587,7 @@ GetIndex(lua_State *L)
     l_int32 idx = 0;
     ll_check_color(_fun, L, 2, &rval, &gval, &bval);
     if (pixcmapGetIndex(cmap, rval, gval, bval, &idx))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, idx + 1);  /* Lua index is 1-based */
     return 1;
 }
@@ -610,7 +610,7 @@ GetMinDepth(lua_State *L)
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
     l_int32 mindepth = 0;
     if (pixcmapGetMinDepth(cmap, &mindepth))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, mindepth);
     return 1;
 }
@@ -635,7 +635,7 @@ GetRGBA(lua_State *L)
     l_int32 bval = 0;
     l_int32 aval = 0;
     if (pixcmapGetRGBA(cmap, idx, &rval, &gval, &bval, &aval))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, rval);
     ll_push_l_int32(_fun, L, gval);
     ll_push_l_int32(_fun, L, bval);
@@ -660,7 +660,7 @@ GetRGBA32(lua_State *L)
     l_int32 idx = ll_check_index(_fun, L, 2, pixcmapGetCount(cmap));
     l_uint32 val32 = 0;
     if (pixcmapGetRGBA32(cmap, idx, &val32))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_uint32(_fun, L, val32);
     return 1;
 }
@@ -680,7 +680,7 @@ HasColor(lua_State *L)
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
     l_int32 color = 0;
     if (pixcmapHasColor(cmap, &color))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     lua_pushboolean(L, color);
     return 1;
 }
@@ -700,7 +700,7 @@ IsBlackAndWhite(lua_State *L)
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
     l_int32 blackandwhite = 0;
     if (pixcmapIsBlackAndWhite(cmap, &blackandwhite))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     lua_pushboolean(L, blackandwhite);
     return 1;
 }
@@ -720,7 +720,7 @@ IsOpaque(lua_State *L)
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
     l_int32 opaque = 0;
     if (pixcmapIsOpaque(cmap, &opaque))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     lua_pushboolean(L, opaque);
     return 1;
 }
@@ -827,7 +827,7 @@ SerializeToMemory(lua_State *L)
     l_int32 ncolors = 0;
     l_uint8 *data = nullptr;
     if (pixcmapSerializeToMemory(cmap, cpc, &ncolors, &data))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     lua_pushlstring(L, reinterpret_cast<const char *>(data), static_cast<size_t>(cpc) * ncolors);
     ll_free(data);
     return 1;
@@ -898,7 +898,7 @@ ToArrays(lua_State *L)
     l_int32 *bmap = nullptr;
     l_int32 *amap = nullptr;
     if (pixcmapToArrays(cmap, &rmap, &gmap, &bmap, &amap))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_pack_Iarray(_fun, L, rmap, ncolors);
     ll_pack_Iarray(_fun, L, gmap, ncolors);
     ll_pack_Iarray(_fun, L, bmap, ncolors);
@@ -914,13 +914,9 @@ ToArrays(lua_State *L)
  * \brief Return a PixColormap* (%cmap) as a Lua array table.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a PixColormap* (cmap).
- *
- * FIXME: Pushing the table of l_uint32 with ll_push_uarray() appears to be broken.
- * When I print the table entries in Lua, each value is 255. It seems as if only
- * the least significant byte of each l_uint32 is pushed?
  * </pre>
  * \param L Lua state.
- * \return 4 array tables on the Lua stack.
+ * \return 1 table array on the Lua stack.
  */
 static int
 ToRGBTable(lua_State *L)
@@ -930,10 +926,10 @@ ToRGBTable(lua_State *L)
     l_int32 ncolors = 0;
     l_uint32 *table = nullptr;
     if (pixcmapToRGBTable(cmap, &table, &ncolors))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_pack_Uarray(_fun, L, table, ncolors);
     ll_free(table);
-    return 4;
+    return 1;
 }
 
 /**
@@ -962,7 +958,7 @@ UsableColor(lua_State *L)
     l_int32 idx = 0;
     ll_check_color(_fun, L, 2, &rval, &gval, &bval);
     if (pixcmapUsableColor(cmap, rval, gval, bval, &idx))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, idx + 1);  /* Lua index is 1-based */
     return 1;
 }
@@ -983,7 +979,7 @@ Write(lua_State *L)
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
     const char *filename = ll_check_string(_fun, L, 2);
     if (pixcmapWrite(filename, cmap))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     lua_pushboolean(L, TRUE);
     return 1;
 }
@@ -1007,7 +1003,7 @@ WriteMem(lua_State *L)
     l_uint8 *data = nullptr;
     size_t size = 0;
     if (pixcmapWriteMem(&data, &size, cmap))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     lua_pushlstring(L, reinterpret_cast<const char *>(data), size);
     ll_free(data);
     return 1;
@@ -1029,7 +1025,7 @@ WriteStream(lua_State *L)
     PixColormap *cmap = ll_check_PixColormap(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 1);
     if (pixcmapWriteStream(stream->f, cmap))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     lua_pushboolean(L, TRUE);
     return 1;
 }
@@ -1076,7 +1072,7 @@ AddColorizedGrayToCmap(lua_State *L)
     Numa *na = nullptr;
     ll_check_color(_fun, L, 3, &rval, &gval, &bval);
     if (addColorizedGrayToCmap(cmap, type, rval, gval, bval, &na))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_Numa(_fun, L, na);
     return 1;
 }
@@ -1120,7 +1116,7 @@ int
 ll_push_PixColormap(const char *_fun, lua_State *L, PixColormap *cmap)
 {
     if (!cmap)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, cmap);
 }
 

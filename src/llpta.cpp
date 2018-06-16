@@ -285,7 +285,7 @@ GetArrays(lua_State *L)
     Numa *ptax = nullptr;
     Numa *ptay = nullptr;
     if (ptaGetArrays(pta, &ptax, &ptay))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_Numa(_fun, L, ptax) + ll_push_Numa(_fun, L, ptay);
 }
 
@@ -307,7 +307,7 @@ GetIPt(lua_State *L)
     l_int32 x;
     l_int32 y;
     if (ptaGetIPt(pta, idx, &x, &y))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, x);
     ll_push_l_int32(_fun, L, y);
     return 2;
@@ -331,7 +331,7 @@ GetPt(lua_State *L)
     l_float32 x = 0;
     l_float32 y = 0;
     if (ptaGetPt(pta, idx, &x, &y))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, x);
     ll_push_l_float32(_fun, L, y);
     return 2;
@@ -498,7 +498,7 @@ WriteMem(lua_State *L)
     l_uint8 *data = nullptr;
     size_t size = 0;
     if (ptaWriteMem(&data, &size, pta, type))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     lua_pushlstring(L, reinterpret_cast<const char *>(data), size);
     ll_free(data);
     return 1;
@@ -564,7 +564,7 @@ int
 ll_push_Pta(const char *_fun, lua_State *L, Pta *pta)
 {
     if (!pta)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, pta);
 }
 

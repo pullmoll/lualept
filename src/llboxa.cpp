@@ -400,7 +400,7 @@ CombineOverlapsInPair(lua_State *L)
     Boxa *boxad1;
     Boxa *boxad2;
     if (boxaCombineOverlapsInPair(boxa1, boxa2, &boxad1, &boxad2, pixadb))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_Boxa(_fun, L, boxad1) + ll_push_Boxa(_fun, L, boxad2);
 }
 
@@ -445,7 +445,7 @@ CompareRegions(lua_State *L)
     l_float32 diffarea = 0.0f;
     l_float32 diffxor = 0.0f;
     if (boxaCompareRegions(boxa1, boxa2, areathresh, &nsame, &diffarea, &diffxor, &pixdb))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, nsame);
     ll_push_l_float32(_fun, L, diffarea);
     ll_push_l_float32(_fun, L, diffxor);
@@ -528,7 +528,7 @@ ContainedInBoxCount(lua_State *L)
     Box *box = ll_check_Box(_fun, L, 2);
     l_int32 count = 0;
     if (boxaContainedInBoxCount(boxas, box, &count))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, count);
     return 1;
 }
@@ -550,7 +550,7 @@ ContainedInBoxa(lua_State *L)
     Boxa *boxa2 = ll_check_Boxa(_fun, L, 2);
     l_int32 contained = 0;
     if (boxaContainedInBoxa(boxa1, boxa2, &contained))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_boolean(_fun, L, contained);
 }
 
@@ -713,7 +713,7 @@ ExtractAsNuma(lua_State *L)
     Numa *naw = nullptr;
     Numa *nah = nullptr;
     if (boxaExtractAsNuma(boxa, &nal, &nar, &nat, &nab, &naw, &nah, keepinvalid))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_Numa(_fun, L, nal) + ll_push_Numa(_fun, L, nar) +
             ll_push_Numa(_fun, L, nat) + ll_push_Numa(_fun, L, nab) +
             ll_push_Numa(_fun, L, naw) + ll_push_Numa(_fun, L, nah);
@@ -751,7 +751,7 @@ ExtractAsPta(lua_State *L)
     Pta *ptaw = nullptr;
     Pta *ptah = nullptr;
     if (boxaExtractAsPta(boxa, &ptal, &ptar, &ptat, &ptab, &ptaw, &ptah, keepinvalid))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_Pta(_fun, L, ptal) + ll_push_Pta(_fun, L, ptar) +
             ll_push_Pta(_fun, L, ptat) + ll_push_Pta(_fun, L, ptab) +
             ll_push_Pta(_fun, L, ptaw) + ll_push_Pta(_fun, L, ptah);
@@ -853,7 +853,7 @@ FindNearestBoxes(lua_State *L)
     Numaa *naaindex = nullptr;
     Numaa *naadist = nullptr;
     if (boxaFindNearestBoxes(boxas, dist_select, range, &naaindex, &naadist))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_Numaa(_fun, L, naaindex) + ll_push_Numaa(_fun, L, naadist);
 }
 
@@ -875,7 +875,7 @@ GetArea(lua_State *L)
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 area = 0;
     if (boxaGetArea(boxas, &area))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, area);
     return 1;
 }
@@ -896,7 +896,7 @@ GetAverageSize(lua_State *L)
     l_float32 w = 0.0f;
     l_float32 h = 0.0f;
     if (boxaGetAverageSize(boxas, &w, &h))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, w);
     ll_push_l_float32(_fun, L, h);
     return 2;
@@ -940,7 +940,7 @@ GetBoxGeometry(lua_State *L)
     l_int32 x, y, w, h;
     l_int32 idx = ll_check_index(_fun, L, 2, boxaGetCount(boxa));
     if (boxaGetBoxGeometry(boxa, idx, &x, &y, &w, &h))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, x);
     ll_push_l_int32(_fun, L, y);
     ll_push_l_int32(_fun, L, w);
@@ -979,7 +979,7 @@ GetCoverage(lua_State *L)
     l_int32 exactflag = ll_opt_boolean(_fun, L, 3, FALSE);
     l_float32 fract = 0.0f;
     if (boxaGetCoverage(boxas, wc, hc, exactflag, &fract))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, fract);
     return 1;
 }
@@ -1009,7 +1009,7 @@ GetExtent(lua_State *L)
     l_int32 h = 0;
     Box *box = nullptr;
     if (boxaGetExtent(boxas, &w, &h, &box))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, w);
     ll_push_l_int32(_fun, L, h);
     ll_push_Box(_fun, L, box);
@@ -1037,7 +1037,7 @@ GetMedianVals(lua_State *L)
     l_int32 w = 0;
     l_int32 h = 0;
     if (boxaGetMedianVals(boxas, &x, &y, &w, &h))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, x);
     ll_push_l_int32(_fun, L, y);
     ll_push_l_int32(_fun, L, w);
@@ -1078,7 +1078,7 @@ GetNearestByDirection(lua_State *L)
     l_int32 index = 0;
     l_int32 dist = 0;
     if (boxaGetNearestByDirection(boxa, i, dir, dist_select, range, &index, &dist))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, index);
     ll_push_l_int32(_fun, L, dist);
     return 2;
@@ -1169,7 +1169,7 @@ GetRankVals(lua_State *L)
     l_int32 w = 0;
     l_int32 h = 0;
     if (boxaGetRankVals(boxas, fract, &x, &y, &w, &h))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, x);
     ll_push_l_int32(_fun, L, y);
     ll_push_l_int32(_fun, L, w);
@@ -1193,7 +1193,7 @@ GetSizes(lua_State *L)
     Numa *naw = nullptr;
     Numa *nah = nullptr;
     if (boxaGetSizes(boxas, &naw, &nah))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_Numa(_fun, L, naw) + ll_push_Numa(_fun, L, nah);
 }
 
@@ -1476,7 +1476,7 @@ IntersectsBoxCount(lua_State *L)
     Box *box = ll_check_Box(_fun, L, 2);
     l_int32 count = 0;
     if (boxaIntersectsBoxCount(boxa, box, &count))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, count);
     return 1;
 }
@@ -1586,7 +1586,7 @@ LocationRange(lua_State *L)
     l_int32 maxx = 0;
     l_int32 maxy = 0;
     if (boxaLocationRange(boxas, &minx, &miny, &maxx, &maxy))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, minx);
     ll_push_l_int32(_fun, L, miny);
     ll_push_l_int32(_fun, L, maxx);
@@ -2043,7 +2043,7 @@ RemoveBoxAndSave(lua_State *L)
     l_int32 idx = ll_check_index(_fun, L, 2, boxaGetCount(boxa));
     Box *box = nullptr;
     if (boxaRemoveBoxAndSave(boxa, idx, &box))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_Box(_fun, L, box);
 }
 
@@ -2374,7 +2374,7 @@ Similar(lua_State *L)
     l_int32 similar = FALSE;
     Numa *nasim = nullptr;
     if (boxaSimilar(boxa1, boxa2, leftdiff, rightdiff, topdiff, botdiff, 0, &similar, &nasim))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_boolean(_fun, L, similar);
     ll_push_Numa(_fun, L, nasim);
     return 2;
@@ -2398,7 +2398,7 @@ SizeRange(lua_State *L)
     l_int32 maxw = 0;
     l_int32 maxh = 0;
     if (boxaSizeRange(boxas, &minw, &minh, &maxw, &maxh))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, minw);
     ll_push_l_int32(_fun, L, minh);
     ll_push_l_int32(_fun, L, maxw);
@@ -2435,7 +2435,7 @@ SizeVariation(lua_State *L)
     l_float32 rms_odd = 0.0f;
     l_float32 rms_all = 0.0f;
     if (boxaSizeVariation(boxas, type, &del_evenodd, &rms_even, &rms_odd, &rms_all))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, del_evenodd);
     ll_push_l_float32(_fun, L, rms_even);
     ll_push_l_float32(_fun, L, rms_odd);
@@ -2675,7 +2675,7 @@ SplitEvenOdd(lua_State *L)
     Boxa *boxae = nullptr;
     Boxa *boxao = nullptr;
     if (boxaSplitEvenOdd(boxa, fillflag, &boxae, &boxao))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_Boxa(_fun, L, boxae) + ll_push_Boxa(_fun, L, boxao);
 }
 
@@ -2786,7 +2786,7 @@ WriteMem(lua_State *L)
     l_uint8 *data = nullptr;
     size_t size = 0;
     if (boxaWriteMem(&data, &size, boxa))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     lua_pushlstring(L, reinterpret_cast<const char *>(data), size);
     ll_free(data);
     return 1;
@@ -2869,7 +2869,7 @@ int
 ll_push_Boxa(const char *_fun, lua_State *L, Boxa *boxa)
 {
     if (!boxa)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, boxa);
 }
 

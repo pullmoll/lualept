@@ -243,7 +243,7 @@ DetermineFormat(lua_State *L)
     l_int32 cmapflag = ll_check_l_int32(_fun, L, 3);
     l_int32 format = 0;
     if (pixcompDetermineFormat(comptype, d, cmapflag, &format))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_string(_fun, L, ll_string_input_format(format));
     return 1;
 }
@@ -266,7 +266,7 @@ GetDimensions(lua_State *L)
     l_int32 h = 0;
     l_int32 d = 0;
     if (pixcompGetDimensions(pixc, &w, &h, &d))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, w);
     ll_push_l_int32(_fun, L, h);
     ll_push_l_int32(_fun, L, d);
@@ -292,7 +292,7 @@ GetParameters(lua_State *L)
     l_int32 comptype = 0;
     l_int32 cmapflag = 0;
     if (pixcompGetParameters(pixc, &xres, &yres, &comptype, &cmapflag))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, xres);
     ll_push_l_int32(_fun, L, yres);
     ll_push_string(_fun, L, ll_string_compression(comptype));
@@ -384,7 +384,7 @@ int
 ll_push_PixComp(const char *_fun, lua_State *L, PixComp *pixcomp)
 {
     if (!pixcomp)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, pixcomp);
 }
 

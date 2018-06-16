@@ -165,7 +165,7 @@ ConvertToPdfData(lua_State *L)
     l_uint8 *data = nullptr;
     size_t nbytes = 0;
     if (cidConvertToPdfData(cid, title, &data, &nbytes))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_bytes(_fun, L, data, nbytes);
     return 1;
 }
@@ -191,7 +191,7 @@ Create(lua_State *L)
     l_int32 ascii85 = ll_opt_boolean(_fun, L, 4, FALSE);
     CompData *cid = nullptr;
     if (l_generateCIData(fname, type, quality, ascii85, &cid))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_CompData(_fun, L, cid);
     return 1;
 }
@@ -215,7 +215,7 @@ CreateForPdf(lua_State *L)
     l_int32 quality = ll_check_l_int32(_fun, L, 3);
     CompData *cid = nullptr;
     if (l_generateCIDataForPdf(fname, pix, quality, &cid))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_CompData(_fun, L, cid);
 }
 
@@ -322,7 +322,7 @@ Generate(lua_State *L)
     l_int32 ascii85 = ll_check_l_int32(_fun, L, 4);
     CompData *cid = nullptr;
     if (l_generateCIData(fname, type, quality, ascii85, &cid))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_CompData(_fun, L, cid);
 }
 
@@ -352,7 +352,7 @@ GenerateCIData(lua_State *L)
     l_int32 ascii85 = ll_check_l_int32(_fun, L, 4);
     CompData *cid = nullptr;
     if (pixGenerateCIData(pixs, type, quality, ascii85, &cid))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_CompData(_fun, L, cid);
 }
 
@@ -549,7 +549,7 @@ int
 ll_push_CompData(const char *_fun, lua_State *L, CompData *cdata)
 {
     if (!cdata)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, cdata);
 }
 
@@ -576,7 +576,7 @@ ll_new_CompData(lua_State *L)
     if (l_generateCIData(fname, type, quality, ascii85, &cid)) {
         DBG(LOG_NEW_PARAM, "%s: failed to create %s*\n", _fun,
             TNAME);
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     }
 
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,

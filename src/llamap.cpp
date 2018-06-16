@@ -314,7 +314,7 @@ Find(lua_State *L)
         break;
     }
     if (!result)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return result;
 }
 
@@ -429,7 +429,7 @@ int
 ll_push_Amap(const char *_fun, lua_State *L, Amap *amap)
 {
     if (!amap)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, amap);
 }
 /**

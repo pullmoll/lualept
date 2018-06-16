@@ -188,7 +188,7 @@ Basins(lua_State *L)
     Pixa *pixa = nullptr;
     Numa *nalevels = nullptr;
     if (wshedBasins(wshed, &pixa, &nalevels))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_Pixa(_fun, L, pixa);
     ll_push_Numa(_fun, L, nalevels);
     return 2;
@@ -302,7 +302,7 @@ int
 ll_push_WShed(const char *_fun, lua_State *L, WShed *ws)
 {
     if (!ws)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, ws);
 }
 /**

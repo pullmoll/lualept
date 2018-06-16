@@ -42,13 +42,6 @@
  * The project's goal is to cover most if not all of Leptonica's huge number of
  * types and functions in a marriage of Lua's and Leptonica's concepts.
  *
- * This is my first *larger* Lua and C-Functions project and I may well be doing some
- * things in an awkward way or even outright wrong, so feel free to point your fingers
- * at me and tell me where I'm missing the point.
- *
- * Still, the project already runs some script (lua/script.lua) which I use for testing
- * the bindings as I write the wrappers.
- *
  * The globals (or Lua <i>classes</i>) defined by this library currently are:
  * - LuaLept the main class
  * - Amap
@@ -58,6 +51,7 @@
  * - Box
  * - Boxa
  * - Boxaa
+ * - Bytea
  * - CompData
  * - CCBord
  * - CCBorda
@@ -82,7 +76,7 @@
  * - PixaComp
  * - Pta
  * - Ptaa
- * - RbtreeNode
+ * - Queue
  * - Sarray
  * - Sel
  * - Sela
@@ -434,12 +428,15 @@ ll_push_udata(const char *_fun, lua_State *L, const char* name, void *udata)
 
 /**
  * \brief Push nil to the Lua stack and return 1.
+ * \param _fun calling function's name
  * \param L Lua state.
  * \return 1 nil on the Lua stack.
  */
 int
-ll_push_nil(lua_State *L)
+ll_push_nil(const char* _fun, lua_State *L)
 {
+    UNUSED(_fun);
+    DBG(LOG_PUSH_NIL, "%s: push nil\n", _fun);
     lua_pushnil(L);
     return 1;
 }
@@ -710,7 +707,7 @@ ll_pack_Iarray(const char* _fun, lua_State *L, const l_int32 *iarray, l_int32 n)
     l_int32 i;
     UNUSED(_fun);
     if (!n || !iarray)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     lua_newtable(L);
     for (i = 0; i < n; i++) {
         DBG(LOG_PUSH_ARRAY, "%s: %s[%d] = 0x%08x\n", _fun,
@@ -735,7 +732,7 @@ ll_pack_Uarray(const char* _fun, lua_State *L, const l_uint32 *uarray, l_int32 n
     l_int32 i;
     UNUSED(_fun);
     if (!n || !uarray)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     lua_newtable(L);
     for (i = 0; i < n; i++) {
         DBG(LOG_PUSH_ARRAY, "%s: %s[%d] = 0x%08x\n", _fun,
@@ -785,7 +782,7 @@ ll_pack_Farray(const char* _fun, lua_State *L, const l_float32 *farray, l_int32 
     l_int32 i;
     UNUSED(_fun);
     if (!n || !farray)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     lua_newtable(L);
     for (i = 0; i < n; i++) {
         DBG(LOG_PUSH_ARRAY, "%s: %s[%d] = %.8g\n", _fun,
@@ -835,7 +832,7 @@ ll_pack_Darray(const char* _fun, lua_State *L, const l_float64 *darray, l_int32 
     l_int32 i;
     UNUSED(_fun);
     if (!n || !darray)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     lua_newtable(L);
     for (i = 0; i < n; i++) {
         DBG(LOG_PUSH_ARRAY, "%s: %s[%d] = %.8g\n", _fun,
@@ -850,7 +847,7 @@ ll_pack_Darray(const char* _fun, lua_State *L, const l_float64 *darray, l_int32 
  * \brief Push a l_float64 2D array (%data) to the Lua stack and return 1.
  * \param _fun calling function's name
  * \param L Lua state.
- * \param data pointer to the l_float32 array
+ * \param data pointer to the l_float64 array
  * \param wpl number of words in the row
  * \param h number of rows
  * \return 1 table containing (h) tables of (wpl) numbers on the stack.
@@ -885,7 +882,7 @@ ll_pack_Sarray(const char* _fun, lua_State *L, Sarray *sa)
     l_int32 i;
     UNUSED(_fun);
     if (!n || !sa)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     lua_newtable(L);
     for (i = 0; i < n; i++) {
         const char* str = sarrayGetString(sa, i, L_NOCOPY);
@@ -912,10 +909,12 @@ ll_unpack_Iarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
         "arg", arg,
         "plen", reinterpret_cast<void *>(plen));
     l_int32 len = static_cast<l_int32>(luaL_len(L, arg));
-    l_int32 *ia = ll_calloc<l_int32>(_fun, L, len);
+    /* allocate data for the array */
+    l_int32 *iarray = ll_calloc<l_int32>(_fun, L, len);
 
     /* verify there is a table at %arg */
     luaL_checktype(L, arg, LUA_TTABLE);
+
     /* push a nil key */
     lua_pushnil(L);
 
@@ -925,8 +924,10 @@ ll_unpack_Iarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
         l_int32 value = ll_check_l_int32(_fun, L, -1);      /* value is at index -1 */
         /* don't write out of bounds */
         if (0 < key && key <= len) {
-            ia[key-1] = value;
+            iarray[key-1] = value;
         } else {
+            DBG(LOG_CHECK_ARRAY, "%s: key out of bounds (%d < %d <= %d)\n", _fun,
+                0, key, len);
             /* FIXME: error? */
         }
         /* remove value; keep 'key' for next iteration */
@@ -934,7 +935,7 @@ ll_unpack_Iarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
     }
     if (plen)
         *plen = len;
-    return ia;
+    return iarray;
 }
 
 /**
@@ -952,10 +953,13 @@ ll_unpack_Uarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
         "arg", arg,
         "plen", reinterpret_cast<void *>(plen));
     l_int32 len = static_cast<l_int32>(luaL_len(L, arg));
-    l_uint32 *ua = ll_calloc<l_uint32>(_fun, L, len);
+
+    /* allocate data for the array */
+    l_uint32 *uarray = ll_calloc<l_uint32>(_fun, L, len);
 
     /* verify there is a table at %arg */
     luaL_checktype(L, arg, LUA_TTABLE);
+
     /* push a nil key */
     lua_pushnil(L);
 
@@ -965,8 +969,10 @@ ll_unpack_Uarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
         l_uint32 value = ll_check_l_uint32(_fun, L, -1);    /* value is at index -1 */
         /* don't write out of bounds */
         if (0 < key && key <= len) {
-            ua[key-1] = value;
+            uarray[key-1] = value;
         } else {
+            DBG(LOG_CHECK_ARRAY, "%s: key out of bounds (%d < %d <= %d)\n", _fun,
+                0, key, len);
             /* FIXME: error? */
         }
         /* remove value; keep 'key' for next iteration */
@@ -974,7 +980,7 @@ ll_unpack_Uarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
     }
     if (plen)
         *plen = len;
-    return ua;
+    return uarray;
 }
 
 /**
@@ -982,21 +988,23 @@ ll_unpack_Uarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
  * \param _fun calling function's name
  * \param L Lua state.
  * \param arg index where to find the table
- * \param data pointer to a array of %wpl * %h * l_uint32
  * \param wpl words per line (inner array)
  * \param h height of the array (outer array)
- * \return pointer %data.
+ * \return pointer to %data.
  */
 l_uint32 *
-ll_unpack_Uarray_2d(const char *_fun, lua_State *L, int arg, l_uint32* data, l_int32 wpl, l_int32 h)
+ll_unpack_Uarray_2d(const char *_fun, lua_State *L, int arg, l_int32 wpl, l_int32 h)
 {
-    DBG(LOG_CHECK_ARRAY, "%s: %s = %d, %s = %p, %s = %d, %s = %d\n", _fun,
+    DBG(LOG_CHECK_ARRAY, "%s: %s = %d, %s = %d, %s = %d\n", _fun,
         "arg", arg,
-        "data", reinterpret_cast<void *>(data),
         "wpl", wpl,
         "h", h);
+    /* allocate data for the 2D array */
+    l_uint32 *data = ll_calloc<l_uint32>(_fun, L, wpl * h);
+
     /* verify there is a table at 2 */
     luaL_checktype(L, arg, LUA_TTABLE);
+
     /* push a nil key */
     lua_pushnil(L);
 
@@ -1011,7 +1019,7 @@ ll_unpack_Uarray_2d(const char *_fun, lua_State *L, int arg, l_uint32* data, l_i
             l_int32 x = ll_check_l_int32(_fun, L, -2);          /* key is at index -2 */
             l_uint32 value = ll_check_l_uint32(_fun, L, -1);    /* value is at index -1 */
             /* if x,y are in bounds */
-            if (y > 0 && y <= h && x > 0 && x <= wpl) {
+            if (0 < y && y <= h && 0 < x && x <= wpl) {
                 data[(y - 1) * wpl + x - 1] = value;
             }
             /* remove value; keep 'key' for next iteration */
@@ -1038,7 +1046,7 @@ ll_unpack_Farray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
         "arg", arg,
         "plen", reinterpret_cast<void *>(plen));
     l_int32 len = static_cast<l_int32>(luaL_len(L, arg));
-    l_float32 *fa = ll_calloc<l_float32>(_fun, L, len);
+    l_float32 *farray = ll_calloc<l_float32>(_fun, L, len);
 
     /* verify there is a table at %arg */
     luaL_checktype(L, arg, LUA_TTABLE);
@@ -1051,8 +1059,10 @@ ll_unpack_Farray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
         l_float32 value = ll_check_l_float32(_fun, L, -1);  /* value is at index -1 */
         /* don't write out of bounds */
         if (0 < key && key <= len) {
-            fa[key-1] = value;
+            farray[key-1] = value;
         } else {
+            DBG(LOG_CHECK_ARRAY, "%s: key out of bounds (%d < %d <= %d)\n", _fun,
+                0, key, len);
             /* FIXME: error? */
         }
         /* remove value; keep 'key' for next iteration */
@@ -1060,7 +1070,7 @@ ll_unpack_Farray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
     }
     if (plen)
         *plen = len;
-    return fa;
+    return farray;
 }
 
 /**
@@ -1068,21 +1078,23 @@ ll_unpack_Farray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
  * \param _fun calling function's name
  * \param L Lua state.
  * \param arg index where to find the table
- * \param data pointer to a array of %wpl * %h * l_float32
  * \param wpl words per line (inner array)
  * \param h height of the array (outer array)
- * \return pointer %data.
+ * \return pointer to %data (%wpl * %h times l_float32).
  */
 l_float32 *
-ll_unpack_Farray_2d(const char *_fun, lua_State *L, int arg, l_float32* data, l_int32 wpl, l_int32 h)
+ll_unpack_Farray_2d(const char *_fun, lua_State *L, int arg, l_int32 wpl, l_int32 h)
 {
-    DBG(LOG_CHECK_ARRAY, "%s: %s = %d, %s = %p, %s = %d, %s = %d\n", _fun,
+    DBG(LOG_CHECK_ARRAY, "%s: %s = %d, %s = %d, %s = %d\n", _fun,
         "arg", arg,
-        "data", reinterpret_cast<void *>(data),
         "wpl", wpl,
         "h", h);
+    /* allocate data for the 2D array */
+    l_float32 *data = ll_calloc<l_float32>(_fun, L, wpl * h);
+
     /* verify there is a table at 2 */
     luaL_checktype(L, arg, LUA_TTABLE);
+
     /* push a nil key */
     lua_pushnil(L);
 
@@ -1097,7 +1109,7 @@ ll_unpack_Farray_2d(const char *_fun, lua_State *L, int arg, l_float32* data, l_
             l_int32 x = ll_check_l_int32(_fun, L, -2);          /* key is at index -2 */
             l_float32 value = ll_check_l_float32(_fun, L, -1);  /* value is at index -1 */
             /* if x,y are in bounds */
-            if (y > 0 && y <= h && x > 0 && x <= wpl) {
+            if (0 < y && y <= h && 0 < x && x <= wpl) {
                 data[(y - 1) * wpl + x - 1] = value;
             }
             /* remove value; keep 'key' for next iteration */
@@ -1131,13 +1143,14 @@ ll_unpack_Farray_2d(const char *_fun, lua_State *L, int arg, l_float32* data, l_
 l_float32 *
 ll_unpack_Matrix(const char *_fun, lua_State *L, int arg, l_int32 w, l_int32 h)
 {
-    l_float32 *data = ll_calloc<l_float32>(_fun, L, w * h);
-    l_int32 x, y, i;
-    l_float32 value;
     DBG(LOG_CHECK_ARRAY, "%s: %s = %d, %s = %d, %s = %d\n", _fun,
         "arg", arg,
         "w", w,
         "h", h);
+    /* allocate data for the matrix */
+    l_float32 *data = ll_calloc<l_float32>(_fun, L, w * h);
+    l_int32 x, y, i;
+    l_float32 value;
 
     if (LUA_TTABLE == lua_type(L, arg)) {
         /* verify there is a table at 2 */
@@ -1157,7 +1170,7 @@ ll_unpack_Matrix(const char *_fun, lua_State *L, int arg, l_int32 w, l_int32 h)
                     x = ll_check_l_int32(_fun, L, -2);          /* key is at index -2 */
                     value = ll_check_l_float32(_fun, L, -1);  /* value is at index -1 */
                     /* if x,y are in bounds */
-                    if (y > 0 && y <= h && x > 0 && x <= w) {
+                    if (0 < y && y <= h && 0 < x && x <= w) {
                         data[(y - 1) * w + x - 1] = value;
                     }
                     /* remove value; keep 'key' for next iteration */
@@ -1197,10 +1210,13 @@ ll_unpack_Darray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
         "arg", arg,
         "plen", reinterpret_cast<void *>(plen));
     l_int32 len = static_cast<l_int32>(luaL_len(L, arg));
-    l_float64 *da = ll_calloc<l_float64>(_fun, L, len);
+
+    /* allocate data for the array */
+    l_float64 *darray = ll_calloc<l_float64>(_fun, L, len);
 
     /* verify there is a table at %arg */
     luaL_checktype(L, arg, LUA_TTABLE);
+
     /* push a nil key */
     lua_pushnil(L);
 
@@ -1210,8 +1226,10 @@ ll_unpack_Darray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
         l_float64 value = ll_check_l_float64(_fun, L, -1);  /* value is at index -1 */
         /* don't write out of bounds */
         if (0 < key && key <= len) {
-            da[key-1] = value;
+            darray[key-1] = value;
         } else {
+            DBG(LOG_CHECK_ARRAY, "%s: key out of bounds (%d < %d <= %d)\n", _fun,
+                0, key, len);
             /* FIXME: error? */
         }
         /* remove value; keep 'key' for next iteration */
@@ -1219,7 +1237,7 @@ ll_unpack_Darray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
     }
     if (plen)
         *plen = len;
-    return da;
+    return darray;
 }
 
 /**
@@ -1227,21 +1245,24 @@ ll_unpack_Darray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
  * \param _fun calling function's name
  * \param L Lua state.
  * \param arg index where to find the table
- * \param data pointer to a array of %wpl / 2 * %h * l_float64
  * \param wpl words per line (inner array)
  * \param h height of the array (outer array)
- * \return pointer %data.
+ * \return pointer to %data (%wpl * %h times l_float64).
  */
 l_float64 *
-ll_unpack_Darray_2d(const char *_fun, lua_State *L, int arg, l_float64* data, l_int32 wpl, l_int32 h)
+ll_unpack_Darray_2d(const char *_fun, lua_State *L, int arg, l_int32 wpl, l_int32 h)
 {
-    DBG(LOG_CHECK_ARRAY, "%s: %s = %d, %s = %p, %s = %d, %s = %d\n", _fun,
+    DBG(LOG_CHECK_ARRAY, "%s: %s = %d, %s = %d, %s = %d\n", _fun,
         "arg", arg,
-        "data", reinterpret_cast<void *>(data),
         "wpl", wpl,
         "h", h);
+
+    /* allocate data for the 2D array */
+    l_float64 *data = ll_calloc<l_float64>(_fun, L, wpl * h);
+
     /* verify there is a table at 2 */
     luaL_checktype(L, arg, LUA_TTABLE);
+
     /* push a nil key */
     lua_pushnil(L);
 
@@ -1256,7 +1277,7 @@ ll_unpack_Darray_2d(const char *_fun, lua_State *L, int arg, l_float64* data, l_
             l_int32 x = ll_check_l_int32(_fun, L, -2);          /* key is at index -2 */
             l_float64 value = ll_check_l_float64(_fun, L, -1);  /* value is at index -1 */
             /* if x,y are in bounds */
-            if (y > 0 && y <= h && x > 0 && x <= wpl) {
+            if (0 < y && y <= h && 0 < x && x <= wpl) {
                 data[(y - 1) * wpl + x - 1] = value;
             }
             /* remove value; keep 'key' for next iteration */
@@ -1283,10 +1304,13 @@ ll_unpack_Sarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
         "arg", arg,
         "plen", reinterpret_cast<void *>(plen));
     l_int32 len = static_cast<l_int32>(luaL_len(L, arg));
+
+    /* allocate the string array */
     Sarray *sa = sarrayCreate(len);
 
     /* verify there is a table at %arg */
     luaL_checktype(L, arg, LUA_TTABLE);
+
     /* push a nil key */
     lua_pushnil(L);
 
@@ -1297,12 +1321,13 @@ ll_unpack_Sarray(const char *_fun, lua_State *L, int arg, l_int32 *plen)
         /* don't write out of bounds */
         if (0 < key && key <= len) {
             size_t slen = strlen(value);
-            /* XXX: sarrayReplaceString() needs a non-const str */
+            /* XXX: sarrayReplaceString() needs a str to take ownership of */
             char *str = ll_calloc<char>(_fun, L, slen + 1);
             memcpy(str, value, slen);
-            sarrayReplaceString(sa, key-1, str, L_CLONE);
-            ll_free(str);
+            sarrayReplaceString(sa, key-1, str, L_INSERT);
         } else {
+            DBG(LOG_CHECK_ARRAY, "%s: key out of bounds (%d < %d <= %d)\n", _fun,
+                0, key, len);
             /* FIXME: error? */
         }
         /* remove value; keep 'key' for next iteration */
@@ -2925,7 +2950,7 @@ Debug(lua_State *L)
     sarrayDestroy(&sa);
     return n;
 #else
-    return ll_push_nil(L);
+    return ll_push_nil(_fun, L);
 #endif
 }
 
@@ -3004,7 +3029,7 @@ ComposeRGB(lua_State *L)
     l_int32 bval = ll_check_l_int32(_fun, L, 3);
     l_uint32 pixel;
     if (composeRGBPixel(rval, gval, bval, &pixel))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_uint32(_fun, L, pixel);
     return 1;
 }
@@ -3030,7 +3055,7 @@ ComposeRGBA(lua_State *L)
     l_int32 aval = ll_check_l_int32(_fun, L, 3);
     l_uint32 pixel;
     if (composeRGBAPixel(rval, gval, bval, aval, &pixel))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_uint32(_fun, L, pixel);
     return 1;
 }
@@ -3077,7 +3102,7 @@ Color(lua_State *L)
         a = 0xff;
     }
     if (composeRGBAPixel(r, g, b, a, &pixel))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_l_uint32(_fun, L, pixel);
 }
 
@@ -3184,7 +3209,7 @@ MakeGrayQuantTableArb(lua_State *L)
     l_int32 *tab = nullptr;
     PixColormap *cmap = nullptr;
     if (makeGrayQuantTableArb(na, outdepth, &tab, &cmap))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_pack_Iarray(_fun, L, tab, 1 << outdepth);
     ll_push_PixColormap(_fun, L, cmap);
     return 2;
@@ -3266,7 +3291,7 @@ CheckForChars(lua_State *L)
     const char *chars = ll_check_string(_fun, L, 2);
     l_int32 found = 0;
     if (stringCheckForChars(src, chars, &found))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, found);
     return 1;
 }
@@ -3354,7 +3379,7 @@ SplitPathAtDirectory(lua_State *L)
     char *dir = nullptr;
     char *tail = nullptr;
     if (splitPathAtDirectory(pathname, &dir, &tail))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_string(_fun, L, dir);
     ll_push_string(_fun, L, tail);
     return 2;
@@ -3389,7 +3414,7 @@ SplitPathAtExtension(lua_State *L)
     char *basename = nullptr;
     char *extension = nullptr;
     if (splitPathAtExtension(pathname, &basename, &extension))
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     ll_push_string(_fun, L, basename);
     ll_push_string(_fun, L, extension);
     return 2;
@@ -3484,7 +3509,7 @@ int
 ll_push_lualept(const char *_fun, lua_State *L, LuaLept *ll)
 {
     if (!ll)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, ll);
 }
 

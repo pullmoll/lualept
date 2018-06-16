@@ -235,7 +235,7 @@ int
 ll_push_Stack(const char *_fun, lua_State *L, Stack *cd)
 {
     if (!cd)
-        return ll_push_nil(L);
+        return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, cd);
 }
 
