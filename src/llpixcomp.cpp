@@ -92,21 +92,24 @@ toString(lua_State *L)
                  TNAME "*: %p",
                  reinterpret_cast<void *>(pixc));
         luaL_addstring(&B, str);
-#if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
         snprintf(str, LL_STRBUFF,
                  "\n    width = %d, height = %d, depth = %d",
                  w, h, d);
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    compression = %s",
-                 ll_string_compression(comptype));
+                 "\n    %s = %d, %s = %d, %s = %s",
+                 "xres", xres,
+                 "yres", yres,
+                 "compression", ll_string_compression(comptype));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    data = %p, size = %#" PRIx64,
-                 reinterpret_cast<void *>(pixc->data), pixc->size);
+                 "\n    %s", cmapflag ? "colormap" : "no colormap");
         luaL_addstring(&B, str);
+#if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
         snprintf(str, LL_STRBUFF,
-                 "\n    %scolormap", cmapflag ? "" : "no ");
+                 "\n    %s = %p, %s = %#" PRIx64,
+                 "data", reinterpret_cast<void *>(pixc->data),
+                 "size", pixc->size);
         luaL_addstring(&B, str);
         if (pixc->text) {
             snprintf(str, LL_STRBUFF,
@@ -181,8 +184,8 @@ CreateFromPix(lua_State *L)
     LL_FUNC("CreateFromPix");
     Pix* pix = ll_check_Pix(_fun, L, 1);
     l_int32 comptype = ll_check_compression(_fun, L, 2, 1);
-    PixComp *pixcomp = pixcompCreateFromPix(pix, comptype);
-    return ll_push_PixComp(_fun, L, pixcomp);
+    PixComp *pixc = pixcompCreateFromPix(pix, comptype);
+    return ll_push_PixComp(_fun, L, pixc);
 }
 
 /**
@@ -277,7 +280,7 @@ GetDimensions(lua_State *L)
  *
  * </pre>
  * \param L pointer to the lua_State
- * \return 4 on the Lua stack.
+ * \return 4 (%xres, %yres, %comptype, %cmapflag) on the Lua stack.
  */
 static int
 GetParameters(lua_State *L)
@@ -292,8 +295,8 @@ GetParameters(lua_State *L)
         return ll_push_nil(L);
     ll_push_l_int32(_fun, L, xres);
     ll_push_l_int32(_fun, L, yres);
-    ll_push_l_int32(_fun, L, comptype);
-    ll_push_l_int32(_fun, L, cmapflag);
+    ll_push_string(_fun, L, ll_string_compression(comptype));
+    ll_push_boolean(_fun, L, cmapflag);
     return 4;
 }
 
@@ -337,7 +340,7 @@ WriteStreamInfo(lua_State *L)
     LL_FUNC("WriteStreamInfo");
     PixComp *pixc = ll_check_PixComp(_fun, L, 1);
     luaL_Stream *stream = ll_check_stream(_fun, L, 2);
-    const char *text = ll_opt_string(_fun, L, 3, "");
+    const char *text = ll_opt_string(_fun, L, 3);
     l_ok ok = pixcompWriteStreamInfo(stream->f, pixc, text);
     return ll_push_boolean(_fun, L, 0 == ok);
 }

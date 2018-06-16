@@ -358,6 +358,7 @@ FillColors(SDL_Palette* palette, PixColormap *cmap, int ncolors, int firstcolor 
 
     if (!cmap) {
         DBG(LOG_SDL2, "%s: cmap is NULL\n", _fun);
+        ll_free(colors);
         return;
     }
     if (!colors) {
@@ -426,10 +427,6 @@ ViewSDL2(Pix* pix, const char* title, int x0, int y0, float dscale)
     SDL_Event event;
     int swidth = 0;
     int sheight = 0;
-    uint32_t rmask = 0u;
-    uint32_t gmask = 0u;
-    uint32_t bmask = 0u;
-    uint32_t amask = 0u;
     int bits = 0;
     int result = TRUE;
 
@@ -508,19 +505,19 @@ ViewSDL2(Pix* pix, const char* title, int x0, int y0, float dscale)
     case 24:
         bits = 24;
         format = SDL_AllocFormat(SDL_PIXELFORMAT_RGB24);
-        rmask = 0xfful << L_RED_SHIFT;
-        gmask = 0xfful << L_GREEN_SHIFT;
-        bmask = 0xfful << L_BLUE_SHIFT;
-        amask = 0;
+        format->Rmask = 0xfful << L_RED_SHIFT;
+        format->Gmask = 0xfful << L_GREEN_SHIFT;
+        format->Bmask = 0xfful << L_BLUE_SHIFT;
+        format->Amask = 0;
         break;
 
     case 32:
         bits = 32;
         format = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA8888);
-        rmask = 0xfful << L_RED_SHIFT;
-        gmask = 0xfful << L_GREEN_SHIFT;
-        bmask = 0xfful << L_BLUE_SHIFT;
-        amask = 0xfful << L_ALPHA_SHIFT;
+        format->Rmask = 0xfful << L_RED_SHIFT;
+        format->Gmask = 0xfful << L_GREEN_SHIFT;
+        format->Bmask = 0xfful << L_BLUE_SHIFT;
+        format->Amask = 0xfful << L_ALPHA_SHIFT;
         break;
     }
 

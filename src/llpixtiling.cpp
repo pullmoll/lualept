@@ -91,16 +91,21 @@ toString(lua_State *L)
         luaL_addstring(&B, str);
 #if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
         snprintf(str, LL_STRBUFF,
-                 "\n    " LL_PIX "*: %p",
-                 reinterpret_cast<void *>(pixt->pix));
+                 "\n    %-14s: %s* %p",
+                 "pix",  LL_PIX, reinterpret_cast<void *>(pixt->pix));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    nx = %d, ny = %d, w = %d, h = %d",
-                 pixt->nx, pixt->ny, pixt->w, pixt->h);
+                 "\n    %s = %d, %s = %d, %s = %d, %s = %d",
+                 "nx", pixt->nx,
+                 "ny", pixt->ny,
+                 "w", pixt->w,
+                 "h", pixt->h);
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    xoverlap = %d, yoverlap = %d, strip = %d",
-                 pixt->xoverlap, pixt->yoverlap, pixt->strip);
+                 "\n    %s = %d, %s = %d, %s = %d",
+                 "xoverlap", pixt->xoverlap,
+                 "yoverlap", pixt->yoverlap,
+                 "strip", pixt->strip);
         luaL_addstring(&B, str);
 #endif
     }

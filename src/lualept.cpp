@@ -3076,7 +3076,7 @@ Color(lua_State *L)
         b = (color >>  0) & 0xff;
         a = 0xff;
     }
-    if (composeRGBPixel(r, g, b, &pixel))
+    if (composeRGBAPixel(r, g, b, a, &pixel))
         return ll_push_nil(L);
     return ll_push_l_uint32(_fun, L, pixel);
 }
