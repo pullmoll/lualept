@@ -13,7 +13,7 @@ file(GLOB src "*.cpp")
 
 add_library                     (lualept ${LIBRARY_TYPE} ${src} ${hdr})
 set_target_properties           (lualept PROPERTIES VERSION ${VERSION_PLAIN})
-set_target_properties           (lualept PROPERTIES SOVERSION 1.0 )
+set_target_properties           (lualept PROPERTIES SOVERSION 0.3 )
 if (WIN32)
 set_target_properties           (lualept PROPERTIES OUTPUT_NAME       lualept-${VERSION_PLAIN})
 set_target_properties           (lualept PROPERTIES DEBUG_OUTPUT_NAME lualept-${VERSION_PLAIN}d)

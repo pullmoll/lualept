@@ -87,67 +87,88 @@ toString(lua_State* L)
         luaL_addstring(&B, str);
 #if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
         snprintf(str, LL_STRBUFF,
-                 "\n    pixs              : %s* %p", LL_PIX, reinterpret_cast<void *>(ws->pixs));
+                 "\n    %-18s: %s* %p",
+                 "pixs", LL_PIX, reinterpret_cast<void *>(ws->pixs));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    pixm              : %s* %p", LL_PIX, reinterpret_cast<void *>(ws->pixm));
+                 "\n    %-18s: %s* %p",
+                 "pixm", LL_PIX, reinterpret_cast<void *>(ws->pixm));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    mindepth          : %d", ws->mindepth);
+                 "\n    %-18s: %d",
+                 "mindepth", ws->mindepth);
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    pixlab            : %s* %p", LL_PIX, reinterpret_cast<void *>(ws->pixlab));
+                 "\n    %-18s: %s* %p",
+                 "pixlab", LL_PIX, reinterpret_cast<void *>(ws->pixlab));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    pixt              : %s* %p", LL_PIX, reinterpret_cast<void *>(ws->pixt));
+                 "\n    %-18s: %s* %p",
+                 "pixt", LL_PIX, reinterpret_cast<void *>(ws->pixt));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    lines8            : %s* %p", "void*", reinterpret_cast<void *>(ws->lines8));
+                 "\n    %-18s: %s** %p",
+                 "lines8", "void", reinterpret_cast<void *>(ws->lines8));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    linem1            : %s* %p", "void*", reinterpret_cast<void *>(ws->linem1));
+                 "\n    %-18s: %s** %p",
+                 "linem1", "void", reinterpret_cast<void *>(ws->linem1));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    linelab32         : %s* %p", "void*", reinterpret_cast<void *>(ws->linelab32));
+                 "\n    %-18s: %s** %p",
+                 "linelab32", "void", reinterpret_cast<void *>(ws->linelab32));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    linet1            : %s* %p", "void*", reinterpret_cast<void *>(ws->linet1));
+                 "\n    %-18s: %s** %p",
+                 "linet1", "void", reinterpret_cast<void *>(ws->linet1));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    pixad             : %s* %p", LL_PIXA, reinterpret_cast<void *>(ws->pixad));
+                 "\n    %-18s: %s* %p",
+                 "pixad", LL_PIXA, reinterpret_cast<void *>(ws->pixad));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    ptas              : %s* %p", LL_PTA, reinterpret_cast<void *>(ws->ptas));
+                 "\n    %-18s: %s* %p",
+                 "ptas", LL_PTA, reinterpret_cast<void *>(ws->ptas));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    nasi              : %s* %p", LL_NUMA, reinterpret_cast<void *>(ws->nasi));
+                 "\n    %-18s: %s* %p",
+                 "nasi", LL_NUMA, reinterpret_cast<void *>(ws->nasi));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    nash              : %s* %p", LL_NUMA, reinterpret_cast<void *>(ws->nash));
+                 "\n    %-18s: %s* %p",
+                 "nash", LL_NUMA, reinterpret_cast<void *>(ws->nash));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    namh              : %s* %p", LL_NUMA, reinterpret_cast<void *>(ws->namh));
+                 "\n    %-18s: %s* %p",
+                 "namh", LL_NUMA, reinterpret_cast<void *>(ws->namh));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    nalevels          : %s* %p", LL_NUMA, reinterpret_cast<void *>(ws->nalevels));
+                 "\n    %-18s: %s* %p",
+                 "nalevels", LL_NUMA, reinterpret_cast<void *>(ws->nalevels));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    nseeds            : %d", ws->nseeds);
+                 "\n    %-18s: %d",
+                 "nseeds", ws->nseeds);
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    nother            : %d", ws->nother);
+                 "\n    %-18s: %d",
+                 "nother", ws->nother);
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    lut               : %s* %p", "l_int32", reinterpret_cast<void *>(ws->lut));
+                 "\n    %-18s: %s* %p",
+                 "lut", "l_int32", reinterpret_cast<void *>(ws->lut));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    links             : %s* %p", LL_NUMA, reinterpret_cast<void *>(ws->links));
+                 "\n    %-18s: %s* %p",
+                 "links", LL_NUMA, reinterpret_cast<void *>(ws->links));
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    arraysize         : %d", ws->arraysize);
+                 "\n    %-18s: %d",
+                 "arraysize", ws->arraysize);
         luaL_addstring(&B, str);
         snprintf(str, LL_STRBUFF,
-                 "\n    debug             : %d", ws->debug);
+                 "\n    %-18s: %d",
+                 "debug", ws->debug);
         luaL_addstring(&B, str);
 #endif
     }

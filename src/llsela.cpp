@@ -106,6 +106,19 @@ toString(lua_State *L)
                  TNAME "*: %p",
                  reinterpret_cast<void *>(sela));
         luaL_addstring(&B, str);
+#if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
+        snprintf(str, LL_STRBUFF,
+                 "\n    %-14s: %d",
+                 "n", sela->n);
+        snprintf(str, LL_STRBUFF,
+                 "\n    %-14s: %d",
+                 "nalloc", sela->nalloc);
+        luaL_addstring(&B, str);
+        snprintf(str, LL_STRBUFF,
+                 "\n    %-14s: %s** %p",
+                 "sel", LL_SEL, reinterpret_cast<void *>(sela->sel));
+        luaL_addstring(&B, str);
+#endif
     }
     luaL_pushresult(&B);
     ll_free(str);

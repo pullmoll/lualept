@@ -1,5 +1,5 @@
 AC_PREREQ([2.50])
-AC_INIT([lualept], [1.0.0])
+AC_INIT([lualept], [0.3.0])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_HEADERS([src/config.h:config/config.h.in])
 AC_CONFIG_SRCDIR([src/lualept.cpp])
