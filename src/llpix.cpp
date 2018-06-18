@@ -1129,9 +1129,10 @@ AddSingleTextblock(lua_State *L)
     l_uint32 val = ll_check_color_index(_fun, L, 4, pixs);
     l_int32 location = ll_check_location(_fun, L, 5);
     l_int32 overflow = 0;
-    if (pixAddSingleTextblock(pixs, bmf, textstr, val, location, &overflow))
-        return ll_push_nil(_fun, L);
-    return ll_push_boolean(_fun, L, overflow);
+    Pix* pixd = pixAddSingleTextblock(pixs, bmf, textstr, val, location, &overflow);
+    ll_push_Pix(_fun, L, pixd);
+    ll_push_boolean(_fun, L, overflow);
+    return 2;
 }
 
 /**
@@ -1185,7 +1186,7 @@ AddText(lua_State *L)
  *      (5) Typical usage is for labelling a pix with some text data.
  * </pre>
  * \param L Lua state.
- * \return 1 Pix * on the Lua stack.
+ * \return 1 Pix* (%pixd) on the Lua stack.
  */
 static int
 AddTextlines(lua_State *L)
@@ -1195,14 +1196,9 @@ AddTextlines(lua_State *L)
     Bmf *bmf = ll_check_Bmf(_fun, L, 2);
     const char *textstr = ll_check_string(_fun, L, 3);
     l_uint32 val = ll_check_color_index(_fun, L, 4, pixs);
-    l_int32 location = ll_check_l_int32(_fun, L, 5);
-    if (32 != pixGetDepth(pixs)) {
-        /* it's a color index */
-        if (val > 0)
-            val = val - 1;
-    }
-    Pix *pix = pixAddTextlines(pixs, bmf, textstr, val, location);
-    return ll_push_Pix(_fun, L, pix);
+    l_int32 location = ll_check_location(_fun, L, 5);
+    Pix *pixd = pixAddTextlines(pixs, bmf, textstr, val, location);
+    return ll_push_Pix(_fun, L, pixd);
 }
 
 /**
@@ -25777,7 +25773,7 @@ SaveTiledOutline(lua_State *L)
  * Arg #7 is expected to be a Bmf* (bmf).
  * Arg #8 is expected to be a string (textstr).
  * Arg #9 is expected to be a l_uint32 (val).
- * Arg #10 is expected to be a l_int32 (location).
+ * Arg #10 is expected to be a string describing the location (location).
  *
  * Leptonica's Notes:
  *      (1) Before calling this function for the first time, use
@@ -25814,20 +25810,20 @@ SaveTiledWithText(lua_State *L)
     Bmf *bmf = ll_check_Bmf(_fun, L, 7);
     const char *textstr = ll_check_string(_fun, L, 8);
     l_uint32 val = ll_check_color_index(_fun, L, 9, pixs);
-    l_int32 location = ll_check_l_int32(_fun, L, 10);
+    l_int32 location = ll_check_location(_fun, L, 10);
     l_int32 result = pixSaveTiledWithText(pixs, pixa, outwidth, newrow, space, linewidth, bmf, textstr, val, location);
     return ll_push_l_int32(_fun, L, result);
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Scale a Pix* (%pixs) by horizontal, vertical factors (%scalex, %scaley).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (scalex).
  * Arg #3 is expected to be a l_float32 (scaley).
  * </pre>
  * \param L Lua state.
- * \return 1 Pix * on the Lua stack.
+ * \return 1 Pix* (%pixd) on the Lua stack.
  */
 static int
 Scale(lua_State *L)
@@ -25836,12 +25832,12 @@ Scale(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 scalex = ll_check_l_float32(_fun, L, 2);
     l_float32 scaley = ll_check_l_float32(_fun, L, 3);
-    Pix *pix = pixScale(pixs, scalex, scaley);
-    return ll_push_Pix(_fun, L, pix);
+    Pix *pixd = pixScale(pixs, scalex, scaley);
+    return ll_push_Pix(_fun, L, pixd);
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Scale a Pix* (%pixd) by horizontal, vertical factors (%scalex, %scaley) and transfer alpha from Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
@@ -25942,7 +25938,7 @@ ScaleAreaMap2(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Scale Pix* (%pixs) to a destination width, height (%wd, %hd) using area mapping.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (wd).
@@ -25958,7 +25954,7 @@ ScaleAreaMap2(lua_State *L)
  *          * It is an error to set both %wd and %hd to 0.
  * </pre>
  * \param L Lua state.
- * \return 1 Pix * on the Lua stack.
+ * \return 1 Pix* (%pixd) on the Lua stack.
  */
 static int
 ScaleAreaMapToSize(lua_State *L)
@@ -25967,12 +25963,12 @@ ScaleAreaMapToSize(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 wd = ll_check_l_int32(_fun, L, 2);
     l_int32 hd = ll_check_l_int32(_fun, L, 3);
-    Pix *pix = pixScaleAreaMapToSize(pixs, wd, hd);
-    return ll_push_Pix(_fun, L, pix);
+    Pix *pixd = pixScaleAreaMapToSize(pixs, wd, hd);
+    return ll_push_Pix(_fun, L, pixd);
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Scale a binary Pix* (%pixs) by horizontal, vertical factors (%scalex, %scaley).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (scalex).
@@ -25984,7 +25980,7 @@ ScaleAreaMapToSize(lua_State *L)
  *          subsampling (scalex and scaley < 1.0).
  * </pre>
  * \param L Lua state.
- * \return 1 Pix * on the Lua stack.
+ * \return 1 Pix* (%pixd) on the Lua stack.
  */
 static int
 ScaleBinary(lua_State *L)
@@ -25993,12 +25989,12 @@ ScaleBinary(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 scalex = ll_check_l_float32(_fun, L, 2);
     l_float32 scaley = ll_check_l_float32(_fun, L, 3);
-    Pix *pix = pixScaleBinary(pixs, scalex, scaley);
-    return ll_push_Pix(_fun, L, pix);
+    Pix *pixd = pixScaleBinary(pixs, scalex, scaley);
+    return ll_push_Pix(_fun, L, pixd);
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Simple isotropic integer reduction for Pix* (%pixs) by %factor.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (factor).
@@ -26009,7 +26005,7 @@ ScaleBinary(lua_State *L)
  *      (2) If %factor == 1, returns a copy.
  * </pre>
  * \param L Lua state.
- * \return 1 Pix * on the Lua stack.
+ * \return 1 Pix* (%pixd) on the Lua stack.
  */
 static int
 ScaleByIntSampling(lua_State *L)
@@ -26017,12 +26013,12 @@ ScaleByIntSampling(lua_State *L)
     LL_FUNC("ScaleByIntSampling");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 factor = ll_check_l_int32(_fun, L, 2);
-    Pix *pix = pixScaleByIntSampling(pixs, factor);
-    return ll_push_Pix(_fun, L, pix);
+    Pix *pixd = pixScaleByIntSampling(pixs, factor);
+    return ll_push_Pix(_fun, L, pixd);
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Scale a Pix* (%pixs) by horizontal, vertical factors (%scalex, %scaley) using sampling.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (scalex).
@@ -26035,7 +26031,7 @@ ScaleByIntSampling(lua_State *L)
  *      (2) If %scalex == 1.0 and %scaley == 1.0, returns a copy.
  * </pre>
  * \param L Lua state.
- * \return 1 Pix * on the Lua stack.
+ * \return 1 Pix* (%pixd) on the Lua stack.
  */
 static int
 ScaleBySampling(lua_State *L)
@@ -26044,8 +26040,8 @@ ScaleBySampling(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 scalex = ll_check_l_float32(_fun, L, 2);
     l_float32 scaley = ll_check_l_float32(_fun, L, 3);
-    Pix *pix = pixScaleBySampling(pixs, scalex, scaley);
-    return ll_push_Pix(_fun, L, pix);
+    Pix *pixd = pixScaleBySampling(pixs, scalex, scaley);
+    return ll_push_Pix(_fun, L, pixd);
 }
 
 /**

@@ -1,15 +1,13 @@
 require "lua/tools"
 
 header("Bmf")
-local bmf = Bmf("fonts", 10);
+local bmf = Bmf(".", 6);
 print(pad("bmf"), bmf)
 
-local pix = Pix(640, 96, 8)
-pix:AddGrayColormap8()
-pix:SetAll()
-local str = "Some funny name is: Mississippi."
-local overflow = pix:AddSingleTextblock(bmf, str, 0, "add-above")
-print(pad("pix:AddSingleTextblock()"), overflow)
+local pix = Pix(440, 220, 32)
+pix:SetAllArbitrary("yellow")
+local pix = pix:AddSingleTextblock(bmf, "Some funny name is: Mississippi.", "dark red", "add-at-top")
+local pix = pix:AddSingleTextblock(bmf, "Here is bottom!", "violet", "add-at-bot")
 pix:View()
 
 local chr = string.byte('x')
