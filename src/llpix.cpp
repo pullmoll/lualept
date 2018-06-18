@@ -117,8 +117,7 @@ Subtract(lua_State *L)
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     Pix *pix = pixSubtract(pixd, pixd, pixs);
-    ll_push_Pix(_fun, L, pix);
-    return 1;
+    return ll_push_Pix(_fun, L, pix);
 }
 
 /**
@@ -148,8 +147,7 @@ Invert(lua_State *L)
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_opt_Pix(_fun, L, 2);
     Pix *pix = pixInvert(pixs ? nullptr : pixd, pixs ? pixs : pixd);
-    ll_push_Pix(_fun, L, pix);
-    return 1;
+    return ll_push_Pix(_fun, L, pix);
 }
 
 /**
@@ -188,8 +186,7 @@ And(lua_State *L)
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     Pix *pix = pixAnd(pixd, pixd, pixs);
-    ll_push_Pix(_fun, L, pix);
-    return 1;
+    return ll_push_Pix(_fun, L, pix);
 }
 
 /**
@@ -228,8 +225,7 @@ Or(lua_State *L)
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     Pix *pix = pixOr(pixd, pixd, pixs);
-    ll_push_Pix(_fun, L, pix);
-    return 1;
+    return ll_push_Pix(_fun, L, pix);
 }
 
 /**
@@ -268,8 +264,7 @@ Xor(lua_State *L)
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     Pix *pix = pixXor(pixd, pixd, pixs);
-    ll_push_Pix(_fun, L, pix);
-    return 1;
+    return ll_push_Pix(_fun, L, pix);
 }
 
 /**
@@ -419,7 +414,7 @@ AbsDiffByRow(lua_State *L)
  *             column:  dir == L_VERTICAL_LINE
  * </pre>
  * \param L Lua state.
- * \return 1 Numa* on the Lua stack.
+ * \return 1 number (%absdiff) on the Lua stack.
  */
 static int
 AbsDiffInRect(lua_State *L)
@@ -431,8 +426,7 @@ AbsDiffInRect(lua_State *L)
     l_float32 absdiff = 0.0f;
     if (pixAbsDiffInRect(pixs, box, dir, &absdiff))
         return ll_push_nil(_fun, L);
-    ll_push_l_float32(_fun, L, absdiff);
-    return 1;
+    return ll_push_l_float32(_fun, L, absdiff);
 }
 
 /**
@@ -462,8 +456,7 @@ AbsDiffOnLine(lua_State *L)
     l_float32 absdiff = 0.0f;
     if (pixAbsDiffOnLine(pixs, x1, y1, x2, y2, &absdiff))
         return ll_push_nil(_fun, L);
-    ll_push_l_float32(_fun, L, absdiff);
-    return 1;
+    return ll_push_l_float32(_fun, L, absdiff);
 }
 
 /**
@@ -495,11 +488,11 @@ AbsDifference(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Accumulate a Pix* (%pixs) into a Pix* (%pixd).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
- * Arg #3 is expected to be a l_int32 (op).
+ * Arg #3 is expected to be a string describing the arithmetic operation (op).
  *
  * Leptonica's Notes:
  *      (1) This adds or subtracts each pixs value from pixd.
@@ -516,12 +509,12 @@ Accumulate(lua_State *L)
     LL_FUNC("Accumulate");
     Pix *pixd = ll_check_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
-    l_int32 op = ll_check_l_int32(_fun, L, 3);  /* FIXME: operations */
+    l_int32 op = ll_check_arithop(_fun, L, 3);
     return ll_push_boolean(_fun, L, 0 == pixAccumulate(pixd, pixs, op));
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Accumulate samples from Pix* of a Pixa* (%pixa) using Pta* (%pta).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
  * Arg #2 is expected to be a Pta* (pta).
@@ -541,7 +534,7 @@ AccumulateSamples(lua_State *L)
 {
     LL_FUNC("AccumulateSamples");
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
-    Pta *pta = ll_check_Pta(_fun, L, 2);
+    Pta *pta = ll_opt_Pta(_fun, L, 2);
     Pix *pixd = nullptr;
     l_float32 x = 0;
     l_float32 y = 0;
@@ -554,7 +547,7 @@ AccumulateSamples(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Adaptive threshold to binary for Pix* (%pixs) using mask Pix* (%pixm).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pix* (pixm).
@@ -592,7 +585,7 @@ AdaptThresholdToBinary(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Adaptive threshold to binary for Pix* (%pixs) using mask Pix* (%pixm), generic.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pix* (pixm).
@@ -632,7 +625,7 @@ AdaptThresholdToBinaryGen(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Generate a 1 bpp Pix* (%pixd) with alpha channel from Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
@@ -660,11 +653,11 @@ AddAlphaTo1bpp(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Add an alpha channel by blending Pix* (%pixs)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_float32 (fract).
- * Arg #3 is expected to be a l_int32 (invert).
+ * Arg #3 is expected to be a boolean (invert).
  *
  * Leptonica's Notes:
  *      (1) This is a simple alpha layer generator, where typically white has
@@ -688,15 +681,15 @@ AddAlphaToBlend(lua_State *L)
     LL_FUNC("AddAlphaToBlend");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 fract = ll_check_l_float32(_fun, L, 2);
-    l_int32 invert = ll_check_l_int32(_fun, L, 3);
+    l_int32 invert = ll_opt_boolean(_fun, L, 3);
     Pix *pix = pixAddAlphaToBlend(pixs, fract, invert);
     return ll_push_Pix(_fun, L, pix);
 }
 
 /**
- * \brief Add black or white border pixels in a Pix* to a new Pix*.
+ * \brief Add black or white border pixels in a Pix* (%pixs) to a new Pix* (%pixd).
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Pix* (pix).
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (left).
  * Arg #3 is expected to be a l_int32 (right).
  * Arg #4 is expected to be a l_int32 (top).
@@ -719,7 +712,7 @@ AddAlphaToBlend(lua_State *L)
  *              pixRasterop(pixd, left, top, ws, hs, PIX_SET, pixs, 0, 0);
  * </pre>
  * \param L Lua state.
- * \return 1 Pix* on the Lua stack.
+ * \return 1 Pix* (%pixd) on the Lua stack.
  */
 static int
 AddBlackOrWhiteBorder(lua_State *L)
@@ -732,8 +725,7 @@ AddBlackOrWhiteBorder(lua_State *L)
     l_int32 bottom = ll_check_l_int32(_fun, L, 5);
     l_int32 op = ll_check_getval(_fun, L, 6, L_GET_BLACK_VAL);
     Pix* pixd = pixAddBlackOrWhiteBorder(pixs, left, right, top, bottom, op);
-    ll_push_Pix(_fun, L, pixd);
-    return 1;
+    return ll_push_Pix(_fun, L, pixd);
 }
 
 /**
@@ -747,7 +739,7 @@ AddBlackOrWhiteBorder(lua_State *L)
  *      (1) See pixGetBlackOrWhiteVal() for values of black and white pixels.
  * </pre>
  * \param L Lua state.
- * \return 1 Pix* on the Lua stack.
+ * \return 1 Pix* (%pixd) on the Lua stack.
  */
 static int
 AddBorder(lua_State *L)
@@ -757,12 +749,11 @@ AddBorder(lua_State *L)
     l_int32 npix = ll_check_l_int32(_fun, L, 2);
     l_uint32 val = ll_check_color_index(_fun, L, 3, pixs);
     Pix* pixd = pixAddBorder(pixs, npix, val);
-    ll_push_Pix(_fun, L, pixd);
-    return 1;
+    return ll_push_Pix(_fun, L, pixd);
 }
 
 /**
- * \brief Add border pixels general (%val) in a Pix* (%pixs) to a new Pix* (%pixd).
+ * \brief Add general border pixels (%val) in a Pix* (%pixs) to a new Pix* (%pixd).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (left).
@@ -794,7 +785,7 @@ AddBorder(lua_State *L)
  *          and use that for val.
  * </pre>
  * \param L Lua state.
- * \return 1 Pix* on the Lua stack.
+ * \return 1 Pix* (%pixd) on the Lua stack.
  */
 static int
 AddBorderGeneral(lua_State *L)
@@ -807,12 +798,11 @@ AddBorderGeneral(lua_State *L)
     l_int32 bottom = ll_check_l_int32(_fun, L, 5);
     l_uint32 val = ll_check_color_index(_fun, L, 6, pixs);
     Pix* pixd = pixAddBorderGeneral(pixs, left, right, top, bottom, val);
-    ll_push_Pix(_fun, L, pixd);
-    return 1;
+    return ll_push_Pix(_fun, L, pixd);
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Add a constant gray value (%val) to Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (val).
@@ -837,9 +827,9 @@ AddConstantGray(lua_State *L)
 }
 
 /**
- * \brief Add continued border pixels in a Pix* to a new Pix*.
+ * \brief Add continued border pixels in a Pix* (%pixs) to a new Pix* (%pixd).
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Pix* (pix).
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a l_int32 (left).
  * Arg #3 is expected to be a l_int32 (right).
  * Arg #4 is expected to be a l_int32 (top).
@@ -850,7 +840,7 @@ AddConstantGray(lua_State *L)
  *          the value on the closest boundary pixel.
  * </pre>
  * \param L Lua state.
- * \return 1 Pix* on the Lua stack.
+ * \return 1 Pix* (%pixd) on the Lua stack.
  */
 static int
 AddContinuedBorder(lua_State *L)
@@ -861,9 +851,8 @@ AddContinuedBorder(lua_State *L)
     l_int32 right = ll_check_l_int32(_fun, L, 3);
     l_int32 top = ll_check_l_int32(_fun, L, 4);
     l_int32 bottom = ll_check_l_int32(_fun, L, 5);
-    Pix* pix = pixAddContinuedBorder(pixs, left, right, top, bottom);
-    ll_push_Pix(_fun, L, pix);
-    return 1;
+    Pix* pixd = pixAddContinuedBorder(pixs, left, right, top, bottom);
+    return ll_push_Pix(_fun, L, pixd);
 }
 
 /**
@@ -909,13 +898,13 @@ AddGaussianNoise(lua_State *L)
  *      (5) pixs2 must be different from both pixd and pixs1.
  * </pre>
  * \param L Lua state.
- * \return 1 Pix * on the Lua stack.
+ * \return 1 Pix* (%pix) on the Lua stack.
  */
 static int
 AddGray(lua_State *L)
 {
     LL_FUNC("AddGray");
-    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixd = ll_opt_Pix(_fun, L, 1);
     Pix *pixs1 = ll_check_Pix(_fun, L, 2);
     Pix *pixs2 = ll_check_Pix(_fun, L, 3);
     Pix *pix = pixAddGray(pixd, pixs1, pixs2);
@@ -952,15 +941,15 @@ AddGrayColormap8(lua_State *L)
  *          input image has unique gray levels.
  * </pre>
  * \param L Lua state.
- * \return 1 Pix * on the Lua stack.
+ * \return 1 Pix* (%pixd) on the Lua stack.
  */
 static int
 AddMinimalGrayColormap8(lua_State *L)
 {
     LL_FUNC("AddMinimalGrayColormap8");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    Pix *pix = pixAddMinimalGrayColormap8(pixs);
-    return ll_push_Pix(_fun, L, pix);
+    Pix *pixd = pixAddMinimalGrayColormap8(pixs);
+    return ll_push_Pix(_fun, L, pixd);
 }
 
 /**
@@ -988,7 +977,7 @@ AddMinimalGrayColormap8(lua_State *L)
  *          because there is no overlap between the src and dest rectangles.
  * </pre>
  * \param L Lua state.
- * \return 1 Pix* on the Lua stack.
+ * \return 1 Pix* (%pixd) on the Lua stack.
  */
 static int
 AddMirroredBorder(lua_State *L)
@@ -1000,8 +989,7 @@ AddMirroredBorder(lua_State *L)
     l_int32 top = ll_check_l_int32(_fun, L, 4);
     l_int32 bottom = ll_check_l_int32(_fun, L, 5);
     Pix* pixd = pixAddMirroredBorder(pixs, left, right, top, bottom);
-    ll_push_Pix(_fun, L, pixd);
-    return 1;
+    return ll_push_Pix(_fun, L, pixd);
 }
 
 /**
@@ -1031,7 +1019,7 @@ AddMirroredBorder(lua_State *L)
  *          src and dest rectangles.
  * </pre>
  * \param L Lua state.
- * \return 1 Pix* on the Lua stack.
+ * \return 1 Pix* (%pixd) on the Lua stack.
  */
 static int
 AddMixedBorder(lua_State *L)
@@ -1042,9 +1030,8 @@ AddMixedBorder(lua_State *L)
     l_int32 right = ll_check_l_int32(_fun, L, 3);
     l_int32 top = ll_check_l_int32(_fun, L, 4);
     l_int32 bottom = ll_check_l_int32(_fun, L, 5);
-    Pix* pix = pixAddMixedBorder(pixs, left, right, top, bottom);
-    ll_push_Pix(_fun, L, pix);
-    return 1;
+    Pix* pixd = pixAddMixedBorder(pixs, left, right, top, bottom);
+    return ll_push_Pix(_fun, L, pixd);
 }
 
 /**
@@ -1062,7 +1049,7 @@ AddMixedBorder(lua_State *L)
  *          pixels are essentially black, such as in pixPerceptualDiff().
  * </pre>
  * \param L Lua state.
- * \return 1 Pix * on the Lua stack.
+ * \return 1 Pix* (%pix) on the Lua stack.
  */
 static int
 AddRGB(lua_State *L)
@@ -1091,7 +1078,7 @@ AddRGB(lua_State *L)
  *          because there is no overlap between the src and dest rectangles.
  * </pre>
  * \param L Lua state.
- * \return 1 Pix* on the Lua stack.
+ * \return 1 Pix* (%pixd) on the Lua stack.
  */
 static int
 AddRepeatedBorder(lua_State *L)
@@ -1103,12 +1090,11 @@ AddRepeatedBorder(lua_State *L)
     l_int32 top = ll_check_l_int32(_fun, L, 4);
     l_int32 bottom = ll_check_l_int32(_fun, L, 5);
     Pix* pixd = pixAddRepeatedBorder(pixs, left, right, top, bottom);
-    ll_push_Pix(_fun, L, pixd);
-    return 1;
+    return ll_push_Pix(_fun, L, pixd);
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Add a single text block to Pix* (%pix) using Bmf* (%bmf).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Bmf* (bmf).
@@ -1131,7 +1117,7 @@ AddRepeatedBorder(lua_State *L)
  *      (5) Typical usage is for labelling a pix with some text data.
  * </pre>
  * \param L Lua state.
- * \return 1 Pix * on the Lua stack.
+ * \return 1 boolean (%overflow) on the Lua stack.
  */
 static int
 AddSingleTextblock(lua_State *L)
@@ -1141,12 +1127,11 @@ AddSingleTextblock(lua_State *L)
     Bmf *bmf = ll_check_Bmf(_fun, L, 2);
     const char *textstr = ll_check_string(_fun, L, 3);
     l_uint32 val = ll_check_color_index(_fun, L, 4, pixs);
-    l_int32 location = ll_check_l_int32(_fun, L, 5);
+    l_int32 location = ll_check_location(_fun, L, 5);
     l_int32 overflow = 0;
     if (pixAddSingleTextblock(pixs, bmf, textstr, val, location, &overflow))
         return ll_push_nil(_fun, L);
-    ll_push_l_int32(_fun, L, overflow);
-    return 1;
+    return ll_push_boolean(_fun, L, overflow);
 }
 
 /**
@@ -1169,8 +1154,7 @@ AddText(lua_State *L)
     LL_FUNC("AddText");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     const char* text = ll_check_string(_fun, L, 2);
-    lua_pushboolean(L, pixAddText(pix, text));
-    return 1;
+    return ll_push_boolean(_fun, L, 0 == pixAddText(pix, text));
 }
 
 /**
@@ -1618,7 +1602,7 @@ AlphaBlendUniform(lua_State *L)
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * </pre>
  * \param L Lua state.
- * \return 1 boolean on the Lua stack.
+ * \return 1 boolean (%opaque) on the Lua stack.
  */
 static int
 AlphaIsOpaque(lua_State *L)
@@ -1628,8 +1612,7 @@ AlphaIsOpaque(lua_State *L)
     l_int32 opaque = 0;
     if (pixAlphaIsOpaque(pix, &opaque))
         return ll_push_nil(_fun, L);
-    lua_pushboolean(L, opaque);
-    return 1;
+    return ll_push_boolean(_fun, L, opaque);
 }
 
 /**
@@ -1777,7 +1760,7 @@ ApplyVariableGrayMap(lua_State *L)
  *          pixel in the image.
  * </pre>
  * \param L Lua state.
- * \return 1 l_int32 on the Lua stack.
+ * \return 1 integer (%countarray) on the Lua stack.
  */
 static int
 AssignToNearestColor(lua_State *L)
@@ -1790,8 +1773,7 @@ AssignToNearestColor(lua_State *L)
     l_int32 countarray = 0;
     if (pixAssignToNearestColor(pixd, pixs, pixm, level, &countarray))
         return ll_push_nil(_fun, L);
-    ll_push_l_int32(_fun, L, countarray);
-    return 1;
+    return ll_push_l_int32(_fun, L, countarray);
 }
 
 /**
@@ -1855,7 +1837,7 @@ AverageByRow(lua_State *L)
  * Arg #2 is an optional Box* (box).
  * </pre>
  * \param L Lua state.
- * \return 1 Numa* on the Lua stack.
+ * \return 1 number (%ave) on the Lua stack.
  */
 static int
 AverageInRect(lua_State *L)
@@ -1866,8 +1848,7 @@ AverageInRect(lua_State *L)
     l_float32 ave = 0.0f;
     if (pixAverageInRect(pixs, box, &ave))
         return ll_push_nil(_fun, L);
-    ll_push_l_float32(_fun, L, ave);
-    return 1;
+    return ll_push_l_float32(_fun, L, ave);
 }
 
 /**
@@ -3842,7 +3823,7 @@ CleanupByteProcessing(lua_State *L)
         return ll_push_nil(_fun, L);
     UNUSED(size);
     // ll_push_string(_fun, L, reinterpret_cast<const char *>(lineptrs), size);
-    return 1;
+    return 0;
 }
 
 /**
@@ -3880,7 +3861,7 @@ ClearAll(lua_State *L)
  *          one in the colormap.  Be sure that this is the intended color!
  * </pre>
  * \param L Lua state.
- * \return 1 integer on the Lua stack.
+ * \return 1 boolean on the Lua stack.
  */
 static int
 ClearInRect(lua_State *L)
@@ -3939,7 +3920,7 @@ ClearPixel(lua_State *L)
  *          to pixClipBoxToForeground().
  * </pre>
  * \param L Lua state.
- * \return 1 l_int32 on the Lua stack.
+ * \return 1 Pix* (%pixd) and Box* (%boxd) on the Lua stack.
  */
 static int
 ClipBoxToEdges(lua_State *L)
@@ -4033,7 +4014,7 @@ ClipMasked(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Clip the Pix* (%pixs) to a rectangle Box* (%box).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Box* (box).
@@ -4064,7 +4045,7 @@ ClipMasked(lua_State *L)
  *  the input box clipped to the src pix.
  * </pre>
  * \param L Lua state.
- * \return 1 Pix * on the Lua stack.
+ * \return 1 Box* (%boxc) on the Lua stack.
  */
 static int
 ClipRectangle(lua_State *L)
@@ -4075,12 +4056,11 @@ ClipRectangle(lua_State *L)
     Box *boxc = nullptr;
     if (pixClipRectangle(pixs, box, &boxc))
         return ll_push_nil(_fun, L);
-    ll_push_Box(_fun, L, boxc);
-    return 1;
+    return ll_push_Box(_fun, L, boxc);
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Clip Pix* (%pixs) by a number of rectangles Boxa* (%boxa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Boxa* (boxa).
@@ -4103,7 +4083,7 @@ ClipRectangles(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Clip to the foreground pixels of Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  *
@@ -4112,7 +4092,7 @@ ClipRectangles(lua_State *L)
  *      (2) If there are no fg pixels, the returned ptrs are null.
  * </pre>
  * \param L Lua state.
- * \return 1 l_int32 on the Lua stack.
+ * \return 2 Pix* (%pixd) and Box* (%box) on the Lua stack.
  */
 static int
 ClipToForeground(lua_State *L)
@@ -4129,7 +4109,7 @@ ClipToForeground(lua_State *L)
 }
 
 /**
- * \brief Clone a Pix*.
+ * \brief Clone a Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix*.
  *
@@ -4162,7 +4142,7 @@ Clone(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Generic morphological closing for Pix* (%pixs) using hits in Sel* (%sel).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).
@@ -4190,7 +4170,7 @@ static int
 Close(lua_State *L)
 {
     LL_FUNC("Close");
-    Pix *pixd = ll_check_Pix(_fun, L, 1);
+    Pix *pixd = ll_opt_Pix(_fun, L, 1);
     Pix *pixs = ll_check_Pix(_fun, L, 2);
     Sel *sel = ll_check_Sel(_fun, L, 3);
     Pix *pix = pixClose(pixd, pixs, sel);
@@ -4198,7 +4178,7 @@ Close(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
+ * \brief Morphological closing for Pix* (%pixs) using a brick sel (%hsize, %vsize).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixd).
  * Arg #2 is expected to be a Pix* (pixs).

@@ -87,6 +87,7 @@
 #define	LL_PIXTILING	"PixTiling"     /*!< Lua class: PixTiling */
 #define	LL_PIXCOMP      "PixComp"       /*!< Lua class: PixComp (compressed Pix) */
 #define	LL_PIXACOMP     "PixaComp"      /*!< Lua class: PixaComp (array of PixComp) */
+#define	LL_PIXACC	"Pixacc"        /*!< Lua class: Pixacc (Pix accumulator) */
 #define	LL_PTA		"Pta"           /*!< Lua class: Pta (array of points, i.e. pair of l_float32) */
 #define	LL_PTAA		"Ptaa"          /*!< Lua class: Ptaa (array of Pta) */
 #define	LL_QUEUE        "Queue"         /*!< Lua class: Queue */
@@ -564,6 +565,9 @@ extern const char     * ll_string_distance(l_int32 dir);
 extern l_int32          ll_check_set_black_white(const char *_fun, lua_State *L, int arg, l_int32 def = L_SET_WHITE);
 extern const char     * ll_string_set_black_white(l_int32 which);
 
+extern l_int32          ll_check_arithop(const char *_fun, lua_State *L, int arg, l_int32 def = PIX_SRC);
+extern const char     * ll_string_arithop(l_int32 op);
+
 extern l_int32          ll_check_rasterop(const char *_fun, lua_State *L, int arg, l_int32 def = PIX_SRC);
 extern const char     * ll_string_rasterop(l_int32 op);
 
@@ -605,6 +609,9 @@ extern const char     * ll_string_from_side(l_int32 which);
 
 extern l_int32          ll_check_adjust_sides(const char *_fun, lua_State *L, int arg, l_int32 def = L_ADJUST_SKIP);
 extern const char     * ll_string_adjust_sides(l_int32 which);
+
+extern l_int32          ll_check_location(const char *_fun, lua_State *L, int arg, l_int32 def = L_ADJUST_SKIP);
+extern const char     * ll_string_location(l_int32 which);
 
 extern l_int32          ll_check_sort_mode(const char *_fun, lua_State *L, int arg, l_int32 def = L_SHELL_SORT);
 extern const char     * ll_string_sort_mode(l_int32 order);
@@ -818,6 +825,12 @@ extern Pixaa          * ll_check_Pixaa(const char *_fun, lua_State *L, int arg);
 extern Pixaa          * ll_opt_Pixaa(const char *_fun, lua_State *L, int arg);
 extern int              ll_push_Pixaa(const char *_fun, lua_State *L, Pixaa *pixaa);
 extern int              ll_new_Pixaa(lua_State *L);
+
+/* llpixacc.cpp */
+extern Pixacc         * ll_check_Pixacc(const char *_fun, lua_State *L, int arg);
+extern Pixacc         * ll_opt_Pixacc(const char *_fun, lua_State *L, int arg);
+extern int              ll_push_Pixacc(const char *_fun, lua_State *L, Pixacc *pixacc);
+extern int              ll_new_Pixacc(lua_State *L);
 
 /* llfpix.cpp */
 extern FPix           * ll_check_FPix(const char *_fun, lua_State *L, int arg);

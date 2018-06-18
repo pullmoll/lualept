@@ -978,6 +978,61 @@ ll_string_set_black_white(l_int32 which)
 }
 
 /**
+ * \brief Table of arithmetic operation names and enumeration values.
+ * <pre>
+ * Arithmetic and logical operator flags.
+ * </pre>
+ */
+static const lept_enum tbl_arithop[] = {
+    TBL_ENTRY("add",            L_ARITH_ADD),
+    TBL_ENTRY("+",              L_ARITH_ADD),
+    TBL_ENTRY("subtract",       L_ARITH_SUBTRACT),
+    TBL_ENTRY("sub",            L_ARITH_SUBTRACT),
+    TBL_ENTRY("-",              L_ARITH_SUBTRACT),
+    TBL_ENTRY("multiply",       L_ARITH_MULTIPLY),  /* On Numa* only */
+    TBL_ENTRY("mult",           L_ARITH_MULTIPLY),  /* On Numa* only */
+    TBL_ENTRY("mul",            L_ARITH_MULTIPLY),  /* On Numa* only */
+    TBL_ENTRY("×",              L_ARITH_MULTIPLY),  /* On Numa* only */
+    TBL_ENTRY("divide",         L_ARITH_DIVIDE),    /* On Numa* only */
+    TBL_ENTRY("div",            L_ARITH_DIVIDE),    /* On Numa* only */
+    TBL_ENTRY("÷",              L_ARITH_DIVIDE),    /* On Numa* only */
+    TBL_ENTRY("union",          L_UNION),           /* On Numa* only */
+    TBL_ENTRY("∪",              L_UNION),           /* On Numa* only */
+    TBL_ENTRY("intersection",   L_INTERSECTION),    /* On Numa* only */
+    TBL_ENTRY("∩",              L_INTERSECTION),    /* On Numa* only */
+    TBL_ENTRY("subtraction",    L_SUBTRACTION),     /* On Numa* only */
+    TBL_ENTRY("∖",              L_SUBTRACTION),     /* On Numa* only */
+    TBL_ENTRY("exclusive-or",   L_EXCLUSIVE_OR),    /* On Numa* only */
+    TBL_ENTRY("xor",            L_EXCLUSIVE_OR),    /* On Numa* only */
+    TBL_ENTRY("⊻",              L_EXCLUSIVE_OR)     /* On Numa* only */
+};
+
+/**
+ * \brief Check for a arithmetic operation name as string.
+ * \param _fun calling function's name
+ * \param L Lua state.
+ * \param arg index where to find the string
+ * \param def default value to return if not specified or unknown
+ * \return storage flag.
+ */
+l_int32
+ll_check_arithop(const char *_fun, lua_State *L, int arg, l_int32 def)
+{
+    return ll_check_tbl(_fun, L, arg, def, tbl_arithop, ARRAYSIZE(tbl_arithop));
+}
+
+/**
+ * \brief Return a string for the arithmetic operation.
+ * \param op enumeration value of the arithmetic operation
+ * \return const string with the name.
+ */
+const char*
+ll_string_arithop(l_int32 op)
+{
+    return ll_string_tbl(op, tbl_arithop, ARRAYSIZE(tbl_arithop));
+}
+
+/**
  * \brief Table of rasterop names and enumeration values.
  * <pre>
  * The following operation bit flags have been modified from
@@ -1741,6 +1796,60 @@ const char*
 ll_string_adjust_sides(l_int32 which)
 {
     return ll_string_tbl(which, tbl_adjust_sides, ARRAYSIZE(tbl_adjust_sides));
+}
+
+/**
+ * \brief Table of location by names and enumeration values.
+ * <pre>
+ * Sort mode flags.
+ * </pre>
+ */
+static const lept_enum tbl_location[] = {
+    TBL_ENTRY("add-above",              L_ADD_ABOVE),
+    TBL_ENTRY("above",                  L_ADD_ABOVE),
+    TBL_ENTRY("a",                      L_ADD_ABOVE),
+    TBL_ENTRY("add-below",              L_ADD_BELOW),
+    TBL_ENTRY("below",                  L_ADD_BELOW),
+    TBL_ENTRY("b",                      L_ADD_BELOW),
+    TBL_ENTRY("add-left",               L_ADD_LEFT),
+    TBL_ENTRY("left",                   L_ADD_LEFT),
+    TBL_ENTRY("l",                      L_ADD_LEFT),
+    TBL_ENTRY("add-right",              L_ADD_RIGHT),
+    TBL_ENTRY("right",                  L_ADD_RIGHT),
+    TBL_ENTRY("r",                      L_ADD_RIGHT),
+    TBL_ENTRY("add-at-top",             L_ADD_AT_TOP),
+    TBL_ENTRY("at-top",                 L_ADD_AT_TOP),
+    TBL_ENTRY("add-at-bot",             L_ADD_AT_BOT),
+    TBL_ENTRY("at-bot",                 L_ADD_AT_BOT),
+    TBL_ENTRY("add-at-left",            L_ADD_AT_LEFT),
+    TBL_ENTRY("at-left",                L_ADD_AT_LEFT),
+    TBL_ENTRY("add-at-right",           L_ADD_AT_RIGHT),
+    TBL_ENTRY("at-right",               L_ADD_AT_RIGHT)
+};
+
+/**
+ * \brief Check for a location name.
+ * \param _fun calling function's name
+ * \param L Lua state.
+ * \param arg index where to find the string
+ * \param def default value to return if not specified or unknown
+ * \return storage flag.
+ */
+l_int32
+ll_check_location(const char *_fun, lua_State* L, int arg, l_int32 def)
+{
+    return ll_check_tbl(_fun, L, arg, def, tbl_location, ARRAYSIZE(tbl_location));
+}
+
+/**
+ * \brief Return a string for the location.
+ * \param location transform location enumeration value
+ * \return const string with the name.
+ */
+const char*
+ll_string_location(l_int32 location)
+{
+    return ll_string_tbl(location, tbl_location, ARRAYSIZE(tbl_location));
 }
 
 /**

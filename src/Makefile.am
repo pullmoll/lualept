@@ -39,6 +39,7 @@ liblualept_la_SOURCES = \
 	llpix.cpp \
 	llpixa.cpp \
 	llpixaa.cpp \
+	llpixacc.cpp \
 	llpixacomp.cpp \
 	llpixcmap.cpp \
 	llpixcomp.cpp \
