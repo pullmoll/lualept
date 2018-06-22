@@ -2034,6 +2034,7 @@ static const ll_type_t types[] = {
     {ll_pix,        LL_PIX},
     {ll_pixa,       LL_PIXA},
     {ll_pixaa,      LL_PIXAA},
+    {ll_pixacc,     LL_PIXACC},
     {ll_pixcmap,    LL_PIXCMAP},
     {ll_pixtiling,  LL_PIXTILING},
     {ll_pixcomp,    LL_PIXCOMP},
@@ -2065,15 +2066,15 @@ ll_typestr(ll_type_e type)
 }
 
 /**
- * \brief Set all global variables defined in %vars.
- * \param _fun calling function's name
+ * \brief Set global variables defined in %vars.
  * \param L Lua state.
  * \param vars pointer to the ll_global_var_t array
  * \return 0 on success, or die on error.
  */
 int
-ll_set_all_globals(const char *_fun, lua_State *L, const ll_global_var_t *vars)
+ll_set_globals(lua_State *L, const ll_global_var_t *vars)
 {
+    FUNC("ll_set_globals");
     const ll_global_var_t *var;
 
     if (nullptr == vars)
@@ -2312,6 +2313,12 @@ ll_set_all_globals(const char *_fun, lua_State *L, const ll_global_var_t *vars)
             lua_setglobal(L, var->name);
             break;
 
+        case ll_pixacc:
+            ll_push_Pixacc(_fun, L, *var->u.ppixacc);
+            *var->u.ppixacc = nullptr;
+            lua_setglobal(L, var->name);
+            break;
+
         case ll_pixcmap:
             ll_push_PixColormap(_fun, L, *var->u.pcmap);
             *var->u.pcmap = nullptr;
@@ -2405,14 +2412,14 @@ ll_set_all_globals(const char *_fun, lua_State *L, const ll_global_var_t *vars)
 
 /**
  * \brief Get all global variables defined in %vars.
- * \param _fun calling function's name
  * \param L Lua state.
  * \param vars pointer to the ll_global_var_t array
  * \return 0 on success, or die on error.
  */
 int
-ll_get_all_globals(const char *_fun, lua_State *L, const ll_global_var_t *vars)
+ll_get_globals(lua_State *L, const ll_global_var_t *vars)
 {
+    FUNC("ll_get_globals");
     const ll_global_var_t *var;
 
     if (nullptr == vars)
@@ -2745,6 +2752,14 @@ ll_get_all_globals(const char *_fun, lua_State *L, const ll_global_var_t *vars)
                 *var->u.ppixaa = ll_take_udata<Pixaa>(_fun, L, -1, ll_typestr(var->type));
             } else {
                 *var->u.ppixaa = nullptr;
+            }
+            break;
+
+        case ll_pixacc:
+            if (LUA_TUSERDATA == lua_getglobal(L, var->name)) {
+                *var->u.ppixacc = ll_take_udata<Pixacc>(_fun, L, -1, ll_typestr(var->type));
+            } else {
+                *var->u.ppixacc = nullptr;
             }
             break;
 
@@ -3609,6 +3624,7 @@ luaopen_lualept(lua_State *L)
     ll_open_Pix(L);
     ll_open_Pixa(L);
     ll_open_Pixaa(L);
+    ll_open_Pixacc(L);
     ll_open_PixColormap(L);
     ll_open_PixComp(L);
     ll_open_PixaComp(L);
@@ -3625,26 +3641,17 @@ luaopen_lualept(lua_State *L)
 }
 
 /**
- * \brief Run a Lua script.
- * \param name filename of an external file to run, if script == nullptr
- * \param script if != nullptr, load the string and run it
- *        using %name as chunk name for debug output
- * \param set_vars optional array of global variable definitions to set.
- * \param get_vars optional array of global variable definitions to get.
- * \param argc optional argument count
- * \param argv optional array of argument values
- * \return 0 on success, or 1 on error.
+ * @brief Open a new lua_State* L, load the Lua libraries and lualept.
+ * @return Pointer to the Lua state.
  */
-int
-ll_run(const char *name, const char *script, ll_global_var_t *set_vars, ll_global_var_t *get_vars,
-       int argc, char** argv)
+lua_State*
+ll_open(bool debug)
 {
-    FUNC("ll_run");
+    FUNC("ll_open");
     lua_State *L;
-    int i, res;
 
     /* Disable Leptonica debugging (pixDisplay ...) */
-    setLeptDebugOK(FALSE);
+    setLeptDebugOK(debug);
 
     /* Allocate a new Lua state */
     L = luaL_newstate();
@@ -3655,9 +3662,21 @@ ll_run(const char *name, const char *script, ll_global_var_t *set_vars, ll_globa
     /* Register our libraries */
     luaopen_lualept(L);
 
-    /* Set any global variables */
-    ll_set_all_globals(_fun, L, set_vars);
+    return L;
+}
 
+/**
+ * \brief Set the global arg[] table array from argc and argv
+ * \param L Lua state.
+ * \param argc optional argument count
+ * \param argv optional array of argument values
+ * \return 0 on success, or 1 on error.
+ */
+int
+ll_set_arg(lua_State* L, int argc, char **argv)
+{
+    FUNC("ll_set_arg");
+    int i;
     if (argc > 0 && nullptr != argv) {
         lua_newtable(L);
         for (i = 1; i < argc; i++) {
@@ -3666,6 +3685,61 @@ ll_run(const char *name, const char *script, ll_global_var_t *set_vars, ll_globa
         }
         lua_setglobal(L, "arg");
     }
+    return 0;
+}
+
+/**
+ * @brief Get all globals and store them in ptable
+ * @param L Lua state.
+ * @param ptable pointer to a ll_global_var_t pointer.
+ * @param pcount pointer to a size_t to receive the count.
+ * @return 0 on success, or 1 on error.
+ */
+int
+ll_all_globals(lua_State* L, ll_global_var_t** ptable, size_t *pcount)
+{
+    FUNC("ll_get_globals");
+    size_t len;
+    const char *key;
+
+    if (ptable)
+        *ptable = nullptr;
+    if (pcount)
+        *pcount = 0;
+
+    /* Get global table */
+    lua_pushglobaltable(L);
+
+    /* put a nil key on stack */
+    lua_pushnil(L);
+
+    /* key(-1) is replaced by the next key(-1) in table(-2) */
+    while (lua_next(L,-2) != 0) {
+        /* Get key(-2) name */
+        key = lua_tolstring(L, -2, &len);
+
+        /* TODO: get value, determine type and create an entry in ptable */
+
+        /* remove value(-1), now key on top at(-1) */
+        lua_pop(L, 1);
+    }
+    // remove global table(-1)
+    lua_pop(L, 1);
+    return 0;
+}
+
+/**
+ * \brief Run a Lua script.
+ * \param name filename of an external file to run, if script == nullptr
+ * \param script if != nullptr, load the string and run it
+ *        using %name as chunk name for debug output
+ * \return 0 on success, or 1 on error.
+ */
+int
+ll_run(lua_State* L, const char *name, const char *script)
+{
+    FUNC("ll_run");
+    int res;
 
     if (nullptr == script) {
         /* load from a file %name */
@@ -3690,13 +3764,20 @@ ll_run(const char *name, const char *script, ll_global_var_t *set_vars, ll_globa
     res = lua_pcall(L, 0, LUA_MULTRET, 0);
     if (LUA_OK != res) {
         const char* msg = lua_tostring(L, -1);
-        lua_close(L);
         return ERROR_INT(msg, _fun, 1);
     }
 
-    /* Get any global variables */
-    ll_get_all_globals(_fun, L, get_vars);
-    lua_close(L);
+    return 0;
+}
 
+/**
+ * @brief Close the lua_State* L
+ * \param L Lua state.
+ * @return 0 on success, or 1 on error.
+ */
+int
+ll_close(lua_State* L)
+{
+    lua_close(L);
     return 0;
 }

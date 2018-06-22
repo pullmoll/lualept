@@ -913,10 +913,4 @@ extern int              ll_new_WShed(lua_State *L);
 /* lualept-sdl2.cpp */
 extern int ViewSDL2(Pix* pix, const char* title = nullptr, int x0 = 0, int y0 = 0, float dscale = 0.0f);
 
-/* lualept.cpp */
-
-extern int ll_set_all_globals(const char *_fun, lua_State *L, const ll_global_var_t *vars);
-extern int ll_get_all_globals(const char *_fun, lua_State *L, const ll_global_var_t *vars);
-
-
 #endif /* !defined(LUALEPT_EXPORTS_H) */

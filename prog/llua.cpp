@@ -86,6 +86,7 @@ void hexdump(ll_bytes_t *bytes)
 int main(int argc, char **argv)
 {
     char buff[256];
+    lua_State* L = nullptr;
     const char* progname = nullptr;
     const char* filename = nullptr;
 
@@ -143,7 +144,22 @@ int main(int argc, char **argv)
     /* Create the Box* box_in */
     i_box = boxCreate(40, 40, 320, 240);
 
-    res = ll_run(filename, nullptr, set_vars, get_vars, argc, argv);
+    /* Open a new lua_State* */
+    L = ll_open(false);
+
+    /* Set the arg[] table array */
+    ll_set_arg(L, argc, argv);
+
+    /* Set globals as defined in set_vars */
+    ll_set_globals(L, set_vars);
+
+    /* Run the script */
+    res = ll_run(L, filename, nullptr);
+
+    if (0 == res) {
+        /* Get globals as defined in get_vars */
+        ll_get_globals(L, get_vars);
+    }
     printf("%s: %s returned %d\n", progname, "ll_RunScript(script)", res);
 
     printf("%s: Pix* i_pix = %p\n", progname, reinterpret_cast<void *>(i_pix));
