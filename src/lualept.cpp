@@ -307,6 +307,7 @@ int
 ll_istable(const char *_fun, lua_State *L, int arg)
 {
     int res = lua_istable(L, arg);
+    UNUSED(_fun);
     DBG(LOG_CHECK_TABLE, "%s: res=%s\n", _fun, res ? "TRUE" : "FALSE");
     return res;
 }
@@ -324,6 +325,7 @@ ll_isudata(const char *_fun, lua_State *L, int arg, const char* tname)
 {
     void **pptr = reinterpret_cast<void **>(luaL_testudata(L, arg, tname));
     int res = nullptr != pptr;
+    UNUSED(_fun);
     DBG(LOG_CHECK_UDATA, "%s: res=%s\n", _fun, res ? "TRUE" : "FALSE");
     return res;
 }
@@ -3543,13 +3545,16 @@ ll_new_lualept(lua_State *L)
     const lua_Number *lua_ver = lua_version(L);
 
     snprintf(lept->str_version, sizeof(lept->str_version), "%s", PACKAGE_VERSION);
+    DBG(1, "%s: %-24s: %s\n", _fun, "str_version", lept->str_version);
 
     snprintf(lept->str_version_lua, sizeof(lept->str_version_lua), "%d.%d",
              static_cast<int>(lua_ver[0])/100, static_cast<int>(lua_ver[0])%100);
+    DBG(1, "%s: %-24s: %s\n", _fun, "str_version_lua", lept->str_version_lua);
 
     if (!strncmp(lept_ver, lept_prefix, strlen(lept_prefix)))
         lept_ver += strlen(lept_prefix);
     snprintf(lept->str_version_lept, sizeof(lept->str_version_lept), "%s", lept_ver);
+    DBG(1, "%s: %-24s: %s\n", _fun, "str_version_lept", lept->str_version_lept);
 
     return ll_push_udata(_fun, L, TNAME, lept);
 }
@@ -3592,10 +3597,7 @@ luaopen_lualept(lua_State *L)
         {"Uncompress",              Uncompress},
         LUA_SENTINEL
     };
-    FUNC("luaopen_lualept");
-
-    ll_register_class(_fun, L, TNAME, methods);
-    ll_set_global_table(_fun, L, TNAME, ll_new_lualept);
+    LO_FUNC(TNAME);
 
     ll_open_Amap(L);
     ll_open_Aset(L);
@@ -3637,6 +3639,10 @@ luaopen_lualept(lua_State *L)
     ll_open_Sela(L);
     ll_open_Stack(L);
     ll_open_WShed(L);
+
+    ll_set_global_cfunct(_fun, L, TNAME, ll_new_lualept);
+    ll_register_class(_fun, L, TNAME, methods);
+
     return 1;
 }
 
@@ -3677,54 +3683,14 @@ ll_set_arg(lua_State* L, int argc, char **argv)
 {
     FUNC("ll_set_arg");
     int i;
-    if (argc > 0 && nullptr != argv) {
-        lua_newtable(L);
-        for (i = 1; i < argc; i++) {
-            lua_pushstring(L, argv[i]);
-            lua_rawseti(L, -2, i);
-        }
-        lua_setglobal(L, "arg");
+    if (argc <= 0 || nullptr == argv)
+        return 1;
+    lua_newtable(L);
+    for (i = 1; i < argc; i++) {
+        lua_pushstring(L, argv[i]);
+        lua_rawseti(L, -2, i);
     }
-    return 0;
-}
-
-/**
- * @brief Get all globals and store them in ptable
- * @param L Lua state.
- * @param ptable pointer to a ll_global_var_t pointer.
- * @param pcount pointer to a size_t to receive the count.
- * @return 0 on success, or 1 on error.
- */
-int
-ll_all_globals(lua_State* L, ll_global_var_t** ptable, size_t *pcount)
-{
-    FUNC("ll_get_globals");
-    size_t len;
-    const char *key;
-
-    if (ptable)
-        *ptable = nullptr;
-    if (pcount)
-        *pcount = 0;
-
-    /* Get global table */
-    lua_pushglobaltable(L);
-
-    /* put a nil key on stack */
-    lua_pushnil(L);
-
-    /* key(-1) is replaced by the next key(-1) in table(-2) */
-    while (lua_next(L,-2) != 0) {
-        /* Get key(-2) name */
-        key = lua_tolstring(L, -2, &len);
-
-        /* TODO: get value, determine type and create an entry in ptable */
-
-        /* remove value(-1), now key on top at(-1) */
-        lua_pop(L, 1);
-    }
-    // remove global table(-1)
-    lua_pop(L, 1);
+    lua_setglobal(L, "arg");
     return 0;
 }
 
@@ -3759,6 +3725,9 @@ ll_run(lua_State* L, const char *name, const char *script)
             return ERROR_INT(msg, _fun, 1);
         }
     }
+
+    ll_new_lualept(L);
+    lua_setglobal(L, LL_LUALEPT);
 
     /* Ask Lua to run our script */
     res = lua_pcall(L, 0, LUA_MULTRET, 0);

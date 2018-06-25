@@ -142,8 +142,8 @@ typedef enum {
  * strings which may contain the '\0' character.
  */
 typedef struct ll_bytes_s {
-    l_uint8    *data;
-    size_t      size;
+    l_uint8 *data;
+    size_t   size;
 }   ll_bytes_t;
 
 /**
@@ -267,7 +267,6 @@ LUALEPT_DLL extern int ll_get_globals(lua_State *L, const ll_global_var_t *vars)
 LUALEPT_DLL extern int luaopen_lualept(lua_State *L);
 LUALEPT_DLL extern lua_State* ll_open(bool debug);
 LUALEPT_DLL extern int ll_set_arg(lua_State *L, int argc, char **argv);
-LUALEPT_DLL extern int ll_all_globals(lua_State *L, ll_global_var_t **ptable, size_t *pcount);
 LUALEPT_DLL extern int ll_run(lua_State *L, const char* filename, const char* script = nullptr);
 LUALEPT_DLL extern int ll_close(lua_State *L);
 

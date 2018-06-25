@@ -114,7 +114,7 @@ int main(int argc, char **argv)
         LL_SENTINEL
     };
     l_int32 x, y, w, h, d;
-    int i, res;
+    int res;
 
     progname = strrchr(argv[0], '\\');
     if (!progname)
@@ -183,5 +183,8 @@ int main(int argc, char **argv)
            reinterpret_cast<void *>(bytes.data), bytes.size);
     hexdump(&bytes);
     free(bytes.data);
+
+    ll_close(L);
+
     return res;
 }

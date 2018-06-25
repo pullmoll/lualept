@@ -36,7 +36,7 @@
 #include "lualept.h"
 
 #if !defined(LUALEPT_DEBUG)
-#define LUALEPT_DEBUG       0     /*!< set to 1 to enable debugging */
+#define LUALEPT_DEBUG       1     /*!< set to 1 to enable debugging */
 #endif
 
 #if !defined(LUALEPT_INTERNALS)
@@ -316,32 +316,23 @@ ll_malloc(const char* _fun, lua_State *L, size_t size)
 }
 
 /**
- * \brief Cast the result of LEPT_CALLOC() to the given type.
+ * \brief Cast the result of LEPT_REALLOC() to the given type.
  * T is the typename of the result pointer
  * \param _fun calling function's name
  * \param L Lua state.
+ * \param ptr previous pointer value
  * \param nmemb number of members
- * \param size size of one member
  * \result memory allocated, zeroed and cast to T*
  */
 template <typename T> T*
-ll_calloc(const char* _fun, lua_State *L, size_t nmemb, size_t size)
+ll_realloc(const char* _fun, lua_State *L, void *inptr, size_t nmemb)
 {
-    void *ptr = LEPT_CALLOC(nmemb, size);
+    void *ptr = LEPT_REALLOC(inptr, nmemb * sizeof(T));
     if (!ptr) {
-        die(_fun, L, "failed to calloc(%d,%d)", nmemb, size);
+        die(_fun, L, "failed to realloc(%d,%d)", nmemb * sizeof(T));
         return nullptr;
     }
     return reinterpret_cast<T *>(ptr);
-}
-
-/**
- * \brief Alias for ll_calloc() with l_int32 nmemb and size.
- */
-template <typename T> T*
-ll_calloc(const char* _fun, lua_State *L, l_int32 nmemb, l_int32 size)
-{
-    return ll_calloc<T>(_fun, L, static_cast<size_t>(nmemb), static_cast<size_t>(size));
 }
 
 /**
@@ -369,7 +360,12 @@ ll_calloc(const char* _fun, lua_State *L, size_t nmemb)
 template <typename T> T*
 ll_calloc(const char* _fun, lua_State *L, l_int32 nmemb)
 {
-    return ll_calloc<T>(_fun, L, static_cast<size_t>(nmemb), sizeof(T));
+    void *ptr = LEPT_CALLOC(nmemb, sizeof(T));
+    if (!ptr) {
+        die(_fun, L, "failed to calloc(%d,%d)", nmemb, sizeof(T));
+        return nullptr;
+    }
+    return reinterpret_cast<T *>(ptr);
 }
 
 /**
