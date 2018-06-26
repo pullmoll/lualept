@@ -153,6 +153,231 @@ AddPix(lua_State *L)
 }
 
 /**
+ * \brief AddPixWithText() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
+ * Arg #2 is expected to be a Pix* (pixs).
+ * Arg #3 is expected to be a l_int32 (reduction).
+ * Arg #4 is expected to be a Bmf* (bmf).
+ * Arg #5 is expected to be a const char* (textstr).
+ * Arg #6 is expected to be a l_uint32 (val).
+ * Arg #7 is expected to be a string describing the location (location).
+ *
+ * Leptonica's Notes:
+ *      (1) This function generates a new pix with added text, and adds
+ *          it by insertion into the pixa.
+ *      (2) If the input pixs is not cmapped and not 32 bpp, it is
+ *          converted to 32 bpp rgb.  %val is a standard 32 bpp pixel,
+ *          expressed as 0xrrggbb00.  If there is a colormap, this does
+ *          the best it can to use the requested color, or something close.
+ *      (3) if %bmf == NULL, generate an 8 pt font; this takes about 5 msec.
+ *      (4) If %textstr == NULL, use the text field in the pix.
+ *      (5) In general, the text string can be written in multiple lines;
+ *          use newlines as the separators.
+ *      (6) Typical usage is for debugging, where the pixa of labeled images
+ *          is used to generate a pdf.  Suggest using 1.0 for scalefactor.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 0 on the Lua stack
+ */
+static int
+AddPixWithText(lua_State *L)
+{
+    LL_FUNC("AddPixWithText");
+    Pixa *pixa = ll_check_Pixa(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
+    l_int32 reduction = ll_check_l_int32(_fun, L, 3);
+    Bmf *bmf = ll_opt_Bmf(_fun, L, 4);
+    const char *textstr = ll_opt_string(_fun, L, 5);
+    l_uint32 val = ll_opt_l_uint32(_fun, L, 6);
+    l_int32 location = ll_check_location(_fun, L, 7);
+    l_ok ok = pixaAddPixWithText(pixa, pixs, reduction, bmf, textstr, val, location);
+    return ll_push_boolean(_fun, L, 0 == ok);
+}
+
+/**
+ * \brief AddTextNumber() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixas).
+ * Arg #2 is expected to be a Bmf* (bmf).
+ * Arg #3 is expected to be a Numa* (na).
+ * Arg #4 is expected to be a l_uint32 (val).
+ * Arg #5 is expected to be a l_int32 (location).
+ *
+ * Leptonica's Notes:
+ *      (1) Typical usage is for labelling each pix in a pixa with a number.
+ *      (2) This function paints numbers external to each pix, in a position
+ *          given by %location.  In all cases, the pix is expanded on
+ *          on side and the number is painted over white in the added region.
+ *      (3) %val is the pixel value to be painted through the font mask.
+ *          It should be chosen to agree with the depth of pixs.
+ *          If it is out of bounds, an intermediate value is chosen.
+ *          For RGB, use hex notation: 0xRRGGBB00, where RR is the
+ *          hex representation of the red intensity, etc.
+ *      (4) If na == NULL, number each pix sequentially, starting with 1.
+ *      (5) If there is a colormap, this does the best it can to use
+ *          the requested color, or something similar to it.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+AddTextNumber(lua_State *L)
+{
+    LL_FUNC("AddTextNumber");
+    Pixa *pixas = ll_check_Pixa(_fun, L, 1);
+    Bmf *bmf = ll_opt_Bmf(_fun, L, 2);
+    Numa *na = ll_opt_Numa(_fun, L, 3);
+    l_uint32 val = ll_opt_l_uint32(_fun, L, 4);
+    l_int32 location = ll_check_location(_fun, L, 5);
+    Pixa *pixa = pixaAddTextNumber(pixas, bmf, na, val, location);
+    return ll_push_Pixa(_fun, L, pixa);
+}
+
+/**
+ * \brief AddTextlines() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixas).
+ * Arg #2 is expected to be a Bmf* (bmf).
+ * Arg #3 is expected to be a Sarray* (sa).
+ * Arg #4 is expected to be a l_uint32 (val).
+ * Arg #5 is expected to be a string describing the location (location).
+ *
+ * Leptonica's Notes:
+ *      (1) This function adds one or more lines of text externally to
+ *          each pix, in a position given by %location.  In all cases,
+ *          the pix is expanded as necessary to accommodate the text.
+ *      (2) %val is the pixel value to be painted through the font mask.
+ *          It should be chosen to agree with the depth of pixs.
+ *          If it is out of bounds, an intermediate value is chosen.
+ *          For RGB, use hex notation: 0xRRGGBB00, where RR is the
+ *          hex representation of the red intensity, etc.
+ *      (3) If sa == NULL, use the text embedded in each pix.  In all
+ *          cases, newlines in the text string are used to separate the
+ *          lines of text that are added to the pix.
+ *      (4) If sa has a smaller count than pixa, issue a warning
+ *          and do not use any embedded text.
+ *      (5) If there is a colormap, this does the best it can to use
+ *          the requested color, or something similar to it.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+AddTextlines(lua_State *L)
+{
+    LL_FUNC("AddTextlines");
+    Pixa *pixas = ll_check_Pixa(_fun, L, 1);
+    Bmf *bmf = ll_opt_Bmf(_fun, L, 2);
+    Sarray *sa = lua_isnil(L, 3) ? nullptr : ll_unpack_Sarray(_fun, L, 3, nullptr);
+    l_uint32 val = ll_opt_l_uint32(_fun, L, 4);
+    l_int32 location = ll_check_location(_fun, L, 5);
+    Pixa *pixa = pixaAddTextlines(pixas, bmf, sa, val, location);
+    return ll_push_Pixa(_fun, L, pixa);
+}
+
+/**
+ * \brief Check if any of the Pix* in Pixa* (%pixa) have a colormap.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
+ *
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 boolean on the Lua stack
+ */
+static int
+AnyColormaps(lua_State *L)
+{
+    LL_FUNC("AnyColormaps");
+    Pixa *pixa = ll_check_Pixa(_fun, L, 1);
+    l_int32 hascmap = 0;
+    if (pixaAnyColormaps(pixa, &hascmap))
+        return ll_push_nil(_fun, L);
+    ll_push_boolean(_fun, L, hascmap);
+    return 1;
+}
+
+/**
+ * \brief BinSort() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixas).
+ * Arg #2 is expected to be a l_int32 (sorttype).
+ * Arg #3 is expected to be a l_int32 (sortorder).
+ * Arg #4 is expected to be a l_int32 (copyflag).
+ *
+ * Leptonica's Notes:
+ *      (1) This sorts based on the data in the boxa.  If the boxa
+ *          count is not the same as the pixa count, this returns an error.
+ *      (2) The copyflag refers to the pix and box copies that are
+ *          inserted into the sorted pixa.  These are either L_COPY
+ *          or L_CLONE.
+ *      (3) For a large number of boxes (say, greater than 1000), this
+ *          O(n) binsort is much faster than the O(nlogn) shellsort.
+ *          For 5000 components, this is over 20x faster than boxaSort().
+ *      (4) Consequently, pixaSort() calls this function if it will
+ *          likely go much faster.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 2 on the Lua stack
+ */
+static int
+BinSort(lua_State *L)
+{
+    LL_FUNC("BinSort");
+    Pixa *pixas = ll_check_Pixa(_fun, L, 1);
+    l_int32 sorttype = ll_check_sort_mode(_fun, L, 2);
+    l_int32 sortorder = ll_check_sort_order(_fun, L, 3);
+    l_int32 copyflag = ll_check_access_storage(_fun, L, 4);
+    Numa *naindex = nullptr;
+    Pixa *pixad = pixaBinSort(pixas, sorttype, sortorder, &naindex, copyflag);
+    ll_push_Pixa(_fun, L, pixad);
+    ll_push_Numa(_fun, L, naindex);
+    return 2;
+}
+
+/**
+ * \brief Centroids() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
+ *
+ * Leptonica's Notes:
+ *      (1) An error message is returned if any pix has something other
+ *          than 1 bpp or 8 bpp depth, and the centroid from that pix
+ *          is saved as (0, 0).
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+Centroids(lua_State *L)
+{
+    LL_FUNC("Centroids");
+    Pixa *pixa = ll_check_Pixa(_fun, L, 1);
+    Pta *pta = pixaCentroids(pixa);
+    return ll_push_Pta(_fun, L, pta);
+}
+
+/**
+ * \brief ChangeRefcount() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
+ * Arg #2 is expected to be a l_int32 (delta).
+ *
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 0 on the Lua stack
+ */
+static int
+ChangeRefcount(lua_State *L)
+{
+    LL_FUNC("ChangeRefcount");
+    Pixa *pixa = ll_check_Pixa(_fun, L, 1);
+    l_int32 delta = ll_check_l_int32(_fun, L, 2);
+    l_ok ok = pixaChangeRefcount(pixa, delta);
+    return ll_push_boolean(_fun, L, 0 == ok);
+}
+
+/**
  * \brief Clear the Pixa* (%pixa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
@@ -171,6 +396,432 @@ Clear(lua_State *L)
     LL_FUNC("Clear");
     Pixa *pixa = ll_check_Pixa(_fun, L, 1);
     return ll_push_boolean(_fun, L, 0 == pixaClear(pixa));
+}
+
+/**
+ * \brief Clip Pix* in the Pixa* (%pixas) to their foreground.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixas).
+ *
+ * Leptonica's Notes:
+ *      (1) At least one of [&pixd, &boxa] must be specified.
+ *      (2) Any pix with no fg pixels is skipped.
+ *      (3) See pixClipToForeground().
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 2 Pixa* (%pixad) and Boxa* (%boxa) on the Lua stack
+ */
+static int
+ClipToForeground(lua_State *L)
+{
+    LL_FUNC("ClipToForeground");
+    Pixa *pixas = ll_check_Pixa(_fun, L, 1);
+    Pixa *pixad = nullptr;
+    Boxa *boxa = nullptr;
+    if (pixaClipToForeground(pixas, &pixad, &boxa))
+        return ll_push_nil(_fun, L);
+    ll_push_Pixa(_fun, L, pixad);
+    ll_push_Boxa(_fun, L, boxa);
+    return 2;
+}
+
+/**
+ * \brief ClipToPix() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixas).
+ * Arg #2 is expected to be a Pix* (pixs).
+ *
+ * Leptonica's Notes:
+ *      (1) This is intended for use in situations where pixas
+ *          was originally generated from the input pixs.
+ *      (2) Returns a pixad where each pix in pixas is ANDed
+ *          with its associated region of the input pixs.  This
+ *          region is specified by the the box that is associated
+ *          with the pix.
+ *      (3) In a typical application of this function, pixas has
+ *          a set of region masks, so this generates a pixa of
+ *          the parts of pixs that correspond to each region
+ *          mask component, along with the bounding box for
+ *          the region.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+ClipToPix(lua_State *L)
+{
+    LL_FUNC("ClipToPix");
+    Pixa *pixas = ll_check_Pixa(_fun, L, 1);
+    Pix *pixs = ll_check_Pix(_fun, L, 2);
+    Pixa *pixad = pixaClipToPix(pixas, pixs);
+    return ll_push_Pixa(_fun, L, pixad);
+}
+
+/**
+ * \brief CompareInPdf() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixa1).
+ * Arg #2 is expected to be a Pixa* (pixa2).
+ * Arg #3 is expected to be a l_int32 (nx).
+ * Arg #4 is expected to be a l_int32 (ny).
+ * Arg #5 is expected to be a l_int32 (tw).
+ * Arg #6 is expected to be a l_int32 (spacing).
+ * Arg #7 is expected to be a l_int32 (border).
+ * Arg #8 is expected to be a l_int32 (fontsize).
+ * Arg #9 is expected to be a const char* (fileout).
+ *
+ * Leptonica's Notes:
+ *      (1) This takes two pixa and renders them interleaved, side-by-side
+ *          in a pdf.  A warning is issued if the input pixa arrays
+ *          have different lengths.
+ *      (2) %nx and %ny specify how many side-by-side pairs are displayed
+ *          on each pdf page.  For example, if %nx = 1 and %ny = 2, then
+ *          two pairs are shown, one above the other, on each page.
+ *      (3) The input pix are scaled to a target width of %tw, and
+ *          then paired with optional %spacing between and optional
+ *          black border of width %border.
+ *      (4) After a pixa is generated of these tiled images, it is
+ *          written to %fileout as a pdf.
+ *      (5) Typical numbers for the input parameters are:
+ *            %nx = small integer (1 - 4)
+ *            %ny = 2 * %nx
+ *            %tw = 200 - 500 pixels
+ *            %spacing = 10
+ *            %border = 2
+ *            %fontsize = 10
+ *      (6) If %fontsize != 0, the index of the pix pair in their pixa
+ *          is printed out below each pair.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 0 on the Lua stack
+ */
+static int
+CompareInPdf(lua_State *L)
+{
+    LL_FUNC("CompareInPdf");
+    Pixa *pixa1 = ll_check_Pixa(_fun, L, 1);
+    Pixa *pixa2 = ll_check_Pixa(_fun, L, 2);
+    l_int32 nx = ll_opt_l_int32(_fun, L, 3, 2);
+    l_int32 ny = ll_opt_l_int32(_fun, L, 4, 4);
+    l_int32 tw = ll_opt_l_int32(_fun, L, 5, 100);
+    l_int32 spacing = ll_opt_l_int32(_fun, L, 6, 10);
+    l_int32 border = ll_opt_l_int32(_fun, L, 7, 2);
+    l_int32 fontsize = ll_opt_l_int32(_fun, L, 8);
+    const char *fileout = ll_check_string(_fun, L, 9);
+    l_ok ok = pixaCompareInPdf(pixa1, pixa2, nx, ny, tw, spacing, border, fontsize, fileout);
+    return ll_push_boolean(_fun, L, 0 == ok);
+}
+
+/**
+ * \brief ComparePhotoRegionsByHisto() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
+ * Arg #2 is expected to be a l_float32 (minratio).
+ * Arg #3 is expected to be a l_float32 (textthresh).
+ * Arg #4 is expected to be a l_int32 (factor).
+ * Arg #5 is expected to be a l_int32 (nx).
+ * Arg #6 is expected to be a l_int32 (ny).
+ * Arg #7 is expected to be a l_float32 (simthresh).
+ *
+ * Leptonica's Notes:
+ *      (1) This function takes a pixa of cropped photo images and
+ *          compares each one to the others for similarity.
+ *          Each image is first tested to see if it is a photo that can
+ *          be compared by tiled histograms.  If so, it is padded to put
+ *          the centroid in the center of the image, and the histograms
+ *          are generated.  The final step of comparing each histogram
+ *          with all the others is very fast.
+ *      (2) An initial filter gives %score = 0 if the ratio of widths
+ *          and heights (smallest / largest) does not exceed a
+ *          threshold %minratio.  If set at 1.0, both images must be
+ *          exactly the same size.  A typical value for %minratio is 0.9.
+ *      (3) The comparison score between two images is a value in [0.0 .. 1.0].
+ *          If the comparison score >= %simthresh, the images are placed in
+ *          the same similarity class.  Default value for %simthresh is 0.25.
+ *      (4) An array %nai of similarity class indices for pix in the
+ *          input pixa is returned.
+ *      (5) There are two debugging options:
+ *          * An optional 2D matrix of scores is returned as a 1D array.
+ *            A visualization of this is written to a temp file.
+ *          * An optional pix showing the similarity classes can be
+ *            returned.  Text in each input pix is reproduced.
+ *      (6) See the notes in pixComparePhotoRegionsByHisto() for details
+ *          on the implementation.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 3 on the Lua stack
+ */
+static int
+ComparePhotoRegionsByHisto(lua_State *L)
+{
+    LL_FUNC("ComparePhotoRegionsByHisto");
+    Pixa *pixa = ll_check_Pixa(_fun, L, 1);
+    l_float32 minratio = ll_check_l_float32(_fun, L, 2);
+    l_float32 textthresh = ll_check_l_float32(_fun, L, 3);
+    l_int32 factor = ll_check_l_int32(_fun, L, 4);
+    l_int32 nx = ll_check_l_int32(_fun, L, 5);
+    l_int32 ny = ll_check_l_int32(_fun, L, 6);
+    l_float32 simthresh = ll_check_l_float32(_fun, L, 7);
+    l_int32 debug = ll_opt_boolean(_fun, L, 8);
+    Numa *nai = nullptr;
+    Pix *pixd = nullptr;
+    if (pixaComparePhotoRegionsByHisto(pixa, minratio, textthresh, factor, nx, ny, simthresh, &nai, nullptr, &pixd, debug))
+        return ll_push_nil(_fun, L);
+    ll_push_Numa(_fun, L, nai);
+    ll_push_Pix(_fun, L, pixd);
+    return 3;
+}
+
+/**
+ * \brief ConstrainedSelect() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixas).
+ * Arg #2 is expected to be a l_int32 (first).
+ * Arg #3 is expected to be a l_int32 (last).
+ * Arg #4 is expected to be a l_int32 (nmax).
+ * Arg #5 is expected to be a boolean (use_pairs).
+ * Arg #6 is expected to be a string describing the copy mode (copyflag).
+ *
+ * Leptonica's Notes:
+ *     (1) See notes in genConstrainedNumaInRange() for how selection
+ *         is made.
+ *     (2) This returns a selection of the pix in the input pixa.
+ *     (3) Use copyflag == L_COPY if you don't want changes in the pix
+ *         in the returned pixa to affect those in the input pixa.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+ConstrainedSelect(lua_State *L)
+{
+    LL_FUNC("ConstrainedSelect");
+    Pixa *pixas = ll_check_Pixa(_fun, L, 1);
+    l_int32 first = ll_check_l_int32(_fun, L, 2);
+    l_int32 last = ll_check_l_int32(_fun, L, 3);
+    l_int32 nmax = ll_check_l_int32(_fun, L, 4);
+    l_int32 use_pairs = ll_opt_boolean(_fun, L, 5);
+    l_int32 copyflag = ll_check_access_storage(_fun, L, 6, L_COPY);
+    Pixa *pixa = pixaConstrainedSelect(pixas, first, last, nmax, use_pairs, copyflag);
+    return ll_push_Pixa(_fun, L, pixa);
+}
+
+/**
+ * \brief Convert all Pix* in Pixa* (%pixas) to 1 bpp.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixas).
+ * Arg #2 is expected to be a l_int32 (thresh).
+ *
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pixa* (%pixa) on the Lua stack
+ */
+static int
+ConvertTo1(lua_State *L)
+{
+    LL_FUNC("ConvertTo1");
+    Pixa *pixas = ll_check_Pixa(_fun, L, 1);
+    l_int32 thresh = ll_check_l_int32(_fun, L, 2);
+    Pixa *pixa = pixaConvertTo1(pixas, thresh);
+    return ll_push_Pixa(_fun, L, pixa);
+}
+
+/**
+ * \brief Convert all Pix* in Pixa* (%pixas) to 8 bpp.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixas).
+ * Arg #2 is expected to be a boolean (cmapflag).
+ *
+ * Leptonica's Notes:
+ *      (1) See notes for pixConvertTo8(), applied to each pix in pixas.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 Pixa* (%pixa) on the Lua stack
+ */
+static int
+ConvertTo8(lua_State *L)
+{
+    LL_FUNC("ConvertTo8");
+    Pixa *pixas = ll_check_Pixa(_fun, L, 1);
+    l_int32 cmapflag = ll_opt_boolean(_fun, L, 2);
+    Pixa *pixa = pixaConvertTo8(pixas, cmapflag);
+    return ll_push_Pixa(_fun, L, pixa);
+}
+
+/**
+ * \brief ConvertTo8Colormap() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixas).
+ * Arg #2 is expected to be a boolean (dither).
+ *
+ * Leptonica's Notes:
+ *      (1) See notes for pixConvertTo8Colormap(), applied to each pix in pixas.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+ConvertTo8Colormap(lua_State *L)
+{
+    LL_FUNC("ConvertTo8Colormap");
+    Pixa *pixas = ll_check_Pixa(_fun, L, 1);
+    l_int32 dither = ll_opt_boolean(_fun, L, 2);
+    Pixa *pixa = pixaConvertTo8Colormap(pixas, dither);
+    return ll_push_Pixa(_fun, L, pixa);
+}
+
+/**
+ * \brief Convert all Pix* in Pixa* (%pixas) to 32 bpp.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixas).
+ *
+ * Leptonica's Notes:
+ *      (1) See notes for pixConvertTo32(), applied to each pix in pixas.
+ *      (2) This can be used to allow 1 bpp pix in a pixa to be displayed
+ *          with color.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+ConvertTo32(lua_State *L)
+{
+    LL_FUNC("ConvertTo32");
+    Pixa *pixas = ll_check_Pixa(_fun, L, 1);
+    Pixa *pixa = pixaConvertTo32(pixas);
+    return ll_push_Pixa(_fun, L, pixa);
+}
+
+/**
+ * \brief ConvertToNUpPixa() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixas).
+ * Arg #2 is expected to be a Sarray* (sa).
+ * Arg #3 is expected to be a l_int32 (nx).
+ * Arg #4 is expected to be a l_int32 (ny).
+ * Arg #5 is expected to be a l_int32 (tw).
+ * Arg #6 is expected to be a l_int32 (spacing).
+ * Arg #7 is expected to be a l_int32 (border).
+ * Arg #8 is expected to be a l_int32 (fontsize).
+ *
+ * Leptonica's Notes:
+ *      (1) This takes an input pixa and an optional array of strings, and
+ *          generates a pixa of NUp tiles from the input, labeled with
+ *          the strings if they exist and %fontsize != 0.
+ *      (2) See notes for convertToNUpFiles()
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+ConvertToNUpPixa(lua_State *L)
+{
+    LL_FUNC("ConvertToNUpPixa");
+    Pixa *pixas = ll_check_Pixa(_fun, L, 1);
+    Sarray *sa = lua_isnil(L, 2) ? nullptr : ll_unpack_Sarray(_fun, L, 2, nullptr);
+    l_int32 nx = ll_opt_l_int32(_fun, L, 3, 2);
+    l_int32 ny = ll_opt_l_int32(_fun, L, 4, 4);
+    l_int32 tw = ll_opt_l_int32(_fun, L, 5, 100);
+    l_int32 spacing = ll_opt_l_int32(_fun, L, 6, 20);
+    l_int32 border = ll_opt_l_int32(_fun, L, 7, 2);
+    l_int32 fontsize = ll_opt_l_int32(_fun, L, 8);
+    Pixa *pixa = pixaConvertToNUpPixa(pixas, sa, nx, ny, tw, spacing, border, fontsize);
+    return ll_push_Pixa(_fun, L, pixa);
+}
+
+/**
+ * \brief ConvertToPdf() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
+ * Arg #2 is expected to be a l_int32 (res).
+ * Arg #3 is expected to be a l_float32 (scalefactor).
+ * Arg #4 is expected to be a l_int32 (type).
+ * Arg #5 is expected to be a l_int32 (quality).
+ * Arg #6 is expected to be a const char* (title).
+ * Arg #7 is expected to be a const char* (fileout).
+ *
+ * Leptonica's Notes:
+ *      (1) The images are encoded with G4 if 1 bpp; JPEG if 8 bpp without
+ *          colormap and many colors, or 32 bpp; FLATE for anything else.
+ *      (2) The scalefactor must be > 0.0; otherwise it is set to 1.0.
+ *      (3) Specifying one of the three encoding types for %type forces
+ *          all images to be compressed with that type.  Use 0 to have
+ *          the type determined for each image based on depth and whether
+ *          or not it has a colormap.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 0 on the Lua stack
+ */
+static int
+ConvertToPdf(lua_State *L)
+{
+    LL_FUNC("ConvertToPdf");
+    Pixa *pixas = ll_check_Pixa(_fun, L, 1);
+    l_int32 res = ll_check_l_int32(_fun, L, 2);
+    l_float32 scalefactor = ll_check_l_float32(_fun, L, 3);
+    l_int32 type = ll_check_encoding(_fun, L, 4);
+    l_int32 quality = ll_check_l_int32(_fun, L, 5);
+    const char *title = ll_check_string(_fun, L, 6);
+    const char *fileout = ll_check_string(_fun, L, 7);
+    l_ok ok = pixaConvertToPdf(pixas, res, scalefactor, type, quality, title, fileout);
+    return ll_push_boolean(_fun, L, 0 == ok);
+}
+
+/**
+ * \brief ConvertToPdfData() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
+ * Arg #2 is expected to be a l_int32 (res).
+ * Arg #3 is expected to be a l_float32 (scalefactor).
+ * Arg #4 is expected to be a l_int32 (type).
+ * Arg #5 is expected to be a l_int32 (quality).
+ * Arg #6 is expected to be a const char* (title).
+ *
+ * Leptonica's Notes:
+ *      (1) See pixaConvertToPdf().
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 2 on the Lua stack
+ */
+static int
+ConvertToPdfData(lua_State *L)
+{
+    LL_FUNC("ConvertToPdfData");
+    Pixa *pixa = ll_check_Pixa(_fun, L, 1);
+    l_int32 res = ll_check_l_int32(_fun, L, 2);
+    l_float32 scalefactor = ll_check_l_float32(_fun, L, 3);
+    l_int32 type = ll_check_l_int32(_fun, L, 4);
+    l_int32 quality = ll_check_l_int32(_fun, L, 5);
+    const char *title = ll_check_string(_fun, L, 6);
+    l_uint8 *data = nullptr;
+    size_t nbytes = 0;
+    if (pixaConvertToPdfData(pixa, res, scalefactor, type, quality, title, &data, &nbytes))
+        return ll_push_nil(_fun, L);
+    ll_push_bytes(_fun, L, data, nbytes);
+    return 1;
+}
+
+/**
+ * \brief ConvertToSameDepth() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixas).
+ *
+ * Leptonica's Notes:
+ *      (1) If any pix has a colormap, they are all converted to rgb.
+ *          Otherwise, they are all converted to the maximum depth of
+ *          all the pix.
+ *      (2) This can be used to allow lossless rendering onto a single pix.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+ConvertToSameDepth(lua_State *L)
+{
+    LL_FUNC("ConvertToSameDepth");
+    Pixa *pixas = ll_check_Pixa(_fun, L, 1);
+    Pixa *pixa = pixaConvertToSameDepth(pixas);
+    return ll_push_Pixa(_fun, L, pixa);
 }
 
 /**
@@ -588,7 +1239,8 @@ ReplacePix(lua_State *L)
     Box *boxs = ll_opt_Box(_fun, L, 4);
     Pix *pix = pixClone(pixs);
     Box *box = boxs ? boxClone(boxs) : nullptr;
-    lua_pushboolean(L, pix && 0 == pixaReplacePix(pixa, idx, pix, box));
+    l_ok ok = pixaReplacePix(pixa, idx, pix, box);
+    lua_pushboolean(L, pix && 0 == ok);
     return 1;
 }
 
@@ -841,37 +1493,57 @@ int
 ll_open_Pixa(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                    Destroy},
-        {"__new",                   ll_new_Pixa},
-        {"__len",                   GetCount},
-        {"__tostring",              toString},
-        {"AddPix",                  AddPix},
-        {"Clear",                   Clear},
-        {"Copy",                    Copy},
-        {"Create",                  Create},
-        {"CreateFromPix",           CreateFromPix},
-        {"CreateFromPixacomp",      CreateFromPixacomp},
-        {"Destroy",                 Destroy},
-        {"Display",                 Display},
-        {"GetAlignedStats",         GetAlignedStats},
-        {"GetBoxGeometry",          GetBoxGeometry},
-        {"GetCount",                GetCount},
-        {"GetPix",                  GetPix},
-        {"InsertPix",               InsertPix},
-        {"Interleave",              Interleave},
-        {"Join",                    Join},
-        {"Read",                    Read},
-        {"ReadFiles",               ReadFiles},
-        {"ReadMem",                 ReadMem},
-        {"ReadStream",              ReadStream},
-        {"RemovePix",               RemovePix},
-        {"RemovePixAndSave",        RemovePixAndSave},
-        {"ReplacePix",              ReplacePix},
-        {"TakePix",                 RemovePixAndSave},  /* alias name */
-        {"TemplatesFromComposites", TemplatesFromComposites},
-        {"Write",                   Write},
-        {"WriteMem",                WriteMem},
-        {"WriteStream",             WriteStream},
+        {"__gc",                        Destroy},
+        {"__new",                       ll_new_Pixa},
+        {"__newindex",                  ReplacePix},
+        {"__len",                       GetCount},
+        {"__tostring",                  toString},
+        {"AddPix",                      AddPix},
+        {"AddPixWithText",              AddPixWithText},
+        {"AddTextNumber",               AddTextNumber},
+        {"AddTextlines",                AddTextlines},
+        {"AnyColormaps",                AnyColormaps},
+        {"BinSort",                     BinSort},
+        {"Centroids",                   Centroids},
+        {"ChangeRefcount",              ChangeRefcount},
+        {"Clear",                       Clear},
+        {"ClipToForeground",            ClipToForeground},
+        {"ClipToPix",                   ClipToPix},
+        {"CompareInPdf",                CompareInPdf},
+        {"ComparePhotoRegionsByHisto",  ComparePhotoRegionsByHisto},
+        {"ConstrainedSelect",           ConstrainedSelect},
+        {"ConvertTo1",                  ConvertTo1},
+        {"ConvertTo8",                  ConvertTo8},
+        {"ConvertTo8Colormap",          ConvertTo8Colormap},
+        {"ConvertTo32",                 ConvertTo32},
+        {"ConvertToNUpPixa",            ConvertToNUpPixa},
+        {"ConvertToPdf",                ConvertToPdf},
+        {"ConvertToPdfData",            ConvertToPdfData},
+        {"Copy",                        Copy},
+        {"Create",                      Create},
+        {"CreateFromPix",               CreateFromPix},
+        {"CreateFromPixacomp",          CreateFromPixacomp},
+        {"Destroy",                     Destroy},
+        {"Display",                     Display},
+        {"GetAlignedStats",             GetAlignedStats},
+        {"GetBoxGeometry",              GetBoxGeometry},
+        {"GetCount",                    GetCount},
+        {"GetPix",                      GetPix},
+        {"InsertPix",                   InsertPix},
+        {"Interleave",                  Interleave},
+        {"Join",                        Join},
+        {"Read",                        Read},
+        {"ReadFiles",                   ReadFiles},
+        {"ReadMem",                     ReadMem},
+        {"ReadStream",                  ReadStream},
+        {"RemovePix",                   RemovePix},
+        {"RemovePixAndSave",            RemovePixAndSave},
+        {"ReplacePix",                  ReplacePix},
+        {"TakePix",                     RemovePixAndSave},  /* alias name */
+        {"TemplatesFromComposites",     TemplatesFromComposites},
+        {"Write",                       Write},
+        {"WriteMem",                    WriteMem},
+        {"WriteStream",                 WriteStream},
         LUA_SENTINEL
     };
     LO_FUNC(TNAME);
