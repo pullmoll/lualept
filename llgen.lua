@@ -728,7 +728,7 @@ function parse(fd, str)
 		if rtype == "l_ok" then
 			-- The Leptonica function returns 0 on success
 			func[#func+1] = '    if (' .. fname .. '(' .. params(types, names, refs) .. '))'
-			func[#func+1] = '        return ll_push_nil(L);'
+			func[#func+1] = '        return ll_push_nil(_fun, L);'
 		elseif rypte == nil or rytpe == "void" then
 			-- the function returns nothing
 			func[#func+1] = '    ' .. fname .. '(' .. params(types, names, refs) .. ');'

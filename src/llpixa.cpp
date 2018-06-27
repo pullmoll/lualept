@@ -134,6 +134,107 @@ toString(lua_State* L)
 }
 
 /**
+ * \brief AccumulateSamples() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
+ * Arg #2 is expected to be a Pta* (pta).
+ *
+ * Leptonica's Notes:
+ *      (1) This generates an aligned (by centroid) sum of the input pix.
+ *      (2) We use only the first 256 samples; that's plenty.
+ *      (3) If pta is not input, we generate two tables, and discard
+ *          after use.  If this is called many times, it is better
+ *          to precompute the pta.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 3 on the Lua stack
+ */
+static int
+AccumulateSamples(lua_State *L)
+{
+    LL_FUNC("AccumulateSamples");
+    Pixa *pixa = ll_check_Pixa(_fun, L, 1);
+    Pta *pta = ll_check_Pta(_fun, L, 2);
+    Pix *pixd = nullptr;
+    l_float32 x = 0;
+    l_float32 y = 0;
+    pixaAccumulateSamples(pixa, pta, &pixd, &x, &y);
+    ll_push_Pix(_fun, L, pixd);
+    ll_push_l_float32(_fun, L, x);
+    ll_push_l_float32(_fun, L, y);
+    return 3;
+}
+
+/**
+ * \brief AddBorderGeneral() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixad).
+ * Arg #2 is expected to be a Pixa* (pixas).
+ * Arg #3 is expected to be a l_int32 (left).
+ * Arg #4 is expected to be a l_int32 (right).
+ * Arg #5 is expected to be a l_int32 (top).
+ * Arg #6 is expected to be a l_int32 (bot).
+ * Arg #7 is expected to be a l_uint32 (val).
+ *
+ * Leptonica's Notes:
+ *      (1) For binary images:
+ *             white:  val = 0
+ *             black:  val = 1
+ *          For grayscale images:
+ *             white:  val = 2 ** d - 1
+ *             black:  val = 0
+ *          For rgb color images:
+ *             white:  val = 0xffffff00
+ *             black:  val = 0
+ *          For colormapped images, use 'index' found this way:
+ *             white: pixcmapGetRankIntensity(cmap, 1.0, &index);
+ *             black: pixcmapGetRankIntensity(cmap, 0.0, &index);
+ *      (2) For in-place replacement of each pix with a bordered version,
+ *          use %pixad = %pixas.  To make a new pixa, use %pixad = NULL.
+ *      (3) In both cases, the boxa has sides adjusted as if it were
+ *          expanded by the border.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+AddBorderGeneral(lua_State *L)
+{
+    LL_FUNC("AddBorderGeneral");
+    Pixa *pixad = ll_check_Pixa(_fun, L, 1);
+    Pixa *pixas = ll_check_Pixa(_fun, L, 2);
+    l_int32 left = ll_check_l_int32(_fun, L, 3);
+    l_int32 right = ll_check_l_int32(_fun, L, 4);
+    l_int32 top = ll_check_l_int32(_fun, L, 5);
+    l_int32 bot = ll_check_l_int32(_fun, L, 6);
+    l_uint32 val = ll_check_l_uint32(_fun, L, 7);
+    Pixa *pixa = pixaAddBorderGeneral(pixad, pixas, left, right, top, bot, val);
+    return ll_push_Pixa(_fun, L, pixa);
+}
+
+/**
+ * \brief AddBox() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
+ * Arg #2 is expected to be a Box* (box).
+ * Arg #3 is expected to be a l_int32 (copyflag).
+ *
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 0 on the Lua stack
+ */
+static int
+AddBox(lua_State *L)
+{
+    LL_FUNC("AddBox");
+    Pixa *pixa = ll_check_Pixa(_fun, L, 1);
+    Box *box = ll_check_Box(_fun, L, 2);
+    l_int32 copyflag = ll_check_access_storage(_fun, L, 3);
+    l_ok ok = pixaAddBox(pixa, box, copyflag);
+    return ll_push_boolean(_fun, L, 0 == ok);
+}
+
+/**
  * \brief Add a Pix* (%pix) to a Pixa* (%pixa).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixa*.
@@ -820,8 +921,8 @@ ConvertToSameDepth(lua_State *L)
 {
     LL_FUNC("ConvertToSameDepth");
     Pixa *pixas = ll_check_Pixa(_fun, L, 1);
-    Pixa *pixa = pixaConvertToSameDepth(pixas);
-    return ll_push_Pixa(_fun, L, pixa);
+    Pixa *pixad = pixaConvertToSameDepth(pixas);
+    return ll_push_Pixa(_fun, L, pixad);
 }
 
 /**
@@ -844,6 +945,48 @@ Copy(lua_State *L)
 }
 
 /**
+ * \brief CountPixels() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
+ *
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+CountPixels(lua_State *L)
+{
+    LL_FUNC("CountPixels");
+    Pixa *pixa = ll_check_Pixa(_fun, L, 1);
+    Numa *na = pixaCountPixels(pixa);
+    return ll_push_Numa(_fun, L, na);
+}
+
+/**
+ * \brief CountText() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
+ *
+ * Leptonica's Notes:
+ *      (1) All pix have non-empty text strings if the returned value %ntext
+ *          equals the pixa count.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+CountText(lua_State *L)
+{
+    LL_FUNC("CountText");
+    Pixa *pixa = ll_check_Pixa(_fun, L, 1);
+    l_int32 ntext = 0;
+    if (pixaCountText(pixa, &ntext))
+        return ll_push_nil(_fun, L);
+    ll_push_l_int32(_fun, L, ntext);
+    return 1;
+}
+
+/**
  * \brief Create a new Pixa*.
  * <pre>
  * Arg #1 is expected to be a l_int32 (n).
@@ -861,6 +1004,36 @@ Create(lua_State *L)
     l_int32 n = ll_opt_l_int32(_fun, L, 1, 1);
     Pixa *pixa = pixaCreate(n);
     return ll_push_Pixa(_fun, L, pixa);
+}
+
+/**
+ * \brief CreateFromBoxa() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is expected to be a Boxa* (boxa).
+ *
+ * Leptonica's Notes:
+ *      (1) This simply extracts from pixs the region corresponding to each
+ *          box in the boxa.
+ *      (2) The 3rd arg is optional.  If the extent of the boxa exceeds the
+ *          size of the pixa, so that some boxes are either clipped
+ *          or entirely outside the pix, a warning is returned as TRUE.
+ *      (3) pixad will have only the properly clipped elements, and
+ *          the internal boxa will be correct.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 2 on the Lua stack
+ */
+static int
+CreateFromBoxa(lua_State *L)
+{
+    LL_FUNC("CreateFromBoxa");
+    Pix *pixs = ll_check_Pix(_fun, L, 1);
+    Boxa *boxa = ll_check_Boxa(_fun, L, 2);
+    l_int32 cropwarn = 0;
+    Pixa* pixa = pixaCreateFromBoxa(pixs, boxa, &cropwarn);
+    ll_push_l_int32(_fun, L, cropwarn);
+    return 2;
 }
 
 /**
@@ -912,6 +1085,37 @@ CreateFromPixacomp(lua_State *L)
     l_int32 accesstype = ll_check_access_storage(_fun, L, 2, L_COPY);
     Pixa *pixa = pixaCreateFromPixacomp(pixac, accesstype);
     return ll_push_Pixa(_fun, L, pixa);
+}
+
+/**
+ * \brief Display() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
+ * Arg #2 is expected to be a l_int32 (w).
+ * Arg #3 is expected to be a l_int32 (h).
+ *
+ * Leptonica's Notes:
+ *      (1) This uses the boxes to place each pix in the rendered composite.
+ *      (2) Set w = h = 0 to use the b.b. of the components to determine
+ *          the size of the returned pix.
+ *      (3) Uses the first pix in pixa to determine the depth.
+ *      (4) The background is written "white".  On 1 bpp, each successive
+ *          pix is "painted" (adding foreground), whereas for grayscale
+ *          or color each successive pix is blitted with just the src.
+ *      (5) If the pixa is empty, returns an empty 1 bpp pix.
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 1 on the Lua stack
+ */
+static int
+Display(lua_State *L)
+{
+    LL_FUNC("Display");
+    Pixa *pixa = ll_check_Pixa(_fun, L, 1);
+    l_int32 w = ll_check_l_int32(_fun, L, 2);
+    l_int32 h = ll_check_l_int32(_fun, L, 3);
+    Pix *pix = pixaDisplay(pixa, w, h);
+    return ll_push_Pix(_fun, L, pix);
 }
 
 /**
@@ -1094,6 +1298,33 @@ Read(lua_State *L)
     const char *filename = ll_check_string(_fun, L, 1);
     Pixa *pixa = pixaRead(filename);
     return ll_push_Pixa(_fun, L, pixa);
+}
+
+/**
+ * \brief ReadBarcodes() brief comment goes here.
+ * <pre>
+ * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
+ * Arg #2 is expected to be a l_int32 (format).
+ * Arg #3 is expected to be a l_int32 (method).
+ * Arg #4 is expected to be a l_int32 (debugflag).
+ *
+ * </pre>
+ * \param L pointer to the lua_State
+ * \return 2 on the Lua stack
+ */
+static int
+ReadBarcodes(lua_State *L)
+{
+    LL_FUNC("ReadBarcodes");
+    Pixa *pixa = ll_check_Pixa(_fun, L, 1);
+    l_int32 format = ll_check_l_int32(_fun, L, 2);
+    l_int32 method = ll_check_l_int32(_fun, L, 3);
+    l_int32 debugflag = ll_check_l_int32(_fun, L, 4);
+    Sarray *saw = nullptr;
+    Sarray *sa = pixReadBarcodes(pixa, format, method, &saw, debugflag);
+    ll_push_Sarray(_fun, L, sa);
+    ll_push_Sarray(_fun, L, saw);
+    return 2;
 }
 
 /**
@@ -1334,37 +1565,6 @@ WriteStream(lua_State *L)
 }
 
 /**
- * \brief Display() brief comment goes here.
- * <pre>
- * Arg #1 (i.e. self) is expected to be a Pixa* (pixa).
- * Arg #2 is expected to be a l_int32 (w).
- * Arg #3 is expected to be a l_int32 (h).
- *
- * Leptonica's Notes:
- *      (1) This uses the boxes to place each pix in the rendered composite.
- *      (2) Set w = h = 0 to use the b.b. of the components to determine
- *          the size of the returned pix.
- *      (3) Uses the first pix in pixa to determine the depth.
- *      (4) The background is written "white".  On 1 bpp, each successive
- *          pix is "painted" (adding foreground), whereas for grayscale
- *          or color each successive pix is blitted with just the src.
- *      (5) If the pixa is empty, returns an empty 1 bpp pix.
- * </pre>
- * \param L Lua state.
- * \return 1 on the Lua stack.
- */
-static int
-Display(lua_State *L)
-{
-    LL_FUNC("Display");
-    Pixa *pixa = ll_check_Pixa(_fun, L, 1);
-    l_int32 w = ll_opt_l_int32(_fun, L, 2, 0);
-    l_int32 h = ll_opt_l_int32(_fun, L, 3, 0);
-    Pix *pix = pixaDisplay(pixa, w, h);
-    return ll_push_Pix(_fun, L, pix);
-}
-
-/**
  * \brief Check Lua stack at index %arg for user data of class Pixa*.
  * \param _fun calling function's name
  * \param L Lua state.
@@ -1498,6 +1698,9 @@ ll_open_Pixa(lua_State *L)
         {"__newindex",                  ReplacePix},
         {"__len",                       GetCount},
         {"__tostring",                  toString},
+        {"AccumulateSamples",           AccumulateSamples},
+        {"AddBorderGeneral",            AddBorderGeneral},
+        {"AddBox",                      AddBox},
         {"AddPix",                      AddPix},
         {"AddPixWithText",              AddPixWithText},
         {"AddTextNumber",               AddTextNumber},
@@ -1513,14 +1716,18 @@ ll_open_Pixa(lua_State *L)
         {"ComparePhotoRegionsByHisto",  ComparePhotoRegionsByHisto},
         {"ConstrainedSelect",           ConstrainedSelect},
         {"ConvertTo1",                  ConvertTo1},
+        {"ConvertTo32",                 ConvertTo32},
         {"ConvertTo8",                  ConvertTo8},
         {"ConvertTo8Colormap",          ConvertTo8Colormap},
-        {"ConvertTo32",                 ConvertTo32},
         {"ConvertToNUpPixa",            ConvertToNUpPixa},
         {"ConvertToPdf",                ConvertToPdf},
         {"ConvertToPdfData",            ConvertToPdfData},
+        {"ConvertToSameDepth",          ConvertToSameDepth},
         {"Copy",                        Copy},
+        {"CountPixels",                 CountPixels},
+        {"CountText",                   CountText},
         {"Create",                      Create},
+        {"CreateFromBoxa",              CreateFromBoxa},
         {"CreateFromPix",               CreateFromPix},
         {"CreateFromPixacomp",          CreateFromPixacomp},
         {"Destroy",                     Destroy},
@@ -1533,6 +1740,7 @@ ll_open_Pixa(lua_State *L)
         {"Interleave",                  Interleave},
         {"Join",                        Join},
         {"Read",                        Read},
+        {"ReadBarcodes",                ReadBarcodes},
         {"ReadFiles",                   ReadFiles},
         {"ReadMem",                     ReadMem},
         {"ReadStream",                  ReadStream},
