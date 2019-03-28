@@ -1665,27 +1665,6 @@ ApplyInvBackgroundRGBMap(lua_State *L)
  * \brief Brief comment goes here.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is expected to be a Pix* (pixth).
- * Arg #3 is expected to be a l_int32 (redfactor).
- * </pre>
- * \param L Lua state.
- * \return 1 Pix * on the Lua stack.
- */
-static int
-ApplyLocalThreshold(lua_State *L)
-{
-    LL_FUNC("ApplyLocalThreshold");
-    Pix *pixs = ll_check_Pix(_fun, L, 1);
-    Pix *pixth = ll_check_Pix(_fun, L, 2);
-    l_int32 redfactor = ll_check_l_int32(_fun, L, 3);
-    Pix *pix = pixApplyLocalThreshold(pixs, pixth, redfactor);
-    return ll_push_Pix(_fun, L, pix);
-}
-
-/**
- * \brief Brief comment goes here.
- * <pre>
- * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pix* (pixg).
  * Arg #3 is expected to be a l_int32 (target).
  *
@@ -5657,14 +5636,13 @@ CompareGray(lua_State *L)
  * Arg #5 is expected to be a l_float32 (minratio).
  * Arg #6 is expected to be a l_int32 (maxgray).
  * Arg #7 is expected to be a l_int32 (factor).
- * Arg #8 is expected to be a l_int32 (nx).
- * Arg #9 is expected to be a l_int32 (ny).
- * Arg #10 is expected to be a boolean (debugflag).
+ * Arg #8 is expected to be a l_int32 (n).
+ * Arg #9 is expected to be a boolean (debugflag).
  *
  * Leptonica's Notes:
  *      (1) This function compares two grayscale photo regions.  It can
  *          do it with a single histogram from each region, or with a
- *          set of (nx * ny) spatially aligned histograms.  For both
+ *          set of (n * n) spatially aligned histograms.  For both
  *          cases, align the regions using the centroid of the inverse
  *          image, and crop to the smallest of the two.
  *      (2) An initial filter gives %score = 0 if the ratio of widths
@@ -5723,11 +5701,10 @@ CompareGrayByHisto(lua_State *L)
     l_float32 minratio = ll_check_l_float32(_fun, L, 5);
     l_int32 maxgray = ll_check_l_int32(_fun, L, 6);
     l_int32 factor = ll_check_l_int32(_fun, L, 7);
-    l_int32 nx = ll_check_l_int32(_fun, L, 8);
-    l_int32 ny = ll_check_l_int32(_fun, L, 9);
-    l_int32 debugflag = ll_opt_boolean(_fun, L, 10);
+    l_int32 n = ll_check_l_int32(_fun, L, 8);
+    l_int32 debugflag = ll_opt_boolean(_fun, L, 9);
     l_float32 score = 0;
-    if (pixCompareGrayByHisto(pix1, pix2, box1, box2, minratio, maxgray, factor, nx, ny, &score, debugflag))
+    if (pixCompareGrayByHisto(pix1, pix2, box1, box2, minratio, maxgray, factor, n, &score, debugflag))
         return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, score);
     return 1;
@@ -5796,15 +5773,14 @@ CompareGrayOrRGB(lua_State *L)
  * Arg #4 is expected to be a Box* (box2).
  * Arg #5 is expected to be a l_float32 (minratio).
  * Arg #6 is expected to be a l_int32 (factor).
- * Arg #7 is expected to be a l_int32 (nx).
- * Arg #8 is expected to be a l_int32 (ny).
- * Arg #9 is expected to be a boolean (debugflag).
+ * Arg #7 is expected to be a l_int32 (n).
+ * Arg #8 is expected to be a boolean (debugflag).
  *
  * Leptonica's Notes:
  *      (1) This function compares two grayscale photo regions.  If a
  *          box is given, the region is clipped; otherwise assume
  *          the entire images are photo regions.  This is done with a
- *          set of (nx * ny) spatially aligned histograms, which are
+ *          set of (n * n) spatially aligned histograms, which are
  *          aligned using the centroid of the inverse image.
  *      (2) An initial filter gives %score = 0 if the ratio of widths
  *          and heights (smallest / largest) does not exceed a
@@ -5850,11 +5826,10 @@ ComparePhotoRegionsByHisto(lua_State *L)
     Box *box2 = ll_check_Box(_fun, L, 4);
     l_float32 minratio = ll_check_l_float32(_fun, L, 5);
     l_int32 factor = ll_check_l_int32(_fun, L, 6);
-    l_int32 nx = ll_check_l_int32(_fun, L, 7);
-    l_int32 ny = ll_check_l_int32(_fun, L, 8);
-    l_int32 debugflag = ll_opt_boolean(_fun, L, 9);
+    l_int32 n = ll_check_l_int32(_fun, L, 7);
+    l_int32 debugflag = ll_opt_boolean(_fun, L, 8);
     l_float32 score = 0;
-    if (pixComparePhotoRegionsByHisto(pix1, pix2, box1, box2, minratio, factor, nx, ny, &score, debugflag))
+    if (pixComparePhotoRegionsByHisto(pix1, pix2, box1, box2, minratio, factor, n, &score, debugflag))
         return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, score);
     return 1;
@@ -9489,10 +9464,9 @@ DarkenGray(lua_State *L)
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
  * Arg #2 is expected to be a l_int32 (factor).
- * Arg #3 is expected to be a l_int32 (nx).
- * Arg #4 is expected to be a l_int32 (ny).
- * Arg #5 is expected to be a l_float32 (thresh).
- * Arg #6 is expected to be a Pixa* (pixadebug).
+ * Arg #3 is expected to be a l_float32 (thresh).
+ * Arg #4 is expected to be a l_int32 (n).
+ * Arg #5 is expected to be a Pixa* (pixadebug).
  *
  * Leptonica's Notes:
  *      (1) The input image must be 8 bpp (no colormap), and padded with
@@ -9517,12 +9491,11 @@ DecideIfPhotoImage(lua_State *L)
     LL_FUNC("DecideIfPhotoImage");
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 factor = ll_check_l_int32(_fun, L, 2);
-    l_int32 nx = ll_check_l_int32(_fun, L, 3);
-    l_int32 ny = ll_check_l_int32(_fun, L, 4);
-    l_float32 thresh = ll_check_l_float32(_fun, L, 5);
-    Pixa *pixadebug = ll_opt_Pixa(_fun, L, 6);
+    l_float32 thresh = ll_check_l_float32(_fun, L, 3);
+    l_int32 n = ll_check_l_int32(_fun, L, 4);
+    Pixa *pixadebug = ll_opt_Pixa(_fun, L, 5);
     Numaa *naa = nullptr;
-    if (pixDecideIfPhotoImage(pix, factor, nx, ny, thresh, &naa, pixadebug))
+    if (pixDecideIfPhotoImage(pix, factor, thresh, n, &naa, pixadebug))
         return ll_push_nil(_fun, L);
     ll_push_Numaa(_fun, L, naa);
     return 1;
@@ -14057,9 +14030,8 @@ GenHalftoneMask(lua_State *L)
  * Arg #2 is expected to be a Box* (box).
  * Arg #3 is expected to be a l_int32 (factor).
  * Arg #4 is expected to be a l_float32 (thresh).
- * Arg #5 is expected to be a l_int32 (nx).
- * Arg #6 is expected to be a l_int32 (ny).
- * Arg #7 is expected to be a boolean (debugflag).
+ * Arg #5 is expected to be a l_int32 (n).
+ * Arg #6 is expected to be a boolean (debugflag).
  *
  * Leptonica's Notes:
  *      (1) This crops and converts to 8 bpp if necessary.  It adds a
@@ -14086,13 +14058,12 @@ GenPhotoHistos(lua_State *L)
     Box *box = ll_check_Box(_fun, L, 2);
     l_int32 factor = ll_check_l_int32(_fun, L, 3);
     l_float32 thresh = ll_check_l_float32(_fun, L, 4);
-    l_int32 nx = ll_check_l_int32(_fun, L, 5);
-    l_int32 ny = ll_check_l_int32(_fun, L, 6);
-    l_int32 debugflag = ll_opt_boolean(_fun, L, 7);
+    l_int32 n = ll_check_l_int32(_fun, L, 5);
+    l_int32 debugflag = ll_opt_boolean(_fun, L, 6);
     Numaa *naa = nullptr;
     l_int32 w = 0;
     l_int32 h = 0;
-    if (pixGenPhotoHistos(pixs, box, factor, thresh, nx, ny, &naa, &w, &h, debugflag))
+    if (pixGenPhotoHistos(pixs, box, factor, thresh, n, &naa, &w, &h, debugflag))
         return ll_push_nil(_fun, L);
     ll_push_Numaa(_fun, L, naa);
     ll_push_l_int32(_fun, L, w);
@@ -15056,42 +15027,6 @@ GetBlackVal(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
- * <pre>
- * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is expected to be a Box* (box).
- *
- * Leptonica's Notes:
- *      (1) We are finding the exterior and interior borders
- *          of an 8-connected component.   This should be used
- *          on a pix that has exactly one 8-connected component.
- *      (2) Typically, pixs is a c.c. in some larger pix.  The
- *          input box gives its location in global coordinates.
- *          This box is saved, as well as the boxes for the
- *          borders of any holes within the c.c., but the latter
- *          are given in relative coords within the c.c.
- *      (3) The calculations for the exterior border are done
- *          on a pix with a 1-pixel
- *          added border, but the saved pixel coordinates
- *          are the correct (relative) ones for the input pix
- *          (without a 1-pixel border)
- *      (4) For the definition of the three tables -- xpostab[], ypostab[]
- *          and qpostab[] -- see above where they are defined.
- * </pre>
- * \param L Lua state.
- * \return 1 CCBord * on the Lua stack.
- */
-static int
-GetCCBorders(lua_State *L)
-{
-    LL_FUNC("GetCCBorders");
-    Pix *pixs = ll_check_Pix(_fun, L, 1);
-    Box *box = ll_check_Box(_fun, L, 2);
-    CCBord *ccb = pixGetCCBorders(pixs, box);
-    return ll_push_CCBord(_fun, L, ccb);
-}
-
-/**
  * \brief Get the histogram of the color mapped Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
@@ -15671,37 +15606,6 @@ GetHeight(lua_State *L)
 }
 
 /**
- * \brief Brief comment goes here.
- * <pre>
- * Arg #1 (i.e. self) is expected to be a CCBord* (ccb).
- * Arg #2 is expected to be a Pix* (pixs).
- * Arg #3 is expected to be a Box* (box).
- * Arg #4 is expected to be a l_int32 (xs).
- * Arg #5 is expected to be a l_int32 (ys).
- *
- * Leptonica's Notes:
- *      (1) we trace out hole border on pixs without addition
- *          of single pixel added border to pixs
- *      (2) therefore all coordinates are relative within the c.c. (pixs)
- *      (3) same position tables and stopping condition as for
- *          exterior borders
- * </pre>
- * \param L Lua state.
- * \return 1 boolean on the Lua stack.
- */
-static int
-GetHoleBorder(lua_State *L)
-{
-    LL_FUNC("GetHoleBorder");
-    CCBord *ccb = ll_check_CCBord(_fun, L, 1);
-    Pix *pixs = ll_check_Pix(_fun, L, 2);
-    Box *box = ll_check_Box(_fun, L, 3);
-    l_int32 xs = ll_check_l_int32(_fun, L, 4);
-    l_int32 ys = ll_check_l_int32(_fun, L, 5);
-    return ll_push_boolean(_fun, L, 0 == pixGetHoleBorder(ccb, pixs, box, xs, ys));
-}
-
-/**
  * \brief Get the input format of a Pix*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pix).
@@ -16086,33 +15990,6 @@ GetOuterBorder(lua_State *L)
     Box *box = ll_check_Box(_fun, L, 3);
     l_int32 result = pixGetOuterBorder(ccb, pixs, box);
     return ll_push_l_int32(_fun, L, result);
-}
-
-/**
- * \brief Brief comment goes here.
- * <pre>
- * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is expected to be a Box* (box).
- *
- * Leptonica's Notes:
- *      (1) We are finding the exterior border of a single 8-connected
- *          component.
- *      (2) If box is NULL, the outline returned is in the local coords
- *          of the input pix.  Otherwise, box is assumed to give the
- *          location of the pix in global coordinates, and the returned
- *          pta will be in those global coordinates.
- * </pre>
- * \param L Lua state.
- * \return 1 Pta * on the Lua stack.
- */
-static int
-GetOuterBorderPta(lua_State *L)
-{
-    LL_FUNC("GetOuterBorderPta");
-    Pix *pixs = ll_check_Pix(_fun, L, 1);
-    Box *box = ll_check_Box(_fun, L, 2);
-    Pta *pta = pixGetOuterBorderPta(pixs, box);
-    return ll_push_Pta(_fun, L, pta);
 }
 
 /**
@@ -25634,56 +25511,6 @@ SauvolaBinarizeTiled(lua_State *L)
 /**
  * \brief Brief comment goes here.
  * <pre>
- * Arg #1 (i.e. self) is expected to be a Pix* (pixm).
- * Arg #2 is expected to be a Pix* (pixms).
- * Arg #3 is expected to be a l_float32 (factor).
- *
- * Leptonica's Notes:
- *      (1) The Sauvola threshold is determined from the formula:
- *            t = m * (1 - k * (1 - s / 128))
- *          where:
- *            t = local threshold
- *            m = local mean
- *            k = %factor (>= 0)   [ typ. 0.35 ]
- *            s = local standard deviation, which is maximized at
- *                127.5 when half the samples are 0 and half are 255.
- *      (2) See pixSauvolaBinarize() for other details.
- *      (3) Important definitions and relations for computing averages:
- *            v == pixel value
- *            E(p) == expected value of p == average of p over some pixel set
- *            S(v) == square of v == v * v
- *            mv == E(v) == expected pixel value == mean value
- *            ms == E(S(v)) == expected square of pixel values
- *               == mean square value
- *            var == variance == expected square of deviation from mean
- *                == E(S(v - mv)) = E(S(v) - 2 * S(v * mv) + S(mv))
- *                                = E(S(v)) - S(mv)
- *                                = ms - mv * mv
- *            s == standard deviation = sqrt(var)
- *          So for evaluating the standard deviation in the Sauvola
- *          threshold, we take
- *            s = sqrt(ms - mv * mv)
- * </pre>
- * \param L Lua state.
- * \return 1 Pix * on the Lua stack.
- */
-static int
-SauvolaGetThreshold(lua_State *L)
-{
-    LL_FUNC("SauvolaGetThreshold");
-    Pix *pixm = ll_check_Pix(_fun, L, 1);
-    Pix *pixms = ll_check_Pix(_fun, L, 2);
-    l_float32 factor = ll_check_l_float32(_fun, L, 3);
-    Pix *pixsd = nullptr;
-    if (pixSauvolaGetThreshold(pixm, pixms, factor, &pixsd))
-        return ll_push_nil(_fun, L);
-    ll_push_Pix(_fun, L, pixsd);
-    return 1;
-}
-
-/**
- * \brief Brief comment goes here.
- * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
  * Arg #2 is expected to be a Pixa* (pixa).
  * Arg #3 is expected to be a l_float32 (scalefactor).
@@ -34044,7 +33871,6 @@ ll_open_Pix(lua_State *L)
         {"And",                             And},
         {"ApplyInvBackgroundGrayMap",       ApplyInvBackgroundGrayMap},
         {"ApplyInvBackgroundRGBMap",        ApplyInvBackgroundRGBMap},
-        {"ApplyLocalThreshold",             ApplyLocalThreshold},
         {"ApplyVariableGrayMap",            ApplyVariableGrayMap},
         {"AssignToNearestColor",            AssignToNearestColor},
         {"AverageByColumn",                 AverageByColumn},
@@ -34430,7 +34256,6 @@ ll_open_Pix(lua_State *L)
         {"GetBinnedComponentRange",         GetBinnedComponentRange},
         {"GetBlackOrWhiteVal",              GetBlackOrWhiteVal},
         {"GetBlackVal",                     GetBlackVal},
-        {"GetCCBorders",                    GetCCBorders},
         {"GetCmapHistogram",                GetCmapHistogram},
         {"GetCmapHistogramInRect",          GetCmapHistogramInRect},
         {"GetCmapHistogramMasked",          GetCmapHistogramMasked},
@@ -34452,7 +34277,6 @@ ll_open_Pix(lua_State *L)
         {"GetGrayHistogramMasked",          GetGrayHistogramMasked},
         {"GetGrayHistogramTiled",           GetGrayHistogramTiled},
         {"GetHeight",                       GetHeight},
-        {"GetHoleBorder",                   GetHoleBorder},
         {"GetInputFormat",                  GetInputFormat},
         {"GetInvBackgroundMap",             GetInvBackgroundMap},
         {"GetLastOffPixelInRun",            GetLastOffPixelInRun},
@@ -34464,7 +34288,6 @@ ll_open_Pix(lua_State *L)
         {"GetMomentByColumn",               GetMomentByColumn},
         {"GetMostPopulatedColors",          GetMostPopulatedColors},
         {"GetOuterBorder",                  GetOuterBorder},
-        {"GetOuterBorderPta",               GetOuterBorderPta},
         {"GetOuterBordersPtaa",             GetOuterBordersPtaa},
         {"GetPSNR",                         GetPSNR},
         {"GetPerceptualDiff",               GetPerceptualDiff},
@@ -34745,7 +34568,6 @@ ll_open_Pix(lua_State *L)
         {"RunlengthTransform",              RunlengthTransform},
         {"SauvolaBinarize",                 SauvolaBinarize},
         {"SauvolaBinarizeTiled",            SauvolaBinarizeTiled},
-        {"SauvolaGetThreshold",             SauvolaGetThreshold},
         {"SaveTiled",                       SaveTiled},
         {"SaveTiledOutline",                SaveTiledOutline},
         {"SaveTiledWithText",               SaveTiledWithText},

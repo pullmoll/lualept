@@ -1017,7 +1017,7 @@ GetExtent(lua_State *L)
 }
 
 /**
- * \brief Get median values for Boxa* (%boxa) as four integers (%x,%y,%w,%h).
+ * \brief Get median values for Boxa* (%boxa) as six integers (%x,%y,%r,%b,%w,%h).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  *
@@ -1034,12 +1034,16 @@ GetMedianVals(lua_State *L)
     Boxa *boxas = ll_check_Boxa(_fun, L, 1);
     l_int32 x = 0;
     l_int32 y = 0;
+    l_int32 r = 0;
+    l_int32 b = 0;
     l_int32 w = 0;
     l_int32 h = 0;
-    if (boxaGetMedianVals(boxas, &x, &y, &w, &h))
+    if (boxaGetMedianVals(boxas, &x, &y, &r, &b, &w, &h))
         return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, x);
     ll_push_l_int32(_fun, L, y);
+    ll_push_l_int32(_fun, L, r);
+    ll_push_l_int32(_fun, L, b);
     ll_push_l_int32(_fun, L, w);
     ll_push_l_int32(_fun, L, h);
     return 4;
@@ -1137,7 +1141,7 @@ GetNearestToPt(lua_State *L)
 }
 
 /**
- * \brief Get rank values for Boxa* (%boxa) as four integers (%x,%y,%w,%h).
+ * \brief Get rank values for Boxa* (%boxa) as six integers (%x,%y,%r,%b,%w,%h).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
  * Arg #2 is expected to be a l_float32 (fract).
@@ -1156,7 +1160,7 @@ GetNearestToPt(lua_State *L)
  *             ~ w and h are sorted in increasing order
  * </pre>
  * \param L Lua state.
- * \return 4 integers on the Lua stack (%x,%y,%w,%h).
+ * \return 6 integers on the Lua stack (%x,%y,%r,%b,%w,%h).
  */
 static int
 GetRankVals(lua_State *L)
@@ -1166,12 +1170,16 @@ GetRankVals(lua_State *L)
     l_float32 fract = ll_check_l_float32(_fun, L, 2);
     l_int32 x = 0;
     l_int32 y = 0;
+    l_int32 r = 0;
+    l_int32 b = 0;
     l_int32 w = 0;
     l_int32 h = 0;
-    if (boxaGetRankVals(boxas, fract, &x, &y, &w, &h))
+    if (boxaGetRankVals(boxas, fract, &x, &y, &r, &b, &w, &h))
         return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, x);
     ll_push_l_int32(_fun, L, y);
+    ll_push_l_int32(_fun, L, r);
+    ll_push_l_int32(_fun, L, b);
     ll_push_l_int32(_fun, L, w);
     ll_push_l_int32(_fun, L, h);
     return 4;

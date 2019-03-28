@@ -136,37 +136,6 @@ Create(lua_State *L)
 }
 
 /**
- * \brief Get the hole border from Pix* (%pixs) for CCBord* (%ccb).
- * <pre>
- * Arg #1 (i.e. self) is expected to be a CCBord* (ccb).
- * Arg #2 is expected to be a Pix* (pixs).
- * Arg #3 is expected to be a Box* (box).
- * Arg #4 is expected to be a l_int32 (xs).
- * Arg #5 is expected to be a l_int32 (ys).
- *
- * Leptonica's Notes:
- *      (1) we trace out hole border on pixs without addition
- *          of single pixel added border to pixs
- *      (2) therefore all coordinates are relative within the c.c. (pixs)
- *      (3) same position tables and stopping condition as for
- *          exterior borders
- * </pre>
- * \param L pointer to the lua_State
- * \return 1 boolean on the Lua stack.
- */
-static int
-GetHoleBorder(lua_State *L)
-{
-    LL_FUNC("GetHoleBorder");
-    CCBord *ccb = ll_check_CCBord(_fun, L, 1);
-    Pix *pixs = ll_check_Pix(_fun, L, 2);
-    Box *box = ll_check_Box(_fun, L, 3);
-    l_int32 xs = ll_check_l_int32(_fun, L, 4);
-    l_int32 ys = ll_check_l_int32(_fun, L, 5);
-    return ll_push_boolean(_fun, L, 0 == pixGetHoleBorder(ccb, pixs, box, xs, ys));
-}
-
-/**
  * \brief Get the outer border from Pix* (%pixs) for CCBord* (%ccb).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a CCBord* (ccb).
@@ -284,7 +253,6 @@ ll_open_CCBord(lua_State *L)
         {"__tostring",          toString},
         {"Create",              Create},
         {"Destroy",             Destroy},
-        {"GetHoleBorder",       GetHoleBorder},
         {"GetOuterBorder",      GetOuterBorder},
         LUA_SENTINEL
     };

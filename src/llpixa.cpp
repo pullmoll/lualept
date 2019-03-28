@@ -620,9 +620,8 @@ CompareInPdf(lua_State *L)
  * Arg #2 is expected to be a l_float32 (minratio).
  * Arg #3 is expected to be a l_float32 (textthresh).
  * Arg #4 is expected to be a l_int32 (factor).
- * Arg #5 is expected to be a l_int32 (nx).
- * Arg #6 is expected to be a l_int32 (ny).
- * Arg #7 is expected to be a l_float32 (simthresh).
+ * Arg #5 is expected to be a l_int32 (n).
+ * Arg #6 is expected to be a l_float32 (simthresh).
  *
  * Leptonica's Notes:
  *      (1) This function takes a pixa of cropped photo images and
@@ -660,13 +659,12 @@ ComparePhotoRegionsByHisto(lua_State *L)
     l_float32 minratio = ll_check_l_float32(_fun, L, 2);
     l_float32 textthresh = ll_check_l_float32(_fun, L, 3);
     l_int32 factor = ll_check_l_int32(_fun, L, 4);
-    l_int32 nx = ll_check_l_int32(_fun, L, 5);
-    l_int32 ny = ll_check_l_int32(_fun, L, 6);
-    l_float32 simthresh = ll_check_l_float32(_fun, L, 7);
-    l_int32 debug = ll_opt_boolean(_fun, L, 8);
+    l_int32 n = ll_check_l_int32(_fun, L, 5);
+    l_float32 simthresh = ll_check_l_float32(_fun, L, 6);
+    l_int32 debug = ll_opt_boolean(_fun, L, 7);
     Numa *nai = nullptr;
     Pix *pixd = nullptr;
-    if (pixaComparePhotoRegionsByHisto(pixa, minratio, textthresh, factor, nx, ny, simthresh, &nai, nullptr, &pixd, debug))
+    if (pixaComparePhotoRegionsByHisto(pixa, minratio, textthresh, factor, n, simthresh, &nai, nullptr, &pixd, debug))
         return ll_push_nil(_fun, L);
     ll_push_Numa(_fun, L, nai);
     ll_push_Pix(_fun, L, pixd);
@@ -1030,8 +1028,11 @@ CreateFromBoxa(lua_State *L)
     LL_FUNC("CreateFromBoxa");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     Boxa *boxa = ll_check_Boxa(_fun, L, 2);
+    l_int32 start = ll_opt_l_int32(_fun, L, 3, 0);
+    l_int32 num = ll_opt_l_int32(_fun, L, 4, 0);
     l_int32 cropwarn = 0;
-    Pixa* pixa = pixaCreateFromBoxa(pixs, boxa, &cropwarn);
+    Pixa* pixa = pixaCreateFromBoxa(pixs, boxa, start, num, &cropwarn);
+    ll_push_Pixa(_fun, L, pixa);
     ll_push_l_int32(_fun, L, cropwarn);
     return 2;
 }
