@@ -1535,48 +1535,6 @@ Join(lua_State *L)
 }
 
 /**
- * \brief Linear fit for Boxa* (%boxas) giving Boxa* (%boxa).
- * <pre>
- * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
- * Arg #2 is expected to be a l_int32 (factor).
- * Arg #3 is an optional boolean (debug).
- *
- * Leptonica's Notes:
- *      (1) This finds a set of boxes (boxad) where each edge of each box is
- *          a linear least square fit (LSF) to the edges of the
- *          input set of boxes (boxas).  Before fitting, outliers in
- *          the boxes in boxas are removed (see below).
- *      (2) This is useful when each of the box edges in boxas are expected
- *          to vary linearly with box index in the set.  These could
- *          be, for example, noisy measurements of similar regions
- *          on successive scanned pages.
- *      (3) Method: there are 2 steps:
- *          (a) Find and remove outliers, separately based on the deviation
- *              from the median of the width and height of the box.
- *              Use %factor to specify tolerance to outliers; use a very
- *              large value of %factor to avoid rejecting any box sides
- *              in the linear LSF.
- *          (b) On the remaining boxes, do a linear LSF independently
- *              for each of the four sides.
- *      (4) Invalid input boxes are not used in computation of the LSF.
- *      (5) The returned boxad can then be used in boxaModifyWithBoxa()
- *          to selectively change the boxes in boxas.
- * </pre>
- * \param L Lua state.
- * \return 1 Boxa* (%boxa) on the Lua stack.
- */
-static int
-LinearFit(lua_State *L)
-{
-    LL_FUNC("LinearFit");
-    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
-    l_int32 factor = ll_opt_l_int32(_fun, L, 2, 3);
-    l_int32 debug = ll_opt_boolean(_fun, L, 3, FALSE);
-    Boxa *boxa = boxaLinearFit(boxas, factor, debug);
-    return ll_push_Boxa(_fun, L, boxa);
-}
-
-/**
  * \brief Get the location range of boxes in a Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxas).
@@ -2452,46 +2410,6 @@ SizeVariation(lua_State *L)
 }
 
 /**
- * \brief Smooth sequence by least square fit for Boxa* (%boxas).
- * <pre>
- * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
- * Arg #2 is expected to be a l_int32 (factor).
- * Arg #3 is expected to be a string describing the sub flag (subflag).
- * Arg #4 is expected to be a l_int32 (maxdiff).
- * Arg #5 is expected to be a l_int32 (extrapixels).
- * Arg #5 is an optional boolean (debug).
- *
- * Leptonica's Notes:
- *      (1) This returns a modified version of %boxas by constructing
- *          for each input box a box that has been linear least square fit
- *          (LSF) to the entire set.  The linear fitting is done to each of
- *          the box sides independently, after outliers are rejected,
- *          and it is computed separately for sequences of even and
- *          odd boxes.  Once the linear LSF box is found, the output box
- *          (in %boxad) is constructed from the input box and the LSF
- *          box, depending on %subflag.  See boxaModifyWithBoxa() for
- *          details on the use of %subflag and %maxdiff.
- *      (2) This is useful if, in both the even and odd sets, the box
- *          edges vary roughly linearly with its index in the set.
- * </pre>
- * \param L Lua state.
- * \return 1 Boxa* (%boxa) on the Lua stack.
- */
-static int
-SmoothSequenceLS(lua_State *L)
-{
-    LL_FUNC("SmoothSequenceLS");
-    Boxa *boxas = ll_check_Boxa(_fun, L, 1);
-    l_int32 factor = ll_opt_l_int32(_fun, L, 2, 3);
-    l_int32 subflag = ll_check_subflag(_fun, L, 3, L_USE_MINSIZE);
-    l_int32 maxdiff = ll_opt_l_int32(_fun, L, 4, 0);
-    l_int32 extrapixels = ll_opt_l_int32(_fun, L, 5, 0);
-    l_int32 debug = ll_opt_boolean(_fun, L, 6, FALSE);
-    Boxa *boxa = boxaSmoothSequenceLS(boxas, factor, subflag, maxdiff, extrapixels, debug);
-    return ll_push_Boxa(_fun, L, boxa);
-}
-
-/**
  * \brief Smooth sequence by median for Boxa* (%boxas).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Boxa* (boxa).
@@ -3003,7 +2921,6 @@ ll_open_Boxa(lua_State *L)
         {"IntersectsBoxCount",      IntersectsBoxCount},
         {"IsFull",                  IsFull},
         {"Join",                    Join},
-        {"LinearFit",               LinearFit},
         {"LocationRange",           LocationRange},
         {"MakeSizeIndicator",       MakeSizeIndicator},
         {"MakeWHRatioIndicator",    MakeWHRatioIndicator},
@@ -3033,7 +2950,6 @@ ll_open_Boxa(lua_State *L)
         {"Similar",                 Similar},
         {"SizeRange",               SizeRange},
         {"SizeVariation",           SizeVariation},
-        {"SmoothSequenceLS",        SmoothSequenceLS},
         {"SmoothSequenceMedian",    SmoothSequenceMedian},
         {"Sort",                    Sort},
         {"Sort2d",                  Sort2d},

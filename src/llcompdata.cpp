@@ -357,106 +357,6 @@ GenerateCIData(lua_State *L)
 }
 
 /**
- * \brief Generate CompData* (%cid) from a file (%filein) using flate compression.
- * <pre>
- * Arg #1 (i.e. self) is expected to be a CompData* (cid).
- * Arg #2 is expected to be a string (filein).
- * Arg #3 is expected to be a l_float32 (xpt).
- * Arg #4 is expected to be a l_float32 (ypt).
- * Arg #5 is expected to be a l_float32 (wpt).
- * Arg #6 is expected to be a l_float32 (hpt).
- * Arg #7 is expected to be a l_int32 (pageno).
- * Arg #8 is expected to be a l_int32 (endpage).
- * </pre>
- * \param L Lua state.
- * \return 1 lstring on the Lua stack.
- */
-static int
-GenerateFlatePS(lua_State *L)
-{
-    LL_FUNC("GenerateFlatePS");
-    CompData *cid = ll_check_CompData(_fun, L, 1);
-    const char *filein = ll_check_string(_fun, L, 2);
-    l_float32 xpt = ll_check_l_float32(_fun, L, 3);
-    l_float32 ypt = ll_check_l_float32(_fun, L, 4);
-    l_float32 wpt = ll_check_l_float32(_fun, L, 5);
-    l_float32 hpt = ll_check_l_float32(_fun, L, 6);
-    l_int32 pageno = ll_check_l_int32(_fun, L, 7);
-    l_int32 endpage = ll_check_l_int32(_fun, L, 8);
-    char *str = generateFlatePS(filein, cid, xpt, ypt, wpt, hpt, pageno, endpage);
-    ll_push_string(_fun, L, str);
-    ll_free(str);
-    return 1;
-}
-
-/**
- * \brief Generate CompData* (%cid) from a file (%filein) using G4 compression.
- * <pre>
- * Arg #1 (i.e. self) is expected to be a CompData* (cid).
- * Arg #2 is expected to be a string (filein).
- * Arg #3 is expected to be a l_float32 (xpt).
- * Arg #4 is expected to be a l_float32 (ypt).
- * Arg #5 is expected to be a l_float32 (wpt).
- * Arg #6 is expected to be a l_float32 (hpt).
- * Arg #7 is expected to be a l_int32 (maskflag).
- * Arg #8 is expected to be a l_int32 (pageno).
- * Arg #9 is expected to be a l_int32 (endpage).
- * </pre>
- * \param L Lua state.
- * \return 1 lstring on the Lua stack.
- */
-static int
-GenerateG4PS(lua_State *L)
-{
-    LL_FUNC("GenerateG4PS");
-    CompData *cid = ll_check_CompData(_fun, L, 1);
-    const char *filein = ll_check_string(_fun, L, 2);
-    l_float32 xpt = ll_check_l_float32(_fun, L, 3);
-    l_float32 ypt = ll_check_l_float32(_fun, L, 4);
-    l_float32 wpt = ll_check_l_float32(_fun, L, 5);
-    l_float32 hpt = ll_check_l_float32(_fun, L, 6);
-    l_int32 maskflag = ll_check_l_int32(_fun, L, 7);
-    l_int32 pageno = ll_check_l_int32(_fun, L, 8);
-    l_int32 endpage = ll_check_l_int32(_fun, L, 9);
-    char *str = generateG4PS(filein, cid, xpt, ypt, wpt, hpt, maskflag, pageno, endpage);
-    ll_push_string(_fun, L, str);
-    ll_free(str);
-    return 1;
-}
-
-/**
- * \brief Generate CompData* (%cid) from a file (%filein) using JPEG compression.
- * <pre>
- * Arg #1 (i.e. self) is expected to be a CompData* (cid).
- * Arg #2 is expected to be a string (filein).
- * Arg #3 is expected to be a l_float32 (xpt).
- * Arg #4 is expected to be a l_float32 (ypt).
- * Arg #5 is expected to be a l_float32 (wpt).
- * Arg #6 is expected to be a l_float32 (hpt).
- * Arg #7 is expected to be a l_int32 (pageno).
- * Arg #8 is expected to be a l_int32 (endpage).
- * </pre>
- * \param L Lua state.
- * \return 1 lstring on the Lua stack.
- */
-static int
-GenerateJpegPS(lua_State *L)
-{
-    LL_FUNC("GenerateJpegPS");
-    CompData *cid = ll_check_CompData(_fun, L, 1);
-    const char *filein = ll_check_string(_fun, L, 2);
-    l_float32 xpt = ll_check_l_float32(_fun, L, 3);
-    l_float32 ypt = ll_check_l_float32(_fun, L, 4);
-    l_float32 wpt = ll_check_l_float32(_fun, L, 5);
-    l_float32 hpt = ll_check_l_float32(_fun, L, 6);
-    l_int32 pageno = ll_check_l_int32(_fun, L, 7);
-    l_int32 endpage = ll_check_l_int32(_fun, L, 8);
-    char *str = generateJpegPS(filein, cid, xpt, ypt, wpt, hpt, pageno, endpage);
-    ll_push_string(_fun, L, str);
-    ll_free(str);
-    return 1;
-}
-/**
  * \brief JPEG compress data from a file (%fname) to a CompData* (%cid).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a string (fname).
@@ -606,9 +506,6 @@ ll_open_CompData(lua_State *L)
         {"G4Data",              G4Data},
         {"Generate",            Generate},
         {"GenerateCIData",      GenerateCIData},
-        {"GenerateFlatePS",     GenerateFlatePS},
-        {"GenerateG4PS",        GenerateG4PS},
-        {"GenerateJpegPS",      GenerateJpegPS},
         {"JpegData",            JpegData},
         {"JpegDataMem",         JpegDataMem},
         LUA_SENTINEL

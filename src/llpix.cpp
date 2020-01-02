@@ -1809,6 +1809,7 @@ AverageByRow(lua_State *L)
  * \brief Build the average inside a Box* (%box) of Pix* (%pixs).
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
+ * Arg #2 is an optional Pix* mask (pixm).
  * Arg #2 is an optional Box* (box).
  * </pre>
  * \param L Lua state.
@@ -1819,9 +1820,13 @@ AverageInRect(lua_State *L)
 {
     LL_FUNC("AverageInRect");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    Box *box = ll_opt_Box(_fun, L, 2);
+    Pix *pixm = ll_opt_Pix(_fun, L, 2);
+    Box *box = ll_opt_Box(_fun, L, 3);
+    l_int32 minval = 0;
+    l_int32 maxval = 255;
+    l_int32 subsamp = 1;
     l_float32 ave = 0.0f;
-    if (pixAverageInRect(pixs, box, &ave))
+    if (pixAverageInRect(pixs, pixm, box, minval, maxval, subsamp, &ave))
         return ll_push_nil(_fun, L);
     return ll_push_l_float32(_fun, L, ave);
 }
@@ -9088,7 +9093,10 @@ CountRGBColors(lua_State *L)
 {
     LL_FUNC("CountRGBColors");
     Pix *pixs = ll_check_Pix(_fun, L, 1);
-    l_int32 count = pixCountRGBColors(pixs);
+    l_int32 factor = ll_opt_l_int32(_fun, L, 2, 1);
+    l_int32 count = 0;
+    if (0 != pixCountRGBColors(pixs, factor, &count))
+        return ll_push_nil(_fun, L);
     return ll_push_l_int32(_fun, L, count);
 }
 
