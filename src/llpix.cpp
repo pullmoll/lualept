@@ -73,9 +73,9 @@ Destroy(lua_State *L)
     LL_FUNC("Destroy");
     Pix *pix = ll_take_udata<Pix>(_fun, L, 1, TNAME);
     DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %d\n", _fun,
-        TNAME,
-        "pix", reinterpret_cast<void *>(pix),
-        "refcount", pixGetRefcount(pix));
+	TNAME,
+	"pix", reinterpret_cast<void *>(pix),
+	"refcount", pixGetRefcount(pix));
     pixDestroy(&pix);
     return 0;
 }
@@ -288,62 +288,62 @@ toString(lua_State* L)
 
     luaL_buffinit(L, &B);
     if (!pix) {
-        luaL_addstring(&B, "nil");
+	luaL_addstring(&B, "nil");
     } else {
-        if (pixGetDimensions(pix, &w, &h, &d)) {
-            luaL_addstring(&B, "invalid");
-        } else {
-            spp = pixGetSpp(pix);
-            wpl = pixGetWpl(pix);
-            size = static_cast<long>(sizeof(l_uint32)) * wpl * h;
-            data = pixGetData(pix);
-            xres = pixGetXRes(pix);
-            yres = pixGetYRes(pix);
-            refcnt = pixGetRefcount(pix);
-            format = ll_string_input_format(pixGetInputFormat(pix));
+	if (pixGetDimensions(pix, &w, &h, &d)) {
+	    luaL_addstring(&B, "invalid");
+	} else {
+	    spp = pixGetSpp(pix);
+	    wpl = pixGetWpl(pix);
+	    size = static_cast<long>(sizeof(l_uint32)) * wpl * h;
+	    data = pixGetData(pix);
+	    xres = pixGetXRes(pix);
+	    yres = pixGetYRes(pix);
+	    refcnt = pixGetRefcount(pix);
+	    format = ll_string_input_format(pixGetInputFormat(pix));
 
-            snprintf(str, LL_STRBUFF,
-                     TNAME "*: %p", reinterpret_cast<void *>(pix));
-            luaL_addstring(&B, str);
+	    snprintf(str, LL_STRBUFF,
+		     TNAME "*: %p", reinterpret_cast<void *>(pix));
+	    luaL_addstring(&B, str);
 
-            snprintf(str, LL_STRBUFF,
-                     "\n    width = %d, height = %d, depth = %d, spp = %d", w, h, d, spp);
-            luaL_addstring(&B, str);
+	    snprintf(str, LL_STRBUFF,
+		     "\n    width = %d, height = %d, depth = %d, spp = %d", w, h, d, spp);
+	    luaL_addstring(&B, str);
 
-            snprintf(str, LL_STRBUFF,
-                     "\n    wpl = %d, data = %p, size = %#" PRIx64, wpl, data, size);
-            luaL_addstring(&B, str);
+	    snprintf(str, LL_STRBUFF,
+		     "\n    wpl = %d, data = %p, size = %#" PRIx64, wpl, data, size);
+	    luaL_addstring(&B, str);
 
-            snprintf(str, LL_STRBUFF,
-                     "\n    xres = %d, yres = %d, refcount = %d", xres, yres, refcnt);
-            luaL_addstring(&B, str);
+	    snprintf(str, LL_STRBUFF,
+		     "\n    xres = %d, yres = %d, refcount = %d", xres, yres, refcnt);
+	    luaL_addstring(&B, str);
 
-            snprintf(str, LL_STRBUFF,
-                     "\n    format = %s", format);
-            luaL_addstring(&B, str);
-        }
+	    snprintf(str, LL_STRBUFF,
+		     "\n    format = %s", format);
+	    luaL_addstring(&B, str);
+	}
 
-        cmap = pixGetColormap(pix);
-        if (cmap) {
-            ccnt = pixcmapGetCount(cmap);
-            ctot = pixcmapGetFreeCount(cmap) + ccnt;
-            snprintf(str, LL_STRBUFF,
-                     "\n    colormap: %d of %d colors", ccnt, ctot);
-        } else {
-            snprintf(str, LL_STRBUFF,
-                     "\n    no colormap");
-        }
-        luaL_addstring(&B, str);
+	cmap = pixGetColormap(pix);
+	if (cmap) {
+	    ccnt = pixcmapGetCount(cmap);
+	    ctot = pixcmapGetFreeCount(cmap) + ccnt;
+	    snprintf(str, LL_STRBUFF,
+		     "\n    colormap: %d of %d colors", ccnt, ctot);
+	} else {
+	    snprintf(str, LL_STRBUFF,
+		     "\n    no colormap");
+	}
+	luaL_addstring(&B, str);
 
-        text = pixGetText(pix);
-        if (text) {
-            snprintf(str, LL_STRBUFF,
-                     "\n    text: %s", text);
-        } else {
-            snprintf(str, LL_STRBUFF,
-                     "\n    no text");
-        }
-        luaL_addstring(&B, str);
+	text = pixGetText(pix);
+	if (text) {
+	    snprintf(str, LL_STRBUFF,
+		     "\n    text: %s", text);
+	} else {
+	    snprintf(str, LL_STRBUFF,
+		     "\n    no text");
+	}
+	luaL_addstring(&B, str);
     }
     luaL_pushresult(&B);
     ll_free(str);
@@ -425,7 +425,7 @@ AbsDiffInRect(lua_State *L)
     l_int32 dir = ll_check_direction(_fun, L, 3, L_HORIZONTAL_LINE);
     l_float32 absdiff = 0.0f;
     if (pixAbsDiffInRect(pixs, box, dir, &absdiff))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_float32(_fun, L, absdiff);
 }
 
@@ -455,7 +455,7 @@ AbsDiffOnLine(lua_State *L)
     l_int32 y2 = ll_check_l_int32(_fun, L, 5);
     l_float32 absdiff = 0.0f;
     if (pixAbsDiffOnLine(pixs, x1, y1, x2, y2, &absdiff))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_float32(_fun, L, absdiff);
 }
 
@@ -539,7 +539,7 @@ AccumulateSamples(lua_State *L)
     l_float32 x = 0;
     l_float32 y = 0;
     if (pixaAccumulateSamples(pixa, pta, &pixd, &x, &y))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixd);
     ll_push_l_float32(_fun, L, x);
     ll_push_l_float32(_fun, L, y);
@@ -1607,7 +1607,7 @@ AlphaIsOpaque(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 opaque = 0;
     if (pixAlphaIsOpaque(pix, &opaque))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_boolean(_fun, L, opaque);
 }
 
@@ -1747,7 +1747,7 @@ AssignToNearestColor(lua_State *L)
     l_int32 level = ll_check_l_int32(_fun, L, 4);
     l_int32 countarray = 0;
     if (pixAssignToNearestColor(pixd, pixs, pixm, level, &countarray))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_int32(_fun, L, countarray);
 }
 
@@ -1827,7 +1827,7 @@ AverageInRect(lua_State *L)
     l_int32 subsamp = 1;
     l_float32 ave = 0.0f;
     if (pixAverageInRect(pixs, pixm, box, minval, maxval, subsamp, &ave))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_float32(_fun, L, ave);
 }
 
@@ -2067,7 +2067,7 @@ BackgroundNormGrayArray(lua_State *L)
     l_int32 smoothy = ll_check_l_int32 (_fun, L, 9);
     Pix *pixd = nullptr;
     if (pixBackgroundNormGrayArray(pixs, pixim, sx, sy, thresh, mincount, bgval, smoothx, smoothy, &pixd))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_Pix(_fun, L, pixd);
 }
 /**
@@ -2099,7 +2099,7 @@ BackgroundNormGrayArrayMorph(lua_State *L)
     l_int32 bgval = ll_check_l_int32 (_fun, L, 5);
     Pix *pixd = nullptr;
     if (pixBackgroundNormGrayArrayMorph(pixs, pixim, reduction, size, bgval, &pixd))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_Pix(_fun, L, pixd);
 }
 
@@ -2197,7 +2197,7 @@ BackgroundNormRGBArrays(lua_State *L)
     Pix *pix_b = ll_check_Pix(_fun, L, 13);
 
     if (pixBackgroundNormRGBArrays(pixs, pixim, pixg, sx, sy, thresh, mincount, bgval, smoothx, smoothy, &pix_r, &pix_g, &pix_b))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_Pix(_fun, L, pix_r) + ll_push_Pix(_fun, L, pix_g) + ll_push_Pix(_fun, L, pix_b);
 }
 
@@ -2232,7 +2232,7 @@ BackgroundNormRGBArraysMorph(lua_State *L)
     Pix *pixg = nullptr;
     Pix *pixb = nullptr;
     if (pixBackgroundNormRGBArraysMorph(pixs, pixim, reduction, size, bgval, &pixr, &pixg, &pixb))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_Pix(_fun, L, pixr) + ll_push_Pix(_fun, L, pixg) + ll_push_Pix(_fun, L, pixb);
 }
 
@@ -2315,7 +2315,7 @@ BestCorrelation(lua_State *L)
     l_int32 dely = 0;
     l_float32 score = 0;
     if (pixBestCorrelation(pix1, pix2, area1, area2, etransx, etransy, maxshift, &tab8, &delx, &dely, &score, debugflag))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, tab8);
     ll_push_l_int32(_fun, L, delx);
     ll_push_l_int32(_fun, L, dely);
@@ -3093,7 +3093,7 @@ BlendGrayAdapt(lua_State *L)
  *          aggressive blending, where, if the gray pixel in pixs2 is 0,
  *          we get a complete inversion of the color of the src pixel in pixs1.
  *      (6) The basic logic is that each component transforms by:
-                 d  -->  c * d + (1 - c ) * (f * (1 - d) + d * (1 - f))
+		 d  -->  c * d + (1 - c ) * (f * (1 - d) + d * (1 - f))
  *          where c is the blender pixel from pixs2,
  *                f is %fract,
  *                c and d are normalized to [0...1]
@@ -3664,7 +3664,7 @@ Centroid(lua_State *L)
     l_float32 xave = 0;
     l_float32 yave = 0;
     if (pixCentroid(pix, &centtab, &sumtab, &xave, &yave))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, centtab);
     ll_push_l_int32(_fun, L, sumtab);
     ll_push_l_float32(_fun, L, xave);
@@ -3697,7 +3697,7 @@ Centroid8(lua_State *L)
     l_float32 cx = 0;
     l_float32 cy = 0;
     if (pixCentroid8(pixs, factor, &cx, &cy))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, cx);
     ll_push_l_float32(_fun, L, cy);
     return 2;
@@ -3800,7 +3800,7 @@ CleanupByteProcessing(lua_State *L)
     l_uint8 *lineptrs = nullptr;
     size_t size = static_cast<size_t>(pixGetHeight(pix));
     if (pixCleanupByteProcessing(pix, &lineptrs))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     UNUSED(size);
     // ll_push_string(_fun, L, reinterpret_cast<const char *>(lineptrs), size);
     return 0;
@@ -3915,7 +3915,7 @@ ClipBoxToEdges(lua_State *L)
     Pix *pixd = nullptr;
     Box *boxd = nullptr;
     if (pixClipBoxToEdges(pixs, boxs, lowthresh, highthresh, maxwidth, factor, &pixd, &boxd))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixd);
     ll_push_Box(_fun, L, boxd);
     return 2;
@@ -3945,7 +3945,7 @@ ClipBoxToForeground(lua_State *L)
     Pix *pixd = nullptr;
     Box *boxd = nullptr;
     if (pixClipBoxToForeground(pixs, boxs, &pixd, &boxd))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixd);
     ll_push_Box(_fun, L, boxd);
     return 2;
@@ -4035,7 +4035,7 @@ ClipRectangle(lua_State *L)
     Box *box = ll_check_Box(_fun, L, 2);
     Box *boxc = nullptr;
     if (pixClipRectangle(pixs, box, &boxc))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_Box(_fun, L, boxc);
 }
 
@@ -4082,7 +4082,7 @@ ClipToForeground(lua_State *L)
     Pix *pixd = nullptr;
     Box *box = nullptr;
     if (pixClipToForeground(pixs, &pixd, &box))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixd);
     ll_push_Box(_fun, L, box);
     return 2;
@@ -4641,7 +4641,7 @@ ColorContent(lua_State *L)
     Pix *pixg = nullptr;
     Pix *pixb = nullptr;
     if (pixColorContent(pixs, rwhite, gwhite, bwhite, mingray, &pixr, &pixg, &pixb))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixr);
     ll_push_Pix(_fun, L, pixg);
     ll_push_Pix(_fun, L, pixb);
@@ -4704,7 +4704,7 @@ ColorFraction(lua_State *L)
     l_float32 pixfract = 0;
     l_float32 colorfract = 0;
     if (pixColorFraction(pixs, darkthresh, lightthresh, diffthresh, factor, &pixfract, &colorfract))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, pixfract);
     ll_push_l_float32(_fun, L, colorfract);
     return 2;
@@ -5213,7 +5213,7 @@ ColorSegmentClean(lua_State *L)
     l_int32 selsize = ll_check_l_int32(_fun, L, 2);
     l_int32 countarray = 0;
     if (pixColorSegmentClean(pixs, selsize, &countarray))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, countarray);
     return 1;
 }
@@ -5422,7 +5422,7 @@ ColorsForQuantization(lua_State *L)
     l_int32 ncolors = 0;
     l_int32 iscolor = 0;
     if (pixColorsForQuantization(pixs, thresh, &ncolors, &iscolor, debug))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, ncolors);
     ll_push_l_int32(_fun, L, iscolor);
     return 2;
@@ -5460,13 +5460,13 @@ ColumnStats(lua_State *L)
     Numa *var = nullptr;
     Numa *rootvar = nullptr;
     if (pixColumnStats(pixs, box, &mean, &median, &mode, &modecount, &var, &rootvar))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_Numa(_fun, L, mean) +
-            ll_push_Numa(_fun, L, median) +
-            ll_push_Numa(_fun, L, mode) +
-            ll_push_Numa(_fun, L, modecount) +
-            ll_push_Numa(_fun, L, var) +
-            ll_push_Numa(_fun, L, rootvar);
+	    ll_push_Numa(_fun, L, median) +
+	    ll_push_Numa(_fun, L, mode) +
+	    ll_push_Numa(_fun, L, modecount) +
+	    ll_push_Numa(_fun, L, var) +
+	    ll_push_Numa(_fun, L, rootvar);
 }
 
 /**
@@ -5587,7 +5587,7 @@ CompareBinary(lua_State *L)
     l_float32 fract = 0;
     Pix *pixdiff = nullptr;
     if (pixCompareBinary(pix1, pix2, comptype, &fract, &pixdiff))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, fract);
     ll_push_Pix(_fun, L, pixdiff);
     return 2;
@@ -5623,7 +5623,7 @@ CompareGray(lua_State *L)
     l_float32 rmsdiff = 0;
     Pix *pixdiff = nullptr;
     if (pixCompareGray(pix1, pix2, comptype, plottype, &same, &diff, &rmsdiff, &pixdiff))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, same);
     ll_push_l_float32(_fun, L, diff);
     ll_push_l_float32(_fun, L, rmsdiff);
@@ -5710,7 +5710,7 @@ CompareGrayByHisto(lua_State *L)
     l_int32 debugflag = ll_opt_boolean(_fun, L, 9);
     l_float32 score = 0;
     if (pixCompareGrayByHisto(pix1, pix2, box1, box2, minratio, maxgray, factor, n, &score, debugflag))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, score);
     return 1;
 }
@@ -5761,7 +5761,7 @@ CompareGrayOrRGB(lua_State *L)
     l_float32 rmsdiff = 0;
     Pix *pixdiff = nullptr;
     if (pixCompareGrayOrRGB(pix1, pix2, comptype, plottype, &same, &diff, &rmsdiff, &pixdiff))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, same);
     ll_push_l_float32(_fun, L, diff);
     ll_push_l_float32(_fun, L, rmsdiff);
@@ -5835,7 +5835,7 @@ ComparePhotoRegionsByHisto(lua_State *L)
     l_int32 debugflag = ll_opt_boolean(_fun, L, 8);
     l_float32 score = 0;
     if (pixComparePhotoRegionsByHisto(pix1, pix2, box1, box2, minratio, factor, n, &score, debugflag))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, score);
     return 1;
 }
@@ -5869,7 +5869,7 @@ CompareRGB(lua_State *L)
     l_float32 rmsdiff = 0;
     Pix *pixdiff = nullptr;
     if (pixCompareRGB(pix1, pix2, comptype, plottype, &same, &diff, &rmsdiff, &pixdiff))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, same);
     ll_push_l_float32(_fun, L, diff);
     ll_push_l_float32(_fun, L, rmsdiff);
@@ -5949,7 +5949,7 @@ CompareTiled(lua_State *L)
     l_int32 type = ll_check_l_int32(_fun, L, 5);
     Pix *pixdiff = nullptr;
     if (pixCompareTiled(pix1, pix2, sx, sy, type, &pixdiff))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixdiff);
     return 1;
 }
@@ -5994,7 +5994,7 @@ CompareWithTranslation(lua_State *L)
     l_int32 dely = 0;
     l_float32 score = 0;
     if (pixCompareWithTranslation(pix1, pix2, thresh, &delx, &dely, &score, debugflag))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, delx);
     ll_push_l_int32(_fun, L, dely);
     ll_push_l_float32(_fun, L, score);
@@ -6084,7 +6084,7 @@ ConformsToRectangle(lua_State *L)
     l_int32 dist = ll_check_l_int32(_fun, L, 3);
     l_int32 conforms = 0;
     if (pixConformsToRectangle(pixs, box, dist, &conforms))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, conforms);
     return 1;
 }
@@ -6111,7 +6111,7 @@ ConnComp(lua_State *L)
     Pixa *pixa = nullptr;
     l_int32 connectivity = ll_check_l_int32(_fun, L, 3);
     if (pixConnComp(pixs, &pixa, connectivity))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pixa(_fun, L, pixa);
     return 1;
 }
@@ -6212,7 +6212,7 @@ ConnCompIncrAdd(lua_State *L)
     l_int32 debug = ll_opt_boolean(_fun, L, 5, FALSE);
     l_int32 ncc = 0;
     if (pixConnCompIncrAdd(pixs, ptaa, &ncc, x, y, debug))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, ncc);
     return 1;
 }
@@ -6248,7 +6248,7 @@ ConnCompIncrInit(lua_State *L)
     Ptaa *ptaa = nullptr;
     l_int32 ncc = 0;
     if (pixConnCompIncrInit(pixs, conn, &pixd, &ptaa, &ncc))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixd);
     ll_push_Ptaa(_fun, L, ptaa);
     ll_push_l_int32(_fun, L, ncc);
@@ -6285,7 +6285,7 @@ ConnCompPixa(lua_State *L)
     Pixa *pixa = nullptr;
     l_int32 connectivity = ll_check_l_int32(_fun, L, 3);
     if (pixConnCompPixa(pixs, &pixa, connectivity))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pixa(_fun, L, pixa);
     return 1;
 }
@@ -7982,7 +7982,7 @@ ConvertToPdf(lua_State *L)
     PdfData *lpd = ll_opt_PdfData(_fun, L, 9);
     l_int32 position = ll_check_position(_fun, L, 10, 0);
     if (pixConvertToPdf(pix, type, quality, fileout, x, y, res, title, position ? &lpd : nullptr, position))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_PdfData(_fun, L, lpd);
     return 1;
 }
@@ -8025,7 +8025,7 @@ ConvertToPdfData(lua_State *L)
     size_t nbytes = 0;
     PdfData *lpd = nullptr;
     if (pixConvertToPdfData(pix, type, quality, &data, &nbytes, x, y, res, title, position ? &lpd : nullptr, position))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_bytes(_fun, L, data, nbytes);
     ll_push_PdfData(_fun, L, lpd);
     return 2;
@@ -8064,7 +8064,7 @@ ConvertToPdfDataSegmented(lua_State *L)
     size_t nbytes = 0;
     l_uint8 *data = nullptr;
     if (pixConvertToPdfDataSegmented(pixs, res, type, thresh, boxa, quality, scalefactor, title, &data, &nbytes))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_bytes(_fun, L, data, nbytes);
     return 1;
 }
@@ -8390,7 +8390,7 @@ ConvolveWithBias(lua_State *L)
     l_int32 force8 = ll_check_l_int32(_fun, L, 4);
     l_int32 bias = 0;
     if (pixConvolveWithBias(pixs, kel1, kel2, force8, &bias))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, bias);
     return 1;
 }
@@ -8633,7 +8633,7 @@ CorrelationBinary(lua_State *L)
     Pix *pix2 = ll_check_Pix(_fun, L, 2);
     l_float32 val = 0;
     if (pixCorrelationBinary(pix1, pix2, &val))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, val);
     return 1;
 }
@@ -8717,7 +8717,7 @@ CorrelationScore(lua_State *L)
     l_int32 tab = 0;
     l_float32 score = 0;
     if (pixCorrelationScore(pix1, pix2, area1, area2, delx, dely, maxdiffw, maxdiffh, &tab, &score))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, tab);
     ll_push_l_float32(_fun, L, score);
     return 2;
@@ -8767,7 +8767,7 @@ CorrelationScoreShifted(lua_State *L)
     l_int32 tab = 0;
     l_float32 score = 0;
     if (pixCorrelationScoreShifted(pix1, pix2, area1, area2, delx, dely, &tab, &score))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, tab);
     ll_push_l_float32(_fun, L, score);
     return 2;
@@ -8809,7 +8809,7 @@ CorrelationScoreSimple(lua_State *L)
     l_int32 tab = 0;
     l_float32 score = 0;
     if (pixCorrelationScoreSimple(pix1, pix2, area1, area2, delx, dely, maxdiffw, maxdiffh, &tab, &score))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, tab);
     ll_push_l_float32(_fun, L, score);
     return 2;
@@ -8882,7 +8882,7 @@ CorrelationScoreThresholded(lua_State *L)
     l_int32 downcount = 0;
     l_float32 score_threshold = ll_check_l_float32(_fun, L, 11);
     if (pixCorrelationScoreThresholded(pix1, pix2, area1, area2, delx, dely, maxdiffw, maxdiffh, &tab, &downcount, score_threshold))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, tab);
     ll_push_l_int32(_fun, L, downcount);
     return 2;
@@ -8915,7 +8915,7 @@ CountArbInRect(lua_State *L)
     Box *box = ll_opt_Box(_fun, L, 4);
     l_int32 count;
     if (pixCountArbInRect(pixs, box, val, factor, &count))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_int32(_fun, L, count);
 }
 
@@ -8982,7 +8982,7 @@ CountConnComp(lua_State *L)
     l_int32 connectivity = ll_check_l_int32(_fun, L, 2);
     l_int32 count = 0;
     if (pixCountConnComp(pixs, connectivity, &count))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_int32(_fun, L, count);
 }
 
@@ -9001,7 +9001,7 @@ CountPixels(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 count = 0;
     if (pixCountPixels(pixs, &count, nullptr))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_int32(_fun, L, count);
 }
 
@@ -9056,7 +9056,7 @@ CountPixelsInRect(lua_State *L)
     Box *box = ll_check_Box(_fun, L, 2);
     l_int32 count = 0;
     if (pixCountPixelsInRect(pixs, box, &count, nullptr))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_int32(_fun, L, count);
 }
 
@@ -9076,7 +9076,7 @@ CountPixelsInRow(lua_State *L)
     l_int32 row = ll_check_l_int32(_fun, L, 2);
     l_int32 count = 0;
     if (pixCountPixelsInRow(pixs, row, &count, nullptr))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_int32(_fun, L, count);
 }
 
@@ -9096,7 +9096,7 @@ CountRGBColors(lua_State *L)
     l_int32 factor = ll_opt_l_int32(_fun, L, 2, 1);
     l_int32 count = 0;
     if (0 != pixCountRGBColors(pixs, factor, &count))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_int32(_fun, L, count);
 }
 
@@ -9132,7 +9132,7 @@ CountTextColumns(lua_State *L)
     Pixa *pixadb = ll_check_Pixa(_fun, L, 5);
     l_int32 ncols = 0;
     if (pixCountTextColumns(pixs, deltafract, peakfract, clipfract, &ncols, pixadb))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, ncols);
     return 1;
 }
@@ -9238,14 +9238,14 @@ CreateNoInit(lua_State *L)
     Pix *pixs = ll_opt_Pix(_fun, L, 1);
     Pix *pix = nullptr;
     if (pixs) {
-        pix = pixCreateTemplateNoInit(pixs);
+	pix = pixCreateTemplateNoInit(pixs);
     } else if (ll_isinteger(_fun, L, 1) && ll_isinteger(_fun, L, 2)) {
-        l_int32 width = ll_check_l_int32(_fun, L, 1);
-        l_int32 height = ll_check_l_int32(_fun, L, 2);
-        l_int32 depth = ll_opt_l_int32(_fun, L, 3, 1);
-        pix = pixCreateNoInit(width, height, depth);
+	l_int32 width = ll_check_l_int32(_fun, L, 1);
+	l_int32 height = ll_check_l_int32(_fun, L, 2);
+	l_int32 depth = ll_opt_l_int32(_fun, L, 3, 1);
+	pix = pixCreateNoInit(width, height, depth);
     } else {
-        pix = pixCreateNoInit(1, 1, 1);
+	pix = pixCreateNoInit(1, 1, 1);
     }
     return ll_push_Pix(_fun, L, pix);
 }
@@ -9364,7 +9364,7 @@ CropAlignedToCentroid(lua_State *L)
     Box *box1 = nullptr;
     Box *box2 = nullptr;
     if (pixCropAlignedToCentroid(pix1, pix2, factor, &box1, &box2))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Box(_fun, L, box1);
     ll_push_Box(_fun, L, box2);
     return 2;
@@ -9399,7 +9399,7 @@ CropToMatch(lua_State *L)
     Pix *pixd1 = nullptr;
     Pix *pixd2 = nullptr;
     if (pixCropToMatch(pixs1, pixs2, &pixd1, &pixd2))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixd1);
     ll_push_Pix(_fun, L, pixd2);
     return 2;
@@ -9504,7 +9504,7 @@ DecideIfPhotoImage(lua_State *L)
     Pixa *pixadebug = ll_opt_Pixa(_fun, L, 5);
     Numaa *naa = nullptr;
     if (pixDecideIfPhotoImage(pix, factor, thresh, n, &naa, pixadebug))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Numaa(_fun, L, naa);
     return 1;
 }
@@ -9560,7 +9560,7 @@ DecideIfTable(lua_State *L)
     l_int32 score = 0;
     Pixa *pixadb = ll_check_Pixa(_fun, L, 5);
     if (pixDecideIfTable(pixs, box, orient, &score, pixadb))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, score);
     return 1;
 }
@@ -9598,7 +9598,7 @@ DecideIfText(lua_State *L)
     l_int32 istext = 0;
     Pixa *pixadb = ll_check_Pixa(_fun, L, 4);
     if (pixDecideIfText(pixs, box, &istext, pixadb))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, istext);
     return 1;
 }
@@ -9681,7 +9681,7 @@ DeskewBarcode(lua_State *L)
     l_float32 angle = 0;
     l_float32 conf = 0;
     if (pixDeskewBarcode(pixs, pixb, box, margin, threshold, &angle, &conf))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, angle);
     ll_push_l_float32(_fun, L, conf);
     return 2;
@@ -9743,7 +9743,7 @@ DeskewGeneral(lua_State *L)
     l_float32 angle = 0;
     l_float32 conf = 0;
     if (pixDeskewGeneral(pixs, redsweep, sweeprange, sweepdelta, redsearch, thresh, &angle, &conf))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, angle);
     ll_push_l_float32(_fun, L, conf);
     return 2;
@@ -10931,7 +10931,7 @@ Equal(lua_State *L)
     Pix *pix2 = ll_check_Pix(_fun, L, 2);
     l_int32 same = 0;
     if (pixEqual(pix1, pix2, &same))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, same);
     return 1;
 }
@@ -10961,7 +10961,7 @@ EqualWithAlpha(lua_State *L)
     l_int32 use_alpha = ll_check_l_int32(_fun, L, 3);
     l_int32 same = 0;
     if (pixEqualWithAlpha(pix1, pix2, use_alpha, &same))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, same);
     return 1;
 }
@@ -10993,7 +10993,7 @@ EqualWithCmap(lua_State *L)
     Pix *pix2 = ll_check_Pix(_fun, L, 2);
     l_int32 same = 0;
     if (pixEqualWithCmap(pix1, pix2, &same))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, same);
     return 1;
 }
@@ -11370,7 +11370,7 @@ EstimateBackground(lua_State *L)
     l_float32 edgecrop = ll_check_l_float32(_fun, L, 3);
     l_int32 bg = 0;
     if (pixEstimateBackground(pixs, darkthresh, edgecrop, &bg))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, bg);
     return 1;
 }
@@ -11509,7 +11509,7 @@ ExtractBarcodeWidths1(lua_State *L)
     Numa *naehist = nullptr;
     Numa *naohist = nullptr;
     if (pixExtractBarcodeWidths1(pixs, thresh, binfract, &naehist, &naohist, debugflag))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Numa(_fun, L, naehist);
     ll_push_Numa(_fun, L, naohist);
     return 2;
@@ -11547,7 +11547,7 @@ ExtractBarcodeWidths2(lua_State *L)
     l_float32 width = 0;
     Numa *nac = nullptr;
     if (pixExtractBarcodeWidths2(pixs, thresh, &width, &nac, debugflag))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, width);
     ll_push_Numa(_fun, L, nac);
     return 2;
@@ -12095,7 +12095,7 @@ FewColorsOctcubeQuant2(lua_State *L)
     l_int32 ncolors = ll_check_l_int32(_fun, L, 4);
     l_int32 nerrors = 0;
     if (pixFewColorsOctcubeQuant2(pixs, level, na, ncolors, &nerrors))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, nerrors);
     return 1;
 }
@@ -12421,7 +12421,7 @@ FindAreaFraction(lua_State *L)
     l_int32 tab = 0;
     l_float32 fract = 0;
     if (pixFindAreaFraction(pixs, &tab, &fract))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, tab);
     ll_push_l_float32(_fun, L, fract);
     return 2;
@@ -12458,7 +12458,7 @@ FindAreaFractionMasked(lua_State *L)
     l_int32 tab = 0;
     l_float32 fract = 0;
     if (pixFindAreaFractionMasked(pixs, box, pixm, &tab, &fract))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, tab);
     ll_push_l_float32(_fun, L, fract);
     return 2;
@@ -12486,7 +12486,7 @@ FindAreaPerimRatio(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 fract = 0.0f;
     if (pixFindAreaPerimRatio(pixs, tab8, &fract))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, fract);
     return 1;
 }
@@ -12531,7 +12531,7 @@ FindBaselines(lua_State *L)
     Pta *pta = nullptr;
     Pixa *pixadb = ll_check_Pixa(_fun, L, 3);
     if (pixFindBaselines(pixs, &pta, pixadb))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pta(_fun, L, pta);
     return 1;
 }
@@ -12610,9 +12610,9 @@ FindColorRegions(lua_State *L)
     Pix *colormask2 = nullptr;
     Pixa *pixadb = ll_check_Pixa(_fun, L, 12);
     if (pixFindColorRegions(pixs, pixm, factor,
-                            lightthresh, darkthresh, mindiff, colordiff, edgefract,
-                            &colorfract, &colormask1, &colormask2, pixadb))
-        return ll_push_nil(_fun, L);
+			    lightthresh, darkthresh, mindiff, colordiff, edgefract,
+			    &colorfract, &colormask1, &colormask2, pixadb))
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, colorfract);
     ll_push_Pix(_fun, L, colormask1);
     ll_push_Pix(_fun, L, colormask2);
@@ -12661,7 +12661,7 @@ FindDifferentialSquareSum(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 sum = 0;
     if (pixFindDifferentialSquareSum(pixs, &sum))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, sum);
     return 1;
 }
@@ -12728,7 +12728,7 @@ FindHistoPeaksHSV(lua_State *L)
     Numa *natot = nullptr;
     Pixa *pixa = nullptr;
     if (pixFindHistoPeaksHSV(pixs, type, width, height, npeaks, erasefactor, &pta, &natot, &pixa))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pta(_fun, L, pta);
     ll_push_Numa(_fun, L, natot);
     ll_push_Pixa(_fun, L, pixa);
@@ -12762,7 +12762,7 @@ FindHorizontalRuns(lua_State *L)
     l_int32 xend = 0;
     l_int32 n = 0;
     if (pixFindHorizontalRuns(pix, y, &xstart, &xend, &n))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, xstart);
     ll_push_l_int32(_fun, L, xend);
     ll_push_l_int32(_fun, L, n);
@@ -12803,7 +12803,7 @@ FindLargeRectangles(lua_State *L)
     Boxa *boxa = nullptr;
     Pix *pixdb = nullptr;
     if (pixFindLargeRectangles(pixs, polarity, nrect, &boxa, &pixdb))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Boxa(_fun, L, boxa);
     ll_push_Pix(_fun, L, pixdb);
     return 2;
@@ -12866,7 +12866,7 @@ FindLargestRectangle(lua_State *L)
     Box *box = nullptr;
     Pix *pixdb = nullptr;
     if (pixFindLargestRectangle(pixs, polarity, &box, &pixdb))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Box(_fun, L, box);
     ll_push_Pix(_fun, L, pixdb);
     return 2;
@@ -12895,7 +12895,7 @@ FindMaxHorizontalRunOnLine(lua_State *L)
     l_int32 xstart = 0;
     l_int32 size = 0;
     if (pixFindMaxHorizontalRunOnLine(pix, y, &xstart, &size))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, xstart);
     ll_push_l_int32(_fun, L, size);
     return 2;
@@ -12923,7 +12923,7 @@ FindMaxRuns(lua_State *L)
     l_int32 direction = ll_check_l_int32(_fun, L, 2);
     Numa *nastart = nullptr;
     if (pixFindMaxRuns(pix, direction, &nastart))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Numa(_fun, L, nastart);
     return 1;
 }
@@ -12951,7 +12951,7 @@ FindMaxVerticalRunOnLine(lua_State *L)
     l_int32 ystart = 0;
     l_int32 size = 0;
     if (pixFindMaxVerticalRunOnLine(pix, x, &ystart, &size))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, ystart);
     ll_push_l_int32(_fun, L, size);
     return 2;
@@ -12984,7 +12984,7 @@ FindNormalizedSquareSum(lua_State *L)
     l_float32 vratio = 0;
     l_float32 fract = 0;
     if (pixFindNormalizedSquareSum(pixs, &hratio, &vratio, &fract))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, hratio);
     ll_push_l_float32(_fun, L, vratio);
     ll_push_l_float32(_fun, L, fract);
@@ -13018,7 +13018,7 @@ FindOverlapFraction(lua_State *L)
     l_float32 ratio = 0;
     l_int32 noverlap = 0;
     if (pixFindOverlapFraction(pixs1, pixs2, x2, y2, &tab, &ratio, &noverlap))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, tab);
     ll_push_l_float32(_fun, L, ratio);
     ll_push_l_int32(_fun, L, noverlap);
@@ -13091,7 +13091,7 @@ FindPerimSizeRatio(lua_State *L)
     l_int32 tab = 0;
     l_float32 ratio = 0;
     if (pixFindPerimSizeRatio(pixs, &tab, &ratio))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, tab);
     ll_push_l_float32(_fun, L, ratio);
     return 2;
@@ -13124,7 +13124,7 @@ FindPerimToAreaRatio(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 fract = 0.0f;
     if (pixFindPerimToAreaRatio(pixs, tab8, &fract))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, fract);
     return 1;
 }
@@ -13199,7 +13199,7 @@ FindRepCloseTile(lua_State *L)
     l_int32 ntiles = ll_check_l_int32(_fun, L, 6);
     Box *boxtile = nullptr;
     if (pixFindRepCloseTile(pixs, box, searchdir, mindist, tsize, ntiles, &boxtile, 0))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_Box(_fun, L, boxtile);
 }
 
@@ -13226,7 +13226,7 @@ FindSkew(lua_State *L)
     l_float32 angle = 0;
     l_float32 conf = 0;
     if (pixFindSkew(pixs, &angle, &conf))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, angle);
     ll_push_l_float32(_fun, L, conf);
     return 2;
@@ -13289,7 +13289,7 @@ FindSkewOrthogonalRange(lua_State *L)
     l_float32 minbsdelta = ll_check_l_float32(_fun, L, 8);
     l_float32 confprior = ll_check_l_float32(_fun, L, 9);
     if (pixFindSkewOrthogonalRange(pixs, &angle, &conf, redsweep, redsearch, sweeprange, sweepdelta, minbsdelta, confprior))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, angle);
     ll_push_l_float32(_fun, L, conf);
     return 2;
@@ -13320,7 +13320,7 @@ FindSkewSweep(lua_State *L)
     l_float32 sweeprange = ll_check_l_float32(_fun, L, 4);
     l_float32 sweepdelta = ll_check_l_float32(_fun, L, 5);
     if (pixFindSkewSweep(pixs, &angle, reduction, sweeprange, sweepdelta))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, angle);
     return 1;
 }
@@ -13363,7 +13363,7 @@ FindSkewSweepAndSearch(lua_State *L)
     l_float32 sweepdelta = ll_check_l_float32(_fun, L, 7);
     l_float32 minbsdelta = ll_check_l_float32(_fun, L, 8);
     if (pixFindSkewSweepAndSearch(pixs, &angle, &conf, redsweep, redsearch, sweeprange, sweepdelta, minbsdelta))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, angle);
     ll_push_l_float32(_fun, L, conf);
     return 2;
@@ -13417,7 +13417,7 @@ FindSkewSweepAndSearchScore(lua_State *L)
     l_float32 sweepdelta = ll_check_l_float32(_fun, L, 9);
     l_float32 minbsdelta = ll_check_l_float32(_fun, L, 10);
     if (pixFindSkewSweepAndSearchScore(pixs, &angle, &conf, &endscore, redsweep, redsearch, sweepcenter, sweeprange, sweepdelta, minbsdelta))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, angle);
     ll_push_l_float32(_fun, L, conf);
     ll_push_l_float32(_fun, L, endscore);
@@ -13464,7 +13464,7 @@ FindSkewSweepAndSearchScorePivot(lua_State *L)
     l_float32 minbsdelta = ll_check_l_float32(_fun, L, 10);
     l_int32 pivot = ll_check_l_int32(_fun, L, 11);
     if (pixFindSkewSweepAndSearchScorePivot(pixs, &angle, &conf, &endscore, redsweep, redsearch, sweepcenter, sweeprange, sweepdelta, minbsdelta, pivot))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, angle);
     ll_push_l_float32(_fun, L, conf);
     ll_push_l_float32(_fun, L, endscore);
@@ -13490,7 +13490,7 @@ FindStrokeLength(lua_State *L)
     l_int32 tab8 = 0;
     l_int32 length = 0;
     if (pixFindStrokeLength(pixs, &tab8, &length))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, tab8);
     ll_push_l_int32(_fun, L, length);
     return 2;
@@ -13524,7 +13524,7 @@ FindStrokeWidth(lua_State *L)
     l_float32 width = 0;
     Numa *nahisto = nullptr;
     if (pixFindStrokeWidth(pixs, thresh, &tab8, &width, &nahisto))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, tab8);
     ll_push_l_float32(_fun, L, width);
     ll_push_Numa(_fun, L, nahisto);
@@ -13549,7 +13549,7 @@ FindThreshFgExtent(lua_State *L)
     l_int32 top = 0;
     l_int32 bot = 0;
     if (pixFindThreshFgExtent(pixs, thresh, &top, &bot))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, top);
     ll_push_l_int32(_fun, L, bot);
     return 2;
@@ -13582,7 +13582,7 @@ FindVerticalRuns(lua_State *L)
     l_int32 yend = 0;
     l_int32 n = 0;
     if (pixFindVerticalRuns(pix, x, &ystart, &yend, &n))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, ystart);
     ll_push_l_int32(_fun, L, yend);
     ll_push_l_int32(_fun, L, n);
@@ -13833,7 +13833,7 @@ ForegroundFraction(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_float32 fract = 0;
     if (pixForegroundFraction(pixs, &fract))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, fract);
     return 1;
 }
@@ -13869,7 +13869,7 @@ FractionFgInMask(lua_State *L)
     Pix *pix2 = ll_check_Pix(_fun, L, 2);
     l_float32 fract = 0;
     if (pixFractionFgInMask(pix1, pix2, &fract))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, fract);
     return 1;
 }
@@ -14025,7 +14025,7 @@ GenHalftoneMask(lua_State *L)
     Pix *pixtext = nullptr;
     l_int32 htfound = 0;
     if (pixGenHalftoneMask(pixs, &pixtext, &htfound, debug))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixtext);
     ll_push_l_int32(_fun, L, htfound);
     return 2;
@@ -14072,7 +14072,7 @@ GenPhotoHistos(lua_State *L)
     l_int32 w = 0;
     l_int32 h = 0;
     if (pixGenPhotoHistos(pixs, box, factor, thresh, n, &naa, &w, &h, debugflag))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Numaa(_fun, L, naa);
     ll_push_l_int32(_fun, L, w);
     ll_push_l_int32(_fun, L, h);
@@ -14137,7 +14137,7 @@ GenTextlineMask(lua_State *L)
     l_int32 tlfound = 0;
     Pixa *pixadb = ll_check_Pixa(_fun, L, 4);
     if (pixGenTextlineMask(pixs, &pixvws, &tlfound, pixadb))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixvws);
     ll_push_l_int32(_fun, L, tlfound);
     return 2;
@@ -14169,7 +14169,7 @@ GenerateCIData(lua_State *L)
     l_int32 ascii85 = ll_check_l_int32(_fun, L, 4);
     CompData *cid = nullptr;
     if (pixGenerateCIData(pixs, type, quality, ascii85, &cid))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_CompData(_fun, L, cid);
     return 1;
 }
@@ -14222,7 +14222,7 @@ GenerateHalftoneMask(lua_State *L)
     l_int32 htfound = 0;
     Pixa *pixadb = ll_check_Pixa(_fun, L, 4);
     if (pixGenerateHalftoneMask(pixs, &pixtext, &htfound, pixadb))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixtext);
     ll_push_l_int32(_fun, L, htfound);
     return 2;
@@ -14451,7 +14451,7 @@ GenerateSelBoundary(lua_State *L)
     l_int32 rightflag = ll_opt_boolean(_fun, L, 9);
     Pix *pixe = nullptr;
     if (pixGenerateSelBoundary(pixs, hitdist, missdist, hitskip, missskip, topflag, botflag, leftflag, rightflag, &pixe))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixe);
     return 1;
 }
@@ -14502,7 +14502,7 @@ GenerateSelRandom(lua_State *L)
     l_int32 rightpix = ll_check_l_int32(_fun, L, 8);
     Pix *pixe = nullptr;
     if (pixGenerateSelRandom(pixs, hitfract, missfract, distance, toppix, botpix, leftpix, rightpix, &pixe))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixe);
     return 1;
 }
@@ -14570,7 +14570,7 @@ GenerateSelWithRuns(lua_State *L)
     l_int32 rightpix = ll_check_l_int32(_fun, L, 9);
     Pix *pixe = nullptr;
     if (pixGenerateSelWithRuns(pixs, nhlines, nvlines, distance, minlength, toppix, botpix, leftpix, rightpix, &pixe))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixe);
     return 1;
 }
@@ -14616,7 +14616,7 @@ GetAutoFormat(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 format = 0;
     if (pixGetAutoFormat(pix, &format))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, format);
     return 1;
 }
@@ -14663,7 +14663,7 @@ GetAverageMasked(lua_State *L)
     l_int32 factor = ll_opt_l_int32(_fun, L, 6, 1);
     l_float32 value = 0.0;
     if (pixGetAverageMasked(pixs, pixm, x, y, factor, type, &value))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, value);
     return 3;
 }
@@ -14701,7 +14701,7 @@ GetAverageMaskedRGB(lua_State *L)
     l_float32 gval = 0.0;
     l_float32 bval = 0.0;
     if (pixGetAverageMaskedRGB(pixs, pixm, x, y, factor, type, &rval, &gval, &bval))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, rval);
     ll_push_l_float32(_fun, L, gval);
     ll_push_l_float32(_fun, L, bval);
@@ -14767,7 +14767,7 @@ GetAverageTiledRGB(lua_State *L)
     Pix *pixg = nullptr;
     Pix *pixb = nullptr;
     if (pixGetAverageTiledRGB(pixs, sx, sy, type, &pixr, &pixg, &pixb))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_Pix(_fun, L, pixr) + ll_push_Pix(_fun, L, pixg) + ll_push_Pix(_fun, L, pixb);
 }
 
@@ -14801,7 +14801,7 @@ GetBackgroundGrayMap(lua_State *L)
     l_int32 mincount = ll_check_l_int32(_fun, L, 6);
     Pix *pixd = nullptr;
     if (pixGetBackgroundGrayMap(pixs, pixim, sx, sy, thresh, mincount, &pixd))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixd);
     return 1;
 }
@@ -14827,7 +14827,7 @@ GetBackgroundGrayMapMorph(lua_State *L)
     l_int32 size = ll_check_l_int32(_fun, L, 4);
     Pix *pixm = nullptr;
     if (pixGetBackgroundGrayMapMorph(pixs, pixim, reduction, size, &pixm))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixm);
     return 1;
 }
@@ -14867,7 +14867,7 @@ GetBackgroundRGBMap(lua_State *L)
     Pix *pixmg = nullptr;
     Pix *pixmb = nullptr;
     if (pixGetBackgroundRGBMap(pixs, pixim, pixg, sx, sy, thresh, mincount, &pixmr, &pixmg, &pixmb))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixmr);
     ll_push_Pix(_fun, L, pixmg);
     ll_push_Pix(_fun, L, pixmb);
@@ -14897,7 +14897,7 @@ GetBackgroundRGBMapMorph(lua_State *L)
     Pix *pixmg = nullptr;
     Pix *pixmb = nullptr;
     if (pixGetBackgroundRGBMapMorph(pixs, pixim, reduction, size, &pixmr, &pixmg, &pixmb))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixmr);
     ll_push_Pix(_fun, L, pixmg);
     ll_push_Pix(_fun, L, pixmb);
@@ -14942,7 +14942,7 @@ GetBinnedColor(lua_State *L)
     l_int32 res;
 
     if (pixGetBinnedColor(pixs, pixg, factor, nbins, alut, &carray, 0))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     res = ll_pack_Uarray(_fun, L, carray, nbins);
     ll_free(carray);
     return res;
@@ -14980,7 +14980,7 @@ GetBinnedComponentRange(lua_State *L)
     l_int32 res;
 
     if (pixGetBinnedComponentRange(pixs, nbins, factor, color, &minval, &maxval, &carray, fontsize))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, minval);
     ll_push_l_int32(_fun, L, maxval);
     res = ll_pack_Uarray(_fun, L, carray, nbins);
@@ -15011,7 +15011,7 @@ GetBlackOrWhiteVal(lua_State *L)
     l_int32 op = ll_check_getval(_fun, L, 2, L_GET_BLACK_VAL);
     l_uint32 val = 0;
     if (pixGetBlackOrWhiteVal(pix, op, &val))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_uint32(_fun, L, val);
 }
 
@@ -15030,7 +15030,7 @@ GetBlackVal(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_uint32 val = 0;
     if (pixGetBlackOrWhiteVal(pix, L_GET_BLACK_VAL, &val))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_uint32(_fun, L, val);
 }
 
@@ -15159,7 +15159,7 @@ GetColorHistogram(lua_State *L)
     Numa *nag = nullptr;
     Numa *nab = nullptr;
     if (pixGetColorHistogram(pixs, factor, &nar, &nag, &nab))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_Numa(_fun, L, nar) + ll_push_Numa(_fun, L, nag) + ll_push_Numa(_fun, L, nab);
 }
 
@@ -15194,7 +15194,7 @@ GetColorHistogramMasked(lua_State *L)
     Numa *nag = nullptr;
     Numa *nab = nullptr;
     if (pixGetColorHistogramMasked(pixs, pixm, x, y, factor, &nar, &nag, &nab))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_Numa(_fun, L, nar) + ll_push_Numa(_fun, L, nag) + ll_push_Numa(_fun, L, nab);
 }
 
@@ -15224,7 +15224,7 @@ GetColorNearMaskBoundary(lua_State *L)
     l_uint32 val = 0;
     l_int32 dist = ll_check_l_int32(_fun, L, 4);
     if (pixGetColorNearMaskBoundary(pixs, pixm, box, dist, &val, 0))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_uint32(_fun, L, val);
 }
 
@@ -15278,8 +15278,8 @@ GetColumnStats(lua_State *L)
     l_int32 thresh = ll_opt_l_int32(_fun, L, 4, 0);
     l_float32 *rowvect = ll_calloc<l_float32>(_fun, L, nbins);
     if (pixGetColumnStats(pixs, type, nbins, thresh, rowvect)) {
-        ll_free(rowvect);
-        return ll_push_nil(_fun, L);
+	ll_free(rowvect);
+	return ll_push_nil(_fun, L);
     }
     ll_pack_Farray(_fun, L, rowvect, nbins);
     ll_free(rowvect);
@@ -15402,7 +15402,7 @@ GetDifferenceStats(lua_State *L)
     l_float32 avediff = 0;
     l_int32 details = ll_check_l_int32(_fun, L, 7);
     if (pixGetDifferenceStats(pix1, pix2, factor, mindiff, &fractdiff, &avediff, details))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, fractdiff);
     ll_push_l_float32(_fun, L, avediff);
     return 2;
@@ -15423,7 +15423,7 @@ GetDimensions(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 width, height, depth;
     if (pixGetDimensions(pix, &width, &height, &depth))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_int32(_fun, L, width) + ll_push_l_int32(_fun, L, height) + ll_push_l_int32(_fun, L, depth);
 }
 
@@ -15476,11 +15476,11 @@ GetExtremeValue(lua_State *L)
     l_int32 bval = 0;
     l_int32 grayval = 0;
     if (pixGetExtremeValue(pixs, factor, type, &rval, &gval, &bval, &grayval))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_int32(_fun, L, rval) +
-        ll_push_l_int32(_fun, L, gval) +
-        ll_push_l_int32(_fun, L, bval) +
-        ll_push_l_int32(_fun, L, grayval);
+	ll_push_l_int32(_fun, L, gval) +
+	ll_push_l_int32(_fun, L, bval) +
+	ll_push_l_int32(_fun, L, grayval);
 }
 
 /**
@@ -15679,7 +15679,7 @@ GetLastOffPixelInRun(lua_State *L)
     l_int32 direction = ll_check_l_int32(_fun, L, 4);
     l_int32 loc = 0;
     if (pixGetLastOffPixelInRun(pixs, x, y, direction, &loc))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, loc);
     return 1;
 }
@@ -15705,7 +15705,7 @@ GetLastOnPixelInRun(lua_State *L)
     l_int32 direction = ll_check_l_int32(_fun, L, 4);
     l_int32 loc = 0;
     if (pixGetLastOnPixelInRun(pixs, x, y, direction, &loc))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, loc);
     return 1;
 }
@@ -15786,7 +15786,7 @@ GetLinePtrs(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 size = 0;
     if (pixGetLinePtrs(pix, &size))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, size);
     return 1;
 }
@@ -15835,7 +15835,7 @@ GetLocalSkewAngles(lua_State *L)
     l_float32 a = 0;
     l_float32 b = 0;
     if (pixGetLocalSkewAngles(pixs, nslices, redsweep, redsearch, sweeprange, sweepdelta, minbsdelta, &a, &b, debug))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, a);
     ll_push_l_float32(_fun, L, b);
     return 2;
@@ -15877,9 +15877,9 @@ GetLocalSkewTransform(lua_State *L)
     Pta *ptas = nullptr;
     Pta *ptad = nullptr;
     if (pixGetLocalSkewTransform(pixs, nslices, redsweep, redsearch, sweeprange, sweepdelta, minbsdelta, &ptas, &ptad))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_Pta(_fun, L, ptas) +
-            ll_push_Pta(_fun, L, ptad);
+	    ll_push_Pta(_fun, L, ptad);
 }
 
 /**
@@ -15908,10 +15908,10 @@ GetMaxValueInRect(lua_State *L)
     l_int32 xmax = 0;
     l_int32 ymax = 0;
     if (pixGetMaxValueInRect(pixs, box, &maxval, &xmax, &ymax))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_uint32(_fun, L, maxval) +
-            ll_push_l_int32(_fun, L, xmax) +
-            ll_push_l_int32(_fun, L, ymax);
+	    ll_push_l_int32(_fun, L, xmax) +
+	    ll_push_l_int32(_fun, L, ymax);
 }
 
 /**
@@ -15963,7 +15963,7 @@ GetMostPopulatedColors(lua_State *L)
     l_uint32 *array = nullptr;
     PixColormap *cmap = nullptr;
     if (pixGetMostPopulatedColors(pixs, sigbits, factor, ncolors, &array, &cmap))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_pack_Uarray(_fun, L, array, ncolors);
     ll_push_PixColormap(_fun, L, cmap);
     return 2;
@@ -16057,7 +16057,7 @@ GetPSNR(lua_State *L)
     l_int32 factor = ll_check_l_int32(_fun, L, 3);
     l_float32 psnr = 0;
     if (pixGetPSNR(pix1, pix2, factor, &psnr))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_float32(_fun, L, psnr);
 }
 
@@ -16118,7 +16118,7 @@ GetPerceptualDiff(lua_State *L)
     Pix *pixdiff1 = nullptr;
     Pix *pixdiff2 = nullptr;
     if (pixGetPerceptualDiff(pixs1, pixs2, sampling, dilation, mindiff, &fract, &pixdiff1, &pixdiff2))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, fract);
     ll_push_Pix(_fun, L, pixdiff1);
     ll_push_Pix(_fun, L, pixdiff2);
@@ -16157,7 +16157,7 @@ GetPixel(lua_State *L)
     l_int32 y = ll_check_l_int32(_fun, L, 3);
     l_uint32 val = 0;
     if (pixGetPixel(pix, x, y, &val))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_uint32(_fun, L, val);
 }
 
@@ -16198,7 +16198,7 @@ GetPixelAverage(lua_State *L)
     l_int32 factor = ll_opt_l_int32(_fun, L, 5, 1);
     l_uint32 value = 0;
     if (pixGetPixelAverage(pixs, pixm, x,y, factor, &value))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_uint32(_fun, L, value);
 }
 
@@ -16227,7 +16227,7 @@ GetPixelStats(lua_State *L)
     l_int32 factor = ll_opt_l_int32(_fun, L, 3, 1);
     l_uint32 value = 0;
     if (pixGetPixelStats(pixs, factor, type, &value))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_uint32(_fun, L, value);
 }
 
@@ -16330,10 +16330,10 @@ GetRGBLine(lua_State *L)
     l_uint8 *bufg = ll_calloc<l_uint8>(_fun, L, width);
     l_uint8 *bufb = ll_calloc<l_uint8>(_fun, L, width);
     if (pixGetRGBLine(pixs, row, bufr, bufg, bufb)) {
-        ll_free(bufr);
-        ll_free(bufg);
-        ll_free(bufb);
-        return ll_push_nil(_fun, L);
+	ll_free(bufr);
+	ll_free(bufg);
+	ll_free(bufb);
+	return ll_push_nil(_fun, L);
     }
     lua_pushlstring(L, reinterpret_cast<const char *>(bufr), width);
     lua_pushlstring(L, reinterpret_cast<const char *>(bufg), width);
@@ -16364,10 +16364,10 @@ GetRGBPixel(lua_State *L)
     l_int32 gval = 0;
     l_int32 bval = 0;
     if (pixGetRGBPixel(pix, x, y, &rval, &gval, &bval))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_int32(_fun, L, rval) +
-        ll_push_l_int32(_fun, L, gval) +
-        ll_push_l_int32(_fun, L, bval);
+	ll_push_l_int32(_fun, L, gval) +
+	ll_push_l_int32(_fun, L, bval);
 }
 
 /**
@@ -16390,10 +16390,10 @@ GetRandomPixel(lua_State *L)
     l_int32 y = 0;
     l_uint32 val = 0;
     if (pixGetRandomPixel(pix, &val, &x, &y))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_uint32(_fun, L, val) +
-        ll_push_l_int32(_fun, L, x) +
-        ll_push_l_int32(_fun, L, y);
+	ll_push_l_int32(_fun, L, x) +
+	ll_push_l_int32(_fun, L, y);
 }
 
 /**
@@ -16419,9 +16419,9 @@ GetRangeValues(lua_State *L)
     l_int32 minval = 0;
     l_int32 maxval = 0;
     if (pixGetRangeValues(pixs, factor, color, &minval, &maxval))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_int32(_fun, L, minval) +
-            ll_push_l_int32(_fun, L, maxval);
+	    ll_push_l_int32(_fun, L, maxval);
 }
 
 /**
@@ -16467,7 +16467,7 @@ GetRankColorArray(lua_State *L)
     l_int32 res;
 
     if (pixGetRankColorArray(pixs, nbins, type, factor, &carray, 0, 0))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     res = ll_pack_Uarray(_fun, L, carray, nbins);
     ll_free(carray);
     return res;
@@ -16498,7 +16498,7 @@ GetRankValue(lua_State *L)
     l_float32 rank = ll_check_l_float32(_fun, L, 3);
     l_uint32 value = 0;
     if (pixGetRankValue(pixs, factor, rank, &value))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_uint32(_fun, L, value);
 }
 
@@ -16544,7 +16544,7 @@ GetRankValueMasked(lua_State *L)
     l_float32 value = 0.0f;
     Numa *na = nullptr;
     if (pixGetRankValueMasked(pixs, pixm, x, y, factor, rank, &value, &na))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, value);
     ll_push_Numa(_fun, L, na);
     return 2;
@@ -16587,7 +16587,7 @@ GetRankValueMaskedRGB(lua_State *L)
     l_float32 gval = 0.0f;
     l_float32 bval = 0.0f;
     if (pixGetRankValueMaskedRGB(pixs, pixm, x, y, factor, rank, &rval, &gval, &bval))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, rval);
     ll_push_l_float32(_fun, L, gval);
     ll_push_l_float32(_fun, L, bval);
@@ -16616,7 +16616,7 @@ GetRasterData(lua_State *L)
     l_uint8 *data = nullptr;
     size_t nbytes = 0;
     if (pixGetRasterData(pixs, &data, &nbytes))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_bytes(_fun, L, data, nbytes);
     return 1;
 }
@@ -16661,7 +16661,7 @@ GetRegionsBinary(lua_State *L)
     Pix *pixtb = nullptr;
     Pixa *pixadb = ll_check_Pixa(_fun, L, 5);
     if (pixGetRegionsBinary(pixs, &pixhm, &pixtm, &pixtb, pixadb))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixhm);
     ll_push_Pix(_fun, L, pixtm);
     ll_push_Pix(_fun, L, pixtb);
@@ -16683,9 +16683,9 @@ GetResolution(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 xres, yres;
     if (pixGetResolution(pix, &xres, &yres))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_int32(_fun, L, xres) +
-            ll_push_l_int32(_fun, L, yres);
+	    ll_push_l_int32(_fun, L, yres);
 }
 
 /**
@@ -16726,8 +16726,8 @@ GetRowStats(lua_State *L)
     l_int32 thresh = ll_opt_l_int32(_fun, L, 4, 0);
     l_float32 *colvect = ll_calloc<l_float32>(_fun, L, nbins);
     if (pixGetRowStats(pixs, type, nbins, thresh, colvect)) {
-        ll_free(colvect);
-        return ll_push_nil(_fun, L);
+	ll_free(colvect);
+	return ll_push_nil(_fun, L);
     }
     ll_pack_Farray(_fun, L, colvect, nbins);
     ll_free(colvect);
@@ -16841,7 +16841,7 @@ GetSortedNeighborValues(lua_State *L)
     l_int32 *neigh = 0;
     l_int32 nvals = 0;
     if (pixGetSortedNeighborValues(pixs, x, y, conn, &neigh, &nvals))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_pack_Iarray(_fun, L, neigh, nvals);
     ll_free(neigh);
     return 1;
@@ -16901,7 +16901,7 @@ GetWhiteVal(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_uint32 val = 0;
     if (pixGetBlackOrWhiteVal(pix, L_GET_WHITE_VAL, &val))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_uint32(_fun, L, val);
 }
 
@@ -16953,7 +16953,7 @@ GetWordBoxesInTextlines(lua_State *L)
     Boxa *boxad = nullptr;
     Numa *nai = nullptr;
     if (pixGetWordBoxesInTextlines(pixs, minwidth, minheight, maxwidth, maxheight, &boxad, &nai))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Boxa(_fun, L, boxad);
     ll_push_Numa(_fun, L, nai);
     return 2;
@@ -17015,7 +17015,7 @@ GetWordsInTextlines(lua_State *L)
     Pixa *pixad = nullptr;
     Numa *nai = nullptr;
     if (pixGetWordsInTextlines(pixs, minwidth, minheight, maxwidth, maxheight, &boxad, &pixad, &nai))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Boxa(_fun, L, boxad);
     ll_push_Pixa(_fun, L, pixad);
     ll_push_Numa(_fun, L, nai);
@@ -17687,7 +17687,7 @@ HasHighlightRed(lua_State *L)
     l_float32 ratio = 0;
     Pix *pixdb = nullptr;
     if (pixHasHighlightRed(pixs, factor, fract, fthresh, &hasred, &ratio, &pixdb))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, hasred);
     ll_push_l_float32(_fun, L, ratio);
     ll_push_Pix(_fun, L, pixdb);
@@ -17855,7 +17855,7 @@ ItalicWords(lua_State *L)
     l_int32 debugflag = ll_opt_boolean(_fun, L, 4);
     Boxa *boxa = nullptr;
     if (pixItalicWords(pixs, boxaw, pixw, &boxa, debugflag))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Boxa(_fun, L, boxa);
     return 1;
 }
@@ -18040,7 +18040,7 @@ LocalExtrema(lua_State *L)
     Pix *pixmin = nullptr;
     Pix *pixmax = nullptr;
     if (pixLocalExtrema(pixs, maxmin, minmax, &pixmin, &pixmax))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixmin);
     ll_push_Pix(_fun, L, pixmax);
     return 2;
@@ -18064,7 +18064,7 @@ LocateBarcodes(lua_State *L)
     Pix *pixb = nullptr;
     Pix *pixm = nullptr;
     if (pixLocateBarcodes(pixs, thresh, &pixb, &pixm))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixb);
     ll_push_Pix(_fun, L, pixm);
     return 2;
@@ -18111,7 +18111,7 @@ MakeAlphaFromMask(lua_State *L)
     Box* box = nullptr;
     Pix* pixd = pixMakeAlphaFromMask(pixs, dist, getbox ? &box : nullptr);
     if (!pixd)
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixd);
     return 1 + (box ? ll_push_Box(_fun, L, box) : 0);
 }
@@ -18229,7 +18229,7 @@ MakeHistoHS(lua_State *L)
     Numa *nahue = nullptr;
     Numa *nasat = nullptr;
     if (pixMakeHistoHS(pixs, factor, &nahue, &nasat))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Numa(_fun, L, nahue);
     ll_push_Numa(_fun, L, nasat);
     return 2;
@@ -18261,7 +18261,7 @@ MakeHistoHV(lua_State *L)
     Numa *nahue = nullptr;
     Numa *naval = nullptr;
     if (pixMakeHistoHV(pixs, factor, &nahue, &naval))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Numa(_fun, L, nahue);
     ll_push_Numa(_fun, L, naval);
     return 2;
@@ -18293,7 +18293,7 @@ MakeHistoSV(lua_State *L)
     Numa *nasat = nullptr;
     Numa *naval = nullptr;
     if (pixMakeHistoSV(pixs, factor, &nasat, &naval))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Numa(_fun, L, nasat);
     ll_push_Numa(_fun, L, naval);
     return 2;
@@ -18322,18 +18322,18 @@ MakeMaskFromLUT(lua_State *L)
     l_int32* tab = nullptr;
     tab = ll_calloc<l_int32>(_fun, L, 256);
     if (ll_isstring(_fun, L, 2)) {
-        size_t len, i;
-        const char* lut = ll_check_lstring(_fun, L, 2, &len);
-        /* expand lookup-table (lut) to array of l_int32 (tab) */
-        for (i = 0; i < 256 && i < len; i++)
-            tab[i] = lut[i];
+	size_t len, i;
+	const char* lut = ll_check_lstring(_fun, L, 2, &len);
+	/* expand lookup-table (lut) to array of l_int32 (tab) */
+	for (i = 0; i < 256 && i < len; i++)
+	    tab[i] = lut[i];
     } else {
-        l_int32 len, i;
-        l_int32 *iarray = ll_unpack_Iarray(_fun, L, 2, &len);
-        /* copy integer array (iarray) to array of l_int32 (tab) */
-        for (i = 0; i < 256 && i < len; i++)
-            tab[i] = iarray[i];
-        ll_free(iarray);
+	l_int32 len, i;
+	l_int32 *iarray = ll_unpack_Iarray(_fun, L, 2, &len);
+	/* copy integer array (iarray) to array of l_int32 (tab) */
+	for (i = 0; i < 256 && i < len; i++)
+	    tab[i] = iarray[i];
+	ll_free(iarray);
     }
     ll_push_Pix(_fun, L, pixMakeMaskFromLUT(pixs, tab));
     ll_free(tab);
@@ -18534,7 +18534,7 @@ MaskConnComp(lua_State *L)
     l_int32 connectivity = ll_check_l_int32(_fun, L, 2);
     Boxa *boxa = nullptr;
     if (pixMaskConnComp(pixs, connectivity, &boxa))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Boxa(_fun, L, boxa);
     return 1;
 }
@@ -18740,7 +18740,7 @@ MeanInRectangle(lua_State *L)
     Pix *pixma = ll_check_Pix(_fun, L, 3);
     l_float32 val = 0;
     if (pixMeanInRectangle(pixs, box, pixma, &val))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, val);
     return 1;
 }
@@ -18813,7 +18813,7 @@ MeasureEdgeSmoothness(lua_State *L)
     l_float32 rpl = 0;
     const char *debugfile = ll_check_string(_fun, L, 8);
     if (pixMeasureEdgeSmoothness(pixs, side, minjump, minreversal, &jpl, &jspl, &rpl, debugfile))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, jpl);
     ll_push_l_float32(_fun, L, jspl);
     ll_push_l_float32(_fun, L, rpl);
@@ -18837,7 +18837,7 @@ MeasureSaturation(lua_State *L)
     l_int32 factor = ll_check_l_int32(_fun, L, 2);
     l_float32 sat = 0;
     if (pixMeasureSaturation(pixs, factor, &sat))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, sat);
     return 1;
 }
@@ -19063,7 +19063,7 @@ MinMaxNearLine(lua_State *L)
     l_float32 minave = 0;
     l_float32 maxave = 0;
     if (pixMinMaxNearLine(pixs, x1, y1, x2, y2, dist, direction, &namin, &namax, &minave, &maxave))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Numa(_fun, L, namin);
     ll_push_Numa(_fun, L, namax);
     ll_push_l_float32(_fun, L, minave);
@@ -19102,7 +19102,7 @@ MinMaxTiles(lua_State *L)
     Pix *pixmin = nullptr;
     Pix *pixmax = nullptr;
     if (pixMinMaxTiles(pixs, sx, sy, mindiff, smoothx, smoothy, &pixmin, &pixmax))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixmin);
     ll_push_Pix(_fun, L, pixmax);
     return 2;
@@ -19188,7 +19188,7 @@ MirrorDetect(lua_State *L)
     l_int32 debug = ll_opt_boolean(_fun, L, 3, FALSE);
     l_float32 conf = 0;
     if (pixMirrorDetect(pixs, &conf, mincount, debug))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, conf);
     return 1;
 }
@@ -19217,7 +19217,7 @@ MirrorDetectDwa(lua_State *L)
     l_int32 debug = ll_opt_boolean(_fun, L, 3, FALSE);
     l_float32 conf = 0;
     if (pixMirrorDetectDwa(pixs, &conf, mincount, debug))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, conf);
     return 1;
 }
@@ -19652,7 +19652,7 @@ MorphSequenceByComponent(lua_State *L)
     l_int32 minh = ll_check_l_int32(_fun, L, 5);
     Boxa *boxa = nullptr;
     if (pixMorphSequenceByComponent(pixs, sequence, connectivity, minw, minh, &boxa))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Boxa(_fun, L, boxa);
     return 1;
 }
@@ -19696,7 +19696,7 @@ MorphSequenceByRegion(lua_State *L)
     l_int32 minh = ll_check_l_int32(_fun, L, 6);
     Boxa *boxa = nullptr;
     if (pixMorphSequenceByRegion(pixs, pixm, sequence, connectivity, minw, minh, &boxa))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Boxa(_fun, L, boxa);
     return 1;
 }
@@ -19984,7 +19984,7 @@ NumColors(lua_State *L)
     l_int32 factor = ll_check_l_int32(_fun, L, 2);
     l_int32 ncolors = 0;
     if (pixNumColors(pixs, factor, &ncolors))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, ncolors);
     return 1;
 }
@@ -20027,7 +20027,7 @@ NumSignificantGrayColors(lua_State *L)
     l_int32 factor = ll_check_l_int32(_fun, L, 5);
     l_int32 ncolors = 0;
     if (pixNumSignificantGrayColors(pixs, darkthresh, lightthresh, minfract, factor, &ncolors))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, ncolors);
     return 1;
 }
@@ -20059,7 +20059,7 @@ NumberOccupiedOctcubes(lua_State *L)
     l_float32 minfract = ll_check_l_float32(_fun, L, 4);
     l_int32 ncolors = 0;
     if (pixNumberOccupiedOctcubes(pix, level, mincount, minfract, &ncolors))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, ncolors);
     return 1;
 }
@@ -20084,7 +20084,7 @@ OctcubeHistogram(lua_State *L)
     l_int32 level = ll_check_l_int32(_fun, L, 2);
     l_int32 ncolors = 0;
     if (pixOctcubeHistogram(pixs, level, &ncolors))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, ncolors);
     return 1;
 }
@@ -20734,7 +20734,7 @@ OrientCorrect(lua_State *L)
     l_float32 leftconf = 0;
     l_int32 rotation = 0;
     if (pixOrientCorrect(pixs, minupconf, minratio, &upconf, &leftconf, &rotation, debug))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, upconf);
     ll_push_l_float32(_fun, L, leftconf);
     ll_push_l_int32(_fun, L, rotation);
@@ -20807,7 +20807,7 @@ OrientDetect(lua_State *L)
     l_float32 upconf = 0;
     l_float32 leftconf = 0;
     if (pixOrientDetect(pixs, &upconf, &leftconf, mincount, debug))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, upconf);
     ll_push_l_float32(_fun, L, leftconf);
     return 2;
@@ -20842,7 +20842,7 @@ OrientDetectDwa(lua_State *L)
     l_float32 upconf = 0;
     l_float32 leftconf = 0;
     if (pixOrientDetectDwa(pixs, &upconf, &leftconf, mincount, debug))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, upconf);
     ll_push_l_float32(_fun, L, leftconf);
     return 2;
@@ -20892,7 +20892,7 @@ OtsuAdaptiveThreshold(lua_State *L)
     Pix *pixth = nullptr;
     Pix *pixd = nullptr;
     if (pixOtsuAdaptiveThreshold(pixs, sx, sy, smoothx, smoothy, scorefract, &pixth, &pixd))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixth);
     ll_push_Pix(_fun, L, pixd);
     return 2;
@@ -21269,7 +21269,7 @@ ProcessBarcodes(lua_State *L)
     l_int32 debugflag = ll_opt_boolean(_fun, L, 4);
     Sarray *saw = nullptr;
     if (pixProcessBarcodes(pixs, format, method, &saw, debugflag))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_pack_Sarray(_fun, L, saw);
     return 1;
 }
@@ -21657,7 +21657,7 @@ QuadtreeMean(lua_State *L)
     Pix *pix_ma = ll_check_Pix(_fun, L, 3);
     FPixa *fpixa = nullptr;
     if (pixQuadtreeMean(pixs, nlevels, pix_ma, &fpixa))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_FPixa(_fun, L, fpixa);
     return 1;
 }
@@ -21689,7 +21689,7 @@ QuadtreeVariance(lua_State *L)
     FPixa *fpixa_v = nullptr;
     FPixa *fpixa_rv = nullptr;
     if (pixQuadtreeVariance(pixs, nlevels, pix_ma, dpix_msa, &fpixa_v, &fpixa_rv))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_FPixa(_fun, L, fpixa_v);
     ll_push_FPixa(_fun, L, fpixa_rv);
     return 2;
@@ -21761,7 +21761,7 @@ QuantizeIfFewColors(lua_State *L)
     l_int32 octlevel = ll_opt_l_int32(_fun, L, 3, 3);
     Pix *pixd = nullptr;
     if (pixQuantizeIfFewColors(pixs, maxcolors, mingraycolors, octlevel, &pixd))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_Pix(_fun, L, pixd);
 }
 
@@ -22071,7 +22071,7 @@ RankHaustest(lua_State *L)
     l_float32 rank = ll_check_l_float32(_fun, L, 11);
     l_int32 tab8 = 0;
     if (pixRankHaustest(pix1, pix2, pix3, pix4, delx, dely, maxdiffw, maxdiffh, area1, area3, rank, &tab8))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, tab8);
     return 1;
 }
@@ -22433,7 +22433,7 @@ ReadBarcodes(lua_State *L)
     l_int32 debugflag = ll_opt_boolean(_fun, L, 4);
     Sarray *saw = nullptr;
     if (pixReadBarcodes(pixa, format, method, &saw, debugflag))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_pack_Sarray(_fun, L, saw);
     return 1;
 }
@@ -22475,7 +22475,7 @@ ReadFromMultipageTiff(lua_State *L)
     const char *fname = ll_check_string(_fun, L, 1);
     size_t offset = 0;
     if (pixReadFromMultipageTiff(fname, &offset))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_size_t(_fun, L, offset);
     return 1;
 }
@@ -22505,7 +22505,7 @@ ReadHeader(lua_State *L)
     l_int32 spp = 0;
     l_int32 iscmap = 0;
     if (pixReadHeader(filename, &format, &w, &h, &bps, &spp, &iscmap))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, format);
     ll_push_l_int32(_fun, L, w);
     ll_push_l_int32(_fun, L, h);
@@ -22548,7 +22548,7 @@ ReadHeaderMem(lua_State *L)
     l_int32 spp = 0;
     l_int32 iscmap = 0;
     if (pixReadHeaderMem(data, len, &format, &w, &h, &bps, &spp, &iscmap))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_string(_fun, L, ll_string_input_format(format));
     ll_push_l_int32(_fun, L, w);
     ll_push_l_int32(_fun, L, h);
@@ -22692,7 +22692,7 @@ ReadJpeg(lua_State *L)
     l_int32 hint = ll_check_hint(_fun, L, 4);
     l_int32 nwarn = 0;
     if (pixReadJpeg(filename, cmapflag, reduction, &nwarn, hint))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, nwarn);
     return 1;
 }
@@ -22775,7 +22775,7 @@ ReadMemFromMultipageTiff(lua_State *L)
     const l_uint8* cdata = reinterpret_cast<const l_uint8 *>(str);
     size_t offset = 0;
     if (pixReadMemFromMultipageTiff(cdata, size, &offset))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_size_t(_fun, L, offset);
     return 1;
 }
@@ -22870,7 +22870,7 @@ ReadMemJpeg(lua_State *L)
     l_int32 hint = ll_check_l_int32(_fun, L, 4);
     l_int32 nwarn = 0;
     if (pixReadMemJpeg(data, size, cmflag, reduction, &nwarn, hint))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, nwarn);
     return 1;
 }
@@ -23111,7 +23111,7 @@ ReadStreamJpeg(lua_State *L)
     l_int32 nwarn = 0;
     l_int32 hint = ll_check_l_int32(_fun, L, 5);
     if (pixReadStreamJpeg(stream->f, cmapflag, reduction, &nwarn, hint))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, nwarn);
     return 1;
 }
@@ -24261,7 +24261,7 @@ RenderPlotFromNuma(lua_State *L)
     l_int32 max = ll_check_l_int32(_fun, L, 5);
     l_uint32 color = ll_check_l_uint32(_fun, L, 6);
     if (pixRenderPlotFromNuma(&pix, na, plotloc, linewidth, max, color))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pix);
     return 1;
 }
@@ -24300,7 +24300,7 @@ RenderPlotFromNumaGen(lua_State *L)
     l_int32 drawref = ll_check_l_int32(_fun, L, 7);
     l_uint32 color = ll_check_l_uint32(_fun, L, 8);
     if (pixRenderPlotFromNumaGen(&pix, na, orient, linewidth, refpos, max, drawref, color))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pix);
     return 1;
 }
@@ -24330,7 +24330,7 @@ RenderPolygon(lua_State *L)
     l_int32 xmin = 0;
     l_int32 ymin = 0;
     if (pixRenderPolygon(ptas, width, &xmin, &ymin))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, xmin);
     ll_push_l_int32(_fun, L, ymin);
     return 2;
@@ -25349,13 +25349,13 @@ RowStats(lua_State *L)
     Numa *var = nullptr;
     Numa *rootvar = nullptr;
     if (pixRowStats(pixs, box, &mean, &median, &mode, &modecount, &var, &rootvar))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_Numa(_fun, L, mean) +
-            ll_push_Numa(_fun, L, median) +
-            ll_push_Numa(_fun, L, mode) +
-            ll_push_Numa(_fun, L, modecount) +
-            ll_push_Numa(_fun, L, var) +
-            ll_push_Numa(_fun, L, rootvar);
+	    ll_push_Numa(_fun, L, median) +
+	    ll_push_Numa(_fun, L, mode) +
+	    ll_push_Numa(_fun, L, modecount) +
+	    ll_push_Numa(_fun, L, var) +
+	    ll_push_Numa(_fun, L, rootvar);
 }
 
 /**
@@ -25462,7 +25462,7 @@ SauvolaBinarize(lua_State *L)
     Pix *pixth = nullptr;
     Pix *pixd = nullptr;
     if (pixSauvolaBinarize(pixs, whsize, factor, addborder, &pixm, &pixsd, &pixth, &pixd))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixm);
     ll_push_Pix(_fun, L, pixsd);
     ll_push_Pix(_fun, L, pixth);
@@ -25510,144 +25510,10 @@ SauvolaBinarizeTiled(lua_State *L)
     Pix *pixth = nullptr;
     Pix *pixd = nullptr;
     if (pixSauvolaBinarizeTiled(pixs, whsize, factor, nx, ny, &pixth, &pixd))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixth);
     ll_push_Pix(_fun, L, pixd);
     return 2;
-}
-
-/**
- * \brief Brief comment goes here.
- * <pre>
- * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is expected to be a Pixa* (pixa).
- * Arg #3 is expected to be a l_float32 (scalefactor).
- * Arg #4 is expected to be a l_int32 (newrow).
- * Arg #5 is expected to be a l_int32 (space).
- * Arg #6 is expected to be a l_int32 (dp).
- * </pre>
- * \param L Lua state.
- * \return 1 l_int32 on the Lua stack.
- */
-static int
-SaveTiled(lua_State *L)
-{
-    LL_FUNC("SaveTiled");
-    Pix *pixs = ll_check_Pix(_fun, L, 1);
-    Pixa *pixa = ll_check_Pixa(_fun, L, 2);
-    l_float32 scalefactor = ll_check_l_float32(_fun, L, 3);
-    l_int32 newrow = ll_check_l_int32(_fun, L, 4);
-    l_int32 space = ll_check_l_int32(_fun, L, 5);
-    l_int32 dp = ll_check_l_int32(_fun, L, 6);
-    l_int32 result = pixSaveTiled(pixs, pixa, scalefactor, newrow, space, dp);
-    return ll_push_l_int32(_fun, L, result);
-}
-
-/**
- * \brief Brief comment goes here.
- * <pre>
- * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is expected to be a Pixa* (pixa).
- * Arg #3 is expected to be a l_float32 (scalefactor).
- * Arg #4 is expected to be a l_int32 (newrow).
- * Arg #5 is expected to be a l_int32 (space).
- * Arg #6 is expected to be a l_int32 (linewidth).
- * Arg #7 is expected to be a l_int32 (dp).
- *
- * Leptonica's Notes:
- *      (1) Before calling this function for the first time, use
- *          pixaCreate() to make the %pixa that will accumulate the pix.
- *          This is passed in each time pixSaveTiled() is called.
- *      (2) %scalefactor scales the input image.  After scaling and
- *          possible depth conversion, the image is saved in the input
- *          pixa, along with a box that specifies the location to
- *          place it when tiled later.  Disable saving the pix by
- *          setting %scalefactor == 0.0.
- *      (3) %newrow and %space specify the location of the new pix
- *          with respect to the last one(s) that were entered.
- *      (4) %dp specifies the depth at which all pix are saved.  It can
- *          be only 8 or 32 bpp.  Any colormap is removed.  This is only
- *          used at the first invocation.
- *      (5) This function uses two variables from call to call.
- *          If they were static, the function would not be .so or thread
- *          safe, and furthermore, there would be interference with two or
- *          more pixa accumulating images at a time.  Consequently,
- *          we use the first pix in the pixa to store and obtain both
- *          the depth and the current position of the bottom (one pixel
- *          below the lowest image raster line when laid out using
- *          the boxa).  The bottom variable is stored in the input format
- *          field, which is the only field available for storing an int.
- * </pre>
- * \param L Lua state.
- * \return 1 l_int32 on the Lua stack.
- */
-static int
-SaveTiledOutline(lua_State *L)
-{
-    LL_FUNC("SaveTiledOutline");
-    Pix *pixs = ll_check_Pix(_fun, L, 1);
-    Pixa *pixa = ll_check_Pixa(_fun, L, 2);
-    l_float32 scalefactor = ll_check_l_float32(_fun, L, 3);
-    l_int32 newrow = ll_check_l_int32(_fun, L, 4);
-    l_int32 space = ll_check_l_int32(_fun, L, 5);
-    l_int32 linewidth = ll_check_l_int32(_fun, L, 6);
-    l_int32 dp = ll_check_l_int32(_fun, L, 7);
-    l_int32 result = pixSaveTiledOutline(pixs, pixa, scalefactor, newrow, space, linewidth, dp);
-    return ll_push_l_int32(_fun, L, result);
-}
-
-/**
- * \brief Brief comment goes here.
- * <pre>
- * Arg #1 (i.e. self) is expected to be a Pix* (pixs).
- * Arg #2 is expected to be a Pixa* (pixa).
- * Arg #3 is expected to be a l_int32 (outwidth).
- * Arg #4 is expected to be a l_int32 (newrow).
- * Arg #5 is expected to be a l_int32 (space).
- * Arg #6 is expected to be a l_int32 (linewidth).
- * Arg #7 is expected to be a Bmf* (bmf).
- * Arg #8 is expected to be a string (textstr).
- * Arg #9 is expected to be a l_uint32 (val).
- * Arg #10 is expected to be a string describing the location (location).
- *
- * Leptonica's Notes:
- *      (1) Before calling this function for the first time, use
- *          pixaCreate() to make the %pixa that will accumulate the pix.
- *          This is passed in each time pixSaveTiled() is called.
- *      (2) %outwidth is the scaled width.  After scaling, the image is
- *          saved in the input pixa, along with a box that specifies
- *          the location to place it when tiled later.  Disable saving
- *          the pix by setting %outwidth == 0.
- *      (3) %newrow and %space specify the location of the new pix
- *          with respect to the last one(s) that were entered.
- *      (4) All pix are saved as 32 bpp RGB.
- *      (5) If both %bmf and %textstr are defined, this generates a pix
- *          with the additional text; otherwise, no text is written.
- *      (6) The text is written before scaling, so it is properly
- *          antialiased in the scaled pix.  However, if the pix on
- *          different calls have different widths, the size of the
- *          text will vary.
- *      (7) See pixSaveTiledOutline() for other implementation details.
- * </pre>
- * \param L Lua state.
- * \return 1 l_int32 on the Lua stack.
- */
-static int
-SaveTiledWithText(lua_State *L)
-{
-    LL_FUNC("SaveTiledWithText");
-    Pix *pixs = ll_check_Pix(_fun, L, 1);
-    Pixa *pixa = ll_check_Pixa(_fun, L, 2);
-    l_int32 outwidth = ll_check_l_int32(_fun, L, 3);
-    l_int32 newrow = ll_check_l_int32(_fun, L, 4);
-    l_int32 space = ll_check_l_int32(_fun, L, 5);
-    l_int32 linewidth = ll_check_l_int32(_fun, L, 6);
-    Bmf *bmf = ll_check_Bmf(_fun, L, 7);
-    const char *textstr = ll_check_string(_fun, L, 8);
-    l_uint32 val = ll_check_color_index(_fun, L, 9, pixs);
-    l_int32 location = ll_check_location(_fun, L, 10);
-    l_int32 result = pixSaveTiledWithText(pixs, pixa, outwidth, newrow, space, linewidth, bmf, textstr, val, location);
-    return ll_push_l_int32(_fun, L, result);
 }
 
 /**
@@ -27022,7 +26888,7 @@ ScanForEdge(lua_State *L)
     l_int32 scanflag = ll_check_from_side(_fun, L, 7);
     l_int32 loc = 0;
     if (pixScanForEdge(pixs, box, lowthresh, highthresh, maxwidth, factor, scanflag, &loc))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, loc);
     return 1;
 }
@@ -27051,7 +26917,7 @@ ScanForForeground(lua_State *L)
     l_int32 scanflag = ll_check_from_side(_fun, L, 3);
     l_int32 loc = 0;
     if (pixScanForForeground(pixs, box, scanflag, &loc))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, loc);
     return 1;
 }
@@ -27109,7 +26975,7 @@ SearchBinaryMaze(lua_State *L)
     l_int32 yf = ll_check_l_int32(_fun, L, 5);
     Pix *pixd = nullptr;
     if (pixSearchBinaryMaze(pixs, xi, yi, xf, yf, &pixd))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixd);
     return 1;
 }
@@ -27137,7 +27003,7 @@ SearchGrayMaze(lua_State *L)
     l_int32 yf = ll_check_l_int32(_fun, L, 5);
     Pix *pixd = nullptr;
     if (pixSearchGrayMaze(pixs, xi, yi, xf, yf, &pixd))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixd);
     return 1;
 }
@@ -27726,7 +27592,7 @@ SelectByAreaFraction(lua_State *L)
     l_int32 type = ll_check_l_int32(_fun, L, 4);
     l_int32 changed = 0;
     if (pixSelectByAreaFraction(pixs, thresh, connectivity, type, &changed))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, changed);
     return 1;
 }
@@ -27764,7 +27630,7 @@ SelectByPerimSizeRatio(lua_State *L)
     l_int32 type = ll_check_l_int32(_fun, L, 4);
     l_int32 changed = 0;
     if (pixSelectByPerimSizeRatio(pixs, thresh, connectivity, type, &changed))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, changed);
     return 1;
 }
@@ -27801,7 +27667,7 @@ SelectByPerimToAreaRatio(lua_State *L)
     l_int32 type = ll_check_l_int32(_fun, L, 4);
     l_int32 changed = 0;
     if (pixSelectByPerimToAreaRatio(pixs, thresh, connectivity, type, &changed))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, changed);
     return 1;
 }
@@ -27843,7 +27709,7 @@ SelectBySize(lua_State *L)
     l_int32 relation = ll_check_l_int32(_fun, L, 6);
     l_int32 changed = 0;
     if (pixSelectBySize(pixs, width, height, connectivity, type, relation, &changed))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, changed);
     return 1;
 }
@@ -27879,7 +27745,7 @@ SelectByWidthHeightRatio(lua_State *L)
     l_int32 type = ll_check_l_int32(_fun, L, 4);
     l_int32 changed = 0;
     if (pixSelectByWidthHeightRatio(pixs, thresh, connectivity, type, &changed))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, changed);
     return 1;
 }
@@ -27899,7 +27765,7 @@ SelectDefaultPdfEncoding(lua_State *L)
     Pix *pix = ll_check_Pix(_fun, L, 1);
     l_int32 type = L_G4_ENCODE;
     if (selectDefaultPdfEncoding(pix, &type))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     lua_pushstring(L, ll_string_encoding(type));
     return 1;
 }
@@ -27969,7 +27835,7 @@ SelectMinInConnComp(lua_State *L)
     Pta *pta = nullptr;
     Numa *nav = nullptr;
     if (pixSelectMinInConnComp(pixs, pixm, &pta, &nav))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pta(_fun, L, pta);
     ll_push_Numa(_fun, L, nav);
     return 2;
@@ -28014,7 +27880,7 @@ SelectedLocalExtrema(lua_State *L)
     Pix *pixmin = nullptr;
     Pix *pixmax = nullptr;
     if (pixSelectedLocalExtrema(pixs, mindist, &pixmin, &pixmax))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixmin);
     ll_push_Pix(_fun, L, pixmax);
     return 2;
@@ -28073,7 +27939,7 @@ SerializeToMemory(lua_State *L)
     l_uint32 *data = nullptr;
     size_t nbytes = 0;
     if (pixSerializeToMemory(pixs, &data, &nbytes))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_pack_Uarray(_fun, L, data, static_cast<l_int32>(nbytes / sizeof(l_uint32)));
 }
 
@@ -28861,7 +28727,7 @@ SetPixelColumn(lua_State *L)
     l_int32 i;
     l_int32 result = 0;
     for (i = 0; i < rows && i < n; i++)
-        colvect[i] = tblvect[i];
+	colvect[i] = tblvect[i];
     result = pixSetPixelColumn(pixd, col, colvect);
     ll_free(tblvect);
     ll_free(colvect);
@@ -29158,7 +29024,7 @@ SetTextblock(lua_State *L)
     l_int32 firstindent = ll_check_l_int32(_fun, L, 8);
     l_int32 overflow = 0;
     if (pixSetTextblock(pixs, bmf, textstr, val, x0, y0, wtext, firstindent, &overflow))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, overflow);
     return 1;
 }
@@ -29203,7 +29069,7 @@ SetTextline(lua_State *L)
     l_int32 width = 0;
     l_int32 overflow = 0;
     if (pixSetTextline(pixs, bmf, textstr, val, x0, y0, &width, &overflow))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, width);
     ll_push_l_int32(_fun, L, overflow);
     return 2;
@@ -29418,7 +29284,7 @@ SetupByteProcessing(lua_State *L)
     l_int32 w = 0;
     l_int32 h = 0;
     if (pixSetupByteProcessing(pix, &w, &h))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, w);
     ll_push_l_int32(_fun, L, h);
     return 2;
@@ -29830,7 +29696,7 @@ SplitComponentWithProfile(lua_State *L)
     l_int32 mindel = ll_check_l_int32(_fun, L, 3);
     Pix *pixdebug = nullptr;
     if (pixSplitComponentWithProfile(pixs, delta, mindel, &pixdebug))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixdebug);
     return 1;
 }
@@ -29860,10 +29726,10 @@ SplitDistributionFgBg(lua_State *L)
     l_int32 fgval;
     l_int32 bgval;
     if (pixSplitDistributionFgBg(pixs, scorefract, factor, &thresh, &fgval, &bgval, nullptr))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_int32(_fun, L, thresh) +
-            ll_push_l_int32(_fun, L, fgval) +
-            ll_push_l_int32(_fun, L, bgval);
+	    ll_push_l_int32(_fun, L, fgval) +
+	    ll_push_l_int32(_fun, L, bgval);
 }
 
 /**
@@ -29944,10 +29810,10 @@ SplitIntoCharacters(lua_State *L)
     Pixa *pixa = nullptr;
     Pix *pixdebug = nullptr;
     if (pixSplitIntoCharacters(pixs, minw, minh, &boxa, &pixa, &pixdebug))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_Boxa(_fun, L, boxa) +
-            ll_push_Pixa(_fun, L, pixa) +
-            ll_push_Pix(_fun, L, pixdebug);
+	    ll_push_Pixa(_fun, L, pixa) +
+	    ll_push_Pix(_fun, L, pixdebug);
 }
 
 /**
@@ -30305,7 +30171,7 @@ TestClipToForeground(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 canclip = 0;
     if (pixTestClipToForeground(pixs, &canclip))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, canclip);
     return 1;
 }
@@ -30367,7 +30233,7 @@ TestForSimilarity(lua_State *L)
     l_int32 similar = 0;
     l_int32 details = ll_check_l_int32(_fun, L, 8);
     if (pixTestForSimilarity(pix1, pix2, factor, mindiff, maxfract, maxave, &similar, details))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, similar);
     return 1;
 }
@@ -30574,7 +30440,7 @@ ThresholdByConnComp(lua_State *L)
     l_int32 globthresh = 0;
     Pix *pixd = nullptr;
     if (pixThresholdByConnComp(pixs, pixm, start, end, incr, thresh48, threshdiff, &globthresh, &pixd, debugflag))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, globthresh);
     ll_push_Pix(_fun, L, pixd);
     return 2;
@@ -30599,9 +30465,9 @@ ThresholdForFgBg(lua_State *L)
     l_int32 fgval;
     l_int32 bgval;
     if (pixThresholdForFgBg(pixs, factor, thresh, &fgval, &bgval))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_l_int32(_fun, L, fgval) +
-            ll_push_l_int32(_fun, L, bgval);
+	    ll_push_l_int32(_fun, L, bgval);
 }
 
 /**
@@ -30715,7 +30581,7 @@ ThresholdPixelSum(lua_State *L)
     l_int32 thresh = ll_check_l_int32(_fun, L, 2);
     l_int32 above = 0;
     if (pixThresholdPixelSum(pixs, thresh, &above, nullptr))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     lua_pushboolean(L, above);
     return 1;
 }
@@ -30775,7 +30641,7 @@ ThresholdSpreadNorm(lua_State *L)
     Pix *pixb = nullptr;
     Pix *pixd = nullptr;
     if (pixThresholdSpreadNorm(pixs, filtertype, edgethresh, smoothx, smoothy, gamma, minval, maxval, targetthresh, &pixth, &pixb, &pixd))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixth);
     ll_push_Pix(_fun, L, pixb);
     ll_push_Pix(_fun, L, pixd);
@@ -31026,7 +30892,7 @@ TilingGetCount(lua_State *L)
     l_int32 nx = 0;
     l_int32 ny = 0;
     if (pixTilingGetCount(pt, &nx, &ny))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, nx);
     ll_push_l_int32(_fun, L, ny);
     return 2;
@@ -31048,7 +30914,7 @@ TilingGetSize(lua_State *L)
     l_int32 w = 0;
     l_int32 h = 0;
     if (pixTilingGetSize(pt, &w, &h))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, w);
     ll_push_l_int32(_fun, L, h);
     return 2;
@@ -31559,7 +31425,7 @@ UpDownDetect(lua_State *L)
     l_int32 debug = ll_opt_boolean(_fun, L, 3, FALSE);
     l_float32 conf = 0;
     if (pixUpDownDetect(pixs, &conf, mincount, debug))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, conf);
     return 1;
 }
@@ -31595,7 +31461,7 @@ UpDownDetectDwa(lua_State *L)
     l_int32 debug = ll_opt_boolean(_fun, L, 3, FALSE);
     l_float32 conf = 0;
     if (pixUpDownDetectDwa(pixs, &conf, mincount, debug))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, conf);
     return 1;
 }
@@ -31647,7 +31513,7 @@ UpDownDetectGeneral(lua_State *L)
     l_int32 debug = ll_opt_boolean(_fun, L, 4, FALSE);
     l_float32 conf = 0;
     if (pixUpDownDetectGeneral(pixs, &conf, mincount, npixels, debug))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, conf);
     return 1;
 }
@@ -31676,7 +31542,7 @@ UpDownDetectGeneralDwa(lua_State *L)
     l_int32 debug = ll_opt_boolean(_fun, L, 4, FALSE);
     l_float32 conf = 0;
     if (pixUpDownDetectGeneralDwa(pixs, &conf, mincount, npixels, debug))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, conf);
     return 1;
 }
@@ -31705,7 +31571,7 @@ UsesCmapColor(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 color = 0;
     if (pixUsesCmapColor(pixs, &color))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_int32(_fun, L, color);
     return 1;
 }
@@ -31974,7 +31840,7 @@ VarianceInRect(lua_State *L)
     Box *box = ll_opt_Box(_fun, L, 2);
     l_float32 sqrvar = 0.0f;
     if (pixVarianceInRect(pixs, box, &sqrvar))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, sqrvar);
     return 1;
 }
@@ -32007,7 +31873,7 @@ VarianceInRectangle(lua_State *L)
     l_float32 var = 0;
     l_float32 rvar = 0;
     if (pixVarianceInRectangle(pixs, box, pix_ma, dpix_msa, &var, &rvar))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_l_float32(_fun, L, var);
     ll_push_l_float32(_fun, L, rvar);
     return 2;
@@ -32268,7 +32134,7 @@ WindowedStats(lua_State *L)
     FPix *fpixv = nullptr;
     FPix *fpixrv = nullptr;
     if (pixWindowedStats(pixs, wc, hc, hasborder, &pixm, &pixms, &fpixv, &fpixrv))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixm);
     ll_push_Pix(_fun, L, pixms);
     ll_push_FPix(_fun, L, fpixv);
@@ -32306,7 +32172,7 @@ WindowedVariance(lua_State *L)
     FPix *fpixv = nullptr;
     FPix *fpixrv = nullptr;
     if (pixWindowedVariance(pixm, pixms, &fpixv, &fpixrv))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_FPix(_fun, L, fpixv);
     ll_push_FPix(_fun, L, fpixrv);
     return 2;
@@ -32347,7 +32213,7 @@ WindowedVarianceOnLine(lua_State *L)
     l_int32 size = ll_check_l_int32(_fun, L, 6);
     Numa *nad = nullptr;
     if (pixWindowedVarianceOnLine(pixs, dir, loc, c1, c2, size, &nad))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Numa(_fun, L, nad);
     return 1;
 }
@@ -32382,7 +32248,7 @@ WordBoxesByDilation(lua_State *L)
     l_int32 size = 0;
     Pixa *pixadb = ll_check_Pixa(_fun, L, 8);
     if (pixWordBoxesByDilation(pixs, minwidth, minheight, maxwidth, maxheight, &boxa, &size, pixadb))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Boxa(_fun, L, boxa);
     ll_push_l_int32(_fun, L, size);
     return 2;
@@ -32426,7 +32292,7 @@ WordMaskByDilation(lua_State *L)
     l_int32 size = 0;
     Pixa *pixadb = ll_check_Pixa(_fun, L, 4);
     if (pixWordMaskByDilation(pixs, &pixm, &size, pixadb))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_Pix(_fun, L, pixm);
     ll_push_l_int32(_fun, L, size);
     return 2;
@@ -32625,7 +32491,7 @@ WriteMem(lua_State *L)
     l_uint8 *data = nullptr;
     size_t size = 0;
     if (pixWriteMem(&data, &size, pix, format))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     lua_pushlstring(L, reinterpret_cast<const char *>(data), size);
     ll_free(data);
     return 1;
@@ -32658,7 +32524,7 @@ WriteMemBmp(lua_State *L)
     l_uint8 *fdata = nullptr;
     size_t fsize = 0;
     if (pixWriteMemBmp(&fdata, &fsize, pixs))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_bytes(_fun, L, fdata, fsize);
     return 1;
 }
@@ -32682,7 +32548,7 @@ WriteMemGif(lua_State *L)
     l_uint8 *data = nullptr;
     size_t size = 0;
     if (pixWriteMemGif(&data, &size, pix))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_bytes(_fun, L, data, size);
     return 1;
 }
@@ -32715,7 +32581,7 @@ WriteMemJp2k(lua_State *L)
     l_uint8 *data = nullptr;
     size_t size = 0;
     if (pixWriteMemJp2k(&data, &size, pix, quality, nlevels, hint, debug))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_bytes(_fun, L, data, size);
     return 1;
 }
@@ -32744,7 +32610,7 @@ WriteMemJpeg(lua_State *L)
     l_uint8 *data = nullptr;
     size_t size = 0;
     if (pixWriteMemJpeg(&data, &size, pix, quality, progressive))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_bytes(_fun, L, data, size);
     return 1;
 }
@@ -32776,7 +32642,7 @@ WriteMemPS(lua_State *L)
     l_uint8 *data = nullptr;
     size_t size = 0;
     if (pixWriteMemPS(&data, &size, pix, box, res, scale))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_bytes(_fun, L, data, size);
     return 1;
 }
@@ -32801,7 +32667,7 @@ WriteMemPam(lua_State *L)
     l_uint8 *data = nullptr;
     size_t size = 0;
     if (pixWriteMemPam(&data, &size, pix))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_bytes(_fun, L, data, size);
     return 1;
 }
@@ -32832,7 +32698,7 @@ WriteMemPdf(lua_State *L)
     l_uint8 *data = nullptr;
     size_t nbytes = 0;
     if (pixWriteMemPdf(&data, &nbytes, pix, res, title))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_bytes(_fun, L, data, nbytes);
     return 1;
 }
@@ -32858,7 +32724,7 @@ WriteMemPng(lua_State *L)
     l_uint8 *filedata = nullptr;
     size_t filesize = 0;
     if (pixWriteMemPng(&filedata, &filesize, pix, gamma))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_bytes(_fun, L, filedata, filesize);
     return 1;
 }
@@ -32883,7 +32749,7 @@ WriteMemPnm(lua_State *L)
     l_uint8 *data = nullptr;
     size_t size = 0;
     if (pixWriteMemPnm(&data, &size, pix))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_bytes(_fun, L, data, size);
     return 1;
 }
@@ -32904,7 +32770,7 @@ WriteMemSpix(lua_State *L)
     l_uint8 *data = nullptr;
     size_t size = 0;
     if (pixWriteMemSpix(&data, &size, pix))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_bytes(_fun, L, data, size);
     return 1;
 }
@@ -32927,7 +32793,7 @@ WriteMemTiff(lua_State *L)
     l_uint8 *data = nullptr;
     size_t size = 0;
     if (pixWriteMemTiff(&data, &size, pix, comptype))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_bytes(_fun, L, data, size);
     return 1;
 }
@@ -32958,7 +32824,7 @@ WriteMemTiffCustom(lua_State *L)
     l_uint8 *data = nullptr;
     size_t size = 0;
     if (pixWriteMemTiffCustom(&data, &size, pix, comptype, natags, savals, satypes, nasizes))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_bytes(_fun, L, data, size);
     return 1;
 }
@@ -32991,7 +32857,7 @@ WriteMemWebP(lua_State *L)
     l_uint8 *encdata = nullptr;
     size_t encsize = 0;
     if (pixWriteMemWebP(&encdata, &encsize, pixs, quality, lossless))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     ll_push_bytes(_fun, L, encdata, encsize);
     return 2;
 }
@@ -33701,7 +33567,7 @@ Zero(lua_State *L)
     Pix *pixs = ll_check_Pix(_fun, L, 1);
     l_int32 empty = 0;
     if (pixZero(pixs, &empty))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_boolean(_fun, L, empty);
 }
 
@@ -33729,7 +33595,7 @@ Pix *
 ll_opt_Pix(const char *_fun, lua_State *L, int arg)
 {
     if (!ll_isudata(_fun, L, arg, TNAME))
-        return nullptr;
+	return nullptr;
     return ll_check_Pix(_fun, L, arg);
 }
 /**
@@ -33743,7 +33609,7 @@ int
 ll_push_Pix(const char *_fun, lua_State *L, Pix *pix)
 {
     if (!pix)
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, pix);
 }
 /**
@@ -33764,58 +33630,58 @@ ll_new_Pix(lua_State *L)
     l_int32 depth = 1;
 
     if (ll_isudata(_fun, L, 1, LL_PIX)) {
-        pixs = ll_opt_Pix(_fun, L, 1);
-        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
-            TNAME, reinterpret_cast<void *>(pixs));
-        pix = pixCreateTemplate(pixs);
+	pixs = ll_opt_Pix(_fun, L, 1);
+	DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+	    TNAME, reinterpret_cast<void *>(pixs));
+	pix = pixCreateTemplate(pixs);
     }
 
     if (!pix && ll_isudata(_fun, L, 1, LUA_FILEHANDLE)) {
-        stream = ll_check_stream(_fun, L, 1);
-        hint = ll_check_hint(_fun, L, 2, hint);
-        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %s\n", _fun,
-            LUA_FILEHANDLE, reinterpret_cast<void *>(stream),
-            "hint", ll_string_hint(hint));
-        pix = pixReadStream(stream->f, hint);
+	stream = ll_check_stream(_fun, L, 1);
+	hint = ll_check_hint(_fun, L, 2, hint);
+	DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %s\n", _fun,
+	    LUA_FILEHANDLE, reinterpret_cast<void *>(stream),
+	    "hint", ll_string_hint(hint));
+	pix = pixReadStream(stream->f, hint);
     }
 
     if (!pix && ll_isinteger(_fun, L, 1)) {
-        width = ll_opt_l_int32(_fun, L, 1, width);
-        height = ll_opt_l_int32(_fun, L, 2, height);
-        depth = ll_opt_l_int32(_fun, L, 3, depth);
-        DBG(LOG_NEW_PARAM, "%s: create for %s = %d,  %s = %d,  %s = %d\n", _fun,
-            "width", width,
-            "height", height,
-            "depth", depth);
-        pix = pixCreate(width, height, depth);
+	width = ll_opt_l_int32(_fun, L, 1, width);
+	height = ll_opt_l_int32(_fun, L, 2, height);
+	depth = ll_opt_l_int32(_fun, L, 3, depth);
+	DBG(LOG_NEW_PARAM, "%s: create for %s = %d,  %s = %d,  %s = %d\n", _fun,
+	    "width", width,
+	    "height", height,
+	    "depth", depth);
+	pix = pixCreate(width, height, depth);
     }
 
     if (!pix && ll_isstring(_fun, L, 1)) {
-        const char* filename = ll_check_string(_fun, L, 1);
-        DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
-            "filename", filename);
-        pix = pixRead(filename);
+	const char* filename = ll_check_string(_fun, L, 1);
+	DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
+	    "filename", filename);
+	pix = pixRead(filename);
     }
 
     if (!pix && ll_isstring(_fun, L, 1)) {
-        size_t size = 0;
-        const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &size);
-        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %llu\n", _fun,
-            "data", reinterpret_cast<const void *>(data),
-            "size", static_cast<l_uint64>(size));
-        pix = pixReadMem(data, size);
+	size_t size = 0;
+	const l_uint8 *data = ll_check_lbytes(_fun, L, 1, &size);
+	DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %llu\n", _fun,
+	    "data", reinterpret_cast<const void *>(data),
+	    "size", static_cast<l_uint64>(size));
+	pix = pixReadMem(data, size);
     }
 
     if (!pix) {
-        DBG(LOG_NEW_PARAM, "%s: create for %s = %d,  %s = %d,  %s = %d\n", _fun,
-            "width", width,
-            "height", height,
-            "depth", depth);
-        pix = pixCreate(width, height, depth);
+	DBG(LOG_NEW_PARAM, "%s: create for %s = %d,  %s = %d,  %s = %d\n", _fun,
+	    "width", width,
+	    "height", height,
+	    "depth", depth);
+	pix = pixCreate(width, height, depth);
     }
 
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
-        TNAME, reinterpret_cast<void *>(pix));
+	TNAME, reinterpret_cast<void *>(pix));
     return ll_push_Pix(_fun, L, pix);
 }
 /**
@@ -33827,1020 +33693,1017 @@ int
 ll_open_Pix(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                            Destroy},
-        {"__new",                           ll_new_Pix},
-        {"__sub",                           Subtract},
-        {"__bnot",                          Invert},
-        {"__band",                          And},
-        {"__bor",                           Or},
-        {"__bxor",                          Xor},
-        {"__tostring",                      toString},
-        {"AbsDiffByColumn",                 AbsDiffByColumn},
-        {"AbsDiffByRow",                    AbsDiffByRow},
-        {"AbsDiffInRect",                   AbsDiffInRect},
-        {"AbsDiffOnLine",                   AbsDiffOnLine},
-        {"AbsDifference",                   AbsDifference},
-        {"Accumulate",                      Accumulate},
-        {"AccumulateSamples",               AccumulateSamples},
-        {"AdaptThresholdToBinary",          AdaptThresholdToBinary},
-        {"AdaptThresholdToBinaryGen",       AdaptThresholdToBinaryGen},
-        {"AddAlphaTo1bpp",                  AddAlphaTo1bpp},
-        {"AddAlphaToBlend",                 AddAlphaToBlend},
-        {"AddBlackOrWhiteBorder",           AddBlackOrWhiteBorder},
-        {"AddBorder",                       AddBorder},
-        {"AddBorderGeneral",                AddBorderGeneral},
-        {"AddConstantGray",                 AddConstantGray},
-        {"AddContinuedBorder",              AddContinuedBorder},
-        {"AddGaussianNoise",                AddGaussianNoise},
-        {"AddGray",                         AddGray},
-        {"AddGrayColormap8",                AddGrayColormap8},
-        {"AddMinimalGrayColormap8",         AddMinimalGrayColormap8},
-        {"AddMirroredBorder",               AddMirroredBorder},
-        {"AddMixedBorder",                  AddMixedBorder},
-        {"AddRGB",                          AddRGB},
-        {"AddRepeatedBorder",               AddRepeatedBorder},
-        {"AddSingleTextblock",              AddSingleTextblock},
-        {"AddText",                         AddText},
-        {"AddTextlines",                    AddTextlines},
-        {"AdjacentOnPixelInRaster",         AdjacentOnPixelInRaster},
-        {"AddWithIndicator",                AddWithIndicator},
-        {"Affine",                          Affine},
-        {"AffineColor",                     AffineColor},
-        {"AffineGray",                      AffineGray},
-        {"AffinePta",                       AffinePta},
-        {"AffinePtaColor",                  AffinePtaColor},
-        {"AffinePtaGray",                   AffinePtaGray},
-        {"AffinePtaWithAlpha",              AffinePtaWithAlpha},
-        {"AffineSampled",                   AffineSampled},
-        {"AffineSampledPta",                AffineSampledPta},
-        {"AffineSequential",                AffineSequential},
-        {"AlphaBlendUniform",               AlphaBlendUniform},
-        {"AlphaIsOpaque",                   AlphaIsOpaque},
-        {"And",                             And},
-        {"ApplyInvBackgroundGrayMap",       ApplyInvBackgroundGrayMap},
-        {"ApplyInvBackgroundRGBMap",        ApplyInvBackgroundRGBMap},
-        {"ApplyVariableGrayMap",            ApplyVariableGrayMap},
-        {"AssignToNearestColor",            AssignToNearestColor},
-        {"AverageByColumn",                 AverageByColumn},
-        {"AverageByRow",                    AverageByRow},
-        {"AverageInRect",                   AverageInRect},
-        {"AverageIntensityProfile",         AverageIntensityProfile},
-        {"AverageOnLine",                   AverageOnLine},
-        {"BackgroundNorm",                  BackgroundNorm},
-        {"BackgroundNormFlex",              BackgroundNormFlex},
-        {"BackgroundNormGrayArray",         BackgroundNormGrayArray},
-        {"BackgroundNormGrayArrayMorph",    BackgroundNormGrayArrayMorph},
-        {"BackgroundNormMorph",             BackgroundNormMorph},
-        {"BackgroundNormRGBArrays",         BackgroundNormRGBArrays},
-        {"BackgroundNormRGBArraysMorph",    BackgroundNormRGBArraysMorph},
-        {"BackgroundNormSimple",            BackgroundNormSimple},
-        {"BestCorrelation",                 BestCorrelation},
-        {"Bilateral",                       Bilateral},
-        {"BilateralExact",                  BilateralExact},
-        {"BilateralGray",                   BilateralGray},
-        {"BilateralGrayExact",              BilateralGrayExact},
-        {"Bilinear",                        Bilinear},
-        {"BilinearColor",                   BilinearColor},
-        {"BilinearGray",                    BilinearGray},
-        {"BilinearPta",                     BilinearPta},
-        {"BilinearPtaColor",                BilinearPtaColor},
-        {"BilinearPtaGray",                 BilinearPtaGray},
-        {"BilinearPtaWithAlpha",            BilinearPtaWithAlpha},
-        {"BilinearSampled",                 BilinearSampled},
-        {"BilinearSampledPta",              BilinearSampledPta},
-        {"Blend",                           Blend},
-        {"BlendBackgroundToColor",          BlendBackgroundToColor},
-        {"BlendBoxaRandom",                 BlendBoxaRandom},
-        {"BlendCmap",                       BlendCmap},
-        {"BlendColor",                      BlendColor},
-        {"BlendColorByChannel",             BlendColorByChannel},
-        {"BlendGray",                       BlendGray},
-        {"BlendGrayAdapt",                  BlendGrayAdapt},
-        {"BlendGrayInverse",                BlendGrayInverse},
-        {"BlendHardLight",                  BlendHardLight},
-        {"BlendInRect",                     BlendInRect},
-        {"BlendMask",                       BlendMask},
-        {"BlendWithGrayMask",               BlendWithGrayMask},
-        {"BlockBilateralExact",             BlockBilateralExact},
-        {"Blockconv",                       Blockconv},
-        {"BlockconvAccum",                  BlockconvAccum},
-        {"BlockconvGray",                   BlockconvGray},
-        {"BlockconvGrayTile",               BlockconvGrayTile},
-        {"BlockconvGrayUnnormalized",       BlockconvGrayUnnormalized},
-        {"BlockconvTiled",                  BlockconvTiled},
-        {"Blockrank",                       Blockrank},
-        {"Blocksum",                        Blocksum},
-        {"CensusTransform",                 CensusTransform},
-        {"Centroid",                        Centroid},
-        {"Centroid8",                       Centroid8},
-        {"ChangeRefcount",                  ChangeRefcount},
-        {"ChooseOutputFormat",              ChooseOutputFormat},
-        {"CleanBackgroundToWhite",          CleanBackgroundToWhite},
-        {"CleanupByteProcessing",           CleanupByteProcessing},
-        {"ClearAll",                        ClearAll},
-        {"ClearInRect",                     ClearInRect},
-        {"ClearPixel",                      ClearPixel},
-        {"ClipBoxToEdges",                  ClipBoxToEdges},
-        {"ClipBoxToForeground",             ClipBoxToForeground},
-        {"ClipMasked",                      ClipMasked},
-        {"ClipRectangle",                   ClipRectangle},
-        {"ClipRectangles",                  ClipRectangles},
-        {"ClipToForeground",                ClipToForeground},
-        {"Clone",                           Clone},
-        {"Close",                           Close},
-        {"CloseBrick",                      CloseBrick},
-        {"CloseBrickDwa",                   CloseBrickDwa},
-        {"CloseCompBrick",                  CloseCompBrick},
-        {"CloseCompBrickDwa",               CloseCompBrickDwa},
-        {"CloseCompBrickExtendDwa",         CloseCompBrickExtendDwa},
-        {"CloseGeneralized",                CloseGeneralized},
-        {"CloseGray",                       CloseGray},
-        {"CloseGray3",                      CloseGray3},
-        {"CloseSafe",                       CloseSafe},
-        {"CloseSafeBrick",                  CloseSafeBrick},
-        {"CloseSafeCompBrick",              CloseSafeCompBrick},
-        {"ColorContent",                    ColorContent},
-        {"ColorFraction",                   ColorFraction},
-        {"ColorGray",                       ColorGray},
-        {"ColorGrayCmap",                   ColorGrayCmap},
-        {"ColorGrayMasked",                 ColorGrayMasked},
-        {"ColorGrayMaskedCmap",             ColorGrayMaskedCmap},
-        {"ColorGrayRegions",                ColorGrayRegions},
-        {"ColorGrayRegionsCmap",            ColorGrayRegionsCmap},
-        {"ColorMagnitude",                  ColorMagnitude},
-        {"ColorMorph",                      ColorMorph},
-        {"ColorMorphSequence",              ColorMorphSequence},
-        {"ColorSegment",                    ColorSegment},
-        {"ColorSegmentClean",               ColorSegmentClean},
-        {"ColorSegmentCluster",             ColorSegmentCluster},
-        {"ColorSegmentRemoveColors",        ColorSegmentRemoveColors},
-        {"ColorShiftRGB",                   ColorShiftRGB},
-        {"ColorizeGray",                    ColorizeGray},
-        {"ColorsForQuantization",           ColorsForQuantization},
-        {"ColumnStats",                     ColumnStats},
-        {"CombineMasked",                   CombineMasked},
-        {"CombineMaskedGeneral",            CombineMaskedGeneral},
-        {"CompareBinary",                   CompareBinary},
-        {"CompareGray",                     CompareGray},
-        {"CompareGrayByHisto",              CompareGrayByHisto},
-        {"CompareGrayOrRGB",                CompareGrayOrRGB},
-        {"ComparePhotoRegionsByHisto",      ComparePhotoRegionsByHisto},
-        {"CompareRGB",                      CompareRGB},
-        {"CompareRankDifference",           CompareRankDifference},
-        {"CompareTiled",                    CompareTiled},
-        {"CompareWithTranslation",          CompareWithTranslation},
-        {"ComponentFunction",               ComponentFunction},
-        {"ConformsToRectangle",             ConformsToRectangle},
-        {"ConnComp",                        ConnComp},
-        {"ConnCompAreaTransform",           ConnCompAreaTransform},
-        {"ConnCompBB",                      ConnCompBB},
-        {"ConnCompIncrAdd",                 ConnCompIncrAdd},
-        {"ConnCompIncrInit",                ConnCompIncrInit},
-        {"ConnCompPixa",                    ConnCompPixa},
-        {"ConnCompTransform",               ConnCompTransform},
-        {"ContrastNorm",                    ContrastNorm},
-        {"ContrastTRC",                     ContrastTRC},
-        {"ContrastTRCMasked",               ContrastTRCMasked},
-        {"Convert16To8",                    Convert16To8},
-        {"Convert1To16",                    Convert1To16},
-        {"Convert1To2",                     Convert1To2},
-        {"Convert1To2Cmap",                 Convert1To2Cmap},
-        {"Convert1To32",                    Convert1To32},
-        {"Convert1To4",                     Convert1To4},
-        {"Convert1To4Cmap",                 Convert1To4Cmap},
-        {"Convert1To8",                     Convert1To8},
-        {"Convert1To8Cmap",                 Convert1To8Cmap},
-        {"Convert24To32",                   Convert24To32},
-        {"Convert2To8",                     Convert2To8},
-        {"Convert32To16",                   Convert32To16},
-        {"Convert32To24",                   Convert32To24},
-        {"Convert32To8",                    Convert32To8},
-        {"Convert4To8",                     Convert4To8},
-        {"Convert8To16",                    Convert8To16},
-        {"Convert8To2",                     Convert8To2},
-        {"Convert8To32",                    Convert8To32},
-        {"Convert8To4",                     Convert8To4},
-        {"ConvertCmapTo1",                  ConvertCmapTo1},
-        {"ConvertColorToSubpixelRGB",       ConvertColorToSubpixelRGB},
-        {"ConvertForPSWrap",                ConvertForPSWrap},
-        {"ConvertGrayToColormap",           ConvertGrayToColormap},
-        {"ConvertGrayToColormap8",          ConvertGrayToColormap8},
-        {"ConvertGrayToFalseColor",         ConvertGrayToFalseColor},
-        {"ConvertGrayToSubpixelRGB",        ConvertGrayToSubpixelRGB},
-        {"ConvertHSVToRGB",                 ConvertHSVToRGB},
-        {"ConvertLossless",                 ConvertLossless},
-        {"ConvertRGBToBinaryArb",           ConvertRGBToBinaryArb},
-        {"ConvertRGBToColormap",            ConvertRGBToColormap},
-        {"ConvertRGBToGray",                ConvertRGBToGray},
-        {"ConvertRGBToGrayArb",             ConvertRGBToGrayArb},
-        {"ConvertRGBToGrayFast",            ConvertRGBToGrayFast},
-        {"ConvertRGBToGrayMinMax",          ConvertRGBToGrayMinMax},
-        {"ConvertRGBToGraySatBoost",        ConvertRGBToGraySatBoost},
-        {"ConvertRGBToHSV",                 ConvertRGBToHSV},
-        {"ConvertRGBToHue",                 ConvertRGBToHue},
-        {"ConvertRGBToLAB",                 ConvertRGBToLAB},
-        {"ConvertRGBToLuminance",           ConvertRGBToLuminance},
-        {"ConvertRGBToSaturation",          ConvertRGBToSaturation},
-        {"ConvertRGBToValue",               ConvertRGBToValue},
-        {"ConvertRGBToXYZ",                 ConvertRGBToXYZ},
-        {"ConvertRGBToYUV",                 ConvertRGBToYUV},
-        {"ConvertTo1",                      ConvertTo1},
-        {"ConvertTo16",                     ConvertTo16},
-        {"ConvertTo1BySampling",            ConvertTo1BySampling},
-        {"ConvertTo2",                      ConvertTo2},
-        {"ConvertTo32",                     ConvertTo32},
-        {"ConvertTo32BySampling",           ConvertTo32BySampling},
-        {"ConvertTo4",                      ConvertTo4},
-        {"ConvertTo8",                      ConvertTo8},
-        {"ConvertTo8BySampling",            ConvertTo8BySampling},
-        {"ConvertTo8Colormap",              ConvertTo8Colormap},
-        {"ConvertTo8Or32",                  ConvertTo8Or32},
-        {"ConvertToDPix",                   ConvertToDPix},
-        {"ConvertToFPix",                   ConvertToFPix},
-        {"ConvertToPdf",                    ConvertToPdf},
-        {"ConvertToPdfData",                ConvertToPdfData},
-        {"ConvertToPdfDataSegmented",       ConvertToPdfDataSegmented},
-        {"ConvertToPdfSegmented",           ConvertToPdfSegmented},
-        {"ConvertToSubpixelRGB",            ConvertToSubpixelRGB},
-        {"ConvertYUVToRGB",                 ConvertYUVToRGB},
-        {"Convolve",                        Convolve},
-        {"ConvolveRGB",                     ConvolveRGB},
-        {"ConvolveRGBSep",                  ConvolveRGBSep},
-        {"ConvolveSep",                     ConvolveSep},
-        {"ConvolveWithBias",                ConvolveWithBias},
-        {"Copy",                            Copy},
-        {"CopyBorder",                      CopyBorder},
-        {"CopyColormap",                    CopyColormap},
-        {"CopyDimensions",                  CopyDimensions},
-        {"CopyInputFormat",                 CopyInputFormat},
-        {"CopyRGBComponent",                CopyRGBComponent},
-        {"CopyResolution",                  CopyResolution},
-        {"CopySpp",                         CopySpp},
-        {"CopyText",                        CopyText},
-        {"CorrelationBinary",               CorrelationBinary},
-        {"CorrelationScore",                CorrelationScore},
-        {"CorrelationScoreShifted",         CorrelationScoreShifted},
-        {"CorrelationScoreSimple",          CorrelationScoreSimple},
-        {"CorrelationScoreThresholded",     CorrelationScoreThresholded},
-        {"CountArbInRect",                  CountArbInRect},
-        {"CountByColumn",                   CountByColumn},
-        {"CountByRow",                      CountByRow},
-        {"CountConnComp",                   CountConnComp},
-        {"CountPixels",                     CountPixels},
-        {"CountPixelsByColumn",             CountPixelsByColumn},
-        {"CountPixelsByRow",                CountPixelsByRow},
-        {"CountPixelsInRect",               CountPixelsInRect},
-        {"CountPixelsInRow",                CountPixelsInRow},
-        {"CountRGBColors",                  CountRGBColors},
-        {"CountTextColumns",                CountTextColumns},
-        {"Create",                          Create},
-        {"CreateFromPixcomp",               CreateFromPixcomp},
-        {"CreateHeader",                    CreateHeader},
-        {"CreateNoInit",                    CreateNoInit},
-        {"CreateRGBImage",                  CreateRGBImage},
-        {"CreateTemplate",                  CreateTemplate},
-        {"CreateTemplateNoInit",            CreateTemplateNoInit},
-        {"CropAlignedToCentroid",           CropAlignedToCentroid},
-        {"CropToMatch",                     CropToMatch},
-        {"CropToSize",                      CropToSize},
-        {"DarkenGray",                      DarkenGray},
-        {"DecideIfPhotoImage",              DecideIfPhotoImage},
-        {"DecideIfTable",                   DecideIfTable},
-        {"DecideIfText",                    DecideIfText},
-        {"DeserializeFromMemory",           DeserializeFromMemory},
-        {"Deskew",                          Deskew},
-        {"DeskewBarcode",                   DeskewBarcode},
-        {"DeskewBoth",                      DeskewBoth},
-        {"DeskewGeneral",                   DeskewGeneral},
-        {"DeskewLocal",                     DeskewLocal},
-        {"Destroy",                         Destroy},
-        {"DestroyColormap",                 DestroyColormap},
-        {"Dilate",                          Dilate},
-        {"DilateBrick",                     DilateBrick},
-        {"DilateBrickDwa",                  DilateBrickDwa},
-        {"DilateCompBrick",                 DilateCompBrick},
-        {"DilateCompBrickDwa",              DilateCompBrickDwa},
-        {"DilateCompBrickExtendDwa",        DilateCompBrickExtendDwa},
-        {"DilateGray",                      DilateGray},
-        {"DilateGray3",                     DilateGray3},
-        {"Display",                         Display},
-        {"DisplayColorArray",               DisplayColorArray},
-        {"DisplayDiffBinary",               DisplayDiffBinary},
-        {"DisplayHitMissSel",               DisplayHitMissSel},
-        {"DisplayLayersRGBA",               DisplayLayersRGBA},
-        {"DisplayMatchedPattern",           DisplayMatchedPattern},
-        {"DisplayPta",                      DisplayPta},
-        {"DisplayPtaPattern",               DisplayPtaPattern},
-        {"DisplayPtaa",                     DisplayPtaa},
-        {"DisplayPtaaPattern",              DisplayPtaaPattern},
-        {"DisplayWithTitle",                DisplayWithTitle},
-        {"DisplayWrite",                    DisplayWrite},
-        {"DistanceFunction",                DistanceFunction},
-        {"DitherTo2bpp",                    DitherTo2bpp},
-        {"DitherTo2bppSpec",                DitherTo2bppSpec},
-        {"DitherToBinary",                  DitherToBinary},
-        {"DitherToBinarySpec",              DitherToBinarySpec},
-        {"DrawBoxa",                        DrawBoxa},
-        {"DrawBoxaRandom",                  DrawBoxaRandom},
-        {"EmbedForRotation",                EmbedForRotation},
-        {"EndianByteSwap",                  EndianByteSwap},
-        {"EndianByteSwapNew",               EndianByteSwapNew},
-        {"EndianTwoByteSwap",               EndianTwoByteSwap},
-        {"EndianTwoByteSwapNew",            EndianTwoByteSwapNew},
-        {"Equal",                           Equal},
-        {"EqualWithAlpha",                  EqualWithAlpha},
-        {"EqualWithCmap",                   EqualWithCmap},
-        {"EqualizeTRC",                     EqualizeTRC},
-        {"Erode",                           Erode},
-        {"ErodeBrick",                      ErodeBrick},
-        {"ErodeBrickDwa",                   ErodeBrickDwa},
-        {"ErodeCompBrick",                  ErodeCompBrick},
-        {"ErodeCompBrickDwa",               ErodeCompBrickDwa},
-        {"ErodeCompBrickExtendDwa",         ErodeCompBrickExtendDwa},
-        {"ErodeGray",                       ErodeGray},
-        {"ErodeGray3",                      ErodeGray3},
-        {"EstimateBackground",              EstimateBackground},
-        {"ExpandBinaryPower2",              ExpandBinaryPower2},
-        {"ExpandBinaryReplicate",           ExpandBinaryReplicate},
-        {"ExpandReplicate",                 ExpandReplicate},
-        {"ExtendByReplication",             ExtendByReplication},
-        {"ExtractBarcodeCrossings",         ExtractBarcodeCrossings},
-        {"ExtractBarcodeWidths1",           ExtractBarcodeWidths1},
-        {"ExtractBarcodeWidths2",           ExtractBarcodeWidths2},
-        {"ExtractBarcodes",                 ExtractBarcodes},
-        {"ExtractBorderConnComps",          ExtractBorderConnComps},
-        {"ExtractBoundary",                 ExtractBoundary},
-        {"ExtractData",                     ExtractData},
-        {"ExtractOnLine",                   ExtractOnLine},
-        {"ExtractRawTextlines",             ExtractRawTextlines},
-        {"ExtractTextlines",                ExtractTextlines},
-        {"FHMTGen_1",                       FHMTGen_1},
-        {"FMorphopGen_1",                   FMorphopGen_1},
-        {"FMorphopGen_2",                   FMorphopGen_2},
-        {"FadeWithGray",                    FadeWithGray},
-        {"FastTophat",                      FastTophat},
-        {"FewColorsMedianCutQuantMixed",    FewColorsMedianCutQuantMixed},
-        {"FewColorsOctcubeQuant1",          FewColorsOctcubeQuant1},
-        {"FewColorsOctcubeQuant2",          FewColorsOctcubeQuant2},
-        {"FewColorsOctcubeQuantMixed",      FewColorsOctcubeQuantMixed},
-        {"FillBgFromBorder",                FillBgFromBorder},
-        {"FillClosedBorders",               FillClosedBorders},
-        {"FillHolesToBoundingRect",         FillHolesToBoundingRect},
-        {"FillMapHoles",                    FillMapHoles},
-        {"FillPolygon",                     FillPolygon},
-        {"FinalAccumulate",                 FinalAccumulate},
-        {"FinalAccumulateThreshold",        FinalAccumulateThreshold},
-        {"FindAreaFraction",                FindAreaFraction},
-        {"FindAreaFractionMasked",          FindAreaFractionMasked},
-        {"FindAreaPerimRatio",              FindAreaPerimRatio},
-        {"FindBaselines",                   FindBaselines},
-        {"FindColorRegions",                FindColorRegions},
-        {"FindCornerPixels",                FindCornerPixels},
-        {"FindDifferentialSquareSum",       FindDifferentialSquareSum},
-        {"FindEqualValues",                 FindEqualValues},
-        {"FindHistoPeaksHSV",               FindHistoPeaksHSV},
-        {"FindHorizontalRuns",              FindHorizontalRuns},
-        {"FindLargeRectangles",             FindLargeRectangles},
-        {"FindLargestRectangle",            FindLargestRectangle},
-        {"FindMaxHorizontalRunOnLine",      FindMaxHorizontalRunOnLine},
-        {"FindMaxRuns",                     FindMaxRuns},
-        {"FindMaxVerticalRunOnLine",        FindMaxVerticalRunOnLine},
-        {"FindNormalizedSquareSum",         FindNormalizedSquareSum},
-        {"FindOverlapFraction",             FindOverlapFraction},
-        {"FindPageForeground",              FindPageForeground},
-        {"FindPerimSizeRatio",              FindPerimSizeRatio},
-        {"FindPerimToAreaRatio",            FindPerimToAreaRatio},
-        {"FindRectangleComps",              FindRectangleComps},
-        {"FindRepCloseTile",                FindRepCloseTile},
-        {"FindSkew",                        FindSkew},
-        {"FindSkewAndDeskew",               FindSkewAndDeskew},
-        {"FindSkewOrthogonalRange",         FindSkewOrthogonalRange},
-        {"FindSkewSweep",                   FindSkewSweep},
-        {"FindSkewSweepAndSearch",          FindSkewSweepAndSearch},
-        {"FindSkewSweepAndSearchScore",     FindSkewSweepAndSearchScore},
-        {"FindSkewSweepAndSearchScorePivot",FindSkewSweepAndSearchScorePivot},
-        {"FindStrokeLength",                FindStrokeLength},
-        {"FindStrokeWidth",                 FindStrokeWidth},
-        {"FindThreshFgExtent",              FindThreshFgExtent},
-        {"FindVerticalRuns",                FindVerticalRuns},
-        {"FixedOctcubeQuant256",            FixedOctcubeQuant256},
-        {"FixedOctcubeQuantGenRGB",         FixedOctcubeQuantGenRGB},
-        {"FlipFHMTGen",                     FlipFHMTGen},
-        {"FlipLR",                          FlipLR},
-        {"FlipPixel",                       FlipPixel},
-        {"FlipTB",                          FlipTB},
-        {"ForegroundFraction",              ForegroundFraction},
-        {"FractionFgInMask",                FractionFgInMask},
-        {"FreeData",                        FreeData},
-        {"GammaTRC",                        GammaTRC},
-        {"GammaTRCMasked",                  GammaTRCMasked},
-        {"GammaTRCWithAlpha",               GammaTRCWithAlpha},
-        {"GenHalftoneMask",                 GenHalftoneMask},
-        {"GenPhotoHistos",                  GenPhotoHistos},
-        {"GenTextblockMask",                GenTextblockMask},
-        {"GenTextlineMask",                 GenTextlineMask},
-        {"GenerateCIData",                  GenerateCIData},
-        {"GenerateFromPta",                 GenerateFromPta},
-        {"GenerateHalftoneMask",            GenerateHalftoneMask},
-        {"GenerateMaskByBand",              GenerateMaskByBand},
-        {"GenerateMaskByBand32",            GenerateMaskByBand32},
-        {"GenerateMaskByDiscr32",           GenerateMaskByDiscr32},
-        {"GenerateMaskByValue",             GenerateMaskByValue},
-        {"GeneratePtaBoundary",             GeneratePtaBoundary},
-        {"GenerateSelBoundary",             GenerateSelBoundary},
-        {"GenerateSelRandom",               GenerateSelRandom},
-        {"GenerateSelWithRuns",             GenerateSelWithRuns},
-        {"GetAllCCBorders",                 GetAllCCBorders},
-        {"GetAutoFormat",                   GetAutoFormat},
-        {"GetAverageMasked",                GetAverageMasked},
-        {"GetAverageMaskedRGB",             GetAverageMaskedRGB},
-        {"GetAverageTiled",                 GetAverageTiled},
-        {"GetAverageTiledRGB",              GetAverageTiledRGB},
-        {"GetBackgroundGrayMap",            GetBackgroundGrayMap},
-        {"GetBackgroundGrayMapMorph",       GetBackgroundGrayMapMorph},
-        {"GetBackgroundRGBMap",             GetBackgroundRGBMap},
-        {"GetBackgroundRGBMapMorph",        GetBackgroundRGBMapMorph},
-        {"GetBinnedColor",                  GetBinnedColor},
-        {"GetBinnedComponentRange",         GetBinnedComponentRange},
-        {"GetBlackOrWhiteVal",              GetBlackOrWhiteVal},
-        {"GetBlackVal",                     GetBlackVal},
-        {"GetCmapHistogram",                GetCmapHistogram},
-        {"GetCmapHistogramInRect",          GetCmapHistogramInRect},
-        {"GetCmapHistogramMasked",          GetCmapHistogramMasked},
-        {"GetColorAmapHistogram",           GetColorAmapHistogram},
-        {"GetColorHistogram",               GetColorHistogram},
-        {"GetColorHistogramMasked",         GetColorHistogramMasked},
-        {"GetColorNearMaskBoundary",        GetColorNearMaskBoundary},
-        {"GetColormap",                     GetColormap},
-        {"GetColumnStats",                  GetColumnStats},
-        {"GetData",                         GetData},
-        {"GetDepth",                        GetDepth},
-        {"GetDifferenceHistogram",          GetDifferenceHistogram},
-        {"GetDifferenceStats",              GetDifferenceStats},
-        {"GetDimensions",                   GetDimensions},
-        {"GetEdgeProfile",                  GetEdgeProfile},
-        {"GetExtremeValue",                 GetExtremeValue},
-        {"GetGrayHistogram",                GetGrayHistogram},
-        {"GetGrayHistogramInRect",          GetGrayHistogramInRect},
-        {"GetGrayHistogramMasked",          GetGrayHistogramMasked},
-        {"GetGrayHistogramTiled",           GetGrayHistogramTiled},
-        {"GetHeight",                       GetHeight},
-        {"GetInputFormat",                  GetInputFormat},
-        {"GetInvBackgroundMap",             GetInvBackgroundMap},
-        {"GetLastOffPixelInRun",            GetLastOffPixelInRun},
-        {"GetLastOnPixelInRun",             GetLastOnPixelInRun},
-        {"GetLinePtrs",                     GetLinePtrs},
-        {"GetLocalSkewAngles",              GetLocalSkewAngles},
-        {"GetLocalSkewTransform",           GetLocalSkewTransform},
-        {"GetMaxValueInRect",               GetMaxValueInRect},
-        {"GetMomentByColumn",               GetMomentByColumn},
-        {"GetMostPopulatedColors",          GetMostPopulatedColors},
-        {"GetOuterBorder",                  GetOuterBorder},
-        {"GetOuterBordersPtaa",             GetOuterBordersPtaa},
-        {"GetPSNR",                         GetPSNR},
-        {"GetPerceptualDiff",               GetPerceptualDiff},
-        {"GetPixel",                        GetPixel},
-        {"GetPixelAverage",                 GetPixelAverage},
-        {"GetPixelStats",                   GetPixelStats},
-        {"GetRGBComponent",                 GetRGBComponent},
-        {"GetRGBComponentCmap",             GetRGBComponentCmap},
-        {"GetRGBHistogram",                 GetRGBHistogram},
-        {"GetRGBLine",                      GetRGBLine},
-        {"GetRGBPixel",                     GetRGBPixel},
-        {"GetRandomPixel",                  GetRandomPixel},
-        {"GetRangeValues",                  GetRangeValues},
-        {"GetRankColorArray",               GetRankColorArray},
-        {"GetRankValue",                    GetRankValue},
-        {"GetRankValueMasked",              GetRankValueMasked},
-        {"GetRankValueMaskedRGB",           GetRankValueMaskedRGB},
-        {"GetRasterData",                   GetRasterData},
-        {"GetRefcount",                     GetRefcount},
-        {"GetRegionsBinary",                GetRegionsBinary},
-        {"GetResolution",                   GetResolution},
-        {"GetRowStats",                     GetRowStats},
-        {"GetRunCentersOnLine",             GetRunCentersOnLine},
-        {"GetRunsOnLine",                   GetRunsOnLine},
-        {"GetSortedNeighborValues",         GetSortedNeighborValues},
-        {"GetSpp",                          GetSpp},
-        {"GetText",                         GetText},
-        {"GetWhiteVal",                     GetWhiteVal},
-        {"GetWidth",                        GetWidth},
-        {"GetWordBoxesInTextlines",         GetWordBoxesInTextlines},
-        {"GetWordsInTextlines",             GetWordsInTextlines},
-        {"GetWpl",                          GetWpl},
-        {"GetXRes",                         GetXRes},
-        {"GetYRes",                         GetYRes},
-        {"GlobalNormNoSatRGB",              GlobalNormNoSatRGB},
-        {"GlobalNormRGB",                   GlobalNormRGB},
-        {"GrayMorphSequence",               GrayMorphSequence},
-        {"GrayQuantFromCmap",               GrayQuantFromCmap},
-        {"GrayQuantFromHisto",              GrayQuantFromHisto},
-        {"HDome",                           HDome},
-        {"HMT",                             HMT},
-        {"HMTDwa_1",                        HMTDwa_1},
-        {"HShear",                          HShear},
-        {"HShearCenter",                    HShearCenter},
-        {"HShearCorner",                    HShearCorner},
-        {"HShearIP",                        HShearIP},
-        {"HShearLI",                        HShearLI},
-        {"HalfEdgeByBandpass",              HalfEdgeByBandpass},
-        {"HasHighlightRed",                 HasHighlightRed},
-        {"Haustest",                        Haustest},
-        {"HolesByFilling",                  HolesByFilling},
-        {"InitAccumulate",                  InitAccumulate},
-        {"IntersectionOfMorphOps",          IntersectionOfMorphOps},
-        {"Invert",                          Invert},
-        {"ItalicWords",                     ItalicWords},
-        {"LinearEdgeFade",                  LinearEdgeFade},
-        {"LinearMapToTargetColor",          LinearMapToTargetColor},
-        {"LinearTRCTiled",                  LinearTRCTiled},
-        {"LocToColorTransform",             LocToColorTransform},
-        {"LocalExtrema",                    LocalExtrema},
-        {"LocateBarcodes",                  LocateBarcodes},
-        {"MakeAlphaFromMask",               MakeAlphaFromMask},
-        {"MakeArbMaskFromRGB",              MakeArbMaskFromRGB},
-        {"MakeFrameMask",                   MakeFrameMask},
-        {"MakeHistoHS",                     MakeHistoHS},
-        {"MakeHistoHV",                     MakeHistoHV},
-        {"MakeHistoSV",                     MakeHistoSV},
-        {"MakeMaskFromLUT",                 MakeMaskFromLUT},
-        {"MakeMaskFromVal",                 MakeMaskFromVal},
-        {"MakeRangeMaskHS",                 MakeRangeMaskHS},
-        {"MakeRangeMaskHV",                 MakeRangeMaskHV},
-        {"MakeRangeMaskSV",                 MakeRangeMaskSV},
-        {"MaskBoxa",                        MaskBoxa},
-        {"MaskConnComp",                    MaskConnComp},
-        {"MaskOverColorPixels",             MaskOverColorPixels},
-        {"MaskOverColorRange",              MaskOverColorRange},
-        {"MaskedThreshOnBackgroundNorm",    MaskedThreshOnBackgroundNorm},
-        {"MaxDynamicRange",                 MaxDynamicRange},
-        {"MaxDynamicRangeRGB",              MaxDynamicRangeRGB},
-        {"MeanInRectangle",                 MeanInRectangle},
-        {"MeanSquareAccum",                 MeanSquareAccum},
-        {"MeasureEdgeSmoothness",           MeasureEdgeSmoothness},
-        {"MeasureSaturation",               MeasureSaturation},
-        {"MedianCutHisto",                  MedianCutHisto},
-        {"MedianCutQuant",                  MedianCutQuant},
-        {"MedianCutQuantGeneral",           MedianCutQuantGeneral},
-        {"MedianCutQuantMixed",             MedianCutQuantMixed},
-        {"MedianFilter",                    MedianFilter},
-        {"MinMaxNearLine",                  MinMaxNearLine},
-        {"MinMaxTiles",                     MinMaxTiles},
-        {"MinOrMax",                        MinOrMax},
-        {"MirrorDetect",                    MirrorDetect},
-        {"MirrorDetectDwa",                 MirrorDetectDwa},
-        {"MirroredTiling",                  MirroredTiling},
-        {"ModifyBrightness",                ModifyBrightness},
-        {"ModifyHue",                       ModifyHue},
-        {"ModifySaturation",                ModifySaturation},
-        {"ModifyStrokeWidth",               ModifyStrokeWidth},
-        {"MorphCompSequence",               MorphCompSequence},
-        {"MorphCompSequenceDwa",            MorphCompSequenceDwa},
-        {"MorphDwa_1",                      MorphDwa_1},
-        {"MorphDwa_2",                      MorphDwa_2},
-        {"MorphGradient",                   MorphGradient},
-        {"MorphSequence",                   MorphSequence},
-        {"MorphSequenceByComponent",        MorphSequenceByComponent},
-        {"MorphSequenceByRegion",           MorphSequenceByRegion},
-        {"MorphSequenceDwa",                MorphSequenceDwa},
-        {"MorphSequenceMasked",             MorphSequenceMasked},
-        {"MosaicColorShiftRGB",             MosaicColorShiftRGB},
-        {"MultConstAccumulate",             MultConstAccumulate},
-        {"MultConstantColor",               MultConstantColor},
-        {"MultConstantGray",                MultConstantGray},
-        {"MultMatrixColor",                 MultMatrixColor},
-        {"MultiplyByColor",                 MultiplyByColor},
-        {"NumColors",                       NumColors},
-        {"NumSignificantGrayColors",        NumSignificantGrayColors},
-        {"NumberOccupiedOctcubes",          NumberOccupiedOctcubes},
-        {"OctcubeHistogram",                OctcubeHistogram},
-        {"OctcubeQuantFromCmap",            OctcubeQuantFromCmap},
-        {"OctcubeQuantMixedWithGray",       OctcubeQuantMixedWithGray},
-        {"OctreeColorQuant",                OctreeColorQuant},
-        {"OctreeColorQuantGeneral",         OctreeColorQuantGeneral},
-        {"OctreeQuantByPopulation",         OctreeQuantByPopulation},
-        {"OctreeQuantNumColors",            OctreeQuantNumColors},
-        {"Open",                            Open},
-        {"OpenBrick",                       OpenBrick},
-        {"OpenBrickDwa",                    OpenBrickDwa},
-        {"OpenCompBrick",                   OpenCompBrick},
-        {"OpenCompBrickDwa",                OpenCompBrickDwa},
-        {"OpenCompBrickExtendDwa",          OpenCompBrickExtendDwa},
-        {"OpenGeneralized",                 OpenGeneralized},
-        {"OpenGray",                        OpenGray},
-        {"OpenGray3",                       OpenGray3},
-        {"Or",                              Or},
-        {"OrientCorrect",                   OrientCorrect},
-        {"OrientDetect",                    OrientDetect},
-        {"OrientDetectDwa",                 OrientDetectDwa},
-        {"OtsuAdaptiveThreshold",           OtsuAdaptiveThreshold},
-        {"OtsuThreshOnBackgroundNorm",      OtsuThreshOnBackgroundNorm},
-        {"PadToCenterCentroid",             PadToCenterCentroid},
-        {"PaintBoxa",                       PaintBoxa},
-        {"PaintBoxaRandom",                 PaintBoxaRandom},
-        {"PaintSelfThroughMask",            PaintSelfThroughMask},
-        {"PaintThroughMask",                PaintThroughMask},
-        {"PlotAlongPta",                    PlotAlongPta},
-        {"Prepare1bpp",                     Prepare1bpp},
-        {"PrintStreamInfo",                 PrintStreamInfo},
-        {"ProcessBarcodes",                 ProcessBarcodes},
-        {"Projective",                      Projective},
-        {"ProjectiveColor",                 ProjectiveColor},
-        {"ProjectiveGray",                  ProjectiveGray},
-        {"ProjectivePta",                   ProjectivePta},
-        {"ProjectivePtaColor",              ProjectivePtaColor},
-        {"ProjectivePtaGray",               ProjectivePtaGray},
-        {"ProjectivePtaWithAlpha",          ProjectivePtaWithAlpha},
-        {"ProjectiveSampled",               ProjectiveSampled},
-        {"ProjectiveSampledPta",            ProjectiveSampledPta},
-        {"QuadraticVShear",                 QuadraticVShear},
-        {"QuadraticVShearLI",               QuadraticVShearLI},
-        {"QuadraticVShearSampled",          QuadraticVShearSampled},
-        {"QuadtreeMean",                    QuadtreeMean},
-        {"QuadtreeVariance",                QuadtreeVariance},
-        {"QuantFromCmap",                   QuantFromCmap},
-        {"QuantizeIfFewColors",             QuantizeIfFewColors},
-        {"RandomHarmonicWarp",              RandomHarmonicWarp},
-        {"RankBinByStrip",                  RankBinByStrip},
-        {"RankColumnTransform",             RankColumnTransform},
-        {"RankFilter",                      RankFilter},
-        {"RankFilterGray",                  RankFilterGray},
-        {"RankFilterRGB",                   RankFilterRGB},
-        {"RankFilterWithScaling",           RankFilterWithScaling},
-        {"RankHaustest",                    RankHaustest},
-        {"RankRowTransform",                RankRowTransform},
-        {"Rasterop",                        Rasterop},
-        {"RasteropFullImage",               RasteropFullImage},
-        {"RasteropHip",                     RasteropHip},
-        {"RasteropIP",                      RasteropIP},
-        {"RasteropVip",                     RasteropVip},
-        {"Read",                            Read},
-        {"ReadBarcodeWidths",               ReadBarcodeWidths},
-        {"ReadBarcodes",                    ReadBarcodes},
-        {"ReadFromMultipageTiff",           ReadFromMultipageTiff},
-        {"ReadHeader",                      ReadHeader},
-        {"ReadHeaderMem",                   ReadHeaderMem},
-        {"ReadIndexed",                     ReadIndexed},
-        {"ReadJp2k",                        ReadJp2k},
-        {"ReadJpeg",                        ReadJpeg},
-        {"ReadMem",                         ReadMem},
-        {"ReadMemBmp",                      ReadMemBmp},
-        {"ReadMemFromMultipageTiff",        ReadMemFromMultipageTiff},
-        {"ReadMemGif",                      ReadMemGif},
-        {"ReadMemJp2k",                     ReadMemJp2k},
-        {"ReadMemJpeg",                     ReadMemJpeg},
-        {"ReadMemPng",                      ReadMemPng},
-        {"ReadMemPnm",                      ReadMemPnm},
-        {"ReadMemSpix",                     ReadMemSpix},
-        {"ReadMemTiff",                     ReadMemTiff},
-        {"ReadMemWebP",                     ReadMemWebP},
-        {"ReadStream",                      ReadStream},
-        {"ReadStreamBmp",                   ReadStreamBmp},
-        {"ReadStreamGif",                   ReadStreamGif},
-        {"ReadStreamJp2k",                  ReadStreamJp2k},
-        {"ReadStreamJpeg",                  ReadStreamJpeg},
-        {"ReadStreamPng",                   ReadStreamPng},
-        {"ReadStreamPnm",                   ReadStreamPnm},
-        {"ReadStreamSpix",                  ReadStreamSpix},
-        {"ReadStreamTiff",                  ReadStreamTiff},
-        {"ReadStreamWebP",                  ReadStreamWebP},
-        {"ReadTiff",                        ReadTiff},
-        {"ReadWithHint",                    ReadWithHint},
-        {"ReduceBinary2",                   ReduceBinary2},
-        {"ReduceRankBinary2",               ReduceRankBinary2},
-        {"ReduceRankBinaryCascade",         ReduceRankBinaryCascade},
-        {"RemoveAlpha",                     RemoveAlpha},
-        {"RemoveBorder",                    RemoveBorder},
-        {"RemoveBorderConnComps",           RemoveBorderConnComps},
-        {"RemoveBorderGeneral",             RemoveBorderGeneral},
-        {"RemoveBorderToSize",              RemoveBorderToSize},
-        {"RemoveColormap",                  RemoveColormap},
-        {"RemoveColormapGeneral",           RemoveColormapGeneral},
-        {"RemoveMatchedPattern",            RemoveMatchedPattern},
-        {"RemoveSeededComponents",          RemoveSeededComponents},
-        {"RemoveUnusedColors",              RemoveUnusedColors},
-        {"RemoveWithIndicator",             RemoveWithIndicator},
-        {"RenderBox",                       RenderBox},
-        {"RenderBoxArb",                    RenderBoxArb},
-        {"RenderBoxBlend",                  RenderBoxBlend},
-        {"RenderBoxa",                      RenderBoxa},
-        {"RenderBoxaArb",                   RenderBoxaArb},
-        {"RenderBoxaBlend",                 RenderBoxaBlend},
-        {"RenderContours",                  RenderContours},
-        {"RenderGridArb",                   RenderGridArb},
-        {"RenderHashBox",                   RenderHashBox},
-        {"RenderHashBoxArb",                RenderHashBoxArb},
-        {"RenderHashBoxBlend",              RenderHashBoxBlend},
-        {"RenderHashBoxa",                  RenderHashBoxa},
-        {"RenderHashBoxaArb",               RenderHashBoxaArb},
-        {"RenderHashBoxaBlend",             RenderHashBoxaBlend},
-        {"RenderHashMaskArb",               RenderHashMaskArb},
-        {"RenderLine",                      RenderLine},
-        {"RenderLineArb",                   RenderLineArb},
-        {"RenderLineBlend",                 RenderLineBlend},
-        {"RenderPlotFromNuma",              RenderPlotFromNuma},
-        {"RenderPlotFromNumaGen",           RenderPlotFromNumaGen},
-        {"RenderPolygon",                   RenderPolygon},
-        {"RenderPolyline",                  RenderPolyline},
-        {"RenderPolylineArb",               RenderPolylineArb},
-        {"RenderPolylineBlend",             RenderPolylineBlend},
-        {"RenderPta",                       RenderPta},
-        {"RenderPtaArb",                    RenderPtaArb},
-        {"RenderPtaBlend",                  RenderPtaBlend},
-        {"RenderRandomCmapPtaa",            RenderRandomCmapPtaa},
-        {"ResizeImageData",                 ResizeImageData},
-        {"ResizeToMatch",                   ResizeToMatch},
-        {"ReversalProfile",                 ReversalProfile},
-        {"Rotate",                          Rotate},
-        {"Rotate180",                       Rotate180},
-        {"Rotate2Shear",                    Rotate2Shear},
-        {"Rotate3Shear",                    Rotate3Shear},
-        {"Rotate90",                        Rotate90},
-        {"RotateAM",                        RotateAM},
-        {"RotateAMColor",                   RotateAMColor},
-        {"RotateAMColorCorner",             RotateAMColorCorner},
-        {"RotateAMColorFast",               RotateAMColorFast},
-        {"RotateAMCorner",                  RotateAMCorner},
-        {"RotateAMGray",                    RotateAMGray},
-        {"RotateAMGrayCorner",              RotateAMGrayCorner},
-        {"RotateBinaryNice",                RotateBinaryNice},
-        {"RotateBySampling",                RotateBySampling},
-        {"RotateOrth",                      RotateOrth},
-        {"RotateShear",                     RotateShear},
-        {"RotateShearCenter",               RotateShearCenter},
-        {"RotateShearCenterIP",             RotateShearCenterIP},
-        {"RotateShearIP",                   RotateShearIP},
-        {"RotateWithAlpha",                 RotateWithAlpha},
-        {"RowStats",                        RowStats},
-        {"RunHistogramMorph",               RunHistogramMorph},
-        {"RunlengthTransform",              RunlengthTransform},
-        {"SauvolaBinarize",                 SauvolaBinarize},
-        {"SauvolaBinarizeTiled",            SauvolaBinarizeTiled},
-        {"SaveTiled",                       SaveTiled},
-        {"SaveTiledOutline",                SaveTiledOutline},
-        {"SaveTiledWithText",               SaveTiledWithText},
-        {"Scale",                           Scale},
-        {"ScaleAndTransferAlpha",           ScaleAndTransferAlpha},
-        {"ScaleAreaMap",                    ScaleAreaMap},
-        {"ScaleAreaMap2",                   ScaleAreaMap2},
-        {"ScaleAreaMapToSize",              ScaleAreaMapToSize},
-        {"ScaleBinary",                     ScaleBinary},
-        {"ScaleByIntSampling",              ScaleByIntSampling},
-        {"ScaleBySampling",                 ScaleBySampling},
-        {"ScaleBySamplingToSize",           ScaleBySamplingToSize},
-        {"ScaleColor2xLI",                  ScaleColor2xLI},
-        {"ScaleColor4xLI",                  ScaleColor4xLI},
-        {"ScaleColorLI",                    ScaleColorLI},
-        {"ScaleGeneral",                    ScaleGeneral},
-        {"ScaleGray2xLI",                   ScaleGray2xLI},
-        {"ScaleGray2xLIDither",             ScaleGray2xLIDither},
-        {"ScaleGray2xLIThresh",             ScaleGray2xLIThresh},
-        {"ScaleGray4xLI",                   ScaleGray4xLI},
-        {"ScaleGray4xLIDither",             ScaleGray4xLIDither},
-        {"ScaleGray4xLIThresh",             ScaleGray4xLIThresh},
-        {"ScaleGrayLI",                     ScaleGrayLI},
-        {"ScaleGrayMinMax",                 ScaleGrayMinMax},
-        {"ScaleGrayMinMax2",                ScaleGrayMinMax2},
-        {"ScaleGrayRank2",                  ScaleGrayRank2},
-        {"ScaleGrayRankCascade",            ScaleGrayRankCascade},
-        {"ScaleGrayToBinaryFast",           ScaleGrayToBinaryFast},
-        {"ScaleLI",                         ScaleLI},
-        {"ScaleMipmap",                     ScaleMipmap},
-        {"ScaleRGBToBinaryFast",            ScaleRGBToBinaryFast},
-        {"ScaleRGBToGray2",                 ScaleRGBToGray2},
-        {"ScaleRGBToGrayFast",              ScaleRGBToGrayFast},
-        {"ScaleResolution",                 ScaleResolution},
-        {"ScaleSmooth",                     ScaleSmooth},
-        {"ScaleSmoothToSize",               ScaleSmoothToSize},
-        {"ScaleToGray",                     ScaleToGray},
-        {"ScaleToGray16",                   ScaleToGray16},
-        {"ScaleToGray2",                    ScaleToGray2},
-        {"ScaleToGray3",                    ScaleToGray3},
-        {"ScaleToGray4",                    ScaleToGray4},
-        {"ScaleToGray6",                    ScaleToGray6},
-        {"ScaleToGray8",                    ScaleToGray8},
-        {"ScaleToGrayFast",                 ScaleToGrayFast},
-        {"ScaleToGrayMipmap",               ScaleToGrayMipmap},
-        {"ScaleToSize",                     ScaleToSize},
-        {"ScaleToSizeRel",                  ScaleToSizeRel},
-        {"ScaleWithAlpha",                  ScaleWithAlpha},
-        {"ScanForEdge",                     ScanForEdge},
-        {"ScanForForeground",               ScanForForeground},
-        {"SearchBinaryMaze",                SearchBinaryMaze},
-        {"SearchGrayMaze",                  SearchGrayMaze},
-        {"Seedfill",                        Seedfill},
-        {"Seedfill4",                       Seedfill4},
-        {"Seedfill4BB",                     Seedfill4BB},
-        {"Seedfill8",                       Seedfill8},
-        {"Seedfill8BB",                     Seedfill8BB},
-        {"SeedfillBB",                      SeedfillBB},
-        {"SeedfillBinary",                  SeedfillBinary},
-        {"SeedfillBinaryRestricted",        SeedfillBinaryRestricted},
-        {"SeedfillGray",                    SeedfillGray},
-        {"SeedfillGrayBasin",               SeedfillGrayBasin},
-        {"SeedfillGrayInv",                 SeedfillGrayInv},
-        {"SeedfillGrayInvSimple",           SeedfillGrayInvSimple},
-        {"SeedfillGraySimple",              SeedfillGraySimple},
-        {"SeedfillMorph",                   SeedfillMorph},
-        {"Seedspread",                      Seedspread},
-        {"SelectByAreaFraction",            SelectByAreaFraction},
-        {"SelectByPerimSizeRatio",          SelectByPerimSizeRatio},
-        {"SelectByPerimToAreaRatio",        SelectByPerimToAreaRatio},
-        {"SelectBySize",                    SelectBySize},
-        {"SelectByWidthHeightRatio",        SelectByWidthHeightRatio},
-        {"SelectDefaultPdfEncoding",        SelectDefaultPdfEncoding},
-        {"SelectLargeULComp",               SelectLargeULComp},
-        {"SelectMinInConnComp",             SelectMinInConnComp},
-        {"SelectedLocalExtrema",            SelectedLocalExtrema},
-        {"SelectiveConnCompFill",           SelectiveConnCompFill},
-        {"SerializeToMemory",               SerializeToMemory},
-        {"SetAll",                          SetAll},
-        {"SetAllArbitrary",                 SetAllArbitrary},
-        {"SetAllGray",                      SetAllGray},
-        {"SetAlphaOverWhite",               SetAlphaOverWhite},
-        {"SetBlack",                        SetBlack},
-        {"SetBlackOrWhite",                 SetBlackOrWhite},
-        {"SetBlackOrWhiteBoxa",             SetBlackOrWhiteBoxa},
-        {"SetBorderRingVal",                SetBorderRingVal},
-        {"SetBorderVal",                    SetBorderVal},
-        {"SetChromaSampling",               SetChromaSampling},
-        {"SetColormap",                     SetColormap},
-        {"SetComponentArbitrary",           SetComponentArbitrary},
-        {"SetData",                         SetData},
-        {"SetDepth",                        SetDepth},
-        {"SetDimensions",                   SetDimensions},
-        {"SetHeight",                       SetHeight},
-        {"SetInRect",                       SetInRect},
-        {"SetInRectArbitrary",              SetInRectArbitrary},
-        {"SetInputFormat",                  SetInputFormat},
-        {"SetLowContrast",                  SetLowContrast},
-        {"SetMasked",                       SetMasked},
-        {"SetMaskedCmap",                   SetMaskedCmap},
-        {"SetMaskedGeneral",                SetMaskedGeneral},
-        {"SetMirroredBorder",               SetMirroredBorder},
-        {"SetOrClearBorder",                SetOrClearBorder},
-        {"SetPadBits",                      SetPadBits},
-        {"SetPadBitsBand",                  SetPadBitsBand},
-        {"SetPixel",                        SetPixel},
-        {"SetPixelColumn",                  SetPixelColumn},
-        {"SetRGBComponent",                 SetRGBComponent},
-        {"SetRGBPixel",                     SetRGBPixel},
-        {"SetResolution",                   SetResolution},
-        {"SetSelectCmap",                   SetSelectCmap},
-        {"SetSelectMaskedCmap",             SetSelectMaskedCmap},
-        {"SetSpecial",                      SetSpecial},
-        {"SetSpp",                          SetSpp},
-        {"SetStrokeWidth",                  SetStrokeWidth},
-        {"SetText",                         SetText},
-        {"SetTextblock",                    SetTextblock},
-        {"SetTextline",                     SetTextline},
-        {"SetUnderTransparency",            SetUnderTransparency},
-        {"SetWhite",                        SetWhite},
-        {"SetWidth",                        SetWidth},
-        {"SetWpl",                          SetWpl},
-        {"SetXRes",                         SetXRes},
-        {"SetYRes",                         SetYRes},
-        {"SetZlibCompression",              SetZlibCompression},
-        {"SetupByteProcessing",             SetupByteProcessing},
-        {"ShiftAndTransferAlpha",           ShiftAndTransferAlpha},
-        {"ShiftByComponent",                ShiftByComponent},
-        {"SimpleCaptcha",                   SimpleCaptcha},
-        {"SimpleColorQuantize",             SimpleColorQuantize},
-        {"SizesEqual",                      SizesEqual},
-        {"SmoothConnectedRegions",          SmoothConnectedRegions},
-        {"SnapColor",                       SnapColor},
-        {"SnapColorCmap",                   SnapColorCmap},
-        {"SobelEdgeFilter",                 SobelEdgeFilter},
-        {"SplitComponentIntoBoxa",          SplitComponentIntoBoxa},
-        {"SplitComponentWithProfile",       SplitComponentWithProfile},
-        {"SplitDistributionFgBg",           SplitDistributionFgBg},
-        {"SplitIntoBoxa",                   SplitIntoBoxa},
-        {"SplitIntoCharacters",             SplitIntoCharacters},
-        {"StereoFromPair",                  StereoFromPair},
-        {"StretchHorizontal",               StretchHorizontal},
-        {"StretchHorizontalLI",             StretchHorizontalLI},
-        {"StretchHorizontalSampled",        StretchHorizontalSampled},
-        {"StrokeWidthTransform",            StrokeWidthTransform},
-        {"SubsampleBoundaryPixels",         SubsampleBoundaryPixels},
-        {"Subtract",                        Subtract},
-        {"SubtractGray",                    SubtractGray},
-        {"SwapAndDestroy",                  SwapAndDestroy},
-        {"TRCMap",                          TRCMap},
-        {"TestClipToForeground",            TestClipToForeground},
-        {"TestForSimilarity",               TestForSimilarity},
-        {"ThinConnected",                   ThinConnected},
-        {"ThinConnectedBySet",              ThinConnectedBySet},
-        {"Threshold8",                      Threshold8},
-        {"ThresholdByConnComp",             ThresholdByConnComp},
-        {"ThresholdForFgBg",                ThresholdForFgBg},
-        {"ThresholdGrayArb",                ThresholdGrayArb},
-        {"ThresholdOn8bpp",                 ThresholdOn8bpp},
-        {"ThresholdPixelSum",               ThresholdPixelSum},
-        {"ThresholdSpreadNorm",             ThresholdSpreadNorm},
-        {"ThresholdTo2bpp",                 ThresholdTo2bpp},
-        {"ThresholdTo4bpp",                 ThresholdTo4bpp},
-        {"ThresholdToBinary",               ThresholdToBinary},
-        {"ThresholdToValue",                ThresholdToValue},
-        {"TilingCreate",                    TilingCreate},
-        {"TilingDestroy",                   TilingDestroy},
-        {"TilingGetCount",                  TilingGetCount},
-        {"TilingGetSize",                   TilingGetSize},
-        {"TilingGetTile",                   TilingGetTile},
-        {"TilingNoStripOnPaint",            TilingNoStripOnPaint},
-        {"TilingPaintTile",                 TilingPaintTile},
-        {"Tophat",                          Tophat},
-        {"TransferAllData",                 TransferAllData},
-        {"Translate",                       Translate},
-        {"TwoSidedEdgeFilter",              TwoSidedEdgeFilter},
-        {"UnionOfMorphOps",                 UnionOfMorphOps},
-        {"UnpackBinary",                    UnpackBinary},
-        {"UnsharpMasking",                  UnsharpMasking},
-        {"UnsharpMaskingFast",              UnsharpMaskingFast},
-        {"UnsharpMaskingGray",              UnsharpMaskingGray},
-        {"UnsharpMaskingGray1D",            UnsharpMaskingGray1D},
-        {"UnsharpMaskingGray2D",            UnsharpMaskingGray2D},
-        {"UnsharpMaskingGrayFast",          UnsharpMaskingGrayFast},
-        {"UpDownDetect",                    UpDownDetect},
-        {"UpDownDetectDwa",                 UpDownDetectDwa},
-        {"UpDownDetectGeneral",             UpDownDetectGeneral},
-        {"UpDownDetectGeneralDwa",          UpDownDetectGeneralDwa},
-        {"UsesCmapColor",                   UsesCmapColor},
-        {"VShear",                          VShear},
-        {"VShearCenter",                    VShearCenter},
-        {"VShearCorner",                    VShearCorner},
-        {"VShearIP",                        VShearIP},
-        {"VShearLI",                        VShearLI},
-        {"VarThresholdToBinary",            VarThresholdToBinary},
-        {"VarianceByColumn",                VarianceByColumn},
-        {"VarianceByRow",                   VarianceByRow},
-        {"VarianceInRect",                  VarianceInRect},
-        {"VarianceInRectangle",             VarianceInRectangle},
-        {"View",                            View},
-        {"WarpStereoscopic",                WarpStereoscopic},
-        {"WindowedMean",                    WindowedMean},
-        {"WindowedMeanSquare",              WindowedMeanSquare},
-        {"WindowedStats",                   WindowedStats},
-        {"WindowedVariance",                WindowedVariance},
-        {"WindowedVarianceOnLine",          WindowedVarianceOnLine},
-        {"WordBoxesByDilation",             WordBoxesByDilation},
-        {"WordMaskByDilation",              WordMaskByDilation},
-        {"Write",                           Write},
-        {"WriteAutoFormat",                 WriteAutoFormat},
-        {"WriteDebug",                      WriteDebug},
-        {"WriteImpliedFormat",              WriteImpliedFormat},
-        {"WriteJp2k",                       WriteJp2k},
-        {"WriteJpeg",                       WriteJpeg},
-        {"WriteMem",                        WriteMem},
-        {"WriteMemBmp",                     WriteMemBmp},
-        {"WriteMemGif",                     WriteMemGif},
-        {"WriteMemJp2k",                    WriteMemJp2k},
-        {"WriteMemJpeg",                    WriteMemJpeg},
-        {"WriteMemPS",                      WriteMemPS},
-        {"WriteMemPam",                     WriteMemPam},
-        {"WriteMemPdf",                     WriteMemPdf},
-        {"WriteMemPng",                     WriteMemPng},
-        {"WriteMemPnm",                     WriteMemPnm},
-        {"WriteMemSpix",                    WriteMemSpix},
-        {"WriteMemTiff",                    WriteMemTiff},
-        {"WriteMemTiffCustom",              WriteMemTiffCustom},
-        {"WriteMemWebP",                    WriteMemWebP},
-        {"WriteMixedToPS",                  WriteMixedToPS},
-        {"WritePSEmbed",                    WritePSEmbed},
-        {"WritePng",                        WritePng},
-        {"WriteSegmentedPageToPS",          WriteSegmentedPageToPS},
-        {"WriteStream",                     WriteStream},
-        {"WriteStreamAsciiPnm",             WriteStreamAsciiPnm},
-        {"WriteStreamBmp",                  WriteStreamBmp},
-        {"WriteStreamGif",                  WriteStreamGif},
-        {"WriteStreamJp2k",                 WriteStreamJp2k},
-        {"WriteStreamJpeg",                 WriteStreamJpeg},
-        {"WriteStreamPS",                   WriteStreamPS},
-        {"WriteStreamPam",                  WriteStreamPam},
-        {"WriteStreamPdf",                  WriteStreamPdf},
-        {"WriteStreamPng",                  WriteStreamPng},
-        {"WriteStreamPnm",                  WriteStreamPnm},
-        {"WriteStreamSpix",                 WriteStreamSpix},
-        {"WriteStreamTiff",                 WriteStreamTiff},
-        {"WriteStreamTiffWA",               WriteStreamTiffWA},
-        {"WriteStreamWebP",                 WriteStreamWebP},
-        {"WriteStringPS",                   WriteStringPS},
-        {"WriteTiff",                       WriteTiff},
-        {"WriteTiffCustom",                 WriteTiffCustom},
-        {"WriteWebP",                       WriteWebP},
-        {"Xor",                             Xor},
-        {"Zero",                            Zero},
-        LUA_SENTINEL
+	{"__gc",                            Destroy},
+	{"__new",                           ll_new_Pix},
+	{"__sub",                           Subtract},
+	{"__bnot",                          Invert},
+	{"__band",                          And},
+	{"__bor",                           Or},
+	{"__bxor",                          Xor},
+	{"__tostring",                      toString},
+	{"AbsDiffByColumn",                 AbsDiffByColumn},
+	{"AbsDiffByRow",                    AbsDiffByRow},
+	{"AbsDiffInRect",                   AbsDiffInRect},
+	{"AbsDiffOnLine",                   AbsDiffOnLine},
+	{"AbsDifference",                   AbsDifference},
+	{"Accumulate",                      Accumulate},
+	{"AccumulateSamples",               AccumulateSamples},
+	{"AdaptThresholdToBinary",          AdaptThresholdToBinary},
+	{"AdaptThresholdToBinaryGen",       AdaptThresholdToBinaryGen},
+	{"AddAlphaTo1bpp",                  AddAlphaTo1bpp},
+	{"AddAlphaToBlend",                 AddAlphaToBlend},
+	{"AddBlackOrWhiteBorder",           AddBlackOrWhiteBorder},
+	{"AddBorder",                       AddBorder},
+	{"AddBorderGeneral",                AddBorderGeneral},
+	{"AddConstantGray",                 AddConstantGray},
+	{"AddContinuedBorder",              AddContinuedBorder},
+	{"AddGaussianNoise",                AddGaussianNoise},
+	{"AddGray",                         AddGray},
+	{"AddGrayColormap8",                AddGrayColormap8},
+	{"AddMinimalGrayColormap8",         AddMinimalGrayColormap8},
+	{"AddMirroredBorder",               AddMirroredBorder},
+	{"AddMixedBorder",                  AddMixedBorder},
+	{"AddRGB",                          AddRGB},
+	{"AddRepeatedBorder",               AddRepeatedBorder},
+	{"AddSingleTextblock",              AddSingleTextblock},
+	{"AddText",                         AddText},
+	{"AddTextlines",                    AddTextlines},
+	{"AdjacentOnPixelInRaster",         AdjacentOnPixelInRaster},
+	{"AddWithIndicator",                AddWithIndicator},
+	{"Affine",                          Affine},
+	{"AffineColor",                     AffineColor},
+	{"AffineGray",                      AffineGray},
+	{"AffinePta",                       AffinePta},
+	{"AffinePtaColor",                  AffinePtaColor},
+	{"AffinePtaGray",                   AffinePtaGray},
+	{"AffinePtaWithAlpha",              AffinePtaWithAlpha},
+	{"AffineSampled",                   AffineSampled},
+	{"AffineSampledPta",                AffineSampledPta},
+	{"AffineSequential",                AffineSequential},
+	{"AlphaBlendUniform",               AlphaBlendUniform},
+	{"AlphaIsOpaque",                   AlphaIsOpaque},
+	{"And",                             And},
+	{"ApplyInvBackgroundGrayMap",       ApplyInvBackgroundGrayMap},
+	{"ApplyInvBackgroundRGBMap",        ApplyInvBackgroundRGBMap},
+	{"ApplyVariableGrayMap",            ApplyVariableGrayMap},
+	{"AssignToNearestColor",            AssignToNearestColor},
+	{"AverageByColumn",                 AverageByColumn},
+	{"AverageByRow",                    AverageByRow},
+	{"AverageInRect",                   AverageInRect},
+	{"AverageIntensityProfile",         AverageIntensityProfile},
+	{"AverageOnLine",                   AverageOnLine},
+	{"BackgroundNorm",                  BackgroundNorm},
+	{"BackgroundNormFlex",              BackgroundNormFlex},
+	{"BackgroundNormGrayArray",         BackgroundNormGrayArray},
+	{"BackgroundNormGrayArrayMorph",    BackgroundNormGrayArrayMorph},
+	{"BackgroundNormMorph",             BackgroundNormMorph},
+	{"BackgroundNormRGBArrays",         BackgroundNormRGBArrays},
+	{"BackgroundNormRGBArraysMorph",    BackgroundNormRGBArraysMorph},
+	{"BackgroundNormSimple",            BackgroundNormSimple},
+	{"BestCorrelation",                 BestCorrelation},
+	{"Bilateral",                       Bilateral},
+	{"BilateralExact",                  BilateralExact},
+	{"BilateralGray",                   BilateralGray},
+	{"BilateralGrayExact",              BilateralGrayExact},
+	{"Bilinear",                        Bilinear},
+	{"BilinearColor",                   BilinearColor},
+	{"BilinearGray",                    BilinearGray},
+	{"BilinearPta",                     BilinearPta},
+	{"BilinearPtaColor",                BilinearPtaColor},
+	{"BilinearPtaGray",                 BilinearPtaGray},
+	{"BilinearPtaWithAlpha",            BilinearPtaWithAlpha},
+	{"BilinearSampled",                 BilinearSampled},
+	{"BilinearSampledPta",              BilinearSampledPta},
+	{"Blend",                           Blend},
+	{"BlendBackgroundToColor",          BlendBackgroundToColor},
+	{"BlendBoxaRandom",                 BlendBoxaRandom},
+	{"BlendCmap",                       BlendCmap},
+	{"BlendColor",                      BlendColor},
+	{"BlendColorByChannel",             BlendColorByChannel},
+	{"BlendGray",                       BlendGray},
+	{"BlendGrayAdapt",                  BlendGrayAdapt},
+	{"BlendGrayInverse",                BlendGrayInverse},
+	{"BlendHardLight",                  BlendHardLight},
+	{"BlendInRect",                     BlendInRect},
+	{"BlendMask",                       BlendMask},
+	{"BlendWithGrayMask",               BlendWithGrayMask},
+	{"BlockBilateralExact",             BlockBilateralExact},
+	{"Blockconv",                       Blockconv},
+	{"BlockconvAccum",                  BlockconvAccum},
+	{"BlockconvGray",                   BlockconvGray},
+	{"BlockconvGrayTile",               BlockconvGrayTile},
+	{"BlockconvGrayUnnormalized",       BlockconvGrayUnnormalized},
+	{"BlockconvTiled",                  BlockconvTiled},
+	{"Blockrank",                       Blockrank},
+	{"Blocksum",                        Blocksum},
+	{"CensusTransform",                 CensusTransform},
+	{"Centroid",                        Centroid},
+	{"Centroid8",                       Centroid8},
+	{"ChangeRefcount",                  ChangeRefcount},
+	{"ChooseOutputFormat",              ChooseOutputFormat},
+	{"CleanBackgroundToWhite",          CleanBackgroundToWhite},
+	{"CleanupByteProcessing",           CleanupByteProcessing},
+	{"ClearAll",                        ClearAll},
+	{"ClearInRect",                     ClearInRect},
+	{"ClearPixel",                      ClearPixel},
+	{"ClipBoxToEdges",                  ClipBoxToEdges},
+	{"ClipBoxToForeground",             ClipBoxToForeground},
+	{"ClipMasked",                      ClipMasked},
+	{"ClipRectangle",                   ClipRectangle},
+	{"ClipRectangles",                  ClipRectangles},
+	{"ClipToForeground",                ClipToForeground},
+	{"Clone",                           Clone},
+	{"Close",                           Close},
+	{"CloseBrick",                      CloseBrick},
+	{"CloseBrickDwa",                   CloseBrickDwa},
+	{"CloseCompBrick",                  CloseCompBrick},
+	{"CloseCompBrickDwa",               CloseCompBrickDwa},
+	{"CloseCompBrickExtendDwa",         CloseCompBrickExtendDwa},
+	{"CloseGeneralized",                CloseGeneralized},
+	{"CloseGray",                       CloseGray},
+	{"CloseGray3",                      CloseGray3},
+	{"CloseSafe",                       CloseSafe},
+	{"CloseSafeBrick",                  CloseSafeBrick},
+	{"CloseSafeCompBrick",              CloseSafeCompBrick},
+	{"ColorContent",                    ColorContent},
+	{"ColorFraction",                   ColorFraction},
+	{"ColorGray",                       ColorGray},
+	{"ColorGrayCmap",                   ColorGrayCmap},
+	{"ColorGrayMasked",                 ColorGrayMasked},
+	{"ColorGrayMaskedCmap",             ColorGrayMaskedCmap},
+	{"ColorGrayRegions",                ColorGrayRegions},
+	{"ColorGrayRegionsCmap",            ColorGrayRegionsCmap},
+	{"ColorMagnitude",                  ColorMagnitude},
+	{"ColorMorph",                      ColorMorph},
+	{"ColorMorphSequence",              ColorMorphSequence},
+	{"ColorSegment",                    ColorSegment},
+	{"ColorSegmentClean",               ColorSegmentClean},
+	{"ColorSegmentCluster",             ColorSegmentCluster},
+	{"ColorSegmentRemoveColors",        ColorSegmentRemoveColors},
+	{"ColorShiftRGB",                   ColorShiftRGB},
+	{"ColorizeGray",                    ColorizeGray},
+	{"ColorsForQuantization",           ColorsForQuantization},
+	{"ColumnStats",                     ColumnStats},
+	{"CombineMasked",                   CombineMasked},
+	{"CombineMaskedGeneral",            CombineMaskedGeneral},
+	{"CompareBinary",                   CompareBinary},
+	{"CompareGray",                     CompareGray},
+	{"CompareGrayByHisto",              CompareGrayByHisto},
+	{"CompareGrayOrRGB",                CompareGrayOrRGB},
+	{"ComparePhotoRegionsByHisto",      ComparePhotoRegionsByHisto},
+	{"CompareRGB",                      CompareRGB},
+	{"CompareRankDifference",           CompareRankDifference},
+	{"CompareTiled",                    CompareTiled},
+	{"CompareWithTranslation",          CompareWithTranslation},
+	{"ComponentFunction",               ComponentFunction},
+	{"ConformsToRectangle",             ConformsToRectangle},
+	{"ConnComp",                        ConnComp},
+	{"ConnCompAreaTransform",           ConnCompAreaTransform},
+	{"ConnCompBB",                      ConnCompBB},
+	{"ConnCompIncrAdd",                 ConnCompIncrAdd},
+	{"ConnCompIncrInit",                ConnCompIncrInit},
+	{"ConnCompPixa",                    ConnCompPixa},
+	{"ConnCompTransform",               ConnCompTransform},
+	{"ContrastNorm",                    ContrastNorm},
+	{"ContrastTRC",                     ContrastTRC},
+	{"ContrastTRCMasked",               ContrastTRCMasked},
+	{"Convert16To8",                    Convert16To8},
+	{"Convert1To16",                    Convert1To16},
+	{"Convert1To2",                     Convert1To2},
+	{"Convert1To2Cmap",                 Convert1To2Cmap},
+	{"Convert1To32",                    Convert1To32},
+	{"Convert1To4",                     Convert1To4},
+	{"Convert1To4Cmap",                 Convert1To4Cmap},
+	{"Convert1To8",                     Convert1To8},
+	{"Convert1To8Cmap",                 Convert1To8Cmap},
+	{"Convert24To32",                   Convert24To32},
+	{"Convert2To8",                     Convert2To8},
+	{"Convert32To16",                   Convert32To16},
+	{"Convert32To24",                   Convert32To24},
+	{"Convert32To8",                    Convert32To8},
+	{"Convert4To8",                     Convert4To8},
+	{"Convert8To16",                    Convert8To16},
+	{"Convert8To2",                     Convert8To2},
+	{"Convert8To32",                    Convert8To32},
+	{"Convert8To4",                     Convert8To4},
+	{"ConvertCmapTo1",                  ConvertCmapTo1},
+	{"ConvertColorToSubpixelRGB",       ConvertColorToSubpixelRGB},
+	{"ConvertForPSWrap",                ConvertForPSWrap},
+	{"ConvertGrayToColormap",           ConvertGrayToColormap},
+	{"ConvertGrayToColormap8",          ConvertGrayToColormap8},
+	{"ConvertGrayToFalseColor",         ConvertGrayToFalseColor},
+	{"ConvertGrayToSubpixelRGB",        ConvertGrayToSubpixelRGB},
+	{"ConvertHSVToRGB",                 ConvertHSVToRGB},
+	{"ConvertLossless",                 ConvertLossless},
+	{"ConvertRGBToBinaryArb",           ConvertRGBToBinaryArb},
+	{"ConvertRGBToColormap",            ConvertRGBToColormap},
+	{"ConvertRGBToGray",                ConvertRGBToGray},
+	{"ConvertRGBToGrayArb",             ConvertRGBToGrayArb},
+	{"ConvertRGBToGrayFast",            ConvertRGBToGrayFast},
+	{"ConvertRGBToGrayMinMax",          ConvertRGBToGrayMinMax},
+	{"ConvertRGBToGraySatBoost",        ConvertRGBToGraySatBoost},
+	{"ConvertRGBToHSV",                 ConvertRGBToHSV},
+	{"ConvertRGBToHue",                 ConvertRGBToHue},
+	{"ConvertRGBToLAB",                 ConvertRGBToLAB},
+	{"ConvertRGBToLuminance",           ConvertRGBToLuminance},
+	{"ConvertRGBToSaturation",          ConvertRGBToSaturation},
+	{"ConvertRGBToValue",               ConvertRGBToValue},
+	{"ConvertRGBToXYZ",                 ConvertRGBToXYZ},
+	{"ConvertRGBToYUV",                 ConvertRGBToYUV},
+	{"ConvertTo1",                      ConvertTo1},
+	{"ConvertTo16",                     ConvertTo16},
+	{"ConvertTo1BySampling",            ConvertTo1BySampling},
+	{"ConvertTo2",                      ConvertTo2},
+	{"ConvertTo32",                     ConvertTo32},
+	{"ConvertTo32BySampling",           ConvertTo32BySampling},
+	{"ConvertTo4",                      ConvertTo4},
+	{"ConvertTo8",                      ConvertTo8},
+	{"ConvertTo8BySampling",            ConvertTo8BySampling},
+	{"ConvertTo8Colormap",              ConvertTo8Colormap},
+	{"ConvertTo8Or32",                  ConvertTo8Or32},
+	{"ConvertToDPix",                   ConvertToDPix},
+	{"ConvertToFPix",                   ConvertToFPix},
+	{"ConvertToPdf",                    ConvertToPdf},
+	{"ConvertToPdfData",                ConvertToPdfData},
+	{"ConvertToPdfDataSegmented",       ConvertToPdfDataSegmented},
+	{"ConvertToPdfSegmented",           ConvertToPdfSegmented},
+	{"ConvertToSubpixelRGB",            ConvertToSubpixelRGB},
+	{"ConvertYUVToRGB",                 ConvertYUVToRGB},
+	{"Convolve",                        Convolve},
+	{"ConvolveRGB",                     ConvolveRGB},
+	{"ConvolveRGBSep",                  ConvolveRGBSep},
+	{"ConvolveSep",                     ConvolveSep},
+	{"ConvolveWithBias",                ConvolveWithBias},
+	{"Copy",                            Copy},
+	{"CopyBorder",                      CopyBorder},
+	{"CopyColormap",                    CopyColormap},
+	{"CopyDimensions",                  CopyDimensions},
+	{"CopyInputFormat",                 CopyInputFormat},
+	{"CopyRGBComponent",                CopyRGBComponent},
+	{"CopyResolution",                  CopyResolution},
+	{"CopySpp",                         CopySpp},
+	{"CopyText",                        CopyText},
+	{"CorrelationBinary",               CorrelationBinary},
+	{"CorrelationScore",                CorrelationScore},
+	{"CorrelationScoreShifted",         CorrelationScoreShifted},
+	{"CorrelationScoreSimple",          CorrelationScoreSimple},
+	{"CorrelationScoreThresholded",     CorrelationScoreThresholded},
+	{"CountArbInRect",                  CountArbInRect},
+	{"CountByColumn",                   CountByColumn},
+	{"CountByRow",                      CountByRow},
+	{"CountConnComp",                   CountConnComp},
+	{"CountPixels",                     CountPixels},
+	{"CountPixelsByColumn",             CountPixelsByColumn},
+	{"CountPixelsByRow",                CountPixelsByRow},
+	{"CountPixelsInRect",               CountPixelsInRect},
+	{"CountPixelsInRow",                CountPixelsInRow},
+	{"CountRGBColors",                  CountRGBColors},
+	{"CountTextColumns",                CountTextColumns},
+	{"Create",                          Create},
+	{"CreateFromPixcomp",               CreateFromPixcomp},
+	{"CreateHeader",                    CreateHeader},
+	{"CreateNoInit",                    CreateNoInit},
+	{"CreateRGBImage",                  CreateRGBImage},
+	{"CreateTemplate",                  CreateTemplate},
+	{"CreateTemplateNoInit",            CreateTemplateNoInit},
+	{"CropAlignedToCentroid",           CropAlignedToCentroid},
+	{"CropToMatch",                     CropToMatch},
+	{"CropToSize",                      CropToSize},
+	{"DarkenGray",                      DarkenGray},
+	{"DecideIfPhotoImage",              DecideIfPhotoImage},
+	{"DecideIfTable",                   DecideIfTable},
+	{"DecideIfText",                    DecideIfText},
+	{"DeserializeFromMemory",           DeserializeFromMemory},
+	{"Deskew",                          Deskew},
+	{"DeskewBarcode",                   DeskewBarcode},
+	{"DeskewBoth",                      DeskewBoth},
+	{"DeskewGeneral",                   DeskewGeneral},
+	{"DeskewLocal",                     DeskewLocal},
+	{"Destroy",                         Destroy},
+	{"DestroyColormap",                 DestroyColormap},
+	{"Dilate",                          Dilate},
+	{"DilateBrick",                     DilateBrick},
+	{"DilateBrickDwa",                  DilateBrickDwa},
+	{"DilateCompBrick",                 DilateCompBrick},
+	{"DilateCompBrickDwa",              DilateCompBrickDwa},
+	{"DilateCompBrickExtendDwa",        DilateCompBrickExtendDwa},
+	{"DilateGray",                      DilateGray},
+	{"DilateGray3",                     DilateGray3},
+	{"Display",                         Display},
+	{"DisplayColorArray",               DisplayColorArray},
+	{"DisplayDiffBinary",               DisplayDiffBinary},
+	{"DisplayHitMissSel",               DisplayHitMissSel},
+	{"DisplayLayersRGBA",               DisplayLayersRGBA},
+	{"DisplayMatchedPattern",           DisplayMatchedPattern},
+	{"DisplayPta",                      DisplayPta},
+	{"DisplayPtaPattern",               DisplayPtaPattern},
+	{"DisplayPtaa",                     DisplayPtaa},
+	{"DisplayPtaaPattern",              DisplayPtaaPattern},
+	{"DisplayWithTitle",                DisplayWithTitle},
+	{"DisplayWrite",                    DisplayWrite},
+	{"DistanceFunction",                DistanceFunction},
+	{"DitherTo2bpp",                    DitherTo2bpp},
+	{"DitherTo2bppSpec",                DitherTo2bppSpec},
+	{"DitherToBinary",                  DitherToBinary},
+	{"DitherToBinarySpec",              DitherToBinarySpec},
+	{"DrawBoxa",                        DrawBoxa},
+	{"DrawBoxaRandom",                  DrawBoxaRandom},
+	{"EmbedForRotation",                EmbedForRotation},
+	{"EndianByteSwap",                  EndianByteSwap},
+	{"EndianByteSwapNew",               EndianByteSwapNew},
+	{"EndianTwoByteSwap",               EndianTwoByteSwap},
+	{"EndianTwoByteSwapNew",            EndianTwoByteSwapNew},
+	{"Equal",                           Equal},
+	{"EqualWithAlpha",                  EqualWithAlpha},
+	{"EqualWithCmap",                   EqualWithCmap},
+	{"EqualizeTRC",                     EqualizeTRC},
+	{"Erode",                           Erode},
+	{"ErodeBrick",                      ErodeBrick},
+	{"ErodeBrickDwa",                   ErodeBrickDwa},
+	{"ErodeCompBrick",                  ErodeCompBrick},
+	{"ErodeCompBrickDwa",               ErodeCompBrickDwa},
+	{"ErodeCompBrickExtendDwa",         ErodeCompBrickExtendDwa},
+	{"ErodeGray",                       ErodeGray},
+	{"ErodeGray3",                      ErodeGray3},
+	{"EstimateBackground",              EstimateBackground},
+	{"ExpandBinaryPower2",              ExpandBinaryPower2},
+	{"ExpandBinaryReplicate",           ExpandBinaryReplicate},
+	{"ExpandReplicate",                 ExpandReplicate},
+	{"ExtendByReplication",             ExtendByReplication},
+	{"ExtractBarcodeCrossings",         ExtractBarcodeCrossings},
+	{"ExtractBarcodeWidths1",           ExtractBarcodeWidths1},
+	{"ExtractBarcodeWidths2",           ExtractBarcodeWidths2},
+	{"ExtractBarcodes",                 ExtractBarcodes},
+	{"ExtractBorderConnComps",          ExtractBorderConnComps},
+	{"ExtractBoundary",                 ExtractBoundary},
+	{"ExtractData",                     ExtractData},
+	{"ExtractOnLine",                   ExtractOnLine},
+	{"ExtractRawTextlines",             ExtractRawTextlines},
+	{"ExtractTextlines",                ExtractTextlines},
+	{"FHMTGen_1",                       FHMTGen_1},
+	{"FMorphopGen_1",                   FMorphopGen_1},
+	{"FMorphopGen_2",                   FMorphopGen_2},
+	{"FadeWithGray",                    FadeWithGray},
+	{"FastTophat",                      FastTophat},
+	{"FewColorsMedianCutQuantMixed",    FewColorsMedianCutQuantMixed},
+	{"FewColorsOctcubeQuant1",          FewColorsOctcubeQuant1},
+	{"FewColorsOctcubeQuant2",          FewColorsOctcubeQuant2},
+	{"FewColorsOctcubeQuantMixed",      FewColorsOctcubeQuantMixed},
+	{"FillBgFromBorder",                FillBgFromBorder},
+	{"FillClosedBorders",               FillClosedBorders},
+	{"FillHolesToBoundingRect",         FillHolesToBoundingRect},
+	{"FillMapHoles",                    FillMapHoles},
+	{"FillPolygon",                     FillPolygon},
+	{"FinalAccumulate",                 FinalAccumulate},
+	{"FinalAccumulateThreshold",        FinalAccumulateThreshold},
+	{"FindAreaFraction",                FindAreaFraction},
+	{"FindAreaFractionMasked",          FindAreaFractionMasked},
+	{"FindAreaPerimRatio",              FindAreaPerimRatio},
+	{"FindBaselines",                   FindBaselines},
+	{"FindColorRegions",                FindColorRegions},
+	{"FindCornerPixels",                FindCornerPixels},
+	{"FindDifferentialSquareSum",       FindDifferentialSquareSum},
+	{"FindEqualValues",                 FindEqualValues},
+	{"FindHistoPeaksHSV",               FindHistoPeaksHSV},
+	{"FindHorizontalRuns",              FindHorizontalRuns},
+	{"FindLargeRectangles",             FindLargeRectangles},
+	{"FindLargestRectangle",            FindLargestRectangle},
+	{"FindMaxHorizontalRunOnLine",      FindMaxHorizontalRunOnLine},
+	{"FindMaxRuns",                     FindMaxRuns},
+	{"FindMaxVerticalRunOnLine",        FindMaxVerticalRunOnLine},
+	{"FindNormalizedSquareSum",         FindNormalizedSquareSum},
+	{"FindOverlapFraction",             FindOverlapFraction},
+	{"FindPageForeground",              FindPageForeground},
+	{"FindPerimSizeRatio",              FindPerimSizeRatio},
+	{"FindPerimToAreaRatio",            FindPerimToAreaRatio},
+	{"FindRectangleComps",              FindRectangleComps},
+	{"FindRepCloseTile",                FindRepCloseTile},
+	{"FindSkew",                        FindSkew},
+	{"FindSkewAndDeskew",               FindSkewAndDeskew},
+	{"FindSkewOrthogonalRange",         FindSkewOrthogonalRange},
+	{"FindSkewSweep",                   FindSkewSweep},
+	{"FindSkewSweepAndSearch",          FindSkewSweepAndSearch},
+	{"FindSkewSweepAndSearchScore",     FindSkewSweepAndSearchScore},
+	{"FindSkewSweepAndSearchScorePivot",FindSkewSweepAndSearchScorePivot},
+	{"FindStrokeLength",                FindStrokeLength},
+	{"FindStrokeWidth",                 FindStrokeWidth},
+	{"FindThreshFgExtent",              FindThreshFgExtent},
+	{"FindVerticalRuns",                FindVerticalRuns},
+	{"FixedOctcubeQuant256",            FixedOctcubeQuant256},
+	{"FixedOctcubeQuantGenRGB",         FixedOctcubeQuantGenRGB},
+	{"FlipFHMTGen",                     FlipFHMTGen},
+	{"FlipLR",                          FlipLR},
+	{"FlipPixel",                       FlipPixel},
+	{"FlipTB",                          FlipTB},
+	{"ForegroundFraction",              ForegroundFraction},
+	{"FractionFgInMask",                FractionFgInMask},
+	{"FreeData",                        FreeData},
+	{"GammaTRC",                        GammaTRC},
+	{"GammaTRCMasked",                  GammaTRCMasked},
+	{"GammaTRCWithAlpha",               GammaTRCWithAlpha},
+	{"GenHalftoneMask",                 GenHalftoneMask},
+	{"GenPhotoHistos",                  GenPhotoHistos},
+	{"GenTextblockMask",                GenTextblockMask},
+	{"GenTextlineMask",                 GenTextlineMask},
+	{"GenerateCIData",                  GenerateCIData},
+	{"GenerateFromPta",                 GenerateFromPta},
+	{"GenerateHalftoneMask",            GenerateHalftoneMask},
+	{"GenerateMaskByBand",              GenerateMaskByBand},
+	{"GenerateMaskByBand32",            GenerateMaskByBand32},
+	{"GenerateMaskByDiscr32",           GenerateMaskByDiscr32},
+	{"GenerateMaskByValue",             GenerateMaskByValue},
+	{"GeneratePtaBoundary",             GeneratePtaBoundary},
+	{"GenerateSelBoundary",             GenerateSelBoundary},
+	{"GenerateSelRandom",               GenerateSelRandom},
+	{"GenerateSelWithRuns",             GenerateSelWithRuns},
+	{"GetAllCCBorders",                 GetAllCCBorders},
+	{"GetAutoFormat",                   GetAutoFormat},
+	{"GetAverageMasked",                GetAverageMasked},
+	{"GetAverageMaskedRGB",             GetAverageMaskedRGB},
+	{"GetAverageTiled",                 GetAverageTiled},
+	{"GetAverageTiledRGB",              GetAverageTiledRGB},
+	{"GetBackgroundGrayMap",            GetBackgroundGrayMap},
+	{"GetBackgroundGrayMapMorph",       GetBackgroundGrayMapMorph},
+	{"GetBackgroundRGBMap",             GetBackgroundRGBMap},
+	{"GetBackgroundRGBMapMorph",        GetBackgroundRGBMapMorph},
+	{"GetBinnedColor",                  GetBinnedColor},
+	{"GetBinnedComponentRange",         GetBinnedComponentRange},
+	{"GetBlackOrWhiteVal",              GetBlackOrWhiteVal},
+	{"GetBlackVal",                     GetBlackVal},
+	{"GetCmapHistogram",                GetCmapHistogram},
+	{"GetCmapHistogramInRect",          GetCmapHistogramInRect},
+	{"GetCmapHistogramMasked",          GetCmapHistogramMasked},
+	{"GetColorAmapHistogram",           GetColorAmapHistogram},
+	{"GetColorHistogram",               GetColorHistogram},
+	{"GetColorHistogramMasked",         GetColorHistogramMasked},
+	{"GetColorNearMaskBoundary",        GetColorNearMaskBoundary},
+	{"GetColormap",                     GetColormap},
+	{"GetColumnStats",                  GetColumnStats},
+	{"GetData",                         GetData},
+	{"GetDepth",                        GetDepth},
+	{"GetDifferenceHistogram",          GetDifferenceHistogram},
+	{"GetDifferenceStats",              GetDifferenceStats},
+	{"GetDimensions",                   GetDimensions},
+	{"GetEdgeProfile",                  GetEdgeProfile},
+	{"GetExtremeValue",                 GetExtremeValue},
+	{"GetGrayHistogram",                GetGrayHistogram},
+	{"GetGrayHistogramInRect",          GetGrayHistogramInRect},
+	{"GetGrayHistogramMasked",          GetGrayHistogramMasked},
+	{"GetGrayHistogramTiled",           GetGrayHistogramTiled},
+	{"GetHeight",                       GetHeight},
+	{"GetInputFormat",                  GetInputFormat},
+	{"GetInvBackgroundMap",             GetInvBackgroundMap},
+	{"GetLastOffPixelInRun",            GetLastOffPixelInRun},
+	{"GetLastOnPixelInRun",             GetLastOnPixelInRun},
+	{"GetLinePtrs",                     GetLinePtrs},
+	{"GetLocalSkewAngles",              GetLocalSkewAngles},
+	{"GetLocalSkewTransform",           GetLocalSkewTransform},
+	{"GetMaxValueInRect",               GetMaxValueInRect},
+	{"GetMomentByColumn",               GetMomentByColumn},
+	{"GetMostPopulatedColors",          GetMostPopulatedColors},
+	{"GetOuterBorder",                  GetOuterBorder},
+	{"GetOuterBordersPtaa",             GetOuterBordersPtaa},
+	{"GetPSNR",                         GetPSNR},
+	{"GetPerceptualDiff",               GetPerceptualDiff},
+	{"GetPixel",                        GetPixel},
+	{"GetPixelAverage",                 GetPixelAverage},
+	{"GetPixelStats",                   GetPixelStats},
+	{"GetRGBComponent",                 GetRGBComponent},
+	{"GetRGBComponentCmap",             GetRGBComponentCmap},
+	{"GetRGBHistogram",                 GetRGBHistogram},
+	{"GetRGBLine",                      GetRGBLine},
+	{"GetRGBPixel",                     GetRGBPixel},
+	{"GetRandomPixel",                  GetRandomPixel},
+	{"GetRangeValues",                  GetRangeValues},
+	{"GetRankColorArray",               GetRankColorArray},
+	{"GetRankValue",                    GetRankValue},
+	{"GetRankValueMasked",              GetRankValueMasked},
+	{"GetRankValueMaskedRGB",           GetRankValueMaskedRGB},
+	{"GetRasterData",                   GetRasterData},
+	{"GetRefcount",                     GetRefcount},
+	{"GetRegionsBinary",                GetRegionsBinary},
+	{"GetResolution",                   GetResolution},
+	{"GetRowStats",                     GetRowStats},
+	{"GetRunCentersOnLine",             GetRunCentersOnLine},
+	{"GetRunsOnLine",                   GetRunsOnLine},
+	{"GetSortedNeighborValues",         GetSortedNeighborValues},
+	{"GetSpp",                          GetSpp},
+	{"GetText",                         GetText},
+	{"GetWhiteVal",                     GetWhiteVal},
+	{"GetWidth",                        GetWidth},
+	{"GetWordBoxesInTextlines",         GetWordBoxesInTextlines},
+	{"GetWordsInTextlines",             GetWordsInTextlines},
+	{"GetWpl",                          GetWpl},
+	{"GetXRes",                         GetXRes},
+	{"GetYRes",                         GetYRes},
+	{"GlobalNormNoSatRGB",              GlobalNormNoSatRGB},
+	{"GlobalNormRGB",                   GlobalNormRGB},
+	{"GrayMorphSequence",               GrayMorphSequence},
+	{"GrayQuantFromCmap",               GrayQuantFromCmap},
+	{"GrayQuantFromHisto",              GrayQuantFromHisto},
+	{"HDome",                           HDome},
+	{"HMT",                             HMT},
+	{"HMTDwa_1",                        HMTDwa_1},
+	{"HShear",                          HShear},
+	{"HShearCenter",                    HShearCenter},
+	{"HShearCorner",                    HShearCorner},
+	{"HShearIP",                        HShearIP},
+	{"HShearLI",                        HShearLI},
+	{"HalfEdgeByBandpass",              HalfEdgeByBandpass},
+	{"HasHighlightRed",                 HasHighlightRed},
+	{"Haustest",                        Haustest},
+	{"HolesByFilling",                  HolesByFilling},
+	{"InitAccumulate",                  InitAccumulate},
+	{"IntersectionOfMorphOps",          IntersectionOfMorphOps},
+	{"Invert",                          Invert},
+	{"ItalicWords",                     ItalicWords},
+	{"LinearEdgeFade",                  LinearEdgeFade},
+	{"LinearMapToTargetColor",          LinearMapToTargetColor},
+	{"LinearTRCTiled",                  LinearTRCTiled},
+	{"LocToColorTransform",             LocToColorTransform},
+	{"LocalExtrema",                    LocalExtrema},
+	{"LocateBarcodes",                  LocateBarcodes},
+	{"MakeAlphaFromMask",               MakeAlphaFromMask},
+	{"MakeArbMaskFromRGB",              MakeArbMaskFromRGB},
+	{"MakeFrameMask",                   MakeFrameMask},
+	{"MakeHistoHS",                     MakeHistoHS},
+	{"MakeHistoHV",                     MakeHistoHV},
+	{"MakeHistoSV",                     MakeHistoSV},
+	{"MakeMaskFromLUT",                 MakeMaskFromLUT},
+	{"MakeMaskFromVal",                 MakeMaskFromVal},
+	{"MakeRangeMaskHS",                 MakeRangeMaskHS},
+	{"MakeRangeMaskHV",                 MakeRangeMaskHV},
+	{"MakeRangeMaskSV",                 MakeRangeMaskSV},
+	{"MaskBoxa",                        MaskBoxa},
+	{"MaskConnComp",                    MaskConnComp},
+	{"MaskOverColorPixels",             MaskOverColorPixels},
+	{"MaskOverColorRange",              MaskOverColorRange},
+	{"MaskedThreshOnBackgroundNorm",    MaskedThreshOnBackgroundNorm},
+	{"MaxDynamicRange",                 MaxDynamicRange},
+	{"MaxDynamicRangeRGB",              MaxDynamicRangeRGB},
+	{"MeanInRectangle",                 MeanInRectangle},
+	{"MeanSquareAccum",                 MeanSquareAccum},
+	{"MeasureEdgeSmoothness",           MeasureEdgeSmoothness},
+	{"MeasureSaturation",               MeasureSaturation},
+	{"MedianCutHisto",                  MedianCutHisto},
+	{"MedianCutQuant",                  MedianCutQuant},
+	{"MedianCutQuantGeneral",           MedianCutQuantGeneral},
+	{"MedianCutQuantMixed",             MedianCutQuantMixed},
+	{"MedianFilter",                    MedianFilter},
+	{"MinMaxNearLine",                  MinMaxNearLine},
+	{"MinMaxTiles",                     MinMaxTiles},
+	{"MinOrMax",                        MinOrMax},
+	{"MirrorDetect",                    MirrorDetect},
+	{"MirrorDetectDwa",                 MirrorDetectDwa},
+	{"MirroredTiling",                  MirroredTiling},
+	{"ModifyBrightness",                ModifyBrightness},
+	{"ModifyHue",                       ModifyHue},
+	{"ModifySaturation",                ModifySaturation},
+	{"ModifyStrokeWidth",               ModifyStrokeWidth},
+	{"MorphCompSequence",               MorphCompSequence},
+	{"MorphCompSequenceDwa",            MorphCompSequenceDwa},
+	{"MorphDwa_1",                      MorphDwa_1},
+	{"MorphDwa_2",                      MorphDwa_2},
+	{"MorphGradient",                   MorphGradient},
+	{"MorphSequence",                   MorphSequence},
+	{"MorphSequenceByComponent",        MorphSequenceByComponent},
+	{"MorphSequenceByRegion",           MorphSequenceByRegion},
+	{"MorphSequenceDwa",                MorphSequenceDwa},
+	{"MorphSequenceMasked",             MorphSequenceMasked},
+	{"MosaicColorShiftRGB",             MosaicColorShiftRGB},
+	{"MultConstAccumulate",             MultConstAccumulate},
+	{"MultConstantColor",               MultConstantColor},
+	{"MultConstantGray",                MultConstantGray},
+	{"MultMatrixColor",                 MultMatrixColor},
+	{"MultiplyByColor",                 MultiplyByColor},
+	{"NumColors",                       NumColors},
+	{"NumSignificantGrayColors",        NumSignificantGrayColors},
+	{"NumberOccupiedOctcubes",          NumberOccupiedOctcubes},
+	{"OctcubeHistogram",                OctcubeHistogram},
+	{"OctcubeQuantFromCmap",            OctcubeQuantFromCmap},
+	{"OctcubeQuantMixedWithGray",       OctcubeQuantMixedWithGray},
+	{"OctreeColorQuant",                OctreeColorQuant},
+	{"OctreeColorQuantGeneral",         OctreeColorQuantGeneral},
+	{"OctreeQuantByPopulation",         OctreeQuantByPopulation},
+	{"OctreeQuantNumColors",            OctreeQuantNumColors},
+	{"Open",                            Open},
+	{"OpenBrick",                       OpenBrick},
+	{"OpenBrickDwa",                    OpenBrickDwa},
+	{"OpenCompBrick",                   OpenCompBrick},
+	{"OpenCompBrickDwa",                OpenCompBrickDwa},
+	{"OpenCompBrickExtendDwa",          OpenCompBrickExtendDwa},
+	{"OpenGeneralized",                 OpenGeneralized},
+	{"OpenGray",                        OpenGray},
+	{"OpenGray3",                       OpenGray3},
+	{"Or",                              Or},
+	{"OrientCorrect",                   OrientCorrect},
+	{"OrientDetect",                    OrientDetect},
+	{"OrientDetectDwa",                 OrientDetectDwa},
+	{"OtsuAdaptiveThreshold",           OtsuAdaptiveThreshold},
+	{"OtsuThreshOnBackgroundNorm",      OtsuThreshOnBackgroundNorm},
+	{"PadToCenterCentroid",             PadToCenterCentroid},
+	{"PaintBoxa",                       PaintBoxa},
+	{"PaintBoxaRandom",                 PaintBoxaRandom},
+	{"PaintSelfThroughMask",            PaintSelfThroughMask},
+	{"PaintThroughMask",                PaintThroughMask},
+	{"PlotAlongPta",                    PlotAlongPta},
+	{"Prepare1bpp",                     Prepare1bpp},
+	{"PrintStreamInfo",                 PrintStreamInfo},
+	{"ProcessBarcodes",                 ProcessBarcodes},
+	{"Projective",                      Projective},
+	{"ProjectiveColor",                 ProjectiveColor},
+	{"ProjectiveGray",                  ProjectiveGray},
+	{"ProjectivePta",                   ProjectivePta},
+	{"ProjectivePtaColor",              ProjectivePtaColor},
+	{"ProjectivePtaGray",               ProjectivePtaGray},
+	{"ProjectivePtaWithAlpha",          ProjectivePtaWithAlpha},
+	{"ProjectiveSampled",               ProjectiveSampled},
+	{"ProjectiveSampledPta",            ProjectiveSampledPta},
+	{"QuadraticVShear",                 QuadraticVShear},
+	{"QuadraticVShearLI",               QuadraticVShearLI},
+	{"QuadraticVShearSampled",          QuadraticVShearSampled},
+	{"QuadtreeMean",                    QuadtreeMean},
+	{"QuadtreeVariance",                QuadtreeVariance},
+	{"QuantFromCmap",                   QuantFromCmap},
+	{"QuantizeIfFewColors",             QuantizeIfFewColors},
+	{"RandomHarmonicWarp",              RandomHarmonicWarp},
+	{"RankBinByStrip",                  RankBinByStrip},
+	{"RankColumnTransform",             RankColumnTransform},
+	{"RankFilter",                      RankFilter},
+	{"RankFilterGray",                  RankFilterGray},
+	{"RankFilterRGB",                   RankFilterRGB},
+	{"RankFilterWithScaling",           RankFilterWithScaling},
+	{"RankHaustest",                    RankHaustest},
+	{"RankRowTransform",                RankRowTransform},
+	{"Rasterop",                        Rasterop},
+	{"RasteropFullImage",               RasteropFullImage},
+	{"RasteropHip",                     RasteropHip},
+	{"RasteropIP",                      RasteropIP},
+	{"RasteropVip",                     RasteropVip},
+	{"Read",                            Read},
+	{"ReadBarcodeWidths",               ReadBarcodeWidths},
+	{"ReadBarcodes",                    ReadBarcodes},
+	{"ReadFromMultipageTiff",           ReadFromMultipageTiff},
+	{"ReadHeader",                      ReadHeader},
+	{"ReadHeaderMem",                   ReadHeaderMem},
+	{"ReadIndexed",                     ReadIndexed},
+	{"ReadJp2k",                        ReadJp2k},
+	{"ReadJpeg",                        ReadJpeg},
+	{"ReadMem",                         ReadMem},
+	{"ReadMemBmp",                      ReadMemBmp},
+	{"ReadMemFromMultipageTiff",        ReadMemFromMultipageTiff},
+	{"ReadMemGif",                      ReadMemGif},
+	{"ReadMemJp2k",                     ReadMemJp2k},
+	{"ReadMemJpeg",                     ReadMemJpeg},
+	{"ReadMemPng",                      ReadMemPng},
+	{"ReadMemPnm",                      ReadMemPnm},
+	{"ReadMemSpix",                     ReadMemSpix},
+	{"ReadMemTiff",                     ReadMemTiff},
+	{"ReadMemWebP",                     ReadMemWebP},
+	{"ReadStream",                      ReadStream},
+	{"ReadStreamBmp",                   ReadStreamBmp},
+	{"ReadStreamGif",                   ReadStreamGif},
+	{"ReadStreamJp2k",                  ReadStreamJp2k},
+	{"ReadStreamJpeg",                  ReadStreamJpeg},
+	{"ReadStreamPng",                   ReadStreamPng},
+	{"ReadStreamPnm",                   ReadStreamPnm},
+	{"ReadStreamSpix",                  ReadStreamSpix},
+	{"ReadStreamTiff",                  ReadStreamTiff},
+	{"ReadStreamWebP",                  ReadStreamWebP},
+	{"ReadTiff",                        ReadTiff},
+	{"ReadWithHint",                    ReadWithHint},
+	{"ReduceBinary2",                   ReduceBinary2},
+	{"ReduceRankBinary2",               ReduceRankBinary2},
+	{"ReduceRankBinaryCascade",         ReduceRankBinaryCascade},
+	{"RemoveAlpha",                     RemoveAlpha},
+	{"RemoveBorder",                    RemoveBorder},
+	{"RemoveBorderConnComps",           RemoveBorderConnComps},
+	{"RemoveBorderGeneral",             RemoveBorderGeneral},
+	{"RemoveBorderToSize",              RemoveBorderToSize},
+	{"RemoveColormap",                  RemoveColormap},
+	{"RemoveColormapGeneral",           RemoveColormapGeneral},
+	{"RemoveMatchedPattern",            RemoveMatchedPattern},
+	{"RemoveSeededComponents",          RemoveSeededComponents},
+	{"RemoveUnusedColors",              RemoveUnusedColors},
+	{"RemoveWithIndicator",             RemoveWithIndicator},
+	{"RenderBox",                       RenderBox},
+	{"RenderBoxArb",                    RenderBoxArb},
+	{"RenderBoxBlend",                  RenderBoxBlend},
+	{"RenderBoxa",                      RenderBoxa},
+	{"RenderBoxaArb",                   RenderBoxaArb},
+	{"RenderBoxaBlend",                 RenderBoxaBlend},
+	{"RenderContours",                  RenderContours},
+	{"RenderGridArb",                   RenderGridArb},
+	{"RenderHashBox",                   RenderHashBox},
+	{"RenderHashBoxArb",                RenderHashBoxArb},
+	{"RenderHashBoxBlend",              RenderHashBoxBlend},
+	{"RenderHashBoxa",                  RenderHashBoxa},
+	{"RenderHashBoxaArb",               RenderHashBoxaArb},
+	{"RenderHashBoxaBlend",             RenderHashBoxaBlend},
+	{"RenderHashMaskArb",               RenderHashMaskArb},
+	{"RenderLine",                      RenderLine},
+	{"RenderLineArb",                   RenderLineArb},
+	{"RenderLineBlend",                 RenderLineBlend},
+	{"RenderPlotFromNuma",              RenderPlotFromNuma},
+	{"RenderPlotFromNumaGen",           RenderPlotFromNumaGen},
+	{"RenderPolygon",                   RenderPolygon},
+	{"RenderPolyline",                  RenderPolyline},
+	{"RenderPolylineArb",               RenderPolylineArb},
+	{"RenderPolylineBlend",             RenderPolylineBlend},
+	{"RenderPta",                       RenderPta},
+	{"RenderPtaArb",                    RenderPtaArb},
+	{"RenderPtaBlend",                  RenderPtaBlend},
+	{"RenderRandomCmapPtaa",            RenderRandomCmapPtaa},
+	{"ResizeImageData",                 ResizeImageData},
+	{"ResizeToMatch",                   ResizeToMatch},
+	{"ReversalProfile",                 ReversalProfile},
+	{"Rotate",                          Rotate},
+	{"Rotate180",                       Rotate180},
+	{"Rotate2Shear",                    Rotate2Shear},
+	{"Rotate3Shear",                    Rotate3Shear},
+	{"Rotate90",                        Rotate90},
+	{"RotateAM",                        RotateAM},
+	{"RotateAMColor",                   RotateAMColor},
+	{"RotateAMColorCorner",             RotateAMColorCorner},
+	{"RotateAMColorFast",               RotateAMColorFast},
+	{"RotateAMCorner",                  RotateAMCorner},
+	{"RotateAMGray",                    RotateAMGray},
+	{"RotateAMGrayCorner",              RotateAMGrayCorner},
+	{"RotateBinaryNice",                RotateBinaryNice},
+	{"RotateBySampling",                RotateBySampling},
+	{"RotateOrth",                      RotateOrth},
+	{"RotateShear",                     RotateShear},
+	{"RotateShearCenter",               RotateShearCenter},
+	{"RotateShearCenterIP",             RotateShearCenterIP},
+	{"RotateShearIP",                   RotateShearIP},
+	{"RotateWithAlpha",                 RotateWithAlpha},
+	{"RowStats",                        RowStats},
+	{"RunHistogramMorph",               RunHistogramMorph},
+	{"RunlengthTransform",              RunlengthTransform},
+	{"SauvolaBinarize",                 SauvolaBinarize},
+	{"SauvolaBinarizeTiled",            SauvolaBinarizeTiled},
+	{"Scale",                           Scale},
+	{"ScaleAndTransferAlpha",           ScaleAndTransferAlpha},
+	{"ScaleAreaMap",                    ScaleAreaMap},
+	{"ScaleAreaMap2",                   ScaleAreaMap2},
+	{"ScaleAreaMapToSize",              ScaleAreaMapToSize},
+	{"ScaleBinary",                     ScaleBinary},
+	{"ScaleByIntSampling",              ScaleByIntSampling},
+	{"ScaleBySampling",                 ScaleBySampling},
+	{"ScaleBySamplingToSize",           ScaleBySamplingToSize},
+	{"ScaleColor2xLI",                  ScaleColor2xLI},
+	{"ScaleColor4xLI",                  ScaleColor4xLI},
+	{"ScaleColorLI",                    ScaleColorLI},
+	{"ScaleGeneral",                    ScaleGeneral},
+	{"ScaleGray2xLI",                   ScaleGray2xLI},
+	{"ScaleGray2xLIDither",             ScaleGray2xLIDither},
+	{"ScaleGray2xLIThresh",             ScaleGray2xLIThresh},
+	{"ScaleGray4xLI",                   ScaleGray4xLI},
+	{"ScaleGray4xLIDither",             ScaleGray4xLIDither},
+	{"ScaleGray4xLIThresh",             ScaleGray4xLIThresh},
+	{"ScaleGrayLI",                     ScaleGrayLI},
+	{"ScaleGrayMinMax",                 ScaleGrayMinMax},
+	{"ScaleGrayMinMax2",                ScaleGrayMinMax2},
+	{"ScaleGrayRank2",                  ScaleGrayRank2},
+	{"ScaleGrayRankCascade",            ScaleGrayRankCascade},
+	{"ScaleGrayToBinaryFast",           ScaleGrayToBinaryFast},
+	{"ScaleLI",                         ScaleLI},
+	{"ScaleMipmap",                     ScaleMipmap},
+	{"ScaleRGBToBinaryFast",            ScaleRGBToBinaryFast},
+	{"ScaleRGBToGray2",                 ScaleRGBToGray2},
+	{"ScaleRGBToGrayFast",              ScaleRGBToGrayFast},
+	{"ScaleResolution",                 ScaleResolution},
+	{"ScaleSmooth",                     ScaleSmooth},
+	{"ScaleSmoothToSize",               ScaleSmoothToSize},
+	{"ScaleToGray",                     ScaleToGray},
+	{"ScaleToGray16",                   ScaleToGray16},
+	{"ScaleToGray2",                    ScaleToGray2},
+	{"ScaleToGray3",                    ScaleToGray3},
+	{"ScaleToGray4",                    ScaleToGray4},
+	{"ScaleToGray6",                    ScaleToGray6},
+	{"ScaleToGray8",                    ScaleToGray8},
+	{"ScaleToGrayFast",                 ScaleToGrayFast},
+	{"ScaleToGrayMipmap",               ScaleToGrayMipmap},
+	{"ScaleToSize",                     ScaleToSize},
+	{"ScaleToSizeRel",                  ScaleToSizeRel},
+	{"ScaleWithAlpha",                  ScaleWithAlpha},
+	{"ScanForEdge",                     ScanForEdge},
+	{"ScanForForeground",               ScanForForeground},
+	{"SearchBinaryMaze",                SearchBinaryMaze},
+	{"SearchGrayMaze",                  SearchGrayMaze},
+	{"Seedfill",                        Seedfill},
+	{"Seedfill4",                       Seedfill4},
+	{"Seedfill4BB",                     Seedfill4BB},
+	{"Seedfill8",                       Seedfill8},
+	{"Seedfill8BB",                     Seedfill8BB},
+	{"SeedfillBB",                      SeedfillBB},
+	{"SeedfillBinary",                  SeedfillBinary},
+	{"SeedfillBinaryRestricted",        SeedfillBinaryRestricted},
+	{"SeedfillGray",                    SeedfillGray},
+	{"SeedfillGrayBasin",               SeedfillGrayBasin},
+	{"SeedfillGrayInv",                 SeedfillGrayInv},
+	{"SeedfillGrayInvSimple",           SeedfillGrayInvSimple},
+	{"SeedfillGraySimple",              SeedfillGraySimple},
+	{"SeedfillMorph",                   SeedfillMorph},
+	{"Seedspread",                      Seedspread},
+	{"SelectByAreaFraction",            SelectByAreaFraction},
+	{"SelectByPerimSizeRatio",          SelectByPerimSizeRatio},
+	{"SelectByPerimToAreaRatio",        SelectByPerimToAreaRatio},
+	{"SelectBySize",                    SelectBySize},
+	{"SelectByWidthHeightRatio",        SelectByWidthHeightRatio},
+	{"SelectDefaultPdfEncoding",        SelectDefaultPdfEncoding},
+	{"SelectLargeULComp",               SelectLargeULComp},
+	{"SelectMinInConnComp",             SelectMinInConnComp},
+	{"SelectedLocalExtrema",            SelectedLocalExtrema},
+	{"SelectiveConnCompFill",           SelectiveConnCompFill},
+	{"SerializeToMemory",               SerializeToMemory},
+	{"SetAll",                          SetAll},
+	{"SetAllArbitrary",                 SetAllArbitrary},
+	{"SetAllGray",                      SetAllGray},
+	{"SetAlphaOverWhite",               SetAlphaOverWhite},
+	{"SetBlack",                        SetBlack},
+	{"SetBlackOrWhite",                 SetBlackOrWhite},
+	{"SetBlackOrWhiteBoxa",             SetBlackOrWhiteBoxa},
+	{"SetBorderRingVal",                SetBorderRingVal},
+	{"SetBorderVal",                    SetBorderVal},
+	{"SetChromaSampling",               SetChromaSampling},
+	{"SetColormap",                     SetColormap},
+	{"SetComponentArbitrary",           SetComponentArbitrary},
+	{"SetData",                         SetData},
+	{"SetDepth",                        SetDepth},
+	{"SetDimensions",                   SetDimensions},
+	{"SetHeight",                       SetHeight},
+	{"SetInRect",                       SetInRect},
+	{"SetInRectArbitrary",              SetInRectArbitrary},
+	{"SetInputFormat",                  SetInputFormat},
+	{"SetLowContrast",                  SetLowContrast},
+	{"SetMasked",                       SetMasked},
+	{"SetMaskedCmap",                   SetMaskedCmap},
+	{"SetMaskedGeneral",                SetMaskedGeneral},
+	{"SetMirroredBorder",               SetMirroredBorder},
+	{"SetOrClearBorder",                SetOrClearBorder},
+	{"SetPadBits",                      SetPadBits},
+	{"SetPadBitsBand",                  SetPadBitsBand},
+	{"SetPixel",                        SetPixel},
+	{"SetPixelColumn",                  SetPixelColumn},
+	{"SetRGBComponent",                 SetRGBComponent},
+	{"SetRGBPixel",                     SetRGBPixel},
+	{"SetResolution",                   SetResolution},
+	{"SetSelectCmap",                   SetSelectCmap},
+	{"SetSelectMaskedCmap",             SetSelectMaskedCmap},
+	{"SetSpecial",                      SetSpecial},
+	{"SetSpp",                          SetSpp},
+	{"SetStrokeWidth",                  SetStrokeWidth},
+	{"SetText",                         SetText},
+	{"SetTextblock",                    SetTextblock},
+	{"SetTextline",                     SetTextline},
+	{"SetUnderTransparency",            SetUnderTransparency},
+	{"SetWhite",                        SetWhite},
+	{"SetWidth",                        SetWidth},
+	{"SetWpl",                          SetWpl},
+	{"SetXRes",                         SetXRes},
+	{"SetYRes",                         SetYRes},
+	{"SetZlibCompression",              SetZlibCompression},
+	{"SetupByteProcessing",             SetupByteProcessing},
+	{"ShiftAndTransferAlpha",           ShiftAndTransferAlpha},
+	{"ShiftByComponent",                ShiftByComponent},
+	{"SimpleCaptcha",                   SimpleCaptcha},
+	{"SimpleColorQuantize",             SimpleColorQuantize},
+	{"SizesEqual",                      SizesEqual},
+	{"SmoothConnectedRegions",          SmoothConnectedRegions},
+	{"SnapColor",                       SnapColor},
+	{"SnapColorCmap",                   SnapColorCmap},
+	{"SobelEdgeFilter",                 SobelEdgeFilter},
+	{"SplitComponentIntoBoxa",          SplitComponentIntoBoxa},
+	{"SplitComponentWithProfile",       SplitComponentWithProfile},
+	{"SplitDistributionFgBg",           SplitDistributionFgBg},
+	{"SplitIntoBoxa",                   SplitIntoBoxa},
+	{"SplitIntoCharacters",             SplitIntoCharacters},
+	{"StereoFromPair",                  StereoFromPair},
+	{"StretchHorizontal",               StretchHorizontal},
+	{"StretchHorizontalLI",             StretchHorizontalLI},
+	{"StretchHorizontalSampled",        StretchHorizontalSampled},
+	{"StrokeWidthTransform",            StrokeWidthTransform},
+	{"SubsampleBoundaryPixels",         SubsampleBoundaryPixels},
+	{"Subtract",                        Subtract},
+	{"SubtractGray",                    SubtractGray},
+	{"SwapAndDestroy",                  SwapAndDestroy},
+	{"TRCMap",                          TRCMap},
+	{"TestClipToForeground",            TestClipToForeground},
+	{"TestForSimilarity",               TestForSimilarity},
+	{"ThinConnected",                   ThinConnected},
+	{"ThinConnectedBySet",              ThinConnectedBySet},
+	{"Threshold8",                      Threshold8},
+	{"ThresholdByConnComp",             ThresholdByConnComp},
+	{"ThresholdForFgBg",                ThresholdForFgBg},
+	{"ThresholdGrayArb",                ThresholdGrayArb},
+	{"ThresholdOn8bpp",                 ThresholdOn8bpp},
+	{"ThresholdPixelSum",               ThresholdPixelSum},
+	{"ThresholdSpreadNorm",             ThresholdSpreadNorm},
+	{"ThresholdTo2bpp",                 ThresholdTo2bpp},
+	{"ThresholdTo4bpp",                 ThresholdTo4bpp},
+	{"ThresholdToBinary",               ThresholdToBinary},
+	{"ThresholdToValue",                ThresholdToValue},
+	{"TilingCreate",                    TilingCreate},
+	{"TilingDestroy",                   TilingDestroy},
+	{"TilingGetCount",                  TilingGetCount},
+	{"TilingGetSize",                   TilingGetSize},
+	{"TilingGetTile",                   TilingGetTile},
+	{"TilingNoStripOnPaint",            TilingNoStripOnPaint},
+	{"TilingPaintTile",                 TilingPaintTile},
+	{"Tophat",                          Tophat},
+	{"TransferAllData",                 TransferAllData},
+	{"Translate",                       Translate},
+	{"TwoSidedEdgeFilter",              TwoSidedEdgeFilter},
+	{"UnionOfMorphOps",                 UnionOfMorphOps},
+	{"UnpackBinary",                    UnpackBinary},
+	{"UnsharpMasking",                  UnsharpMasking},
+	{"UnsharpMaskingFast",              UnsharpMaskingFast},
+	{"UnsharpMaskingGray",              UnsharpMaskingGray},
+	{"UnsharpMaskingGray1D",            UnsharpMaskingGray1D},
+	{"UnsharpMaskingGray2D",            UnsharpMaskingGray2D},
+	{"UnsharpMaskingGrayFast",          UnsharpMaskingGrayFast},
+	{"UpDownDetect",                    UpDownDetect},
+	{"UpDownDetectDwa",                 UpDownDetectDwa},
+	{"UpDownDetectGeneral",             UpDownDetectGeneral},
+	{"UpDownDetectGeneralDwa",          UpDownDetectGeneralDwa},
+	{"UsesCmapColor",                   UsesCmapColor},
+	{"VShear",                          VShear},
+	{"VShearCenter",                    VShearCenter},
+	{"VShearCorner",                    VShearCorner},
+	{"VShearIP",                        VShearIP},
+	{"VShearLI",                        VShearLI},
+	{"VarThresholdToBinary",            VarThresholdToBinary},
+	{"VarianceByColumn",                VarianceByColumn},
+	{"VarianceByRow",                   VarianceByRow},
+	{"VarianceInRect",                  VarianceInRect},
+	{"VarianceInRectangle",             VarianceInRectangle},
+	{"View",                            View},
+	{"WarpStereoscopic",                WarpStereoscopic},
+	{"WindowedMean",                    WindowedMean},
+	{"WindowedMeanSquare",              WindowedMeanSquare},
+	{"WindowedStats",                   WindowedStats},
+	{"WindowedVariance",                WindowedVariance},
+	{"WindowedVarianceOnLine",          WindowedVarianceOnLine},
+	{"WordBoxesByDilation",             WordBoxesByDilation},
+	{"WordMaskByDilation",              WordMaskByDilation},
+	{"Write",                           Write},
+	{"WriteAutoFormat",                 WriteAutoFormat},
+	{"WriteDebug",                      WriteDebug},
+	{"WriteImpliedFormat",              WriteImpliedFormat},
+	{"WriteJp2k",                       WriteJp2k},
+	{"WriteJpeg",                       WriteJpeg},
+	{"WriteMem",                        WriteMem},
+	{"WriteMemBmp",                     WriteMemBmp},
+	{"WriteMemGif",                     WriteMemGif},
+	{"WriteMemJp2k",                    WriteMemJp2k},
+	{"WriteMemJpeg",                    WriteMemJpeg},
+	{"WriteMemPS",                      WriteMemPS},
+	{"WriteMemPam",                     WriteMemPam},
+	{"WriteMemPdf",                     WriteMemPdf},
+	{"WriteMemPng",                     WriteMemPng},
+	{"WriteMemPnm",                     WriteMemPnm},
+	{"WriteMemSpix",                    WriteMemSpix},
+	{"WriteMemTiff",                    WriteMemTiff},
+	{"WriteMemTiffCustom",              WriteMemTiffCustom},
+	{"WriteMemWebP",                    WriteMemWebP},
+	{"WriteMixedToPS",                  WriteMixedToPS},
+	{"WritePSEmbed",                    WritePSEmbed},
+	{"WritePng",                        WritePng},
+	{"WriteSegmentedPageToPS",          WriteSegmentedPageToPS},
+	{"WriteStream",                     WriteStream},
+	{"WriteStreamAsciiPnm",             WriteStreamAsciiPnm},
+	{"WriteStreamBmp",                  WriteStreamBmp},
+	{"WriteStreamGif",                  WriteStreamGif},
+	{"WriteStreamJp2k",                 WriteStreamJp2k},
+	{"WriteStreamJpeg",                 WriteStreamJpeg},
+	{"WriteStreamPS",                   WriteStreamPS},
+	{"WriteStreamPam",                  WriteStreamPam},
+	{"WriteStreamPdf",                  WriteStreamPdf},
+	{"WriteStreamPng",                  WriteStreamPng},
+	{"WriteStreamPnm",                  WriteStreamPnm},
+	{"WriteStreamSpix",                 WriteStreamSpix},
+	{"WriteStreamTiff",                 WriteStreamTiff},
+	{"WriteStreamTiffWA",               WriteStreamTiffWA},
+	{"WriteStreamWebP",                 WriteStreamWebP},
+	{"WriteStringPS",                   WriteStringPS},
+	{"WriteTiff",                       WriteTiff},
+	{"WriteTiffCustom",                 WriteTiffCustom},
+	{"WriteWebP",                       WriteWebP},
+	{"Xor",                             Xor},
+	{"Zero",                            Zero},
+	LUA_SENTINEL
     };
 
     for (int i = 0; i < 256; i++) {
-        tab8[i] = ((i >> 7) & 1) +
-                  ((i >> 6) & 1) +
-                  ((i >> 5) & 1) +
-                  ((i >> 4) & 1) +
-                  ((i >> 3) & 1) +
-                  ((i >> 2) & 1) +
-                  ((i >> 1) & 1) +
-                  ((i >> 0) & 1);
+	tab8[i] = ((i >> 7) & 1) +
+		  ((i >> 6) & 1) +
+		  ((i >> 5) & 1) +
+		  ((i >> 4) & 1) +
+		  ((i >> 3) & 1) +
+		  ((i >> 2) & 1) +
+		  ((i >> 1) & 1) +
+		  ((i >> 0) & 1);
     }
     LO_FUNC(TNAME);
     ll_set_global_cfunct(_fun, L, TNAME, ll_new_Pix);

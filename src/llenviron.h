@@ -69,4 +69,6 @@ typedef unsigned int uintptr_t;
   #define LUALEPT_DLL
 #endif  /* _WIN32 */
 
+#define VERSION "0.5.0"
+
 #endif	/* !defined(LUALEPT_LLENVIRON_H) */

@@ -150,9 +150,9 @@ Destroy(lua_State *L)
     LL_FUNC("Destroy");
     CCBorda *ccba = ll_take_udata<CCBorda>(_fun, L, 1, TNAME);
     DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %d\n", _fun,
-        TNAME,
-        "ccba", reinterpret_cast<void *>(ccba),
-        "count", ccbaGetCount(ccba));
+	TNAME,
+	"ccba", reinterpret_cast<void *>(ccba),
+	"count", ccbaGetCount(ccba));
     ccbaDestroy(&ccba);
     return 0;
 }
@@ -175,31 +175,31 @@ toString(lua_State* L)
 
     luaL_buffinit(L, &B);
     if (!ccba) {
-        luaL_addstring(&B, "nil");
+	luaL_addstring(&B, "nil");
     } else {
-        snprintf(str, LL_STRBUFF,
-                TNAME "*: %p",
-                reinterpret_cast<void *>(ccba));
-        luaL_addstring(&B, str);
+	snprintf(str, LL_STRBUFF,
+		TNAME "*: %p",
+		reinterpret_cast<void *>(ccba));
+	luaL_addstring(&B, str);
 #if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
-        snprintf(str, LL_STRBUFF, "\n    %-14s: %s* %p",
-                 "pix", LL_PIX, reinterpret_cast<void *>(ccba->pix));
-        luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
-                 "w", ccba->w);
-        luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
-                 "h", ccba->h);
-        luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
-                 "n", ccba->n);
-        luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
-                 "nalloc", ccba->nalloc);
-        luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF, "\n    %-14s: %s** %p",
-                 "ccb", LL_CCBORD, reinterpret_cast<void *>(ccba->ccb));
-        luaL_addstring(&B, str);
+	snprintf(str, LL_STRBUFF, "\n    %-14s: %s* %p",
+		 "pix", LL_PIX, reinterpret_cast<void *>(ccba->pix));
+	luaL_addstring(&B, str);
+	snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+		 "w", ccba->w);
+	luaL_addstring(&B, str);
+	snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+		 "h", ccba->h);
+	luaL_addstring(&B, str);
+	snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+		 "n", ccba->n);
+	luaL_addstring(&B, str);
+	snprintf(str, LL_STRBUFF, "\n    %-14s: %d",
+		 "nalloc", ccba->nalloc);
+	luaL_addstring(&B, str);
+	snprintf(str, LL_STRBUFF, "\n    %-14s: %s** %p",
+		 "ccb", LL_CCBORD, reinterpret_cast<void *>(ccba->ccb));
+	luaL_addstring(&B, str);
 #endif
     }
     luaL_pushresult(&B);
@@ -652,7 +652,11 @@ WriteSVGString(lua_State *L)
     LL_FUNC("WriteSVGString");
     CCBorda *ccba = ll_check_CCBorda(_fun, L, 2);
     const char *filename = ll_check_string(_fun, L, 1);
-    char *str = ccbaWriteSVGString(filename, ccba);
+    char *str = ccbaWriteSVGString(ccba);
+    FILE* fp;
+    fp = fopen(filename, "w");
+    fwrite(str, 1, strlen(str), fp);
+    fclose(fp);
     ll_push_string(_fun, L, str);
     ll_free(str);
     return 1;
@@ -700,7 +704,7 @@ CCBorda *
 ll_opt_CCBorda(const char *_fun, lua_State *L, int arg)
 {
     if (!ll_isudata(_fun, L, arg, TNAME))
-        return nullptr;
+	return nullptr;
     return ll_check_CCBorda(_fun, L, arg);
 }
 
@@ -715,7 +719,7 @@ int
 ll_push_CCBorda(const char *_fun, lua_State *L, CCBorda *cd)
 {
     if (!cd)
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, cd);
 }
 
@@ -731,40 +735,40 @@ ll_new_CCBorda(lua_State *L)
     CCBorda *ccba = nullptr;
 
     if (ll_isudata(_fun, L, 1, LL_PIX)) {
-        Pix* pixs = ll_opt_Pix(_fun, L, 1);
-        l_int32 n = ll_opt_l_int32(_fun, L, 2, 1);
-        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %d\n", _fun,
-            LL_PIX, reinterpret_cast<void *>(pixs),
-            "n", n);
-        ccba = ccbaCreate(pixs, n);
+	Pix* pixs = ll_opt_Pix(_fun, L, 1);
+	l_int32 n = ll_opt_l_int32(_fun, L, 2, 1);
+	DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %d\n", _fun,
+	    LL_PIX, reinterpret_cast<void *>(pixs),
+	    "n", n);
+	ccba = ccbaCreate(pixs, n);
     }
 
     if (ll_isudata(_fun, L, 1, LUA_FILEHANDLE)) {
-        luaL_Stream *stream = ll_check_stream(_fun, L, 1);
-        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
-            LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
-        ccba = ccbaReadStream(stream->f);
+	luaL_Stream *stream = ll_check_stream(_fun, L, 1);
+	DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+	    LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
+	ccba = ccbaReadStream(stream->f);
     }
 
     if (!ccba && ll_isstring(_fun, L, 1)) {
-        const char* filename = ll_check_string(_fun, L, 1);
-        DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
-            "filename", filename);
-        ccba = ccbaRead(filename);
+	const char* filename = ll_check_string(_fun, L, 1);
+	DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
+	    "filename", filename);
+	ccba = ccbaRead(filename);
     }
 
     if (!ccba) {
-        /* FIXME: create data for no pix? */
-        Pix* pix = nullptr;
-        l_int32 n = 1;
-        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %d\n", _fun,
-            LL_PIX, reinterpret_cast<void *>(pix),
-            "n", n);
-        ccba = ccbaCreate(pix, n);
+	/* FIXME: create data for no pix? */
+	Pix* pix = nullptr;
+	l_int32 n = 1;
+	DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %d\n", _fun,
+	    LL_PIX, reinterpret_cast<void *>(pix),
+	    "n", n);
+	ccba = ccbaCreate(pix, n);
     }
 
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
-        TNAME, reinterpret_cast<void *>(ccba));
+	TNAME, reinterpret_cast<void *>(ccba));
     return ll_push_CCBorda(_fun, L, ccba);
 }
 
@@ -777,31 +781,31 @@ int
 ll_open_CCBorda(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                    Destroy},
-        {"__new",                   ll_new_CCBorda},
-        {"__len",                   GetCount},
-        {"__tostring",              toString},
-        {"AddCcb",                  AddCcb},
-        {"Create",                  Create},
-        {"Destroy",                 Destroy},
-        {"DisplayBorder",           DisplayBorder},
-        {"DisplayImage1",           DisplayImage1},
-        {"DisplayImage2",           DisplayImage2},
-        {"DisplaySPBorder",         DisplaySPBorder},
-        {"GenerateGlobalLocs",      GenerateGlobalLocs},
-        {"GenerateSPGlobalLocs",    GenerateSPGlobalLocs},
-        {"GenerateSinglePath",      GenerateSinglePath},
-        {"GenerateStepChains",      GenerateStepChains},
-        {"GetCcb",                  GetCcb},
-        {"GetCount",                GetCount},
-        {"Read",                    Read},
-        {"ReadStream",              ReadStream},
-        {"StepChainsToPixCoords",   StepChainsToPixCoords},
-        {"Write",                   Write},
-        {"WriteSVG",                WriteSVG},
-        {"WriteSVGString",          WriteSVGString},
-        {"WriteStream",             WriteStream},
-        LUA_SENTINEL
+	{"__gc",                    Destroy},
+	{"__new",                   ll_new_CCBorda},
+	{"__len",                   GetCount},
+	{"__tostring",              toString},
+	{"AddCcb",                  AddCcb},
+	{"Create",                  Create},
+	{"Destroy",                 Destroy},
+	{"DisplayBorder",           DisplayBorder},
+	{"DisplayImage1",           DisplayImage1},
+	{"DisplayImage2",           DisplayImage2},
+	{"DisplaySPBorder",         DisplaySPBorder},
+	{"GenerateGlobalLocs",      GenerateGlobalLocs},
+	{"GenerateSPGlobalLocs",    GenerateSPGlobalLocs},
+	{"GenerateSinglePath",      GenerateSinglePath},
+	{"GenerateStepChains",      GenerateStepChains},
+	{"GetCcb",                  GetCcb},
+	{"GetCount",                GetCount},
+	{"Read",                    Read},
+	{"ReadStream",              ReadStream},
+	{"StepChainsToPixCoords",   StepChainsToPixCoords},
+	{"Write",                   Write},
+	{"WriteSVG",                WriteSVG},
+	{"WriteSVGString",          WriteSVGString},
+	{"WriteStream",             WriteStream},
+	LUA_SENTINEL
     };
     LO_FUNC(TNAME);
     ll_set_global_cfunct(_fun, L, TNAME, ll_new_CCBorda);

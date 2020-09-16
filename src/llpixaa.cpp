@@ -58,9 +58,9 @@ Destroy(lua_State *L)
     LL_FUNC("Destroy");
     Pixaa *pixaa = ll_take_udata<Pixaa>(_fun, L, 1, TNAME);
     DBG(LOG_DESTROY, "%s: '%s' %s = %p, %s = %d\n", _fun,
-        TNAME,
-        "pixaa", reinterpret_cast<void *>(pixaa),
-        "count", pixaaGetCount(pixaa, nullptr));
+	TNAME,
+	"pixaa", reinterpret_cast<void *>(pixaa),
+	"count", pixaaGetCount(pixaa, nullptr));
     pixaaDestroy(&pixaa);
     return 0;
 }
@@ -102,27 +102,27 @@ toString(lua_State* L)
 
     luaL_buffinit(L, &B);
     if (!pixaa) {
-        luaL_addstring(&B, "nil");
+	luaL_addstring(&B, "nil");
     } else {
-        snprintf(str, LL_STRBUFF,
-                 TNAME "*: %p", reinterpret_cast<void *>(pixaa));
-        luaL_addstring(&B, str);
+	snprintf(str, LL_STRBUFF,
+		 TNAME "*: %p", reinterpret_cast<void *>(pixaa));
+	luaL_addstring(&B, str);
 #if defined(LUALEPT_INTERNALS) && (LUALEPT_INTERNALS > 0)
-        snprintf(str, LL_STRBUFF,
-                 "\n    %-14s: %d",
-                 "n", pixaa->n);
-        luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF,
-                 "\n    %-14s: %d",
-                 "nalloc", pixaa->nalloc);
-        snprintf(str, LL_STRBUFF,
-                 "\n    %-14s: %s** %p",
-                 "pix", LL_PIXA, reinterpret_cast<void *>(pixaa->pixa));
-        luaL_addstring(&B, str);
-        snprintf(str, LL_STRBUFF,
-                 "\n    %-14s: %s* %p",
-                 "boxa", LL_BOXA, reinterpret_cast<void *>(pixaa->boxa));
-        luaL_addstring(&B, str);
+	snprintf(str, LL_STRBUFF,
+		 "\n    %-14s: %d",
+		 "n", pixaa->n);
+	luaL_addstring(&B, str);
+	snprintf(str, LL_STRBUFF,
+		 "\n    %-14s: %d",
+		 "nalloc", pixaa->nalloc);
+	snprintf(str, LL_STRBUFF,
+		 "\n    %-14s: %s** %p",
+		 "pix", LL_PIXA, reinterpret_cast<void *>(pixaa->pixa));
+	luaL_addstring(&B, str);
+	snprintf(str, LL_STRBUFF,
+		 "\n    %-14s: %s* %p",
+		 "boxa", LL_BOXA, reinterpret_cast<void *>(pixaa->boxa));
+	luaL_addstring(&B, str);
 #endif
     }
     luaL_pushresult(&B);
@@ -282,22 +282,6 @@ CreateFromPixa(lua_State *L)
 }
 
 /**
- * \brief Extend array of a Pixaa*.
- * <pre>
- * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
- * </pre>
- * \param L Lua state.
- * \return 1 boolean on the Lua stack.
- */
-static int
-ExtendArray(lua_State *L)
-{
-    LL_FUNC("ExtendArray");
-    Pixaa *pixaa = ll_check_Pixaa(_fun, L, 1);
-    return ll_push_boolean(_fun, L, 0 == pixaaExtendArray(pixaa));
-}
-
-/**
  * \brief Get a Boxa* from a Pixaa*.
  * <pre>
  * Arg #1 (i.e. self) is expected to be a Pixaa* user data.
@@ -429,12 +413,12 @@ ReadFromFiles(lua_State *L)
     l_int32 nfiles = 0;
     Pixaa *pixaa = nullptr;
     if (ll_isinteger(_fun, L, 2) && ll_isinteger(_fun, L, 3)) {
-        first = ll_opt_l_int32(_fun, L, 2, 0);
-        nfiles = ll_opt_l_int32(_fun, L, 3, 0);
+	first = ll_opt_l_int32(_fun, L, 2, 0);
+	nfiles = ll_opt_l_int32(_fun, L, 3, 0);
     } else {
-        substr = ll_check_string(_fun, L, 2);
-        first = ll_opt_l_int32(_fun, L, 3, 0);
-        nfiles = ll_opt_l_int32(_fun, L, 4, 0);
+	substr = ll_check_string(_fun, L, 2);
+	first = ll_opt_l_int32(_fun, L, 3, 0);
+	nfiles = ll_opt_l_int32(_fun, L, 4, 0);
     }
     pixaa = pixaaReadFromFiles(dirname, substr, first, nfiles);
     return ll_push_Pixaa(_fun, L, pixaa);
@@ -568,7 +552,7 @@ WriteMem(lua_State *L)
     l_uint8 *data = nullptr;
     size_t size = 0;
     if (pixaaWriteMem(&data, &size, pixaa))
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     lua_pushlstring(L, reinterpret_cast<const char *>(data), size);
     ll_free(data);
     return 1;
@@ -620,7 +604,7 @@ Pixaa *
 ll_opt_Pixaa(const char *_fun, lua_State *L, int arg)
 {
     if (!ll_isudata(_fun, L, arg, TNAME))
-        return nullptr;
+	return nullptr;
     return ll_check_Pixaa(_fun, L, arg);
 }
 
@@ -635,7 +619,7 @@ int
 ll_push_Pixaa(const char *_fun, lua_State *L, Pixaa *pixaa)
 {
     if (!pixaa)
-        return ll_push_nil(_fun, L);
+	return ll_push_nil(_fun, L);
     return ll_push_udata(_fun, L, TNAME, pixaa);
 }
 
@@ -659,48 +643,48 @@ ll_new_Pixaa(lua_State *L)
     l_int32 copyflag = L_COPY;
 
     if (ll_isudata(_fun, L, 1, LL_PIXA)) {
-        pixa = ll_opt_Pixa(_fun, L, 1);
-        n = ll_opt_l_int32(_fun, L, 2, 1);
-        type = ll_check_consecutive_skip_by(_fun, L, 3, type);
-        copyflag = ll_check_access_storage(_fun, L, 4, copyflag);
-        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %d, %s = %s, %s = %s\n", _fun,
-            LL_PIXA, reinterpret_cast<void *>(pixa),
-            "n", n,
-            "type", ll_string_consecutive_skip_by(type),
-            "copyflag", ll_string_access_storage(copyflag));
-        pixaa = pixaaCreateFromPixa(pixa, n, type, copyflag);
+	pixa = ll_opt_Pixa(_fun, L, 1);
+	n = ll_opt_l_int32(_fun, L, 2, 1);
+	type = ll_check_consecutive_skip_by(_fun, L, 3, type);
+	copyflag = ll_check_access_storage(_fun, L, 4, copyflag);
+	DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %d, %s = %s, %s = %s\n", _fun,
+	    LL_PIXA, reinterpret_cast<void *>(pixa),
+	    "n", n,
+	    "type", ll_string_consecutive_skip_by(type),
+	    "copyflag", ll_string_access_storage(copyflag));
+	pixaa = pixaaCreateFromPixa(pixa, n, type, copyflag);
     }
 
     if (!pixaa && ll_isudata(_fun, L, 1, LUA_FILEHANDLE)) {
-        stream = ll_check_stream(_fun, L, 1);
-        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
-            LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
-        pixaa = pixaaReadStream(stream->f);
+	stream = ll_check_stream(_fun, L, 1);
+	DBG(LOG_NEW_PARAM, "%s: create for %s* = %p\n", _fun,
+	    LUA_FILEHANDLE, reinterpret_cast<void *>(stream));
+	pixaa = pixaaReadStream(stream->f);
     }
 
     if (!pixaa && ll_isstring(_fun, L, 1)) {
-        filename = ll_check_string(_fun, L, 1);
-            DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
-                "filename", filename);
-        pixaa = pixaaRead(filename);
+	filename = ll_check_string(_fun, L, 1);
+	    DBG(LOG_NEW_PARAM, "%s: create for %s = '%s'\n", _fun,
+		"filename", filename);
+	pixaa = pixaaRead(filename);
     }
 
     if (!pixaa && ll_isstring(_fun, L, 1)) {
-        data = ll_check_lbytes(_fun, L, 1, &size);
-        DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %llu\n", _fun,
-            "data", reinterpret_cast<const void *>(data),
-            "size", static_cast<l_uint64>(size));
-        pixaa = pixaaReadMem(data, size);
+	data = ll_check_lbytes(_fun, L, 1, &size);
+	DBG(LOG_NEW_PARAM, "%s: create for %s* = %p, %s = %llu\n", _fun,
+	    "data", reinterpret_cast<const void *>(data),
+	    "size", static_cast<l_uint64>(size));
+	pixaa = pixaaReadMem(data, size);
     }
 
     if (!pixaa) {
-        DBG(LOG_NEW_PARAM, "%s: create for %s = %d\n", _fun,
-            "n", n);
-        pixaa = pixaaCreate(n);
+	DBG(LOG_NEW_PARAM, "%s: create for %s = %d\n", _fun,
+	    "n", n);
+	pixaa = pixaaCreate(n);
     }
 
     DBG(LOG_NEW_CLASS, "%s: created %s* %p\n", _fun,
-        LL_PIXA, reinterpret_cast<void *>(pixaa));
+	LL_PIXA, reinterpret_cast<void *>(pixaa));
     return ll_push_Pixaa(_fun, L, pixaa);
 }
 
@@ -713,32 +697,31 @@ int
 ll_open_Pixaa(lua_State *L)
 {
     static const luaL_Reg methods[] = {
-        {"__gc",                Destroy},
-        {"__new",               ll_new_Pixaa},
-        {"__len",               GetCount},
-        {"__tostring",          toString},
-        {"AddBox",              AddBox},
-        {"AddPix",              AddPix},
-        {"AddPixa",		AddPixa},
-        {"Clear",               Clear},
-        {"Create",              Create},
-        {"CreateFromPixa",      CreateFromPixa},
-        {"Destroy",             Destroy},
-        {"ExtendArray",		ExtendArray},
-        {"GetBoxa",             GetBoxa},
-        {"GetCount",            GetCount},
-        {"GetPixa",             GetPixa},
-        {"Join",                Join},
-        {"Read",                Read},
-        {"ReadFromFiles",       ReadFromFiles},
-        {"ReadMem",             ReadMem},
-        {"ReadStream",          ReadStream},
-        {"ReplacePixa",		ReplacePixa},
-        {"Truncate",		Truncate},
-        {"Write",               Write},
-        {"WriteMem",            WriteMem},
-        {"WriteStream",         WriteStream},
-        LUA_SENTINEL
+	{"__gc",                Destroy},
+	{"__new",               ll_new_Pixaa},
+	{"__len",               GetCount},
+	{"__tostring",          toString},
+	{"AddBox",              AddBox},
+	{"AddPix",              AddPix},
+	{"AddPixa",		AddPixa},
+	{"Clear",               Clear},
+	{"Create",              Create},
+	{"CreateFromPixa",      CreateFromPixa},
+	{"Destroy",             Destroy},
+	{"GetBoxa",             GetBoxa},
+	{"GetCount",            GetCount},
+	{"GetPixa",             GetPixa},
+	{"Join",                Join},
+	{"Read",                Read},
+	{"ReadFromFiles",       ReadFromFiles},
+	{"ReadMem",             ReadMem},
+	{"ReadStream",          ReadStream},
+	{"ReplacePixa",		ReplacePixa},
+	{"Truncate",		Truncate},
+	{"Write",               Write},
+	{"WriteMem",            WriteMem},
+	{"WriteStream",         WriteStream},
+	LUA_SENTINEL
     };
     LO_FUNC(TNAME);
     ll_set_global_cfunct(_fun, L, TNAME, ll_new_Pixaa);
